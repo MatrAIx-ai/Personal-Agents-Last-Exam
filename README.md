@@ -1,10 +1,10 @@
-# Personal Agent Last Exam
+# Personal Agents' Last Exam
 
-**Challenge and measure Personal AI agents on real-world, long-horizon tasks.**
+**🎯 Challenge and measure Personal AI agents on real-world, long-horizon tasks.**
 
-Led by [MatrAIx](https://matraix.ai/) · [💬 Join our Discord](https://discord.gg/knVyQQnRFa)
+🔬 Led by [MatrAIx](https://matraix.ai/) · [💬 Join our Discord](https://discord.gg/knVyQQnRFa)
 
-Personal Agent Last Exam is building an open-source benchmark for [PersonalAgentEval](https://personalagenteval.com/), measuring how personal AI agents handle real-world, long-horizon tasks with verifiable outcomes. It examines personalization across evolving life contexts: integrating fragmented records, retaining changing preferences, and coordinating actions across domains and sessions.
+🌍 Personal Agents' Last Exam is building an open-source benchmark for [PersonalAgentEval](https://personalagenteval.com/), measuring how personal AI agents handle real-world, long-horizon tasks with verifiable outcomes. It examines personalization across evolving life contexts: integrating fragmented records, retaining changing preferences, and coordinating actions across domains and sessions.
 
 ![Personal agents across learning, work, family, travel, and care, with cases from PersonalAgentEval](assets/life-personalization.gif)
 
