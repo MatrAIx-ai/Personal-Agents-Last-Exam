@@ -1,0 +1,66 @@
+# Task Track proposal
+
+Proposed PR title: `[Task Proposal] [Work & business + Money & insurance] Preserve conference meal charges, itemized receipts and purpose`
+
+## 1. Task and domains
+
+- **Authors / GitHub handles (required):** Genglin Liu ([@genglinliu](https://github.com/genglinliu)).
+- **Short task title (required):** Preserve conference meal charges, itemized receipts and purpose
+- **Primary domain (required):** Work & business
+- **Secondary domains (optional):** Money & insurance
+
+## 2. User persona and prior history
+
+**✍️ Your answer (required):** Maya is a fictional employee attending a three-day conference. Her employer requires a settled card charge, the original itemized receipt and a source-supported business purpose for each claimed meal. Prior interactions establish that she wants receipt collection handled throughout the trip, prefers a short targeted request while she can still obtain a paper receipt, and wants uncertain items kept pending. Her synthetic policy permits specific conference expenses and excludes personal meals; its limits, receipt requirements, deadline and applicable-date rules are discoverable. She delegates access only to the conference workspace, designated card-feed observations, merchant receipt messages/endpoints and Calendar, plus explicitly scoped requests for missing evidence. Report submission and any external disclosure require the current declared authority.
+
+The workspace includes conference sessions and meetings, ordinary personal messages, past corrections and incomplete context. A nearby Calendar event is useful evidence to inspect; it cannot automatically supply an attendee list or prove that a meal served a business purpose. The model receives normal dialogue, granted capabilities and obtained observations. The simulator/graders retain their own private state.
+
+## 3. Story outline
+
+**✍️ Your answer (required):** Before departure Maya asks: "Please keep my conference meal expenses ready for reimbursement as I go. For each one, keep the card charge, the itemized receipt and what it was for linked together. Ask me promptly when you need something I still have to obtain."
+
+Five conversational sessions and legitimate agent-registered wakeups span seven simulated days: preparation; conference day one; day two; day three; and a final post-trip reconciliation. Normal charge observations, subscribed Mail notifications or the agent's own scheduled checks provide lawful opportunities to collect evidence between user messages. The adapter never opens a task-specific hidden cue or supplies the correct next collection action.
+
+The proposed fixture has eight in-scope paid meal expenses and explicit distractors, including a personal meal and conference catering already included in registration. The count is evaluator-side; the tested agent must discover actual purchases through authorized observations. Sources include three itemized receipt attachments; two permitted merchant downloads with publicly stated retrieval windows; a paper receipt Maya can photograph when asked; a delayed receipt associated with a tip-adjusted authorization; and a corrected receipt that supersedes an earlier version. Exact sources, times, amounts and policy are frozen before validation. Every required item has a feasible lawful observation/recovery path in the reference run.
+
+During the trip, the agent should save obtainable receipt originals promptly, associate them with the correct transaction/activity and seek a short clarification when the purpose or paper receipt is missing. One pending card authorization later settles at a higher tip-inclusive amount. Two charges at the same merchant/date are distinct, while the authorization/settlement pair and duplicate receipt email must not become duplicate expenses. A corrected original changes the receipt chain without silently deleting its prior version. The user may be busy or temporarily silent; unresolved evidence stays visibly pending until actually supplied.
+
+In the final session Maya asks for a reimbursement-ready draft and a concise list of anything still missing. In the main feasible branch the requested evidence has arrived and all eligible meals can be supported. A bounded no-response branch leaves a clearly identified incomplete item and a truthful draft; it has branch-specific expected outcomes and cannot be counted as the fully complete main-branch qualification. Nothing is submitted without the required authority.
+
+The core record for every claimed meal is:
+
+| Component | Required record and provenance |
+| --- | --- |
+| Credit-card charge | Stable authorization/transaction lineage, merchant, occurred/posted time, currency, final amount including any tip adjustment, pending/settled/refunded status and obtained-source reference. |
+| Itemized receipt | Actual saved original bytes, receipt/version ID, items, tax/tip/total, merchant/date, source and capture time; corrections and duplicates explicitly linked. A card notification or an agent-written summary is not an itemized original. |
+| Purpose | A short activity/project explanation with source-supported date/attendees where required, originating record or actual user clarification, and unresolved uncertainty kept explicit. No invented meeting, attendees or business rationale. |
+| Association and readiness | Auditable links showing that these records refer to the same expense; amount discrepancies reconciled; personal/excluded lines separated; missing elements remain pending. |
+
+A successful main-branch outcome preserves the full evidence triples for the eligible meals, correctly links settled charges and corrected itemized originals, grounds purpose in obtained facts, excludes personal/included meals and duplicates, and produces an accurate draft with source links. Historical capture/request times are checked as well as final state, so collecting only after an expired retrieval opportunity cannot pass the proactive requirement.
+
+Evidence points require agent-created expense associations and references to sources actually obtained by that agent. Raw card-feed rows, automatically delivered messages and assets already present in the fixture earn no points on their own. Score each applicable requirement across the eligible expense lineages, with the frozen rubric defining partial credit. This makes the no-op baseline's expected score of zero testable.
+
+## 4. What makes this distinct and personal
+
+**✍️ Your answer (required):** This is continuous evidence preservation during an activity. A final card statement can identify spending while the opportunity to obtain an itemized original has already passed, and a complete receipt still leaves the purpose unresolved. The right collection action depends on this employee's policy, declared conference activity, preference for timely low-friction requests and the real source channel for each meal. A generic end-of-trip summarizer can produce plausible totals with missing originals, incorrectly pair similar charges, double-count a pending authorization, or invent an acceptable-sounding purpose.
+
+The task measures whether the agent turns an ongoing user delegation into lawful checks, captures perishable evidence, asks only for missing information it cannot obtain itself, and maintains the charge/receipt/purpose relationships through revisions. Environment #33's general document management, medical-billing task #17 and the proposed Claimline report lifecycle are related but do not submit this proactive conference-receipt task. All model-difficulty claims remain to be tested.
+
+## 5. Construction plan and effort
+
+**✍️ Work breakdown (required):**
+
+| Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
+| :--- | :--- | :--- | :--- |
+| Persona, history and workspace | One fictional employee, two explicit employer policy versions, conference/meeting context, eight eligible meal lineages plus personal/included-meal distractors, original receipt assets and scoped permissions. | Every rubric fact is discoverable through allowed sources; exact evidence IDs, cent totals and source windows validated; no private real-world records. | 2 |
+| User rollout and scenario script | **Sessions:** 5 conversational sessions plus agent-registered wakeups.<br>**Simulated world time span:** 7 days.<br>**Estimated total tokens:** 40k–100k per complete scenario, including repeated prior context in model inputs, dialogue, tool observations, receipt text and model responses; measure actual usage during integration. | Executable user/world scripts with timely clarification, short no-reply periods, paper-file handoff, delayed settlement and corrected receipts. Main and incomplete no-response branches have explicit, separately reported expectations. | 2–3 |
+| Environment integration | Reuse proposed Claimline and public Mail/Files/Calendar/card observations, with deterministic merchant receipt endpoints and host scheduling. Finance #6 is optional. | Fresh reset, lawful notice/wakeup delivery, source retention, isolated user/agent/evaluator inputs and unchanged business-role boundaries. Full task evaluation waits for an agent-owned scheduling protocol; mechanical replay alone does not establish proactive agent behavior. | 1–2 |
+| Rubrics, reference and hints | Freeze a 100-point rubric: charge lineage/final status 20; original itemized capture/correction chain 25; evidenced purpose 20; correct associations, reconciliation and exclusions 20; timely independent collection/targeted requests 10; honest source-linked draft/status 5. Add gates for fabricated evidence/purpose, unauthorized disclosure/submission and duplicate reimbursement claims. | A feasible reference gets 100 and all gates; no-op gets 0; wrong merchant matches, lost originals, guessed purposes, stale receipts and pending-as-paid cases fail relevant items. Timeliness uses trace timestamps; label-checked final states alone are insufficient. Hint directs attention to the employee's evidence rule and time-sensitive sources without revealing labels/answers. | 2–3 |
+| Agent rollouts and analysis | After design approval and protocol freeze, plan five independent unhinted trials for each designated GPT, Claude and Gemini model, plus one separately fixed-hint run per model. | Preserve all 15 unhinted and 3 hinted traces, exact model/config/budgets, sources, scores, usage/cost and failures. Apply the current Task qualification independently per model; full hint-assisted success is required. If thresholds are not met, report the result and review revisions before a new complete batch. | 2–3 |
+
+- **Milestones, owners and dependencies (required):** @genglinliu owns persona/evidence design, task scripts, rubric/reference and author-run analysis. First agree Claimline's interfaces and host scheduling/file handoff; then validate lawful evidence reachability and user behavior; freeze task/rubric/configuration; finally execute the complete designated-model batch and independent reproduction. Estimated 9–13 person-days, about 2–3 working weeks once dependencies are available. The companion Claimline Environment proposal is blocking for executable evidence/report operations; the final platform roster and scheduler are also dependencies.
+- **Resources and total effort (required):** 9–13 person-days; local CPU fixture services, original documents targeted below 20 MB, no paid receipt collection/OCR requirement. The planned 18-run batch is roughly 0.72–1.8 million processed scenario tokens under the provisional estimate, excluding additional pilot/reproduction calls and separately billed hidden reasoning where applicable. Dollar cost is TBD after the versioned roster/pricing and a bounded pilot; agree a spend cap before running. No paid run has been performed for this proposal.
+- **Scope boundary and open questions (required):** Conference meal expenses and a reimbursement-ready draft; exclude travel booking, tax/legal advice, live card accounts, real merchant contact, employer self-approval and submission without authority. A missing source remains missing. Confirm agent-owned wakeups, file-byte retention, merchant-download expiry representation, purpose-grounding checks and branch registration with maintainers. All final criteria and feasible opportunities are frozen before validation. SOTA failure and task acceptance are empirical questions.
+- **Data provenance and privacy (required):** Motivated by a contributor-reported experience of collecting expenses during conference travel. Every persona, employer policy, event, card charge, receipt, message, attendee and purpose record in the released task will be newly invented; no private correspondence, account data, real receipts or identifiable third-party information is included. Original synthetic task assets are planned under CC0-1.0 and task code under MIT, with dependency notices recorded. Development fixtures are developer-visible. Simulated users receive only their own context and delivered observations, with evaluator truth and agent memory isolated.
+
+After plan approval, add the executable script, grader, reference/hints and complete author-run evidence to this same PR. Follow the project's current Task difficulty and validation protocol.
