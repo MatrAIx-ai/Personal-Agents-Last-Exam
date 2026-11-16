@@ -26,6 +26,7 @@ INDEX_BRANCH = "proposal-index"
 MAX_PROPOSAL_BYTES = 200_000
 TITLE = re.compile(r"^\[(Environment|Task) Proposal\]\s*(?:\[([^\]]+)\])?\s*(.*)$", re.I)
 PROPOSAL_PATH = re.compile(r"^proposals/(environment|task)/[A-Za-z0-9][A-Za-z0-9_.-]*\.md$")
+URL = re.compile(r"(https?://\S+)")
 
 
 class APIError(RuntimeError):
@@ -110,7 +111,8 @@ def clean(value):
 
 
 def field(text, name):
-    pattern = r"^\s*(?:[-*]\s+)?\*\*" + re.escape(name) + r"(?:\s*\([^)]*\))?:\*\*\s*(.*)$"
+    # The value is the rest of the label's own line; an empty value must not capture the next line.
+    pattern = r"^[ \t]*(?:[-*][ \t]+)?\*\*" + re.escape(name) + r"(?:\s*\([^)]*\))?:\*\*[ \t]*(.*)$"
     match = re.search(pattern, text, re.M | re.I)
     return clean(match[1]) if match else ""
 
@@ -197,7 +199,8 @@ def progress(pr, changes_requested):
 def proposal_text(api, pr, kind):
     files = list(api.pages(f"/repos/{api.repository}/pulls/{pr['number']}/files"))
     if len(files) >= 3000:
-        raise RuntimeError("PR file list reached GitHub's cap; cannot identify the proposal reliably")
+        # GitHub lists at most 3000 files. Flag this row rather than abort the whole index.
+        return "", "", "PR changes too many files to identify the proposal file"
     paths = [x["filename"] for x in files if x.get("status") != "removed" and PROPOSAL_PATH.fullmatch(x["filename"])]
     paths = [path for path in paths if path.split("/")[1] == kind]
     if len(paths) != 1:
@@ -205,9 +208,13 @@ def proposal_text(api, pr, kind):
     path = paths[0]
     # The base repository's pull ref also works for public fork PRs. Never check out the head.
     ref = f"refs/pull/{pr['number']}/head"
-    result = api.contents(path, ref)
-    if result is None and pr.get("merged_at") and pr.get("merge_commit_sha"):
-        result = api.contents(path, pr["merge_commit_sha"])
+    try:
+        result = api.contents(path, ref)
+        if result is None and pr.get("merged_at") and pr.get("merge_commit_sha"):
+            result = api.contents(path, pr["merge_commit_sha"])
+    except ValueError:
+        # A symlink, submodule or directory at the proposal path. API errors still abort the run.
+        return "", path, "Proposal path must be a regular Markdown file"
     if result is None:
         return "", path, "Proposal file is unavailable"
     try:
@@ -267,11 +274,19 @@ def collect(api, domain_names, branch):
 def escape_cell(value, limit=240):
     value = " ".join(str(value).split())
     if len(value) > limit:
-        value = value[:limit - 1] + "…"
+        cut = value[:limit - 1]
+        if not value[limit - 1].isspace() and " " in cut:
+            # End on a whole word so that no word or link is left half-printed.
+            cut = cut.rsplit(" ", 1)[0]
+        value = cut.rstrip(" ,;:([") + "…"
     value = html.escape(value, quote=False)
-    for char in ("\\", "|", "[", "]", "*", "_", "`", "!"):
-        value = value.replace(char, "\\" + char)
-    return value
+    parts = URL.split(value)
+    for index, part in enumerate(parts):
+        # Odd items are bare URLs: an escaped underscore would become part of the link target.
+        for char in ("\\", "|", "[", "]", "*", "`", "!") + (() if index % 2 else ("_",)):
+            part = part.replace(char, "\\" + char)
+        parts[index] = part
+    return "".join(parts)
 
 
 def utc(value):
