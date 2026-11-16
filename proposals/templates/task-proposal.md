@@ -64,5 +64,6 @@ Estimate token volume for **one complete scenario across all sessions** and stat
 - **Milestones, owners and dependencies (required):** `[Fill in: work order, responsible contributors, expected calendar duration and environment/infra dependencies; link related PRs]`
 - **Resources and total effort (required):** `[Fill in: total person-days, estimated model/API and generation costs, and compute needs; estimates or explained TBDs]`
 - **Scope boundary and open questions (required):** `[Fill in: what is excluded or deferred, and how unresolved decisions will be settled]`
+- **Data provenance and privacy (required):** `[Fill in: invented, or transformed from a real experience; sources and reuse terms of any collected material; confirm that private messages, account details and third-party personal information are removed]`
 
 After approval, add the script, grader and author-run evidence against these deliverables in the same PR. Reviewers use the approved plan as the acceptance baseline; substantial scope changes require another design review. Follow the [implementation and validation guide](../../CONTRIBUTING.md#task-difficulty-and-validation).
