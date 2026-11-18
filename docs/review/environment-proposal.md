@@ -25,6 +25,24 @@ Authors should consult the [existing App contracts](../app-integrations.md) and 
 
 For each planned connection, check the linked App/tool/receive-schema version, whether the dependency is required or optional, the direction and data/file formats, and the observable outcome in the receiving App. The plan should identify who supplies a missing capability and how the integration will be demonstrated. A sender's successful return alone is not a sufficient acceptance criterion.
 
+### Verify the dependency, not only its name
+
+Inventory the personal Apps needed by the declared workflows, including Apps the Agent calls separately rather than through Messaging. Also list other receiving/sending Apps. For each connection, record:
+
+| Workflow and required effect | App and required/optional scope | Reviewed implementation revision and public interface | Capability check and planned evidence | Missing capability, owner and fallback |
+| --- | --- | --- | --- | --- |
+| Example: order confirmation reaches an inbox | Mail; required for this workflow | Pinned App package, receive declaration, operation and payload/wire schema | Check the example against the receiver schema; later verify the actual inbox record and receipt | Record any missing feature; do not infer it from the App name |
+
+This is a reviewer evidence table, not a second App registry or an extra author configuration file. Use the proposal's existing connections, integrations and validation fields to request missing information.
+
+1. **Check availability at the reviewed revision.** Open the package and interface files; distinguish an implemented capability from a proposal, test fixture or planned adapter. At the introduction of this check, the canonical personal App examples are Mail and Calendar under `examples/apps/`. Recheck the current tree for each review; the template's mention of Contacts does not establish an implementation. A shared person/account binding is not a Contacts App.
+2. **Check the specific effect and caller.** An existing App may lack the required feature. Calendar has business tools and Infra event handlers but currently no Messaging receiver. Distinguish Agent tool use, authorized business-client calls, task-supplied seed/events and App-to-App messages. Do not infer automatic Calendar updates from an email or require every App to connect to Mail.
+3. **Read the contract, not just its identifier.** Check input/output shape, required fields, file support, receive operation and version against the proposed use. When an example is supplied, compare it with the actual schema; use the public validator when feasible and record the result. A payload fragment is not a full wire message. If no concrete example is supplied, record compatibility as unverified and request only the detail needed to judge the design. Proposal review does not require a finished App or integration test.
+4. **Check completion and failure semantics.** Separate sender commit, receiver commit and any business result returned to the caller. Delivery acknowledgement does not imply a payment decision, a Calendar update or rollback of the sender. Check rejection, retry and unknown outcomes for the proposed workflow. Identify required platform support explicitly rather than assuming a cross-App transaction or request/response interface.
+5. **Close or bound the gap.** An unavailable receiver/operation needs an owner, sequence and feasible fallback, or exclusion from the initial scope. Optional future links do not block an independently useful first version. If a linked Task requires the optional connection, record that Task's narrower dependency separately.
+
+Keep diagnostic traces separate from business mutations and grading evidence. For a proposal that needs evaluator-only records of reads or rejected attempts, identify the recording hook and persistence path. The reference Core rejects business-data mutation from read tools; optional best-effort `ctx.log` is not automatically a durable evaluator record. A missing evidence adapter is a platform dependency to resolve, not a reason to weaken read-only guarantees.
+
 Public Core/Messaging makes reference integration reproducible by contributors. Authors identify intended checks and required runtime capabilities in the existing Validation and reset workstream. Do not require token policies, TLS deployment, log retention design or completed tests in a proposal. Optional step logging becomes a delivery requirement only when included in approved scope.
 
 ## Findings and outcome

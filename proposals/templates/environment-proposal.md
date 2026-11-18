@@ -39,7 +39,7 @@ Briefly describe the main workflows and why this environment would be useful for
 
 Name possible connections and briefly explain their purpose. Internal personal apps include Mail, Calendar, Contacts and similar tools. Use `None` if no connection applies, or `TBD` if undecided.
 
-- **Internal personal apps (required):** `[Fill in: personal apps and what could be read or updated, or None / TBD]`
+- **Internal personal apps (required):** `[Fill in: which personal apps each workflow needs, what it reads or updates, and whether each connection is required or optional; link the existing public interface/version, or name the missing capability, owner and fallback; or None / TBD]`
 - **Other apps and websites (required):** `[Fill in: services and potential shared workflows, or None / TBD]`
 
 ### Integration details
