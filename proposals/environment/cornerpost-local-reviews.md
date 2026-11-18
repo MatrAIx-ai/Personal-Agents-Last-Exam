@@ -1,6 +1,6 @@
 # Environment Track proposal
 
-**PR title:** `[Environment Proposal] [News & information + Social & communities] Cornerpost local business reviews`
+**PR title:** `[Environment Proposal] [News & information + Social & communities] Cornerpost local business reviews (Yelp-inspired)`
 
 ## 1. App and domains
 
