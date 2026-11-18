@@ -4,7 +4,7 @@
 
 ## Start with a proposal
 
-1. Check the [proposal list](proposals/proposal-list.md) for related work, then copy the [Environment proposal template](proposals/templates/environment-proposal.md) or [Task proposal template](proposals/templates/task-proposal.md).
+1. Check the [proposal list](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/blob/proposal-index/proposals/proposal-list.md) for related work, then copy the [Environment proposal template](proposals/templates/environment-proposal.md) or [Task proposal template](proposals/templates/task-proposal.md).
 2. Replace the `[Fill in: …]` placeholders, then add the completed design to `proposals/environment/<slug>.md` or `proposals/task/<slug>.md` in your fork. Follow the required/optional labels; explain how any `TBD` decisions will be resolved.
 3. Open a PR against `main`. Use the [PR summary template](proposals/templates/pr-summary.md) to describe the track, stage and proposal, and link the design file. Keep it Draft while writing; request review when ready.
 
@@ -21,17 +21,21 @@ Both tracks use the exact names in the [domain list](#environment-domains). Choo
 
 > 📝 **Proposal PR** → 🔍 **Design review** → ✅ **Plan approved** → 🛠️ **Implement in the same PR** → 🧪 **Validate & merge**
 
-- **Design review:** reviewers comment; the author revises. A maintainer records the approved scope and commit in a comment and adds `plan-approved`. The PR stays open.
+- **Design review:** reviewers comment; the author revises. An assigned Track reviewer or non-author maintainer posts `/approve-plan <commit-sha>` using the full current commit SHA. The bot records the approved scope and commit and adds `plan-approved`. The PR stays open; this does not merge the proposal.
 - **Implementation:** once the infrastructure is available, add code and evidence to the same PR. Request a design re-review for substantial scope changes.
 - **Acceptance:** link implementation and verification evidence to each planned deliverable. Reviewers compare it with the approved scope, check outcomes and reproduce key results. Only the final validated merge counts as an accepted contribution.
+
+**Environment v1 is due within 14 calendar days of the first plan approval.** Submit a runnable core implementation, fixtures/reset behavior, tests and reproduction evidence in the same PR. This is the first-version submission deadline, not the merge deadline. The bot records the UTC due date and flags overdue submissions; a maintainer can extend it with a reason. Task Track does not receive this deadline automatically.
+
+Use `/start-implementation`, then `/submit-implementation <commit-sha> <https-evidence-url>`. A non-author maintainer records final validation with `/accept-implementation <commit-sha> <https-evidence-url>` before final GitHub approval and manual merge. See [lifecycle commands, deadlines and merge protection](docs/review/proposal-lifecycle.md). GitHub **Approve** alone does not approve a plan, and `plan-approved` alone does not satisfy the merge gate.
 
 Approval does not reserve exclusive ownership. Link overlapping proposals; parallel work is allowed. Once related work merges, later submissions are assessed for additional value. Record when a PR is ready for final review; the merge timestamp records acceptance.
 
 ## Tracking proposals
 
-Use the **PR number and URL** as the proposal reference. Maintainers apply the track and status labels; contributors only need to fill the template.
+Use the **PR number and URL** as the proposal reference. Lifecycle commands maintain stage labels; maintainers manage Track labels. Contributors fill the template and keep implementation evidence in the same PR.
 
-The [proposal list](proposals/proposal-list.md) automatically groups Environment and Task PRs with submission time, domains, track-specific summary, author, review progress and merge time. GitHub Actions reads each PR and its completed proposal file, including proposals that have not merged. Keep one proposal file per PR and preserve the template's field labels. No manual list updates are needed; an index update does not count as plan approval or contribution acceptance. See [automatic tracking](proposals/README.md#automatic-tracking).
+The [proposal list](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/blob/proposal-index/proposals/proposal-list.md) automatically groups Environment and Task PRs with submission time, domains, track-specific summary, author, review progress and merge time. GitHub Actions reads each PR and its completed proposal file, including proposals that have not merged. Keep one proposal file per PR and preserve the template's field labels. No manual list updates are needed; an index update does not count as plan approval or contribution acceptance. See [automatic tracking](proposals/README.md#automatic-tracking).
 
 | What | How to track it |
 | :--- | :--- |
@@ -44,6 +48,8 @@ The [proposal list](proposals/proposal-list.md) automatically groups Environment
 For example, Task proposal `#57` can depend on Environment proposal `#42`. These are examples, not existing PRs. The PR number tracks the contribution; the slug identifies the reusable environment or task. One proposal should have a clear scope; PR count alone does not determine contribution credit.
 
 ## 🏗️ Environment Track
+
+The [App delivery guide](docs/app-contribution.md) and [public Core / Messaging runtime](runtime/README.md) provide reproducible local business and integration checks. Consult [existing App interfaces](docs/app-integrations.md) before building cross-App connections. Use the separate [proposal review](docs/review/environment-proposal.md) and [implementation review](docs/review/app-implementation.md) criteria; local runtime success does not replace maintainer acceptance or deployment-specific checks.
 
 Propose a website or app you would like to build and the main workflows it could support. Choose one primary domain and any relevant secondary domains from the list below. Use these exact names in the proposal and PR title.
 
@@ -69,6 +75,8 @@ For shared personal apps or device interfaces, select domains by the proposed wo
 Include milestone order, responsible contributors, expected calendar duration, dependencies and resource costs. Separate initial scope from future connections. Estimates may be ranges; explain how unresolved details will be settled.
 
 After plan approval, develop the concrete interfaces and implementation details. Final review checks complete workflows, permissions, state consistency, reset behavior, and integration evidence.
+
+For a proposed App package layout, locally testable Mail/Calendar examples and delivery instructions, see the [App contribution guide](docs/app-contribution.md).
 
 “Complete” means each declared workflow operates end to end, including modification, cancellation, confirmations, and realistic errors where relevant. It does not mean recreating every feature of the reference product.
 
