@@ -1,6 +1,6 @@
 # Task Track proposal
 
-Proposed PR title: `[Task Proposal] [Travel & commuting + Weather & outdoors] White Sands context-aware weather brief`
+Proposed PR title: `[Task Proposal] [Travel & commuting + Weather & outdoors] Proactive Weather Evidence Seeking for Personalized Activities`
 
 ## 1. Task and domains
 
