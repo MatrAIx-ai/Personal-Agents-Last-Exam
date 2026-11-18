@@ -171,7 +171,7 @@ After mapping, three things usually need a question:
 
 ## Review before handing over
 
-The checker covers structure and arithmetic. These need judgment. Go through them before each round of questions and again before handing over, and tell the contributor about any that fail.
+The checker covers structure and arithmetic. These need judgment. Go through them before each round of questions and again before handing over, and tell the contributor about any that fail. They are advice for a stronger proposal, not conditions for submitting one.
 
 1. **Personal.** Apply the "different user" test to Section 4. The right action must change when only the user's history changes.
 2. **Discoverable.** Every requirement a rubric item scores is stated in a named record with a date, and that record exists before the agent needs it. An item that scores something nobody asked for fails this test.

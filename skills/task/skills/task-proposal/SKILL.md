@@ -5,7 +5,9 @@ description: Draft, complete or upgrade a Task Track proposal for Personal Agent
 
 # Task proposal
 
-Help a contributor produce a complete Task Track proposal at `proposals/task/<slug>.md`. The contributor knows the story. Your job is to write it down in the template's structure and to ask for what is missing, because the parts people skip (where each fact lives, what must never happen, what the hint may say) are the parts reviewers need most.
+Help a contributor write a Task Track proposal at `proposals/task/<slug>.md`. The contributor knows the story. Your job is to write it down in the template's structure and to ask for what is missing, because the parts people skip (where each fact lives, what must never happen, what the hint may say) are the parts reviewers need most.
+
+You are a helper, not a gate. Nothing here stops a contributor from submitting. A proposal with open gaps can still be opened as a PR, and reviewers will pick up what is left. Point out what is missing, make it easy to fix, and leave the decision to them.
 
 ## Sources of truth
 
@@ -68,7 +70,7 @@ This is a priority, not a script. One round may mix sections, and when upgrading
 
 `references/section-guide.md` lists, for each section, what a good answer looks like, the gaps that are common in submitted proposals and questions that close them. Read it before the first round.
 
-Update the file after each round, so progress lives in the proposal and not in the conversation. The contributor can stop at any point and continue later from the file. Stop asking when the checker reports no errors, the review list holds, and each remaining `TBD` says how it will be resolved. A proposal may be submitted with those.
+Update the file after each round, so progress lives in the proposal and not in the conversation. The contributor can stop at any point, continue later from the file, or submit as it is. Stop asking when nothing important is open, or as soon as the contributor says it is good enough. Do not repeat a question they have chosen not to answer; write `TBD` there and move on.
 
 ### 4. Check
 
@@ -78,15 +80,15 @@ Run the checker from this skill's folder:
 python3 <this skill's folder>/scripts/check_task_proposal.py proposals/task/<slug>.md
 ```
 
-It reports errors (must fix) and warnings (confirm or fix). A proposal passes when there are no errors; a warning about remaining `TBD`s is normal while work is open. It checks structure against the template, leftover placeholders, domain names, the length of the personalization insight, rubric points and the pass mark, that every rubric item appears in the reference solution, and timestamps. It is quick, so run it after every round. Fix what you can and ask the contributor about the rest.
+It is advisory. It lists gaps (something the template asks for that is not there yet) and notes (worth a second look), and neither blocks submission. It checks structure against the template, leftover placeholders, domain names, the length of the personalization insight, rubric points and the pass mark, that every rubric item appears in the reference solution, and timestamps. It is quick, so run it after every round. Fix what you can yourself and turn the rest into questions.
 
-The checker cannot judge content. A draft can pass while a rubric item relies on a fact no record contains, or while the hint gives the answer away. The review list in `references/section-guide.md` covers those; go through it yourself each round and report anything that fails.
+The checker cannot judge content. A draft can have no gaps while a rubric item relies on a fact no record contains, or while the hint gives the answer away. The review list in `references/section-guide.md` covers those; go through it yourself each round and report anything that fails.
 
 ### 5. Hand over
 
 Tell the contributor:
 
-- where the file is and what is still `TBD`;
+- where the file is, and which gaps and `TBD`s are still open, so they can mention them in the PR if they submit now;
 - which parts you proposed and they have not confirmed;
 - the PR title the checker printed, and that the PR description follows `proposals/templates/pr-summary.md`.
 
