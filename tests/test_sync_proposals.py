@@ -224,6 +224,48 @@ class ProposalSyncTests(unittest.TestCase):
             self.assertTrue(sync.publish(api, "main", "new"))
         self.assertEqual(request.call_args.args[2]["sha"], "b")
 
+    def test_empty_field_does_not_capture_the_next_line(self):
+        text = ("- **Primary domain (required):**\n"
+                "- **Secondary domains (optional):**\n\n"
+                "### Domain names\n")
+        self.assertEqual(sync.field(text, "Primary domain"), "")
+        self.assertEqual(sync.field(text, "Secondary domains"), "")
+        filled = "  * **Primary domain (required):**   Travel & commuting  \n"
+        self.assertEqual(sync.field(filled, "Primary domain"), "Travel & commuting")
+        api = FakeAPI(pr(), self.task.replace("Money & insurance", ""))
+        self.assertEqual(sync.collect(api, self.domains, "main")[0]["secondary"], "")
+
+    def test_one_unreadable_proposal_is_flagged_without_aborting_the_index(self):
+        api = FakeAPI(pr(), self.task)
+        with patch.object(api, "contents", side_effect=ValueError("Expected a regular file")):
+            item = sync.collect(api, self.domains, "main")[0]
+        self.assertIn("regular Markdown file", item["issue"])
+        self.assertEqual(item["primary"], "Travel & commuting")  # Title fallback.
+        many = [{"filename": f"assets/{n}.png", "status": "added"} for n in range(3000)]
+        with patch.object(api, "pages", side_effect=lambda path, **_: many if path.endswith("/files") else []):
+            text, path, issue = sync.proposal_text(api, api.pr, "task")
+        self.assertEqual((text, path), ("", ""))
+        self.assertIn("too many files", issue)
+        self.assertIn("Metadata: " + sync.escape_cell(item["issue"]), sync.render([item], api.repository))
+
+    def test_long_cells_end_on_a_whole_word_and_never_inside_a_link(self):
+        text = "A portal modelled on Regulations.gov (https://www.regulations.gov/docket) with comments"
+        cut = sync.escape_cell(text, 45)
+        self.assertEqual(cut, "A portal modelled on Regulations.gov…")
+        self.assertNotIn("http", cut)
+        self.assertEqual(sync.escape_cell("word " * 10, 23), "word word word word…")
+        self.assertEqual(sync.escape_cell("abcde fghij", 11), "abcde fghij")
+        self.assertEqual(sync.escape_cell("x" * 30, 10), "x" * 9 + "…")
+        self.assertLessEqual(len(sync.escape_cell("word " * 100)), 240)
+
+    def test_bare_links_keep_underscores_while_text_is_still_escaped(self):
+        cell = sync.escape_cell("Zotero https://www.zotero.org/support/collections_and_tags uses snake_case | x")
+        self.assertIn("https://www.zotero.org/support/collections_and_tags", cell)
+        self.assertIn(r"snake\_case", cell)
+        self.assertIn(r"\| x", cell)
+        hostile = sync.escape_cell("https://bad.example/a|b[c]*d`e!f")
+        self.assertEqual(hostile, r"https://bad.example/a\|b\[c\]\*d\`e\!f")
+
     def test_oversized_proposal_is_not_parsed(self):
         api = FakeAPI(pr(), "x" * (sync.MAX_PROPOSAL_BYTES + 1))
         text, _, issue = sync.proposal_text(api, api.pr, "task")
