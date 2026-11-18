@@ -69,13 +69,19 @@ class ProposalSyncTests(unittest.TestCase):
         self.task = template.replace("`[Fill in: a concise task title]`", "Airport pickup")
         self.task = self.task.replace("`[Fill in: one domain from the table below]`", "Travel & commuting")
         self.task = self.task.replace("`[Fill in: other relevant domains, or None]`", "Money & insurance")
-        self.task = self.task.replace("`[Fill in: the central personalization challenge or insight]`",
-                                      "Resolve a changed arrival time against the user's mobility needs.")
+        self.task = self.task.replace(
+            "`[Fill in: 1–2 sentences on why the right action depends on this person's history, boundaries or relationships rather than the surface request alone]`",
+            "Resolve a changed arrival time against the user's mobility needs.",
+        )
 
     def test_real_templates_and_domains_are_readable(self):
         self.assertEqual(len(self.domains), 15)
         self.assertEqual(sync.field(self.task, "Primary domain"), "Travel & commuting")
         self.assertTrue(sync.answer(self.task, "What makes this distinct and personal").startswith("Resolve"))
+        legacy = "## 4. What makes this distinct and personal\n\n**✍️ Your answer (required):** Legacy summary.\n\nDetails."
+        self.assertEqual(sync.answer(legacy, "What makes this distinct and personal"), "Legacy summary.")
+        example = (ROOT / "proposals/task/lena-spring-gathering.md").read_text()
+        self.assertTrue(sync.answer(example, "What makes this distinct and personal").startswith("When an earlier cutoff"))
         empty = (ROOT / "proposals/templates/task-proposal.md").read_text()
         self.assertEqual(sync.field(empty, "Short task title"), "")
         self.assertEqual(sync.answer(empty, "What makes this distinct and personal"), "")

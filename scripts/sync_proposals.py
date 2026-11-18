@@ -105,6 +105,13 @@ def answer(text, heading):
     section = re.search(pattern, text, re.M | re.S | re.I)
     if not section:
         return ""
+    bullet = re.search(
+        r"^\s*[-*]\s+\*\*Personalization insight(?:\s*\([^)]*\))?:\*\*\s*(.*?)(?=^\s*[-*]\s+\*\*|\n\n|\Z)",
+        section[1],
+        re.M | re.S | re.I,
+    )
+    if bullet:
+        return clean(bullet[1])
     response = re.search(r"\*\*(?:✍️\s*)?Your answer \(required\):\*\*\s*(.*)", section[1], re.S)
     return clean(response[1].split("\n\n", 1)[0]) if response else ""
 

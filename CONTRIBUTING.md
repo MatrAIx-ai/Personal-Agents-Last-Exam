@@ -84,9 +84,10 @@ Start with a realistic user situation and a clear personalization idea. The prop
 - **User persona and prior history:** the background, preferences and experiences that matter to the task.
 - **Story outline:** what the user wants, what happens or changes, and what a good outcome looks like. Include a rough time span only if relevant.
 - **What makes this distinct and personal:** the central challenge or insight, why the person's context changes the right action, and what a generic assistant might miss.
+- **Rubric, hint and reference solution:** forbidden and expected rubric items with their evidence and checks, the full-pass rule, the exact hint text, and one reference timeline that earns a full score.
 - **Construction plan and effort:** persona/history/workspace construction, user rollout and scenario scripting, environment integration, rubrics/reference/hints, and agent rollouts with analysis. For each workstream, specify planned coverage, deliverables, quality checks and effort in person-days, plus owners, dependencies, milestone order and expected resources.
 
-After plan approval, task authors develop the executable scenario, precise timeline, context, rubrics and reference solution. Authors then run the required model evaluations themselves and submit traces, scores, configurations, hint-assisted results and failure analysis for implementation review.
+After plan approval, task authors develop the executable scenario, precise timeline, context, grader and replayable reference solution from the approved rubric. Authors then run the required model evaluations themselves and submit traces, scores, configurations, hint-assisted results and failure analysis for implementation review.
 
 The user rollout describes planned user interactions, responses and branches across the story. Specify the **number of sessions**, **simulated world time span**, and **estimated total tokens for one complete scenario across all sessions**, including the token estimate's scope (dialogue, prior context, tool outputs, etc.). The scenario script implements user behavior and world events. An agent rollout is an actual model execution against the script. Plan the work for both; allow multiple valid agent strategies.
 
