@@ -30,32 +30,45 @@ Accept any of these, and ask which one they have if it is not clear:
 - **A pasted conversation or an exported file.**
 - **A link to a shared chat.** Try to read it. These links often need a login, so if you cannot read it, ask the contributor to paste the text.
 
-Raw material stays out of the repository. A real conversation usually contains other people's names, messages and account details, and the template requires those to be removed. Ask the contributor to remove sensitive details before pasting, write only a fictionalized version into the proposal, and do not save the raw material to a file in the repository. Screenshots are a poor source for the same reason; ask for text.
+Raw material stays out of the repository. A real conversation or a story about real people usually contains names, messages, health or account details, and the template requires those to be removed. Raise this in your first reply, not at the end: ask the contributor to remove sensitive details before pasting, write only a fictionalized version into the proposal, and do not save the raw material to a file in the repository. Screenshots are a poor source for the same reason; ask for text.
+
+Before drafting, look through `proposals/proposal-list.md` for proposals with a similar story, and tell the contributor about any you find.
 
 ### 2. Draft first, then ask
 
-Copy the template to `proposals/task/<slug>.md` and fill in everything the material supports. Do not start with a list of questions: a contributor reacts faster to a draft than to an empty form.
+Copy the template to `proposals/task/<slug>.md` and fill it in. Do not start with a list of questions: a contributor reacts faster to a draft than to an empty form. For a new proposal, the slug is a few lowercase words joined by hyphens. When upgrading, keep the file path the proposal already has, so its PR keeps pointing at the same file.
 
-- Where you do not know something, write `TBD` followed by what is needed.
-- Where you made something up to keep the draft moving (a date, a price, a name), tell the contributor which parts are your proposals. The story is theirs.
-- When upgrading an old proposal, keep the author's wording where it fits, move existing content to the field where it now belongs, and leave gaps as `TBD` rather than inventing a rubric they did not design.
+How much to write yourself depends on what you were given:
+
+- **Details you may invent:** names, dates, prices, places, the wording of messages. Use fictional ones and say which they are.
+- **The core you may propose but not decide:** the decisive moment, what changes during the story, what must never happen, and the rubric that follows from them. For a new story, draft all of these so the contributor has something to react to, and make the parts that were not in their material your first questions. If the story has no change after the first request, propose one and ask.
+- **An existing design you should preserve:** when upgrading, keep the author's wording, items and weights wherever they fit the current template, and move content to the field where it now belongs. Where the old design does not fit, write `TBD` with your suggestion next to it instead of silently replacing it. `references/section-guide.md` has a section on upgrading.
+
+Where you do not know something, write `TBD` followed by what is needed to resolve it.
 
 Write the proposal in English. Talk to the contributor in the language they use.
 
 ### 3. Ask for what is missing, a few questions at a time
 
-Ask at most four questions per round, as a plain numbered list. Give each question a suggested answer, so the contributor can reply "1 yes, 2 use yours, 3 no, it should be…". Say in a few words why a question matters when that is not obvious. Plain numbered text works in every tool; a structured question prompt is fine if your environment has one.
+Before each round, run the checker (step 4) and go through the "Review before handing over" list in `references/section-guide.md`. Together they are the best source of questions: they show what is missing and what would not survive review.
 
-Ask in this order, because later answers depend on earlier ones:
+Each message to the contributor has two short parts:
 
-1. **The decisive moment** (Section 4). Everything else is built around it.
-2. **The rubric**: what must never happen, what a good outcome achieves, and where each fact can be found.
+- **What you assumed.** A brief list of the details you invented, for them to correct. They do not need to answer these one by one.
+- **Questions.** At most four per round, as a plain numbered list. Give each a suggested answer, so the contributor can reply "1 yes, 2 use yours, 3 no, it should be…". Say in a few words why a question matters when that is not obvious. Plain numbered text works in every tool; a structured question prompt is fine if your environment has one.
+
+When more than four things are open, choose by this priority, because later answers depend on earlier ones:
+
+1. **The decisive moment** (Section 4), together with the facts it rests on: where they are recorded and when. Everything else is built around it.
+2. **The rubric**: what must never happen, what a good outcome achieves, and whether the points make the decisive outcome necessary.
 3. **The hint and the reference solution.**
 4. **The construction plan.** Propose the estimates yourself and ask the contributor to correct them.
 
+This is a priority, not a script. One round may mix sections, and when upgrading a proposal whose story is already settled, start with whatever the checker and the review list flag.
+
 `references/section-guide.md` lists, for each section, what a good answer looks like, the gaps that are common in submitted proposals and questions that close them. Read it before the first round.
 
-Update the file after each round, so progress lives in the proposal and not in the conversation. The contributor can stop at any point and continue later from the file. Stop asking when the checker passes and the remaining `TBD`s each say how they will be resolved; a proposal may be submitted with those.
+Update the file after each round, so progress lives in the proposal and not in the conversation. The contributor can stop at any point and continue later from the file. Stop asking when the checker reports no errors, the review list holds, and each remaining `TBD` says how it will be resolved. A proposal may be submitted with those.
 
 ### 4. Check
 
@@ -65,9 +78,9 @@ Run the checker from this skill's folder:
 python3 <this skill's folder>/scripts/check_task_proposal.py proposals/task/<slug>.md
 ```
 
-It reports errors (must fix) and warnings (confirm or fix). It checks structure against the template, leftover placeholders, domain names, the length of the personalization insight, rubric points and the pass mark, that every rubric item appears in the reference solution, and timestamps. Fix what you can and ask the contributor about the rest.
+It reports errors (must fix) and warnings (confirm or fix). A proposal passes when there are no errors; a warning about remaining `TBD`s is normal while work is open. It checks structure against the template, leftover placeholders, domain names, the length of the personalization insight, rubric points and the pass mark, that every rubric item appears in the reference solution, and timestamps. It is quick, so run it after every round. Fix what you can and ask the contributor about the rest.
 
-The checker cannot judge content. After it passes, go through the "Review before handing over" list in `references/section-guide.md` yourself, and report anything that fails.
+The checker cannot judge content. A draft can pass while a rubric item relies on a fact no record contains, or while the hint gives the answer away. The review list in `references/section-guide.md` covers those; go through it yourself each round and report anything that fails.
 
 ### 5. Hand over
 

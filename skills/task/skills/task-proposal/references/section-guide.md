@@ -12,6 +12,7 @@ The section numbers follow `proposals/templates/task-proposal.md`. If the templa
 - [Section 5: hint](#section-5-hint)
 - [Section 5: reference solution](#section-5-reference-solution)
 - [Section 6: construction plan](#section-6-construction-plan)
+- [Upgrading an older proposal](#upgrading-an-older-proposal)
 - [Review before handing over](#review-before-handing-over)
 
 ## Sections 1–3: domains, persona and story
@@ -147,12 +148,33 @@ Propose these numbers yourself from the story and ask the contributor to correct
 - "Which apps does this need? Do they exist in the repository already, or do you plan to build or simulate one?"
 - "Is the story invented or based on something real? If real, what has been changed or removed?"
 
+## Upgrading an older proposal
+
+Proposals written with an earlier template keep the rubric, hint and reference inside one row of the construction plan, often as "gates" plus weighted categories. Keep the author's design and move it; do not replace it.
+
+| The old proposal has | In the current template |
+| :--- | :--- |
+| A gate that prohibits something ("must not share…", "never exceeds…") | A forbidden item |
+| A gate that requires an outcome ("the booking exists", "all three targets met") | An expected item, with enough points that missing it fails the task. Several such gates that describe one outcome can become one all-or-nothing item. |
+| Weighted categories or scored criteria | Expected items, keeping the author's weights where they still add up |
+| A list of constraints | Each one becomes a forbidden item or an expected item |
+| "Success criteria" in prose | Split into items the grader can check; mark `TBD` where the check is unclear |
+| A hint that states a fact or an action | Keep the author's text visible, put a suggested rewording that points to records next to it, and ask which to use |
+| A one-line reference approach | A draft timeline built from the story, marked as your proposal |
+| Free-text Section 4 | The four fields, split from the author's own sentences |
+
+After mapping, three things usually need a question:
+
+- **Arithmetic.** Old weights were not designed around a pass mark. Check whether the largest item outweighs the gap between the total and the pass mark, and ask how to rebalance if it does not.
+- **Evidence.** Old criteria rarely say which record states the requirement. Ask for the record and date of each.
+- **Existing results.** If the proposal reports pilot scores, compare them with the thresholds in `CONTRIBUTING.md` and tell the contributor where they stand. A pilot above the threshold means the task or the rubric needs to change before validation, and that is better said now.
+
 ## Review before handing over
 
-The checker covers structure and arithmetic. These need judgment. Go through them and tell the contributor about any that fail.
+The checker covers structure and arithmetic. These need judgment. Go through them before each round of questions and again before handing over, and tell the contributor about any that fail.
 
 1. **Personal.** Apply the "different user" test to Section 4. The right action must change when only the user's history changes.
-2. **Discoverable.** Every fact a rubric item relies on appears in a named record with a date, and that record exists before the agent needs it.
+2. **Discoverable.** Every requirement a rubric item scores is stated in a named record with a date, and that record exists before the agent needs it. An item that scores something nobody asked for fails this test.
 3. **Doing nothing fails.** Work out the score of an agent that takes no action. It should be zero or close to it.
 4. **The obvious wrong answer fails.** Work out the score of the generic mistake described in Section 4. It should trigger a forbidden item or score well below the pass mark.
 5. **No overlap.** Nothing is listed as both forbidden and expected.

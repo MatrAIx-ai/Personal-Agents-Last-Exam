@@ -185,11 +185,14 @@ def check_required_fields(text, template, report):
 
 def check_placeholders(text, template, report):
     template_lines = set(template.splitlines()) if template else set()
+    open_items = []
     for number, line in enumerate(text.splitlines(), 1):
         if PLACEHOLDER.search(line):
             report.error("placeholder left in the file: replace `[Fill in: …]` with an answer", number)
         elif re.search(r"\bTBD\b", line) and line not in template_lines and "use `TBD`" not in line:
-            report.warn("TBD: make sure it says how it will be resolved", number)
+            open_items.append(str(number))
+    if open_items:
+        report.warn(f"{len(open_items)} line(s) contain TBD (lines {', '.join(open_items)}); make sure each says how it will be resolved")
 
 
 def check_domains(text, template, report):
