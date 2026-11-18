@@ -1,0 +1,77 @@
+# Task Track proposal
+
+**PR title format:** `[Task Proposal] [Food & dining] Keep each person's lunch preferences current while ordering for family`
+
+## 1. Task and domains
+
+- **Authors / GitHub handles (required):** [@onepounchman](https://github.com/onepounchman). Codex assisted with proposal drafting; the contributor owns review, implementation and validation.
+- **Short task title (required):** Keep each person's lunch preferences current while ordering for family
+- **Primary domain (required):** Food & dining
+- **Secondary domains (optional):** None
+
+## 2. User persona and prior history
+
+**✍️ Your answer (required):** Maya usually manages lunch orders through her own delivery account. Her husband, Evan, works from home most days, while Maya usually goes to the office, so she often orders just for him. When she works from home, she orders for herself or both of them. The account and delivery address are the same, but their initial tastes differ: Maya prefers mild food without cilantro; Evan prefers hot food with cilantro. These are ordinary taste preferences, without medical restrictions. Most recent purchases were for Evan, so the account history contains more of his meals than hers.
+
+The initial workspace contains about ten historical orders and twelve short messages or meal reviews spanning two weeks. Recipient attribution comes from dated conversations, references to particular orders and attributed feedback. A payment receipt alone does not establish who ate the meal. The record includes several clear examples for each person; it does not require guessing a preference from one ambiguous purchase.
+
+Maya has authorized the assistant to order the requested number of lunches to the recorded home address, up to US$32 per person including all charges. That permission is recorded separately from either person's tastes. Each live request makes the intended eater clear. Maya relays her husband's lunch-specific request and his later ongoing preference change; no separate account access or external contact with him is required. The assistant must use those instructions with their stated scope while preserving Maya's preferences. The delegated-ordering situation is adapted from the contributor's experience; the married couple and specific requests are synthetic scenario choices.
+
+## 3. Story outline
+
+**✍️ Your answer (required):** Five sessions over ten days alternate between delegated and personal purchases. The assistant's own new orders become part of the same account history. A good outcome is six appropriately selected meals that respect each person's current preferences and any lunch-specific exception, with payment and recipient allocation confirmed.
+
+| Session and simulated timestamp | User request or event | Expected outcome |
+| :--- | :--- | :--- |
+| 1 — `2026-06-01T11:00:00-07:00` | “Please order lunch for Evan at home again. Use my account.” | Find the relevant historical conversations and order one meal suited to Evan. |
+| 2 — `2026-06-03T11:00:00-07:00` | “Lunch for Evan again, please. He wants mild food with no cilantro just for today's lunch.” | Follow the exception for this meal. Preserve its stated scope; this purchase does not change Maya's tastes or establish a lasting change for Evan. |
+| 3 — `2026-06-05T11:00:00-07:00` | “I'm working from home today. Just order lunch for me.” | Select for Maya despite the greater frequency and recency of her husband's orders. |
+| 4 — `2026-06-08T11:00:00-07:00` | “I'm home today. Lunch for Evan and me, please.” A further user message says, “Starting tomorrow, Evan would like cilantro left out of his lunches.” | Order for Maya's ongoing tastes and Evan's ongoing tastes today, after the June 3 exception has expired. Preserve the new cilantro instruction with its June 9 effective date. One cart or separate orders can be valid. |
+| 5 — `2026-06-10T11:00:00-07:00` | The usual restaurant is closed in the current catalog. “Find Evan something else for lunch at home.” | Select hot food without cilantro at a different restaurant: honor Evan's lasting ingredient change while preserving his unchanged spice preference, then verify payment. |
+
+All sessions request delivery to the couple's home for the published lunch window. The household records identify Maya and Evan as spouses, and each request makes its intended eaters clear. Each catalog offers several valid dishes and plausible alternatives, with explicit spice and ingredient information, including hot meals without cilantro. Prices and delivery windows remain straightforward. Historical chats and the current requests' recipient and scope remain searchable throughout the episode. The June 8 future instruction is delivered before the session ends, regardless of the agent's ordering strategy; it does not assert that an unmade purchase occurred.
+
+Clarification is allowed. Scripted answers resolve a genuine recipient ambiguity or answer a taste question truthfully; the user simulator will not deliberately withhold an answer to make the task harder. An autonomous history-based solution and a solution using reasonable clarification can both pass. World events and new receipts depend on actions actually taken: the scenario never inserts a successful purchase the agent failed to make.
+
+## 4. What makes this distinct and personal
+
+**✍️ Your answer (required):** The assistant must keep each person's preferences current while the shared account accumulates orders that reflect different eaters and differently scoped instructions. The June 3 mild meal is correct for Evan that day, yet treating it as his new default would make the June 8 meal wrong. Keeping every original preference permanently fixed would also fail when his ongoing cilantro preference changes. Maya's tastes remain independent throughout.
+
+For example, the June 8 request names both eaters. Searchable history establishes their ongoing tastes and labels Evan's June 3 request as applying only to that lunch. Today Maya should receive mild food without cilantro and Evan hot food with cilantro. The current message then changes Evan's cilantro preference starting June 9. At the next restaurant the appropriate combination is hot food without cilantro, even if he has never bought that exact dish there before. Public recipients, wording and dates determine the answer; a hidden preference label cannot override them.
+
+Related proposal: [#3](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/3) also uses recipient evidence in personalized recommendations.
+
+## 5. Construction plan and effort
+
+**✍️ Work breakdown (required):**
+
+| Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
+| :--- | :--- | :--- | :--- |
+| Persona, history and workspace | Write two taste profiles, about ten historical orders and twelve attributed messages/reviews; build three stores and roughly eighteen fully specified menu items across the scheduled catalogs. | A human reviewer can trace each relevant taste and recipient to public evidence. Several products satisfy each person's request. | 2 |
+| User rollout and scenario script | **Sessions:** 5.<br>**Simulated world time span:** June 1–10, 2026, plus two weeks of seeded history.<br>**Estimated total tokens:** 30k–60k per complete episode, including dialogue, surfaced history, tool instructions/results, repeated context and agent outputs; private grading and separately billed reasoning are excluded.<br>Use the UTC-offset timestamps in Section 3 for user turns, actions and events. | Truthful clarification; six meals; a one-lunch exception and a later effective-dated preference change; actual new orders carried across sessions. Record execution dates and wall-clock duration separately. | 2 |
+| Environment integration | Reuse VitaBench 2.0 delivery search, details, order creation and payment. Add a searchable text-history fixture, persistent order state and a complete action ledger. Build the common PALE bridge here for potential reuse by the other candidate tasks. | English tool-visible content; deterministic local addresses and clock; validated product variants; consistent account, payment and reset behavior. | 3–4 |
+| Rubrics, reference and hints | Define meal-level taste checks, completion checks and receipt reconciliation. Implement a reference and controls that change instruction scope while holding recipients fixed, as well as recipient and menu controls. | Reference full credit; no-op fails; temporary requests, lasting updates and unchanged attributes scored from public evidence. Alternatives and clarification pass. Audit fixed-hint coverage before validation. | 2–3 |
+| Agent rollouts and analysis | Plan one exploratory pilot per designated model, then five fresh unhinted and one fixed-hint run per designated GPT, Claude and Gemini model. Budget six additional diagnostic episodes separately. | All traces, scores, configurations, costs and failure analysis, with observations on the simulated timeline. Keep pilots and diagnostics outside qualification averages. | 2–3 |
+
+### Environment reuse and missing components
+
+The implementation starting point is [VitaBench 2.0 at commit f60169e](https://github.com/meituan-longcat/VitaBench-2.0/tree/f60169e89f30499cb7883f3dad76bd03facc908d), particularly its [delivery toolkit](https://github.com/meituan-longcat/VitaBench-2.0/blob/f60169e89f30499cb7883f3dad76bd03facc908d/src/vita/domains/delivery/tools.py). Products will use explicit, valid variants so a free-text customization cannot magically remove an ingredient. A public order-history view and historical messages will expose normal receipts and source links; private preference and recipient labels will remain evaluator-only.
+
+Vita's personalization runner constructs each subtask environment from supplied state. The bridge must explicitly carry actual orders and action-derived events between sessions, while using PALE's approved memory lifecycle. It must not inject a hand-authored preference summary or the ground-truth memory backend. The stock outcome evaluator resolves a last write action; the task instead needs a grader covering all six meals, their allocations and the complete transaction ledger. The PALE integration interface and acceptance of this API environment are dependencies to resolve at design review.
+
+### Proposed grading and reference
+
+Proposed scoring totals 100 points: recipient-appropriate selection and supported variants across the six requested meals (60; 10 per meal); successful paid fulfillment within the stated quantity, price, address and delivery limits (30; 5 per meal); and accurate receipt-based reporting of what was bought for whom (10). A meal can earn selection credit before payment, but an unpurchased recommendation cannot earn fulfillment credit. A correct final order cannot erase an earlier unwanted paid order.
+
+Full-task gates require all six meals fulfilled, a clear two-person allocation in Session 4, and no excess paid purchases or spending beyond permission. Gates and rubric points remain separate; one failed gate does not automatically zero the score. Check the entire ledger, including any cancellations and corrections, under a documented repair policy. Either valid cart structure is accepted. The grader uses discoverable menu attributes and recipient evidence, accepts multiple suitable dishes, and does not score the format of private agent memory.
+
+The reference retrieves the chats and linked orders, keeps the two people's ongoing tastes separate, applies a temporary request only to its named lunch, and applies the later ingredient change from its stated effective date without changing the other taste dimension. It places and pays the requested orders and verifies receipts. The fixed hint is: “For each eater, distinguish ongoing preferences from instructions for one lunch. Use each change only for its stated person, attributes and effective time; a new purchase is not automatically a new default. Apply the current requirements to the available menu and verify order, allocation and payment.” It supplies no person's tastes or product IDs.
+
+The decisive diagnostic holds all recipients and purchased June 3 dishes fixed but changes “just for today's lunch” to “from now on,” with all subsequent evidence kept consistent. The appropriate June 8 Evan meal must change, although there is no recipient ambiguity. Other controls remove the later lasting cilantro update, swap attributed historical feedback, and rename final-menu products while preserving their features. These are variants within this task, not additional contributions. Qualification follows the [PALE protocol](../../CONTRIBUTING.md#task-difficulty-and-validation): freeze the task, rubric, model roster, memory configuration and budgets; report every run; require each designated model independently to have 0/5 full-task passes and a mean score strictly below 50%, plus a separate fixed-hint run at 100% with every gate passed under the same budget. If this design is too easy, report that result and revise substantively or withdraw; cosmetic changes or different weights will not establish difficulty.
+
+- **Milestones, owners and dependencies (required):** @onepounchman owns history and scenario construction, the Vita/PALE bridge, rubric/reference review, and model validation, in that order. Allow roughly 3–4 calendar weeks after PALE interfaces and the designated roster are available. Seek an independent fixture and grader review before freezing runs. Resolve API-environment compatibility, searchable sources, session persistence and reset semantics first. This proposal budgets the shared bridge; the other proposals budget their own scenarios and domain-specific extensions.
+- **Resources and total effort (required):** 11–14 person-days. CPU-only synthetic fixtures; no local model weights, GPU or paid dataset. The 27 planned pilot, qualification/hinted and diagnostic episodes imply roughly 0.81–1.62 million visible tokens, plus reasoning and generation costs. Provisional API planning envelope: US$100–400, to be recalculated using pilot measurements and the designated roster's pricing.
+- **Scope boundary and open questions (required):** One account, two eaters, five sessions, one temporary exception, one later ingredient-preference change and one restaurant closure. Live recipients and instruction scope are explicit. Exclude allergies, reimbursements, refunds, external messaging and a custom memory architecture. Settle allocation format, repair behavior and shared-history access before freeze. The scope comparison does not establish exclusivity or model difficulty; no model rollouts have been completed.
+- **Data provenance and privacy (required):** The delegated-ordering situation is adapted from the contributor's own real-life experience. The married couple, one-lunch exception and later preference change are synthetic scenario choices, not claims about specific family events. All people, dates, addresses, messages, orders and menu records will be fictionalized or synthesized, with no original private logs, credentials or identifiable third-party information. Retain Vita's MIT notices; author fresh English scenario text and catalogs. Record fixture licensing and later asset reuse before release. Codex assisted with drafting.
+
+After approval, add the scenario, bridge, grader, reference and author-run evidence in the same PR. Substantial changes require design re-review.
