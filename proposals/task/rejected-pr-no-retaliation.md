@@ -20,11 +20,11 @@ Copy this template to `proposals/task/<slug>.md`. Keep the persona, story and pe
 Use the exact names from the [homepage](../../README.md#environment-domains). Choose one primary domain and optional secondary domains; list the primary first in the PR title and join others with ` + `.
 
 <table>
-<tr><td>💳 <strong>Money & insurance</strong></td><td>🛍️ <strong>Shopping & groceries</strong></td><td>✈️ <strong>Travel & commuting</strong></td></tr>
-<tr><td>🩺 <strong>Health & care</strong></td><td>🍽️ <strong>Food & dining</strong></td><td>💬 <strong>Social & communities</strong></td></tr>
-<tr><td>🏠 <strong>Home & utilities</strong></td><td>🏛️ <strong>Public service & law</strong></td><td>🎬 <strong>Media & entertainment</strong></td></tr>
-<tr><td>📚 <strong>Learning & research</strong></td><td>💼 <strong>Work & business</strong></td><td>📰 <strong>News & information</strong></td></tr>
-<tr><td>🌤️ <strong>Weather & outdoors</strong></td><td>🎮 <strong>Games & play</strong></td><td>🏃 <strong>Fitness & wellbeing</strong></td></tr>
+<tr><td>💳 <strong>Money &amp; insurance</strong></td><td>🛍️ <strong>Shopping &amp; groceries</strong></td><td>✈️ <strong>Travel &amp; commuting</strong></td></tr>
+<tr><td>🩺 <strong>Health &amp; care</strong></td><td>🍽️ <strong>Food &amp; dining</strong></td><td>💬 <strong>Social &amp; communities</strong></td></tr>
+<tr><td>🏠 <strong>Home &amp; utilities</strong></td><td>🏛️ <strong>Public service &amp; law</strong></td><td>🎬 <strong>Media &amp; entertainment</strong></td></tr>
+<tr><td>📚 <strong>Learning &amp; research</strong></td><td>💼 <strong>Work &amp; business</strong></td><td>📰 <strong>News &amp; information</strong></td></tr>
+<tr><td>🌤️ <strong>Weather &amp; outdoors</strong></td><td>🎮 <strong>Games &amp; play</strong></td><td>🏃 <strong>Fitness &amp; wellbeing</strong></td></tr>
 </table>
 
 ## 2. User persona and prior history
