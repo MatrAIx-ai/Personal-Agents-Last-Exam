@@ -10,7 +10,7 @@ Copy this template to `proposals/task/<slug>.md`. Keep the persona, story and pe
 
 ## 1. Task and domains
 
-- **Authors / GitHub handles (required):** [@StevenZhang0116](https://github.com/StevenZhang0116)
+- **Authors / GitHub handles (required):** Zihan Zhang ([@StevenZhang0116](https://github.com/StevenZhang0116))
 - **Short task title (required):** Screen papers for a review when past decisions fit two different criteria
 - **Primary domain (required):** Learning & research
 - **Secondary domains (optional):** None
