@@ -47,6 +47,8 @@ class FakeAPI:
             return [{"filename": self.path, "status": "added"}]
         if path.endswith("/reviews"):
             return self.reviews
+        if path.endswith("/comments"):
+            return []
         raise AssertionError(path)
 
     def request(self, path):
@@ -213,13 +215,13 @@ class ProposalSyncTests(unittest.TestCase):
     def test_publish_is_idempotent_and_updates_only_index(self):
         api = sync.GitHub("example/benchmark", None)
         with patch.object(api, "contents", return_value=encoded("current")), patch.object(api, "request") as request:
-            self.assertFalse(sync.publish(api, "main", "current"))
+            self.assertFalse(sync.publish(api, sync.INDEX_BRANCH, "current"))
             request.assert_not_called()
-            self.assertTrue(sync.publish(api, "main", "changed"))
+            self.assertTrue(sync.publish(api, sync.INDEX_BRANCH, "changed"))
             endpoint, method, data = request.call_args.args
             self.assertEqual(endpoint, "/repos/example/benchmark/contents/proposals/proposal-list.md")
             self.assertEqual(method, "PUT")
-            self.assertEqual(data["branch"], "main")
+            self.assertEqual(data["branch"], sync.INDEX_BRANCH)
             self.assertEqual(data["sha"], "file-sha")
             self.assertEqual(base64.b64decode(data["content"]).decode(), "changed")
 
@@ -227,8 +229,21 @@ class ProposalSyncTests(unittest.TestCase):
         api = sync.GitHub("example/benchmark", None)
         with patch.object(api, "contents", side_effect=[encoded("old", "a"), encoded("other", "b")]), \
                 patch.object(api, "request", side_effect=[sync.APIError(409, "Conflict"), {}]) as request:
-            self.assertTrue(sync.publish(api, "main", "new"))
+            self.assertTrue(sync.publish(api, sync.INDEX_BRANCH, "new"))
         self.assertEqual(request.call_args.args[2]["sha"], "b")
+
+    def test_generated_index_cannot_write_main(self):
+        api = sync.GitHub("example/benchmark", None)
+        with patch.object(api, "request") as request:
+            with self.assertRaises(ValueError):
+                sync.publish(api, "main", "generated data")
+            request.assert_not_called()
+
+    def test_index_branch_bootstrap_only_creates_dedicated_ref(self):
+        api = sync.GitHub("example/benchmark", None)
+        with patch.object(api, "request", side_effect=[sync.APIError(404, "Missing"), {"object": {"sha": "base"}}, {}]) as request:
+            sync.ensure_index_branch(api, "main")
+        self.assertEqual(request.call_args.args[2], {"ref": "refs/heads/proposal-index", "sha": "base"})
 
     def test_oversized_proposal_is_not_parsed(self):
         api = FakeAPI(pr(), "x" * (sync.MAX_PROPOSAL_BYTES + 1))
