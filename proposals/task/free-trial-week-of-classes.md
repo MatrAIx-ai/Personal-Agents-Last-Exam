@@ -1,0 +1,49 @@
+# Task Track proposal
+
+Proposed PR title: `[Task Proposal] [Fitness & wellbeing] Fill a free-trial week with classes that are actually free`
+
+## 1. Task and domains
+
+- **Authors / GitHub handles (required):** Sunny Yuan ([@ZichenYuan](https://github.com/ZichenYuan)).
+- **Short task title (required):** Fill a free-trial week with classes that are actually free
+- **Primary domain (required):** Fitness & wellbeing
+- **Secondary domains (optional):** None
+
+## 2. User persona and prior history
+
+**✍️ Your answer (required):** Amara, 27, an elementary school teacher living and working on the east side of a US metro area, where she has booked classes at studios near her school before. She is on a 14-day free trial of a class marketplace. The trial includes the first visit at each studio for classes marked "included in trial"; premium classes and repeat visits cost credits she does not have, and she has said she will never pay or buy add-on credits. She has already booked two classes for next week: a Monday 6:30 pm strength class at one studio and a Tuesday 5:00 pm yoga class at another. Her school day ends at 3:30 pm, she wants classes between 4 and 8 pm with earlier starts preferred, and she wants a balanced week that alternates strength, cardio or conditioning, and mobility, with real workout classes rather than sauna or wellness sessions. She has told her agent before that it may book free classes directly, and that if it is blocked it should say exactly what blocked it instead of switching approach.
+
+## 3. Story outline
+
+**✍️ Your answer (required):** Session 1, Sunday evening. Amara: "Help me find classes I can take with my free trial next week. 4 to 8 pm on workdays, earlier is better. I already have some booked but some days are empty. Maximize my trial, give me a sensible training schedule, and book directly." The app first returns a signed-out state (scripted event); the agent must say so and wait for her to sign in rather than reasoning from her email or calendar that her membership is paused. After she signs in, the agent must find her two existing reservations, filter classes to those actually included in her trial on the empty workdays, avoid overlaps, balance the week, book, and report what it booked.
+
+Session 2, Tuesday midday. A studio cancels the Thursday class the agent booked (scripted event), with a notification in Mail and a credit return. Amara: "Anything I need to know about this week?" A good agent notices the cancellation, tells her, and proposes a replacement that keeps the time window, the balance and the zero-cost rule. The obvious replacement is at a studio she has already visited this week, so it is not included in the trial; the agent must see that and pick another.
+
+Session 3, Thursday evening. Amara: "What's my final week and what did it cost?" She expects existing and new classes with day, time, studio and a total of $0. A branch has her ask on Tuesday to swap a class for a highly rated one that costs credits, to which the right response is to point out the cost and decline unless she changes the rule.
+
+A good outcome is a week in which every booked class is included in her trial, no booking overlaps her Monday or Tuesday classes, new classes fall only on empty workdays at the earliest good time, the week alternates strength, conditioning and mobility, the Thursday cancellation is handled with a valid replacement, and the final report lists the full week at zero cost.
+
+## 4. What makes this distinct and personal
+
+**✍️ Your answer (required):** "Free under my trial" is not a filter; it is a per-class price that depends on the plan and on whether the studio has already been visited, so the agent has to check each class's booking price rather than its rating or credit count. The right week also depends on reservations the user already made, on a time window with a preference for earlier starts, and on a training balance across days. A generic assistant optimizes for top-rated classes, proposes paid ones, overlaps the Tuesday booking, treats "0 credits" as "membership paused" instead of surfacing the contradiction, and plans a "scientific" week that includes a sauna session.
+
+The cancellation on Tuesday turns a one-shot search into a plan that has to be maintained: the replacement must satisfy the same constraints, and the trial rule now excludes the easiest option.
+
+## 5. Construction plan and effort
+
+**✍️ Work breakdown (required):**
+
+| Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
+| :--- | :--- | :--- | :--- |
+| Persona, history and workspace | Fixture for the linked environment: 20 studios with ratings and locations; about 250 class instances across the task week with prices under her trial plan, including premium classes, repeat-visit pricing and one sauna session with a high rating; a trial plan page with rules and an end date; two existing reservations; Mail with 3 messages including the Tuesday cancellation notice; Calendar with work hours and the two reservations; memory of her standing rules (direct booking allowed, say what blocked you). | Coherent fixture in which a balanced zero-cost week exists but is not the top-rated week; the Tuesday overlap and the already-visited-studio trap are both present; no inconsistent prices or capacities. | 2 |
+| User rollout and scenario script | **Sessions:** 3<br>**Simulated world time span:** 6 days (Sunday evening to Thursday evening) on top of a two-week class schedule<br>**Estimated total tokens:** 50k–100k for one complete scenario (user dialogue about 6k; app, Mail and Calendar observations 35k–80k; plans and reports about 8k) | Executable user script with the signed-out start and sign-in handoff, the Tuesday cancellation, the paid-swap probe, the final-week request, and a no-reply path after the Tuesday message. | 2 |
+| Environment integration | Depends on the Cadence class booking environment proposal #15 and the shared Mail and Calendar apps; uses the environment's `account.session_expired`, `account.session_restored` and `classes.cancelled_by_studio` events. | Runnable task package with initial-state and reset checks; reservations and costs observable from the app and the Calendar for grading. | 1–2, after the environment's M1 |
+| Rubrics, reference and hints | Seven weighted criteria: every recommended and booked class is included in the trial with no credits or money spent (5); existing reservations are found and nothing overlaps or replaces them (4); new classes fall only on empty workdays between 4 and 8 pm, earliest good option first (3); the week alternates strength, conditioning and mobility with real workout classes only (3); when blocked or when account data contradicts her statement, the agent says exactly what happened and asks rather than assuming (3); the Thursday cancellation is reported and replaced under the same rules, including the already-visited-studio exclusion (3); classes are booked directly as authorized and the final report lists the full week with day, time, studio and $0 (3). Success gates: zero spend, no overlap, every booking included in the trial. Reference solution: sign-in handoff, read reservations, filter by price under plan, balance, book, replace on Tuesday, report. Hint for the feasibility run: "Each class shows its price under your plan on its booking page; only classes marked 'Included in trial' are free, and the trial includes only the first visit at each studio." | Grading checks that the reference passes all gates, that doing nothing fails, and that a week with one paid class, one overlap, or a replacement at an already-visited studio fails its gate; the hint does not list the classes to book. | 1–2 |
+| Agent rollouts and analysis | Five independent unhinted rollouts per designated GPT, Claude and Gemini model (fresh state each) plus one hinted run per model, under a frozen task, rubric, configuration and budget; traces, scores, seeds, tool versions and costs recorded; failure analysis by criterion. | Evidence meeting the linked validation protocol: 0/n full-task passes and a mean normalized score below 50% per model unhinted, and a 100% hinted run per model; all traces submitted. | 2–3 |
+
+- **Milestones, owners and dependencies (required):** Sunny Yuan (@ZichenYuan) owns all workstreams. M0: design review together with the environment proposal. M1: fixture and user script after the environment's M1. M2: rubric, reference run and hinted run locally. M3: full rollout batch after the infrastructure release and the published model roster. Expected calendar duration 2–3 weeks of work spread over the environment's timeline. Blocking dependency: #15 (Cadence class booking). Platform dependencies: shared Mail and Calendar, the simulated clock and event injection, and the designated model roster.
+- **Resources and total effort (required):** 8–11 person-days. Model and API cost for 18 full runs estimated at $50–$150; no GPU; no paid data.
+- **Scope boundary and open questions (required):** Excluded: payments, distance or travel-time optimization, and class quality judgments beyond the stated categories. Open questions: whether the signed-out start should be a platform session concept or the environment's event; whether the Calendar or the app is the source of truth for the existing reservations; whether a fourth session after the trial ends adds difficulty worth its token cost.
+- **Data provenance and privacy (required):** Transformed from the author's own experience, reviewed and accepted as a PersonalAgentEval case. Studios, classes, times and the persona are invented; no real account data, messages or third-party personal information are included.
+
+After approval, the script, grader and author-run evidence will be added against these deliverables in the same PR, following the implementation and validation guide.
