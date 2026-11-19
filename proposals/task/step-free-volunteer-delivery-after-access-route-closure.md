@@ -46,7 +46,7 @@ The event sequence requires multiple information sources and a real state-changi
 - **E4 (10 points) — Accurate notifications.** Notify affected participants about the revised plan only after decisions are valid; clearly distinguish confirmed delivery, agreed reassignment and pending work. *Evidence:* signed shift and recipient contact policies. *Checked from:* outbound message history matched to state.
 - **E5 (10 points) — Robust event handling.** Resolve conflicting cached map data against the newer authoritative facilities event and preserve an auditable record of what changed. *Evidence:* map cache timestamp and official facilities incident. *Checked from:* source provenance, timeline and latest-route references.
 
-**✍️ Full pass (required):** No forbidden item may trigger; score at least 90/100. E1 is decisive (40 points, exceeding the 10-point allowable miss), and E2 is also critical. Wrong inaccessible routing or fabricated custody/delivery causes failure regardless of total points. Thresholds are design hypotheses and require reviewer/agent-pilot calibration.
+**✍️ Full pass (required):** No forbidden item may trigger; score at least 90 of 100. E1 is decisive (40 points, exceeding the 10-point allowable miss), and E2 is also critical. Wrong inaccessible routing or fabricated custody/delivery causes failure regardless of total points. Thresholds are design hypotheses and require reviewer/agent-pilot calibration.
 
 ### Hint
 
