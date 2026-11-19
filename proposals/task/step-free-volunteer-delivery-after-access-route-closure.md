@@ -77,7 +77,7 @@ The event sequence requires multiple information sources and a real state-changi
 
 | Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
 | --- | --- | --- | --- |
-| Persona, history and workspace | Three volunteers, three recipients, four kits/items, two signed commitments, 16 synthetic route edges, two conflicting route-source versions and at least seven messages | Stable source IDs and timestamps; source credibility and accessibility constraints discoverable | 1–2 |
+| Persona, history and workspace | One coordinator (Mina), two delivery volunteers (Jules and Rowan), three recipients, three delivery items (two reading kits and one shared supply box), two signed commitments, 16 synthetic route edges, two conflicting route-source versions and at least seven messages | Stable source IDs and timestamps; source credibility and accessibility constraints discoverable | 1–2 |
 | User rollout and scenario script | **4 sessions** across **6 simulated days**; **10k–16k tokens** per full scenario including user messages, prior records and tool observations | Deterministic closure, reply/no-reply branches and event injection | 2–3 |
 | Environment integration | Existing approved messaging, volunteer-calendar and delivery/custody adapters where available; synthetic route and facilities event fixtures | Resettable initial state, action/consent logs, route-edge validation and real receipt evidence | 3–5 |
 | Rubrics, reference and hints | F1–F3 and E1–E5, two history counterfactuals, closure-versus-cache checks | Executable reference scores full; no-op and unreachable/reassignment-without-consent/fabricated-delivery negatives fail | 2–3 |
