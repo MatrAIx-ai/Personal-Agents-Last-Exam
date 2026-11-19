@@ -10,11 +10,13 @@ Agent skills for Personal Agents' Last Exam, grouped into three categories. Each
 
 ## Skills
 
-| Skill | What it does |
-| :--- | :--- |
-| `pale-task:task-proposal` | Drafts, completes or upgrades a Task Track proposal. It writes a draft from the contributor's story or old proposal, asks for the details that are usually missing, and runs an advisory checker against the task template. It does not block submission. |
+| Skill | Category | What it does |
+| :--- | :--- | :--- |
+| `pale-env:env-proposal-review` | Environment | Turns an environment proposal review into feedback the author can act on: runs the agent checklist, lists what the human reviewer still has to decide, applies the reviewer's answers and writes the author feedback, with a script that checks cited lines and quotations. |
+| `pale-task:task-proposal` | Task | Drafts, completes or upgrades a Task Track proposal. It writes a draft from the contributor's story or old proposal, asks for the details that are usually missing, and runs an advisory checker against the task template. It does not block submission. |
 
-The Environment and General categories have no skills yet.
+The General category is ready for skills.
+
 
 ## Layout
 

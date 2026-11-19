@@ -34,7 +34,7 @@ Accept any of these, and ask which one they have if it is not clear:
 
 Raw material stays out of the repository. A real conversation or a story about real people usually contains names, messages, health or account details, and the template requires those to be removed. Raise this in your first reply, not at the end: ask the contributor to remove sensitive details before pasting, write only a fictionalized version into the proposal, and do not save the raw material to a file in the repository. Screenshots are a poor source for the same reason; ask for text.
 
-Before drafting, look through `proposals/proposal-list.md` for proposals with a similar story, and tell the contributor about any you find.
+Before drafting, open the [live proposal list](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/blob/proposal-index/proposals/proposal-list.md) and look for proposals with a similar story. `proposals/proposal-list.md` on `main` is only a link to that generated index; do not treat it as the list itself. If the live index cannot be read, inspect the current GitHub PR list or state that the overlap check is incomplete. Tell the contributor about related proposals; approval does not reserve a topic or automatically exclude parallel work.
 
 ### 2. Draft first, then ask
 

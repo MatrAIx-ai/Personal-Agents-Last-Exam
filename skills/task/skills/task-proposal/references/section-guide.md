@@ -67,7 +67,7 @@ A story may have several such moments. The proposal needs the one that matters m
 - Each item states its **evidence** (the record and date from which the agent can learn the requirement) and what the grader **checks** (order records, outgoing messages, calendar and so on).
 - **Full pass** is no forbidden item triggered plus a minimum score. The decisive outcome carries more points than the gap between the total and that minimum, so an agent that misses it cannot pass.
 
-There is no separate list of constraints. A constraint is either a forbidden item or an expected item.
+There is no separate list of constraints. A constraint is either a forbidden item or an expected item. Temporal prohibitions such as "never changes the start time" require the ordered change history or attributable tool-call trace; a final snapshot cannot detect a violation that was later undone.
 
 **Common gaps**
 
@@ -183,3 +183,5 @@ The checker covers structure and arithmetic. These need judgment. Go through the
 8. **The reference earns a full score.** Walk through it against every item.
 9. **Consistent.** Dates, amounts and names agree across the story, the rubric and the reference.
 10. **Private details removed.** No real names, messages or account details are present, and the data provenance field says so.
+
+When comparing two users with the same current request, preserve its explicit constraints. Prior history or standing permission cannot override a newer spending limit, refusal or consent boundary.
