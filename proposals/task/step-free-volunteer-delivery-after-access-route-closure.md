@@ -92,3 +92,14 @@ The event sequence requires multiple information sources and a real state-changi
 8. Alternate eligible volunteer history supports stair route; the user's latest explicit constraints remain binding.
 
 These are design checks for later implementation and official rollout; no completed harness run or acceptance is claimed.
+
+
+### Qualification protocol (planned after official plan approval)
+
+- Use the maintainer's **dated, versioned** designated GPT, Claude and Gemini models; freeze model IDs, agent settings, tool versions, task/rubric, resource budget and random seeds before validation.
+- Run **at least one independent unhinted fresh-state rollout per model; target five per model**, reporting *every* valid attempt. For **each model separately**, full-task pass rate must be **0/n**, and mean normalized rubric score must be **strictly below 50%**. Do not cherry-pick failed samples or pool scores across model families.
+- Run a **separate, fixed, source-location-only hint-assisted rollout for each designated model**, requiring **100/100** points and all forbidden-action gates passed. Use the same budget; preserve full trajectory, dates and wall-clock times.
+- Run the replayable reference and one legitimately different accepted solution path; assert that the no-op baseline earns **zero** by checking for absent required deliveries/actions rather than relying on rubric prose. Retest the entire batch if the task or rubric changes.
+- Distinguish simulated world timestamps (with UTC offset), real evaluation timestamps and wall-clock durations. Attach reproducible logs, versioned inputs, outcome records, actual per-model scores and counterfactual failure analyses. Infrastructure failures are not evidence of model difficulty.
+
+**Status:** validation protocol specified only; no official model execution or author-qualification evidence yet.
