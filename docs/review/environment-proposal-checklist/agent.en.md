@@ -185,8 +185,8 @@ Guide: “Prevent duplicate effects, silent conflicts and irreproducible state. 
 
 - **What to check:** Writes return evidence, retries do not repeat effects, and conflicts are visible.
 - **Look at:** §3 State and lifecycle; Operations and access.
-- **✓ Approve:** Writes return a receipt and a version; the same `request_id` returns the same result; a stale `expected_version` is rejected; reads do not mutate business state. If read/failed-attempt evidence is promised, its separate recording path is identified; optional diagnostics alone do not establish durable grading evidence.
-- **◐ Partial approve:** Retry, commit or concurrency behavior is incompletely described; ask for the missing guarantee rather than infer that duplicate effects occur.
+- **✓ Approve:** Writes return a receipt and a version; the same `request_id` returns the same result; a stale `expected_version` is rejected; reads do not mutate business state. If evaluator records are promised, map them to App history, existing Core audit and the supplied Agent execution records. Ordinary reads and denials already have audit rows; describe caller/commit correlation, replay counting and snapshot retention before reset. Missing fields in Core audit alone do not require a Core change.
+- **◐ Partial approve:** Retry, commit or concurrency behavior is incompletely described, or required evaluator fields have no verified source. Identify the missing App-owned record, supplied evidence artifact or correlation/counting rule; do not infer that rejected calls leave no audit or that optional diagnostics provide complete evidence. Review the App evidence plan without adding an external recorder implementation requirement.
 - **? Human judge:** Domain-specific conflicts, such as two people buying the last seat, need a decision on the expected behavior.
 - **✗ Reject:** A retry can repeat an effect (a double charge), or conflicting writes silently overwrite each other.
 - **Source:** Guide · State and lifecycle; PR #12 docs/review/app-implementation.md (Versions and concurrency)
@@ -331,7 +331,7 @@ Guide: “An independent reviewer needs observable acceptance criteria rather th
 
 - **What to check:** Each deliverable has an observable pass condition that an independent reviewer can check.
 - **Look at:** §4 Deliverable / quality check column.
-- **✓ Approve:** Every deliverable has a pass condition someone else can observe, and the points that need human review are named.
+- **✓ Approve:** Every deliverable has a pass condition someone else can observe, and the points that need human review are named. For promised evaluation records, identify the source and join: App revisions/state, Core outcome evidence and supplied tool calls/arguments/results. Plan checks of required content and failure coverage; optional diagnostic logs alone do not establish that coverage.
 - **◐ Partial approve:** Some deliverables have no pass condition.
 - **? Human judge:** Acceptance depends on subjective quality, such as how realistic the assets look.
 - **✗ Reject:** Acceptance rests on a promised number of tests or screenshots.

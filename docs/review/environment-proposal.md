@@ -41,7 +41,25 @@ This is a reviewer evidence table, not a second App registry or an extra author 
 4. **Check completion and failure semantics.** Separate sender commit, receiver commit and any business result returned to the caller. Delivery acknowledgement does not imply a payment decision, a Calendar update or rollback of the sender. Check rejection, retry and unknown outcomes for the proposed workflow. Identify required platform support explicitly rather than assuming a cross-App transaction or request/response interface.
 5. **Close or bound the gap.** An unavailable receiver/operation needs an owner, sequence and feasible fallback, or exclusion from the initial scope. Optional future links do not block an independently useful first version. If a linked Task requires the optional connection, record that Task's narrower dependency separately.
 
-Keep diagnostic traces separate from business mutations and grading evidence. For a proposal that needs evaluator-only records of reads or rejected attempts, identify the recording hook and persistence path. The reference Core rejects business-data mutation from read tools; optional best-effort `ctx.log` is not automatically a durable evaluator record. A missing evidence adapter is a platform dependency to resolve, not a reason to weaken read-only guarantees.
+### Use App records and the supplied execution trace
+
+Treat Agent execution records as a supplied evaluation input. This review covers the App and public runtime in this repository, not implementation of the external execution recorder. Core runs and commits individual Apps; Messaging delivers between Apps. A field missing from Core audit does not by itself require a Core change.
+
+The reference Core records ordinary successful reads and rejected tool calls in `state.audit`, persisted with App state and available through the administrative snapshot. Rejection discards the attempted business-data change, not the denial audit row. MCP adds connection identity, times, selected inputs and result summaries. Its fixed projection omits search queries, arbitrary App-specific target fields and full publication text. See [Core outcomes](../../runtime/core/runtime.cjs), [MCP projection/persistence](../../runtime/core/mcp.cjs) and [diagnostics](../../runtime/core/app-log.cjs).
+
+For an App such as Forkyard, distinguish its business records from derived evaluation records:
+
+| Promised record | App-owned implementation | Evidence used for evaluation |
+| --- | --- | --- |
+| Public writes and revisions | Preserve full text, revisions, audience/reach and normalized hashes, including history needed after edit/delete | Join the preserved revision to the supplied call/result and Core commit/version |
+| Subject index | Define person/name matching, object ownership and surface rules; compute in the App or an App-owned evaluator helper | Reproducible matches over retained revisions and declared rules |
+| Cross-surface links | Resolve and preserve links among comments, posts and notes | App history; links within one App need no new Messaging feature |
+| Attention/read record | Define which targets count and how objects map to people; keep read handlers from mutating business data | Supplied tool arguments/results provide queries and read targets; join with App history and existing audit |
+| Pressure counters, including rejected attempts | Define grouping, overlap thresholds and logical-attempt counting | Combine App history with rejected attempts in supplied execution records and audit; a rejected change is already audited |
+
+An evaluator can assemble these records from App history, snapshots/audit and the supplied execution trace; the App need not mutate a derived report on every read. The plan should describe the join and counting rules. Distinguish new actions from transport retries and successful idempotent replays: successful replay currently returns before another audit row, while repeated rejected requests can add rows. Reset/seed replacement clears prior audit and receipts, so retain the necessary snapshot before reset.
+
+Optional `ctx.log` is filtered, best-effort diagnostics, not automatically a grading archive. If delivery evidence is missing, name the missing artifact or App-owned record; do not automatically prescribe a Core extension or weaken read-only behavior. The default path above needs no new Core API or App business schema.
 
 Public Core/Messaging makes reference integration reproducible by contributors. Authors identify intended checks and required runtime capabilities in the existing Validation and reset workstream. Do not require token policies, TLS deployment, log retention design or completed tests in a proposal. Optional step logging becomes a delivery requirement only when included in approved scope.
 

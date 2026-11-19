@@ -46,7 +46,7 @@ Template: §3 Integration details: Operations and access, State and lifecycle, E
 Template: “The construction plan defines the scope, deliverables, quality checks and effort that reviewers will follow through implementation and merge in this same PR.”
 
 - [ ] H4.1 The total effort looks realistic for the scope, the people named and the calendar time. (D7.2, D7.3)
-- [ ] H4.2 The planned checks are strong enough for acceptance at merge: actual receiver records/files and caller-visible business results, plus relevant failure/retry outcomes. Supplied message examples were compared with the receiver contract, or the compatibility gap is recorded. Delivery acknowledgement is not automatically a business decision or sender rollback. (D8.1, D8.2, D8.3)
+- [ ] H4.2 The planned checks are strong enough for acceptance at merge: actual receiver records/files and caller-visible business results, plus relevant failure/retry outcomes. Supplied message examples were compared with the receiver contract, or the compatibility gap is recorded. Delivery acknowledgement is not automatically a business decision or sender rollback. Promised evaluator records have a feasible path through App history, Core audit and supplied Agent execution records, with explicit correlation and counting rules. Missing fields in Core audit alone do not imply a required Core change. (D4.2, D8.1, D8.2, D8.3)
 - [ ] H4.3 The scope boundary leaves out the right things for a first version; reference-host limits are distinguished from required future adapters. (D2.3)
 
 **H5 · Are the data, assets and run-time dependencies safe to use?**

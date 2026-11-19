@@ -46,7 +46,7 @@
 模板： “The construction plan defines the scope, deliverables, quality checks and effort that reviewers will follow through implementation and merge in this same PR.”
 
 - [ ] H4.1 以范围、列出的人手和日历时间来看，总工作量合理。 (D7.2, D7.3)
-- [ ] H4.2 验收计划检查真实接收端记录 / 文件、调用方需要的业务结果，以及相关失败与重试结果。提供的消息示例已对照接收契约，或明确记录兼容性缺口。投递回执不自动代表业务决策，也不保证发送端回滚。 (D8.1, D8.2, D8.3)
+- [ ] H4.2 验收计划检查真实接收端记录 / 文件、调用方需要的业务结果，以及相关失败与重试结果。提供的消息示例已对照接收契约，或明确记录兼容性缺口。投递回执不自动代表业务决策，也不保证发送端回滚。承诺的 evaluator record 可由 App 历史、Core audit 与给定的 Agent 执行记录组合得到，并说明关联与计数规则。Core audit 缺少某字段，不自动代表 Core 必须增加功能。 (D4.2, D8.1, D8.2, D8.3)
 - [ ] H4.3 范围边界对第一版的取舍是对的，并区分当前参考运行时限制与未来需要的 adapter。 (D2.3)
 
 **H5 · 数据、素材和运行时依赖可以安全使用吗？**
