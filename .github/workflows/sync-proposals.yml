@@ -5,7 +5,7 @@ on:
     branches: [main]
     types: [opened, edited, synchronize, reopened, closed, labeled, unlabeled, ready_for_review, converted_to_draft, review_requested, review_request_removed]
   workflow_run:
-    workflows: [Proposal review event]
+    workflows: [Proposal review event, Proposal lifecycle]
     types: [completed]
   push:
     branches: [main]
@@ -13,6 +13,7 @@ on:
       - .github/workflows/sync-proposals.yml
       - .github/workflows/proposal-review-events.yml
       - scripts/sync_proposals.py
+      - scripts/proposal_lifecycle.py
       - tests/test_sync_proposals.py
       - proposals/**
       - README.md
@@ -39,7 +40,7 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           persist-credentials: false
       - name: Check synchronization logic
-        run: python3 -m unittest discover -s tests -p test_sync_proposals.py -v
+        run: python3 -m unittest discover -s tests -v
       - name: Refresh the proposal list
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

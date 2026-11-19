@@ -4,7 +4,7 @@
 
 ## Start with a proposal
 
-1. Check the [proposal list](proposals/proposal-list.md) for related work, then copy the [Environment proposal template](proposals/templates/environment-proposal.md) or [Task proposal template](proposals/templates/task-proposal.md).
+1. Check the [proposal list](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/blob/proposal-index/proposals/proposal-list.md) for related work, then copy the [Environment proposal template](proposals/templates/environment-proposal.md) or [Task proposal template](proposals/templates/task-proposal.md).
 2. Replace the `[Fill in: …]` placeholders, then add the completed design to `proposals/environment/<slug>.md` or `proposals/task/<slug>.md` in your fork. Follow the required/optional labels; explain how any `TBD` decisions will be resolved.
 3. Open a PR against `main`. Use the [PR summary template](proposals/templates/pr-summary.md) to describe the track, stage and proposal, and link the design file. Keep it Draft while writing; request review when ready.
 
@@ -21,17 +21,21 @@ Both tracks use the exact names in the [domain list](#environment-domains). Choo
 
 > 📝 **Proposal PR** → 🔍 **Design review** → ✅ **Plan approved** → 🛠️ **Implement in the same PR** → 🧪 **Validate & merge**
 
-- **Design review:** reviewers comment; the author revises. A maintainer records the approved scope and commit in a comment and adds `plan-approved`. The PR stays open.
+- **Design review:** reviewers comment; the author revises. An assigned Track reviewer or non-author maintainer posts `/approve-plan <commit-sha>` using the full current commit SHA. The bot records the approved scope and commit and adds `plan-approved`. The PR stays open; this does not merge the proposal.
 - **Implementation:** once the infrastructure is available, add code and evidence to the same PR. Request a design re-review for substantial scope changes.
 - **Acceptance:** link implementation and verification evidence to each planned deliverable. Reviewers compare it with the approved scope, check outcomes and reproduce key results. Only the final validated merge counts as an accepted contribution.
+
+**Environment v1 is due within 14 calendar days of the first plan approval.** Submit a runnable core implementation, fixtures/reset behavior, tests and reproduction evidence in the same PR. This is the first-version submission deadline, not the merge deadline. The bot records the UTC due date and flags overdue submissions; a maintainer can extend it with a reason. Task Track does not receive this deadline automatically.
+
+Use `/start-implementation`, then `/submit-implementation <commit-sha> <https-evidence-url>`. A non-author maintainer records final validation with `/accept-implementation <commit-sha> <https-evidence-url>` before final GitHub approval and manual merge. See [lifecycle commands, deadlines and merge protection](docs/review/proposal-lifecycle.md). GitHub **Approve** alone does not approve a plan, and `plan-approved` alone does not satisfy the merge gate.
 
 Approval does not reserve exclusive ownership. Link overlapping proposals; parallel work is allowed. Once related work merges, later submissions are assessed for additional value. Record when a PR is ready for final review; the merge timestamp records acceptance.
 
 ## Tracking proposals
 
-Use the **PR number and URL** as the proposal reference. Maintainers apply the track and status labels; contributors only need to fill the template.
+Use the **PR number and URL** as the proposal reference. Lifecycle commands maintain stage labels; maintainers manage Track labels. Contributors fill the template and keep implementation evidence in the same PR.
 
-The [proposal list](proposals/proposal-list.md) automatically groups Environment and Task PRs with submission time, domains, track-specific summary, author, review progress and merge time. GitHub Actions reads each PR and its completed proposal file, including proposals that have not merged. Keep one proposal file per PR and preserve the template's field labels. No manual list updates are needed; an index update does not count as plan approval or contribution acceptance. See [automatic tracking](proposals/README.md#automatic-tracking).
+The [proposal list](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/blob/proposal-index/proposals/proposal-list.md) automatically groups Environment and Task PRs with submission time, domains, track-specific summary, author, review progress and merge time. GitHub Actions reads each PR and its completed proposal file, including proposals that have not merged. Keep one proposal file per PR and preserve the template's field labels. No manual list updates are needed; an index update does not count as plan approval or contribution acceptance. See [automatic tracking](proposals/README.md#automatic-tracking).
 
 | What | How to track it |
 | :--- | :--- |
@@ -84,9 +88,10 @@ Start with a realistic user situation and a clear personalization idea. The prop
 - **User persona and prior history:** the background, preferences and experiences that matter to the task.
 - **Story outline:** what the user wants, what happens or changes, and what a good outcome looks like. Include a rough time span only if relevant.
 - **What makes this distinct and personal:** the central challenge or insight, why the person's context changes the right action, and what a generic assistant might miss.
+- **Rubric, hint and reference solution:** forbidden and expected rubric items with their evidence and checks, the full-pass rule, the exact hint text, and one reference timeline that earns a full score.
 - **Construction plan and effort:** persona/history/workspace construction, user rollout and scenario scripting, environment integration, rubrics/reference/hints, and agent rollouts with analysis. For each workstream, specify planned coverage, deliverables, quality checks and effort in person-days, plus owners, dependencies, milestone order and expected resources.
 
-After plan approval, task authors develop the executable scenario, precise timeline, context, rubrics and reference solution. Authors then run the required model evaluations themselves and submit traces, scores, configurations, hint-assisted results and failure analysis for implementation review.
+After plan approval, task authors develop the executable scenario, precise timeline, context, grader and replayable reference solution from the approved rubric. Authors then run the required model evaluations themselves and submit traces, scores, configurations, hint-assisted results and failure analysis for implementation review.
 
 The user rollout describes planned user interactions, responses and branches across the story. Specify the **number of sessions**, **simulated world time span**, and **estimated total tokens for one complete scenario across all sessions**, including the token estimate's scope (dialogue, prior context, tool outputs, etc.). The scenario script implements user behavior and world events. An agent rollout is an actual model execution against the script. Plan the work for both; allow multiple valid agent strategies.
 
