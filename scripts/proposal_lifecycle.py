@@ -112,9 +112,16 @@ def render_state(state, now):
     return "\n".join(lines)
 
 
-def classify(pr, files, state):
-    paths = [f["filename"] for f in files if f.get("status") != "removed" and PROPOSAL_PATH.fullmatch(f["filename"])]
-    touched = any(PROPOSAL_PATH.fullmatch(f.get(k, "")) for f in files for k in ("filename", "previous_filename"))
+def classify(pr, files, state, documentation_examples=()):
+    # Only the trusted default-branch policy can identify existing worked
+    # examples. New files, deletions and renames still receive contribution
+    # classification, including a rename into an allowlisted example path.
+    examples = set(documentation_examples)
+    proposal_files = [f for f in files if not (
+        f["filename"] in examples and f.get("status") == "modified"
+        and not f.get("previous_filename"))]
+    paths = [f["filename"] for f in proposal_files if f.get("status") != "removed" and PROPOSAL_PATH.fullmatch(f["filename"])]
+    touched = any(PROPOSAL_PATH.fullmatch(f.get(k, "")) for f in proposal_files for k in ("filename", "previous_filename"))
     implementation = any(f["filename"].startswith(("apps/", "tasks/")) for f in files)
     candidate = bool(track(pr) or touched or implementation or state.get("track"))
     if not candidate:
@@ -275,7 +282,7 @@ class Lifecycle:
             raise ValueError("PR file cap reached; refusing partial classification")
         comments = list(self.api.pages(f"{self.base}/issues/{number}/comments"))
         state, comment_id = load_state(comments, number)
-        kind, path, issue = classify(pr, files, state)
+        kind, path, issue = classify(pr, files, state, self.rules.get("documentation_examples", []))
         blob, text = None, ""
         if path:
             data = self.api.contents(path, pr["head"]["sha"])

@@ -200,6 +200,48 @@ class LifecycleTests(unittest.TestCase):
         self.assertEqual(life.classify(pr(title="Fix tooling"), rows, initial()), (None, None, ""))
         self.assertEqual(gate(initial(), kind=None)[0], "success")
 
+    def test_allowlisted_existing_example_is_documentation_maintenance(self):
+        example = "proposals/task/lena-spring-gathering.md"
+        rows = [{"filename": example, "status": "modified"},
+                {"filename": "proposals/templates/task-proposal.md", "status": "modified"}]
+        self.assertEqual(life.classify(pr(title="Improve the worked example"), rows, initial(), [example]), (None, None, ""))
+        self.assertEqual(life.classify(pr(title="Improve the worked example"), rows, initial())[0], "task")
+
+    def test_new_removed_or_renamed_examples_do_not_bypass_contribution_review(self):
+        example = "proposals/task/lena-spring-gathering.md"
+        for row in [{"filename": example, "status": "added"},
+                    {"filename": example, "status": "removed"},
+                    {"filename": example, "status": "renamed", "previous_filename": "proposals/task/new-task.md"},
+                    {"filename": "docs/example.md", "status": "renamed", "previous_filename": example}]:
+            with self.subTest(row=row):
+                self.assertIsNotNone(life.classify(pr(title="Docs"), [row], initial(), [example])[0])
+
+    def test_example_edit_does_not_hide_new_proposal_or_implementation(self):
+        example = "proposals/task/lena-spring-gathering.md"
+        rows = [{"filename": example, "status": "modified"}]
+        for other in ["apps/demo/plugin.cjs", "tasks/demo/instruction.md", "proposals/task/another-task.md"]:
+            with self.subTest(other=other):
+                result = life.classify(pr(title="Docs"), rows + [{"filename": other, "status": "added"}], initial(), [example])
+                self.assertIsNotNone(result[0])
+
+    def test_explicit_track_and_recorded_lifecycle_cannot_become_example_maintenance(self):
+        example = "proposals/task/lena-spring-gathering.md"
+        rows = [{"filename": example, "status": "modified"}]
+        for p, state in [(pr(title="[Task Proposal] [Food & dining] Example"), initial()),
+                         (pr(title="Docs", labels=[{"name": "track:task"}]), initial()),
+                         (pr(title="Docs", body="- [x] Task Track"), initial()),
+                         (pr(title="Docs"), {**initial(), "track": "task"})]:
+            self.assertIsNotNone(life.classify(p, rows, state, [example])[0])
+
+    def test_context_uses_trusted_policy_for_example_maintenance(self):
+        example = "proposals/task/lena-spring-gathering.md"
+        api = Mock(repository="example/repo")
+        api.pages.side_effect = lambda path, **kwargs: (
+            [{"filename": example, "status": "modified"}] if path.endswith("/files") else [])
+        context = life.Lifecycle(api, {**RULES, "documentation_examples": [example]}, NOW).context(pr(title="Docs"))
+        self.assertIsNone(context["kind"])
+        api.contents.assert_not_called()
+
     def test_spoofed_state_comment_is_ignored(self):
         for changes in [{"user": {"login": "author"}}, {"performed_via_github_app": None}]:
             self.assertIsNone(life.load_state([bot_comment(accepted(), **changes)], 123)[1])
