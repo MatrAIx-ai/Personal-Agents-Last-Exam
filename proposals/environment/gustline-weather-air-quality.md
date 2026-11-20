@@ -227,7 +227,7 @@ For internal personal Apps, state which workflow needs each App and whether the 
   {"event_id":"ev-ao-1000","at":"2027-10-08T10:05:00-07:00","operation":"air.observation_recorded","payload":{"observation_id":"ao-cedar-1000","monitor_id":"mon-cedar","observed_at":"2027-10-08T10:00:00-07:00","pm25_ugm3":48.2,"o3_ppb":31}}
   {"event_id":"ev-af-1006","at":"2027-10-06T14:00:00-07:00","operation":"air.forecast_issued","payload":{"issuance_id":"af-cedar-1006","air_area_id":"aa-cedar","issued_at":"2027-10-06T13:30:00-07:00","days":[{"date":"2027-10-08","aqi_category":"unhealthy_for_sensitive_groups","dominant_pollutant":"pm25"},{"date":"2027-10-09","aqi_category":"moderate","dominant_pollutant":"pm25"}],"narrative":"Smoke from a fire to the south is expected to settle in the basin on Friday."}}
   {"event_id":"ev-aqa-77-v2","at":"2027-10-06T09:00:00-07:00","operation":"alert.published","payload":{"alert_id":"aqa-77","version":2,"msg_type":"update","references":[{"alert_id":"aqa-77","version":1}],"issuer":"Cedar Basin Air District","event":"smoke_advisory","severity":"moderate","urgency":"expected","certainty":"likely","areas":{"air_area_ids":["aa-cedar"]},"onset":"2027-10-08T00:00:00-07:00","expires":"2027-10-11T00:00:00-07:00","headline":"Smoke advisory extended through Sunday","instruction":"Sensitive groups should limit time outdoors."}}
-  {"event_id":"ev-dlv-n12","at":"2027-10-08T10:06:00-07:00","operation":"notification.delivery_recorded","payload":{"notification_id":"n-12","outcome":"committed","code":null,"stop_run":false,"router_event_id":"router-3f9c2a7b1d0e4c55a8e1b2c3d4e5f607"}}
+  {"event_id":"ev-dlv-n12","at":"2027-10-08T10:06:00-07:00","operation":"notification.delivery_recorded","payload":{"notification_id":"n-12","status":"committed","code":null,"stop_run":false,"router_event_id":"router-3f9c2a7b1d0e4c55a8e1b2c3d4e5f607"}}
   {"event_id":"ev-tick-0700","at":"2027-10-09T07:00:00-07:00","operation":"clock.advanced","payload":{}}
   ```
 
@@ -235,13 +235,13 @@ For internal personal Apps, state which workflow needs each App and whether the 
 
   - Gustline's App-owned outbound adapter (`src/publisher.cjs`, following Mail's publisher pattern) reads `pending_delivery` records from an Infra snapshot, so its reads are not counted as the Agent's.
   - It builds the receiver-owned message for the recipient taken from the trusted binding, and publishes it through Messaging with `request_id` equal to the notification ID.
-  - Infra then records the outcome with `notification.delivery_recorded`:
+  - Infra then records the outcome with `notification.delivery_recorded`. The payload carries Messaging's `status`, `code`, `stop_run` (treated as false when Messaging omits it) and the router `event_id`:
 
   | Messaging result | Notification becomes |
   | :--- | :--- |
   | `committed` | `delivered`, with the router `event_id` stored |
-  | `rejected` with `stop_run: false` (for example `recipient_not_authorized`, `incompatible_contract`) | `delivery_failed`, with the code stored |
-  | `rejected` with `stop_run: true` (`receiver_rejected`, `concurrent_dispatch`, `receiver_lifecycle_changed`) or unknown | stays `pending_delivery` with the code stored; the run halts for reconciliation, per the Messaging rules |
+  | `rejected` without `stop_run` (for example `recipient_not_authorized`, `incompatible_contract`, `source_identity_mismatch`) | `delivery_failed`, with the code stored |
+  | any result with `stop_run: true`: `rejected` (`receiver_rejected`, `concurrent_dispatch`, `receiver_lifecycle_changed`), `unknown` (`receiver_unconfirmed`, `receipt_audit_failed`) or `halted` (`run_halted`) | stays `pending_delivery` with the code stored; the run halts for reconciliation, per the Messaging rules |
 
   Example wire message (validated as described under Internal personal apps):
 
