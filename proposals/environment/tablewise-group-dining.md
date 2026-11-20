@@ -1,0 +1,57 @@
+# Environment Track proposal
+
+Proposed PR title: `[Environment Proposal] [Food & dining] Tablewise group dining and shared meals`
+
+## 1. App and domains
+
+- **Authors / GitHub handles (required):** Genglin Liu ([@genglinliu](https://github.com/genglinliu)).
+- **Reference app or website / URL (required):** Tablewise, an independently branded group-dining app. [OpenTable private dining](https://www.opentable.com/private-dining/) is a public workflow reference. All restaurant records, menus, policies and participant histories will be original synthetic fixtures.
+- **Primary domain (required):** Food & dining
+- **Secondary domains (optional):** None
+
+## 2. What you plan to build
+
+**✍️ Your answer (required):** A resettable app for organizing restaurant meals for groups of 4–12 people. It connects an outing's participants and responses to a venue quotation, group menu, confirmed headcount, reservation and shared deposit. Changes to attendance, dietary requests, budget or venue terms remain visible across sessions. Agents can investigate and coordinate, then complete actions within current authority. The app stores business records and consequences; it does not choose the restaurant, infer the right guest list or solve the task for the agent.
+
+Initial workflows, each with edit/cancel paths and explicit errors:
+
+1. **Outings and participants.** Create an outing with candidate times and a named participant list. Invite, record tentative/accepted/declined responses, amend the list, and distinguish expected attendance from a guaranteed headcount. Scenario-operated participant accounts can change their responses. Private participant details have an explicit sharing audience; a kitchen-only dietary note is distinct from a group announcement.
+2. **Group venue and menu quotations.** Search 6–8 fictional venues; inspect party limits, accessibility attributes, private-room terms, set-menu options, per-person/all-inclusive prices, minimum spend and headcount lock times. Request and read a quotation, choose menu options and submit dietary questions. Venue acknowledgement is a dated record with supported/unresolved/declined status. A recorded note is not an assurance that a venue can accommodate it.
+3. **Reservation and headcount changes.** Hold an available group slot, preview the quoted menu, guest count, total and deadlines, then confirm or discard. Amend time, headcount or menu with a new preview. Recheck capacity and quote version at commit. A failed amendment leaves the existing reservation intact. Store what was actually guaranteed to the venue, even when the guest list later changes.
+4. **Shared deposit and closeout.** Preview/confirm a simulated host deposit; record participant contributions against that one deposit, outstanding shares and refunds/adjustments. Do not charge a guest simply because the host invited them. Cancel the outing or reservation with the current fee/refund preview, release the table and record the outcome exactly once. No real collection or payment occurs.
+5. **Scoped communication.** Preview recipients and the information to be sent, then publish a group update or venue message under the user's authority. Store delivery/visibility history so later edits or deletions cannot erase an earlier disclosure. Coordinate a changed venue/time with the outing and Calendar rather than treating a successful booking as completion of the whole meal.
+
+Illustrative task: arrange a group celebration from prior budget and food preferences. Two people change attendance, one requests step-free access, a dietary question remains unanswered, and the venue changes the group-menu quote. A useful outcome has the current authorized guest count, a feasible acknowledged menu, correct shared deposit records and the right information delivered to the right people. Exact task criteria and model qualification would be a separate Task submission.
+
+**Independent scope:** Tablewise's state model centers on multi-person responses, group quotations, menu/headcount commitments, contribution records and communication audiences. The companion fine-dining proposal centers on advance reservation releases and a primary/backup booking lifecycle for two people. Shared UI or date utilities may be reused; each app has its own workflows, fixtures, reset boundary and acceptance evidence. We request review of that distinction before implementation; authorship credit is assessed after validated acceptance.
+
+## 3. Potential app connections
+
+- **Internal personal apps (required):** Mail for invitations, venue replies and change notices; Calendar for feasible times and the confirmed outing; Contacts for stable participant/venue identities if available. A scenario can seed equivalent participant records when Contacts is unavailable. Messages are optional after the initial Mail path works. Only granted personal data and permitted audiences are exposed.
+- **Other apps and websites (required):** None required. The restaurant catalog, venue responses, availability and deposit ledger are local. A future link to [Finance #6](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/6) could show host deposit/refund transactions; it is not a blocking dependency.
+
+### Integration details
+
+- **Operations and access (required):** A browser UI and same-state public MCP/API actions for outing/participant inspection, invitations, venue/menu reads, quotation requests, reservation previews/confirmation/amendment/cancellation, contribution records and recipient-scoped messages. Platform-only operations load fixtures, reset/restore and inject participant, venue and clock events. The agent cannot manufacture participant consent or a venue acknowledgement. Final method names and host authorization hooks are TBD at design review.
+- **State and lifecycle (required):** Separate fixed venue/menu definitions, account/participant roles, and run-specific outings, replies, quote versions, holds, bookings, contributions, message deliveries and event cursor. Exact integer-cent amounts, explicit time zones and expiring previews are used. Confirmations bind current parameters and relevant versions; repeated request IDs return the original receipt. Expired or conflicting operations have no new side effect. Reset clears run state and pending deliveries; restore resumes the same recorded state.
+- **Events and notifications (required):** Incoming events include `participant.response_changed`, `venue.quote_updated`, `venue.dietary_reply`, `slot.occupied` and simulated time advancement. Example: a participant declines an outing after headcount lock; their attendance becomes declined, while the already-guaranteed count remains unchanged until an authorized amendment succeeds. Outgoing Mail and proposed Calendar updates cite stable outing/reservation IDs. Task scripts determine event timing. Exact envelopes/routing follow the released platform contract.
+- **Shared data and dependencies (required):** Outing, participant, venue, quote, menu, reservation, contribution and delivery IDs link public records. Original text menus and synthetic statement/receipt files are sufficient; no photos, live vendor accounts or payment rails are required. Prefer the public Mail/Calendar contracts after adoption. The app's local fixture path works independently of a Finance integration.
+
+## 4. Construction plan and effort
+
+**✍️ Work breakdown (required):**
+
+| Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
+| :--- | :--- | :--- | :--- |
+| Web / app construction | Build outing/guest, venue/menu, quote, review/booking, shared-deposit and scoped-update views for the five workflows. Reuse original UI/date/money primitives where licensed. | Complete group planning, amendment and cancellation loops; guest responses, guaranteed headcount, venue acknowledgement and actual deliveries remain distinguishable. | 4–5 |
+| Data and image collection | Inventory reference/reuse sources and dependencies. External image collection is N/A: text menus and original local UI assets suffice. | Provenance/license manifest; no remote assets or private records needed at runtime. | 1 |
+| Synthetic data and assets | Three reset fixtures, each with 6–10 participants, 6–8 venues, 2–3 group menus per venue, 12–18 messages and 8–12 scheduled changes. | Consistent people/quotes/menus; cent-accurate totals; feasible and infeasible group options; explicit audience and acknowledgement records. | 2–3 |
+| App integrations | Bind public actions and Mail/Calendar; implement participant/venue event inputs, resource references, current approvals and reset/restore contracts. | One reproducible participant-change → revised quotation → authorized amendment → scoped notification flow. No task-solving policy in adapters. | 2–3 |
+| Validation and reset | Local business, concurrent-change, permissions and lifecycle tests; deliver fixture inputs/expected outcomes and a fresh-environment reproduction for platform review. | Cover partial replies, stale quotes, slot loss, headcount lock, refund/contribution math, duplicate calls, private-note disclosure, failed amendments and complete reset. Platform maintainers provide integration evidence. | 3–5 |
+
+- **Milestones, owners and dependencies (required):** @genglinliu owns M0–M3: agree on independent scope and interfaces; deliver fixture-backed business/UI flows; connect public apps/events; supply reproducible tests and independent validation inputs. Active effort: 12–17 person-days, roughly 3–4 working weeks for one contributor, excluding infrastructure/review waits. Related work: community events [#26](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/26) has RSVP/audience primitives; grocery [#37](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/37) has food products. Tablewise adds restaurant-specific quotations, menus and group commitments. The companion fine-dining proposal is independent of this implementation.
+- **Resources and total effort (required):** 12–17 person-days. Target local CPU backend/browser and fixtures below 10 MB, with no paid collection/generation or mandatory external service. Model-trial count/cost is TBD with maintainers before validation. Named independent reviewers and platform runtime requirements are settled at M0.
+- **Scope boundary and open questions (required):** Initial scope is one outing per run and synthetic group dining; exclude actual messaging/payments, food delivery, cooking, clinical nutrition advice and advance-release inventory racing. Group preferences do not authorize spending or disclosure. Confirm actor roles, supported attachment/Calendar routing and exact resource-version semantics with maintainers. Review the distinct business scope relative to the companion two-person fine-dining app and #26 before implementation; no separate contribution credit is presumed.
+- **License and external dependencies (required):** Original contribution code: MIT; original synthetic fixtures: CC0-1.0. Reused research code/assets require an explicit compatibility inventory before inclusion. Product names identify public workflow references only. Record every dependency and notice; all first-release components are redistributed, with no hosted-only requirement. Actual private conversations, restaurant policies and third-party assets are excluded.
+
+After plan approval, add implementation and validation links against the deliverables in this same PR. Return material scope changes for design review.
