@@ -3,113 +3,147 @@
 ## 1. App and domains
 
 - **Authors / GitHub handles (required):** Nassim (@nassimberrada)
-- **Reference app or website / URL (required):** [Paperless-ngx](https://docs.paperless-ngx.com/) — open-source document management system. The proposed environment extends this model with richer document relationships, extracted information, evidence tracking and agent-facing workflows.
+- **Reference app or website / URL (required):** [Paperless-ngx](https://docs.paperless-ngx.com/) — open-source document management system. The proposed environment extends this model with arbitrary document relationships, passage-level information extraction, evidence tracking, and agent-assisted review workflows.
 - **Primary domain (required):** Work & business
 - **Secondary domains (optional):** Money & insurance; Public service & law; Home & utilities; Health & care
 
+### Added value and relationship to existing work
+- **Relationship to `Files` (`docs/personal-apps.md`):** The merged `Files` App provides basic folder hierarchies and immutable byte storage. `Personal Records` acts as an intelligence and reasoning layer on top of document storage: it provides full-text content search (SQLite FTS5), passage-level citation for factual claims, arbitrary cross-document relationship graphs (e.g., tax-packet evidence, successive payslips), and explicit verification states (`INFERRED` vs. `USER_CONFIRMED`).
+- **Relationship to Research Library (PR #4):** While PR #4 specializes in academic literature and bibliographic citations, Personal Records is dedicated to personal administration (employment contracts, payslips, tax filings, insurance policies, and household receipts) with personal timeline and audit semantics.
+
 ## 2. What you plan to build
 
-Build a personal document management and intelligence app where users can store, organise, search and manage important personal records. The app should go beyond basic file storage: it should extract useful information from documents, identify relationships between records, track changes and provide traceable evidence for decisions.
+Build a personal document management and intelligence environment where users and agents store, organize, search, and manage important personal records with verifiable evidence attribution.
 
 Core workflows include:
-- **Document intake:** Upload documents or receive them from connected sources. Support PDFs, images, email attachments and common office formats.
-- **Organisation and search:** Categorise documents by type, person, organisation, date, topic and custom tags. Support full-text and metadata search.
-- **Information extraction:** Extract relevant fields such as dates, amounts, names, policy terms, account details and contract conditions. Retain links to the original document and relevant passages.
-- **Document relationships:** Link related documents, such as successive payslips, employment contracts, bank statements, insurance policies and investment reports.
-- **Change and expiry tracking:** Identify new versions, changed terms, missing records, upcoming expirations and relevant updates.
-- **Evidence tracking:** Let users and agents link claims, facts and decisions to supporting documents. Track evidence quality, source, date and verification status.
-- **Agent-assisted workflows:** Allow agents to search records, summarise documents, identify relevant evidence, flag inconsistencies and prepare proposed updates. Require user approval for consequential changes.
+1. **Document intake & import:** Upload digital documents directly or import them from connected apps (`Mail`, `Files`). Supports PDFs, text, and common image formats in v1.
+2. **Organization & full-text search:** Categorize documents by person, organization, date, topic, and tags. Support SQLite FTS5 full-text and metadata search.
+3. **Information extraction & passage citation:** Extract structured fields (dates, amounts, counterparty names, policy numbers, terms) alongside stable passage anchors (line/character offset spans). Digital PDFs and text are extracted via lightweight local parsers (`pypdf` / `pdf-parse`), paired with deterministic pre-extracted fallback text in fixtures to eliminate heavy, nondeterministic runtime OCR dependencies.
+4. **Arbitrary document relationships:** Model relationships as an open, directed graph. Agents and users can connect any two documents with custom, configurable relationship strings (e.g., `supersedes`, `tax_supporting_document`, `receipt_for`, `amends`, `parent_contract`), directly supporting multi-document tasks like tax packets and evidentiary bundles.
+5. **Change & expiry tracking:** Track document validity and renewal dates evaluated strictly against virtual time (`ctx.virtual_now`). Identify material discrepancies across linked records (e.g., net pay differences across successive payslips).
+6. **Evidence tracking, verification & agent proposals:** Allow agents to cite exact document passages to support factual claims with explicit provenance (`INFERRED` vs. `USER_CONFIRMED`). Agents can draft proposed metadata, relationship links, or status updates, but high-consequence mutations (modifying confirmed records or deleting files) require explicit user approval via the Web UI.
 
-The environment is useful for evaluating agents because it tests document retrieval, cross-document reasoning, information extraction, source attribution, uncertainty handling, change detection and user control.
+The environment evaluates personal agents on retrieval precision, multi-document temporal reasoning, source attribution, uncertainty handling, and adherence to user confirmation boundaries.
 
 ## 3. Potential app connections
 
+### Connected workflows using public contracts
 - **Internal personal apps (required):**
-  - Mail: Read permitted messages and attachments to identify relevant records and events. Support saving attachments into the document library.
-  - Calendar: Read relevant dates, deadlines and upcoming events. Link them to documents where useful.
-  - Contacts: Associate documents with people, employers, advisers and organisations.
-  - These should initially use simulated accounts and data rather than live personal accounts.
+  - **Mail (`examples/apps/mail/tools.json:1954`):** Read-only integration. Personal Records calls `mail.get_message` and `mail.get_attachment` using message `id` and `asset_id` to fetch original attachment bytes, MIME types, and SHA-256 hashes. Reading Mail leaves Mail's business state unchanged.
+  - **Files (`apps/files/tools.json:914`):** Read-only integration. Personal Records provides an import adapter calling `files.read_file_bytes(file_id, version_id)` to ingest documents deposited by users or agents into the `Files` app.
+  - **Calendar (`examples/apps/calendar/tools.json:3,237`):** Read-only integration. Personal Records calls `calendar.list_events` with range filters to correlate contract renewals and tax deadlines. No Messaging receiver is required for Calendar reads.
+  - **Contacts (`apps/contacts/tools.json:184`):** Read-only integration. Personal Records calls `contacts.list_contacts` to map extracted organization names and employer/issuer strings to stable `person_id` or contact entities.
+  - *Outbound notifications via Mail (`examples/apps/mail/schemas/router-message.schema.json`):* Retained outbound alerts optionally send a notification to the user inbox using `mail.receive_notification` with payload `urn:pale:email-payload:1`.
 
 - **Other apps and websites (required):**
-  - Google Drive / Dropbox / OneDrive: Import and organise documents from external storage.
-  - Gmail / Outlook: Import permitted email attachments and relevant messages.
-  - Personal finance and investment platforms: Import synthetic statements, account summaries and transaction reports.
-  - E-signature services: Import signed contracts and agreements.
-  - These connections should be represented by controlled adapters or simulated services in the initial environment. Live third-party account access is out of scope.
+  - **Cloud storage, investment platforms, & e-sign platforms:** To guarantee 100% local reproducibility without live internet dependencies, external services are simulated via static, deterministic synthetic intake fixtures and controlled local folder adapters in v1. Live third-party API access is out of scope.
 
 ### Integration details
 
-- **Operations and access (required):**
-  - Provide a browser-based interface for document upload, browsing, search, preview, tagging, editing metadata, linking records and managing permissions.
-  - Provide agent-facing API or MCP operations for listing, searching, reading, uploading, categorising, linking and updating documents.
-  - Expose structured metadata and extracted text alongside references to the original files and relevant text passages.
-  - Support document version creation, evidence-link creation, annotation and audit-log retrieval.
-  - Provide platform operations for creating accounts, loading fixtures, injecting new documents and events, capturing state and resetting an environment.
-  - Destructive actions and changes to verified records should require explicit confirmation.
+#### Operations and access (required)
 
-- **State and lifecycle (required):**
-  - Keep user accounts and their document libraries isolated.
-  - Store original files separately from extracted text, metadata, annotations and derived information.
-  - Preserve document identity, source, upload time, creation date, version history and processing status.
-  - Track the origin of extracted facts and distinguish user-confirmed information from machine-extracted or inferred information.
-  - Support deterministic initial datasets, snapshots and full reset to a known state.
-  - Make writes idempotent where possible. Return clear success or failure results and handle retries without creating duplicate records.
-  - Use version checks to prevent concurrent updates from silently overwriting user changes.
+The environment strictly separates Agent/User business tools from Platform administrative operations:
 
-- **Events and notifications (required):**
-  - Accept events such as a new document upload, a replacement document, an email attachment arriving, a document expiry approaching or a connected source receiving an update.
-  - Notify users about processing failures, missing information, potential duplicates, conflicting records and documents requiring review.
-  - Support simulated event injection so task scenarios can introduce new evidence over time.
-  - Example: a new payslip arrives; the system extracts its pay period and net income, links it to previous payslips and flags a material change for review.
-  - Example: a revised insurance policy arrives; the system compares it with the prior version and highlights changed coverage terms.
-  - Notifications should be available in the app. Email and push notifications can be simulated.
+| Operation | Mode | Caller | Access | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `records.upload_document` | MCP / Web UI | Agent / User | Write | Uploads original bytes and creates an intake record. |
+| `records.import_from_source` | MCP / Web UI | Agent / User | Write | Ingests from `mail` or `files` via their public read contracts. |
+| `records.get_document` | MCP / Web UI | Agent / User | Read | Retrieves document metadata, versions, and extracted text/passages. Non-mutating. |
+| `records.search` | MCP / Web UI | Agent / User | Read | Full-text (FTS5) and structured field search. Non-mutating. |
+| `records.link_documents` | MCP / Web UI | Agent / User | Write | Creates a directed link (`source_id`, `target_id`, `relationship_type`, `metadata`). `relationship_type` is an open/arbitrary string. |
+| `records.create_evidence_claim` | MCP / Web UI | Agent / User | Write | Links a factual claim to specific passage citations. |
+| `records.propose_update` | MCP | Agent | Write | Submits a proposed metadata or relationship change pending confirmation. |
+| `records.confirm_update` | Web UI | User only | Write | Approves or rejects a pending agent update. |
+| `platform.seed_fixtures` | Platform API | Platform | Write | Loads initial scenario documents and ground truth. Blocked from Agent. |
+| `platform.reset` | Platform API | Platform | Write | Resets database, blobs, and indexes to baseline. Blocked from Agent. |
+| `platform.inject_event` | Platform API | Platform | Write | Injects a timestamped document or expiry event. Blocked from Agent. |
 
-- **Shared data and dependencies (required):**
-  - Core objects: users, accounts, documents, document versions, attachments, extracted fields, tags, entities, relationships, annotations, evidence claims, permissions, events and audit records.
-  - Support PDF, PNG, JPEG, TXT, DOCX, XLSX and common email formats such as EML.
-  - Store original files and extracted content with stable identifiers so agents can cite specific documents and passages.
-  - Use OCR and document parsing for scanned and digital documents. Keep extraction results reproducible where possible.
-  - Shared services include file storage, a relational database, full-text search and document-processing workers.
-  - Use synthetic personal information and financial records throughout the environment.
+- **Browser audience and Web UI:** The browser interface runs on PALE's standard **Business Web Host** (`runtime/web/README.md`) over the same authenticated MCP state. It serves human users inspecting records, approving proposals, or verifying claims, and supports CUA-based evaluation agents.
+
+#### State and lifecycle (required)
+- **Account and run isolation:** User libraries, document files, and metadata are partitioned strictly by `account_id` and benchmark run.
+- **Document state machine:**
+  - Processing lifecycle: `PENDING_INGEST` $\rightarrow$ `PARSING` $\rightarrow$ `READY` (or `EXTRACTION_FAILED`).
+  - Verification lifecycle: `INFERRED` (machine-extracted) $\rightarrow$ `USER_CONFIRMED` (verified by human/user) $\rightarrow$ `SUPERSEDED` (replaced by newer document version).
+- **Transitions and error outcomes:**
+  - `DUPLICATE_DOCUMENT`: Ingest rejected when SHA-256 hash matches an existing document in the same account (returns existing `document_id`).
+  - `UNSUPPORTED_FORMAT`: Returns explicit error receipt if uploaded MIME type is outside v1 scope.
+  - `STALE_VERSION`: Writes specifying an `expected_version` fail if the record was mutated concurrently.
+  - `CONFIRMATION_REQUIRED`: Agent attempts to alter `USER_CONFIRMED` data or delete records produce a pending change receipt rather than mutating state.
+  - `EVIDENCE_INVALIDATION`: Superseding a document version marks existing claims referencing it as `REVIEW_REQUIRED` without destroying historical claim records.
+- **Fixture ground truth:** Synthetic datasets provide paired `truth.json` manifests specifying ground-truth fields, passage coordinates, and expected relationship graphs for deterministic grading.
+- **Core write/replay and reset contract:**
+  - Follows `runtime/core/runtime.cjs:119–126`. Read operations produce zero business mutations. Write operations accept idempotency keys.
+  - Reset (`platform.reset`) clears all App-local tables (documents, extractions, links, claims, in-app notifications) and resets SQLite FTS5 indexes and temporary blob storage back to the scenario's initial baseline.
+  - App-owned business history (visible to users and agents) is kept distinct from PALE Core execution audit logs.
+
+#### Events and notifications (required)
+- **Virtual time and scheduling:** All temporal calculations (e.g., document expiry, policy renewal notices) evaluate against `ctx.virtual_now`. Advancing time via `env.advance_time` executes no ambient polling or timers. Event handlers evaluate conditions when invoked at `event.at`.
+- **Structured event injection:** Scenarios inject events via standard envelopes:
+  ```json
+  {
+    "event_id": "evt_payslip_2026_11",
+    "at": "2026-11-20T09:00:00Z",
+    "operation": "records.inject_document",
+    "payload": {
+      "source": "mail_attachment",
+      "source_account": "user@example.com",
+      "message_id": "msg_nov_payslip",
+      "asset_id": "ast_payslip_pdf"
+    }
+  }
+  ```
+- **Notification semantics:**
+  - In-app alerts are written directly to the internal `records_notifications` table.
+  - External notifications: Retained email notifications use `mail.receive_notification` adhering to `urn:pale:email-payload:1`. Mobile push notifications are deferred.
+
+#### Shared data and dependencies (required)
+- **Format scope (v1):** Supported formats are strictly **PDF, PNG, JPEG, and TXT**. Complex office formats (DOCX, XLSX) and raw email containers (EML) are excluded from v1 parsing and handled only as raw unparsed attachments.
+- **Resource and storage budgets:**
+  - Per-file maximum size: 10 MB.
+  - Total synthetic fixture bundle: 150–250 documents $\le$ 250 MB total storage.
+  - Compute & OCR: Built with SQLite (with FTS5) and lightweight local text extraction (`pypdf` / `pdf-parse`). Synthetic document fixtures bundle pre-extracted text fallback fields in `truth.json` to guarantee fast (<2s), 100% deterministic CI runs without GPU or external OCR engine requirements.
+- **Stable identifiers:** Documents are referenced by immutable `document_id`. Citations reference `passage_id` or line/character offset spans `{start_offset, end_offset}` to ensure precise source attribution.
 
 ## 4. Construction plan and effort
 
-**Work breakdown (required):**
+### Work breakdown (required)
 
 | Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
 | :--- | :--- | :--- | ---: |
-| Web / app construction | Build a responsive document library, upload flow, document preview, search, filters, metadata editor, document detail page, version history, relationships and evidence view. Include approximately 8–10 main screens. | Working browser app. Verify upload, search, preview, metadata edits, linking, version history and permissions through end-to-end tests. | 8–12 |
-| Data and image collection | Use no real personal records. Review Paperless-ngx and similar open-source systems for reusable interaction patterns. Create a small set of public-domain or openly licensed sample documents only if needed for format testing. | Record source and license for reused assets. Verify that no personal or restricted data is included. | 1–2 |
-| Synthetic data and assets | Generate approximately 150–250 realistic documents across 8–10 categories, including financial, employment, insurance, property, tax, legal, health and household records. Include scans, digital PDFs, spreadsheets, email attachments, multiple versions, missing fields and conflicting information. | A coherent synthetic dataset with linked people, organisations, dates and accounts. Check extraction accuracy, consistency, realistic variation, duplicate handling and traceability to source documents. | 4–6 |
-| App integrations | Build simulated adapters for Mail, Calendar and Contacts, plus import adapters for cloud storage and financial records. Support document and event injection through APIs. | Verify import, attachment handling, source attribution, permissions and state consistency across connected services. | 3–5 |
-| Validation and reset | Test document upload, search, extraction, version comparison, evidence linking, permissions, concurrent updates, event handling and reset. Create repeatable fixtures and expected outcomes. | Reproducible local tests and platform validation evidence. Verify account isolation, permission enforcement, audit history and clean reset. | 3–5 |
+| Storage & Core MCP Backend | Implement SQLite schema, FTS5 search index, file blob store, and agent MCP endpoints (`upload`, `get`, `search`, `link`, `create_evidence_claim`). | Working MCP server passing local CRUD, FTS5 search, idempotency, and version conflict tests. | 5–7 |
+| Web UI (Web Host) | Implement 6–8 responsive business views (document library, file preview, passage viewer, link inspector, review/confirmation modal) on `runtime/web`. | Verified UI rendering, passage highlighting, and confirmation flows across major browsers via Playwright. | 4–6 |
+| App Integrations (Mail, Files, Contacts, Calendar) | Implement read-only adapters for Mail attachments, Files original bytes, Contacts entity matching, and Calendar date linking. | Integration tests verifying source byte/hash preservation and ensuring zero mutations on source apps. | 3–4 |
+| Synthetic Dataset & Ground Truth | Synthesize 150–250 realistic documents across 8 categories (tax, employment, insurance, property, utilities, healthcare, banking, legal) with ground-truth `truth.json` manifests. | Coherent persona histories. Check duplicate detection, extraction consistency, and passage ground-truth alignment. | 4–6 |
+| Platform Lifecycle & Reset Harness | Implement `platform.seed`, `platform.reset`, event injection handlers, and Core replay compliance. | Reproducible reset tests verifying clean table/FTS restoration, baseline re-seeding, and deterministic state. | 3–5 |
 
-- **Milestones, owners and dependencies (required):**
-  1. Finalise data model, app scope and API design.
-  2. Build document storage, upload, search and preview.
-  3. Add extraction, metadata, document relationships and version history.
-  4. Generate synthetic documents and connected-source fixtures.
-  5. Add agent-facing operations, event injection and notifications.
-  6. Run workflow tests, fix issues and prepare platform validation evidence.
+### Milestones, owners, and dependencies (required)
 
-  Owners: Nassim (@nassimberrada). Expected calendar duration: approximately 3–5 weeks, depending on team size and parallel work. Main dependencies are file storage, database, OCR/document parsing and the platform's environment integration interface.
+- **14-day First Runnable Slice (Approval Milestone):**
+  - Deliver runnable core SQLite engine, blob storage, core MCP operations (`records.upload`, `records.get`, `records.search`, `records.link`), baseline fixture seeder, and `platform.reset`.
+  - Pass reproducible unit and integration tests under `npm test` / `pytest`.
+- **Subsequent Milestones:**
+  - Milestone 2: Mail and Files import adapters; Contacts/Calendar read linking.
+  - Milestone 3: Web Host interface and confirmation workflows.
+  - Milestone 4: Full synthetic dataset scale-up (150–250 documents) and paired `truth.json` manifests.
+  - Milestone 5: End-to-end task integration validation (supporting Task proposals #102 and #106).
 
-- **Resources and total effort (required):**
-  - Estimated total: 19–30 person-days.
-  - Expected costs: Low. Use local or open-source OCR and document-processing tools where possible.
-  - Storage and compute: A modest local development environment with file storage, a relational database and background processing.
+Owners: Nassim (@nassimberrada). Calendar duration: 3–4 weeks.
 
-- **Scope boundary and open questions (required):**
-  - The initial environment focuses on personal document management and evidence tracking, not a full personal finance, email or cloud-storage replacement.
-  - No live financial account access, transactions, payments, investment execution or legal/financial advice.
-  - No real personal or sensitive records. Use synthetic data, including synthetic health and financial documents.
-  - Agents may extract, compare and propose changes, but must not silently alter original documents or treat inferred facts as verified.
-  - Users must be able to inspect the source behind extracted information and correct errors.
-  - Initial integrations will be simulated. Which external services, if any, should be implemented as live integrations can be decided after the core environment is validated.
-  - The exact OCR and document-parsing stack remains TBD and will be selected based on local deployment, supported formats and extraction quality.
+### Resources and total effort (required)
+- **Estimated total effort:** 19–28 person-days.
+- **Compute & storage:** Modest local development environment (SQLite, Python / Node runtime, $\le$ 250 MB disk). No external paid APIs or cloud dependencies.
 
-- **License and external dependencies (required):**
-  - New application code should use an open-source license compatible with the repository's contribution requirements; proposed license: MIT.
-  - Reuse of Paperless-ngx or other external code is not assumed. Its documentation and interface patterns may be used as references. Any reused code or assets must have their licenses recorded and be compatible with the chosen license.
-  - Synthetic documents and generated assets will be created for this environment and distributed with it where practical.
-  - No external service should be required at runtime for the initial version. OCR and parsing should run locally or through controlled, replayable services.
+### Scope boundary and open questions (required)
+- **Included in v1:** Digital PDF/image/text parsing, SQLite FTS5 full-text search, arbitrary directed document relationships, immutable version history, passage-level evidence linking, and user confirmation boundaries.
+- **Excluded / deferred:**
+  - Parsing of DOCX, XLSX, and EML formats is deferred (stored as raw blobs only in v1).
+  - Heavy ML OCR models are excluded; v1 uses digital PDF text extraction with deterministic pre-extracted fallback in fixture truth.
+  - Live third-party cloud/finance API connections are excluded (simulated via static local fixtures).
+  - Device push notifications are deferred; local in-app alerts and simulated email inbox notifications are supported.
+  - No automated legal or financial advice features.
+
+### License and external dependencies (required)
+- Application code will be licensed under **MIT**.
+- Synthetic assets and document templates will be released under **CC-BY-4.0** or dedicated public-domain marks (CC0).
+- Runtime dependencies: SQLite3 (with FTS5), lightweight PDF/text parsing (`pypdf` or `pdf-parse`). All runtime code executes locally and deterministically.
