@@ -79,14 +79,16 @@ Five workflows. Each lists its entities, transitions, operations (R = read, W = 
    - *Errors:* `place_not_found`, `stop_not_found`, `route_not_found`, `invalid_window`, `outside_planning_horizon` (more than 7 days ahead).
 
 2. **Trip planning with step-free routing.**
-   - *Operation:* R `hopline.trips.plan(from, to, depart_at | arrive_by, step_free, max_walk_m, max_transfers, avoid_modes, card_id?)` returns up to three itineraries. Each has:
+   - *Operation:* R `hopline.trips.plan(from, to, depart_at | arrive_by, step_free, max_walk_m, max_transfers, avoid_modes, card_id?)` returns up to three itineraries: the earliest arrival, then the earliest arrival with fewer transfers, then the earliest arrival whose first route differs, without duplicates. Each has:
      - legs (walk, ride, transfer pathway) with times in local time and UTC offsets;
      - a `step_free` flag;
      - the fare for the given card, with any pass or cap applied;
-     - `uses_estimates`: facilities whose outage is due to end, by its estimate, before the leg reaches them, but whose restoration has not been recorded.
+     - `uses_estimates`: facilities whose outage is due to end, by an estimate that is still in the future at `as_of`, before the leg reaches them, but whose restoration has not been recorded.
    - *Search:* a deterministic time-dependent earliest-arrival search over the computed trips. Ties are broken by fewer transfers, then shorter walking.
    - *What it considers:* active alerts (detours, closed stops, no service), trip updates and facility outages, all derived at `as_of` and at each leg's own time.
-   - *Step-free filtering:* with `step_free: true`, any pathway with stairs or escalators is excluded, as is any elevator that is out of service at the leg's time. An elevator whose estimated return falls before the leg is allowed but listed in `uses_estimates`, so the uncertainty is visible.
+   - *Step-free filtering:* with `step_free: true`, any pathway with stairs or escalators is excluded, as is any elevator that is out of service at the leg's time.
+     - An elevator whose estimated return is still later than `as_of` and earlier than the leg is allowed, but listed in `uses_estimates`.
+     - Once the estimate has passed with no restoration event, the elevator is excluded again and reported as a blocker with `estimate_passed`. Hopline never treats an expired estimate as a restoration.
    - *Errors:* `no_route`, `no_step_free_route` (with the blocking facilities or closed stops), `outside_service_hours`, `outside_planning_horizon`.
 
 3. **Service alerts, trip updates and facility outages** (all arrive as Infra events).
@@ -102,13 +104,14 @@ Five workflows. Each lists its entities, transitions, operations (R = read, W = 
    - *Entities:*
      - saved place, such as "Home" or "Clinic";
      - saved commute: from, to, days of week, departure window, `step_free` and other preferences;
-     - subscription: a route, stop, facility or saved commute, a window, quiet hours with `urgent_override`, delivery `mail | in_app`, and status `active | paused`;
+     - subscription: a target (route, stop, facility, saved commute or card), a window, `delay_threshold_min` for routes and commutes, `low_balance_cents` for cards, quiet hours with `urgent_override`, delivery `mail | in_app`, and status `active | paused`;
      - notification: `notification_id`, subscription, trigger key, trigger source, virtual `created_at`, `release_at`, `delivery_status` (`in_app | held_quiet_hours | pending_delivery | delivered | delivery_failed | withdrawn`), Messaging outcome, `acknowledged_at`.
    - *Operations:* R `hopline.saved.list`, R `hopline.subscriptions.list`, R `hopline.notifications.list`; W `hopline.saved.add`, W `hopline.saved.remove`, W `hopline.subscriptions.create`, W `hopline.subscriptions.update`, W `hopline.subscriptions.delete`, W `hopline.notifications.acknowledge`.
    - *Evaluation:*
      - Subscriptions are evaluated only when a business event is applied (alert, trip update, facility status, tap, eligibility or payment), in a fixed order. They are never evaluated on reads or on clock movement.
      - A saved-commute subscription fires when the event breaks or delays that commute inside its window. Examples: its step-free itinerary no longer exists, a trip it uses is cancelled, or the delay exceeds the subscription's threshold.
-     - The trigger key is `(subscription_id, source_id, source_version, recipient)`. Replays and repeated evaluations create nothing.
+     - The trigger key is `(subscription_id, source_id, source_version, recipient)`. An alert's version, a facility's status sequence number, or a trip update's sequence number is its `source_version`. Replays and repeated evaluations create nothing.
+     - A card subscription fires on a low balance after a tap, a settled or failed load, and an eligibility decision.
      - The notification ID is derived from the trigger key and is the Messaging `request_id`.
      - Quiet hours (account time zone) hold a notification once as `held_quiet_hours`, with `release_at` at the end of the quiet period. Its effective status is derived from `ctx.virtual_now` wherever it is read or written, including the outbound adapter: from `release_at` on, it reads as `pending_delivery`. A later event that resolves the cause before `release_at` (a restored elevator, a cancelled alert) marks it `withdrawn`.
      - `urgent_override` releases `no_service` and `stop_closed` alerts at once.
@@ -116,40 +119,50 @@ Five workflows. Each lists its entities, transitions, operations (R = read, W = 
 
 5. **Fare card, passes, cap and reduced fare.**
    - *Entities:*
-     - card: `active | blocked`, stored-value balance in integer cents, `pending` loads, an autoreload rule, attached passes and the weekly cap progress;
+     - card: `active | blocked`, stored-value balance in integer cents, `pending` loads, an autoreload rule (`threshold_cents`, `amount_cents`, `payment_method_id`), attached passes, reduced-fare status and the weekly cap progress;
      - pass: a monthly pass valid for one calendar month; `scheduled → active → expired`, with status derived from its dates;
      - tap: an actual boarding, recorded by an Infra event;
      - ledger entries: `load_pending`, `load_settled`, `load_failed`, `fare`, `pass_purchase`, `pass_refund`, `replacement_fee`;
      - reduced-fare application: `submitted → approved (with expiry) | denied`, with `expired` derived from the expiry.
    - *Fare rules (fixture catalog, versioned):*
      - Rail costs $2.40 and bus $1.70. Within 120 min of a paid boarding, a transfer costs only the difference (bus to rail $0.70; rail to bus free).
-     - The weekly cap is $22.50 from Monday 00:00 to Sunday 23:59, local time. Once fares in that week reach the cap, further taps cost $0.00.
+     - The weekly cap is $22.50 over the half-open week [Monday 00:00, next Monday 00:00), local time. A tap is charged min(fare, cap minus the week's paid fares), so the tap that reaches the cap pays only the remainder, and later taps cost $0.00.
      - A reduced fare halves every fare and the cap.
      - A monthly pass costs $90.00 and makes every tap in its month $0.00.
-     - If the balance is too low, one tap may take the balance down to the price of a rail fare below zero. After that, taps are declined (`insufficient_balance`) until a load settles.
+     - If the balance is too low, a charged tap may take the balance down to minus the card's current rail fare (full or reduced). A charged tap that would go below that is declined `insufficient_balance` until a load settles.
+       - Taps that cost $0.00 (a free transfer, a capped week or a pass) are always accepted.
+       - A tap whose mode does not match its route is rejected `mode_mismatch`.
+     - Autoreload is checked only inside `fare.tap_recorded`, because no App code runs when the clock moves. After a charged tap leaves the spendable balance below `threshold_cents`, it creates at most one `load_pending` for `amount_cents`, which settles through `payment.settled` like any load.
    - *Operations:*
      - R `hopline.cards.get`, R `hopline.cards.history(card_id, from, to)`, R `hopline.fares.products`;
      - W `hopline.cards.add_value(card_id, amount, payment_method_id)`: creates a `load_pending` entry; the money becomes spendable only when `payment.settled` arrives;
      - W `hopline.cards.set_autoreload`;
-     - W `hopline.passes.purchase(card_id, product, start_month)`: from the current month on;
+     - W `hopline.passes.purchase(card_id, product, start_month)`: from the current month on, debited from the settled balance (`insufficient_balance` if it is short);
      - W `hopline.passes.cancel`: a full refund before the pass starts, otherwise `pass_started`;
-     - W `hopline.cards.report_lost(card_id)`: blocks the card at once and issues a virtual replacement that carries over the settled balance, any pending loads and passes, minus a $5.00 replacement fee. A later tap with the blocked card is declined `card_blocked`;
+     - W `hopline.cards.report_lost(card_id)`: blocks the card at once and issues a virtual replacement `<card_id>~r<n>`.
+       - The replacement carries over the settled balance, pending loads (same ledger IDs, now credited to the replacement), passes, reduced-fare status and any pending application, the week's cap progress and the autoreload rule.
+       - A $5.00 replacement fee is debited from the settled balance. If that balance is under $5.00 or negative, the fee is owed and taken from the next settled load.
+       - A later tap with the blocked card is declined `card_blocked`. Every write on a blocked card, including a second `report_lost`, returns `card_blocked`, so the fee is never charged twice.
      - W `hopline.reduced_fare.apply(card_id, program)`, with `program` one of `senior`, `disability` or `low_income`. The decision arrives as an Infra event.
-   - *Errors:* `card_not_found`, `card_blocked`, `invalid_amount`, `payment_method_not_found`, `pass_started`, `pass_overlaps`, `application_pending`, `not_eligible_program`.
+   - *Errors:* `card_not_found`, `card_blocked`, `invalid_amount`, `insufficient_balance`, `payment_method_not_found`, `pass_started`, `pass_overlaps`, `application_pending`, `not_eligible_program`.
+   - *Predictable IDs for scripted events:* objects the agent creates get deterministic IDs: replacement cards `<card_id>~r<n>`, ledger entries `le-<card_id>-<n>`, applications `ap-<card_id>-<n>`. `payment.settled` may name a ledger entry or a `card_id` (it then settles the oldest pending load). `fare.eligibility_decided` names the `card_id`, since only one application can be pending. A selector that matches nothing commits as a no-op with the reason recorded in Hopline's history.
 
 **Core examples (precondition → action or event → expected outcome → control or error).** Times are in `America/New_York` (EST, `-05:00`), in fixture metro Ashford.
 
 | Workflow | Example |
 | :--- | :--- |
 | 2 | Virtual time is Mon Dec 7, 07:30. Elevator EL-12 at Central (street to Blue Line platform) has been `out_of_service` since 06:40, with `expected_return` Tue Dec 8, 18:00. Dana calls `hopline.trips.plan(Elm & 3rd → Harbor Square, depart_at 07:35, step_free: true)`. → One itinerary: Bus 40 direct, arriving 08:21, `step_free: true`, fare $0.85 on Dana's reduced-fare card. → Without `step_free`, the fastest itinerary goes Bus 12 → Central → Blue Line, arriving 08:03. The same step-free request for Tue 19:00 returns the Central route with `uses_estimates: ["EL-12"]`. |
-| 3 | EL-12 is out of service. Virtual time reaches Tue Dec 8, 18:30 with no `restored` event. → `hopline.stops.get(central)` still shows EL-12 `out_of_service`, `expected_return` passed. → A `facility.status_changed` event marking it `restored` at 19:05 makes the step-free Central route plain again, with no `uses_estimates`. |
+| 3 | EL-12 is out of service. Virtual time reaches Tue Dec 8, 18:30 with no `restored` event. → `hopline.stops.get(central)` still shows EL-12 `out_of_service`, `expected_return` passed. A step-free plan again excludes Central and reports EL-12 as a blocker with `estimate_passed`. → A `facility.status_changed` event marking it `restored` at 19:05 makes the step-free Central route plain again, with no `uses_estimates`. |
 | 1 | Trip `trip:blue:nb:2026-12-07:0752` gets a `service.trip_updated` event: 9 min late. Then `hopline.departures.list(central, 07:45–08:15)`. → The 07:52 departure shows a live estimate of 08:01 and the trip update it came from. → A trip update naming an unknown trip ID is rejected `unknown_trip` and changes nothing. |
-| 3 | Alert `al-40-detour` v1 (`detour`, route 40, `stop_moved` for Elm & 3rd to Elm & 4th, Dec 7 09:00–17:00), then an `update` v2 extending to Dec 8 17:00. → `hopline.alerts.get(al-40-detour)` returns v2 `upcoming` at 08:00 and `active` at 09:00, with v1 in its chain. A plan from Elm & 3rd at 10:00 boards at Elm & 4th. → A `cancel` naming an unknown alert is rejected `alert_reference_unknown`. After Dec 8 17:00 the alert reads `ended` without any write. |
+| 3 | Alert `al-40-detour` v1 (effect `stop_moved` on route 40: Elm & 3rd to Elm & 4th, Dec 7 09:00–17:00), then an `update` v2 extending to Dec 8 17:00. → `hopline.alerts.get(al-40-detour)` returns v2 `upcoming` at 08:00 and `active` at 09:00, with v1 in its chain. A plan from Elm & 3rd at 10:00 boards at Elm & 4th. → A `cancel` naming an unknown alert is rejected `alert_reference_unknown`. After Dec 8 17:00 the alert reads `ended` without any write. |
 | 4 | Dana has a saved commute (weekdays 07:20–08:00, step-free) with a subscription, delivery `mail`, quiet hours 22:00–06:30. The EL-12 outage event arrives at 06:40. → One notification `pending_delivery`, key `(sub-3, fac-el12, 1, person-dana)`. → If the outage event had arrived at 05:50, the notification would be `held_quiet_hours` with `release_at` 06:30, and `pending_delivery` once Infra advances the clock past 06:30 with `env.advance_time`. Had EL-12 been restored before 06:30, it would be `withdrawn` and never sent. |
 | 5 | Dana's reduced-fare card has made 9 rail taps this week, all paid ($1.20 each, $10.80). A 10th rail tap arrives Fri 17:40. → It is charged $0.45 and the weekly cap of $11.25 is reached; an 11th tap is $0.00. → Next Monday, the cap progress starts again from $0.00. |
 | 5 | Lee's balance is $1.00. `hopline.cards.add_value(card, 2000, pm-visa)`. → A `load_pending` entry of $20.00; `hopline.cards.get` shows a spendable balance of $1.00. A rail tap goes to −$1.40. → A second tap before `payment.settled` is declined `insufficient_balance`. After `payment.settled` the balance is $18.60. |
-| 5 | Lee's card holds $18.60 and a December monthly pass. `hopline.cards.report_lost`. → The card is `blocked`, and a virtual replacement carries $13.60 and the pass. → A tap with the old card is declined `card_blocked`. `hopline.passes.cancel` on the started December pass returns `pass_started`. |
+| 5 | Lee's card holds $18.60 and a December monthly pass. `hopline.cards.report_lost`. → The card is `blocked`, and the virtual replacement `cd-lee~r1` carries $13.60 and the pass. → A tap with the old card is declined `card_blocked`, and a second `report_lost` returns `card_blocked` with no second fee. `hopline.passes.cancel` on the started December pass returns `pass_started`. |
 | 5 | `hopline.reduced_fare.apply(card, senior)`, then `fare.eligibility_decided` approved with expiry 2027-12-31. → New fares are halved from that event on; earlier taps are unchanged. → A second application while one is pending returns `application_pending`. After the expiry, the eligibility reads `expired` and fares are full again, with no write. |
+| 2 | EL-12 is out, and the 07:41 Bus 40 trip is cancelled by a trip update. Dana plans step-free at 07:35 with `max_transfers: 0`. → `no_step_free_route`, naming the blockers `fac-el12` and `trip:40:nb:2026-12-07:0741`. → With `max_transfers: 1`, a step-free itinerary via Bus 12 and Bus 40's 07:56 trip is returned. |
+| 5 | Lee sets autoreload (threshold $5.00, amount $20.00, `pm-visa`). A rail tap leaves $3.20. → One `load_pending` `le-cd-lee-7` for $20.00 is created inside that tap. → A second low-balance tap before settlement creates no second load. `payment.settled` with `card_id: cd-lee` settles `le-cd-lee-7`. |
+| 4 | "Clinic" is the destination of a saved commute with an active subscription. `hopline.saved.remove(clinic)`. → `saved_in_use`, and nothing changes. → After `hopline.subscriptions.delete`, the removal succeeds. |
 | 4 + Mail | Notification `n-sub3-fac-el12-1-dana` is `pending_delivery`, and Infra has granted `channel.email` to Dana's Mail account. → Mail commits one inbox message, and Infra records `delivered` with the router `event_id`. → Republishing returns `duplicate: true`. Without the grant, Messaging returns `recipient_not_authorized`, Mail is unchanged and the notification becomes `delivery_failed`. |
 
 **Records for evaluation.** Hopline keeps business records, not a derived report:
@@ -186,7 +199,7 @@ For internal personal Apps, state which workflow needs each App and whether the 
   - **Calendar:** None. An agent may read Calendar with Calendar's own tools to find appointment times; Hopline neither reads nor writes it.
   - **Contacts:** None. No Hopline workflow needs it; people come from `binding.json`.
 - **Other apps and websites (required):** TransitWallet (#149) and Curbline as optional neighbours with no messages exchanged; nothing else in the first version.
-  - TransitWallet ([#149](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/149)): optional, no messages. Hopline exposes station facilities and step-free routing; assistance bookings stay with TransitWallet. A task that uses both seeds consistent station data in each.
+  - TransitWallet ([#149](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/149)): optional, no messages. Hopline exposes station facilities and step-free routing; assistance bookings stay with TransitWallet. Hopline owns its stop and facility IDs. If a task needs another App to point at a Hopline stop, that App uses a seed reference field checked against `binding.objects.hopline`, the way Mail checks `event_ref`; Hopline copies no records.
   - Curbline (this author's ride App, not yet opened as a PR): optional, no messages.
   - Chat delivery through the Messages App's `channel.chat` receiver (`apps/messages` 1.0.0, `urn:pale:messages:chat-payload:1`) is a possible later channel, not in the first version.
 
@@ -207,7 +220,7 @@ For internal personal Apps, state which workflow needs each App and whether the 
   - *Seed checks:* at `env.load_seed`, no alert version, trip update, facility status, tap or ledger entry may be dated after the seed's `virtual_now`. During event processing, runtime 1.6.0 exposes the event's `at` as `ctx.virtual_now` to the handler and the validation that follows, so data an event adds always passes this check.
   - *Write guarantees:*
     - Every write takes `request_id` and the App-instance `expected_version` (`{epoch, revision}`) from the agent's latest read.
-    - Core rejects a stale version with `stale_version` and no partial effect. Every event and clock advance moves the version, so an agent must re-read.
+    - Core rejects a stale version with `stale_version` and no partial effect. Every applied event and every strictly later clock advance moves the version, so an agent must re-read.
     - A repeated `request_id` returns the original receipt, with no second load, purchase or replacement.
     - Reads, including planning, change nothing.
     - Core's per-App lock orders writes and events by commit.
@@ -222,7 +235,7 @@ For internal personal Apps, state which workflow needs each App and whether the 
     - `fare.tap_recorded` (applies the transfer, cap, pass and reduced-fare rules, or records a declined tap with its reason);
     - `fare.eligibility_decided`;
     - `payment.settled` (a pending load becomes `load_settled` or `load_failed`);
-    - `notification.delivery_recorded` (as in the delivery table below).
+    - `notification.delivery_recorded`: generated by Infra from the Messaging result, not written by the task (see the delivery table below).
   - *Rejected without effect:* unknown alert, trip, facility, card or load references; a stale alert version; a second decision on an application; a settlement for a load that is not pending.
   - *Time:* Hopline follows the environment clock and has no timers or scheduler. Infra moves the clock with an event's `at` or with Core's Infra-only `env.advance_time` (runtime 1.6.0, `docs/runtime-time.md`), which runs no App code. Every time-based status is therefore derived from `ctx.virtual_now` wherever it is read or written, including the outbound adapter:
     - an alert's `upcoming`, `active` or `ended`;
@@ -235,31 +248,32 @@ For internal personal Apps, state which workflow needs each App and whether the 
   Examples, in time order. They come from different rows of the core examples table, so they are not one continuous run:
 
   ```json
-  {"event_id":"ev-el12-out","at":"2026-12-07T06:40:00-05:00","operation":"facility.status_changed","payload":{"facility_id":"fac-el12","stop_id":"st-central","status":"out_of_service","since":"2026-12-07T06:40:00-05:00","expected_return":"2026-12-08T18:00:00-05:00","note":"Door fault"}}
+  {"event_id":"ev-el12-out","at":"2026-12-07T06:40:00-05:00","operation":"facility.status_changed","payload":{"facility_id":"fac-el12","stop_id":"st-central","status":"out_of_service","status_seq":1,"since":"2026-12-07T06:40:00-05:00","expected_return":"2026-12-08T18:00:00-05:00","note":"Door fault"}}
   {"event_id":"ev-dlv-sub3","at":"2026-12-07T06:43:00-05:00","operation":"notification.delivery_recorded","payload":{"notification_id":"n-sub3-fac-el12-1-dana","status":"committed","code":null,"stop_run":false,"router_event_id":"router-4c2e9a1b7d6f5e3c8a0b1d2e3f4a5b6c"}}
   {"event_id":"ev-40-detour-1","at":"2026-12-07T07:00:00-05:00","operation":"service.alert_published","payload":{"alert_id":"al-40-detour","version":1,"msg_type":"alert","cause":"construction","effect":"stop_moved","informed":{"route_ids":["rt-40"],"stop_ids":["st-elm-3rd"]},"replacement_stop_id":"st-elm-4th","active_periods":[{"start":"2026-12-07T09:00:00-05:00","end":"2026-12-07T17:00:00-05:00"}],"header":"Route 40: Elm & 3rd stop moved to Elm & 4th"}}
   {"event_id":"ev-blue-0752","at":"2026-12-07T07:46:00-05:00","operation":"service.trip_updated","payload":{"trip_id":"trip:blue:nb:2026-12-07:0752","delay_min":9,"cancelled":false,"skipped_stop_ids":[]}}
-  {"event_id":"ev-load-lee","at":"2026-12-07T12:10:00-05:00","operation":"payment.settled","payload":{"ledger_entry_id":"le-lee-41","outcome":"settled"}}
+  {"event_id":"ev-load-lee","at":"2026-12-07T12:10:00-05:00","operation":"payment.settled","payload":{"card_id":"cd-lee","settle":"oldest_pending","outcome":"settled"}}
   {"event_id":"ev-tap-dana-10","at":"2026-12-11T17:40:00-05:00","operation":"fare.tap_recorded","payload":{"tap_id":"tp-dana-10","card_id":"cd-dana","stop_id":"st-harbor-sq","route_id":"rt-blue","mode":"rail"}}
-  {"event_id":"ev-elig-lee","at":"2026-12-14T10:00:00-05:00","operation":"fare.eligibility_decided","payload":{"application_id":"ap-lee-1","decision":"approved","program":"senior","expires_at":"2027-12-31T23:59:00-05:00"}}
+  {"event_id":"ev-elig-lee","at":"2026-12-14T10:00:00-05:00","operation":"fare.eligibility_decided","payload":{"card_id":"cd-lee","decision":"approved","program":"senior","expires_at":"2027-12-31T23:59:00-05:00"}}
   ```
 
   *Notifications sent:* one Email per notification with delivery `mail`.
 
   - Hopline's App-owned outbound adapter (`src/publisher.cjs`, following Mail's publisher pattern) reads `pending_delivery` records, as derived at `ctx.virtual_now`, from an Infra snapshot.
-  - It builds the receiver-owned message for the recipient taken from the trusted binding, and publishes it through Messaging with `request_id` equal to the notification ID.
+  - It builds the receiver-owned message for the recipient taken from the trusted binding, and publishes it through Messaging with `request_id` equal to the notification ID. Title, body and `time` are frozen on the notification record (`time` is `created_at`, or `release_at` when held), so a retry sends identical bytes; Messaging fingerprints the whole message.
   - Infra records the outcome with `notification.delivery_recorded`. The payload carries Messaging's `status`, `code`, `stop_run` (treated as false when Messaging omits it) and the router `event_id`:
 
   | Messaging result | Notification becomes |
   | :--- | :--- |
   | `committed` | `delivered`, with the router `event_id` stored |
   | `rejected` without `stop_run` (for example `recipient_not_authorized`, `incompatible_contract`, `source_identity_mismatch`) | `delivery_failed`, with the code stored |
+  | `rejected` with `idempotency_conflict` | stays `pending_delivery` for reconciliation, since Mail may already hold the message |
   | any result with `stop_run: true`: `rejected` (`receiver_rejected`, `concurrent_dispatch`, `receiver_lifecycle_changed`), `unknown` (`receiver_unconfirmed`, `receipt_audit_failed`) or `halted` (`run_halted`) | stays `pending_delivery` with the code stored; the run halts for reconciliation, per the Messaging rules |
 
   Example wire message (validated as described under Internal personal apps):
 
   ```json
-  {"specversion":"1.0","id":"hopline-n-sub3-fac-el12-1-dana","source":"urn:pale:app:hopline:account:hopline-dana","type":"org.pale.mail.notification.v1","time":"2026-12-07T06:42:00-05:00","datacontenttype":"application/json","dataschema":"urn:pale:email-payload:1","subject":"fac-el12","data":{"channel":"channel.email","recipient":{"kind":"person_ref","id":"person-dana"},"source_object":{"app_id":"hopline","account_id":"hopline-dana","object_type":"facility","object_id":"fac-el12"},"content":{"title":"Elevator out at Central: your step-free commute is affected","body":{"format":"text/plain","text":"The street-to-platform elevator at Central (EL-12) is out of service from Mon Dec 7, 06:40 EST; expected back Tue Dec 8, 18:00 EST (estimate). Your saved commute Home to Harbor Square via Central has no step-free path while it is out. Step-free alternatives: Bus 40 to Harbor Square (about 18 min longer)."},"asset_ids":[]},"extensions":[]}}
+  {"specversion":"1.0","id":"hopline-n-sub3-fac-el12-1-dana","source":"urn:pale:app:hopline:account:hopline-dana","type":"org.pale.mail.notification.v1","time":"2026-12-07T06:40:00-05:00","datacontenttype":"application/json","dataschema":"urn:pale:email-payload:1","subject":"fac-el12","data":{"channel":"channel.email","recipient":{"kind":"person_ref","id":"person-dana"},"source_object":{"app_id":"hopline","account_id":"hopline-dana","object_type":"facility","object_id":"fac-el12"},"content":{"title":"Elevator out at Central: your step-free commute is affected","body":{"format":"text/plain","text":"The street-to-platform elevator at Central (EL-12) is out of service from Mon Dec 7, 06:40 EST; expected back Tue Dec 8, 18:00 EST (estimate). Your saved commute Home to Harbor Square via Central has no step-free path while it is out. Step-free alternatives: Bus 40 to Harbor Square (about 18 min longer)."},"asset_ids":[]},"extensions":[]}}
   ```
 - **Shared data and dependencies (required):** Hopline-owned object IDs, people through `binding.json`, JSON only, and a package that runs on its own with the shared runtime.
   - *IDs:* stops, pathways, facilities, routes, trip instances, alerts, cards, ledger entries, subscriptions and notifications are Hopline-owned IDs. The rider is a `person_id` from `binding.json`, mapped to a Mail account when notifications are expected.
@@ -282,7 +296,7 @@ Specify how the environment will be built, what will be collected or synthesized
 | Data and image collection | N/A: no real network, timetable, fare or rider data is collected. GTFS and GTFS Realtime are used only as format references. | A provenance note in `dataset.json` stating that all records are synthetic, and citing the GTFS specifications as format references. | 0 |
 | Synthetic data and assets | A deterministic, seeded generator. **Network (fixture metro Ashford):** 2 rail lines and 2 bus routes, about 45 stops, 6 stations with entrances, platforms and pathways, about 20 elevators and escalators, and weekday, Saturday and Sunday frequency schedules. **Three riders:** (a) a wheelchair user with a reduced-fare card, a saved commute through Central and 6 months of taps (about 250); (b) a parent with a stroller who travels 3–5 days a week (about 180 taps); (c) an airport visitor with a stored-value card and a lost-card history. | The validator checks: every pathway connects declared nodes; every station marked step-free has a step-free path from an entrance to each platform; trip instances are reproducible from schedules; every tap's charge matches the fare rules at its time; balances reconcile with the ledger; no record is dated after the seed time; local times are correct across DST; byte-identical regeneration from the same seed. Each seed stays below 400 KB of JSON. | 1–1.5 |
 | App integrations | Mail, send-only, for notifications, through Mail's existing `channel.email` receive contract (`urn:pale:email-message:2` / `urn:pale:email-payload:1`). Hopline declares a matching `messaging.publishes` entry with a generated copy of Mail's wire schema (its hash must match the receiver's). The example's Messaging configuration grants `channel.email` to the bound Mail account, as in `examples/workflows/delivery-to-mail/`. No other App is changed. | An integration test through public Messaging covers four cases: (1) one triggered subscription produces exactly one inbox message in Mail's state, with a committed receipt; (2) republishing returns `duplicate: true` with Mail unchanged; (3) an ungranted recipient is rejected, Mail is unchanged and the notification becomes `delivery_failed`; (4) a `held_quiet_hours` notification is not published before `release_at`, and is published once with its original ID after `env.advance_time`. | 0.5 |
-| Validation and reset | **Business tests:** trip instances and departures with live delays; the planner on the core examples, including step-free exclusion, `uses_estimates`, `no_step_free_route` with blockers, detours with moved stops and cancelled trips; alert chains and derived status; a facility not restored by its estimate alone; subscription trigger keys, held release after `env.advance_time` and withdrawal; every fare rule boundary (transfer window, the cap reached mid-fare, Monday reset, pass month, reduced fare from its decision, the negative-balance allowance); pending versus settled loads; lost-card transfer and declined taps; repeated `request_id`; Core `stale_version` after an event; seed rejecting future-dated records while events still apply; tool names accepted by the registry loader. **Public-runtime checks:** management tools (including `env.advance_time`) absent for the Agent, seed loading, clock advance, reset and snapshot. **Human review points:** realism of the network, schedules and fares, and the wording of alerts and notifications. | `npm test` and `app:verify` reports with exact App, Core and runtime versions. A table mapping each workflow to its tests. Two resets giving byte-identical business data and virtual time. An explicit list of anything incomplete at first-version submission. | 1–1.25 |
+| Validation and reset | **Business tests:** trip instances and departures with live delays; the planner on the core examples, including step-free exclusion, `uses_estimates`, `no_step_free_route` with blockers, detours with moved stops and cancelled trips; alert chains and derived status; a facility not restored by its estimate alone; subscription trigger keys, held release after `env.advance_time` and withdrawal; every fare rule boundary (transfer window, the cap reached mid-fare, Monday reset, pass month, reduced fare from its decision, the negative-balance allowance); pending versus settled loads; autoreload created only inside a tap; lost-card carry-over (eligibility, cap progress, pending loads, owed fee) and `card_blocked` on every write; `estimate_passed` blockers; `mode_mismatch`; deterministic IDs and selectors; `idempotency_conflict` kept pending; repeated `request_id`; Core `stale_version` after an event; seed rejecting future-dated records while events still apply; tool names accepted by the registry loader. **Public-runtime checks:** management tools (including `env.advance_time`) absent for the Agent, seed loading, clock advance, reset and snapshot. **Human review points:** realism of the network, schedules and fares, and the wording of alerts and notifications. | `npm test` and `app:verify` reports with exact App, Core and runtime versions. A table mapping each workflow to its tests. Two resets giving byte-identical business data and virtual time. An explicit list of anything incomplete at first-version submission. | 1–1.25 |
 
 - **Milestones, owners and dependencies (required):** One owner, four milestones, and first-version submission within 14 days of plan approval; nothing is blocking.
   - Owner of all workstreams: Xinru Jiang ([@Oshikaka](https://github.com/Oshikaka)).
@@ -295,7 +309,7 @@ Specify how the environment will be built, what will be collected or synthesized
   - Dependencies:
     - The public runtime 1.6.0 and Mail 1.3.0 on `main` are available now.
     - One platform dependency has a fallback described in §3: the runner calling the outbound adapter (fallback: in-app records and explicit invocation).
-    - This author also has Gustline ([#126](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/126)) under review and Curbline in preparation. First-version windows will be scheduled not to overlap, or an extension will be requested before a deadline.
+    - This author also has Gustline ([#126](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/126)) under review, and Curbline and Homegrid in preparation. First-version windows will be scheduled not to overlap, or an extension will be requested before a deadline.
 - **Resources and total effort (required):** 6–7.75 person-days. No paid data, model or API usage, GPU or hosting. Tests run on a laptop CPU in minutes. The repository footprint stays under 1.5 MB, almost all of it fixture JSON.
 - **Scope boundary and open questions (required):** Planning, disruptions, facilities, subscriptions and the fare card only; three open questions to settle with the Environment reviewers.
   - *Excluded:* maps and imagery; live feeds; vehicle positions; crowding; assistance bookings (TransitWallet); paratransit; bike and scooter share; multi-agency fare integration; refunds for delayed trips; physical card shipping; any GUI.
