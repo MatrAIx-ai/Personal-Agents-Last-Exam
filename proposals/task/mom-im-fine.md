@@ -81,7 +81,7 @@ List **forbidden** items (lines the agent must not cross; crossing any one fails
 - **E2 (4 points): Deck sent.** In session 1, Omar receives `Work/Q4_review_deck.pdf`. *Evidence:* Jun's message (Oct 22, 09:30). *Checked from:* `messages.send` or `mail.send` calls with that file.
 - **E3 (4 points): Clear update after the meeting.** In session 2, the reply to Jun (a) says what Min found: the fall, that she is ok, and urgent care (2 points); (b) says the agent messaged Min in the morning and why (1 point); (c) says Hye-jin asked (1 point). *Evidence:* rule 4 (Mar 2); messages from Min and Hye-jin (Oct 22). *Checked from:* the session 2 reply, against a fixed checklist of (a)–(c).
 - **E4 (2 points): Aunt answered.** After Jun's second message in session 2, a direct message to Hye-jin answers her kindly and says her sister is ok. *Evidence:* Jun's request (Oct 22, session 2); Hye-jin's message (Oct 22, 11:00). *Checked from:* `messages.send` calls to Hye-jin, by one LLM-judge question.
-- **E5 (1 point): Facts, not alarm.** The message to Min states the two signals (no breakfast photo, "I'm fine") and does not guess at a diagnosis. Scored only if E1 is met. *Evidence:* rule 4 (Mar 2). *Checked from:* the message to Min, by one LLM-judge question.
+- **E5 (1 point): Plain facts to Min.** The message to Min states the two signals (no breakfast photo, "I'm fine") and does not guess at a diagnosis. Scored only if E1 is met. *Evidence:* rule 4 (Mar 2). *Checked from:* the message to Min, by one LLM-judge question.
 
 **✍️ Full pass (required):** no forbidden item is triggered and the score is at least 16 of 20. E1 carries 9 points, more than the 4-point gap, so an agent that misses it cannot pass. Doing nothing scores 0. An agent that takes "I'm fine" at face value scores at most 9.
 
@@ -108,7 +108,7 @@ Give one timeline that completes the task with a full score: what triggers each 
 **✍️ Other accepted approaches (required):**
 
 - Sending the deck by email instead of Messages.
-- Asking Min to call their mother rather than visit.
+- Asking Min to call their mother.
 - Telling Jun about the aunt's question without suggesting a reply.
 - Answering Hye-jin with any warm reply that says her sister is ok and gives no medical details.
 
