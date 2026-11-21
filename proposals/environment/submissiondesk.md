@@ -56,3 +56,5 @@ Related work: Research Library #4 and Personal Records #33 cover bibliography/ex
 - **License and external dependencies (required):** Proposed MIT for original code and wholly invented fixtures, subject to upstream contribution terms. No copied source data/images or real account credentials. No hosted component. Real sources establish workflow plausibility only; invented provider rules are prominently labeled.
 
 Before final acceptance, require a positive and negative trace for each declared workflow/event, relevant modify/cancel paths agreed in scope review, history/receipt consistency, reset reproduction, actual MCP launch, denied management access, separate account/run tests, stale/concurrent/retry checks, and independent reviewer execution. Current local tests cover only the author module layer.
+
+Related proposal: [Companion Task proposal #151](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/151). This Environment can run independently of that Task; the Task depends on this Environment's validated delivery.
