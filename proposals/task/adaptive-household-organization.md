@@ -29,29 +29,117 @@ A good outcome is a practical, coherent home arrangement that accommodates the n
 
 ## 4. What makes this distinct and personal
 
-The task combines visual-spatial reasoning with long-term personalization. A generic layout assistant might identify an empty corner and place a desk there. A capable personal agent must understand whether that corner has enough space, light, power access and clearance—and whether working there fits the user's habits.
+### 4.1 Personal Context & Dispersal
 
-The same physical space can have different meanings for different households. A large table might be essential for shared meals, a spare room might double as a reading space, and a piece of furniture might be worth keeping because of its personal significance. These details change which layout is best.
+The household context is distributed across several dated records and multimodal artifacts:
 
-The agent must connect three kinds of context:
+- **Floor plan & photos (`workspace/floorplan.png`, `workspace/photos/`):** Capture architectural boundaries, door swings, window light, and wall outlet placements.
+- **Inventory ledger (`workspace/inventory.json`):** Records object dimensions ($L \times W \times H$), weight, and physical condition.
+- **Personal history & notes (`workspace/notes/`):** Contains dated notes on household routines, partner work schedules, sentimental heirlooms, and past layout attempts.
+- **Interactive dialogue:** Discloses emerging changes (e.g., guest arrival, new remote work mandates) over a 6-week timeline across 5 distinct sessions.
 
-- **Spatial context:** room geometry, doors, windows, walkways, furniture dimensions, clearances and storage.
-- **Personal context:** routines, preferences, accessibility needs, valued possessions, household relationships and previous decisions.
-- **Practical context:** budget, rental restrictions, effort, timing and willingness to buy, move or discard items.
+While casual users rarely keep a CAD database of their home, this scenario reflects a realistic digital footprint: floor plans extracted from lease documents, furniture dimensions retrieved from digital purchase receipts, and personal constraints scattered across personal notes and chat history. The personal agent's key role is cross-referencing these fragmented sources to solve a physical space constraint.
 
-Visual input is essential: the agent must use photos and floor plans rather than relying only on text descriptions. Personal history is equally important: a physically feasible layout is not necessarily a good layout for this household.
+### 4.2 Decisive Personalization Moment (Counterfactual Test)
 
-This differs from a general routine-planning task. The central challenge is deciding how to change a real physical environment as a person's needs evolve.
+- **The Request (Session 4, Week 5):** The user announces their brother is visiting for 3 weeks, requiring a guest sleeping setup and a daytime workspace in the 3.5m × 3.0m second room, with a strict budget cap of $250.
+- **Dated Historical Anchor:** `workspace/notes/move_in_notes_2026_09_15.md` states:
+  > *"Grandfather’s mid-century leather armchair (95cm x 90cm) is irreplaceable. The basement locker has moisture leaks, so it must stay in the living areas. Do not sell or store in basement."*
+  Additionally, `workspace/notes/partner_schedule.md` (dated Oct 2, 2026) notes:
+  > *"Partner takes confidential telehealth client calls between 09:00–11:00 AM; requires a clean, non-bedroom background behind the desk."*
+- **Layout Outcome for Profile A (This User):**
+  The agent cannot place a full fold-out sofa bed along the main wall because keeping the bulky grandfather armchair in the room requires that clearance. The desk must face the window with Wall B (bookshelf) as the camera backdrop. The agent chooses a narrow folding guest cot stored in the closet during the day, keeping the armchair in the corner nook.
+- **Counterfactual Profile B (Identical room, identical furniture, identical request):**
+  A generic user without the heirloom constraint and without video-call backdrop requirements. For Profile B, the armchair is moved to the basement storage locker, and a permanent dual-sleeper sofa bed is unfolded along Wall B. 
+  *A generic model without personalization will treat the armchair as disposable clutter or put the bed directly behind the camera backdrop, failing the household's core constraints.*
 
-## 5. Construction plan and effort
+### 4.3 Baseline Model Failure Mode (Unhinted Gate)
+
+In blind unhinted runs, frontier LLMs consistently fail for three reasons:
+1. **Geometric clearance blindness:** Placing desks or beds blocking door swings (requires $\ge 80\text{ cm}$ arc) or obstructing window radiators.
+2. **Context amnesia regarding sentiment:** Moving grandfather's armchair to damp basement storage or recommending selling it.
+3. **Over-purchasing bias:** Defaulting to recommending new modular furniture purchases ($600+) instead of repurposing existing items, violating the $250 budget limit.
+
+### 4.4 Solvability & Hint Justification
+
+When the model is explicitly reminded of the dated notes via the standardized hint, it is fully capable of solving the 2D packing constraint and respecting the user's non-negotiables, achieving a 100% pass rate.
+
+---
+
+## 5. Rubrics, reference and hints
+
+### 5.1 Grader Inputs and Submission Format
+
+The agent does not submit arbitrary free-form text. At the end of Session 5, the agent writes its final proposal to `workspace/layout_proposal.json` alongside a `rationale.md`.
+
+```json
+{
+  "room_id": "bedroom_2_multipurpose",
+  "placements": [
+    {
+      "item_id": "armchair_grandfather",
+      "action": "retained",
+      "position_cm": [40, 45],
+      "rotation_deg": 45
+    },
+    {
+      "item_id": "desk_compact",
+      "action": "relocated",
+      "position_cm": [120, 240],
+      "rotation_deg": 0
+    }
+  ],
+  "purchases": [
+    {
+      "item": "tri-fold guest floor mattress",
+      "cost_usd": 120.00
+    }
+  ],
+  "total_spend_usd": 120.00
+}
+```
+
+### 5.2 Deterministic Rubric & Scoring Breakdown (Total: 100 Points)
+
+| Metric | Max Points | Evaluation Method | Failure Condition |
+| :--- | :---: | :--- | :--- |
+| **Spatial Feasibility & Clearance** | 30 | Automated bounding-box 2D collision check: $\ge 75\text{ cm}$ walkway width, unobstructed door swing arc, access to outlets. | Any collision or walkway $< 60\text{ cm}$ = 0 pts. |
+| **Heirloom & Constraint Retention** | 25 | Automated check on `workspace/layout_proposal.json`: grandfather armchair is neither discarded nor placed in basement storage. | Armchair removed or stored in basement = 0 pts. |
+| **Call Privacy & Camera Backdrop** | 15 | Vector orientation check: desk seating direction does not have the guest bed in the rear viewing angle. | Bed visible behind desk view vector = 0 pts. |
+| **Budget Compliance** | 15 | `total_spend_usd` $\le \$250.00$. | Spend $> \$250.00$ = 0 pts. |
+| **Continuity & Rationale** | 15 | Rubric evaluation of `rationale.md` confirming trade-offs and explicit mention of partner's call schedule and brother's visit duration. | Omits explanation of visitor accommodation = 0 pts. |
+
+**Full-Pass Rule:** A run passes if and only if:
+- Total score $\ge 85/100$, **AND**
+- Hard Gates passed: 0 spatial bounding box collisions, budget $\le \$250.00$, grandfather armchair retained safely.
+
+The evaluation does not perform an exact-coordinate match against a single reference layout. Instead, it uses property-based validation: an automated script verifies that the agent's proposed layout_proposal.json satisfies all spatial invariants (no bounding-box collisions, unobstructed door swings, ≥75cm pathways), respects personal hard constraints (armchair retention, camera backdrop isolation), and stays within budget. Multiple distinct layouts are valid as long as they satisfy these invariants.
+
+### 5.3 Reference Timeline (5 Sessions)
+
+- **Session 1 (Day 1):** User orientation, space audit, agent reviews `floorplan.png` and `inventory.json`.
+- **Session 2 (Day 8):** Hybrid work setup discussion. User reports monitor glare in bedroom 1. Agent suggests shifting desk to bedroom 2.
+- **Session 3 (Day 20):** Dinner hosting preparation. Checking living room chair configuration.
+- **Session 4 (Day 32 - Critical Gate):** Brother's impending 3-week visit announced. Desk + guest bed dilemma introduced.
+- **Session 5 (Day 38):** Review of user revisions, final layout proposal generated and committed to `workspace/layout_proposal.json`.
+
+### 5.4 Exact Standard Hint & Injection Point
+
+- **Injection Point:** Turn 1 of Session 4 (when the user requests the multi-purpose layout for the visiting brother).
+- **Exact Hint Text:**
+  > `[SYSTEM HINT: Review 'workspace/notes/move_in_notes_2026_09_15.md' regarding heirloom furniture restrictions and 'workspace/notes/partner_schedule.md' regarding video call framing before proposing furniture rearrangements. Keep total purchases strictly below $250.]`
+
+---
+
+## 6. Construction plan and effort
 
 | Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
 | :--- | :--- | :--- | :--- |
-| Persona, history and workspace | Create one fictional household, a two-bedroom apartment, floor plan, room photos, furniture inventory with dimensions, routines, preferences, budget and prior decisions. Include personal details that affect layout choices. | Consistent household profile and evidence distributed across sessions. Photos and floor plan must agree with dimensions and inventory. | 2 |
-| User rollout and scenario script | **Sessions:** 5–6. **Simulated world time span:** 6 weeks. **Estimated total tokens:** 20,000–35,000 per complete scenario across all sessions, including dialogue, prior context and tool outputs. | Executable multi-session script with user messages, expected information disclosure, corrections, changes over time and response/no-reply branches. State must persist across sessions. | 2 |
-| Environment integration | Reuse available file, memory and workspace tools where possible. Build a small household environment to expose photos, floor plans, furniture inventory, dimensions, budget and household constraints. Support updates to the proposed layout and inventory. | Runnable task package, deterministic initial state, reset procedure and checks that spatial data and tool actions work as intended. | 2–3 |
-| Rubrics, reference and hints | Define criteria for spatial feasibility, use of personal context, constraint handling, budget, trade-off reasoning, continuity and communication. Create a reference solution and a fixed hint for each scenario. | Grader with measurable criteria, explicit success gates, partial-credit rules and a feasible reference solution. | 2 |
-| Agent rollouts and analysis | Run at least one independent unhinted rollout per designated GPT, Claude and Gemini model; target five per model. Run separate hinted validation for each model. Record exact model versions, configurations, traces, scores and costs. | Evidence meeting the repository validation protocol, including failure analysis and reproducible run details. | 2–3 |
+| Persona, history and workspace | Build apartment profile, 2D floor plan image, furniture dimension inventory (`inventory.json`), dated context notes (`notes/*.md`). | Verified inventory dimensions matching floor plan clearances; consistent mock timestamps. | 2 |
+| User rollout and scenario script | 5 sessions, 6-week span. Estimated token footprint: 20k–30k tokens. Multi-turn dialogue scripts with branching feedback. | Executable YAML/Python rollout script simulating user replies and corrections. | 2 |
+| Environment integration | Standard Filesystem / Workspace tool. No custom server or API required. Preloaded `workspace/` directory with static images and text files. | Agent interacts via standard file-read and file-write tools; deterministic validation harness. | 2 |
+| Rubrics, reference and hints | Python geometric collision evaluator for `layout_proposal.json`; rule-based checks for budget and inventory tags; exact hint injection. | Deterministic scoring script outputting normalized score $[0, 100]$ and binary pass/fail flags. | 2 |
+| Agent rollouts and validation | Baseline unhinted rollouts across designated GPT, Claude, and Gemini models. Hinted validation verifying 100% pass rate. | Execution traces, failure logs, and scorecards formatted to repository standards. | 3 |
 
 **Milestones, owners and dependencies**
 
