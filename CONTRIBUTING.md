@@ -6,7 +6,7 @@
 
 1. Check the [proposal list](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/blob/proposal-index/proposals/proposal-list.md) for related work, then copy the [Environment proposal template](proposals/templates/environment-proposal.md) or [Task proposal template](proposals/templates/task-proposal.md).
 2. Replace the `[Fill in: …]` placeholders, then add the completed design to `proposals/environment/<slug>.md` or `proposals/task/<slug>.md` in your fork. Follow the required/optional labels; explain how any `TBD` decisions will be resolved.
-3. Open a PR against `main`. Use the [PR summary template](proposals/templates/pr-summary.md) to describe the track, stage and proposal, and link the design file. Keep it Draft while writing; request review when ready.
+3. Open a PR against `main`. Use the [PR summary template](proposals/templates/pr-summary.md) to describe the track, stage and proposal, and link the design file. Keep it Draft while writing; mark it Ready for review when ready. A reviewer is assigned automatically by Track and primary domain, preserving same-author continuity and existing manual assignments. See the [reviewer routing policy](docs/review/reviewer-routing.md).
 
 ### 🏷️ Proposal naming
 
@@ -20,6 +20,8 @@ Both tracks use the exact names in the [domain list](#environment-domains). Choo
 ## Review and implementation
 
 > 📝 **Proposal PR** → 🔍 **Design review** → ✅ **Plan approved** → 🛠️ **Implement in the same PR** → 🧪 **Validate & merge**
+
+**Owner-managed work:** DavidZWZ can review, approve and accept their own changes, including maintainer integrations, without another reviewer. Their PRs are not automatically assigned to the reviewer pools. Implementation evidence, commit-bound acceptance and required CI still apply. The non-author review requirements below apply to other contributors. See the [owner exception](docs/review/proposal-lifecycle.md).
 
 - **Design review:** reviewers comment; the author revises. An assigned Track reviewer or non-author maintainer posts `/approve-plan <commit-sha>` using the full current commit SHA. The bot records the approved scope and commit and adds `plan-approved`. The PR stays open; this does not merge the proposal.
 - **Implementation:** once the infrastructure is available, add code and evidence to the same PR. Request a design re-review for substantial scope changes.
