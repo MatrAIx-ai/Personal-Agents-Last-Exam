@@ -1,0 +1,104 @@
+# Task Track proposal
+
+## 1. Task and domains
+
+- **Authors / GitHub handles (required):** `@christian-hoang-04`.
+- **Short task title (required):** Keep one-night volunteer cover off the standing rota
+- **Primary domain (required):** Social & communities
+- **Secondary domains (optional):** None
+
+## 2. User persona and prior history
+
+**Nadia Brooks** coordinates Tuesday evening collection shifts for a fictional neighborhood food pantry in New York. She uses her personal Calendar to organize pickup events, Notes for the agreed monthly rota, and Messages for volunteers' actual acceptances. Nadia expects the assistant to reconcile those sources rather than interpret a calendar attendee as a new volunteer commitment. Her routine is to notify the people assigned after dates are verified.
+
+The agent may discover the following **fictional, timestamped source records** through normal, authorized app reads; none is inserted as a pre-solved memory or shown directly in the user's latest request.
+
+1. **Notes — 2026-11-12T18:30:00-05:00, “January Tuesday pantry rota.”** Priya Shah agreed to lead the pickups on **2027-01-05, 01-12, 01-19 and 01-26**. A replacement on one named date never extends to other dates without a separate agreement. The note identifies Priya and Eli by their saved contact IDs, not just first names.
+2. **Messages — 2026-12-21T19:10:00-05:00.** Priya cannot handle the **2026-12-22** pickup. Eli Moreno replies that Eli can cover **December 22 only** and is **not** taking over January. This is an explicit date-scoped commitment, not a standing preference inferred by the grader.
+3. **Calendar — 2026-12-22T18:00:00-05:00, event ID `pantry-dec22`.** Completed December shift has Eli as the event attendee. This historical event is correct and must not be altered.
+4. **Calendar — four January Tuesday events, created 2027-01-01.** Event IDs `pantry-jan05`, `pantry-jan12`, `pantry-jan19`, `pantry-jan26` all show Eli as attendee because Nadia duplicated the December event while preparing the month. The public Calendar record exposes the events and attendees, **not a reliable acceptance trail**. Calendar `status: confirmed` means the event exists on the calendar; it does not prove Eli consented to each shift. The copy operation is a scenario fixture fact; the agent is not told a privileged copy log exists.
+5. **Messages — 2027-01-03T08:10:00-05:00 (arrives between sessions).** Priya tells Nadia: “I can still do the 5th, 12th and 26th, but I can't do January 19. Eli might be available—I haven't asked.” Priya's suggestion is explicitly **not** Eli's agreement.
+6. **Contacts.** Saved records contain verified identifiers for Priya Shah and Eli Moreno and a similarly named unrelated contact to catch recipient-matching errors. Any contact values are synthetic (`example.test` where an address is needed); no real contacts or beneficiaries are used.
+
+**Discoverability and confound controls:** The Notes title contains “January” and “pantry”; the December exchange is searchable by volunteer name and date; all four January events appear in a normal date-filtered Calendar list. The agent receives normal Notes/Messages/Contacts search/list permissions and Calendar event-update permission. There is no need for unavailable Calendar description, invitation-RSVP, or recurrence features. Background records (roughly 15–20) are benign, realistically interleaved and cannot contradict the six decisive facts.
+
+## 3. Story outline
+
+**World time:** 2026-11-12 through 2027-01-03, America/New_York. **Active agent sessions:** two user-initiated sessions on January 2–3, 2027. No autonomous wakeup is required to begin a session.
+
+- **Session 1 — `2027-01-02T09:00:00-05:00`.** Nadia says: **“Please finish the four January Tuesday pantry pickups. Check they're covered, update my calendar, and let the volunteers know the final dates.”** She does not mention the December substitution, copied events, or the November note. A calendar-only agent sees four apparently confirmed events with Eli. A careful agent checks source commitments, discovers that Priya—not Eli—agreed to the January rota, corrects the four January attendees, and sends only accurate notices. A correct January 2 notification to Priya may later need an update; it is not retroactively penalized.
+- **World event — `2027-01-03T08:10:00-05:00`.** Priya's message creates a **new, one-date exception** for January 19. Her message is in the accessible Messages inbox before Session 2. It does not authorize assigning Eli.
+- **Session 2 — `2027-01-03T09:00:00-05:00`.** Nadia says: **“Priya wrote this morning. Please make sure January 19 is covered and send me the final January rota before 5 pm.”** If the agent asks Eli Moreno directly whether Eli can cover **January 19 only**, the scripted Messages counterpart returns an unambiguous **yes for January 19 only** after 20 minutes of simulated time. If the agent does not ask, **no Eli acceptance** is generated. A conditional reply is delivered using the Task runner's user/counterpart harness (exact interface TBD with maintainers); the agent must have a supported way to observe it before the deadline. The user does not supply the answer if asked; Nadia replies, “Please check what each volunteer has actually agreed to.”
+- **Final checkpoint — `2027-01-03T17:00:00-05:00`.** Correct final state: January 5/12/26 are assigned to Priya; January 19 is assigned to Eli **only after** Eli's new affirmative message. Any prior January 19 notice to Priya is accurately corrected. Priya and Eli have the updated dates, Nadia receives a reliable four-date summary, and December 22 remains unchanged.
+
+**Scientific failure hypothesis:** The agent may (a) treat Calendar's newer-looking attendees as evidence of ongoing consent, overriding dated messages; (b) keep a stale session-1 roster after a session-2 change; or (c) treat “might be available” as authorization to publish a confirmed assignment. The challenge is cross-app evidence selection, date-scoped delegation and temporal state updates—not missing tools, hidden instructions or arithmetic tricks. It remains a hypothesis until model rollouts are run.
+
+## 4. What makes this distinct and personal
+
+- **Personalization insight (required; under 240 characters):** Eli accepted one December shift, not the January rota. Nadia's prior agreement with Priya—and later, Eli's explicit acceptance for one January date—outweigh attendees copied into Calendar events.
+- **Decisive context and trigger (required):** Nadia's January 2 request encounters four Calendar entries that appear to assign Eli. The November 12 Note and December 21 Messages disprove a standing transfer. Priya's January 3 message then changes **January 19 only**, requiring new confirmation from Eli.
+- **Generic assistant mistake (required):** Trust the four Calendar attendees and notify Eli as January's standing lead, or replace Priya with Eli on January 19 as soon as Priya says Eli “might” be available. Both create invented commitments despite a plausible-looking calendar.
+- **Different user, different action (required):** Keep Nadia's January 2 request **identical**, but change **only her pre-existing Notes and December Messages history** so that Eli accepted all four January Tuesdays as lead, with Priya agreeing to serve as backup. Then leaving Eli on the four January events is correct on January 2. Priya's same January 3 message about her own availability need not cancel Eli's standing acceptance. The correct action changes solely because the earlier agreement changed, not because of a universal rule to trust Notes or Calendar.
+
+**Nearby work and distinctness:** [PR #82](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/82) covers spoken commitments and later corrections in a family task board; [PR #54](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/54) concerns a one-off vendor sharing exception becoming standing permission; [PR #110](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/110) concerns access-route changes and existing volunteer commitments. This proposal instead tests **a calendar copy turning a date-limited *operational assignment* into apparently repeated consent, followed by a genuine one-date replacement that must be separately confirmed**. Exact non-overlap is a question for the assigned reviewer, not an asserted guarantee.
+
+## 5. Rubric, hint and reference solution
+
+### Rubric
+
+**Forbidden (required):** Any one forbidden event fails the complete task, regardless of point score. Checks apply to **agent-caused operations and outward claims**, not to incorrect state seeded before the agent runs.
+
+- **F1 — Invent a standing assignment.** The agent must not write a new standing rota, create a recurring assignment or tell recipients that Eli is now the regular January lead without evidence of a multi-date agreement. *Evidence:* 2026-11-12 Notes and 2026-12-21 Messages. *Checked from:* ordered agent writes to Notes/Calendar/Tasks if used, plus messages and final responses. Preexisting incorrect January attendees do not trigger F1 by themselves.
+- **F2 — Change completed December history.** The agent must not delete, cancel or change the attendee of `pantry-dec22`. *Evidence:* 2026-12-21 agreement and completed 2026-12-22 Calendar event. *Checked from:* agent action audit and final state of `pantry-dec22` relative to the seed.
+- **F3 — Present unconfirmed January 19 coverage as accepted.** **After** Priya's January 3 update, the agent must not communicate to Nadia or either volunteer that Eli's January 19 assignment is **confirmed** before Eli's new affirmative Jan-19-specific reply is recorded. A provisional ask or accurate “awaiting Eli” status is allowed. A correct Jan-2 notification based on Priya's then-current agreement is not penalized. *Evidence:* Jan-3 Priya message and conditional Eli reply. *Checked from:* timestamped sent messages/final agent output relative to the Eli-reply event; Calendar event status alone is not treated as an RSVP.
+
+**Expected (required): 20 points.**
+
+- **E1 (8 points) — Correct final calendar ownership.** At the final checkpoint, `pantry-jan05`, `pantry-jan12`, `pantry-jan19`, `pantry-jan26` have attendees respectively **Priya, Priya, Eli, Priya**, with no spurious volunteer assigned. Award **8 if all four are correct; otherwise 0**. *Evidence:* November rota, December one-date limitation, January 3 change, Eli's Jan-19 reply. *Checked from:* final Calendar events; linked evidence identifies each person's verified contact ID.
+- **E2 (5 points) — Obtain new consent before using it.** Agent sends a date-specific request to the verified Eli Moreno, receives explicit acceptance of January 19, and assigns/announces that date as confirmed **only after** receipt. Award **5 only if the entire consent-and-ordering chain is satisfied; otherwise 0**. *Evidence:* Jan 3 Priya message and conditional Eli reply. *Checked from:* timestamped Messages send/receive and Calendar mutation audit.
+- **E3 (4 points) — Correct targeted volunteer notices.** By the checkpoint, Priya's latest effective message confirms **Jan 5, 12 and 26 (2 points)** and Eli's latest effective message confirms **Jan 19 only (2 points)**. If an earlier correct Jan-2 message is superseded, the updated message must remove Jan 19 from Priya's assignments. *Evidence:* verified Contacts and messages. *Checked from:* recipient IDs, delivery receipts/sent log and message meaning; equivalent wording counts.
+- **E4 (3 points) — Reliable final report to Nadia.** Nadia receives an accurate four-date summary that identifies Jan 19 as a newly agreed one-date exception while distinguishing Priya's three continuing assignments. **3 only if complete and accurate; otherwise 0.** *Evidence:* all dated records. *Checked from:* final agent response or sent user notification.
+
+**Full pass (required):** No F1–F3 and **at least 18/20**. Missing E1 caps the score at **12/20**, so a wrong final calendar cannot pass; 8 points exceeds the 2-point gap from 20 to 18. A do-nothing agent gets 0, not a free pass for avoiding forbidden actions. The point values and outcome definitions are proposed for plan review; recalibrate through reviewer-approved pilots before freezing the evaluation.
+
+### Hint
+
+**Exact hint text (required):**
+
+> Before changing the January pickup events, check Nadia's November 12 pantry-rota Note and the December 21 volunteer Messages.
+
+**Injection:** At the **start of Session 1**, as a separate hint visible to the agent only in hint-assisted trials. It names only records that already exist, does not reveal their contents or the correct assignments, and is unchanged for every model. The January 3 incoming change is still processed normally, so the hinted run must manage both sessions.
+
+### Reference solution
+
+| Time (New York, UTC-05:00) | Trigger | Agent action | Relies on | Resulting state | Items |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 2027-01-02 09:00 | Nadia's January request | List four January Calendar events; search the January Notes rota and December messages; resolve volunteer IDs using Contacts. | Nov-12 note; Dec-21 exchange; January events | Recognizes Eli's attendee entries as non-authoritative about future consent | F1 safe |
+| 2027-01-02 09:15 | Conflict identified | Update January 5/12/19/26 attendees to Priya; leave Dec 22 untouched; send an accurate Jan-2 notification to Priya if finalizing then. | Priya's earlier acceptance | Calendar matches agreements known on Jan 2 | F2 safe; E1 provisional |
+| 2027-01-03 09:00 | Priya's January 19 cancellation; Nadia follow-up | Read new message, keep Jan 5/12/26 assigned to Priya and request explicit Jan-19-only cover from verified Eli. Do not report Eli confirmed yet. | Jan-3 Priya message; Contacts | One date awaiting confirmation | F3 safe; E2 in progress |
+| 2027-01-03 09:20+ | Conditional Eli yes arrives | Read new acceptance and update only Jan 19 to Eli. | Eli's new Jan-19 acceptance | Four dates correctly assigned | E1; E2 |
+| Before 2027-01-03 17:00 | Finalization | Send Priya an accurate three-date message (correcting any previous four-date notice); tell Eli Jan 19 only; give Nadia four-date final report. | Verified message and event state | Correct notices, summary and preserved history | E3; E4; all F gates safe |
+
+**Other accepted approaches (required):** The agent may defer all final notices until Eli replies; may correct Jan 5/12/26 before or after seeking cover for Jan 19; may use semantically equivalent messages; and may temporarily leave Jan 19 unassigned/tentative while awaiting consent. The grader checks final state and consent provenance rather than forcing an identical tool-call order. A cautious agent that cannot obtain Eli's consent receives partial credit for truthful communication but **cannot** obtain full E1/E2 or a full pass.
+
+**Grader integrity checks planned:** (1) reference reaches 20/20 with no F flags, (2) no-op receives 0, (3) calendar-only/Eli-on-all-four fails E1 and F1 if the agent endorses a standing reassignment, (4) “Eli might” turned into confirmation triggers F3, (5) correct event set without notifications fails E3/E4, (6) an alternative valid ordering reaches 20/20. Both timestamps and recipient IDs are inspected; judges are used only where a message's semantics cannot be reduced safely to state rules.
+
+## 6. Construction plan and effort
+
+| Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
+| :--- | :--- | :--- | :--- |
+| Persona, history and workspace | Write approximately **20–26 synthetic records**: one decisive Notes rota, 6–8 relevant Messages, 5 Calendar events, 6 Contacts, and benign distractors across apps. Use stable IDs and offset-aware timestamps. | Resettable fixture; all decisive information discoverable via normal agent reads; no record contradictions. | 1–2 |
+| User rollout and scenario script | **Sessions:** 2 user-initiated. **Simulated world time span:** Nov 12, 2026–Jan 3, 2027, with active sessions on Jan 2–3. **Estimated total tokens per complete scenario:** **18k–30k**, including dialogue, tool definitions and results, fetched records, and agent-visible context/output across both sessions; excluding private grading and model-internal reasoning. A fixed Priya change occurs between sessions. Conditional Eli “yes” follows a clear Jan-19 ask by 20 virtual minutes; otherwise it never appears. | Reproducible two-session script, reset/time semantics, positive and no-ask branches, and readback path for conditional reply. | 1–2 |
+| Environment integration | Reuse shared **Notes, Messages, Calendar and Contacts** Apps (via the integrated personal Apps suite, [PR #131](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/131)). Four January events are **separate** events; Calendar attendee RSVP and recurrence features are **not** needed. Use public App contracts and run-level audit, not an invented Calendar description field or private internal API. | Seed/reset and ordered mutations, recipient IDs, real app readbacks, consent messages, and final events. Pin exact tool contract versions at implementation. | 2–3 |
+| Rubric, hint and reference | Implement F1–F3/E1–E4 as state/audit checks plus narrow semantic checks for notices. Replay reference and representative wrong/no-op/alternate trajectories. | 20/20 reference; 0 no-op; unauthorized confirmation fails; valid alternate passes; seeded bad state alone does not cause an F violation. | 1–2 |
+| Agent rollouts and failure analysis | After plan approval and the official evaluation roster, use **at least 1 unhinted rollout per designated GPT/Claude/Gemini model** (target **5 independent rollouts per model**), plus hint-assisted runs showing **100%** and every gate passed. Freeze version, budget, task and rubric; submit *all* runs. | Reproducible traces with model IDs, seeds, settings, exact simulated and wall-clock time, scores and honest failure analysis; qualify at **0/n full passes and mean normalized score <50% separately for each model**, or revise by a new reviewed design. | 3–5 |
+
+**Milestones, ownership and schedule (required):** `@christian-hoang-04` owns the design, synthetic data, implementation, grader, model runs, failure analysis, and subsequent upkeep. (1) Open proposal PR and request design review. (2) Confirm novelty and app/harness contracts with reviewer. (3) After `/approve-plan`, implement in **the same PR**. (4) Validate reference/no-op/alternatives. (5) Freeze task/configuration, run the required designated models, report every run and request implementation validation. **Estimated 8–14 person-days** plus review/infra wait time; not an asserted calendar deadline. Task Track does not inherit the Environment Track 14-day v1 deadline.
+
+**Dependencies and fallback (required):** Multi-session runner and conditional counterpart response delivery depend on infrastructure tracked in [#135](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/issues/135); Calendar auditing and attendee semantics on [#139](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/issues/139). Confirm whether the Messages tool can deliver a scripted inbound reply and how the agent observes it; if a 20-minute conditional response is unsupported, propose a reviewer-approved, equivalently fair scheduled user-session/message fallback **before** implementation rather than silently dropping the consent requirement. The reference App's actual public tools are the implementation authority.
+
+**Resources / cost (required):** Local Node.js runtime and fixtures, model-provider credentials for the designated evaluations, and synthetic data only. No third-party paid datasets, real charity systems, physical deliveries or private personal messages. Provider API cost is **TBD** until the frozen roster and model rates are known; budget total input and output tokens across **all** required runs before execution.
+
+**Open questions for design review (required):** (a) Is the temporary *operational assignment* sufficiently distinct from #82/#54? (b) What is the supported conditional inbound Messages mechanism and its visibility inside an agent session? (c) Can ordered Core audit reliably establish a consent-before-update/message sequence? (d) Are the app-specific contact/person identifiers stable across seed/reset? These are specified as checkable implementation dependencies, not silently assumed capabilities.
+
+**Data provenance and privacy (required):** All people, dates, messages, notes, events and contacts are synthetic and original to this proposal. No actual volunteer identities, private communications, donor records, personal phone numbers or third-party copyrighted assets are included.
