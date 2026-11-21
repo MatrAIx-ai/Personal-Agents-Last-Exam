@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:infra-messaging-config:2",
+  "title": "Infra messaging runtime binding and authorization",
+  "description": "Infra-approved identities, package references and grants. Messaging directions and handlers are read only from App contributions. No credentials or message-defined identities.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 2
+    },
+    "registry": {
+      "type": "string",
+      "minLength": 1
+    },
+    "receiver_state_namespace": {
+      "type": "string",
+      "pattern": "^[-a-zA-Z0-9_]{1,80}$"
+    },
+    "authentication": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "const": "trusted-stdio"
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "publishers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          },
+          "owner_person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          },
+          "package_root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contribution_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "allowed_recipients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "app_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                },
+                "account_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                },
+                "channel": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "app_id",
+                "account_id",
+                "channel"
+              ],
+              "additionalProperties": false
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "app_id",
+          "account_id",
+          "owner_person_id",
+          "package_root",
+          "contribution_ref",
+          "allowed_recipients"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "registry",
+    "publishers"
+  ],
+  "additionalProperties": false
+}
