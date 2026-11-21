@@ -19,10 +19,10 @@ from urllib.parse import quote, urlparse
 
 try:
     from .review_identity import can_self_review
-    from .sync_proposals import APIError, GitHub, PROPOSAL_PATH, decode_file, field, track
+    from .sync_proposals import APIError, GitHub, RateLimited, rate_limit_notice, PROPOSAL_PATH, decode_file, field, track
 except ImportError:
     from review_identity import can_self_review
-    from sync_proposals import APIError, GitHub, PROPOSAL_PATH, decode_file, field, track
+    from sync_proposals import APIError, GitHub, RateLimited, rate_limit_notice, PROPOSAL_PATH, decode_file, field, track
 
 ROOT = Path(__file__).resolve().parents[1]
 MARKER = "<!-- pale-lifecycle:v1\n"
@@ -528,6 +528,8 @@ def main():
 if __name__ == "__main__":
     try:
         main()
+    except RateLimited as error:
+        rate_limit_notice("Proposal lifecycle", error)
     except (APIError, ValueError, RuntimeError) as error:
         print(f"Lifecycle failed: {error}", file=sys.stderr)
         sys.exit(1)

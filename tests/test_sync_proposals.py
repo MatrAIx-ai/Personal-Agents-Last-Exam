@@ -272,6 +272,80 @@ class ProposalSyncTests(unittest.TestCase):
         line = next(x for x in rendered.splitlines() if x.startswith("| Task | [haolun-wu]"))
         self.assertTrue(line.endswith("| 1 |"), line)
 
+    def test_exhausted_quota_is_reported_as_a_rate_limit(self):
+        from email.message import Message
+        from io import BytesIO
+        from urllib.error import HTTPError
+        api = sync.GitHub("example/benchmark", None)
+        headers = Message()
+        headers["x-ratelimit-remaining"] = "0"
+        headers["x-ratelimit-reset"] = "1795305600"
+        limited = HTTPError("https://api.github.com/x", 403, "Forbidden", headers, BytesIO(b"{}"))
+        with patch.object(sync, "urlopen", side_effect=limited):
+            with self.assertRaises(sync.RateLimited) as caught:
+                api.request("/repos/example/benchmark")
+        self.assertEqual(caught.exception.reset, 1795305600)
+        denied = HTTPError("https://api.github.com/x", 403, "Forbidden", Message(), BytesIO(b"{}"))
+        with patch.object(sync, "urlopen", side_effect=denied):
+            with self.assertRaises(sync.APIError) as caught:
+                api.request("/repos/example/benchmark")
+        self.assertNotIsInstance(caught.exception, sync.RateLimited)
+
+    def test_rate_limit_notice_is_a_warning_with_the_reset_time(self):
+        from contextlib import redirect_stdout
+        from io import StringIO
+        out = StringIO()
+        with redirect_stdout(out):
+            sync.rate_limit_notice("Proposal sync", sync.RateLimited(403, "limited", 1795305600))
+        self.assertTrue(out.getvalue().startswith("::warning title=GitHub API rate limit::Proposal sync skipped"))
+        self.assertIn("00:00 UTC", out.getvalue())
+
+    def test_cache_reuses_unchanged_proposals_and_refreshes_changed_ones(self):
+        live = pr(head={"sha": "h1"}, updated_at="2026-11-21T10:00:00Z")
+        api = FakeAPI(live, self.task)
+        cache = {}
+        first = sync.collect(api, self.domains, "main", cache, now=1000)
+        self.assertEqual(list(cache), ["42"])
+        api.calls.clear()
+        self.assertEqual(sync.collect(api, self.domains, "main", cache, now=2000), first)
+        self.assertFalse([c for c in api.calls if "/pulls/42/" in str(c) or isinstance(c, tuple) and c[0] == api.path])
+        live["updated_at"] = "2026-11-21T11:00:00Z"
+        api.calls.clear()
+        sync.collect(api, self.domains, "main", cache, now=3000)
+        self.assertTrue(any("/pulls/42/files" in str(c) for c in api.calls))
+        api.calls.clear()
+        sync.collect(api, self.domains, "main", cache, now=3000 + sync.OPEN_REFRESH_SECONDS)
+        self.assertTrue(any("/pulls/42/files" in str(c) for c in api.calls), "open PRs are re-read after the refresh window")
+        live["state"] = "closed"
+        live["updated_at"] = "2026-11-21T12:00:00Z"
+        sync.collect(api, self.domains, "main", cache, now=10_000)
+        api.calls.clear()
+        sync.collect(api, self.domains, "main", cache, now=10_000 + 10 * sync.OPEN_REFRESH_SECONDS)
+        self.assertFalse(any("/pulls/42/files" in str(c) for c in api.calls), "closed, unchanged PRs stay cached")
+
+    def test_listing_without_update_time_is_never_served_from_cache(self):
+        api = FakeAPI(pr(), self.task)
+        cache = {"42": {"key": None, "fetched": 0, "record": {"number": 42}}}
+        records = sync.collect(api, self.domains, "main", cache, now=1)
+        self.assertEqual(records[0]["primary"], "Travel & commuting")
+        self.assertEqual(cache["42"]["record"], {"number": 42})
+
+    def test_cache_is_discarded_when_code_or_policy_changes(self):
+        api = sync.GitHub("example/benchmark", None)
+        stored = sync.cache_content({"42": {"key": ["t", "h"], "fetched": 1, "record": {}}}, "old")
+        with patch.object(api, "contents", return_value=encoded(stored)):
+            self.assertEqual(sync.load_cache(api, "new"), {})
+            self.assertIn("42", sync.load_cache(api, "old"))
+        with patch.object(api, "contents", return_value=encoded("not json")):
+            self.assertEqual(sync.load_cache(api, "old"), {})
+        with patch.object(api, "contents", return_value=None):
+            self.assertEqual(sync.load_cache(api, "old"), {})
+        self.assertEqual(len(sync.cache_fingerprint()), 64)
+
+    def test_cache_is_written_only_to_the_index_branch(self):
+        api = sync.GitHub("example/benchmark", None)
+        with self.assertRaises(ValueError):
+            sync.publish(api, "main", "{}", sync.CACHE_PATH, "Update proposal cache")
 
 if __name__ == "__main__":
     unittest.main()

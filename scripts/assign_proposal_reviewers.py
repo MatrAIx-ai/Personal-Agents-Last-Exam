@@ -13,10 +13,10 @@ import sys
 
 try:
     from .review_identity import can_self_review
-    from .sync_proposals import APIError, GitHub, PROPOSAL_PATH, TITLE, decode_file, domains_from_readme, field, labels, track
+    from .sync_proposals import APIError, GitHub, RateLimited, rate_limit_notice, PROPOSAL_PATH, TITLE, decode_file, domains_from_readme, field, labels, track
 except ImportError:
     from review_identity import can_self_review
-    from sync_proposals import APIError, GitHub, PROPOSAL_PATH, TITLE, decode_file, domains_from_readme, field, labels, track
+    from sync_proposals import APIError, GitHub, RateLimited, rate_limit_notice, PROPOSAL_PATH, TITLE, decode_file, domains_from_readme, field, labels, track
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -265,6 +265,8 @@ def main():
 if __name__ == "__main__":
     try:
         main()
+    except RateLimited as error:
+        rate_limit_notice("Reviewer routing", error)
     except (APIError, ValueError, RuntimeError) as error:
         print(f"Reviewer routing failed: {error}", file=sys.stderr)
         sys.exit(1)
