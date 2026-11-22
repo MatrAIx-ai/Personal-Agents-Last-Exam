@@ -353,7 +353,7 @@ Specify how the environment will be built, what will be collected or synthesized
   - Dependencies:
     - The public runtime 1.6.0 and Mail 1.3.0 on `main` are available now.
     - One platform dependency has a fallback described in §3: the runner calling the outbound adapter (fallback: in-app records and explicit invocation).
-    - This author also has Gustline ([#126](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/126)) under review and other environments in preparation. First-version windows will be scheduled not to overlap, or an extension will be requested before a deadline.
+    - This author also has Gustline ([#126](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/126)), Curbline ([#169](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/169)) and Hopline ([#171](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/171)) under review. First-version windows will be scheduled not to overlap, or an extension will be requested before a deadline.
 - **Resources and total effort (required):** 6.75–8.5 person-days. No paid data, model or API usage, GPU or hosting. Tests run on a laptop CPU in minutes. The repository footprint stays under 1.5 MB, almost all of it fixture JSON.
 - **Scope boundary and open questions (required):** Service orders, appointments, equipment, outages, advisories, billing and notifications only; three open questions to settle with the Environment reviewers.
   - *Excluded:* gas and other utilities; meter reading and smart-meter data beyond billed usage; solar and net metering; rate-plan comparison; energy-assistance programs; credit checks beyond a seeded payment history; disconnection for non-payment; live outage maps; device control (Brightwire Home or Hearth); any GUI.
