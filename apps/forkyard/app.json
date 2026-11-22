@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "app_id": "forkyard",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:forkyard"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "pull.closed",
+    "pull.merged",
+    "pull.reopened",
+    "pull.review_submitted",
+    "pull.locked",
+    "pull.opened_by_other",
+    "comment.post",
+    "issue.opened",
+    "repo.settings_changed",
+    "repo.block_account",
+    "release.published",
+    "tag.created_by_other",
+    "commits.pushed_by_other",
+    "checks.update",
+    "notice.delivery_result"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Forkyard stores text, commit ancestry, tags, release metadata and seeded check runs. It does not run git, CI, or signature verification."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}

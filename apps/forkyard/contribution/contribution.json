@@ -1,0 +1,443 @@
+{
+  "schema_version": "pale.app-contribution.v1",
+  "contract_revision": "0.4.0",
+  "app_id": "forkyard",
+  "app_categories": [
+    "external"
+  ],
+  "runtime_manifest_ref": "app.json",
+  "interfaces": [
+    {
+      "interface_id": "agent-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "agent"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role agent",
+      "operations": [
+        {
+          "name": "forkyard.repos.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.repos.search",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.repos.files.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.repos.files.read",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.issues.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.issues.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.pulls.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.pulls.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.pulls.diff",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.pulls.timeline",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.people.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.people.activity",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.people.search",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.notifications.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.commits.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.commits.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.commits.compare",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.tags.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.releases.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.releases.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.checks.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.forks.create",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.commits.push",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.issues.comment",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.pulls.open",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.pulls.update",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.pulls.comment",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.pulls.review_reply",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.pulls.request_review",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.pulls.reopen",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.pulls.close",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.comments.edit",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.comments.delete",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.reactions.set",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.people.follow",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.people.unfollow",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.people.block",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.people.unblock",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.profile.update_self",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.notifications.mark_read",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.tags.create",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.releases.create_draft",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.releases.update_draft",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.releases.publish",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "forkyard.releases.delete_draft",
+          "effect": "write",
+          "caller": "agent"
+        }
+      ]
+    },
+    {
+      "interface_id": "infra-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "infra"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role infra",
+      "operations": [
+        {
+          "name": "env.reset",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.load_seed",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.apply_event",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.snapshot",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.event_status",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.validate_bundle",
+          "effect": "admin",
+          "caller": "infra"
+        }
+      ]
+    }
+  ],
+  "state": {
+    "owner": "app",
+    "isolation_keys": [
+      "run_id",
+      "app_id"
+    ],
+    "seed_schema_ref": "schemas/seed.schema.json",
+    "snapshot_includes_assets": true,
+    "reset_scope": "app_instance",
+    "version_checks": "implemented",
+    "idempotent_writes": "implemented",
+    "concurrency_control": "Per-App lock and optimistic epoch/revision check",
+    "commit_confirmation": "committed + epoch/revision; failures preserve business state",
+    "outbox_atomic_with_business_state": "unsupported"
+  },
+  "events": {
+    "accepts": [
+      {
+        "type": "pull.closed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "pull.merged",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "pull.reopened",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "pull.review_submitted",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "pull.locked",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "pull.opened_by_other",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "comment.post",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "issue.opened",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "repo.settings_changed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "repo.block_account",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "release.published",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "tag.created_by_other",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "commits.pushed_by_other",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "checks.update",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "notice.delivery_result",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      }
+    ],
+    "emits": [],
+    "trigger_owner": "task_and_infra"
+  },
+  "shared_data": {
+    "identity_binding_ref": "fixtures/binding.json",
+    "account_model_ref": "schemas/seed.schema.json",
+    "cross_app_references": false,
+    "asset_catalog_refs": [
+      "assets.catalog.json"
+    ]
+  },
+  "gui_ref": "gui.json",
+  "notification_channels": [],
+  "subscriptions": {
+    "business_owner": "source_app",
+    "routing_owner": "infra",
+    "task_binding_required": true,
+    "preferences_seed_ref": null,
+    "status": "unsupported"
+  },
+  "dependencies": {
+    "core_api": "1.2.0",
+    "required_apps": [],
+    "services": []
+  },
+  "extensions": [],
+  "asset_runtime": {
+    "implemented_descriptor_versions": [
+      "pale.asset-descriptor.v1"
+    ],
+    "implemented_mime_types": [
+      "image/png",
+      "image/jpeg",
+      "audio/mpeg",
+      "audio/wav",
+      "video/mp4",
+      "application/json",
+      "application/pdf",
+      "text/plain",
+      "text/calendar"
+    ],
+    "implemented_storage_adapters": [
+      "storage.file",
+      "storage.inline"
+    ],
+    "max_assets": 64,
+    "max_bundle_bytes": 1048576
+  },
+  "messaging": {
+    "publishes": [
+      {
+        "channel": "channel.email",
+        "schema_id": "urn:pale:email-message:2",
+        "schema_ref": "schemas/router-message.schema.json",
+        "status": "implemented",
+        "event_type": "org.pale.mail.notification.v1",
+        "payload_schema_id": "urn:pale:email-payload:1"
+      }
+    ],
+    "receives": [],
+    "envelope": "cloudevents/1.0"
+  }
+}
