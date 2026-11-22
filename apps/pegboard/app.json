@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "app_id": "pegboard",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:pegboard; author GitHub handle mingyin1"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "pegboard.schedule.published",
+    "pegboard.shift.changed",
+    "pegboard.shift.cancelled",
+    "pegboard.handoff.received",
+    "pegboard.handoff.answered",
+    "pegboard.handoff.decided",
+    "pegboard.handoff.withdrawn",
+    "pegboard.time_off.decided"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Synthetic schedule only: no time clock, timesheets, payroll, tips, breaks or overtime pay. Estimated pay is scheduled hours times the position's rate.",
+    "One employee account at one workplace per App instance. Managers and coworkers are not accounts: what they do arrives as events.",
+    "MCP only: no GUI and no manager's console.",
+    "Time is the environment's: the App has no clock event, timer or scheduler. Time-based states (a shift's phase, an expired handoff or time-off entry, a held notification) are derived from the supplied virtual time.",
+    "The workplace policy is five illustrative values, not the law of any real place. Managers are not checked against it; the account holder's shifts carry flags where a schedule breaks it.",
+    "Notifications reach Mail only through an Infra-run sender and Messaging; the App itself delivers nothing.",
+    "No attachments or media: resources are not used."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}
