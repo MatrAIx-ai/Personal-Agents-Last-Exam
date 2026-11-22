@@ -64,44 +64,104 @@ Done this way, the whole trip costs $277 in cash.
 
 ## 4. What makes this distinct and personal
 
-**✍️ Your answer (required):** Points travel is a puzzle of real program rules, and frontier models know the rules. Our pilot confirmed they pick the right redemption, apply the certificate category limit and get the pooling arithmetic exactly right. What breaks this trip is acting on that knowledge in time.
+- **Personalization insight (required):** Daniel's own rules decide when points move and which card pays: book award space when found, put award taxes on the Reserve, at most two pings before Oct 1, and Mei acts only on exact texts.
+- **Decisive context and trigger (required):** In session 1 (2027-08-24T21:00−05:00) the award search shows two business seats left each way. Daniel's 281,600 points cover both return seats, but not the whole trip, and Mei will not read a text until 07:30 after her night shift. The governing context is all discoverable then:
+  - the memory notes from 2027-07-02 ("when you find award space that works, book it"), 2027-05-30 (Mei) and 2027-08-18 (two pings);
+  - Mei's night-shift entries in Calendar;
+  - the balances.
+- **Generic assistant mistake (required):** It waits to book everything together once Mei's points arrive, which looks prudent because transfers are irreversible. Then it schedules the check-in for that evening or asks in chat for a message. The return seats sell out at 18:00 the next day, and with them the trip.
+- **Different user, different action (required):** Keep the request and the $600 cash limit word for word. Suppose instead his notes said they never hold a one-way award and would rather skip the trip than risk a split booking. Then the right action is to book nothing until Mei's points arrive and set the check-in for right after 07:40.
 
-1. **Earning and spending pull against each other.** Charging the $220 of award taxes to the Hilton card would help the bonus but void the delay coverage Daniel insists on. The bonus needs an eligible, early, explicitly-carded purchase instead, and its points arrive too late to fund this trip.
-2. **Irreversible steps meet scarce inventory.** Transfers cannot be undone, and seats vanish. The right move is to lock the scarcest leg with the points already in hand, not to wait until everything can be booked together.
-3. **Handoffs go through two people with their own rules.** Mei acts only on precise instructions. Daniel acts only on alerts, and he allows two before Oct 1.
-4. **Narrow questions hide changes in the world.** A schedule change and a category increase arrive while Daniel is asking about something else.
+## 5. Rubric, hint and reference solution
 
-A generic assistant does each step sensibly in isolation. It waits for the full balance before booking, answers the balance question as asked, and reports honestly. The trip is lost anyway.
+Times are US Central daylight time (UTC−05:00). "End state" is the bookings, card records, loyalty balances and Calendar after session 3.
 
-## 5. Construction plan and effort
+### Rubric
+
+**✍️ Forbidden (required):**
+
+- **F1 — Award taxes on the wrong card.** Any award-ticket tax or fee charged to a card other than the Sapphire Reserve. *Evidence:* memory note 2027-06-15; Guide to Benefits excerpt. *Checked from:* booking payment records.
+- **F2 — Excluded purchase for the bonus.** A gift card, prepaid card, P2P payment or other cash equivalent bought to reach the Hilton offer. *Evidence:* offer terms file. *Checked from:* card transactions.
+- **F3 — Over the cash limit.** Cash for flights and hotels (taxes, fees, cash or Points+Cash nights, foreign-transaction fees) above $600. *Evidence:* memory note 2027-02-20. *Checked from:* booking and card records.
+- **F4 — False report or unbacked promise.** Something reported as ticketed, booked or earned when the state says otherwise. Or a promise to act later with no alerted event behind it. *Checked from:* transcript compared with end state and Calendar.
+- **F5 — Alert budget exceeded.** More than two alerts fire between 2027-08-24T21:00 and 2027-10-01T17:00, counted cumulatively. *Evidence:* memory note 2027-08-18. *Checked from:* the notification delivery log.
+
+**✍️ Expected (required):** 30 points.
+
+- **E1 (8) — The whole trip is booked.** At end state:
+  - both travelers are ticketed together in business both ways, out Oct 15 and home Oct 25, with legal connections;
+  - all nine nights are confirmed: Oct 16 near Haneda, Oct 17–19 in Tokyo, Oct 20–24 in Kyoto.
+
+  All or nothing. *Evidence:* Daniel's plan file; memory note 2027-08-10. *Checked from:* airline and hotel records.
+- **E2 (4) — Welcome offer earned.** At least $2,000 of eligible purchases posted on the Hilton Amex by Sep 21. *Evidence:* offer terms; Amex progress mail 2027-08-15; Progressive renewal mail 2027-08-20. *Checked from:* card offer tracker.
+- **E3 (4) — Nothing forfeited.** 2 points for qualifying Hyatt activity before Sep 30. 2 points for using the Category 1–4 certificate for a check-in on or before Oct 16. *Evidence:* Hyatt statement 2027-08-19; certificate file. *Checked from:* Hyatt account.
+- **E4 (3) — No stranded points.** No partner program holds 5,000 or more transferred points that end state leaves unused. *Evidence:* transfer terms. *Checked from:* loyalty balances and transfer log.
+- **E5 (4) — Good value.** 2 points if the flights cost no more than 300,000 Aeroplan points, or the bonus-adjusted equivalent. 2 points if Kyoto is booked before Oct 1 at the Category 6 price. *Evidence:* search results; Hyatt mail 2027-09-10. *Checked from:* booking records.
+- **E6 (4) — Handoffs.** 2 points if Mei's text names an amount at least as large as the shortfall, the Combine points method and Daniel as destination. 2 points if an alert-triggered check-in fires after her move and while the seats still unbooked are available. *Evidence:* memory notes 2027-05-30 and 2027-03-03; Calendar. *Checked from:* Messages and the delivery log.
+- **E7 (3) — Later sessions.** 2 points if in session 2 the agent reads the 2027-09-11 schedule-change mail and accepts the free alternative before Sep 18. 1 point for an accurate trip report in session 3. *Checked from:* booking records; transcript.
+
+**✍️ Full pass (required):** No forbidden item is triggered and the score is at least 24 of 30. The gap is 6 points. The decisive item, E1, carries 8, so an agent that does not end up with the whole trip booked cannot pass.
+
+### Hint
+
+**✍️ Hint (required):** "Before acting in each session, check Daniel's memory notes, his calendar, his mail since your previous session, and the current status of every award search, booking and card offer."
+
+- **Injection:** Appended to the system prompt at the start of every session, scripted or alert-triggered, identical for all models.
+
+### Reference solution
+
+**✍️ Reference (required):**
+
+| Time | Trigger | Agent action | Relies on | Resulting state | Items |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 2027-08-24T21:00−05:00 | Session 1 request | Compares Aeroplan, United, Virgin and the portal. Transfers 150,000 UR to Aeroplan and tickets both return seats (OPT-R1), with taxes on the Reserve ($197.80). Texts Mei to send at least 165,400 UR to Daniel with Combine points. Creates one alert for Aug 25 08:00: "Message assistant: finish Japan booking + pay Progressive $642 now with the Hilton Amex". | Memory notes; search results; balances; offer terms; Progressive mail | Returns ticketed; Mei asked; one alert | E4, E6; F1, F4, F5 |
+| 2027-08-25T07:40−05:00 | Mei reads the text | (world) Mei sends 171,900 UR | — | Pool 303,500 UR | — |
+| 2027-08-25T08:00−05:00 | Alert-triggered session | Transfers 150,000 UR to Aeroplan and tickets the outbound (OPT-A1), with taxes on the Reserve ($79.40). Transfers 147,000 UR to Hyatt. Books Tokyo Bay with the certificate (Oct 16), Hyatt Regency Tokyo (Oct 17–20, 63,000) and Hyatt Regency Kyoto (Oct 20–25, 125,000). Daniel pays Progressive on the Hilton Amex; it posts Aug 27. | Search results; Hyatt categories; certificate terms | All flights and nights booked; offer met; Hyatt active | E1, E2, E3, E5; F2, F3 |
+| 2027-09-12T10:30−05:00 | Session 2: statement balance | Answers $1,964.33, due Sep 18. Reads mail and accepts ALT-1 for the 2027-09-11 schedule change. | Card statement; Aeroplan mail | Legal return connection | E1, E7 |
+| 2027-10-03T11:00−05:00 | Session 3: dinner on calendar | Adds Kikunoi and reports the trip accurately. | Bookings | — | E7; F4 |
+
+Cash in total: $277.20.
+
+**✍️ Other accepted approaches (required):**
+- Booking the outbound in a Sep 1 alert session with the 30% transfer bonus (116,000 UR), as long as that session falls before the outbound sells out on Sep 2 at 09:00.
+- Asking Mei for all of her points, or using Aeroplan family sharing with equally exact steps.
+- Booking the Tokyo hotels in session 1 with Daniel's remaining points, and Kyoto in a later session before Oct 1.
+- Paying a different eligible bill on the Hilton Amex, provided it posts by Sep 21.
+
+## 6. Construction plan and effort
 
 **✍️ Work breakdown (required):**
 
 | Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
 | :--- | :--- | :--- | :--- |
-| Persona, history and workspace | About 16 mails (6 decisive: transfer bonus, insurance renewal, Hyatt expiry, Aeroplan fee notice, Amex progress, Kikunoi), a 10-week calendar, 5 terms excerpts (Ultimate Rewards transfers and household pooling, Sapphire Reserve trip delay, Hilton Amex offer terms, Freedom Unlimited fees, Hyatt certificate), Daniel's draft plan, and 13 memory notes. Already drafted in the pilot. | Every decisive rule appears in exactly one workspace artifact. The reference solution passes all gates. | 2 |
-| User rollout and scenario script | **Sessions:** 3 scripted (Aug 24, Sep 12, Oct 3), plus alert-triggered sessions the agent creates (at most 2 count before Oct 1)<br>**Simulated world time span:** about 6 weeks of interaction (Aug 24 – Oct 3) for a trip 7–9 weeks out<br>**Estimated total tokens:** 120k–250k for one complete scenario (prompt and workspace about 12k; tool results about 40k–150k from repeated award searches; agent reasoning excluded) | A deterministic user model, already written for the pilot. Daniel acts only on alerted calendar events, does small tasks only if an alert spells them out (including which card), and enforces a cumulative two-alert budget. Mei acts at fixed times, and only on precise requests. A timeline engine fires seat sell-outs, the bonus window, the category change, the schedule change with a 7-day free fix, and the expiry and posting deadlines. | 3 |
-| Environment integration | Reuse shared Mail, Calendar (with an alert flag and alert-triggered sessions), Files, Notes and Messages. Needs a points-and-travel fixture: card accounts with point balances and household pooling, partner transfers with bonus windows, an award search with time-based inventory, Hyatt search and booking with certificates and category changes, and a card-offer tracker with posting dates. None exists in the proposal list. #44 (hotel guest portal) and #47 (flight disruption) touch nearby flows without points. A companion Environment proposal (TBD) or a task-local fixture will cover it. | Runnable package with reset; every transfer, ticket, payment card, alert and message is observable for grading. | 3–5 |
-| Rubrics, reference and hints | **Seven gates:** (G1) the whole trip is booked: both travelers ticketed together, business both ways, Oct 15 out and home Oct 25, legal connections, and confirmed accommodation for all nine nights (Oct 16 near Haneda, Oct 17–19 in Tokyo, Oct 20–24 in Kyoto); (G2) trip cash ≤ $600; (G3) welcome offer earned without excluded purchases; (G4) Hyatt points and certificate not forfeited; (G5) no ≥5k points stranded in a partner program; (G6) truthful reporting, no promise without a mechanism; (G7) award taxes on the Sapphire Reserve. **30 weighted points:** redemption choice 4; points math and pooling 4; handoffs 5; earning side 4; Hyatt rules and timing 4; card choice 2; session-2 world check 4; session-3 honesty and alert restraint 3. Full pass = all gates and ≥24. **Hint** for the feasibility run: "Lock scarce award seats with the points you already have; set an alert for right after Mei acts; check mail every time you run." | Reference passes all gates ($277.20 cash). Waiting for Mei without an alert fails G1, and so does booking the flights while leaving any hotel night unbooked. Booking Kyoto after Oct 1 fails G2 (about $782). Gate checks are deterministic from final state plus transcript. | 2 |
-| Agent rollouts and analysis | Five unhinted rollouts per designated GPT, Claude and Gemini model plus one hinted run each, under a frozen script. **Manual pilot already run** (Claude Code as environment, claude.ai incognito, Nov 2026): Opus 5.5 High scored 21/30 and failed G1. Its redemption choice, certificate handling, message to Mei (166,000 against the 165,400 needed) and Hilton bonus plan were all correct. But it did not book the two remaining return seats with points it already held. It waited for Mei's points and set the check-in alert for 18:00, by which time the seats were gone. In session 2 it again answered only the question asked and never read the mail. | Traces, scores and per-criterion failure analysis meeting the validation protocol; all traces submitted. | 3 |
+| Persona, history and workspace | About 16 mails (6 decisive: transfer bonus, insurance renewal, Hyatt expiry, Aeroplan fee notice, Amex progress, Kikunoi); a 10-week calendar; 5 terms excerpts (Ultimate Rewards transfers and household pooling, Sapphire Reserve trip delay, Hilton Amex offer terms, Freedom Unlimited fees, Hyatt certificate); Daniel's draft plan; 13 memory notes. Drafted in the pilot. | Every fact a rubric item relies on appears in the record named in Section 5, and the records agree. The reference scores 30/30. | 2 |
+| User rollout and scenario script | **Sessions:** 3 scripted (2027-08-24T21:00−05:00, 2027-09-12T10:30−05:00, 2027-10-03T11:00−05:00), plus alert-triggered sessions the agent creates (at most 2 count before Oct 1)<br>**Simulated world time span:** about 6 weeks of interaction (Aug 24 – Oct 3) for a trip 7–9 weeks out<br>**Estimated total tokens:** 120k–250k per complete scenario: prompt and workspace about 12k, tool results 40k–150k from repeated award searches, plus dialogue and agent output. Excludes separately billed reasoning. | A deterministic user model, already written for the pilot:<br>- Daniel acts only on alerted events, and does a small task only if the alert spells it out, including the card.<br>- Mei acts at 07:40 on an exact text; on a vague one she asks back and acts at 15:00 only if exact steps have arrived.<br>Timed events:<br>- the return seats sell out 2027-08-25T18:00;<br>- the bonus window runs Sep 1–30;<br>- the outbound seats sell out 2027-09-02T09:00;<br>- the Kyoto category rises on Oct 1;<br>- the schedule change arrives 2027-09-11T03:12, with a free fix until Sep 18;<br>- posting takes two business days. | 3 |
+| Environment integration | **Existing Apps reused:**<br>- Mail and Calendar (`examples/apps`).<br>- Messages (`apps/messages`): texts with Mei.<br>- Files (`apps/files`): terms excerpts and the plan.<br>- Notes (`apps/notes`): memory notes.<br>- Contacts (`apps/contacts`): Mei, Kikunoi.<br>**Environment proposals relied on:**<br>- Alerts and alert-triggered sessions: Reminders and phone notifications ([#191](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/191)).<br>- Card statements, posting dates and welcome-offer progress: Brindle Card ([#182](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/182)), whose partner-points transfers are out of its scope.<br>**Missing:** transferable points with household pooling and partner transfers; airline award search and booking with sell-outs and schedule changes (PaleAir, [#69](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/69), excludes award travel); hotel award booking with certificates and category changes. We will open a "points and awards" Environment proposal for these and link it here. | Each run starts from the same records with nothing transferred or booked. Every transfer, ticket, payment card, alert and message is observable for grading. | 3–5, after the dependencies are available |
+| Rubrics, reference and hints | Grader for F1–F5 and E1–E7: rule-based checks on end state and the delivery log, plus an LLM judge for F4 and the precision of Mei's text. Run the reference and one accepted alternative (the Sep 1 bonus path). | The reference scores 30/30 ($277.20 cash) and triggers no forbidden item. Doing nothing scores 0. The alternative passes. Weights frozen before the official runs. | 2 |
+| Agent rollouts and analysis | **Pilot (done):** Claude Opus 5.5 at High effort, Nov 2026, Claude Code as environment, claude.ai incognito. Re-scored under this rubric: 14/30, no forbidden item.<br>- Correct: the redemption choice, the certificate category rule, the pooling amount (166,000 against 165,400 needed) and the Hilton plan (E2 = 4, E3 = 4, E4 = 3, Mei's text 2).<br>- It did not book the two remaining return seats with points it already held; it waited for Mei and set the check-in for Aug 25 18:00, when those seats sold out (E1 = 0).<br>- In session 2 it never read mail (E7 = 1).<br>**Official:** five unhinted runs and one hinted run per designated GPT, Claude and Gemini model: 18 runs. | Every run's trace, score, settings and cost, with a failure analysis.<br>Timestamp agent actions and observations on the same simulated timeline as the user script; record real execution dates and wall-clock duration separately. | 3 |
 
-- **Milestones, owners and dependencies (required):** Ruihong Yin (@RuihongY) owns all workstreams.
-  - **M0:** design review, with pilot materials attached (prompt, harness, reference solution, transcript).
-  - **M1:** port the scripted world and user models to the platform's simulated clock, event injection, messaging and alert-triggered sessions.
-  - **M2:** reference and hinted runs.
-  - **M3:** full rollout batch.
+- **Milestones, owners and dependencies (required):** Ruihong Yin (@RuihongY) owns all workstreams. The order is:
+  1. Port the pilot records and user model onto the reused Apps.
+  2. Connect alerts (#191), the card account (#182) and the points-and-awards environment.
+  3. Build the grader and replay the reference.
+  4. Run the pilot, freeze the task, then run the official batch.
 
-  Calendar duration: 3–4 weeks of part-time work after the infrastructure release. Dependencies: shared Calendar with alerts and alert-triggered sessions; a messaging channel with a scripted third party; the points-and-travel fixture (TBD); the designated model roster.
-- **Resources and total effort (required):** 13–15 person-days. Model and API cost for 18 full runs is estimated at $120–$300. No GPU and no paid data.
+  Expected duration: 3–4 weeks of part-time work once the dependencies below are available.
+  - Mail, Calendar, Messages, Files, Notes and Contacts: available.
+  - Alerts: #191, opened by us.
+  - Card account: #182, in design review.
+  - Points and awards: to be opened.
+  - Related: #47 (flight disruption) and #133 (credit-card retention offer).
+- **Resources and total effort (required):** 13–15 person-days. No GPU or paid data. 18 official runs plus 3 pilot runs are estimated at 2M–5M visible tokens. API cost is TBD and will be estimated from the pilot.
 - **Scope boundary and open questions (required):**
   - **Excluded:** actual card applications, real payments, credit or financial advice, travel insurance claims, and in-trip changes.
   - **Open questions:**
-    1. **Real brands.** The task uses real program and card names (Chase, Aeroplan, United, Hyatt, Hilton, American Express), with rules paraphrased from public 2026 terms into the workspace. The prompt states that the workspace overrides the model's memory of these programs. Is this acceptable, or should brands be renamed?
-    2. **Timing rule.** When an alert asks Daniel to do small tasks before messaging the agent, the pilot starts the session after he finishes them (about 3 minutes per task). In the pilot this put the session at 18:06, after the 18:00 sell-out. Under a lenient reading the agent would have booked in time. It would then likely still have failed G1 by missing the Sep 11 schedule change, but that path was not run. We propose fixing the rule in the script before validation.
-    3. Same platform question as our other proposals: is "the agent only runs when the user messages it" acceptable as a stated property of the user's setup?
+    1. **Brand names.** The pilot uses real program and card names (Chase, Aeroplan, United, Hyatt, Hilton, American Express), with rules paraphrased from public 2026 terms. The shared environments use independent synthetic brands. Should the task switch to synthetic brands with the same rules so it can reuse them?
+    2. **Timing rule.** When an alert asks Daniel to do small tasks before messaging the agent, the pilot starts the session after he finishes, about 3 minutes per task. In the pilot this put the session after the 18:00 sell-out. We propose fixing this rule in the script before validation.
+    3. Is "the agent only runs when the user messages it" acceptable as a stated property of his setup?
     4. Should Mei be a scripted responder, as in the pilot, or a simulated user LLM with a fixed persona card?
 
     These will be settled in design review.
-- **Data provenance and privacy (required):** The scenario, people, balances, mails, seat inventory and timeline are entirely invented and not based on any specific real experience. Brand names are real. Program rules (transfer ratios, household pooling, partner booking fee, certificate categories, points expiry, welcome-offer exclusions and posting delay, foreign transaction fee, trip-delay conditions) are paraphrased from public 2026 terms into fixtures, so grading never depends on outside knowledge. Prices and category changes are scenario values: the Kyoto recategorisation is a fictional event. No real account numbers, private messages or third-party personal information are included.
+- **Data provenance and privacy (required):** The scenario, people, balances, mails, seat inventory and timeline are entirely invented and not based on any specific real experience. Brand names are real in the pilot (see open question 1). Program rules are paraphrased from public 2026 terms into fixtures, so grading never depends on outside knowledge. Prices and category changes are scenario values: the Kyoto recategorisation is a fictional event. All interactions with external platforms are dated 2025-09 onward; memory notes are text-only history. No real account numbers, private messages or third-party personal information are included.
 
-After approval, the script, grader and author-run evidence will be added against these deliverables in the same PR, following the implementation and validation guide.
+After approval, add the script, grader and author-run evidence against these deliverables in the same PR. Reviewers use the approved plan as the acceptance baseline; substantial scope changes require another design review. Follow the [implementation and validation guide](../../CONTRIBUTING.md#task-difficulty-and-validation).
