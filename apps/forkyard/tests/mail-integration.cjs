@@ -6,7 +6,8 @@ const path = require('node:path');
 const {createRuntime} = require('../../../runtime/core/runtime.cjs');
 const {Client} = require('../../../runtime/client.cjs');
 const {create} = require('../../../runtime/messaging/src/router.cjs');
-const {publishPending, reconcile} = require('../src/publisher.cjs');
+const {digest} = require('../../../runtime/messaging/src/contracts.cjs');
+const {publishPending, reconcile, messageFor} = require('../src/publisher.cjs');
 
 const root = path.resolve(__dirname, '../../..');
 const registry = path.join(root, 'apps.registry.json');
@@ -19,8 +20,6 @@ function mayaSeed() {
   for (const notice of data.notices) {
     if (notice.account_id === 'fy-tomasreyes') notice.person_id = 'person-maya';
   }
-  const seeded = data.notices.find(item => item.notice_id === 'notice-seed');
-  if (seeded) seeded.status = 'committed';
   return data;
 }
 
@@ -95,23 +94,37 @@ async function main() {
     });
     clients.push(router);
     await router.initialize();
-    const sent = await publishPending({notices: prepared.state.data.notices, accountId: 'fy-tomasreyes', router});
-    assert.equal(sent.length, 1);
-    assert.equal(sent[0].result.status, 'committed');
-    assert.equal(sent[0].outcome.delivery, 'confirmed');
-    assert.equal(sent[0].outcome.same_run_retry, false);
-    const again = await router.call('router.publish', {request_id: sent[0].request_id, message: sent[0].message});
+    const sent = await publishPending({
+      notices: prepared.state.data.notices, accountId: 'fy-tomasreyes', router, runId: run,
+      inspectReceipt: async (eventId) => {
+        const inspector = new Client('mail', 'infra', run, dir, 'mail-commit-status', {registry: mailRegistry});
+        clients.push(inspector);
+        await inspector.initialize();
+        return inspector.call('env.event_status', {event_id: eventId});
+      }
+    });
+    assert.equal(sent.attempts.length, 1);
+    assert.equal(sent.attempts[0].result.status, 'committed');
+    assert.equal(sent.attempts[0].outcome.delivery, 'confirmed');
+    assert.equal(sent.attempts[0].outcome.same_run_retry, false);
+    const again = await router.call('router.publish', {request_id: sent.attempts[0].request_id, message: sent.attempts[0].message});
     assert.equal(again.duplicate, true);
-    assert.equal(again.event_id, sent[0].result.event_id);
+    assert.equal(again.event_id, sent.attempts[0].result.event_id);
+    const duplicate = reconcile({
+      messaging: again,
+      attempted: {event_id: again.event_id, run_id: run, receiver: again.target, receiver_epoch: again.version && again.version.epoch}
+    });
+    assert.equal(duplicate.delivery, 'confirmed');
+    assert.equal(duplicate.duplicate_within_run, true);
     const after = await messages(dir, run);
     assert.equal(after.length, before.length + 1);
-    assert.equal(after.at(-1).id, sent[0].result.event_id);
+    assert.equal(after.at(-1).id, sent.attempts[0].result.event_id);
     assert.match(after.at(-1).body, /at 09:05\./);
     const mail = new Client('mail', 'infra', run, dir, 'mail-status', {registry: mailRegistry});
     clients.push(mail);
     await mail.initialize();
-    const receipt = await mail.call('env.event_status', {event_id: sent[0].result.event_id});
-    const joined = reconcile({messaging: sent[0].result, mailReceipt: receipt});
+    const receipt = await mail.call('env.event_status', {event_id: sent.attempts[0].result.event_id});
+    const joined = reconcile({messaging: sent.attempts[0].result, mailReceipt: receipt});
     assert.equal(joined.delivery, 'confirmed');
     assert.equal(joined.same_run_retry, false);
     await router.close();
@@ -128,12 +141,15 @@ async function main() {
     });
     clients.push(deniedRouter);
     await deniedRouter.initialize();
-    const rejected = await publishPending({notices: deniedState.state.data.notices, accountId: 'fy-tomasreyes', router: deniedRouter});
-    assert.equal(rejected.length, 1);
-    assert.equal(rejected[0].result.code, 'recipient_not_authorized');
-    assert.equal(rejected[0].outcome.delivery, 'unresolved');
-    assert.equal(rejected[0].outcome.source_committed, true);
-    assert.equal(rejected[0].outcome.same_run_retry, false);
+    const rejected = await publishPending({notices: deniedState.state.data.notices, accountId: 'fy-tomasreyes', router: deniedRouter, runId: deniedRun});
+    assert.equal(rejected.attempts.length, 1);
+    assert.equal(rejected.attempts[0].result.code, 'recipient_not_authorized');
+    assert.equal(rejected.attempts[0].outcome.delivery, 'unresolved');
+    assert.equal(rejected.attempts[0].outcome.source_committed, true);
+    assert.equal(rejected.attempts[0].outcome.same_run_retry, false);
+    assert.equal(rejected.stopped, true);
+    const suppressed = await publishPending({notices: deniedState.state.data.notices, accountId: 'fy-tomasreyes', router: deniedRouter, runId: deniedRun});
+    assert.equal(suppressed.suppressed, true);
     assert.equal(deniedState.state.data.pulls.find(item => item.number === 2318).state, 'closed');
     assert.equal((await messages(deniedDir, deniedRun)).length, deniedBefore.length);
 
@@ -151,32 +167,290 @@ async function main() {
         if (name === 'env.apply_event') throw new Error('Simulated lost acknowledgement');
         return result;
       };
-      lost = await publishPending({notices: lostState.state.data.notices, accountId: 'fy-tomasreyes', router: lostRouter});
+      const lostMail = new Client('mail', 'infra', lostRun, lostDir, 'mail-lost-inline', {registry: mailRegistry});
+      clients.push(lostMail);
+      await lostMail.initialize();
+      lost = await publishPending({
+        notices: lostState.state.data.notices, accountId: 'fy-tomasreyes', router: lostRouter, runId: lostRun,
+        inspectReceipt: (eventId) => lostMail.call('env.event_status', {event_id: eventId}),
+        receiver: {app_id: 'mail', account_id: 'mail-maya'}
+      });
     } finally {
       Client.prototype.call = original;
     }
-    assert.equal(lost.length, 1);
-    assert.equal(lost[0].result.status, 'unknown');
-    assert.equal(lost[0].outcome.delivery, 'unresolved');
-    assert.equal(lost[0].outcome.same_run_retry, false);
+    assert.equal(lost.attempts.length, 1);
+    assert.equal(lost.attempts[0].result.status, 'unknown');
+    assert.equal(lost.attempts[0].outcome.delivery, 'confirmed');
+    assert.equal(lost.attempts[0].outcome.same_run_retry, false);
+    assert.equal(lost.attempts[0].outcome.correlated, true);
     const inspector = new Client('mail', 'infra', lostRun, lostDir, 'mail-lost', {registry: mailRegistry});
     clients.push(inspector);
     await inspector.initialize();
-    const persisted = await inspector.call('env.event_status', {event_id: lost[0].result.event_id});
-    const traced = reconcile({messaging: lost[0].result, mailReceipt: persisted});
+    const persisted = await inspector.call('env.event_status', {event_id: lost.attempts[0].result.event_id});
     assert.equal(persisted.receipt.status, 'committed');
-    assert.equal(traced.delivery, 'confirmed');
-    assert.equal(traced.same_run_retry, false);
-    const halted = await lostRouter.call('router.publish', {request_id: 'notice-another', message: lost[0].message});
+    assert.equal(persisted.receipt.event_id, lost.attempts[0].result.event_id);
+    const halted = await lostRouter.call('router.publish', {request_id: 'notice-another', message: lost.attempts[0].message});
     assert.equal(halted.code, 'run_halted');
     const stored = (await inspector.call('env.snapshot')).snapshot.data.messages;
-    assert.equal(stored.filter(item => item.thread_id === lost[0].message.id).length, 1);
+    assert.equal(stored.filter(item => item.thread_id === lost.attempts[0].message.id).length, 1);
+    const rejectDir = path.join(dir, 'rejected');
+    fs.mkdirSync(rejectDir);
+    const rejectRun = 'fy_mail_rejected';
+    const rejectState = prepare(rejectRun);
+    const rejectNotice = rejectState.state.data.notices.find(item => item.status === 'pending_delivery');
+    const rejectMessage = messageFor(rejectNotice, 'fy-tomasreyes');
+    const rejectMail = new Client('mail', 'infra', rejectRun, rejectDir, 'mail-reject-prep', {registry: mailRegistry});
+    clients.push(rejectMail);
+    await rejectMail.initialize();
+    const rejectSnap = await rejectMail.call('env.snapshot');
+    const occupied = 'router-' + digest({
+      run: rejectRun,
+      source: rejectMessage.source,
+      id: rejectMessage.id,
+      target: 'mail',
+      account: 'mail-maya',
+      epoch: rejectSnap.snapshot.epoch
+    }).slice(0, 32);
+    const occupiedEvent = await rejectMail.call('env.apply_event', {
+      expected_version: rejectSnap.version,
+      event: {
+        event_id: 'mail-occupy-id',
+        at: '2026-11-15T09:05:00-08:00',
+        operation: 'mail.deliver',
+        payload: {
+          id: occupied,
+          thread_id: 'occupied',
+          account_id: 'mail-maya',
+          from: 'alex.rivera@example.com',
+          to: ['maya.main@example.com'],
+          subject: 'Occupied record',
+          body: 'This record id is already stored.',
+          received_at: '2026-11-15T09:05:00-08:00',
+          folder: 'inbox',
+          read: false,
+          attachments: []
+        }
+      }
+    });
+    assert.equal(occupiedEvent.status, 'committed');
+    await rejectMail.close();
+    const rejectRouter = new Client(null, null, null, null, 'forkyard-rejected', {
+      commandArgs: [path.join(root, 'runtime/messaging/service.cjs'), '--config', allowed, '--publisher', 'forkyard', '--run', rejectRun, '--state-dir', rejectDir]
+    });
+    clients.push(rejectRouter);
+    await rejectRouter.initialize();
+    const refused = await publishPending({
+      notices: rejectState.state.data.notices, accountId: 'fy-tomasreyes', router: rejectRouter, runId: rejectRun
+    });
+    assert.equal(refused.attempts.length, 1);
+    assert.equal(refused.attempts[0].result.code, 'receiver_rejected');
+    assert.equal(refused.attempts[0].outcome.delivery, 'unresolved');
+    assert.equal(refused.stopped, true);
+    assert.equal(rejectState.state.data.pulls.find(item => item.number === 2318).state, 'closed');
+
+    const missDir = path.join(dir, 'missing');
+    fs.mkdirSync(missDir);
+    const missRun = 'fy_mail_missing';
+    const missState = prepare(missRun);
+    const missRouter = await create({config: allowed, publisher: 'forkyard', run: missRun, stateDir: missDir});
+    clients.push(missRouter);
+    const missMail = new Client('mail', 'infra', missRun, missDir, 'mail-missing', {registry: mailRegistry});
+    clients.push(missMail);
+    await missMail.initialize();
+    const decoy = await missMail.call('env.apply_event', {
+      expected_version: (await missMail.call('env.snapshot')).version,
+      event: {
+        event_id: 'mail-decoy-receipt',
+        at: '2026-11-15T09:06:00-08:00',
+        operation: 'mail.deliver',
+        payload: {
+          id: 'decoy-message',
+          thread_id: 'decoy',
+          account_id: 'mail-maya',
+          from: 'alex.rivera@example.com',
+          to: ['maya.main@example.com'],
+          subject: 'Other receipt',
+          body: 'A committed receipt for a different event.',
+          received_at: '2026-11-15T09:06:00-08:00',
+          folder: 'inbox',
+          read: false,
+          attachments: []
+        }
+      }
+    });
+    assert.equal(decoy.status, 'committed');
+    const patched = Client.prototype.call;
+    let missing;
+    let mismatched;
+    try {
+      Client.prototype.call = async function(name, args) {
+        if (name === 'env.apply_event') throw new Error('dropped before the receiver applied it');
+        return patched.call(this, name, args);
+      };
+      missing = await publishPending({
+        notices: missState.state.data.notices, accountId: 'fy-tomasreyes', router: missRouter, runId: missRun,
+        inspectReceipt: (eventId) => missMail.call('env.event_status', {event_id: eventId})
+      });
+      const mismatchRun = 'fy_mail_mismatch';
+      const mismatchDir = path.join(dir, 'mismatch');
+      fs.mkdirSync(mismatchDir);
+      const mismatchState = prepare(mismatchRun);
+      const mismatchRouter = await create({config: allowed, publisher: 'forkyard', run: mismatchRun, stateDir: mismatchDir});
+      clients.push(mismatchRouter);
+      mismatched = await publishPending({
+        notices: mismatchState.state.data.notices, accountId: 'fy-tomasreyes', router: mismatchRouter, runId: mismatchRun,
+        inspectReceipt: async (eventId) => {
+          const absent = await missMail.call('env.event_status', {event_id: eventId});
+          assert.equal(absent.receipt, null);
+          return missMail.call('env.event_status', {event_id: 'mail-decoy-receipt'});
+        }
+      });
+    } finally {
+      Client.prototype.call = patched;
+    }
+    assert.equal(missing.attempts[0].result.status, 'unknown');
+    assert.equal(missing.attempts[0].outcome.delivery, 'unresolved');
+    assert.equal(missing.stopped, true);
+    const missingReceipt = await missMail.call('env.event_status', {event_id: missing.attempts[0].result.event_id});
+    assert.equal(missingReceipt.receipt, null);
+    assert.equal(mismatched.attempts[0].result.status, 'unknown');
+    assert.equal(mismatched.attempts[0].outcome.delivery, 'unresolved');
+    assert.equal(mismatched.attempts[0].outcome.correlated, false);
+    assert.equal(missState.state.data.pulls.find(item => item.number === 2318).state, 'closed');
+
+    const transportDir = path.join(dir, 'transport');
+    fs.mkdirSync(transportDir);
+    const transportRun = 'fy_mail_transport';
+    const transportState = prepare(transportRun);
+    const transportRouter = new Client(null, null, null, null, 'forkyard-transport', {
+      commandArgs: [path.join(root, 'runtime/messaging/service.cjs'), '--config', allowed, '--publisher', 'forkyard', '--run', transportRun, '--state-dir', transportDir]
+    });
+    clients.push(transportRouter);
+    await transportRouter.initialize();
+    let transportCalls = 0;
+    const flaky = {
+      async call(name, args) {
+        transportCalls += 1;
+        if (transportCalls > 1) throw new Error('socket closed');
+        return transportRouter.call(name, args);
+      }
+    };
+    const firstNotice = transportState.state.data.notices.find(item => item.status === 'pending_delivery');
+    const transported = await publishPending({
+      notices: [firstNotice, {...firstNotice, notice_id: 'notice-extra', object_id: 'tidewater.tidewater.extra'}],
+      accountId: 'fy-tomasreyes', router: flaky, runId: transportRun
+    });
+    assert.equal(transported.attempts.length, 2);
+    assert.equal(transported.attempts[0].result.status, 'committed');
+    assert.equal(transported.attempts[1].result.code, 'transport_error');
+    assert.equal(transported.stopped, true);
+    const held = await publishPending({
+      notices: [firstNotice], accountId: 'fy-tomasreyes', router: flaky, runId: transportRun
+    });
+    assert.equal(held.suppressed, true);
+    assert.equal(transportCalls, 2);
+
+    const taskDir = path.join(dir, 'task74');
+    fs.mkdirSync(taskDir);
+    const taskRun = 'fy_mail_task74';
+    const taskConfig = path.join(dir, 'task74.json');
+    fs.writeFileSync(taskConfig, JSON.stringify({
+      schema_version: 2,
+      registry: 'examples/registry.mail.json',
+      authentication: {mode: 'trusted-stdio'},
+      publishers: [{
+        app_id: 'forkyard',
+        account_id: 'fy-tomasreyes',
+        owner_person_id: 'person-tomas',
+        package_root: 'apps/forkyard',
+        contribution_ref: 'contribution/contribution.json',
+        allowed_recipients: [{app_id: 'mail', account_id: 'mail-maya', channel: 'channel.email'}]
+      }]
+    }));
+    const mailSeed = structuredClone(require('../../../examples/apps/mail/fixtures/minimal.json'));
+    mailSeed.owner_person_id = 'person-tomas';
+    const mailBinding = structuredClone(require('../../../examples/apps/mail/fixtures/binding.json'));
+    mailBinding.people.push({person_id: 'person-tomas', name: 'Tomas Reyes'});
+    mailBinding.accounts[0].owner_person_id = 'person-tomas';
+    const mailPrep = new Client('mail', 'infra', taskRun, taskDir, 'mail-task-prep', {registry: mailRegistry});
+    clients.push(mailPrep);
+    await mailPrep.initialize();
+    const mailReady = await mailPrep.call('env.load_seed', {
+      expected_version: (await mailPrep.call('env.snapshot')).version,
+      request_id: 'mail-owner-tomas',
+      data: mailSeed,
+      binding: mailBinding,
+      virtual_now: '2026-11-15T09:00:00-08:00'
+    });
+    assert.equal(mailReady.status, 'ready');
+    await mailPrep.close();
+    const taskInfra = new Client('forkyard', 'infra', taskRun, taskDir, 'fy-task-infra', {registry});
+    const taskAgent = new Client('forkyard', 'agent', taskRun, taskDir, 'fy-task-agent', {registry});
+    clients.push(taskInfra, taskAgent);
+    await taskInfra.initialize();
+    await taskAgent.initialize();
+    const taskSnap = await taskInfra.call('env.snapshot');
+    assert.equal(taskSnap.snapshot.profile, 'scenario');
+    const taskLoaded = await taskInfra.call('env.load_seed', {
+      expected_version: taskSnap.version,
+      request_id: 'seed-task74-mcp',
+      data: require('../examples/task-data/rejected-pr/seed.json'),
+      binding: require('../examples/task-data/rejected-pr/binding.json'),
+      policies: require('../examples/task-data/rejected-pr/policies.json'),
+      virtual_now: '2026-02-09T20:40:00-08:00'
+    });
+    assert.equal(taskLoaded.status, 'ready');
+    const taskOpened = await taskAgent.call('forkyard.pulls.open', {
+      expected_version: taskLoaded.version,
+      request_id: 'open-2318-mcp',
+      repo: 'tidewater/tidewater',
+      head: 'tomasreyes/tidewater:fix/tz-parse',
+      base: 'main',
+      title: 'Fix timezone parsing for offsets without colons',
+      body: 'Handle offsets that omit the colon.'
+    });
+    assert.equal(taskOpened.status, 'committed');
+    assert.equal(taskOpened.number, 2318);
+    assert.deepEqual(taskOpened.reviewers, ['acc-ihalvorsen', 'acc-praman', 'acc-msolis']);
+    const taskClosed = await taskInfra.call('env.apply_event', {
+      expected_version: taskOpened.version,
+      event: {
+        event_id: 'fy-task-74-mcp',
+        at: '2026-02-11T10:12:00-08:00',
+        operation: 'pull.closed',
+        payload: {
+          repo: 'tidewater/tidewater',
+          number: 2318,
+          actor_account_id: 'acc-ihalvorsen',
+          comment: 'Closing: this changes the public parse_tz() signature, and #2290 already addresses this bug.'
+        }
+      }
+    });
+    assert.equal(taskClosed.status, 'committed');
+    const taskView = await taskInfra.call('env.snapshot');
+    const taskPending = taskView.snapshot.data.notices.filter(item => item.status === 'pending_delivery');
+    assert.equal(taskPending.length, 1);
+    assert.equal(taskPending[0].person_id, 'person-tomas');
+    assert.equal(taskView.snapshot.data.pulls.find(item => item.number === 2318).state, 'closed');
+    const taskRouter = new Client(null, null, null, null, 'forkyard-task-router', {
+      commandArgs: [path.join(root, 'runtime/messaging/service.cjs'), '--config', taskConfig, '--publisher', 'forkyard', '--run', taskRun, '--state-dir', taskDir]
+    });
+    clients.push(taskRouter);
+    await taskRouter.initialize();
+    const taskSent = await publishPending({
+      notices: taskView.snapshot.data.notices, accountId: 'fy-tomasreyes', router: taskRouter, runId: taskRun
+    });
+    assert.equal(taskSent.attempts.length, 1);
+    assert.equal(taskSent.attempts[0].result.status, 'committed');
+    const taskBox = await messages(taskDir, taskRun);
+    assert.equal(taskBox.filter(item => item.thread_id === taskSent.attempts[0].message.id).length, 1);
+
     console.log(JSON.stringify({
       passed: true,
-      committed_event_id: sent[0].result.event_id,
+      committed_event_id: sent.attempts[0].result.event_id,
       duplicate: true,
-      denied: rejected[0].result.code,
-      unknown_event_id: lost[0].result.event_id,
+      denied: rejected.attempts[0].result.code,
+      unknown_event_id: lost.attempts[0].result.event_id,
       halted: halted.code,
       mail_messages_added: 1
     }, null, 2));

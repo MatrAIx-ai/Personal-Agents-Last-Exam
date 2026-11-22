@@ -44,12 +44,16 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "repository": {
+          "type": "object"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "repository"
       ],
       "additionalProperties": true
     }
@@ -98,12 +102,16 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "repositories": {
+          "type": "array"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "repositories"
       ],
       "additionalProperties": true
     }
@@ -159,12 +167,27 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$"
+        },
+        "files": {
+          "type": "array"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "ref",
+        "sha",
+        "files"
       ],
       "additionalProperties": true
     }
@@ -226,12 +249,35 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "content": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 65536
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "ref",
+        "sha",
+        "path",
+        "content"
       ],
       "additionalProperties": true
     }
@@ -287,12 +333,16 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "issues": {
+          "type": "array"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "issues"
       ],
       "additionalProperties": true
     }
@@ -347,12 +397,26 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "issue": {
+          "type": "object"
+        },
+        "comments": {
+          "type": "array"
+        },
+        "url": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "issue",
+        "comments",
+        "url"
       ],
       "additionalProperties": true
     }
@@ -410,12 +474,16 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "pulls": {
+          "type": "array"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "pulls"
       ],
       "additionalProperties": true
     }
@@ -470,12 +538,30 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "pull": {
+          "type": "object"
+        },
+        "comments": {
+          "type": "array"
+        },
+        "reviews": {
+          "type": "array"
+        },
+        "url": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "pull",
+        "comments",
+        "reviews",
+        "url"
       ],
       "additionalProperties": true
     }
@@ -530,12 +616,37 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "repo": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "changed_lines": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "paths": {
+          "type": "array"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200000
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "repo",
+        "number",
+        "changed_lines",
+        "paths",
+        "text"
       ],
       "additionalProperties": true
     }
@@ -590,12 +701,16 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "entries": {
+          "type": "array"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "entries"
       ],
       "additionalProperties": true
     }
@@ -648,12 +763,22 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "account": {
+          "type": "object"
+        },
+        "url": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "account",
+        "url"
       ],
       "additionalProperties": true
     }
@@ -725,12 +850,29 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "items": {
+          "type": "array"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 40
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "items",
+        "next_cursor"
       ],
       "additionalProperties": true
     }
@@ -781,12 +923,16 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "accounts": {
+          "type": "array"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "accounts"
       ],
       "additionalProperties": true
     }
@@ -833,12 +979,16 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "notifications": {
+          "type": "array"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "notifications"
       ],
       "additionalProperties": true
     }
@@ -904,12 +1054,34 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$"
+        },
+        "items": {
+          "type": "array"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 40
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "sha",
+        "items",
+        "next_cursor"
       ],
       "additionalProperties": true
     }
@@ -964,12 +1136,16 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "commit": {
+          "type": "object"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "commit"
       ],
       "additionalProperties": true
     }
@@ -1031,12 +1207,55 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "repo": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "base": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "head": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "ahead_by": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "behind_by": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "merge_base": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{7,40}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "base_is_ancestor": {
+          "type": "boolean"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "repo",
+        "base",
+        "head",
+        "ahead_by",
+        "behind_by",
+        "merge_base",
+        "base_is_ancestor"
       ],
       "additionalProperties": true
     }
@@ -1086,12 +1305,16 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "tags": {
+          "type": "array"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "tags"
       ],
       "additionalProperties": true
     }
@@ -1141,12 +1364,87 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "releases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "release_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "repo": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+              },
+              "tag": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 120
+              },
+              "title": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 200
+              },
+              "notes": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 65536
+              },
+              "status": {
+                "enum": [
+                  "draft",
+                  "published"
+                ]
+              },
+              "assets": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 0,
+                      "maxLength": 200
+                    },
+                    "size_bytes": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "sha256": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "size_bytes",
+                    "sha256"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "release_id",
+              "repo",
+              "tag",
+              "title",
+              "notes",
+              "status",
+              "assets"
+            ],
+            "additionalProperties": true
+          }
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "releases"
       ],
       "additionalProperties": true
     }
@@ -1196,12 +1494,90 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "release": {
+          "type": "object",
+          "properties": {
+            "release_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "repo": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+            },
+            "tag": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 120
+            },
+            "title": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 200
+            },
+            "notes": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 65536
+            },
+            "status": {
+              "enum": [
+                "draft",
+                "published"
+              ]
+            },
+            "assets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 200
+                  },
+                  "size_bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  }
+                },
+                "required": [
+                  "name",
+                  "size_bytes",
+                  "sha256"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "release_id",
+            "repo",
+            "tag",
+            "title",
+            "notes",
+            "status",
+            "assets"
+          ],
+          "additionalProperties": true
+        },
+        "url": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "release",
+        "url"
       ],
       "additionalProperties": true
     }
@@ -1256,12 +1632,16 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "checks": {
+          "type": "array"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "checks"
       ],
       "additionalProperties": true
     }
@@ -1336,12 +1716,28 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "repo": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "url": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "head_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "repo",
+        "url",
+        "head_sha"
       ],
       "additionalProperties": true
     }
@@ -1463,12 +1859,32 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$"
+        },
+        "changed_lines": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "paths": {
+          "type": "array"
+        },
+        "url": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "sha",
+        "changed_lines",
+        "paths",
+        "url"
       ],
       "additionalProperties": true
     }
@@ -1554,12 +1970,28 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "comment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "url": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "comment_id",
+        "revision",
+        "url"
       ],
       "additionalProperties": true
     }
@@ -1661,12 +2093,47 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "repo": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "state": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 40
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reviewers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          }
+        },
+        "url": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "repo",
+        "number",
+        "state",
+        "revision",
+        "reviewers",
+        "url"
       ],
       "additionalProperties": true
     }
@@ -1764,12 +2231,33 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "repo": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "url": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "repo",
+        "number",
+        "revision",
+        "url"
       ],
       "additionalProperties": true
     }
@@ -1855,12 +2343,28 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "comment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "url": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "comment_id",
+        "revision",
+        "url"
       ],
       "additionalProperties": true
     }
@@ -1951,12 +2455,22 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "comment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "comment_id",
+        "revision"
       ],
       "additionalProperties": true
     }
@@ -2041,12 +2555,30 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "repo": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reviewers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          }
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "repo",
+        "number",
+        "reviewers"
       ],
       "additionalProperties": true
     }
@@ -2126,12 +2658,28 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "repo": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "state": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 40
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "repo",
+        "number",
+        "state"
       ],
       "additionalProperties": true
     }
@@ -2216,12 +2764,28 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "repo": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "state": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 40
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "repo",
+        "number",
+        "state"
       ],
       "additionalProperties": true
     }
@@ -2307,12 +2871,22 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "comment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "comment_id",
+        "revision"
       ],
       "additionalProperties": true
     }
@@ -2392,12 +2966,26 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "comment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deleted": {
+          "type": "boolean"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "comment_id",
+        "revision",
+        "deleted"
       ],
       "additionalProperties": true
     }
@@ -2482,12 +3070,27 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "comment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 40
+        },
+        "active": {
+          "type": "boolean"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "comment_id",
+        "name",
+        "active"
       ],
       "additionalProperties": true
     }
@@ -2562,12 +3165,21 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "following": {
+          "type": "boolean"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "account_id",
+        "following"
       ],
       "additionalProperties": true
     }
@@ -2642,12 +3254,21 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "following": {
+          "type": "boolean"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "account_id",
+        "following"
       ],
       "additionalProperties": true
     }
@@ -2722,12 +3343,21 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "blocked": {
+          "type": "boolean"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "account_id",
+        "blocked"
       ],
       "additionalProperties": true
     }
@@ -2802,12 +3432,21 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "blocked": {
+          "type": "boolean"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "account_id",
+        "blocked"
       ],
       "additionalProperties": true
     }
@@ -2906,12 +3545,28 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "url": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "account_id",
+        "revision",
+        "url"
       ],
       "additionalProperties": true
     }
@@ -2986,12 +3641,21 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "notification_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "unread": {
+          "type": "boolean"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "notification_id",
+        "unread"
       ],
       "additionalProperties": true
     }
@@ -3082,12 +3746,28 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "repo": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "target_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "repo",
+        "name",
+        "target_sha"
       ],
       "additionalProperties": true
     }
@@ -3210,12 +3890,22 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "release_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "release_id",
+        "revision"
       ],
       "additionalProperties": true
     }
@@ -3335,12 +4025,22 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "release_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "release_id",
+        "revision"
       ],
       "additionalProperties": true
     }
@@ -3420,12 +4120,32 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "release_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "published_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "receipt": {
+          "type": "object"
+        },
+        "url": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "release_id",
+        "published_at",
+        "receipt",
+        "url"
       ],
       "additionalProperties": true
     }
@@ -3505,12 +4225,21 @@
             "revision"
           ],
           "additionalProperties": false
+        },
+        "release_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "deleted": {
+          "type": "boolean"
         }
       },
       "required": [
         "status",
         "app_id",
-        "version"
+        "version",
+        "release_id",
+        "deleted"
       ],
       "additionalProperties": true
     }

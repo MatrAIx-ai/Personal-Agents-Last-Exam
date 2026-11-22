@@ -33,12 +33,16 @@ function applyEvent(ctx, data, event) {
     }
     const comparison = store.graph.compareShas(data, payload.repo, branch.sha, pull.head_sha);
     if (!comparison.base_is_ancestor) {
+      const ancestorSha = comparison.merge_base;
+      if (!ancestorSha) fail('invalid_event', 'invalid_event: The branches have no common ancestor.');
+      const merged = store.graph.mergeTrees(
+        store.graph.treeAt(data, payload.repo, ancestorSha),
+        store.graph.treeAt(data, payload.repo, branch.sha),
+        store.graph.treeAt(data, pull.head_repo, pull.head_sha)
+      );
+      if (merged.conflict) fail('invalid_event', 'invalid_event: Merge would change ' + merged.conflict + ' on both sides.');
       const mergeSha = require('node:crypto').createHash('sha256').update(JSON.stringify({merge: pull.repo, number: pull.number, base: branch.sha, head: pull.head_sha})).digest('hex').slice(0, 12);
       if (!store.graph.commitBySha(data, payload.repo, mergeSha)) {
-        const headTree = store.graph.treeAt(data, pull.head_repo, pull.head_sha);
-        const baseTree = store.graph.treeAt(data, payload.repo, branch.sha);
-        const files = Object.entries(headTree).map(([path, file]) => ({path, content: file.binary ? '' : file.content, binary: !!file.binary}));
-        for (const path of Object.keys(baseTree)) if (!headTree[path]) files.push({path, content: null, binary: false});
         const commit = {
           sha: mergeSha,
           repo: payload.repo,
@@ -46,7 +50,7 @@ function applyEvent(ctx, data, event) {
           author_account_id: payload.actor_account_id,
           message: 'Merge pull request #' + pull.number + ' from ' + pull.head_repo + ':' + pull.head_branch,
           committed_at: at,
-          files,
+          files: merged.files,
           changed_lines: 0,
           paths: []
         };
@@ -60,7 +64,6 @@ function applyEvent(ctx, data, event) {
     branch.updated_at = at;
     pull.state = 'merged';
     pull.merged_at = at;
-    pull.base_sha = branch.sha;
     store.touch(ctx, pull);
     store.addTimeline(ctx, data, {repo: pull.repo, number: pull.number, actor_account_id: payload.actor_account_id, kind: 'merged', text: 'Merged.'});
     const who = actor(data, payload.actor_account_id);
@@ -160,6 +163,7 @@ function applyEvent(ctx, data, event) {
     const repo = store.repoOf(data, payload.repo);
     store.assertPush(data, repo, payload.actor_account_id);
     let release = payload.release_id ? store.releaseOf(data, payload.release_id) : null;
+    if (release && release.repo !== payload.repo) fail('invalid_event', 'invalid_event: Release ' + payload.release_id + ' belongs to ' + release.repo + '.');
     if (release && release.status === 'published') fail('already_published', 'already_published: Release is already published.');
     if (!release) {
       const tag = data.tags.find(item => item.repo === payload.repo && item.name === payload.tag);

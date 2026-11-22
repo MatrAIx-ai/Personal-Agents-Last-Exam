@@ -63,13 +63,78 @@ function lineChangeCount(beforeText, afterText) {
   return (before.length - shared) + (after.length - shared);
 }
 
+function editScript(before, after) {
+  const height = before.length;
+  const width = after.length;
+  if (height * width > 400000) {
+    return before.map(line => ({op: '-', line})).concat(after.map(line => ({op: '+', line})));
+  }
+  const scores = Array.from({length: height + 1}, () => new Array(width + 1).fill(0));
+  for (let row = height - 1; row >= 0; row -= 1) {
+    for (let column = width - 1; column >= 0; column -= 1) {
+      scores[row][column] = before[row] === after[column]
+        ? scores[row + 1][column + 1] + 1
+        : Math.max(scores[row + 1][column], scores[row][column + 1]);
+    }
+  }
+  const ops = [];
+  let row = 0;
+  let column = 0;
+  while (row < height && column < width) {
+    if (before[row] === after[column]) {
+      ops.push({op: ' ', line: before[row]});
+      row += 1;
+      column += 1;
+    } else if (scores[row + 1][column] >= scores[row][column + 1]) {
+      ops.push({op: '-', line: before[row]});
+      row += 1;
+    } else {
+      ops.push({op: '+', line: after[column]});
+      column += 1;
+    }
+  }
+  while (row < height) {
+    ops.push({op: '-', line: before[row]});
+    row += 1;
+  }
+  while (column < width) {
+    ops.push({op: '+', line: after[column]});
+    column += 1;
+  }
+  return ops;
+}
+
 function unified(path, beforeText, afterText) {
   const before = String(beforeText).split('\n');
   const after = String(afterText).split('\n');
-  const lines = ['--- a/' + path, '+++ b/' + path];
-  for (const line of before) if (!after.includes(line)) lines.push('-' + line);
-  for (const line of after) if (!before.includes(line)) lines.push('+' + line);
-  return lines.join('\n');
+  const body = editScript(before, after).map(item => item.op + item.line);
+  return ['--- a/' + path, '+++ b/' + path, '@@ -1,' + before.length + ' +1,' + after.length + ' @@', ...body].join('\n');
+}
+
+function sameFile(left, right) {
+  return JSON.stringify(left || null) === JSON.stringify(right || null);
+}
+
+function mergeTrees(ancestor, base, head) {
+  const paths = [...new Set([...Object.keys(ancestor), ...Object.keys(base), ...Object.keys(head)])].sort();
+  const tree = {};
+  for (const path of paths) {
+    const left = ancestor[path] || null;
+    const current = base[path] || null;
+    const incoming = head[path] || null;
+    const baseChanged = !sameFile(left, current);
+    const headChanged = !sameFile(left, incoming);
+    if (baseChanged && headChanged && !sameFile(current, incoming)) return {conflict: path};
+    const chosen = headChanged ? incoming : current;
+    if (chosen) tree[path] = chosen;
+  }
+  const files = [];
+  for (const path of [...new Set([...Object.keys(base), ...Object.keys(tree)])].sort()) {
+    if (sameFile(base[path], tree[path])) continue;
+    const file = tree[path];
+    files.push(file ? {path, content: file.binary ? '' : file.content, binary: !!file.binary} : {path, content: null, binary: false});
+  }
+  return {conflict: null, tree, files};
 }
 
 function diffTrees(before, after) {
@@ -139,5 +204,5 @@ function resolveRef(data, repo, ref) {
 
 module.exports = {
   commitsFor, commitBySha, requireCommit, reachable, treeAt, lineChangeCount,
-  diffTrees, commitStat, compareShas, resolveRef, mergeBase
+  diffTrees, commitStat, compareShas, resolveRef, mergeBase, mergeTrees, unified
 };

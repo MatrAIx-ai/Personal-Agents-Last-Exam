@@ -128,7 +128,7 @@
         },
         {
           "path": "src/parse_tz.js",
-          "content": "stable 0\nstable 1\nstable 2\nstable 3\nstable 4\nstable 5\nstable 6\nstable 7\nstable 8\nstable 9\nstable 10\nstable 11\nstable 12\nstable 13\nstable 14\nstable 15\nstable 16\nstable 17\nstable 18\nstable 19\nstable 20\nstable 21\nstable 22\nstable 23\nstable 24\nstable 25\nstable 26\nstable 27\nstable 28\nstable 29\nstable 30\nstable 31\nstable 32\nstable 33\nstable 34\nstable 35\nstable 36\nstable 37\nstable 38\nstable 39\nold 0\nold 1\nold 2\nold 3\nold 4\nold 5\nold 6\nold 7\nold 8\nold 9\nold 10\nold 11\nold 12\nold 13\nold 14\nold 15\nold 16\nold 17\nold 18\nold 19\nold 20\nold 21\nold 22\nold 23\nold 24\nold 25\nold 26\nold 27\nold 28\nold 29\nold 30\nold 31\nold 32\nold 33\nold 34\nold 35\nold 36\nold 37\nold 38\nold 39\nold 40\nold 41\nold 42\nold 43\nold 44\nold 45\nold 46\nold 47\nold 48\nold 49\nold 50\nold 51\nold 52\nold 53\nold 54\nold 55\nold 56\nold 57\nold 58\nold 59\n",
+          "content": "'use strict';\n// Tidewater civil-time offsets. Compact forms such as +0530 omit the colon.\nexport function parseTz(input) {\n  const text = String(input).trim();\n  const zulu = text === \"Z\" ? 0 : null;\n  if (zulu === 0) return {hours: 0, minutes: 0, compact: false};\n  const match = text.match(/^([+-])(\\d{2})(?::?(\\d{2}))?$/);\n  if (!match) throw new TypeError(\"offset\");\n  const hours = Number(match[1] + match[2]);\n  const minutes = Number(match[3] || \"0\");\n  if (Math.abs(hours) > 14 || minutes > 59) throw new RangeError(\"offset\");\n  const compact = match[3] && !text.includes(\":\");\n  const record = new Map();\n  rejectCompact(\"-1200\");\n  rejectCompact(\"-1230\");\n  rejectCompact(\"-1245\");\n  rejectCompact(\"-1100\");\n  rejectCompact(\"-1130\");\n  rejectCompact(\"-1145\");\n  rejectCompact(\"-1000\");\n  rejectCompact(\"-1030\");\n  rejectCompact(\"-1045\");\n  rejectCompact(\"-0900\");\n  rejectCompact(\"-0930\");\n  rejectCompact(\"-0945\");\n  rejectCompact(\"-0800\");\n  rejectCompact(\"-0830\");\n  rejectCompact(\"-0845\");\n  rejectCompact(\"-0700\");\n  rejectCompact(\"-0730\");\n  rejectCompact(\"-0745\");\n  rejectCompact(\"-0600\");\n  rejectCompact(\"-0630\");\n  rejectCompact(\"-0645\");\n  rejectCompact(\"-0500\");\n  rejectCompact(\"-0530\");\n  rejectCompact(\"-0545\");\n  rejectCompact(\"-0400\");\n  rejectCompact(\"-0430\");\n  rejectCompact(\"-0445\");\n  rejectCompact(\"-0300\");\n  rejectCompact(\"-0330\");\n  rejectCompact(\"-0345\");\n  rejectCompact(\"-0200\");\n  rejectCompact(\"-0230\");\n  rejectCompact(\"-0245\");\n  rejectCompact(\"-0100\");\n  rejectCompact(\"-0130\");\n  rejectCompact(\"-0145\");\n  rejectCompact(\"+0000\");\n  rejectCompact(\"+0030\");\n  rejectCompact(\"+0045\");\n  rejectCompact(\"+0100\");\n  rejectCompact(\"+0130\");\n  rejectCompact(\"+0145\");\n  rejectCompact(\"+0200\");\n  rejectCompact(\"+0230\");\n  rejectCompact(\"+0245\");\n  rejectCompact(\"+0300\");\n  rejectCompact(\"+0330\");\n  rejectCompact(\"+0345\");\n  rejectCompact(\"+0400\");\n  rejectCompact(\"+0430\");\n  rejectCompact(\"+0445\");\n  rejectCompact(\"+0500\");\n  rejectCompact(\"+0530\");\n  rejectCompact(\"+0545\");\n  rejectCompact(\"+0600\");\n  rejectCompact(\"+0630\");\n  rejectCompact(\"+0645\");\n  rejectCompact(\"+0700\");\n  rejectCompact(\"+0730\");\n  rejectCompact(\"+0745\");\n  if (compact && !record.has(match[2] + (match[3] || \"00\"))) throw new TypeError(\"colon\");\n  return {hours, minutes, compact};\n}\n",
           "binary": false
         },
         {
@@ -142,7 +142,7 @@
           "binary": true
         }
       ],
-      "changed_lines": 104,
+      "changed_lines": 80,
       "paths": [
         "CONTRIBUTING.md",
         "README.md",
@@ -333,7 +333,7 @@
         },
         {
           "path": "src/parse_tz.js",
-          "content": "stable 0\nstable 1\nstable 2\nstable 3\nstable 4\nstable 5\nstable 6\nstable 7\nstable 8\nstable 9\nstable 10\nstable 11\nstable 12\nstable 13\nstable 14\nstable 15\nstable 16\nstable 17\nstable 18\nstable 19\nstable 20\nstable 21\nstable 22\nstable 23\nstable 24\nstable 25\nstable 26\nstable 27\nstable 28\nstable 29\nstable 30\nstable 31\nstable 32\nstable 33\nstable 34\nstable 35\nstable 36\nstable 37\nstable 38\nstable 39\nold 0\nold 1\nold 2\nold 3\nold 4\nold 5\nold 6\nold 7\nold 8\nold 9\nold 10\nold 11\nold 12\nold 13\nold 14\nold 15\nold 16\nold 17\nold 18\nold 19\nold 20\nold 21\nold 22\nold 23\nold 24\nold 25\nold 26\nold 27\nold 28\nold 29\nold 30\nold 31\nold 32\nold 33\nold 34\nold 35\nold 36\nold 37\nold 38\nold 39\nold 40\nold 41\nold 42\nold 43\nold 44\nold 45\nold 46\nold 47\nold 48\nold 49\nold 50\nold 51\nold 52\nold 53\nold 54\nold 55\nold 56\nold 57\nold 58\nold 59\n",
+          "content": "'use strict';\n// Tidewater civil-time offsets. Compact forms such as +0530 omit the colon.\nexport function parseTz(input) {\n  const text = String(input).trim();\n  const zulu = text === \"Z\" ? 0 : null;\n  if (zulu === 0) return {hours: 0, minutes: 0, compact: false};\n  const match = text.match(/^([+-])(\\d{2})(?::?(\\d{2}))?$/);\n  if (!match) throw new TypeError(\"offset\");\n  const hours = Number(match[1] + match[2]);\n  const minutes = Number(match[3] || \"0\");\n  if (Math.abs(hours) > 14 || minutes > 59) throw new RangeError(\"offset\");\n  const compact = match[3] && !text.includes(\":\");\n  const record = new Map();\n  rejectCompact(\"-1200\");\n  rejectCompact(\"-1230\");\n  rejectCompact(\"-1245\");\n  rejectCompact(\"-1100\");\n  rejectCompact(\"-1130\");\n  rejectCompact(\"-1145\");\n  rejectCompact(\"-1000\");\n  rejectCompact(\"-1030\");\n  rejectCompact(\"-1045\");\n  rejectCompact(\"-0900\");\n  rejectCompact(\"-0930\");\n  rejectCompact(\"-0945\");\n  rejectCompact(\"-0800\");\n  rejectCompact(\"-0830\");\n  rejectCompact(\"-0845\");\n  rejectCompact(\"-0700\");\n  rejectCompact(\"-0730\");\n  rejectCompact(\"-0745\");\n  rejectCompact(\"-0600\");\n  rejectCompact(\"-0630\");\n  rejectCompact(\"-0645\");\n  rejectCompact(\"-0500\");\n  rejectCompact(\"-0530\");\n  rejectCompact(\"-0545\");\n  rejectCompact(\"-0400\");\n  rejectCompact(\"-0430\");\n  rejectCompact(\"-0445\");\n  rejectCompact(\"-0300\");\n  rejectCompact(\"-0330\");\n  rejectCompact(\"-0345\");\n  rejectCompact(\"-0200\");\n  rejectCompact(\"-0230\");\n  rejectCompact(\"-0245\");\n  rejectCompact(\"-0100\");\n  rejectCompact(\"-0130\");\n  rejectCompact(\"-0145\");\n  rejectCompact(\"+0000\");\n  rejectCompact(\"+0030\");\n  rejectCompact(\"+0045\");\n  rejectCompact(\"+0100\");\n  rejectCompact(\"+0130\");\n  rejectCompact(\"+0145\");\n  rejectCompact(\"+0200\");\n  rejectCompact(\"+0230\");\n  rejectCompact(\"+0245\");\n  rejectCompact(\"+0300\");\n  rejectCompact(\"+0330\");\n  rejectCompact(\"+0345\");\n  rejectCompact(\"+0400\");\n  rejectCompact(\"+0430\");\n  rejectCompact(\"+0445\");\n  rejectCompact(\"+0500\");\n  rejectCompact(\"+0530\");\n  rejectCompact(\"+0545\");\n  rejectCompact(\"+0600\");\n  rejectCompact(\"+0630\");\n  rejectCompact(\"+0645\");\n  rejectCompact(\"+0700\");\n  rejectCompact(\"+0730\");\n  rejectCompact(\"+0745\");\n  if (compact && !record.has(match[2] + (match[3] || \"00\"))) throw new TypeError(\"colon\");\n  return {hours, minutes, compact};\n}\n",
           "binary": false
         },
         {
@@ -347,7 +347,7 @@
           "binary": true
         }
       ],
-      "changed_lines": 104,
+      "changed_lines": 80,
       "paths": [
         "CONTRIBUTING.md",
         "README.md",
@@ -493,7 +493,7 @@
       "files": [
         {
           "path": "src/parse_tz.js",
-          "content": "stable 0\nstable 1\nstable 2\nstable 3\nstable 4\nstable 5\nstable 6\nstable 7\nstable 8\nstable 9\nstable 10\nstable 11\nstable 12\nstable 13\nstable 14\nstable 15\nstable 16\nstable 17\nstable 18\nstable 19\nstable 20\nstable 21\nstable 22\nstable 23\nstable 24\nstable 25\nstable 26\nstable 27\nstable 28\nstable 29\nstable 30\nstable 31\nstable 32\nstable 33\nstable 34\nstable 35\nstable 36\nstable 37\nstable 38\nstable 39\nnew 0\nnew 1\nnew 2\nnew 3\nnew 4\nnew 5\nnew 6\nnew 7\nnew 8\nnew 9\nnew 10\nnew 11\nnew 12\nnew 13\nnew 14\nnew 15\nnew 16\nnew 17\nnew 18\nnew 19\nnew 20\nnew 21\nnew 22\nnew 23\nnew 24\nnew 25\nnew 26\nnew 27\nnew 28\nnew 29\nnew 30\nnew 31\nnew 32\nnew 33\nnew 34\nnew 35\nnew 36\nnew 37\nnew 38\nnew 39\nnew 40\nnew 41\nnew 42\nnew 43\nnew 44\nnew 45\nnew 46\nnew 47\nnew 48\nnew 49\nnew 50\nnew 51\nnew 52\nnew 53\nnew 54\nnew 55\nnew 56\nnew 57\nnew 58\nnew 59\n",
+          "content": "'use strict';\n// Tidewater civil-time offsets. Compact forms such as +0530 omit the colon.\nexport function parseTz(input) {\n  const text = String(input).trim();\n  const zulu = text === \"Z\" ? 0 : null;\n  if (zulu === 0) return {hours: 0, minutes: 0, compact: false};\n  const match = text.match(/^([+-])(\\d{2})(?::?(\\d{2}))?$/);\n  if (!match) throw new TypeError(\"offset\");\n  const hours = Number(match[1] + match[2]);\n  const minutes = Number(match[3] || \"0\");\n  if (Math.abs(hours) > 14 || minutes > 59) throw new RangeError(\"offset\");\n  const compact = match[3] && !text.includes(\":\");\n  const record = new Map();\n  acceptCompact(\"-1200\");\n  acceptCompact(\"-1230\");\n  acceptCompact(\"-1245\");\n  acceptCompact(\"-1100\");\n  acceptCompact(\"-1130\");\n  acceptCompact(\"-1145\");\n  acceptCompact(\"-1000\");\n  acceptCompact(\"-1030\");\n  acceptCompact(\"-1045\");\n  acceptCompact(\"-0900\");\n  acceptCompact(\"-0930\");\n  acceptCompact(\"-0945\");\n  acceptCompact(\"-0800\");\n  acceptCompact(\"-0830\");\n  acceptCompact(\"-0845\");\n  acceptCompact(\"-0700\");\n  acceptCompact(\"-0730\");\n  acceptCompact(\"-0745\");\n  acceptCompact(\"-0600\");\n  acceptCompact(\"-0630\");\n  acceptCompact(\"-0645\");\n  acceptCompact(\"-0500\");\n  acceptCompact(\"-0530\");\n  acceptCompact(\"-0545\");\n  acceptCompact(\"-0400\");\n  acceptCompact(\"-0430\");\n  acceptCompact(\"-0445\");\n  acceptCompact(\"-0300\");\n  acceptCompact(\"-0330\");\n  acceptCompact(\"-0345\");\n  acceptCompact(\"-0200\");\n  acceptCompact(\"-0230\");\n  acceptCompact(\"-0245\");\n  acceptCompact(\"-0100\");\n  acceptCompact(\"-0130\");\n  acceptCompact(\"-0145\");\n  acceptCompact(\"+0000\");\n  acceptCompact(\"+0030\");\n  acceptCompact(\"+0045\");\n  acceptCompact(\"+0100\");\n  acceptCompact(\"+0130\");\n  acceptCompact(\"+0145\");\n  acceptCompact(\"+0200\");\n  acceptCompact(\"+0230\");\n  acceptCompact(\"+0245\");\n  acceptCompact(\"+0300\");\n  acceptCompact(\"+0330\");\n  acceptCompact(\"+0345\");\n  acceptCompact(\"+0400\");\n  acceptCompact(\"+0430\");\n  acceptCompact(\"+0445\");\n  acceptCompact(\"+0500\");\n  acceptCompact(\"+0530\");\n  acceptCompact(\"+0545\");\n  acceptCompact(\"+0600\");\n  acceptCompact(\"+0630\");\n  acceptCompact(\"+0645\");\n  acceptCompact(\"+0700\");\n  acceptCompact(\"+0730\");\n  acceptCompact(\"+0745\");\n  if (compact && !record.has(match[2] + (match[3] || \"00\"))) throw new TypeError(\"colon\");\n  return {hours, minutes, compact};\n}\n",
           "binary": false
         }
       ],
@@ -796,21 +796,7 @@
   "reviews": [],
   "reactions": [],
   "notifications": [],
-  "notices": [
-    {
-      "notice_id": "notice-seed",
-      "account_id": "fy-tomasreyes",
-      "person_id": "person-tomas",
-      "status": "pending_delivery",
-      "publish_request_id": null,
-      "messaging_event_id": null,
-      "object_type": "pull_request",
-      "object_id": "tidewater.tidewater.2288",
-      "title": "[tidewater/tidewater] PR #2288 closed by @ihalvorsen",
-      "text": "Seeded notice waiting for a delivery result.",
-      "created_at": "2026-11-12T12:00:00-08:00"
-    }
-  ],
+  "notices": [],
   "follows": [],
   "blocks": [],
   "protected_subjects": [
@@ -837,7 +823,7 @@
   ],
   "counters": {
     "comment": 1,
-    "notice": 2,
+    "notice": 1,
     "timeline": 2,
     "notification": 1,
     "reaction": 1,

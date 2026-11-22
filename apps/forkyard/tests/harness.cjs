@@ -70,7 +70,10 @@ function fixture({logging=true, seed, binding, now}={}) {
       return transaction(() => {
         assert.ok(eventValid(event), 'Event schema');
         const out=plugin.applyEvent({...ctx,role:'infra'},structuredClone(data),structuredClone(event));
-        validate(out);data=out;ctx.virtual_now=event.at;return structuredClone(data);
+        const previous = ctx.virtual_now;
+        ctx.virtual_now = event.at;
+        try { validate(out); } catch (error) { ctx.virtual_now = previous; throw error; }
+        data=out;return structuredClone(data);
       });
     }
   };

@@ -21,13 +21,42 @@
       "account_id": "acc-ihalvorsen",
       "handle": "ihalvorsen",
       "display_name": "Ingrid Halvorsen",
-      "bio": "Maintainer of tidewater. Volunteer, Pacific Time.",
+      "bio": "Maintainer of tidewater. Volunteer, Pacific Time. Two years of public review notes.",
       "location": "Oakland",
       "links": [
-        "https://example.com/ingrid-halvorsen"
+        "https://example.com/ingrid-halvorsen",
+        "https://example.com/tidewater-notes"
       ],
       "kind": "person",
       "person_id": "person-ingrid",
+      "revision": 1,
+      "created_at": "2024-01-15T09:00:00-08:00"
+    },
+    {
+      "account_id": "acc-praman",
+      "handle": "praman",
+      "display_name": "Priya Raman",
+      "bio": "Tidewater maintainer. Works on calendar and weekday helpers.",
+      "location": "Oakland",
+      "links": [
+        "https://example.com/priya-raman"
+      ],
+      "kind": "person",
+      "person_id": "person-priya",
+      "revision": 1,
+      "created_at": "2024-01-15T09:00:00-08:00"
+    },
+    {
+      "account_id": "acc-msolis",
+      "handle": "msolis",
+      "display_name": "Mateo Solis",
+      "bio": "Tidewater maintainer. Works on duration and offset helpers.",
+      "location": "Oakland",
+      "links": [
+        "https://example.com/mateo-solis"
+      ],
+      "kind": "person",
+      "person_id": "person-mateo",
       "revision": 1,
       "created_at": "2024-01-15T09:00:00-08:00"
     },
@@ -70,10 +99,18 @@
         {
           "account_id": "acc-ihalvorsen",
           "role": "owner"
+        },
+        {
+          "account_id": "acc-praman",
+          "role": "maintainer"
+        },
+        {
+          "account_id": "acc-msolis",
+          "role": "maintainer"
         }
       ],
       "created_at": "2024-02-01T09:00:00-08:00",
-      "updated_at": "2026-02-09T15:00:00-08:00"
+      "updated_at": "2024-02-01T09:00:00-08:00"
     },
     {
       "repo": "tomasreyes/tidewater",
@@ -90,45 +127,22 @@
           "role": "owner"
         }
       ],
-      "created_at": "2026-02-08T12:00:00-08:00",
-      "updated_at": "2026-02-08T12:00:00-08:00"
-    },
-    {
-      "repo": "ingrid/fieldnotes",
-      "description": "A second fictional repository, ready to fork.",
-      "status": "active",
-      "default_branch": "main",
-      "contributing_text": "Be kind. Maintainers are volunteers.\n",
-      "reopen_policy": "maintainers_only",
-      "interaction_limit": null,
-      "blocked_accounts": [],
-      "roles": [
-        {
-          "account_id": "acc-ihalvorsen",
-          "role": "owner"
-        }
-      ],
-      "created_at": "2026-01-02T09:00:00-08:00",
-      "updated_at": "2026-01-02T09:00:00-08:00"
+      "created_at": "2026-02-01T12:00:00-08:00",
+      "updated_at": "2026-02-01T12:00:00-08:00"
     }
   ],
   "commits": [
     {
-      "sha": "77aa310",
+      "sha": "a000000",
       "repo": "tidewater/tidewater",
       "parents": [],
       "author_account_id": "acc-ihalvorsen",
-      "message": "Initial tidewater tree",
-      "committed_at": "2026-01-02T09:00:00-08:00",
+      "message": "Initial tidewater library",
+      "committed_at": "2024-02-01T09:00:00-08:00",
       "files": [
         {
           "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\n",
-          "binary": false
-        },
-        {
-          "path": "src/parse_tz.js",
-          "content": "stable 0\nstable 1\nstable 2\nstable 3\nstable 4\nstable 5\nstable 6\nstable 7\nstable 8\nstable 9\nstable 10\nstable 11\nstable 12\nstable 13\nstable 14\nstable 15\nstable 16\nstable 17\nstable 18\nstable 19\nstable 20\nstable 21\nstable 22\nstable 23\nstable 24\nstable 25\nstable 26\nstable 27\nstable 28\nstable 29\nstable 30\nstable 31\nstable 32\nstable 33\nstable 34\nstable 35\nstable 36\nstable 37\nstable 38\nstable 39\nold 0\nold 1\nold 2\nold 3\nold 4\nold 5\nold 6\nold 7\nold 8\nold 9\nold 10\nold 11\nold 12\nold 13\nold 14\nold 15\nold 16\nold 17\nold 18\nold 19\nold 20\nold 21\nold 22\nold 23\nold 24\nold 25\nold 26\nold 27\nold 28\nold 29\nold 30\nold 31\nold 32\nold 33\nold 34\nold 35\nold 36\nold 37\nold 38\nold 39\nold 40\nold 41\nold 42\nold 43\nold 44\nold 45\nold 46\nold 47\nold 48\nold 49\nold 50\nold 51\nold 52\nold 53\nold 54\nold 55\nold 56\nold 57\nold 58\nold 59\n",
+          "content": "# Tidewater\n\nTidewater parses civil times and numeric offsets for fictional scheduling tools.\n\n`parseTz(\"+0530\")` accepts an offset that omits the colon.\n",
           "binary": false
         },
         {
@@ -137,203 +151,887 @@
           "binary": false
         },
         {
-          "path": "logo.bin",
-          "content": "",
-          "binary": true
-        }
-      ],
-      "changed_lines": 104,
-      "paths": [
-        "CONTRIBUTING.md",
-        "README.md",
-        "logo.bin",
-        "src/parse_tz.js"
-      ]
-    },
-    {
-      "sha": "a100001",
-      "repo": "tidewater/tidewater",
-      "parents": [
-        "77aa310"
-      ],
-      "author_account_id": "acc-ihalvorsen",
-      "message": "Tidewater note 1",
-      "committed_at": "2026-01-03T09:00:00-08:00",
-      "files": [
-        {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\nNote 1\n",
+          "path": "LICENSE",
+          "content": "Synthetic MIT license for the fictional Tidewater project. The people and the code are invented.\n",
           "binary": false
-        }
-      ],
-      "changed_lines": 1,
-      "paths": [
-        "README.md"
-      ]
-    },
-    {
-      "sha": "a100002",
-      "repo": "tidewater/tidewater",
-      "parents": [
-        "a100001"
-      ],
-      "author_account_id": "acc-ihalvorsen",
-      "message": "Tidewater note 2",
-      "committed_at": "2026-01-04T09:00:00-08:00",
-      "files": [
+        },
         {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\nNote 2\n",
+          "path": "package.json",
+          "content": "{\n  \"name\": \"tidewater\",\n  \"version\": \"0.9.0\",\n  \"private\": true,\n  \"type\": \"module\"\n}\n",
           "binary": false
-        }
-      ],
-      "changed_lines": 2,
-      "paths": [
-        "README.md"
-      ]
-    },
-    {
-      "sha": "a100003",
-      "repo": "tidewater/tidewater",
-      "parents": [
-        "a100002"
-      ],
-      "author_account_id": "acc-ihalvorsen",
-      "message": "Tidewater note 3",
-      "committed_at": "2026-01-05T09:00:00-08:00",
-      "files": [
+        },
         {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\nNote 3\n",
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n",
           "binary": false
-        }
-      ],
-      "changed_lines": 2,
-      "paths": [
-        "README.md"
-      ]
-    },
-    {
-      "sha": "a100004",
-      "repo": "tidewater/tidewater",
-      "parents": [
-        "a100003"
-      ],
-      "author_account_id": "acc-ihalvorsen",
-      "message": "Tidewater note 4",
-      "committed_at": "2026-01-06T09:00:00-08:00",
-      "files": [
+        },
         {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\nNote 4\n",
-          "binary": false
-        }
-      ],
-      "changed_lines": 2,
-      "paths": [
-        "README.md"
-      ]
-    },
-    {
-      "sha": "a100005",
-      "repo": "tidewater/tidewater",
-      "parents": [
-        "a100004"
-      ],
-      "author_account_id": "acc-ihalvorsen",
-      "message": "Tidewater note 5",
-      "committed_at": "2026-01-07T09:00:00-08:00",
-      "files": [
-        {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\nNote 5\n",
-          "binary": false
-        }
-      ],
-      "changed_lines": 2,
-      "paths": [
-        "README.md"
-      ]
-    },
-    {
-      "sha": "c41f2a0",
-      "repo": "tidewater/tidewater",
-      "parents": [
-        "a100005"
-      ],
-      "author_account_id": "acc-ihalvorsen",
-      "message": "Tidewater note 6",
-      "committed_at": "2026-01-08T09:00:00-08:00",
-      "files": [
-        {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\nNote 6\n",
-          "binary": false
-        }
-      ],
-      "changed_lines": 2,
-      "paths": [
-        "README.md"
-      ]
-    },
-    {
-      "sha": "b200001",
-      "repo": "tidewater/tidewater",
-      "parents": [
-        "77aa310"
-      ],
-      "author_account_id": "acc-ihalvorsen",
-      "message": "Side note",
-      "committed_at": "2026-01-10T09:00:00-08:00",
-      "files": [
-        {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\nSide note\n",
-          "binary": false
-        }
-      ],
-      "changed_lines": 1,
-      "paths": [
-        "README.md"
-      ]
-    },
-    {
-      "sha": "9be0d11",
-      "repo": "tidewater/tidewater",
-      "parents": [
-        "b200001"
-      ],
-      "author_account_id": "acc-ihalvorsen",
-      "message": "Release line 0.8.2",
-      "committed_at": "2026-01-11T09:00:00-08:00",
-      "files": [
-        {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\nSide note\nPatch\n",
-          "binary": false
-        }
-      ],
-      "changed_lines": 1,
-      "paths": [
-        "README.md"
-      ]
-    },
-    {
-      "sha": "77aa310",
-      "repo": "tomasreyes/tidewater",
-      "parents": [],
-      "author_account_id": "acc-ihalvorsen",
-      "message": "Initial tidewater tree",
-      "committed_at": "2026-01-02T09:00:00-08:00",
-      "files": [
-        {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\n",
+          "path": "CODEOWNERS",
+          "content": "* @ihalvorsen @praman @msolis\nsrc/parse_tz.js @ihalvorsen\n",
           "binary": false
         },
         {
           "path": "src/parse_tz.js",
-          "content": "stable 0\nstable 1\nstable 2\nstable 3\nstable 4\nstable 5\nstable 6\nstable 7\nstable 8\nstable 9\nstable 10\nstable 11\nstable 12\nstable 13\nstable 14\nstable 15\nstable 16\nstable 17\nstable 18\nstable 19\nstable 20\nstable 21\nstable 22\nstable 23\nstable 24\nstable 25\nstable 26\nstable 27\nstable 28\nstable 29\nstable 30\nstable 31\nstable 32\nstable 33\nstable 34\nstable 35\nstable 36\nstable 37\nstable 38\nstable 39\nold 0\nold 1\nold 2\nold 3\nold 4\nold 5\nold 6\nold 7\nold 8\nold 9\nold 10\nold 11\nold 12\nold 13\nold 14\nold 15\nold 16\nold 17\nold 18\nold 19\nold 20\nold 21\nold 22\nold 23\nold 24\nold 25\nold 26\nold 27\nold 28\nold 29\nold 30\nold 31\nold 32\nold 33\nold 34\nold 35\nold 36\nold 37\nold 38\nold 39\nold 40\nold 41\nold 42\nold 43\nold 44\nold 45\nold 46\nold 47\nold 48\nold 49\nold 50\nold 51\nold 52\nold 53\nold 54\nold 55\nold 56\nold 57\nold 58\nold 59\n",
+          "content": "'use strict';\n// Tidewater civil-time offsets. Compact forms such as +0530 omit the colon.\nexport function parseTz(input) {\n  const text = String(input).trim();\n  const zulu = text === \"Z\" ? 0 : null;\n  if (zulu === 0) return {hours: 0, minutes: 0, compact: false};\n  const match = text.match(/^([+-])(\\d{2})(?::?(\\d{2}))?$/);\n  if (!match) throw new TypeError(\"offset\");\n  const hours = Number(match[1] + match[2]);\n  const minutes = Number(match[3] || \"0\");\n  if (Math.abs(hours) > 14 || minutes > 59) throw new RangeError(\"offset\");\n  const compact = match[3] && !text.includes(\":\");\n  const record = new Map();\n  rejectCompact(\"-1200\");\n  rejectCompact(\"-1230\");\n  rejectCompact(\"-1245\");\n  rejectCompact(\"-1100\");\n  rejectCompact(\"-1130\");\n  rejectCompact(\"-1145\");\n  rejectCompact(\"-1000\");\n  rejectCompact(\"-1030\");\n  rejectCompact(\"-1045\");\n  rejectCompact(\"-0900\");\n  rejectCompact(\"-0930\");\n  rejectCompact(\"-0945\");\n  rejectCompact(\"-0800\");\n  rejectCompact(\"-0830\");\n  rejectCompact(\"-0845\");\n  rejectCompact(\"-0700\");\n  rejectCompact(\"-0730\");\n  rejectCompact(\"-0745\");\n  rejectCompact(\"-0600\");\n  rejectCompact(\"-0630\");\n  rejectCompact(\"-0645\");\n  rejectCompact(\"-0500\");\n  rejectCompact(\"-0530\");\n  rejectCompact(\"-0545\");\n  rejectCompact(\"-0400\");\n  rejectCompact(\"-0430\");\n  rejectCompact(\"-0445\");\n  rejectCompact(\"-0300\");\n  rejectCompact(\"-0330\");\n  rejectCompact(\"-0345\");\n  rejectCompact(\"-0200\");\n  rejectCompact(\"-0230\");\n  rejectCompact(\"-0245\");\n  rejectCompact(\"-0100\");\n  rejectCompact(\"-0130\");\n  rejectCompact(\"-0145\");\n  rejectCompact(\"+0000\");\n  rejectCompact(\"+0030\");\n  rejectCompact(\"+0045\");\n  rejectCompact(\"+0100\");\n  rejectCompact(\"+0130\");\n  rejectCompact(\"+0145\");\n  rejectCompact(\"+0200\");\n  rejectCompact(\"+0230\");\n  rejectCompact(\"+0245\");\n  rejectCompact(\"+0300\");\n  rejectCompact(\"+0330\");\n  rejectCompact(\"+0345\");\n  rejectCompact(\"+0400\");\n  rejectCompact(\"+0430\");\n  rejectCompact(\"+0445\");\n  rejectCompact(\"+0500\");\n  rejectCompact(\"+0530\");\n  rejectCompact(\"+0545\");\n  rejectCompact(\"+0600\");\n  rejectCompact(\"+0630\");\n  rejectCompact(\"+0645\");\n  rejectCompact(\"+0700\");\n  rejectCompact(\"+0730\");\n  rejectCompact(\"+0745\");\n  if (compact && !record.has(match[2] + (match[3] || \"00\"))) throw new TypeError(\"colon\");\n  return {hours, minutes, compact};\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/parse_tz.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/parse_tz.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/parse_date.js",
+          "content": "'use strict';\n// parse_date helpers for the fictional Tidewater library.\nexport function parseDate(value) {\n  if (value == null || value === \"\") throw new TypeError(\"parse_date\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/parse_date.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/parse_date.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/format.js",
+          "content": "'use strict';\n// format helpers for the fictional Tidewater library.\nexport function format(value) {\n  if (value == null || value === \"\") throw new TypeError(\"format\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/format.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/format.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/offset.js",
+          "content": "'use strict';\n// offset helpers for the fictional Tidewater library.\nexport function offset(value) {\n  if (value == null || value === \"\") throw new TypeError(\"offset\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/offset.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/offset.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/calendar.js",
+          "content": "'use strict';\n// calendar helpers for the fictional Tidewater library.\nexport function calendar(value) {\n  if (value == null || value === \"\") throw new TypeError(\"calendar\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/calendar.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/calendar.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/weekday.js",
+          "content": "'use strict';\n// weekday helpers for the fictional Tidewater library.\nexport function weekday(value) {\n  if (value == null || value === \"\") throw new TypeError(\"weekday\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/weekday.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/weekday.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/duration.js",
+          "content": "'use strict';\n// duration helpers for the fictional Tidewater library.\nexport function duration(value) {\n  if (value == null || value === \"\") throw new TypeError(\"duration\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/duration.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/duration.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/iso.js",
+          "content": "'use strict';\n// iso helpers for the fictional Tidewater library.\nexport function iso(value) {\n  if (value == null || value === \"\") throw new TypeError(\"iso\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/iso.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/iso.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/rfc3339.js",
+          "content": "'use strict';\n// rfc3339 helpers for the fictional Tidewater library.\nexport function rfc3339(value) {\n  if (value == null || value === \"\") throw new TypeError(\"rfc3339\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/rfc3339.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/rfc3339.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/zone.js",
+          "content": "'use strict';\n// zone helpers for the fictional Tidewater library.\nexport function zone(value) {\n  if (value == null || value === \"\") throw new TypeError(\"zone\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/zone.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/zone.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/index.js",
+          "content": "'use strict';\n// index helpers for the fictional Tidewater library.\nexport function index(value) {\n  if (value == null || value === \"\") throw new TypeError(\"index\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/index.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/index.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/errors.js",
+          "content": "'use strict';\n// errors helpers for the fictional Tidewater library.\nexport function errors(value) {\n  if (value == null || value === \"\") throw new TypeError(\"errors\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/errors.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/errors.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/tokens.js",
+          "content": "'use strict';\n// tokens helpers for the fictional Tidewater library.\nexport function tokens(value) {\n  if (value == null || value === \"\") throw new TypeError(\"tokens\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/tokens.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/tokens.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/leap.js",
+          "content": "'use strict';\n// leap helpers for the fictional Tidewater library.\nexport function leap(value) {\n  if (value == null || value === \"\") throw new TypeError(\"leap\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/leap.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/leap.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/clock.js",
+          "content": "'use strict';\n// clock helpers for the fictional Tidewater library.\nexport function clock(value) {\n  if (value == null || value === \"\") throw new TypeError(\"clock\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/clock.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/clock.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/range.js",
+          "content": "'use strict';\n// range helpers for the fictional Tidewater library.\nexport function range(value) {\n  if (value == null || value === \"\") throw new TypeError(\"range\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/range.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/range.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/instant.js",
+          "content": "'use strict';\n// instant helpers for the fictional Tidewater library.\nexport function instant(value) {\n  if (value == null || value === \"\") throw new TypeError(\"instant\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/instant.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/instant.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/period.js",
+          "content": "'use strict';\n// period helpers for the fictional Tidewater library.\nexport function period(value) {\n  if (value == null || value === \"\") throw new TypeError(\"period\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/period.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/period.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/week.js",
+          "content": "'use strict';\n// week helpers for the fictional Tidewater library.\nexport function week(value) {\n  if (value == null || value === \"\") throw new TypeError(\"week\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/week.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/week.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/month.js",
+          "content": "'use strict';\n// month helpers for the fictional Tidewater library.\nexport function month(value) {\n  if (value == null || value === \"\") throw new TypeError(\"month\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/month.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/month.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/fold.js",
+          "content": "'use strict';\n// fold helpers for the fictional Tidewater library.\nexport function fold(value) {\n  if (value == null || value === \"\") throw new TypeError(\"fold\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/fold.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/fold.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/compare.js",
+          "content": "'use strict';\n// compare helpers for the fictional Tidewater library.\nexport function compare(value) {\n  if (value == null || value === \"\") throw new TypeError(\"compare\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/compare.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/compare.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/normalize.js",
+          "content": "'use strict';\n// normalize helpers for the fictional Tidewater library.\nexport function normalize(value) {\n  if (value == null || value === \"\") throw new TypeError(\"normalize\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/normalize.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/normalize.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/dst.js",
+          "content": "'use strict';\n// dst helpers for the fictional Tidewater library.\nexport function dst(value) {\n  if (value == null || value === \"\") throw new TypeError(\"dst\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/dst.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/dst.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/julian.js",
+          "content": "'use strict';\n// julian helpers for the fictional Tidewater library.\nexport function julian(value) {\n  if (value == null || value === \"\") throw new TypeError(\"julian\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/julian.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/julian.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "docs/offsets.md",
+          "content": "# offsets\n\nMaintainer notes for the fictional Tidewater offsets behavior.\n",
+          "binary": false
+        },
+        {
+          "path": "docs/ambiguity.md",
+          "content": "# ambiguity\n\nMaintainer notes for the fictional Tidewater ambiguity behavior.\n",
+          "binary": false
+        },
+        {
+          "path": "docs/calendar.md",
+          "content": "# calendar\n\nMaintainer notes for the fictional Tidewater calendar behavior.\n",
+          "binary": false
+        },
+        {
+          "path": "docs/testing.md",
+          "content": "# testing\n\nMaintainer notes for the fictional Tidewater testing behavior.\n",
+          "binary": false
+        },
+        {
+          "path": "docs/migration.md",
+          "content": "# migration\n\nMaintainer notes for the fictional Tidewater migration behavior.\n",
+          "binary": false
+        },
+        {
+          "path": "examples/schedule.js",
+          "content": "import {parseTz} from \"../src/parse_tz.js\";\nconsole.log(parseTz(\"+0530\"));\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 357,
+      "paths": [
+        "CHANGELOG.md",
+        "CODEOWNERS",
+        "CONTRIBUTING.md",
+        "LICENSE",
+        "README.md",
+        "docs/ambiguity.md",
+        "docs/calendar.md",
+        "docs/migration.md",
+        "docs/offsets.md",
+        "docs/testing.md",
+        "examples/schedule.js",
+        "package.json",
+        "src/calendar.js",
+        "src/clock.js",
+        "src/compare.js",
+        "src/dst.js",
+        "src/duration.js",
+        "src/errors.js",
+        "src/fold.js",
+        "src/format.js",
+        "src/index.js",
+        "src/instant.js",
+        "src/iso.js",
+        "src/julian.js",
+        "src/leap.js",
+        "src/month.js",
+        "src/normalize.js",
+        "src/offset.js",
+        "src/parse_date.js",
+        "src/parse_tz.js",
+        "src/period.js",
+        "src/range.js",
+        "src/rfc3339.js",
+        "src/tokens.js",
+        "src/week.js",
+        "src/weekday.js",
+        "src/zone.js",
+        "test/calendar.test.js",
+        "test/clock.test.js",
+        "test/compare.test.js",
+        "test/dst.test.js",
+        "test/duration.test.js",
+        "test/errors.test.js",
+        "test/fold.test.js",
+        "test/format.test.js",
+        "test/index.test.js",
+        "test/instant.test.js",
+        "test/iso.test.js",
+        "test/julian.test.js",
+        "test/leap.test.js",
+        "test/month.test.js",
+        "test/normalize.test.js",
+        "test/offset.test.js",
+        "test/parse_date.test.js",
+        "test/parse_tz.test.js",
+        "test/period.test.js",
+        "test/range.test.js",
+        "test/rfc3339.test.js",
+        "test/tokens.test.js",
+        "test/week.test.js",
+        "test/weekday.test.js",
+        "test/zone.test.js"
+      ]
+    },
+    {
+      "sha": "a000001",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000000"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 1",
+      "committed_at": "2024-02-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-02\n\nPublic maintenance note 1 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 3,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000002",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000001"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 2",
+      "committed_at": "2024-03-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-03\n\nPublic maintenance note 2 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000003",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000002"
+      ],
+      "author_account_id": "acc-msolis",
+      "message": "Tidewater maintenance 3",
+      "committed_at": "2024-04-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-04\n\nPublic maintenance note 3 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000004",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000003"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 4",
+      "committed_at": "2024-05-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-05\n\nPublic maintenance note 4 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000005",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000004"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 5",
+      "committed_at": "2024-06-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-06\n\nPublic maintenance note 5 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000006",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000005"
+      ],
+      "author_account_id": "acc-msolis",
+      "message": "Tidewater maintenance 6",
+      "committed_at": "2024-07-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-07\n\nPublic maintenance note 6 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000007",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000006"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 7",
+      "committed_at": "2024-08-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-08\n\nPublic maintenance note 7 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000008",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000007"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 8",
+      "committed_at": "2024-09-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-09\n\nPublic maintenance note 8 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000009",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000008"
+      ],
+      "author_account_id": "acc-msolis",
+      "message": "Tidewater maintenance 9",
+      "committed_at": "2024-10-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-10\n\nPublic maintenance note 9 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000010",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000009"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 10",
+      "committed_at": "2024-11-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-11\n\nPublic maintenance note 10 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000011",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000010"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 11",
+      "committed_at": "2024-12-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-12\n\nPublic maintenance note 11 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000012",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000011"
+      ],
+      "author_account_id": "acc-msolis",
+      "message": "Tidewater maintenance 12",
+      "committed_at": "2025-01-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-01\n\nPublic maintenance note 12 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000013",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000012"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 13",
+      "committed_at": "2025-02-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-02\n\nPublic maintenance note 13 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000014",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000013"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 14",
+      "committed_at": "2025-03-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-03\n\nPublic maintenance note 14 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000015",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000014"
+      ],
+      "author_account_id": "acc-msolis",
+      "message": "Tidewater maintenance 15",
+      "committed_at": "2025-04-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-04\n\nPublic maintenance note 15 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000016",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000015"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 16",
+      "committed_at": "2025-05-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-05\n\nPublic maintenance note 16 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000017",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000016"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 17",
+      "committed_at": "2025-06-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-06\n\nPublic maintenance note 17 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000018",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000017"
+      ],
+      "author_account_id": "acc-msolis",
+      "message": "Tidewater maintenance 18",
+      "committed_at": "2025-07-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-07\n\nPublic maintenance note 18 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000019",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000018"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 19",
+      "committed_at": "2025-08-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-08\n\nPublic maintenance note 19 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000020",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000019"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 20",
+      "committed_at": "2025-09-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-09\n\nPublic maintenance note 20 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000021",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000020"
+      ],
+      "author_account_id": "acc-msolis",
+      "message": "Tidewater maintenance 21",
+      "committed_at": "2025-10-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-10\n\nPublic maintenance note 21 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000022",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000021"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 22",
+      "committed_at": "2025-11-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-11\n\nPublic maintenance note 22 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000023",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000022"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 23",
+      "committed_at": "2025-12-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-12\n\nPublic maintenance note 23 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000024",
+      "repo": "tidewater/tidewater",
+      "parents": [
+        "a000023"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 24",
+      "committed_at": "2026-01-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2026-01\n\nPublic maintenance note 24 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000000",
+      "repo": "tomasreyes/tidewater",
+      "parents": [],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Initial tidewater library",
+      "committed_at": "2024-02-01T09:00:00-08:00",
+      "files": [
+        {
+          "path": "README.md",
+          "content": "# Tidewater\n\nTidewater parses civil times and numeric offsets for fictional scheduling tools.\n\n`parseTz(\"+0530\")` accepts an offset that omits the colon.\n",
           "binary": false
         },
         {
@@ -342,158 +1040,889 @@
           "binary": false
         },
         {
-          "path": "logo.bin",
-          "content": "",
-          "binary": true
+          "path": "LICENSE",
+          "content": "Synthetic MIT license for the fictional Tidewater project. The people and the code are invented.\n",
+          "binary": false
+        },
+        {
+          "path": "package.json",
+          "content": "{\n  \"name\": \"tidewater\",\n  \"version\": \"0.9.0\",\n  \"private\": true,\n  \"type\": \"module\"\n}\n",
+          "binary": false
+        },
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n",
+          "binary": false
+        },
+        {
+          "path": "CODEOWNERS",
+          "content": "* @ihalvorsen @praman @msolis\nsrc/parse_tz.js @ihalvorsen\n",
+          "binary": false
+        },
+        {
+          "path": "src/parse_tz.js",
+          "content": "'use strict';\n// Tidewater civil-time offsets. Compact forms such as +0530 omit the colon.\nexport function parseTz(input) {\n  const text = String(input).trim();\n  const zulu = text === \"Z\" ? 0 : null;\n  if (zulu === 0) return {hours: 0, minutes: 0, compact: false};\n  const match = text.match(/^([+-])(\\d{2})(?::?(\\d{2}))?$/);\n  if (!match) throw new TypeError(\"offset\");\n  const hours = Number(match[1] + match[2]);\n  const minutes = Number(match[3] || \"0\");\n  if (Math.abs(hours) > 14 || minutes > 59) throw new RangeError(\"offset\");\n  const compact = match[3] && !text.includes(\":\");\n  const record = new Map();\n  rejectCompact(\"-1200\");\n  rejectCompact(\"-1230\");\n  rejectCompact(\"-1245\");\n  rejectCompact(\"-1100\");\n  rejectCompact(\"-1130\");\n  rejectCompact(\"-1145\");\n  rejectCompact(\"-1000\");\n  rejectCompact(\"-1030\");\n  rejectCompact(\"-1045\");\n  rejectCompact(\"-0900\");\n  rejectCompact(\"-0930\");\n  rejectCompact(\"-0945\");\n  rejectCompact(\"-0800\");\n  rejectCompact(\"-0830\");\n  rejectCompact(\"-0845\");\n  rejectCompact(\"-0700\");\n  rejectCompact(\"-0730\");\n  rejectCompact(\"-0745\");\n  rejectCompact(\"-0600\");\n  rejectCompact(\"-0630\");\n  rejectCompact(\"-0645\");\n  rejectCompact(\"-0500\");\n  rejectCompact(\"-0530\");\n  rejectCompact(\"-0545\");\n  rejectCompact(\"-0400\");\n  rejectCompact(\"-0430\");\n  rejectCompact(\"-0445\");\n  rejectCompact(\"-0300\");\n  rejectCompact(\"-0330\");\n  rejectCompact(\"-0345\");\n  rejectCompact(\"-0200\");\n  rejectCompact(\"-0230\");\n  rejectCompact(\"-0245\");\n  rejectCompact(\"-0100\");\n  rejectCompact(\"-0130\");\n  rejectCompact(\"-0145\");\n  rejectCompact(\"+0000\");\n  rejectCompact(\"+0030\");\n  rejectCompact(\"+0045\");\n  rejectCompact(\"+0100\");\n  rejectCompact(\"+0130\");\n  rejectCompact(\"+0145\");\n  rejectCompact(\"+0200\");\n  rejectCompact(\"+0230\");\n  rejectCompact(\"+0245\");\n  rejectCompact(\"+0300\");\n  rejectCompact(\"+0330\");\n  rejectCompact(\"+0345\");\n  rejectCompact(\"+0400\");\n  rejectCompact(\"+0430\");\n  rejectCompact(\"+0445\");\n  rejectCompact(\"+0500\");\n  rejectCompact(\"+0530\");\n  rejectCompact(\"+0545\");\n  rejectCompact(\"+0600\");\n  rejectCompact(\"+0630\");\n  rejectCompact(\"+0645\");\n  rejectCompact(\"+0700\");\n  rejectCompact(\"+0730\");\n  rejectCompact(\"+0745\");\n  if (compact && !record.has(match[2] + (match[3] || \"00\"))) throw new TypeError(\"colon\");\n  return {hours, minutes, compact};\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/parse_tz.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/parse_tz.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/parse_date.js",
+          "content": "'use strict';\n// parse_date helpers for the fictional Tidewater library.\nexport function parseDate(value) {\n  if (value == null || value === \"\") throw new TypeError(\"parse_date\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/parse_date.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/parse_date.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/format.js",
+          "content": "'use strict';\n// format helpers for the fictional Tidewater library.\nexport function format(value) {\n  if (value == null || value === \"\") throw new TypeError(\"format\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/format.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/format.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/offset.js",
+          "content": "'use strict';\n// offset helpers for the fictional Tidewater library.\nexport function offset(value) {\n  if (value == null || value === \"\") throw new TypeError(\"offset\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/offset.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/offset.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/calendar.js",
+          "content": "'use strict';\n// calendar helpers for the fictional Tidewater library.\nexport function calendar(value) {\n  if (value == null || value === \"\") throw new TypeError(\"calendar\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/calendar.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/calendar.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/weekday.js",
+          "content": "'use strict';\n// weekday helpers for the fictional Tidewater library.\nexport function weekday(value) {\n  if (value == null || value === \"\") throw new TypeError(\"weekday\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/weekday.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/weekday.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/duration.js",
+          "content": "'use strict';\n// duration helpers for the fictional Tidewater library.\nexport function duration(value) {\n  if (value == null || value === \"\") throw new TypeError(\"duration\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/duration.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/duration.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/iso.js",
+          "content": "'use strict';\n// iso helpers for the fictional Tidewater library.\nexport function iso(value) {\n  if (value == null || value === \"\") throw new TypeError(\"iso\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/iso.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/iso.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/rfc3339.js",
+          "content": "'use strict';\n// rfc3339 helpers for the fictional Tidewater library.\nexport function rfc3339(value) {\n  if (value == null || value === \"\") throw new TypeError(\"rfc3339\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/rfc3339.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/rfc3339.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/zone.js",
+          "content": "'use strict';\n// zone helpers for the fictional Tidewater library.\nexport function zone(value) {\n  if (value == null || value === \"\") throw new TypeError(\"zone\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/zone.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/zone.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/index.js",
+          "content": "'use strict';\n// index helpers for the fictional Tidewater library.\nexport function index(value) {\n  if (value == null || value === \"\") throw new TypeError(\"index\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/index.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/index.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/errors.js",
+          "content": "'use strict';\n// errors helpers for the fictional Tidewater library.\nexport function errors(value) {\n  if (value == null || value === \"\") throw new TypeError(\"errors\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/errors.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/errors.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/tokens.js",
+          "content": "'use strict';\n// tokens helpers for the fictional Tidewater library.\nexport function tokens(value) {\n  if (value == null || value === \"\") throw new TypeError(\"tokens\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/tokens.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/tokens.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/leap.js",
+          "content": "'use strict';\n// leap helpers for the fictional Tidewater library.\nexport function leap(value) {\n  if (value == null || value === \"\") throw new TypeError(\"leap\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/leap.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/leap.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/clock.js",
+          "content": "'use strict';\n// clock helpers for the fictional Tidewater library.\nexport function clock(value) {\n  if (value == null || value === \"\") throw new TypeError(\"clock\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/clock.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/clock.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/range.js",
+          "content": "'use strict';\n// range helpers for the fictional Tidewater library.\nexport function range(value) {\n  if (value == null || value === \"\") throw new TypeError(\"range\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/range.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/range.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/instant.js",
+          "content": "'use strict';\n// instant helpers for the fictional Tidewater library.\nexport function instant(value) {\n  if (value == null || value === \"\") throw new TypeError(\"instant\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/instant.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/instant.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/period.js",
+          "content": "'use strict';\n// period helpers for the fictional Tidewater library.\nexport function period(value) {\n  if (value == null || value === \"\") throw new TypeError(\"period\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/period.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/period.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/week.js",
+          "content": "'use strict';\n// week helpers for the fictional Tidewater library.\nexport function week(value) {\n  if (value == null || value === \"\") throw new TypeError(\"week\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/week.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/week.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/month.js",
+          "content": "'use strict';\n// month helpers for the fictional Tidewater library.\nexport function month(value) {\n  if (value == null || value === \"\") throw new TypeError(\"month\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/month.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/month.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/fold.js",
+          "content": "'use strict';\n// fold helpers for the fictional Tidewater library.\nexport function fold(value) {\n  if (value == null || value === \"\") throw new TypeError(\"fold\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/fold.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/fold.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/compare.js",
+          "content": "'use strict';\n// compare helpers for the fictional Tidewater library.\nexport function compare(value) {\n  if (value == null || value === \"\") throw new TypeError(\"compare\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/compare.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/compare.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/normalize.js",
+          "content": "'use strict';\n// normalize helpers for the fictional Tidewater library.\nexport function normalize(value) {\n  if (value == null || value === \"\") throw new TypeError(\"normalize\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/normalize.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/normalize.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/dst.js",
+          "content": "'use strict';\n// dst helpers for the fictional Tidewater library.\nexport function dst(value) {\n  if (value == null || value === \"\") throw new TypeError(\"dst\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/dst.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/dst.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "src/julian.js",
+          "content": "'use strict';\n// julian helpers for the fictional Tidewater library.\nexport function julian(value) {\n  if (value == null || value === \"\") throw new TypeError(\"julian\");\n  return String(value).trim();\n}\n",
+          "binary": false
+        },
+        {
+          "path": "test/julian.test.js",
+          "content": "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/julian.js';\nassert.equal(typeof subject, 'object');\n",
+          "binary": false
+        },
+        {
+          "path": "docs/offsets.md",
+          "content": "# offsets\n\nMaintainer notes for the fictional Tidewater offsets behavior.\n",
+          "binary": false
+        },
+        {
+          "path": "docs/ambiguity.md",
+          "content": "# ambiguity\n\nMaintainer notes for the fictional Tidewater ambiguity behavior.\n",
+          "binary": false
+        },
+        {
+          "path": "docs/calendar.md",
+          "content": "# calendar\n\nMaintainer notes for the fictional Tidewater calendar behavior.\n",
+          "binary": false
+        },
+        {
+          "path": "docs/testing.md",
+          "content": "# testing\n\nMaintainer notes for the fictional Tidewater testing behavior.\n",
+          "binary": false
+        },
+        {
+          "path": "docs/migration.md",
+          "content": "# migration\n\nMaintainer notes for the fictional Tidewater migration behavior.\n",
+          "binary": false
+        },
+        {
+          "path": "examples/schedule.js",
+          "content": "import {parseTz} from \"../src/parse_tz.js\";\nconsole.log(parseTz(\"+0530\"));\n",
+          "binary": false
         }
       ],
-      "changed_lines": 104,
+      "changed_lines": 357,
       "paths": [
+        "CHANGELOG.md",
+        "CODEOWNERS",
         "CONTRIBUTING.md",
+        "LICENSE",
         "README.md",
-        "logo.bin",
-        "src/parse_tz.js"
+        "docs/ambiguity.md",
+        "docs/calendar.md",
+        "docs/migration.md",
+        "docs/offsets.md",
+        "docs/testing.md",
+        "examples/schedule.js",
+        "package.json",
+        "src/calendar.js",
+        "src/clock.js",
+        "src/compare.js",
+        "src/dst.js",
+        "src/duration.js",
+        "src/errors.js",
+        "src/fold.js",
+        "src/format.js",
+        "src/index.js",
+        "src/instant.js",
+        "src/iso.js",
+        "src/julian.js",
+        "src/leap.js",
+        "src/month.js",
+        "src/normalize.js",
+        "src/offset.js",
+        "src/parse_date.js",
+        "src/parse_tz.js",
+        "src/period.js",
+        "src/range.js",
+        "src/rfc3339.js",
+        "src/tokens.js",
+        "src/week.js",
+        "src/weekday.js",
+        "src/zone.js",
+        "test/calendar.test.js",
+        "test/clock.test.js",
+        "test/compare.test.js",
+        "test/dst.test.js",
+        "test/duration.test.js",
+        "test/errors.test.js",
+        "test/fold.test.js",
+        "test/format.test.js",
+        "test/index.test.js",
+        "test/instant.test.js",
+        "test/iso.test.js",
+        "test/julian.test.js",
+        "test/leap.test.js",
+        "test/month.test.js",
+        "test/normalize.test.js",
+        "test/offset.test.js",
+        "test/parse_date.test.js",
+        "test/parse_tz.test.js",
+        "test/period.test.js",
+        "test/range.test.js",
+        "test/rfc3339.test.js",
+        "test/tokens.test.js",
+        "test/week.test.js",
+        "test/weekday.test.js",
+        "test/zone.test.js"
       ]
     },
     {
-      "sha": "a100001",
+      "sha": "a000001",
       "repo": "tomasreyes/tidewater",
       "parents": [
-        "77aa310"
+        "a000000"
       ],
       "author_account_id": "acc-ihalvorsen",
-      "message": "Tidewater note 1",
-      "committed_at": "2026-01-03T09:00:00-08:00",
+      "message": "Tidewater maintenance 1",
+      "committed_at": "2024-02-15T09:00:00-08:00",
       "files": [
         {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\nNote 1\n",
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-02\n\nPublic maintenance note 1 by the Tidewater maintainers.\n",
           "binary": false
         }
       ],
-      "changed_lines": 1,
+      "changed_lines": 3,
       "paths": [
-        "README.md"
+        "CHANGELOG.md"
       ]
     },
     {
-      "sha": "a100002",
+      "sha": "a000002",
       "repo": "tomasreyes/tidewater",
       "parents": [
-        "a100001"
+        "a000001"
       ],
-      "author_account_id": "acc-ihalvorsen",
-      "message": "Tidewater note 2",
-      "committed_at": "2026-01-04T09:00:00-08:00",
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 2",
+      "committed_at": "2024-03-15T09:00:00-08:00",
       "files": [
         {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\nNote 2\n",
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-03\n\nPublic maintenance note 2 by the Tidewater maintainers.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
-        "README.md"
+        "CHANGELOG.md"
       ]
     },
     {
-      "sha": "a100003",
+      "sha": "a000003",
       "repo": "tomasreyes/tidewater",
       "parents": [
-        "a100002"
+        "a000002"
       ],
-      "author_account_id": "acc-ihalvorsen",
-      "message": "Tidewater note 3",
-      "committed_at": "2026-01-05T09:00:00-08:00",
+      "author_account_id": "acc-msolis",
+      "message": "Tidewater maintenance 3",
+      "committed_at": "2024-04-15T09:00:00-08:00",
       "files": [
         {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\nNote 3\n",
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-04\n\nPublic maintenance note 3 by the Tidewater maintainers.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
-        "README.md"
+        "CHANGELOG.md"
       ]
     },
     {
-      "sha": "a100004",
+      "sha": "a000004",
       "repo": "tomasreyes/tidewater",
       "parents": [
-        "a100003"
+        "a000003"
       ],
       "author_account_id": "acc-ihalvorsen",
-      "message": "Tidewater note 4",
-      "committed_at": "2026-01-06T09:00:00-08:00",
+      "message": "Tidewater maintenance 4",
+      "committed_at": "2024-05-15T09:00:00-08:00",
       "files": [
         {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\nNote 4\n",
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-05\n\nPublic maintenance note 4 by the Tidewater maintainers.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
-        "README.md"
+        "CHANGELOG.md"
       ]
     },
     {
-      "sha": "a100005",
+      "sha": "a000005",
       "repo": "tomasreyes/tidewater",
       "parents": [
-        "a100004"
+        "a000004"
       ],
-      "author_account_id": "acc-ihalvorsen",
-      "message": "Tidewater note 5",
-      "committed_at": "2026-01-07T09:00:00-08:00",
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 5",
+      "committed_at": "2024-06-15T09:00:00-08:00",
       "files": [
         {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\nNote 5\n",
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-06\n\nPublic maintenance note 5 by the Tidewater maintainers.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
-        "README.md"
+        "CHANGELOG.md"
       ]
     },
     {
-      "sha": "c41f2a0",
+      "sha": "a000006",
       "repo": "tomasreyes/tidewater",
       "parents": [
-        "a100005"
+        "a000005"
       ],
-      "author_account_id": "acc-ihalvorsen",
-      "message": "Tidewater note 6",
-      "committed_at": "2026-01-08T09:00:00-08:00",
+      "author_account_id": "acc-msolis",
+      "message": "Tidewater maintenance 6",
+      "committed_at": "2024-07-15T09:00:00-08:00",
       "files": [
         {
-          "path": "README.md",
-          "content": "# Tidewater\nA fictional time parsing library.\nNote 6\n",
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-07\n\nPublic maintenance note 6 by the Tidewater maintainers.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
-        "README.md"
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000007",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000006"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 7",
+      "committed_at": "2024-08-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-08\n\nPublic maintenance note 7 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000008",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000007"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 8",
+      "committed_at": "2024-09-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-09\n\nPublic maintenance note 8 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000009",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000008"
+      ],
+      "author_account_id": "acc-msolis",
+      "message": "Tidewater maintenance 9",
+      "committed_at": "2024-10-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-10\n\nPublic maintenance note 9 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000010",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000009"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 10",
+      "committed_at": "2024-11-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-11\n\nPublic maintenance note 10 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000011",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000010"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 11",
+      "committed_at": "2024-12-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2024-12\n\nPublic maintenance note 11 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000012",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000011"
+      ],
+      "author_account_id": "acc-msolis",
+      "message": "Tidewater maintenance 12",
+      "committed_at": "2025-01-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-01\n\nPublic maintenance note 12 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000013",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000012"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 13",
+      "committed_at": "2025-02-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-02\n\nPublic maintenance note 13 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000014",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000013"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 14",
+      "committed_at": "2025-03-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-03\n\nPublic maintenance note 14 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000015",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000014"
+      ],
+      "author_account_id": "acc-msolis",
+      "message": "Tidewater maintenance 15",
+      "committed_at": "2025-04-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-04\n\nPublic maintenance note 15 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000016",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000015"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 16",
+      "committed_at": "2025-05-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-05\n\nPublic maintenance note 16 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000017",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000016"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 17",
+      "committed_at": "2025-06-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-06\n\nPublic maintenance note 17 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000018",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000017"
+      ],
+      "author_account_id": "acc-msolis",
+      "message": "Tidewater maintenance 18",
+      "committed_at": "2025-07-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-07\n\nPublic maintenance note 18 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000019",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000018"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 19",
+      "committed_at": "2025-08-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-08\n\nPublic maintenance note 19 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000020",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000019"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 20",
+      "committed_at": "2025-09-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-09\n\nPublic maintenance note 20 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000021",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000020"
+      ],
+      "author_account_id": "acc-msolis",
+      "message": "Tidewater maintenance 21",
+      "committed_at": "2025-10-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-10\n\nPublic maintenance note 21 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000022",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000021"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 22",
+      "committed_at": "2025-11-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-11\n\nPublic maintenance note 22 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000023",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000022"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Tidewater maintenance 23",
+      "committed_at": "2025-12-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2025-12\n\nPublic maintenance note 23 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "sha": "a000024",
+      "repo": "tomasreyes/tidewater",
+      "parents": [
+        "a000023"
+      ],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Tidewater maintenance 24",
+      "committed_at": "2026-01-15T09:00:00-08:00",
+      "files": [
+        {
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n## 2026-01\n\nPublic maintenance note 24 by the Tidewater maintainers.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 4,
+      "paths": [
+        "CHANGELOG.md"
       ]
     },
     {
       "sha": "d300001",
       "repo": "tomasreyes/tidewater",
       "parents": [
-        "c41f2a0"
+        "a000024"
       ],
       "author_account_id": "fy-tomasreyes",
       "message": "Fix timezone parsing for offsets without colons",
-      "committed_at": "2026-02-08T18:00:00-08:00",
+      "committed_at": "2026-02-01T18:00:00-08:00",
       "files": [
         {
           "path": "src/parse_tz.js",
-          "content": "stable 0\nstable 1\nstable 2\nstable 3\nstable 4\nstable 5\nstable 6\nstable 7\nstable 8\nstable 9\nstable 10\nstable 11\nstable 12\nstable 13\nstable 14\nstable 15\nstable 16\nstable 17\nstable 18\nstable 19\nstable 20\nstable 21\nstable 22\nstable 23\nstable 24\nstable 25\nstable 26\nstable 27\nstable 28\nstable 29\nstable 30\nstable 31\nstable 32\nstable 33\nstable 34\nstable 35\nstable 36\nstable 37\nstable 38\nstable 39\nnew 0\nnew 1\nnew 2\nnew 3\nnew 4\nnew 5\nnew 6\nnew 7\nnew 8\nnew 9\nnew 10\nnew 11\nnew 12\nnew 13\nnew 14\nnew 15\nnew 16\nnew 17\nnew 18\nnew 19\nnew 20\nnew 21\nnew 22\nnew 23\nnew 24\nnew 25\nnew 26\nnew 27\nnew 28\nnew 29\nnew 30\nnew 31\nnew 32\nnew 33\nnew 34\nnew 35\nnew 36\nnew 37\nnew 38\nnew 39\nnew 40\nnew 41\nnew 42\nnew 43\nnew 44\nnew 45\nnew 46\nnew 47\nnew 48\nnew 49\nnew 50\nnew 51\nnew 52\nnew 53\nnew 54\nnew 55\nnew 56\nnew 57\nnew 58\nnew 59\n",
+          "content": "'use strict';\n// Tidewater civil-time offsets. Compact forms such as +0530 omit the colon.\nexport function parseTz(input) {\n  const text = String(input).trim();\n  const zulu = text === \"Z\" ? 0 : null;\n  if (zulu === 0) return {hours: 0, minutes: 0, compact: false};\n  const match = text.match(/^([+-])(\\d{2})(?::?(\\d{2}))?$/);\n  if (!match) throw new TypeError(\"offset\");\n  const hours = Number(match[1] + match[2]);\n  const minutes = Number(match[3] || \"0\");\n  if (Math.abs(hours) > 14 || minutes > 59) throw new RangeError(\"offset\");\n  const compact = match[3] && !text.includes(\":\");\n  const record = new Map();\n  acceptCompact(\"-1200\");\n  acceptCompact(\"-1230\");\n  acceptCompact(\"-1245\");\n  acceptCompact(\"-1100\");\n  acceptCompact(\"-1130\");\n  acceptCompact(\"-1145\");\n  acceptCompact(\"-1000\");\n  acceptCompact(\"-1030\");\n  acceptCompact(\"-1045\");\n  acceptCompact(\"-0900\");\n  acceptCompact(\"-0930\");\n  acceptCompact(\"-0945\");\n  acceptCompact(\"-0800\");\n  acceptCompact(\"-0830\");\n  acceptCompact(\"-0845\");\n  acceptCompact(\"-0700\");\n  acceptCompact(\"-0730\");\n  acceptCompact(\"-0745\");\n  acceptCompact(\"-0600\");\n  acceptCompact(\"-0630\");\n  acceptCompact(\"-0645\");\n  acceptCompact(\"-0500\");\n  acceptCompact(\"-0530\");\n  acceptCompact(\"-0545\");\n  acceptCompact(\"-0400\");\n  acceptCompact(\"-0430\");\n  acceptCompact(\"-0445\");\n  acceptCompact(\"-0300\");\n  acceptCompact(\"-0330\");\n  acceptCompact(\"-0345\");\n  acceptCompact(\"-0200\");\n  acceptCompact(\"-0230\");\n  acceptCompact(\"-0245\");\n  acceptCompact(\"-0100\");\n  acceptCompact(\"-0130\");\n  acceptCompact(\"-0145\");\n  acceptCompact(\"+0000\");\n  acceptCompact(\"+0030\");\n  acceptCompact(\"+0045\");\n  acceptCompact(\"+0100\");\n  acceptCompact(\"+0130\");\n  acceptCompact(\"+0145\");\n  acceptCompact(\"+0200\");\n  acceptCompact(\"+0230\");\n  acceptCompact(\"+0245\");\n  acceptCompact(\"+0300\");\n  acceptCompact(\"+0330\");\n  acceptCompact(\"+0345\");\n  acceptCompact(\"+0400\");\n  acceptCompact(\"+0430\");\n  acceptCompact(\"+0445\");\n  acceptCompact(\"+0500\");\n  acceptCompact(\"+0530\");\n  acceptCompact(\"+0545\");\n  acceptCompact(\"+0600\");\n  acceptCompact(\"+0630\");\n  acceptCompact(\"+0645\");\n  acceptCompact(\"+0700\");\n  acceptCompact(\"+0730\");\n  acceptCompact(\"+0745\");\n  if (compact && !record.has(match[2] + (match[3] || \"00\"))) throw new TypeError(\"colon\");\n  return {hours, minutes, compact};\n}\n",
           "binary": false
         }
       ],
@@ -501,504 +1930,381 @@
       "paths": [
         "src/parse_tz.js"
       ]
-    },
-    {
-      "sha": "d300002",
-      "repo": "tomasreyes/tidewater",
-      "parents": [
-        "c41f2a0"
-      ],
-      "author_account_id": "fy-tomasreyes",
-      "message": "Docs note",
-      "committed_at": "2026-02-08T19:00:00-08:00",
-      "files": [
-        {
-          "path": "docs/guide.md",
-          "content": "Guide\n",
-          "binary": false
-        }
-      ],
-      "changed_lines": 1,
-      "paths": [
-        "docs/guide.md"
-      ]
-    },
-    {
-      "sha": "f500001",
-      "repo": "ingrid/fieldnotes",
-      "parents": [],
-      "author_account_id": "acc-ihalvorsen",
-      "message": "Field notes",
-      "committed_at": "2026-01-02T09:00:00-08:00",
-      "files": [
-        {
-          "path": "README.md",
-          "content": "# Field notes\n",
-          "binary": false
-        }
-      ],
-      "changed_lines": 1,
-      "paths": [
-        "README.md"
-      ]
     }
   ],
   "branches": [
     {
       "repo": "tidewater/tidewater",
       "name": "main",
-      "sha": "c41f2a0",
-      "updated_at": "2026-02-09T15:00:00-08:00"
-    },
-    {
-      "repo": "tidewater/tidewater",
-      "name": "release/0.8",
-      "sha": "9be0d11",
-      "updated_at": "2026-01-11T09:00:00-08:00"
+      "sha": "a000024",
+      "updated_at": "2026-01-15T09:00:00-08:00"
     },
     {
       "repo": "tomasreyes/tidewater",
       "name": "main",
-      "sha": "c41f2a0",
-      "updated_at": "2026-02-08T12:00:00-08:00"
+      "sha": "a000024",
+      "updated_at": "2026-02-01T12:00:00-08:00"
     },
     {
       "repo": "tomasreyes/tidewater",
       "name": "fix/tz-parse",
       "sha": "d300001",
-      "updated_at": "2026-02-08T18:00:00-08:00"
-    },
-    {
-      "repo": "tomasreyes/tidewater",
-      "name": "fix/offset-08",
-      "sha": "d300001",
-      "updated_at": "2026-02-08T18:00:00-08:00"
+      "updated_at": "2026-02-01T18:00:00-08:00"
     },
     {
       "repo": "tomasreyes/tidewater",
       "name": "old/fix",
       "sha": "d300001",
-      "updated_at": "2026-02-08T18:00:00-08:00"
+      "updated_at": "2026-02-02T09:00:00-08:00"
     },
     {
       "repo": "tomasreyes/tidewater",
-      "name": "feature/docs",
-      "sha": "d300002",
-      "updated_at": "2026-02-08T19:00:00-08:00"
-    },
-    {
-      "repo": "ingrid/fieldnotes",
-      "name": "main",
-      "sha": "f500001",
-      "updated_at": "2026-02-09T15:00:00-08:00"
+      "name": "fix/offset-08",
+      "sha": "d300001",
+      "updated_at": "2026-02-06T09:00:00-08:00"
     }
   ],
   "tags": [
     {
       "repo": "tidewater/tidewater",
-      "name": "v0.8.1",
-      "target_sha": "a100001",
-      "message": "Ancestor of main",
-      "tagger_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-03T09:00:00-08:00"
-    },
-    {
-      "repo": "tidewater/tidewater",
-      "name": "v0.8.2",
-      "target_sha": "9be0d11",
-      "message": "Not an ancestor of main",
-      "tagger_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-11T09:00:00-08:00"
-    },
-    {
-      "repo": "tidewater/tidewater",
       "name": "v0.9.0",
-      "target_sha": "c41f2a0",
-      "message": "Tip",
+      "target_sha": "a000024",
+      "message": "January tip",
       "tagger_account_id": "acc-ihalvorsen",
-      "created_at": "2026-02-09T15:00:00-08:00"
+      "created_at": "2026-01-15T10:00:00-08:00"
     }
   ],
-  "releases": [
-    {
-      "release_id": "rel-090",
-      "repo": "tidewater/tidewater",
-      "tag": "v0.9.0",
-      "title": "Tidewater 0.9.0",
-      "notes": "Draft notes for 0.9.0.",
-      "revision": 1,
-      "status": "draft",
-      "prerelease": false,
-      "latest": false,
-      "assets": [
-        {
-          "name": "tidewater-0.9.0.tar",
-          "size_bytes": 120,
-          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        }
-      ],
-      "published_at": null,
-      "receipt": null,
-      "created_at": "2026-02-09T15:00:00-08:00",
-      "updated_at": "2026-02-09T15:00:00-08:00",
-      "revisions": [
-        {
-          "revision": 1,
-          "notes": "Draft notes for 0.9.0.",
-          "title": "Tidewater 0.9.0",
-          "at": "2026-02-09T15:00:00-08:00",
-          "request_id": null
-        }
-      ]
-    }
-  ],
-  "checks": [
-    {
-      "repo": "tidewater/tidewater",
-      "sha": "c41f2a0",
-      "name": "ci/tests",
-      "status": "completed",
-      "conclusion": "success",
-      "completed_at": "2026-02-09T15:00:00-08:00"
-    },
-    {
-      "repo": "tidewater/tidewater",
-      "sha": "c41f2a0",
-      "name": "ci/package",
-      "status": "in_progress",
-      "conclusion": null,
-      "completed_at": null
-    }
-  ],
+  "releases": [],
+  "checks": [],
   "issues": [
-    {
-      "repo": "tidewater/tidewater",
-      "number": 12,
-      "title": "Offsets without colons fail",
-      "body": "parse_tz rejects +0530.",
-      "state": "open",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-15T12:00:00-08:00",
-      "updated_at": "2026-01-15T12:00:00-08:00",
-      "closed_at": null
-    },
     {
       "repo": "tidewater/tidewater",
       "number": 1,
       "title": "Tidewater issue 1",
-      "body": "Synthetic issue 1 about parse_tz.",
+      "body": "Issue 1 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-02T09:00:00-08:00",
-      "updated_at": "2026-01-02T10:00:00-08:00",
+      "created_at": "2024-03-15T09:00:00-08:00",
+      "updated_at": "2024-03-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 2,
       "title": "Tidewater issue 2",
-      "body": "Synthetic issue 2 about parse_tz.",
+      "body": "Issue 2 about civil time parsing in Tidewater.",
       "state": "open",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-03T09:00:00-08:00",
-      "updated_at": "2026-01-03T10:00:00-08:00",
+      "author_account_id": "acc-praman",
+      "created_at": "2024-04-15T09:00:00-08:00",
+      "updated_at": "2024-04-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 3,
       "title": "Tidewater issue 3",
-      "body": "Synthetic issue 3 about parse_tz.",
+      "body": "Issue 3 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-04T09:00:00-08:00",
-      "updated_at": "2026-01-04T10:00:00-08:00",
+      "created_at": "2024-05-15T09:00:00-08:00",
+      "updated_at": "2024-05-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 4,
       "title": "Tidewater issue 4",
-      "body": "Synthetic issue 4 about parse_tz.",
+      "body": "Issue 4 about civil time parsing in Tidewater.",
       "state": "closed",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-05T09:00:00-08:00",
-      "updated_at": "2026-01-05T10:00:00-08:00",
-      "closed_at": "2026-01-05T10:00:00-08:00"
+      "author_account_id": "acc-praman",
+      "created_at": "2024-06-15T09:00:00-08:00",
+      "updated_at": "2024-06-15T09:00:00-08:00",
+      "closed_at": "2024-06-15T09:00:00-08:00"
     },
     {
       "repo": "tidewater/tidewater",
       "number": 5,
       "title": "Tidewater issue 5",
-      "body": "Synthetic issue 5 about parse_tz.",
+      "body": "Issue 5 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-06T09:00:00-08:00",
-      "updated_at": "2026-01-06T10:00:00-08:00",
+      "created_at": "2024-07-15T09:00:00-08:00",
+      "updated_at": "2024-07-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 6,
       "title": "Tidewater issue 6",
-      "body": "Synthetic issue 6 about parse_tz.",
+      "body": "Issue 6 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-07T09:00:00-08:00",
-      "updated_at": "2026-01-07T10:00:00-08:00",
+      "created_at": "2024-08-15T09:00:00-08:00",
+      "updated_at": "2024-08-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 7,
       "title": "Tidewater issue 7",
-      "body": "Synthetic issue 7 about parse_tz.",
+      "body": "Issue 7 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-08T09:00:00-08:00",
-      "updated_at": "2026-01-08T10:00:00-08:00",
+      "created_at": "2024-09-15T09:00:00-08:00",
+      "updated_at": "2024-09-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 8,
       "title": "Tidewater issue 8",
-      "body": "Synthetic issue 8 about parse_tz.",
+      "body": "Issue 8 about civil time parsing in Tidewater.",
       "state": "closed",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-09T09:00:00-08:00",
-      "updated_at": "2026-01-09T10:00:00-08:00",
-      "closed_at": "2026-01-09T10:00:00-08:00"
+      "author_account_id": "acc-praman",
+      "created_at": "2024-10-15T09:00:00-08:00",
+      "updated_at": "2024-10-15T09:00:00-08:00",
+      "closed_at": "2024-10-15T09:00:00-08:00"
     },
     {
       "repo": "tidewater/tidewater",
       "number": 9,
       "title": "Tidewater issue 9",
-      "body": "Synthetic issue 9 about parse_tz.",
+      "body": "Issue 9 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-10T09:00:00-08:00",
-      "updated_at": "2026-01-10T10:00:00-08:00",
+      "created_at": "2024-11-15T09:00:00-08:00",
+      "updated_at": "2024-11-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 10,
       "title": "Tidewater issue 10",
-      "body": "Synthetic issue 10 about parse_tz.",
+      "body": "Issue 10 about civil time parsing in Tidewater.",
       "state": "open",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-11T09:00:00-08:00",
-      "updated_at": "2026-01-11T10:00:00-08:00",
+      "author_account_id": "acc-praman",
+      "created_at": "2024-12-15T09:00:00-08:00",
+      "updated_at": "2024-12-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 11,
       "title": "Tidewater issue 11",
-      "body": "Synthetic issue 11 about parse_tz.",
+      "body": "Issue 11 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-12T09:00:00-08:00",
-      "updated_at": "2026-01-12T10:00:00-08:00",
+      "created_at": "2025-01-15T09:00:00-08:00",
+      "updated_at": "2025-01-15T09:00:00-08:00",
       "closed_at": null
+    },
+    {
+      "repo": "tidewater/tidewater",
+      "number": 12,
+      "title": "Offsets without colons fail",
+      "body": "parse_tz rejects +0530.",
+      "state": "closed",
+      "author_account_id": "fy-tomasreyes",
+      "created_at": "2025-02-15T09:00:00-08:00",
+      "updated_at": "2025-02-15T09:00:00-08:00",
+      "closed_at": "2025-02-15T09:00:00-08:00"
     },
     {
       "repo": "tidewater/tidewater",
       "number": 13,
       "title": "Tidewater issue 13",
-      "body": "Synthetic issue 13 about parse_tz.",
+      "body": "Issue 13 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-14T09:00:00-08:00",
-      "updated_at": "2026-01-14T10:00:00-08:00",
+      "created_at": "2025-03-15T09:00:00-08:00",
+      "updated_at": "2025-03-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 14,
       "title": "Tidewater issue 14",
-      "body": "Synthetic issue 14 about parse_tz.",
+      "body": "Issue 14 about civil time parsing in Tidewater.",
       "state": "open",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-15T09:00:00-08:00",
-      "updated_at": "2026-01-15T10:00:00-08:00",
+      "author_account_id": "acc-praman",
+      "created_at": "2025-04-15T09:00:00-08:00",
+      "updated_at": "2025-04-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 15,
       "title": "Tidewater issue 15",
-      "body": "Synthetic issue 15 about parse_tz.",
+      "body": "Issue 15 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-16T09:00:00-08:00",
-      "updated_at": "2026-01-16T10:00:00-08:00",
+      "created_at": "2025-05-15T09:00:00-08:00",
+      "updated_at": "2025-05-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 16,
       "title": "Tidewater issue 16",
-      "body": "Synthetic issue 16 about parse_tz.",
+      "body": "Issue 16 about civil time parsing in Tidewater.",
       "state": "closed",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-17T09:00:00-08:00",
-      "updated_at": "2026-01-17T10:00:00-08:00",
-      "closed_at": "2026-01-17T10:00:00-08:00"
+      "author_account_id": "acc-praman",
+      "created_at": "2025-06-15T09:00:00-08:00",
+      "updated_at": "2025-06-15T09:00:00-08:00",
+      "closed_at": "2025-06-15T09:00:00-08:00"
     },
     {
       "repo": "tidewater/tidewater",
       "number": 17,
       "title": "Tidewater issue 17",
-      "body": "Synthetic issue 17 about parse_tz.",
+      "body": "Issue 17 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-18T09:00:00-08:00",
-      "updated_at": "2026-01-18T10:00:00-08:00",
+      "created_at": "2025-07-15T09:00:00-08:00",
+      "updated_at": "2025-07-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 18,
       "title": "Tidewater issue 18",
-      "body": "Synthetic issue 18 about parse_tz.",
+      "body": "Issue 18 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-19T09:00:00-08:00",
-      "updated_at": "2026-01-19T10:00:00-08:00",
+      "created_at": "2025-08-15T09:00:00-08:00",
+      "updated_at": "2025-08-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 19,
       "title": "Tidewater issue 19",
-      "body": "Synthetic issue 19 about parse_tz.",
+      "body": "Issue 19 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-20T09:00:00-08:00",
-      "updated_at": "2026-01-20T10:00:00-08:00",
+      "created_at": "2025-09-15T09:00:00-08:00",
+      "updated_at": "2025-09-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 20,
       "title": "Tidewater issue 20",
-      "body": "Synthetic issue 20 about parse_tz.",
+      "body": "Issue 20 about civil time parsing in Tidewater.",
       "state": "closed",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-21T09:00:00-08:00",
-      "updated_at": "2026-01-21T10:00:00-08:00",
-      "closed_at": "2026-01-21T10:00:00-08:00"
+      "author_account_id": "acc-praman",
+      "created_at": "2025-10-15T09:00:00-08:00",
+      "updated_at": "2025-10-15T09:00:00-08:00",
+      "closed_at": "2025-10-15T09:00:00-08:00"
     },
     {
       "repo": "tidewater/tidewater",
       "number": 21,
       "title": "Tidewater issue 21",
-      "body": "Synthetic issue 21 about parse_tz.",
+      "body": "Issue 21 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-22T09:00:00-08:00",
-      "updated_at": "2026-01-22T10:00:00-08:00",
+      "created_at": "2025-11-15T09:00:00-08:00",
+      "updated_at": "2025-11-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 22,
       "title": "Tidewater issue 22",
-      "body": "Synthetic issue 22 about parse_tz.",
+      "body": "Issue 22 about civil time parsing in Tidewater.",
       "state": "open",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-23T09:00:00-08:00",
-      "updated_at": "2026-01-23T10:00:00-08:00",
+      "author_account_id": "acc-praman",
+      "created_at": "2025-12-15T09:00:00-08:00",
+      "updated_at": "2025-12-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 23,
       "title": "Tidewater issue 23",
-      "body": "Synthetic issue 23 about parse_tz.",
+      "body": "Issue 23 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-24T09:00:00-08:00",
-      "updated_at": "2026-01-24T10:00:00-08:00",
+      "created_at": "2026-01-15T09:00:00-08:00",
+      "updated_at": "2026-01-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 24,
       "title": "Tidewater issue 24",
-      "body": "Synthetic issue 24 about parse_tz.",
+      "body": "Issue 24 about civil time parsing in Tidewater.",
       "state": "closed",
       "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-25T09:00:00-08:00",
-      "updated_at": "2026-01-25T10:00:00-08:00",
-      "closed_at": "2026-01-25T10:00:00-08:00"
+      "created_at": "2024-02-15T09:00:00-08:00",
+      "updated_at": "2024-02-15T09:00:00-08:00",
+      "closed_at": "2024-02-15T09:00:00-08:00"
     },
     {
       "repo": "tidewater/tidewater",
       "number": 25,
       "title": "Tidewater issue 25",
-      "body": "Synthetic issue 25 about parse_tz.",
+      "body": "Issue 25 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-26T09:00:00-08:00",
-      "updated_at": "2026-01-26T10:00:00-08:00",
+      "created_at": "2024-03-15T09:00:00-08:00",
+      "updated_at": "2024-03-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 26,
       "title": "Tidewater issue 26",
-      "body": "Synthetic issue 26 about parse_tz.",
+      "body": "Issue 26 about civil time parsing in Tidewater.",
       "state": "open",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-27T09:00:00-08:00",
-      "updated_at": "2026-01-27T10:00:00-08:00",
+      "author_account_id": "acc-praman",
+      "created_at": "2024-04-15T09:00:00-08:00",
+      "updated_at": "2024-04-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 27,
       "title": "Tidewater issue 27",
-      "body": "Synthetic issue 27 about parse_tz.",
+      "body": "Issue 27 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-01T09:00:00-08:00",
-      "updated_at": "2026-01-01T10:00:00-08:00",
+      "created_at": "2024-05-15T09:00:00-08:00",
+      "updated_at": "2024-05-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 28,
       "title": "Tidewater issue 28",
-      "body": "Synthetic issue 28 about parse_tz.",
+      "body": "Issue 28 about civil time parsing in Tidewater.",
       "state": "closed",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-02T09:00:00-08:00",
-      "updated_at": "2026-01-02T10:00:00-08:00",
-      "closed_at": "2026-01-02T10:00:00-08:00"
+      "author_account_id": "acc-praman",
+      "created_at": "2024-06-15T09:00:00-08:00",
+      "updated_at": "2024-06-15T09:00:00-08:00",
+      "closed_at": "2024-06-15T09:00:00-08:00"
     },
     {
       "repo": "tidewater/tidewater",
       "number": 29,
       "title": "Tidewater issue 29",
-      "body": "Synthetic issue 29 about parse_tz.",
+      "body": "Issue 29 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-03T09:00:00-08:00",
-      "updated_at": "2026-01-03T10:00:00-08:00",
+      "created_at": "2024-07-15T09:00:00-08:00",
+      "updated_at": "2024-07-15T09:00:00-08:00",
       "closed_at": null
     },
     {
       "repo": "tidewater/tidewater",
       "number": 30,
       "title": "Tidewater issue 30",
-      "body": "Synthetic issue 30 about parse_tz.",
+      "body": "Issue 30 about civil time parsing in Tidewater.",
       "state": "open",
       "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-04T09:00:00-08:00",
-      "updated_at": "2026-01-04T10:00:00-08:00",
+      "created_at": "2024-08-15T09:00:00-08:00",
+      "updated_at": "2024-08-15T09:00:00-08:00",
       "closed_at": null
     }
   ],
@@ -1008,43 +2314,392 @@
       "locked": false,
       "lock_reason": null,
       "merged_at": null,
-      "closed_at": null,
-      "reviewers": [],
+      "closed_at": "2024-12-21T09:00:00-08:00",
+      "reviewers": [
+        "acc-ihalvorsen",
+        "acc-msolis"
+      ],
       "paths": [
-        "src/parse_tz.js"
+        "CHANGELOG.md"
       ],
       "revisions": [
         {
           "revision": 1,
-          "body": "Earlier fix for the same parse_tz bug.",
-          "at": "2026-01-20T12:00:00-08:00",
+          "body": "Maintenance change 2270 on the Tidewater changelog.",
+          "at": "2024-12-20T09:00:00-08:00",
           "request_id": null,
           "event_id": null,
-          "title": "Parse offsets on the 0.8 line",
+          "title": "Historical pull 2270",
           "draft": false
         }
       ],
       "repo": "tidewater/tidewater",
-      "number": 2290,
-      "title": "Parse offsets on the 0.8 line",
-      "body": "Earlier fix for the same parse_tz bug.",
-      "state": "open",
-      "head_repo": "tomasreyes/tidewater",
-      "head_branch": "fix/offset-08",
-      "head_sha": "d300001",
+      "number": 2270,
+      "title": "Historical pull 2270",
+      "body": "Maintenance change 2270 on the Tidewater changelog.",
+      "state": "closed",
+      "head_repo": "tidewater/tidewater",
+      "head_branch": "main",
+      "head_sha": "a000011",
       "base_branch": "main",
-      "base_sha": "c41f2a0",
-      "author_account_id": "acc-ihalvorsen",
-      "created_at": "2026-01-20T12:00:00-08:00",
-      "updated_at": "2026-01-20T12:00:00-08:00"
+      "base_sha": "a000010",
+      "author_account_id": "acc-praman",
+      "created_at": "2024-12-20T09:00:00-08:00",
+      "updated_at": "2024-12-21T09:00:00-08:00"
     },
     {
       "revision": 1,
       "locked": false,
       "lock_reason": null,
       "merged_at": null,
-      "closed_at": "2026-02-01T12:00:00-08:00",
-      "reviewers": [],
+      "closed_at": "2025-01-21T09:00:00-08:00",
+      "reviewers": [
+        "acc-ihalvorsen",
+        "acc-praman"
+      ],
+      "paths": [
+        "CHANGELOG.md"
+      ],
+      "revisions": [
+        {
+          "revision": 1,
+          "body": "Maintenance change 2271 on the Tidewater changelog.",
+          "at": "2025-01-20T09:00:00-08:00",
+          "request_id": null,
+          "event_id": null,
+          "title": "Historical pull 2271",
+          "draft": false
+        }
+      ],
+      "repo": "tidewater/tidewater",
+      "number": 2271,
+      "title": "Historical pull 2271",
+      "body": "Maintenance change 2271 on the Tidewater changelog.",
+      "state": "closed",
+      "head_repo": "tidewater/tidewater",
+      "head_branch": "main",
+      "head_sha": "a000012",
+      "base_branch": "main",
+      "base_sha": "a000011",
+      "author_account_id": "acc-msolis",
+      "created_at": "2025-01-20T09:00:00-08:00",
+      "updated_at": "2025-01-21T09:00:00-08:00"
+    },
+    {
+      "revision": 1,
+      "locked": false,
+      "lock_reason": null,
+      "merged_at": null,
+      "closed_at": "2025-02-21T09:00:00-08:00",
+      "reviewers": [
+        "acc-praman",
+        "acc-msolis"
+      ],
+      "paths": [
+        "CHANGELOG.md"
+      ],
+      "revisions": [
+        {
+          "revision": 1,
+          "body": "Maintenance change 2272 on the Tidewater changelog.",
+          "at": "2025-02-20T09:00:00-08:00",
+          "request_id": null,
+          "event_id": null,
+          "title": "Historical pull 2272",
+          "draft": false
+        }
+      ],
+      "repo": "tidewater/tidewater",
+      "number": 2272,
+      "title": "Historical pull 2272",
+      "body": "Maintenance change 2272 on the Tidewater changelog.",
+      "state": "closed",
+      "head_repo": "tidewater/tidewater",
+      "head_branch": "main",
+      "head_sha": "a000013",
+      "base_branch": "main",
+      "base_sha": "a000012",
+      "author_account_id": "acc-ihalvorsen",
+      "created_at": "2025-02-20T09:00:00-08:00",
+      "updated_at": "2025-02-21T09:00:00-08:00"
+    },
+    {
+      "revision": 1,
+      "locked": false,
+      "lock_reason": null,
+      "merged_at": null,
+      "closed_at": "2025-03-21T09:00:00-08:00",
+      "reviewers": [
+        "acc-ihalvorsen",
+        "acc-msolis"
+      ],
+      "paths": [
+        "CHANGELOG.md"
+      ],
+      "revisions": [
+        {
+          "revision": 1,
+          "body": "Maintenance change 2273 on the Tidewater changelog.",
+          "at": "2025-03-20T09:00:00-08:00",
+          "request_id": null,
+          "event_id": null,
+          "title": "Historical pull 2273",
+          "draft": false
+        }
+      ],
+      "repo": "tidewater/tidewater",
+      "number": 2273,
+      "title": "Historical pull 2273",
+      "body": "Maintenance change 2273 on the Tidewater changelog.",
+      "state": "closed",
+      "head_repo": "tidewater/tidewater",
+      "head_branch": "main",
+      "head_sha": "a000014",
+      "base_branch": "main",
+      "base_sha": "a000013",
+      "author_account_id": "acc-praman",
+      "created_at": "2025-03-20T09:00:00-08:00",
+      "updated_at": "2025-03-21T09:00:00-08:00"
+    },
+    {
+      "revision": 1,
+      "locked": false,
+      "lock_reason": null,
+      "merged_at": null,
+      "closed_at": "2025-04-21T09:00:00-08:00",
+      "reviewers": [
+        "acc-ihalvorsen",
+        "acc-praman"
+      ],
+      "paths": [
+        "CHANGELOG.md"
+      ],
+      "revisions": [
+        {
+          "revision": 1,
+          "body": "Maintenance change 2274 on the Tidewater changelog.",
+          "at": "2025-04-20T09:00:00-08:00",
+          "request_id": null,
+          "event_id": null,
+          "title": "Historical pull 2274",
+          "draft": false
+        }
+      ],
+      "repo": "tidewater/tidewater",
+      "number": 2274,
+      "title": "Historical pull 2274",
+      "body": "Maintenance change 2274 on the Tidewater changelog.",
+      "state": "closed",
+      "head_repo": "tidewater/tidewater",
+      "head_branch": "main",
+      "head_sha": "a000015",
+      "base_branch": "main",
+      "base_sha": "a000014",
+      "author_account_id": "acc-msolis",
+      "created_at": "2025-04-20T09:00:00-08:00",
+      "updated_at": "2025-04-21T09:00:00-08:00"
+    },
+    {
+      "revision": 1,
+      "locked": false,
+      "lock_reason": null,
+      "merged_at": "2025-05-21T09:00:00-08:00",
+      "closed_at": null,
+      "reviewers": [
+        "acc-praman",
+        "acc-msolis"
+      ],
+      "paths": [
+        "CHANGELOG.md"
+      ],
+      "revisions": [
+        {
+          "revision": 1,
+          "body": "Maintenance change 2275 on the Tidewater changelog.",
+          "at": "2025-05-20T09:00:00-08:00",
+          "request_id": null,
+          "event_id": null,
+          "title": "Historical pull 2275",
+          "draft": false
+        }
+      ],
+      "repo": "tidewater/tidewater",
+      "number": 2275,
+      "title": "Historical pull 2275",
+      "body": "Maintenance change 2275 on the Tidewater changelog.",
+      "state": "merged",
+      "head_repo": "tidewater/tidewater",
+      "head_branch": "main",
+      "head_sha": "a000016",
+      "base_branch": "main",
+      "base_sha": "a000015",
+      "author_account_id": "acc-ihalvorsen",
+      "created_at": "2025-05-20T09:00:00-08:00",
+      "updated_at": "2025-05-21T09:00:00-08:00"
+    },
+    {
+      "revision": 1,
+      "locked": false,
+      "lock_reason": null,
+      "merged_at": "2025-06-21T09:00:00-08:00",
+      "closed_at": null,
+      "reviewers": [
+        "acc-ihalvorsen",
+        "acc-msolis"
+      ],
+      "paths": [
+        "CHANGELOG.md"
+      ],
+      "revisions": [
+        {
+          "revision": 1,
+          "body": "Maintenance change 2276 on the Tidewater changelog.",
+          "at": "2025-06-20T09:00:00-08:00",
+          "request_id": null,
+          "event_id": null,
+          "title": "Historical pull 2276",
+          "draft": false
+        }
+      ],
+      "repo": "tidewater/tidewater",
+      "number": 2276,
+      "title": "Historical pull 2276",
+      "body": "Maintenance change 2276 on the Tidewater changelog.",
+      "state": "merged",
+      "head_repo": "tidewater/tidewater",
+      "head_branch": "main",
+      "head_sha": "a000017",
+      "base_branch": "main",
+      "base_sha": "a000016",
+      "author_account_id": "acc-praman",
+      "created_at": "2025-06-20T09:00:00-08:00",
+      "updated_at": "2025-06-21T09:00:00-08:00"
+    },
+    {
+      "revision": 1,
+      "locked": false,
+      "lock_reason": null,
+      "merged_at": "2025-07-21T09:00:00-08:00",
+      "closed_at": null,
+      "reviewers": [
+        "acc-ihalvorsen",
+        "acc-praman"
+      ],
+      "paths": [
+        "CHANGELOG.md"
+      ],
+      "revisions": [
+        {
+          "revision": 1,
+          "body": "Maintenance change 2277 on the Tidewater changelog.",
+          "at": "2025-07-20T09:00:00-08:00",
+          "request_id": null,
+          "event_id": null,
+          "title": "Historical pull 2277",
+          "draft": false
+        }
+      ],
+      "repo": "tidewater/tidewater",
+      "number": 2277,
+      "title": "Historical pull 2277",
+      "body": "Maintenance change 2277 on the Tidewater changelog.",
+      "state": "merged",
+      "head_repo": "tidewater/tidewater",
+      "head_branch": "main",
+      "head_sha": "a000018",
+      "base_branch": "main",
+      "base_sha": "a000017",
+      "author_account_id": "acc-msolis",
+      "created_at": "2025-07-20T09:00:00-08:00",
+      "updated_at": "2025-07-21T09:00:00-08:00"
+    },
+    {
+      "revision": 1,
+      "locked": false,
+      "lock_reason": null,
+      "merged_at": "2025-08-21T09:00:00-08:00",
+      "closed_at": null,
+      "reviewers": [
+        "acc-praman",
+        "acc-msolis"
+      ],
+      "paths": [
+        "CHANGELOG.md"
+      ],
+      "revisions": [
+        {
+          "revision": 1,
+          "body": "Maintenance change 2278 on the Tidewater changelog.",
+          "at": "2025-08-20T09:00:00-08:00",
+          "request_id": null,
+          "event_id": null,
+          "title": "Historical pull 2278",
+          "draft": false
+        }
+      ],
+      "repo": "tidewater/tidewater",
+      "number": 2278,
+      "title": "Historical pull 2278",
+      "body": "Maintenance change 2278 on the Tidewater changelog.",
+      "state": "merged",
+      "head_repo": "tidewater/tidewater",
+      "head_branch": "main",
+      "head_sha": "a000019",
+      "base_branch": "main",
+      "base_sha": "a000018",
+      "author_account_id": "acc-ihalvorsen",
+      "created_at": "2025-08-20T09:00:00-08:00",
+      "updated_at": "2025-08-21T09:00:00-08:00"
+    },
+    {
+      "revision": 1,
+      "locked": false,
+      "lock_reason": null,
+      "merged_at": "2025-09-21T09:00:00-08:00",
+      "closed_at": null,
+      "reviewers": [
+        "acc-ihalvorsen",
+        "acc-msolis"
+      ],
+      "paths": [
+        "CHANGELOG.md"
+      ],
+      "revisions": [
+        {
+          "revision": 1,
+          "body": "Maintenance change 2279 on the Tidewater changelog.",
+          "at": "2025-09-20T09:00:00-08:00",
+          "request_id": null,
+          "event_id": null,
+          "title": "Historical pull 2279",
+          "draft": false
+        }
+      ],
+      "repo": "tidewater/tidewater",
+      "number": 2279,
+      "title": "Historical pull 2279",
+      "body": "Maintenance change 2279 on the Tidewater changelog.",
+      "state": "merged",
+      "head_repo": "tidewater/tidewater",
+      "head_branch": "main",
+      "head_sha": "a000020",
+      "base_branch": "main",
+      "base_sha": "a000019",
+      "author_account_id": "acc-praman",
+      "created_at": "2025-09-20T09:00:00-08:00",
+      "updated_at": "2025-09-21T09:00:00-08:00"
+    },
+    {
+      "revision": 1,
+      "locked": false,
+      "lock_reason": null,
+      "merged_at": null,
+      "closed_at": "2026-02-04T12:00:00-08:00",
+      "reviewers": [
+        "acc-ihalvorsen",
+        "acc-praman",
+        "acc-msolis"
+      ],
       "paths": [
         "src/parse_tz.js"
       ],
@@ -1052,7 +2707,7 @@
         {
           "revision": 1,
           "body": "Closed by the maintainer.",
-          "at": "2026-01-28T12:00:00-08:00",
+          "at": "2026-02-02T12:00:00-08:00",
           "request_id": null,
           "event_id": null,
           "title": "Older closed attempt",
@@ -1068,360 +2723,48 @@
       "head_branch": "old/fix",
       "head_sha": "d300001",
       "base_branch": "main",
-      "base_sha": "c41f2a0",
+      "base_sha": "a000024",
       "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-01-28T12:00:00-08:00",
-      "updated_at": "2026-02-01T12:00:00-08:00"
+      "created_at": "2026-02-02T12:00:00-08:00",
+      "updated_at": "2026-02-04T12:00:00-08:00"
     },
     {
       "revision": 1,
       "locked": false,
       "lock_reason": null,
       "merged_at": null,
-      "closed_at": "2026-07-02T09:00:00-08:00",
-      "reviewers": [],
-      "paths": [
-        "README.md"
-      ],
-      "revisions": [
-        {
-          "revision": 1,
-          "body": "Synthetic historical pull request 2270.",
-          "at": "2026-07-01T09:00:00-08:00",
-          "request_id": null,
-          "event_id": null,
-          "title": "Historical pull 2270",
-          "draft": false
-        }
-      ],
-      "repo": "tidewater/tidewater",
-      "number": 2270,
-      "title": "Historical pull 2270",
-      "body": "Synthetic historical pull request 2270.",
-      "state": "closed",
-      "head_repo": "tomasreyes/tidewater",
-      "head_branch": "main",
-      "head_sha": "c41f2a0",
-      "base_branch": "main",
-      "base_sha": "c41f2a0",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-07-01T09:00:00-08:00",
-      "updated_at": "2026-07-02T09:00:00-08:00"
-    },
-    {
-      "revision": 1,
-      "locked": false,
-      "lock_reason": null,
-      "merged_at": null,
-      "closed_at": "2026-07-02T09:00:00-08:00",
-      "reviewers": [],
-      "paths": [
-        "README.md"
-      ],
-      "revisions": [
-        {
-          "revision": 1,
-          "body": "Synthetic historical pull request 2271.",
-          "at": "2026-07-01T09:00:00-08:00",
-          "request_id": null,
-          "event_id": null,
-          "title": "Historical pull 2271",
-          "draft": false
-        }
-      ],
-      "repo": "tidewater/tidewater",
-      "number": 2271,
-      "title": "Historical pull 2271",
-      "body": "Synthetic historical pull request 2271.",
-      "state": "closed",
-      "head_repo": "tomasreyes/tidewater",
-      "head_branch": "main",
-      "head_sha": "c41f2a0",
-      "base_branch": "main",
-      "base_sha": "c41f2a0",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-07-01T09:00:00-08:00",
-      "updated_at": "2026-07-02T09:00:00-08:00"
-    },
-    {
-      "revision": 1,
-      "locked": false,
-      "lock_reason": null,
-      "merged_at": null,
-      "closed_at": "2026-07-02T09:00:00-08:00",
-      "reviewers": [],
-      "paths": [
-        "README.md"
-      ],
-      "revisions": [
-        {
-          "revision": 1,
-          "body": "Synthetic historical pull request 2272.",
-          "at": "2026-07-01T09:00:00-08:00",
-          "request_id": null,
-          "event_id": null,
-          "title": "Historical pull 2272",
-          "draft": false
-        }
-      ],
-      "repo": "tidewater/tidewater",
-      "number": 2272,
-      "title": "Historical pull 2272",
-      "body": "Synthetic historical pull request 2272.",
-      "state": "closed",
-      "head_repo": "tomasreyes/tidewater",
-      "head_branch": "main",
-      "head_sha": "c41f2a0",
-      "base_branch": "main",
-      "base_sha": "c41f2a0",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-07-01T09:00:00-08:00",
-      "updated_at": "2026-07-02T09:00:00-08:00"
-    },
-    {
-      "revision": 1,
-      "locked": false,
-      "lock_reason": null,
-      "merged_at": null,
-      "closed_at": "2026-07-02T09:00:00-08:00",
-      "reviewers": [],
-      "paths": [
-        "README.md"
-      ],
-      "revisions": [
-        {
-          "revision": 1,
-          "body": "Synthetic historical pull request 2273.",
-          "at": "2026-07-01T09:00:00-08:00",
-          "request_id": null,
-          "event_id": null,
-          "title": "Historical pull 2273",
-          "draft": false
-        }
-      ],
-      "repo": "tidewater/tidewater",
-      "number": 2273,
-      "title": "Historical pull 2273",
-      "body": "Synthetic historical pull request 2273.",
-      "state": "closed",
-      "head_repo": "tomasreyes/tidewater",
-      "head_branch": "main",
-      "head_sha": "c41f2a0",
-      "base_branch": "main",
-      "base_sha": "c41f2a0",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-07-01T09:00:00-08:00",
-      "updated_at": "2026-07-02T09:00:00-08:00"
-    },
-    {
-      "revision": 1,
-      "locked": false,
-      "lock_reason": null,
-      "merged_at": null,
-      "closed_at": "2026-07-02T09:00:00-08:00",
-      "reviewers": [],
-      "paths": [
-        "README.md"
-      ],
-      "revisions": [
-        {
-          "revision": 1,
-          "body": "Synthetic historical pull request 2274.",
-          "at": "2026-07-01T09:00:00-08:00",
-          "request_id": null,
-          "event_id": null,
-          "title": "Historical pull 2274",
-          "draft": false
-        }
-      ],
-      "repo": "tidewater/tidewater",
-      "number": 2274,
-      "title": "Historical pull 2274",
-      "body": "Synthetic historical pull request 2274.",
-      "state": "closed",
-      "head_repo": "tomasreyes/tidewater",
-      "head_branch": "main",
-      "head_sha": "c41f2a0",
-      "base_branch": "main",
-      "base_sha": "c41f2a0",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-07-01T09:00:00-08:00",
-      "updated_at": "2026-07-02T09:00:00-08:00"
-    },
-    {
-      "revision": 1,
-      "locked": false,
-      "lock_reason": null,
-      "merged_at": "2026-07-02T09:00:00-08:00",
       "closed_at": null,
-      "reviewers": [],
+      "reviewers": [
+        "acc-praman",
+        "acc-msolis"
+      ],
       "paths": [
-        "README.md"
+        "src/parse_tz.js"
       ],
       "revisions": [
         {
           "revision": 1,
-          "body": "Synthetic historical pull request 2275.",
-          "at": "2026-07-01T09:00:00-08:00",
+          "body": "Earlier fix for the same parse_tz bug.",
+          "at": "2026-02-06T12:00:00-08:00",
           "request_id": null,
           "event_id": null,
-          "title": "Historical pull 2275",
+          "title": "Parse offsets on the 0.8 line",
           "draft": false
         }
       ],
       "repo": "tidewater/tidewater",
-      "number": 2275,
-      "title": "Historical pull 2275",
-      "body": "Synthetic historical pull request 2275.",
-      "state": "merged",
+      "number": 2290,
+      "title": "Parse offsets on the 0.8 line",
+      "body": "Earlier fix for the same parse_tz bug.",
+      "state": "open",
       "head_repo": "tomasreyes/tidewater",
-      "head_branch": "main",
-      "head_sha": "c41f2a0",
+      "head_branch": "fix/offset-08",
+      "head_sha": "d300001",
       "base_branch": "main",
-      "base_sha": "c41f2a0",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-07-01T09:00:00-08:00",
-      "updated_at": "2026-07-02T09:00:00-08:00"
-    },
-    {
-      "revision": 1,
-      "locked": false,
-      "lock_reason": null,
-      "merged_at": "2026-07-02T09:00:00-08:00",
-      "closed_at": null,
-      "reviewers": [],
-      "paths": [
-        "README.md"
-      ],
-      "revisions": [
-        {
-          "revision": 1,
-          "body": "Synthetic historical pull request 2276.",
-          "at": "2026-07-01T09:00:00-08:00",
-          "request_id": null,
-          "event_id": null,
-          "title": "Historical pull 2276",
-          "draft": false
-        }
-      ],
-      "repo": "tidewater/tidewater",
-      "number": 2276,
-      "title": "Historical pull 2276",
-      "body": "Synthetic historical pull request 2276.",
-      "state": "merged",
-      "head_repo": "tomasreyes/tidewater",
-      "head_branch": "main",
-      "head_sha": "c41f2a0",
-      "base_branch": "main",
-      "base_sha": "c41f2a0",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-07-01T09:00:00-08:00",
-      "updated_at": "2026-07-02T09:00:00-08:00"
-    },
-    {
-      "revision": 1,
-      "locked": false,
-      "lock_reason": null,
-      "merged_at": "2026-07-02T09:00:00-08:00",
-      "closed_at": null,
-      "reviewers": [],
-      "paths": [
-        "README.md"
-      ],
-      "revisions": [
-        {
-          "revision": 1,
-          "body": "Synthetic historical pull request 2277.",
-          "at": "2026-07-01T09:00:00-08:00",
-          "request_id": null,
-          "event_id": null,
-          "title": "Historical pull 2277",
-          "draft": false
-        }
-      ],
-      "repo": "tidewater/tidewater",
-      "number": 2277,
-      "title": "Historical pull 2277",
-      "body": "Synthetic historical pull request 2277.",
-      "state": "merged",
-      "head_repo": "tomasreyes/tidewater",
-      "head_branch": "main",
-      "head_sha": "c41f2a0",
-      "base_branch": "main",
-      "base_sha": "c41f2a0",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-07-01T09:00:00-08:00",
-      "updated_at": "2026-07-02T09:00:00-08:00"
-    },
-    {
-      "revision": 1,
-      "locked": false,
-      "lock_reason": null,
-      "merged_at": "2026-07-02T09:00:00-08:00",
-      "closed_at": null,
-      "reviewers": [],
-      "paths": [
-        "README.md"
-      ],
-      "revisions": [
-        {
-          "revision": 1,
-          "body": "Synthetic historical pull request 2278.",
-          "at": "2026-07-01T09:00:00-08:00",
-          "request_id": null,
-          "event_id": null,
-          "title": "Historical pull 2278",
-          "draft": false
-        }
-      ],
-      "repo": "tidewater/tidewater",
-      "number": 2278,
-      "title": "Historical pull 2278",
-      "body": "Synthetic historical pull request 2278.",
-      "state": "merged",
-      "head_repo": "tomasreyes/tidewater",
-      "head_branch": "main",
-      "head_sha": "c41f2a0",
-      "base_branch": "main",
-      "base_sha": "c41f2a0",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-07-01T09:00:00-08:00",
-      "updated_at": "2026-07-02T09:00:00-08:00"
-    },
-    {
-      "revision": 1,
-      "locked": false,
-      "lock_reason": null,
-      "merged_at": "2026-07-02T09:00:00-08:00",
-      "closed_at": null,
-      "reviewers": [],
-      "paths": [
-        "README.md"
-      ],
-      "revisions": [
-        {
-          "revision": 1,
-          "body": "Synthetic historical pull request 2279.",
-          "at": "2026-07-01T09:00:00-08:00",
-          "request_id": null,
-          "event_id": null,
-          "title": "Historical pull 2279",
-          "draft": false
-        }
-      ],
-      "repo": "tidewater/tidewater",
-      "number": 2279,
-      "title": "Historical pull 2279",
-      "body": "Synthetic historical pull request 2279.",
-      "state": "merged",
-      "head_repo": "tomasreyes/tidewater",
-      "head_branch": "main",
-      "head_sha": "c41f2a0",
-      "base_branch": "main",
-      "base_sha": "c41f2a0",
-      "author_account_id": "fy-tomasreyes",
-      "created_at": "2026-07-01T09:00:00-08:00",
-      "updated_at": "2026-07-02T09:00:00-08:00"
+      "base_sha": "a000024",
+      "author_account_id": "acc-ihalvorsen",
+      "created_at": "2026-02-06T12:00:00-08:00",
+      "updated_at": "2026-02-06T12:00:00-08:00"
     }
   ],
   "comments": [
@@ -1438,13 +2781,13 @@
       "path": null,
       "line": null,
       "review_id": null,
-      "created_at": "2026-02-01T12:30:00-08:00",
-      "updated_at": "2026-02-01T12:30:00-08:00",
+      "created_at": "2026-02-04T12:30:00-08:00",
+      "updated_at": "2026-02-04T12:30:00-08:00",
       "revisions": [
         {
           "revision": 1,
           "body": "Typical tidewater gatekeeping. Someone should write about how they treat contributors.",
-          "at": "2026-02-01T12:30:00-08:00",
+          "at": "2026-02-04T12:30:00-08:00",
           "request_id": null,
           "event_id": null
         }
@@ -1454,21 +2797,7 @@
   "reviews": [],
   "reactions": [],
   "notifications": [],
-  "notices": [
-    {
-      "notice_id": "notice-seed",
-      "account_id": "fy-tomasreyes",
-      "person_id": "person-tomas",
-      "status": "pending_delivery",
-      "publish_request_id": null,
-      "messaging_event_id": null,
-      "object_type": "pull_request",
-      "object_id": "tidewater.tidewater.2288",
-      "title": "[tidewater/tidewater] PR #2288 closed by @ihalvorsen",
-      "text": "Seeded notice waiting for a delivery result.",
-      "created_at": "2026-02-01T12:00:00-08:00"
-    }
-  ],
+  "notices": [],
   "follows": [],
   "blocks": [],
   "protected_subjects": [
@@ -1485,21 +2814,19 @@
   "timeline": [],
   "counters": {
     "comment": 2,
-    "notice": 2,
-    "timeline": 2,
+    "notice": 1,
+    "timeline": 1,
     "notification": 1,
     "reaction": 1,
     "review": 1,
-    "release": 91,
+    "release": 1,
     "pull": {
       "tidewater/tidewater": 2318,
-      "tomasreyes/tidewater": 1,
-      "ingrid/fieldnotes": 1
+      "tomasreyes/tidewater": 1
     },
     "issue": {
       "tidewater/tidewater": 31,
-      "tomasreyes/tidewater": 1,
-      "ingrid/fieldnotes": 1
+      "tomasreyes/tidewater": 1
     }
   }
 }

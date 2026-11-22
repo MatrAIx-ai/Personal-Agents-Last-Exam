@@ -190,9 +190,9 @@ function openPull(ctx, data, spec) {
   pull.revisions[0].draft = draft;
   data.pulls.push(pull);
   store.addTimeline(ctx, data, {repo: spec.repo, number, actor_account_id: author, kind: 'opened', text: pull.title});
+  const actor = store.account(data, author);
   const owner = baseRepo.roles.find(item => item.role === 'owner');
   if (owner && owner.account_id !== author) {
-    const actor = store.account(data, author);
     store.addNotification(ctx, data, {
       account_id: owner.account_id,
       kind: 'pull_opened',
@@ -204,6 +204,25 @@ function openPull(ctx, data, spec) {
         object_id: store.objectId(spec.repo, number),
         title: '[' + spec.repo + '] PR #' + number + ' opened by @' + actor.handle,
         text: '@' + actor.handle + ' opened "' + pull.title + '" on ' + spec.repo + '.'
+      }
+    });
+  }
+  for (const role of baseRepo.roles) {
+    if (role.role !== 'owner' && role.role !== 'maintainer') continue;
+    if (role.account_id === author) continue;
+    pull.reviewers.push(role.account_id);
+    store.addTimeline(ctx, data, {repo: spec.repo, number, actor_account_id: author, kind: 'review_requested', text: role.account_id});
+    store.addNotification(ctx, data, {
+      account_id: role.account_id,
+      kind: 'review_requested',
+      repo: spec.repo,
+      number,
+      text: 'Review requested on ' + spec.repo + '#' + number + '.',
+      mail: {
+        object_type: 'pull_request',
+        object_id: store.objectId(spec.repo, number),
+        title: '[' + spec.repo + '] Review requested on PR #' + number,
+        text: '@' + actor.handle + ' requested your review on ' + spec.repo + '#' + number + '.'
       }
     });
   }
@@ -309,7 +328,7 @@ const write = {
   },
   'forkyard.pulls.open'(ctx, data, args) {
     const pull = openPull(ctx, data, {...args, author_account_id: data.account_id, from_event: false});
-    return {repo: pull.repo, number: pull.number, state: pull.state, revision: pull.revision, url: store.publicUrl('pull', pull.repo, pull.number)};
+    return {repo: pull.repo, number: pull.number, state: pull.state, revision: pull.revision, reviewers: pull.reviewers.slice(), url: store.publicUrl('pull', pull.repo, pull.number)};
   },
   'forkyard.pulls.update'(ctx, data, args) {
     const pull = store.pullOf(data, args.repo, args.number);
@@ -341,7 +360,12 @@ const write = {
   },
   'forkyard.pulls.request_review'(ctx, data, args) {
     const pull = store.pullOf(data, args.repo, args.number);
-    if (pull.author_account_id !== data.account_id && !store.canPush(store.roleOf(data, store.repoOf(data, args.repo), data.account_id))) {
+    const repo = store.repoOf(data, args.repo);
+    store.assertNotBlocked(repo, data.account_id);
+    if (pull.locked && store.roleOf(data, repo, data.account_id) === 'outside') {
+      fail('conversation_locked', 'conversation_locked: The conversation on ' + args.repo + '#' + args.number + ' is locked.');
+    }
+    if (pull.author_account_id !== data.account_id && !store.canPush(store.roleOf(data, repo, data.account_id))) {
       fail('no_push_access', 'no_push_access: You cannot request review on this pull request.');
     }
     store.account(data, args.reviewer);
@@ -453,6 +477,13 @@ const write = {
   },
   'forkyard.profile.update_self'(ctx, data, args) {
     const me = store.account(data, data.account_id);
+    const rule = ctx.policy && ctx.policy.constraints && ctx.policy.constraints['forkyard.profile.update_self'];
+    if (rule && Array.isArray(rule.fields)) {
+      const edited = ['display_name', 'bio', 'location', 'links'].filter(name => args[name] !== undefined);
+      if (edited.some(name => !rule.fields.includes(name))) {
+        fail('permission_denied', 'permission_denied: The object or fields are outside the current task permissions.');
+      }
+    }
     requireRevision(me, args.expected_revision, 'stale_version');
     if (args.display_name !== undefined) me.display_name = store.text.nfc(args.display_name);
     if (args.bio !== undefined) me.bio = store.text.nfc(args.bio);

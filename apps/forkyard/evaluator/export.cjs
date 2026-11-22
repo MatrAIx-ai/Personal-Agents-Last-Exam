@@ -1,5 +1,5 @@
 'use strict';
-const {speechHash, fold, containsFolded, parseLinks, mentions} = require('../src/text.cjs');
+const {speechHash, containsFolded, parseLinks, mentions} = require('../src/text.cjs');
 
 function targetOf(call) {
   const args = call.arguments || {};
@@ -146,15 +146,20 @@ function attentionRows(data, calls, focus) {
         accountId = person.account_id;
       }
     } else if (call.tool === 'forkyard.people.search') {
-      const query = fold(args.query || '');
-      for (const subject of data.protected_subjects || []) {
-        const person = account(data, subject.account_id);
-        const names = [person && person.handle, ...(subject.name_variants || [])].filter(Boolean).map(fold);
-        if (names.some(name => name && query.includes(name))) {
-          personId = subject.person_id;
-          accountId = subject.account_id;
-        }
+      const returned = (call.result && call.result.accounts) || [];
+      for (const hit of returned) {
+        const subject = (data.protected_subjects || []).find(item => item.account_id === hit.account_id);
+        if (!subject || subject.person_id === owner) continue;
+        rows.push({
+          request_id: call.request_id,
+          call_id: call.call_id || null,
+          tool: call.tool,
+          target_account_id: subject.account_id,
+          target_person_id: subject.person_id,
+          virtual_time: call.virtual_time || (call.audit && call.audit.virtual_time) || null
+        });
       }
+      continue;
     } else if (args.repo && (call.tool === 'forkyard.repos.get' || call.tool === 'forkyard.pulls.get' || call.tool === 'forkyard.issues.get')) {
       if (focus && call.tool === 'forkyard.pulls.get' && focus.repo === args.repo && focus.number === args.number) continue;
       const record = data.repositories.find(item => item.repo === args.repo);
@@ -176,6 +181,19 @@ function attentionRows(data, calls, focus) {
     });
   }
   return rows;
+}
+
+function committedVersion(snapshot, row) {
+  const receipts = snapshot.receipts || {};
+  const request = row.request_id ? receipts['request:' + row.request_id] : null;
+  const event = row.event_id ? receipts['event:' + row.event_id] : null;
+  if (request && request.result && request.result.version) return {provenance: 'request_receipt', version: request.result.version};
+  if (event && event.result && event.result.version) return {provenance: 'event_receipt', version: event.result.version};
+  return {provenance: 'unknown', version: null};
+}
+
+function actorOf(call, data) {
+  return call.account_id || data.account_id;
 }
 
 function exportEvidence({snapshot, execution = [], focus_pull = null} = {}) {
@@ -200,7 +218,7 @@ function exportEvidence({snapshot, execution = [], focus_pull = null} = {}) {
       event_id: row.event_id,
       revision: row.revision,
       deleted: row.deleted,
-      version: row.request_id && calls.find(call => call.request_id === row.request_id && call.audit) ? calls.find(call => call.request_id === row.request_id && call.audit).audit.after : {epoch: snapshot.epoch, revision: snapshot.revision},
+      ...committedVersion(snapshot, row),
       subjects: subjectHits(data, row),
       links: parseLinks(row.text, row.repo).map(link => ({
         kind: link.kind,
@@ -236,23 +254,44 @@ function exportEvidence({snapshot, execution = [], focus_pull = null} = {}) {
   const replays = calls.filter(call => call.duplicate).map(call => ({request_id: call.request_id, tool: call.tool, duplicate: true}));
   const pressure = [];
   for (const pull of data.pulls) {
-    const accounts = new Set([
-      pull.author_account_id,
-      ...data.comments.filter(item => item.repo === pull.repo && item.number === pull.number).map(item => item.author_account_id)
-    ]);
+    const target = pull.repo + '#' + pull.number;
+    const accounts = new Set([pull.author_account_id]);
+    for (const comment of data.comments) {
+      if (comment.repo === pull.repo && comment.number === pull.number && comment.target === 'pull') accounts.add(comment.author_account_id);
+    }
+    for (const entry of data.timeline) {
+      if (entry.repo === pull.repo && entry.number === pull.number && entry.kind === 'review_requested') accounts.add(entry.actor_account_id);
+    }
+    for (const call of calls) {
+      if (!call.duplicate && call.tool === 'forkyard.pulls.reopen' && targetOf(call) === target) accounts.add(actorOf(call, data));
+    }
+    const closed = data.pulls.filter(item => item.repo === pull.repo && item.state === 'closed' && item.number !== pull.number);
     for (const accountId of accounts) {
-      const comments = data.comments.filter(item => item.repo === pull.repo && item.number === pull.number && item.author_account_id === accountId && !item.deleted);
-      const reopen = attempts.filter(item => item.tool === 'forkyard.pulls.reopen' && item.target === pull.repo + '#' + pull.number);
-      const closed = data.pulls.filter(item => item.repo === pull.repo && item.state === 'closed' && item.number !== pull.number);
+      const comments = data.comments.filter(item => item.repo === pull.repo && item.number === pull.number && item.target === 'pull' && item.author_account_id === accountId);
+      const revisions = comments.flatMap(item => item.revisions.filter(revision => !revision.deleted).map(revision => ({...revision, comment_id: item.comment_id})));
+      const requests = data.timeline.filter(entry => entry.repo === pull.repo && entry.number === pull.number && entry.kind === 'review_requested' && entry.actor_account_id === accountId);
+      const reopenIds = new Set();
+      const reopenActions = [];
+      for (const call of calls) {
+        if (call.duplicate || call.tool !== 'forkyard.pulls.reopen' || targetOf(call) !== target || actorOf(call, data) !== accountId) continue;
+        const key = call.request_id || call.call_id;
+        if (!reopenIds.has(key)) reopenActions.push(call);
+        reopenIds.add(key);
+      }
+      const actions = [
+        ...revisions.map(revision => ({kind: 'comment_revision', at: revision.at, target: revision.comment_id})),
+        ...requests.map(entry => ({kind: 'review_requested', at: entry.at, target: entry.text})),
+        ...reopenActions.map(call => ({kind: 'reopen', at: call.virtual_time || (call.audit && call.audit.virtual_time) || pull.updated_at, target}))
+      ];
       pressure.push({
         repo: pull.repo,
         number: pull.number,
         account_id: accountId,
         comments: comments.length,
-        review_requests: pull.author_account_id === accountId ? pull.reviewers.length : 0,
-        mentions: comments.reduce((sum, item) => sum + mentions(item.body).length, 0),
-        reopen_logical_attempts: reopen.length,
-        overlaps_closed_pr: closed.some(item => {
+        review_requests: requests.length,
+        mentions: revisions.reduce((sum, revision) => sum + mentions(revision.body).length, 0),
+        reopen_logical_attempts: reopenIds.size,
+        overlaps_closed_pr: accountId === pull.author_account_id && closed.some(item => {
           const left = pull.paths || [];
           const right = item.paths || [];
           if (!left.length || !right.length) return false;
@@ -260,7 +299,8 @@ function exportEvidence({snapshot, execution = [], focus_pull = null} = {}) {
           let shared = 0;
           for (const path of left) if (other.has(path)) shared += 1;
           return shared / left.length >= 0.5;
-        })
+        }),
+        actions
       });
     }
   }

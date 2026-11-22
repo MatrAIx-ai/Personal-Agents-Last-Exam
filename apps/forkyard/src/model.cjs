@@ -78,10 +78,57 @@ function validateSeed(ctx, data) {
     if ((pull.state === 'closed') !== (pull.closed_at !== null)) fail('invalid_seed', 'invalid_seed: Closed time must agree with pull state.');
     if ((pull.state === 'merged') !== (pull.merged_at !== null)) fail('invalid_seed', 'invalid_seed: Merge time must agree with pull state.');
   }
+  const seenIds = new Set();
+  function claim(kind, value) {
+    const key = kind + ':' + value;
+    if (seenIds.has(key)) fail('invalid_seed', 'invalid_seed: Duplicate ' + kind + ' ' + value + '.');
+    seenIds.add(key);
+  }
+  for (const item of data.accounts) claim('account', item.account_id);
+  for (const item of data.issues) claim('issue', item.repo + '#' + item.number);
+  for (const item of data.pulls) claim('pull', item.repo + '#' + item.number);
+  for (const item of data.releases) claim('release', item.release_id);
+  for (const item of data.reviews) claim('review', item.review_id);
+  for (const item of data.notices) claim('notice', item.notice_id);
+  for (const item of data.notifications) claim('notification', item.notification_id);
+  for (const item of data.comments) claim('comment', item.comment_id);
   for (const comment of data.comments) {
     if (!accounts.has(comment.author_account_id)) fail('invalid_seed', 'invalid_seed: Comment author missing.');
+    if (comment.target === 'pull' && !data.pulls.some(item => item.repo === comment.repo && item.number === comment.number)) {
+      fail('invalid_seed', 'invalid_seed: Comment ' + comment.comment_id + ' has no pull request ' + comment.repo + '#' + comment.number + '.');
+    }
+    if (comment.target === 'issue' && !data.issues.some(item => item.repo === comment.repo && item.number === comment.number)) {
+      fail('invalid_seed', 'invalid_seed: Comment ' + comment.comment_id + ' has no issue ' + comment.repo + '#' + comment.number + '.');
+    }
     const last = comment.revisions[comment.revisions.length - 1];
     if (!last || last.body !== comment.body || last.revision !== comment.revision) fail('invalid_seed', 'invalid_seed: Comment revisions must retain the current text.');
+  }
+  for (const review of data.reviews) {
+    if (!data.pulls.some(item => item.repo === review.repo && item.number === review.number)) {
+      fail('invalid_seed', 'invalid_seed: Review ' + review.review_id + ' has no pull request ' + review.repo + '#' + review.number + '.');
+    }
+  }
+  for (const reaction of data.reactions) {
+    if (!data.comments.some(item => item.comment_id === reaction.comment_id)) {
+      fail('invalid_seed', 'invalid_seed: Reaction ' + reaction.reaction_id + ' has no comment ' + reaction.comment_id + '.');
+    }
+  }
+  if (ctx && ctx.virtual_now) {
+    const limit = Date.parse(ctx.virtual_now);
+    const visit = (value, label, seen = new Set()) => {
+      if (!value || typeof value !== 'object' || seen.has(value)) return;
+      seen.add(value);
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => visit(item, label + '[' + index + ']', seen));
+        return;
+      }
+      for (const [key, item] of Object.entries(value)) {
+        if ((key === 'at' || key.endsWith('_at')) && typeof item === 'string' && Date.parse(item) > limit) {
+          fail('invalid_seed', 'invalid_seed: ' + label + '.' + key + ' is after the load clock.');
+        } else if (item && typeof item === 'object') visit(item, label + '.' + key, seen);
+      }
+    };
+    visit(data, 'seed');
   }
   for (const subject of data.protected_subjects) {
     if (!accounts.has(subject.account_id)) fail('invalid_seed', 'invalid_seed: Protected subject account missing.');

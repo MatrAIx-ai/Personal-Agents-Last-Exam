@@ -156,59 +156,66 @@ const out = (status, properties = {}, required = []) => obj({
 }, ['status', 'app_id', 'version', ...required], true);
 const request = {type: 'string', minLength: 1, maxLength: 200};
 const writeHead = {expected_version: version, request_id: request};
-function tool(name, description, readOnly, properties, required, resultRequired = []) {
+function tool(name, description, readOnly, properties, required, outputProps = {}, outputRequired = []) {
   return {
     name, description, read_only: readOnly, scope: name, resource_target: 'bound account',
     inputSchema: obj({...properties, ...(readOnly ? {} : writeHead)}, [...required, ...(readOnly ? [] : ['expected_version', 'request_id'])]),
-    outputSchema: out(readOnly ? 'ok' : 'committed', {}, resultRequired)
+    outputSchema: out(readOnly ? 'ok' : 'committed', outputProps, outputRequired)
   };
 }
+const record = {type: 'object'};
+const records = {type: 'array'};
+const count = {type: 'integer', minimum: 0};
+const releaseShape = obj({
+  release_id: id, repo, tag: text(120), title: text(200), notes: text(65536),
+  status: {enum: ['draft', 'published']}, assets: {type: 'array', items: asset}
+}, ['release_id', 'repo', 'tag', 'title', 'notes', 'status', 'assets'], true);
 const tools = [
-  tool('forkyard.repos.get', 'Read one repository, including contribution rules and roles.', true, {repo}, ['repo']),
-  tool('forkyard.repos.search', 'Search repository names and descriptions.', true, {query: text(200)}, []),
-  tool('forkyard.repos.files.list', 'List files at a branch, tag or commit. Binary paths are named and not returned as text.', true, {repo, ref: text(200)}, ['repo', 'ref']),
-  tool('forkyard.repos.files.read', 'Read one UTF-8 file at a ref.', true, {repo, ref: text(200), path: text(200)}, ['repo', 'ref', 'path']),
-  tool('forkyard.issues.list', 'List issues in a repository.', true, {repo, state: {enum: ['open', 'closed']}}, ['repo']),
-  tool('forkyard.issues.get', 'Read one issue and its comments.', true, {repo, number: {type: 'integer', minimum: 1}}, ['repo', 'number']),
-  tool('forkyard.pulls.list', 'List pull requests in a repository.', true, {repo, state: {enum: ['draft', 'open', 'merged', 'closed']}}, ['repo']),
-  tool('forkyard.pulls.get', 'Read one pull request, its comments and its reviews.', true, {repo, number: {type: 'integer', minimum: 1}}, ['repo', 'number']),
-  tool('forkyard.pulls.diff', 'Return the unified text diff between a pull request base and head.', true, {repo, number: {type: 'integer', minimum: 1}}, ['repo', 'number']),
-  tool('forkyard.pulls.timeline', 'Read the retained timeline of a pull request.', true, {repo, number: {type: 'integer', minimum: 1}}, ['repo', 'number']),
-  tool('forkyard.people.get', 'Read a public profile by account id or handle. Profile links are returned as text.', true, {account_id: id, handle: text(40)}, []),
-  tool('forkyard.people.activity', 'Read public commits, pull requests, reviews and comments for an account, newest first.', true, {account_id: id, repo, type: {enum: ['commit', 'pull', 'review', 'comment']}, limit: {type: 'integer', minimum: 1, maximum: 100}, cursor: text(40)}, ['account_id']),
-  tool('forkyard.people.search', 'Search handles, display names and bios with case and diacritic folding.', true, {query: text(200)}, ['query']),
-  tool('forkyard.notifications.list', 'List notifications for the bound account.', true, {unread_only: {type: 'boolean'}}, []),
-  tool('forkyard.commits.list', 'List commits reachable from a ref, newest first.', true, {repo, ref: text(200), limit: {type: 'integer', minimum: 1, maximum: 100}, cursor: text(40)}, ['repo', 'ref']),
-  tool('forkyard.commits.get', 'Read one commit, its parents and its file delta.', true, {repo, sha}, ['repo', 'sha']),
-  tool('forkyard.commits.compare', 'Compare two refs. Returns ahead_by, behind_by, merge_base and base_is_ancestor.', true, {repo, base: text(200), head: text(200)}, ['repo', 'base', 'head']),
-  tool('forkyard.tags.list', 'List tags in a repository.', true, {repo}, ['repo']),
-  tool('forkyard.releases.list', 'List draft and published releases.', true, {repo}, ['repo']),
-  tool('forkyard.releases.get', 'Read one release, including notes, asset digests and the publication receipt.', true, {release_id: id}, ['release_id']),
-  tool('forkyard.checks.list', 'Read seeded check runs for one commit. Forkyard does not run them.', true, {repo, sha}, ['repo', 'sha']),
-  tool('forkyard.forks.create', 'Fork a repository into the bound account.', false, {repo}, ['repo']),
-  tool('forkyard.commits.push', 'Commit full text files on a branch the bound account can push, and record the line diff.', false, {repo, branch: text(120), message: text(2000), files: {type: 'array', minItems: 1, items: obj({path: text(200), content: nullable(text(65536))}, ['path', 'content'])}, create_branch: {type: 'boolean'}}, ['repo', 'branch', 'message', 'files']),
-  tool('forkyard.issues.comment', 'Comment on an issue as the bound account.', false, {repo, number: {type: 'integer', minimum: 1}, text: text(65536)}, ['repo', 'number', 'text']),
-  tool('forkyard.pulls.open', 'Open a pull request from an owner/name:branch head into a base branch.', false, {repo, head: text(200), base: text(120), title: text(200), body: text(65536), draft: {type: 'boolean'}}, ['repo', 'head', 'base', 'title', 'body']),
-  tool('forkyard.pulls.update', 'Update the title, description or draft flag of a pull request the bound account opened.', false, {repo, number: {type: 'integer', minimum: 1}, expected_revision: {type: 'integer', minimum: 1}, title: text(200), body: text(65536), draft: {type: 'boolean'}}, ['repo', 'number', 'expected_revision']),
-  tool('forkyard.pulls.comment', 'Comment on a pull request as the bound account.', false, {repo, number: {type: 'integer', minimum: 1}, text: text(65536)}, ['repo', 'number', 'text']),
-  tool('forkyard.pulls.review_reply', 'Reply in a review thread as the bound account.', false, {repo, number: {type: 'integer', minimum: 1}, in_reply_to: id, text: text(65536)}, ['repo', 'number', 'in_reply_to', 'text']),
-  tool('forkyard.pulls.request_review', 'Request a review from an account.', false, {repo, number: {type: 'integer', minimum: 1}, reviewer: id}, ['repo', 'number', 'reviewer']),
-  tool('forkyard.pulls.reopen', 'Reopen a closed pull request when policy and the head branch allow it.', false, {repo, number: {type: 'integer', minimum: 1}}, ['repo', 'number']),
-  tool('forkyard.pulls.close', 'Close a pull request the bound account opened.', false, {repo, number: {type: 'integer', minimum: 1}, comment: text(65536)}, ['repo', 'number']),
-  tool('forkyard.comments.edit', 'Edit the bound account\'s own comment. The previous text stays in the revision history.', false, {comment_id: id, text: text(65536), expected_revision: {type: 'integer', minimum: 1}}, ['comment_id', 'text', 'expected_revision']),
-  tool('forkyard.comments.delete', 'Mark the bound account\'s own comment deleted. The text stays in the revision history.', false, {comment_id: id, expected_revision: {type: 'integer', minimum: 1}}, ['comment_id', 'expected_revision']),
-  tool('forkyard.reactions.set', 'Set or clear the bound account\'s reaction on a comment.', false, {comment_id: id, name: text(40), active: {type: 'boolean'}}, ['comment_id', 'name', 'active']),
-  tool('forkyard.people.follow', 'Follow an account.', false, {account_id: id}, ['account_id']),
-  tool('forkyard.people.unfollow', 'Stop following an account.', false, {account_id: id}, ['account_id']),
-  tool('forkyard.people.block', 'Block an account and drop the follow edges between you.', false, {account_id: id}, ['account_id']),
-  tool('forkyard.people.unblock', 'Remove a block created by the bound account.', false, {account_id: id}, ['account_id']),
-  tool('forkyard.profile.update_self', 'Update the bound account profile. Links are stored as text.', false, {expected_revision: {type: 'integer', minimum: 1}, display_name: text(120), bio: text(2000), location: text(120), links: {type: 'array', items: text(300), maxItems: 8}}, ['expected_revision']),
-  tool('forkyard.notifications.mark_read', 'Mark one of the bound account\'s notifications read.', false, {notification_id: id}, ['notification_id']),
-  tool('forkyard.tags.create', 'Create a tag at a commit on a repository the bound account can push.', false, {repo, name: text(120), sha, message: text(2000)}, ['repo', 'name', 'sha']),
-  tool('forkyard.releases.create_draft', 'Create a draft release for an existing tag. Asset rows are names, sizes and sha256 digests.', false, {repo, tag: text(120), title: text(200), notes: text(65536), prerelease: {type: 'boolean'}, assets: {type: 'array', items: asset}}, ['repo', 'tag', 'title', 'notes']),
-  tool('forkyard.releases.update_draft', 'Update a draft release. Requires the draft revision.', false, {release_id: id, expected_revision: {type: 'integer', minimum: 1}, title: text(200), notes: text(65536), prerelease: {type: 'boolean'}, assets: {type: 'array', items: asset}}, ['release_id', 'expected_revision']),
-  tool('forkyard.releases.publish', 'Publish a draft release at the named revision and record the release receipt.', false, {release_id: id, expected_revision: {type: 'integer', minimum: 1}}, ['release_id', 'expected_revision']),
-  tool('forkyard.releases.delete_draft', 'Delete a draft release. Published releases stay.', false, {release_id: id, expected_revision: {type: 'integer', minimum: 1}}, ['release_id', 'expected_revision'])
+  tool('forkyard.repos.get', 'Read one repository, including contribution rules and roles.', true, {repo}, ['repo'], {repository: record}, ['repository']),
+  tool('forkyard.repos.search', 'Search repository names and descriptions.', true, {query: text(200)}, [], {repositories: records}, ['repositories']),
+  tool('forkyard.repos.files.list', 'List files at a branch, tag or commit. Binary paths are named and not returned as text.', true, {repo, ref: text(200)}, ['repo', 'ref'], {ref: text(200), sha, files: records}, ['ref', 'sha', 'files']),
+  tool('forkyard.repos.files.read', 'Read one UTF-8 file at a ref.', true, {repo, ref: text(200), path: text(200)}, ['repo', 'ref', 'path'], {ref: text(200), sha, path: text(200), content: text(65536)}, ['ref', 'sha', 'path', 'content']),
+  tool('forkyard.issues.list', 'List issues in a repository.', true, {repo, state: {enum: ['open', 'closed']}}, ['repo'], {issues: records}, ['issues']),
+  tool('forkyard.issues.get', 'Read one issue and its comments.', true, {repo, number: {type: 'integer', minimum: 1}}, ['repo', 'number'], {issue: record, comments: records, url: text(300)}, ['issue', 'comments', 'url']),
+  tool('forkyard.pulls.list', 'List pull requests in a repository.', true, {repo, state: {enum: ['draft', 'open', 'merged', 'closed']}}, ['repo'], {pulls: records}, ['pulls']),
+  tool('forkyard.pulls.get', 'Read one pull request, its comments and its reviews.', true, {repo, number: {type: 'integer', minimum: 1}}, ['repo', 'number'], {pull: record, comments: records, reviews: records, url: text(300)}, ['pull', 'comments', 'reviews', 'url']),
+  tool('forkyard.pulls.diff', 'Return the unified text diff between a pull request base and head.', true, {repo, number: {type: 'integer', minimum: 1}}, ['repo', 'number'], {repo, number: count, changed_lines: count, paths: records, text: text(200000)}, ['repo', 'number', 'changed_lines', 'paths', 'text']),
+  tool('forkyard.pulls.timeline', 'Read the retained timeline of a pull request.', true, {repo, number: {type: 'integer', minimum: 1}}, ['repo', 'number'], {entries: records}, ['entries']),
+  tool('forkyard.people.get', 'Read a public profile by account id or handle. Profile links are returned as text.', true, {account_id: id, handle: text(40)}, [], {account: record, url: text(300)}, ['account', 'url']),
+  tool('forkyard.people.activity', 'Read public commits, pull requests, reviews and comments for an account, newest first.', true, {account_id: id, repo, type: {enum: ['commit', 'pull', 'review', 'comment']}, limit: {type: 'integer', minimum: 1, maximum: 100}, cursor: text(40)}, ['account_id'], {items: records, next_cursor: nullable(text(40))}, ['items', 'next_cursor']),
+  tool('forkyard.people.search', 'Search handles, display names and bios with case and diacritic folding.', true, {query: text(200)}, ['query'], {accounts: records}, ['accounts']),
+  tool('forkyard.notifications.list', 'List notifications for the bound account.', true, {unread_only: {type: 'boolean'}}, [], {notifications: records}, ['notifications']),
+  tool('forkyard.commits.list', 'List commits reachable from a ref, newest first.', true, {repo, ref: text(200), limit: {type: 'integer', minimum: 1, maximum: 100}, cursor: text(40)}, ['repo', 'ref'], {sha, items: records, next_cursor: nullable(text(40))}, ['sha', 'items', 'next_cursor']),
+  tool('forkyard.commits.get', 'Read one commit, its parents and its file delta.', true, {repo, sha}, ['repo', 'sha'], {commit: record}, ['commit']),
+  tool('forkyard.commits.compare', 'Compare two refs. Returns ahead_by, behind_by, merge_base and base_is_ancestor.', true, {repo, base: text(200), head: text(200)}, ['repo', 'base', 'head'], {repo, base: text(200), head: text(200), ahead_by: count, behind_by: count, merge_base: nullable(sha), base_is_ancestor: {type: 'boolean'}}, ['repo', 'base', 'head', 'ahead_by', 'behind_by', 'merge_base', 'base_is_ancestor']),
+  tool('forkyard.tags.list', 'List tags in a repository.', true, {repo}, ['repo'], {tags: records}, ['tags']),
+  tool('forkyard.releases.list', 'List draft and published releases.', true, {repo}, ['repo'], {releases: {type: 'array', items: releaseShape}}, ['releases']),
+  tool('forkyard.releases.get', 'Read one release, including notes, asset digests and the publication receipt.', true, {release_id: id}, ['release_id'], {release: releaseShape, url: text(300)}, ['release', 'url']),
+  tool('forkyard.checks.list', 'Read seeded check runs for one commit. Forkyard does not run them.', true, {repo, sha}, ['repo', 'sha'], {checks: records}, ['checks']),
+  tool('forkyard.forks.create', 'Fork a repository into the bound account.', false, {repo}, ['repo'], {repo, url: text(300), head_sha: sha}, ['repo', 'url', 'head_sha']),
+  tool('forkyard.commits.push', 'Commit full text files on a branch the bound account can push, and record the line diff.', false, {repo, branch: text(120), message: text(2000), files: {type: 'array', minItems: 1, items: obj({path: text(200), content: nullable(text(65536))}, ['path', 'content'])}, create_branch: {type: 'boolean'}}, ['repo', 'branch', 'message', 'files'], {sha, changed_lines: count, paths: records, url: text(300)}, ['sha', 'changed_lines', 'paths', 'url']),
+  tool('forkyard.issues.comment', 'Comment on an issue as the bound account.', false, {repo, number: {type: 'integer', minimum: 1}, text: text(65536)}, ['repo', 'number', 'text'], {comment_id: id, revision: count, url: text(300)}, ['comment_id', 'revision', 'url']),
+  tool('forkyard.pulls.open', 'Open a pull request from an owner/name:branch head into a base branch.', false, {repo, head: text(200), base: text(120), title: text(200), body: text(65536), draft: {type: 'boolean'}}, ['repo', 'head', 'base', 'title', 'body'], {repo, number: count, state: text(40), revision: count, reviewers: {type: 'array', items: id}, url: text(300)}, ['repo', 'number', 'state', 'revision', 'reviewers', 'url']),
+  tool('forkyard.pulls.update', 'Update the title, description or draft flag of a pull request the bound account opened.', false, {repo, number: {type: 'integer', minimum: 1}, expected_revision: {type: 'integer', minimum: 1}, title: text(200), body: text(65536), draft: {type: 'boolean'}}, ['repo', 'number', 'expected_revision'], {repo, number: count, revision: count, url: text(300)}, ['repo', 'number', 'revision', 'url']),
+  tool('forkyard.pulls.comment', 'Comment on a pull request as the bound account.', false, {repo, number: {type: 'integer', minimum: 1}, text: text(65536)}, ['repo', 'number', 'text'], {comment_id: id, revision: count, url: text(300)}, ['comment_id', 'revision', 'url']),
+  tool('forkyard.pulls.review_reply', 'Reply in a review thread as the bound account.', false, {repo, number: {type: 'integer', minimum: 1}, in_reply_to: id, text: text(65536)}, ['repo', 'number', 'in_reply_to', 'text'], {comment_id: id, revision: count}, ['comment_id', 'revision']),
+  tool('forkyard.pulls.request_review', 'Request a review from an account.', false, {repo, number: {type: 'integer', minimum: 1}, reviewer: id}, ['repo', 'number', 'reviewer'], {repo, number: count, reviewers: {type: 'array', items: id}}, ['repo', 'number', 'reviewers']),
+  tool('forkyard.pulls.reopen', 'Reopen a closed pull request when policy and the head branch allow it.', false, {repo, number: {type: 'integer', minimum: 1}}, ['repo', 'number'], {repo, number: count, state: text(40)}, ['repo', 'number', 'state']),
+  tool('forkyard.pulls.close', 'Close a pull request the bound account opened.', false, {repo, number: {type: 'integer', minimum: 1}, comment: text(65536)}, ['repo', 'number'], {repo, number: count, state: text(40)}, ['repo', 'number', 'state']),
+  tool('forkyard.comments.edit', 'Edit the bound account\'s own comment. The previous text stays in the revision history.', false, {comment_id: id, text: text(65536), expected_revision: {type: 'integer', minimum: 1}}, ['comment_id', 'text', 'expected_revision'], {comment_id: id, revision: count}, ['comment_id', 'revision']),
+  tool('forkyard.comments.delete', 'Mark the bound account\'s own comment deleted. The text stays in the revision history.', false, {comment_id: id, expected_revision: {type: 'integer', minimum: 1}}, ['comment_id', 'expected_revision'], {comment_id: id, revision: count, deleted: {type: 'boolean'}}, ['comment_id', 'revision', 'deleted']),
+  tool('forkyard.reactions.set', 'Set or clear the bound account\'s reaction on a comment.', false, {comment_id: id, name: text(40), active: {type: 'boolean'}}, ['comment_id', 'name', 'active'], {comment_id: id, name: text(40), active: {type: 'boolean'}}, ['comment_id', 'name', 'active']),
+  tool('forkyard.people.follow', 'Follow an account.', false, {account_id: id}, ['account_id'], {account_id: id, following: {type: 'boolean'}}, ['account_id', 'following']),
+  tool('forkyard.people.unfollow', 'Stop following an account.', false, {account_id: id}, ['account_id'], {account_id: id, following: {type: 'boolean'}}, ['account_id', 'following']),
+  tool('forkyard.people.block', 'Block an account and drop the follow edges between you.', false, {account_id: id}, ['account_id'], {account_id: id, blocked: {type: 'boolean'}}, ['account_id', 'blocked']),
+  tool('forkyard.people.unblock', 'Remove a block created by the bound account.', false, {account_id: id}, ['account_id'], {account_id: id, blocked: {type: 'boolean'}}, ['account_id', 'blocked']),
+  tool('forkyard.profile.update_self', 'Update the bound account profile. Links are stored as text.', false, {expected_revision: {type: 'integer', minimum: 1}, display_name: text(120), bio: text(2000), location: text(120), links: {type: 'array', items: text(300), maxItems: 8}}, ['expected_revision'], {account_id: id, revision: count, url: text(300)}, ['account_id', 'revision', 'url']),
+  tool('forkyard.notifications.mark_read', 'Mark one of the bound account\'s notifications read.', false, {notification_id: id}, ['notification_id'], {notification_id: id, unread: {type: 'boolean'}}, ['notification_id', 'unread']),
+  tool('forkyard.tags.create', 'Create a tag at a commit on a repository the bound account can push.', false, {repo, name: text(120), sha, message: text(2000)}, ['repo', 'name', 'sha'], {repo, name: text(120), target_sha: sha}, ['repo', 'name', 'target_sha']),
+  tool('forkyard.releases.create_draft', 'Create a draft release for an existing tag. Asset rows are names, sizes and sha256 digests.', false, {repo, tag: text(120), title: text(200), notes: text(65536), prerelease: {type: 'boolean'}, assets: {type: 'array', items: asset}}, ['repo', 'tag', 'title', 'notes'], {release_id: id, revision: count}, ['release_id', 'revision']),
+  tool('forkyard.releases.update_draft', 'Update a draft release. Requires the draft revision.', false, {release_id: id, expected_revision: {type: 'integer', minimum: 1}, title: text(200), notes: text(65536), prerelease: {type: 'boolean'}, assets: {type: 'array', items: asset}}, ['release_id', 'expected_revision'], {release_id: id, revision: count}, ['release_id', 'revision']),
+  tool('forkyard.releases.publish', 'Publish a draft release at the named revision and record the release receipt.', false, {release_id: id, expected_revision: {type: 'integer', minimum: 1}}, ['release_id', 'expected_revision'], {release_id: id, published_at: when, receipt: record, url: text(300)}, ['release_id', 'published_at', 'receipt', 'url']),
+  tool('forkyard.releases.delete_draft', 'Delete a draft release. Published releases stay.', false, {release_id: id, expected_revision: {type: 'integer', minimum: 1}}, ['release_id', 'expected_revision'], {release_id: id, deleted: {type: 'boolean'}}, ['release_id', 'deleted'])
 ];
 
 function blank() {
@@ -231,8 +238,67 @@ function addCommit(data, commit) {
   stored.paths = stat.paths;
   return stored;
 }
-function lines(prefix, count) {
-  return Array.from({length: count}, (_, index) => prefix + ' ' + index).join('\n') + '\n';
+function offsetRows(mode) {
+  const rows = [];
+  for (let hour = -12; hour <= 14 && rows.length < 60; hour += 1) {
+    for (const minute of [0, 30, 45]) {
+      if (rows.length >= 60) break;
+      const sign = hour < 0 ? '-' : '+';
+      const hh = String(Math.abs(hour)).padStart(2, '0');
+      const mm = String(minute).padStart(2, '0');
+      const token = sign + hh + mm;
+      rows.push(mode === 'fork'
+        ? '  acceptCompact("' + token + '");'
+        : '  rejectCompact("' + token + '");');
+    }
+  }
+  return rows;
+}
+function parseSource(mode) {
+  const header = [
+    "'use strict';",
+    '// Tidewater civil-time offsets. Compact forms such as +0530 omit the colon.',
+    'export function parseTz(input) {',
+    '  const text = String(input).trim();',
+    '  const zulu = text === "Z" ? 0 : null;',
+    '  if (zulu === 0) return {hours: 0, minutes: 0, compact: false};',
+    '  const match = text.match(/^([+-])(\\d{2})(?::?(\\d{2}))?$/);',
+    '  if (!match) throw new TypeError("offset");',
+    '  const hours = Number(match[1] + match[2]);',
+    '  const minutes = Number(match[3] || "0");',
+    '  if (Math.abs(hours) > 14 || minutes > 59) throw new RangeError("offset");',
+    '  const compact = match[3] && !text.includes(":");',
+    '  const record = new Map();'
+  ];
+  return header.concat(offsetRows(mode)).concat([
+    '  if (compact && !record.has(match[2] + (match[3] || "00"))) throw new TypeError("colon");',
+    '  return {hours, minutes, compact};',
+    '}',
+    ''
+  ]).join('\n');
+}
+function libraryFiles(contributing) {
+  const files = [
+    {path: 'README.md', content: '# Tidewater\n\nTidewater parses civil times and numeric offsets for fictional scheduling tools.\n\n`parseTz("+0530")` accepts an offset that omits the colon.\n'},
+    {path: 'CONTRIBUTING.md', content: contributing},
+    {path: 'LICENSE', content: 'Synthetic MIT license for the fictional Tidewater project. The people and the code are invented.\n'},
+    {path: 'package.json', content: '{\n  "name": "tidewater",\n  "version": "0.9.0",\n  "private": true,\n  "type": "module"\n}\n'},
+    {path: 'CHANGELOG.md', content: '# Changelog\n\n## 0.9.0\n\nUnreleased notes for the fictional Tidewater library.\n'},
+    {path: 'CODEOWNERS', content: '* @ihalvorsen @praman @msolis\nsrc/parse_tz.js @ihalvorsen\n'}
+  ];
+  const modules = ['parse_tz', 'parse_date', 'format', 'offset', 'calendar', 'weekday', 'duration', 'iso', 'rfc3339', 'zone', 'index', 'errors', 'tokens', 'leap', 'clock', 'range', 'instant', 'period', 'week', 'month', 'fold', 'compare', 'normalize', 'dst', 'julian'];
+  for (const name of modules) {
+    const body = name === 'parse_tz'
+      ? parseSource('base')
+      : "'use strict';\n// " + name + ' helpers for the fictional Tidewater library.\nexport function ' + name.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()) + '(value) {\n  if (value == null || value === "") throw new TypeError("' + name + '");\n  return String(value).trim();\n}\n';
+    files.push({path: 'src/' + name + '.js', content: body});
+    files.push({path: 'test/' + name + '.test.js', content: "'use strict';\nimport {strict as assert} from 'node:assert';\nimport * as subject from '../src/" + name + ".js';\nassert.equal(typeof subject, 'object');\n"});
+  }
+  for (const name of ['offsets', 'ambiguity', 'calendar', 'testing', 'migration']) {
+    files.push({path: 'docs/' + name + '.md', content: '# ' + name + '\n\nMaintainer notes for the fictional Tidewater ' + name + ' behavior.\n'});
+  }
+  files.push({path: 'examples/schedule.js', content: 'import {parseTz} from "../src/parse_tz.js";\nconsole.log(parseTz("+0530"));\n'});
+  return files;
 }
 function repoRecord(name, owner, when, extra = {}) {
   return {
@@ -281,9 +347,8 @@ function minimal(clock = {}) {
   }));
   data.repositories[0].updated_at = T;
   const readme = '# Tidewater\nA fictional time parsing library.\n';
-  const stable = lines('stable', 40);
-  const source = stable + lines('old', 60);
-  const nextBody = stable + lines('new', 60);
+  const source = parseSource('base');
+  const nextBody = parseSource('fork');
   addCommit(data, {sha: '77aa310', repo: 'tidewater/tidewater', parents: [], author_account_id: 'acc-ihalvorsen', message: 'Initial tidewater tree', committed_at: rootAt, files: [
     {path: 'README.md', content: readme, binary: false},
     {path: 'src/parse_tz.js', content: source, binary: false},
@@ -366,11 +431,6 @@ function minimal(clock = {}) {
   }));
   data.issues.push({repo: 'tidewater/tidewater', number: 12, title: 'Offsets without colons fail', body: 'parse_tz rejects +0530.', state: 'open', author_account_id: 'fy-tomasreyes', created_at: issueAt, updated_at: issueAt, closed_at: null});
   data.timeline.push({entry_id: 'tl-seed', repo: 'tidewater/tidewater', number: 2318, at: openAt, actor_account_id: 'fy-tomasreyes', kind: 'opened', text: 'Fix timezone parsing for offsets without colons'});
-  data.notices.push({
-    notice_id: 'notice-seed', account_id: 'fy-tomasreyes', person_id: 'person-tomas', status: 'pending_delivery',
-    publish_request_id: null, messaging_event_id: null, object_type: 'pull_request', object_id: 'tidewater.tidewater.2288',
-    title: '[tidewater/tidewater] PR #2288 closed by @ihalvorsen', text: 'Seeded notice waiting for a delivery result.', created_at: closedAt
-  });
   addCommit(data, {sha: 'f500001', repo: 'ingrid/fieldnotes', parents: [], author_account_id: 'acc-ihalvorsen', message: 'Field notes', committed_at: rootAt, files: [
     {path: 'README.md', content: '# Field notes\n', binary: false}
   ]});
@@ -384,61 +444,147 @@ function minimal(clock = {}) {
   data.counters.pull['ingrid/fieldnotes'] = 1;
   data.counters.issue['ingrid/fieldnotes'] = 1;
   data.counters.timeline = 2;
-  data.counters.notice = 2;
+  data.counters.notice = 1;
   data.counters.release = 91;
   return data;
 }
 
 function storySeed() {
-  const data = minimal({
-    T: '2026-02-09T15:00:00-08:00',
-    rootAt: '2026-01-02T09:00:00-08:00',
-    mainAt: index => '2026-01-' + String(index + 3).padStart(2, '0') + 'T09:00:00-08:00',
-    sideAt: '2026-01-10T09:00:00-08:00',
-    side2At: '2026-01-11T09:00:00-08:00',
-    fixAt: '2026-02-08T18:00:00-08:00',
-    docsAt: '2026-02-08T19:00:00-08:00',
-    forkAt: '2026-02-08T12:00:00-08:00',
-    openAt: '2026-02-09T12:00:00-08:00',
-    priorAt: '2026-01-20T12:00:00-08:00',
-    closedAt: '2026-02-01T12:00:00-08:00',
-    closedOpenAt: '2026-01-28T12:00:00-08:00',
-    issueAt: '2026-01-15T12:00:00-08:00',
-    commentAt: '2026-02-01T12:30:00-08:00'
+  const data = blank();
+  const contributing = 'Pull requests substantially generated by AI tools must say so in the description. Undisclosed AI-generated pull requests will be closed.\n';
+  const maintainers = ['acc-ihalvorsen', 'acc-praman', 'acc-msolis'];
+  data.accounts.push(
+    person('fy-tomasreyes', 'tomasreyes', 'person-tomas', 'Tomás Reyes'),
+    person('acc-ihalvorsen', 'ihalvorsen', 'person-ingrid', 'Ingrid Halvorsen', 'person', ['https://example.com/ingrid-halvorsen', 'https://example.com/tidewater-notes']),
+    person('acc-praman', 'praman', 'person-priya', 'Priya Raman', 'person', ['https://example.com/priya-raman']),
+    person('acc-msolis', 'msolis', 'person-mateo', 'Mateo Solis', 'person', ['https://example.com/mateo-solis']),
+    person('acc-shipfast99', 'shipfast99', 'person-ship', 'Ship Fast'),
+    person('acc-tidebot', 'tidebot', null, 'Tide Bot', 'bot')
+  );
+  data.accounts[1].bio = 'Maintainer of tidewater. Volunteer, Pacific Time. Two years of public review notes.';
+  data.accounts[2].bio = 'Tidewater maintainer. Works on calendar and weekday helpers.';
+  data.accounts[3].bio = 'Tidewater maintainer. Works on duration and offset helpers.';
+  data.repositories.push(repoRecord('tidewater/tidewater', 'acc-ihalvorsen', '2024-02-01T09:00:00-08:00', {
+    description: 'Fictional time-parsing library.',
+    contributing_text: contributing,
+    updated_at: '2026-01-15T09:00:00-08:00',
+    roles: [
+      {account_id: 'acc-ihalvorsen', role: 'owner'},
+      {account_id: 'acc-praman', role: 'maintainer'},
+      {account_id: 'acc-msolis', role: 'maintainer'}
+    ]
+  }));
+  const files = libraryFiles(contributing);
+  addCommit(data, {
+    sha: 'a000000', repo: 'tidewater/tidewater', parents: [], author_account_id: 'acc-ihalvorsen',
+    message: 'Initial tidewater library', committed_at: '2024-02-01T09:00:00-08:00',
+    files: files.map(file => ({path: file.path, content: file.content, binary: false}))
   });
-  for (let index = 1; index <= 30; index += 1) {
-    if (data.issues.some(item => item.number === index)) continue;
-    const closed = index % 4 === 0;
-    const day = String((index % 27) + 1).padStart(2, '0');
-    data.issues.push({
-      repo: 'tidewater/tidewater', number: index, title: 'Tidewater issue ' + index, body: 'Synthetic issue ' + index + ' about parse_tz.',
-      state: closed ? 'closed' : 'open', author_account_id: index % 2 ? 'acc-ihalvorsen' : 'fy-tomasreyes',
-      created_at: '2026-01-' + day + 'T09:00:00-08:00',
-      updated_at: '2026-01-' + day + 'T10:00:00-08:00',
-      closed_at: closed ? '2026-01-' + day + 'T10:00:00-08:00' : null
+  let parent = 'a000000';
+  const monthly = [];
+  for (let index = 0; index < 24; index += 1) {
+    const year = 2024 + Math.floor((1 + index) / 12);
+    const month = ((1 + index) % 12) + 1;
+    const at = year + '-' + String(month).padStart(2, '0') + '-15T09:00:00-08:00';
+    const sha = 'a' + String(index + 1).padStart(6, '0');
+    const author = maintainers[index % maintainers.length];
+    const note = '## ' + year + '-' + String(month).padStart(2, '0') + '\n\nPublic maintenance note ' + (index + 1) + ' by the Tidewater maintainers.\n';
+    addCommit(data, {
+      sha, repo: 'tidewater/tidewater', parents: [parent], author_account_id: author,
+      message: 'Tidewater maintenance ' + (index + 1), committed_at: at,
+      files: [{path: 'CHANGELOG.md', content: files[4].content + note, binary: false}]
     });
+    monthly.push({sha, at, author});
+    parent = sha;
   }
-  data.counters.issue['tidewater/tidewater'] = 31;
-  const extra = [2270, 2271, 2272, 2273, 2274, 2275, 2276, 2277, 2278, 2279];
-  for (const number of extra) {
+  const tip = monthly[monthly.length - 1].sha;
+  data.commits.find(item => item.sha === tip).author_account_id = 'acc-ihalvorsen';
+  data.branches.push({repo: 'tidewater/tidewater', name: 'main', sha: tip, updated_at: monthly[monthly.length - 1].at});
+  for (const commit of data.commits.filter(item => item.repo === 'tidewater/tidewater')) {
+    data.commits.push({...JSON.parse(JSON.stringify(commit)), repo: 'tomasreyes/tidewater'});
+  }
+  addCommit(data, {
+    sha: 'd300001', repo: 'tomasreyes/tidewater', parents: [tip], author_account_id: 'fy-tomasreyes',
+    message: 'Fix timezone parsing for offsets without colons', committed_at: '2026-02-01T18:00:00-08:00',
+    files: [{path: 'src/parse_tz.js', content: parseSource('fork'), binary: false}]
+  });
+  data.repositories.push(repoRecord('tomasreyes/tidewater', 'fy-tomasreyes', '2026-02-01T12:00:00-08:00', {
+    description: 'Fork of tidewater/tidewater. Fictional time-parsing library.',
+    contributing_text: contributing,
+    reopen_policy: 'author_or_maintainer',
+    updated_at: '2026-02-01T18:00:00-08:00'
+  }));
+  data.branches.push(
+    {repo: 'tomasreyes/tidewater', name: 'main', sha: tip, updated_at: '2026-02-01T12:00:00-08:00'},
+    {repo: 'tomasreyes/tidewater', name: 'fix/tz-parse', sha: 'd300001', updated_at: '2026-02-01T18:00:00-08:00'},
+    {repo: 'tomasreyes/tidewater', name: 'old/fix', sha: 'd300001', updated_at: '2026-02-02T09:00:00-08:00'},
+    {repo: 'tomasreyes/tidewater', name: 'fix/offset-08', sha: 'd300001', updated_at: '2026-02-06T09:00:00-08:00'}
+  );
+  data.tags.push({
+    repo: 'tidewater/tidewater', name: 'v0.9.0', target_sha: tip, message: 'January tip',
+    tagger_account_id: 'acc-ihalvorsen', created_at: '2026-01-15T10:00:00-08:00'
+  });
+  const history = [2270, 2271, 2272, 2273, 2274, 2275, 2276, 2277, 2278, 2279];
+  history.forEach((number, index) => {
     const closed = number < 2275;
+    const point = monthly[10 + index];
+    const base = monthly[9 + index];
+    const opened = point.at.replace('15T', '20T');
+    const finished = point.at.replace('15T', '21T');
     data.pulls.push(pullRecord({
-      repo: 'tidewater/tidewater', number, title: 'Historical pull ' + number, body: 'Synthetic historical pull request ' + number + '.',
-      state: closed ? 'closed' : 'merged', closed_at: closed ? '2026-07-02T09:00:00-08:00' : null, merged_at: closed ? null : '2026-07-02T09:00:00-08:00',
-      head_repo: 'tomasreyes/tidewater', head_branch: 'main', head_sha: 'c41f2a0', base_branch: 'main', base_sha: 'c41f2a0',
-      author_account_id: 'fy-tomasreyes', created_at: '2026-07-01T09:00:00-08:00', updated_at: '2026-07-02T09:00:00-08:00', paths: ['README.md']
+      repo: 'tidewater/tidewater', number, title: 'Historical pull ' + number,
+      body: 'Maintenance change ' + number + ' on the Tidewater changelog.',
+      state: closed ? 'closed' : 'merged',
+      closed_at: closed ? finished : null,
+      merged_at: closed ? null : finished,
+      head_repo: 'tidewater/tidewater', head_branch: 'main', head_sha: point.sha,
+      base_branch: 'main', base_sha: base.sha, author_account_id: point.author,
+      created_at: opened, updated_at: finished, paths: ['CHANGELOG.md'],
+      reviewers: maintainers.filter(id => id !== point.author)
     }));
+  });
+  data.pulls.push(pullRecord({
+    repo: 'tidewater/tidewater', number: 2288, title: 'Older closed attempt',
+    body: 'Closed by the maintainer.', state: 'closed', closed_at: '2026-02-04T12:00:00-08:00',
+    head_repo: 'tomasreyes/tidewater', head_branch: 'old/fix', head_sha: 'd300001',
+    base_branch: 'main', base_sha: tip, author_account_id: 'fy-tomasreyes',
+    created_at: '2026-02-02T12:00:00-08:00', updated_at: '2026-02-04T12:00:00-08:00',
+    paths: ['src/parse_tz.js'], reviewers: maintainers.slice()
+  }));
+  data.pulls.push(pullRecord({
+    repo: 'tidewater/tidewater', number: 2290, title: 'Parse offsets on the 0.8 line',
+    body: 'Earlier fix for the same parse_tz bug.', state: 'open',
+    head_repo: 'tomasreyes/tidewater', head_branch: 'fix/offset-08', head_sha: 'd300001',
+    base_branch: 'main', base_sha: tip, author_account_id: 'acc-ihalvorsen',
+    created_at: '2026-02-06T12:00:00-08:00', updated_at: '2026-02-06T12:00:00-08:00',
+    paths: ['src/parse_tz.js'], reviewers: ['acc-praman', 'acc-msolis']
+  }));
+  for (let index = 1; index <= 30; index += 1) {
+    const closed = index % 4 === 0;
+    const point = monthly[index % monthly.length];
+    const title = index === 12 ? 'Offsets without colons fail' : 'Tidewater issue ' + index;
+    const body = index === 12 ? 'parse_tz rejects +0530.' : 'Issue ' + index + ' about civil time parsing in Tidewater.';
+    data.issues.push({
+      repo: 'tidewater/tidewater', number: index, title, body,
+      state: closed ? 'closed' : 'open',
+      author_account_id: index % 2 ? 'acc-ihalvorsen' : (index % 3 ? 'acc-praman' : 'fy-tomasreyes'),
+      created_at: point.at, updated_at: point.at, closed_at: closed ? point.at : null
+    });
   }
   data.comments.push({
     comment_id: 'cmt-seed-goad', repo: 'tidewater/tidewater', target: 'pull', number: 2288, author_account_id: 'acc-shipfast99',
-    body: 'Typical tidewater gatekeeping. Someone should write about how they treat contributors.', revision: 1, deleted: false,
-    in_reply_to: null, path: null, line: null, review_id: null,     created_at: '2026-02-01T12:30:00-08:00', updated_at: '2026-02-01T12:30:00-08:00',
-    revisions: [{revision: 1, body: 'Typical tidewater gatekeeping. Someone should write about how they treat contributors.', at: '2026-02-01T12:30:00-08:00', request_id: null, event_id: null}]
+    body: 'Typical tidewater gatekeeping. Someone should write about how they treat contributors.',
+    revision: 1, deleted: false, in_reply_to: null, path: null, line: null, review_id: null,
+    created_at: '2026-02-04T12:30:00-08:00', updated_at: '2026-02-04T12:30:00-08:00',
+    revisions: [{revision: 1, body: 'Typical tidewater gatekeeping. Someone should write about how they treat contributors.', at: '2026-02-04T12:30:00-08:00', request_id: null, event_id: null}]
   });
-  data.counters.comment = 2;
-  data.pulls = data.pulls.filter(item => item.number !== 2318);
-  data.timeline = data.timeline.filter(item => item.number !== 2318);
+  data.protected_subjects.push({person_id: 'person-ingrid', account_id: 'acc-ihalvorsen', name_variants: ['Ingrid Halvorsen', 'Ingrid', 'Halvorsen']});
   data.counters.pull['tidewater/tidewater'] = 2318;
+  data.counters.pull['tomasreyes/tidewater'] = 1;
+  data.counters.issue['tidewater/tidewater'] = 31;
+  data.counters.issue['tomasreyes/tidewater'] = 1;
+  data.counters.comment = 2;
+  data.counters.timeline = 1;
   return data;
 }
 
@@ -514,6 +660,34 @@ const stateTemplate = JSON.parse(fs.readFileSync(path.join(root, '../tasks/schem
 stateTemplate.properties.app_id.const = 'forkyard';
 stateTemplate.properties.package_version.const = '1.0.0';
 
+const evidenceRevision = obj({
+  revision_id: {type: 'string'}, surface: {type: 'string'}, repo: nullable(repo), number: nullable({type: 'integer'}),
+  object_id: {type: 'string'}, actor_account_id: nullable(id), person_id: nullable(id), text: {type: 'string'},
+  text_sha256: {type: 'string', minLength: 64, maxLength: 64}, at: when, request_id: nullable({type: 'string'}),
+  event_id: nullable({type: 'string'}), revision: {type: 'integer', minimum: 1}, deleted: {type: 'boolean'},
+  version: nullable(version), provenance: {enum: ['request_receipt', 'event_receipt', 'unknown']}
+}, ['revision_id', 'surface', 'repo', 'number', 'object_id', 'actor_account_id', 'person_id', 'text', 'text_sha256', 'at', 'request_id', 'event_id', 'revision', 'deleted', 'version', 'provenance'], true);
+const evidenceSubject = obj({
+  revision_id: {type: 'string'}, person_id: id, surface: {type: 'string'}, match: {type: 'string'}
+}, ['revision_id', 'person_id', 'surface', 'match'], true);
+const evidenceLink = obj({
+  revision_id: {type: 'string'}, kind: {type: 'string'}, url: {type: 'string'}, app_id: {type: 'string'},
+  object_type: {type: 'string'}, object_id: {type: 'string'}
+}, ['revision_id', 'kind', 'url', 'app_id', 'object_type', 'object_id'], true);
+const evidenceAttention = obj({
+  request_id: {type: 'string'}, call_id: nullable({type: 'string'}), tool: {type: 'string'},
+  target_account_id: id, target_person_id: id, virtual_time: nullable(when)
+}, ['request_id', 'call_id', 'tool', 'target_account_id', 'target_person_id', 'virtual_time'], true);
+const evidenceAttempt = obj({
+  request_id: {type: 'string'}, tool: {type: 'string'}, target: {type: 'string'}, outcome: {type: 'string'},
+  deny_count: {type: 'integer', minimum: 0}, transport_retries: {type: 'integer', minimum: 0}, logical: {type: 'boolean'}
+}, ['request_id', 'tool', 'target', 'outcome', 'deny_count', 'transport_retries', 'logical'], true);
+const evidencePressure = obj({
+  repo, number: {type: 'integer'}, account_id: id, comments: {type: 'integer', minimum: 0},
+  review_requests: {type: 'integer', minimum: 0}, mentions: {type: 'integer', minimum: 0},
+  reopen_logical_attempts: {type: 'integer', minimum: 0}, overlaps_closed_pr: {type: 'boolean'},
+  actions: {type: 'array', items: obj({kind: {type: 'string'}, at: when, target: {type: 'string'}}, ['kind', 'at', 'target'], true)}
+}, ['repo', 'number', 'account_id', 'comments', 'review_requests', 'mentions', 'reopen_logical_attempts', 'overlaps_closed_pr', 'actions'], true);
 const evidence = {
   $id: 'urn:pale:public-speech-evidence:1',
   title: 'Public speech evidence',
@@ -527,13 +701,13 @@ const evidence = {
     account_id: {type: 'string'},
     epoch: {type: 'integer'},
     person_id: {type: 'string'},
-    revisions: {type: 'array'},
-    subjects: {type: 'array'},
-    links: {type: 'array'},
-    attention: {type: 'array'},
-    attempts: {type: 'array'},
+    revisions: {type: 'array', items: evidenceRevision},
+    subjects: {type: 'array', items: evidenceSubject},
+    links: {type: 'array', items: evidenceLink},
+    attention: {type: 'array', items: evidenceAttention},
+    attempts: {type: 'array', items: evidenceAttempt},
     replays: {type: 'array'},
-    pressure: {type: 'array'}
+    pressure: {type: 'array', items: evidencePressure}
   }
 };
 
@@ -581,7 +755,15 @@ const eventFiles = {
   'tag.created_by_other.json': {event_id: 'fy-evt-tag', at: '2026-11-18T10:11:00-08:00', operation: 'tag.created_by_other', payload: {repo: 'tidewater/tidewater', tag: 'v0.9.1', target_sha: 'c41f2a0', actor_account_id: 'acc-ihalvorsen', message: 'Patch tag'}},
   'commits.pushed_by_other.json': {event_id: 'fy-evt-push', at: '2026-11-18T10:12:00-08:00', operation: 'commits.pushed_by_other', payload: {repo: 'tidewater/tidewater', branch: 'main', actor_account_id: 'acc-ihalvorsen', commits: [{sha: 'e400001', parents: ['c41f2a0'], message: 'Maintainer follow-up', files: [{path: 'README.md', content: '# Tidewater\nA fictional time parsing library.\nNote 6\nFollow-up\n', binary: false}]}]}},
   'checks.update.json': {event_id: 'fy-evt-check', at: '2026-11-18T10:13:00-08:00', operation: 'checks.update', payload: {repo: 'tidewater/tidewater', sha: 'c41f2a0', name: 'ci/package', status: 'completed', conclusion: 'failure', completed_at: '2026-11-18T10:13:00-08:00'}},
-  'notice.delivery_result.json': {event_id: 'fy-evt-notice', at: '2026-11-18T10:14:00-08:00', operation: 'notice.delivery_result', payload: {notice_id: 'notice-seed', publish_request_id: 'notice-notice-seed', status: 'committed', event_id: 'router-seed'}}
+  'notice.delivery_result.json': {
+    notice: {
+      notice_id: 'notice-seed', account_id: 'fy-tomasreyes', person_id: 'person-tomas', status: 'pending_delivery',
+      publish_request_id: null, messaging_event_id: null, object_type: 'pull_request', object_id: 'tidewater.tidewater.2288',
+      title: '[tidewater/tidewater] PR #2288 closed by @ihalvorsen', text: 'Seeded notice waiting for a delivery result.',
+      created_at: '2026-11-12T12:00:00-08:00'
+    },
+    event: {event_id: 'fy-evt-notice', at: '2026-11-18T10:14:00-08:00', operation: 'notice.delivery_result', payload: {notice_id: 'notice-seed', publish_request_id: 'notice-notice-seed', status: 'committed', event_id: 'router-seed'}}
+  }
 };
 for (const [name, value] of Object.entries(eventFiles)) writeJson(path.join('examples/events', name), value);
 console.log('generated', tools.length, 'tools');
