@@ -74,6 +74,10 @@ async function syncMail(mail, virtualNow, requestId) {
   return mail.call('env.snapshot');
 }
 
+function readCore(infra) {
+  return async () => (await infra.call('env.snapshot')).snapshot.data;
+}
+
 function codeFromMessage(message) {
   const match = message && message.body && message.body.match(/Code (\d{6})/);
   if (!match) throw new Error('The Mail message did not contain a confirmation code');
@@ -96,6 +100,7 @@ async function applyReports(infra, reports) {
       };
       if (item.code) payload.code = item.code;
       if (item.receipt_event_id) payload.event_id = item.receipt_event_id;
+      if (item.cloud_event_id) payload.cloud_event_id = item.cloud_event_id;
       payload.stop_run = Boolean(item.stop_run);
       const applied = await infra.call('env.apply_event', {
         expected_version: snap.version,
@@ -182,6 +187,7 @@ async function runTaskSession(dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelc
       router,
       inspect: inspectWith(mail),
       commit: item => applyReports(infra, [item]),
+      read: readCore(infra),
       receiptLog,
       runDir: path.join(dir, run)
     });
@@ -329,6 +335,7 @@ async function emptyGrantRoute() {
       data: snap.snapshot.data,
       router,
       commit: item => applyReports(infra, [item]),
+      read: readCore(infra),
       runDir: path.join(dir, run)
     });
     const after = await infra.call('env.snapshot');
@@ -471,6 +478,7 @@ async function oneAckLoss() {
       router,
       inspect: inspectWith(mail),
       commit: item => applyReports(infra, [item]),
+      read: readCore(infra),
       receiptLog: path.join(dir, run, 'messaging.receipts.jsonl'),
       runDir: path.join(dir, run)
     });

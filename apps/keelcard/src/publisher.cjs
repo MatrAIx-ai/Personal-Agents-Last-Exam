@@ -6,7 +6,9 @@ const { wireFor } = require('./notices.cjs');
 
 // Halt and confirmation are separate.
 // A router result halts the run unless it is a fresh committed receipt for this binding.
-// The halt is stored before Mail is inspected, and nothing in the run clears it.
+// The halt is written to the publication file first, then to Core.
+// A stale Core write is repeated until a following read shows the halt.
+// When that write cannot be stored, the call stops with no further router call.
 // Mail confirmation only changes delivery evidence.
 
 function evidenceEventId(noticeId, status, receiptEventId, code) {
@@ -146,13 +148,24 @@ function writeOk(write) {
   return ['committed', 'ok', 'ready'].includes(write.status);
 }
 
-function alreadySaved(notice, report) {
+function deliveryMatches(notice, report) {
+  if (!notice || !notice.delivery || !notice.delivery.recorded_at) return false;
   const status = deliveryStatus(report);
-  if (!notice || notice.status !== status || !notice.delivery) return false;
-  const savedId = notice.delivery.event_id || null;
-  const nextId = report.event_id || null;
-  if (savedId !== nextId) return false;
+  if (notice.status !== status) return false;
+  if ((notice.delivery.event_id || null) !== (report.event_id || null)) return false;
   return (notice.delivery.code || null) === (report.code || null);
+}
+
+async function savedInCore(read, report) {
+  if (!read) return false;
+  try {
+    const fresh = await read();
+    if (!fresh || !Array.isArray(fresh.notices)) return false;
+    const notice = fresh.notices.find(item => item.notice_id === report.notice_id);
+    return deliveryMatches(notice, report);
+  } catch {
+    return false;
+  }
 }
 
 async function inspectNotice(inspect, notice, eventId) {
@@ -171,7 +184,7 @@ function stamp(notice, report) {
   return report;
 }
 
-async function settle(data, notice, receipt, inspect, commit) {
+async function settle(data, notice, receipt, inspect, commit, read) {
   const eventId = receipt && receipt.event_id || notice.delivery && notice.delivery.event_id || null;
   const evidence = await inspectNotice(inspect, notice, eventId);
   const report = stamp(notice, classifyDelivery({
@@ -182,13 +195,12 @@ async function settle(data, notice, receipt, inspect, commit) {
   }));
   if (evidence && evidence.failed && !report.mail_confirmed) report.code = 'inspection_unavailable';
   const item = persistOf(report);
-  if (alreadySaved(notice, report)) {
+  if (deliveryMatches(notice, report)) item.recorded_at = notice.delivery.recorded_at;
+  const seen = await savedInCore(read, report);
+  if (seen || (!read && deliveryMatches(notice, report))) {
     report.persisted = true;
     report.mail_confirmed = Boolean(report.mail_confirmed);
     return { report, item, write: { status: 'committed', duplicate: true } };
-  }
-  if (notice.delivery && notice.delivery.recorded_at && notice.delivery.status === item.status && (notice.delivery.event_id || null) === (item.receipt_event_id || null)) {
-    item.recorded_at = notice.delivery.recorded_at;
   }
   recordEvidence(data, report);
   let write = null;
@@ -222,6 +234,7 @@ function haltItem(record) {
     event_id: 'halt-' + record.notice_id,
     notice_id: record.notice_id,
     publish_request_id: record.publish_request_id,
+    cloud_event_id: record.cloud_event_id || null,
     status: record.status,
     code: record.code,
     stop_run: Boolean(record.stop_run),
@@ -229,51 +242,109 @@ function haltItem(record) {
   };
 }
 
-function loadHalt(data, file) {
-  if (data.publication && data.publication.halted) return data.publication;
-  const stored = readHalt(file);
-  if (stored) data.publication = stored;
-  return data.publication && data.publication.halted ? data.publication : null;
-}
+const haltAttempts = 8;
 
-async function rememberHalt(data, file, notice, receipt, commit) {
-  const existing = loadHalt(data, file);
-  if (existing) return existing;
-  const record = haltRecord(notice, receipt);
-  data.publication = record;
-  writeHalt(file, record);
-  if (commit) {
-    try { await commit(haltItem(record)); }
-    catch { /* The snapshot write can be repeated. The halt record stays. */ }
+async function readPublication(read) {
+  if (!read) return null;
+  try {
+    const fresh = await read();
+    if (fresh && fresh.publication && fresh.publication.halted) return fresh.publication;
+  } catch {
+    return null;
   }
-  return record;
+  return null;
 }
 
-async function publishPending({ data, router, inspect, commit, receiptLog, runDir, binding }) {
+async function persistHalt(data, file, record, commit, read) {
+  writeHalt(file, record);
+  let write = null;
+  if (!commit) {
+    const seen = await readPublication(read);
+    data.publication = seen || record;
+    if (seen) writeHalt(file, seen);
+    return { ok: Boolean(seen), record: data.publication, write };
+  }
+  for (let attempt = 0; attempt < haltAttempts; attempt += 1) {
+    const seen = await readPublication(read);
+    if (seen) {
+      data.publication = seen;
+      writeHalt(file, seen);
+      return { ok: true, record: seen, write };
+    }
+    try { write = await commit(haltItem(record)); }
+    catch (error) { write = { status: error && error.code || 'stale_version', message: error && error.message }; }
+    if (writeOk(write)) {
+      const confirmed = await readPublication(read);
+      if (confirmed) {
+        data.publication = confirmed;
+        writeHalt(file, confirmed);
+        return { ok: true, record: confirmed, write };
+      }
+      if (!read) {
+        data.publication = record;
+        return { ok: true, record, write };
+      }
+    } else if (!write || write.status !== 'stale_version') {
+      break;
+    }
+  }
+  const last = await readPublication(read);
+  if (last) {
+    data.publication = last;
+    writeHalt(file, last);
+    return { ok: true, record: last, write };
+  }
+  data.publication = record;
+  return { ok: false, record, write };
+}
+
+function blocked(record, write) {
+  const report = stamp(record, {
+    outcome: 'unresolved',
+    halted: true,
+    event_id: record.event_id || null,
+    code: record.code || 'run_halted',
+    mail_confirmed: false,
+    persisted: false
+  });
+  return { stopped: true, halted: true, sent: [], persist: [], report, reports: [report], write };
+}
+
+async function finishHeld(data, held, receiptLog, inspect, commit, read) {
+  data.publication = held;
+  const notice = data.notices.find(item => item.notice_id === held.notice_id);
+  if (!notice) {
+    const report = stamp(held, { outcome: 'unresolved', halted: true, event_id: held.event_id || null, code: held.code || 'run_halted', mail_confirmed: false, persisted: false });
+    return { stopped: true, halted: true, sent: [], persist: [], report, reports: [report] };
+  }
+  const logged = receiptForNotice(receiptLog, notice);
+  const receipt = logged || {
+    status: held.status || 'unknown',
+    event_id: held.event_id || (notice.delivery && notice.delivery.event_id) || null,
+    code: held.code || null,
+    stop_run: held.stop_run
+  };
+  const done = await settle(data, notice, receipt, inspect, commit, read);
+  done.report.halted = true;
+  return { stopped: true, halted: true, sent: [], persist: [done.item], report: done.report, reports: [done.report], write: done.write };
+}
+
+async function publishPending({ data, router, inspect, commit, read, receiptLog, runDir, binding }) {
   const file = publicationPath(runDir, receiptLog);
   const sent = [];
   const persist = [];
   const reports = [];
-  const held = loadHalt(data, file);
-  if (held) {
-    data.publication = held;
-    const notice = data.notices.find(item => item.notice_id === held.notice_id);
-    if (!notice) {
-      const report = stamp(held, { outcome: 'unresolved', halted: true, event_id: held.event_id || null, code: held.code || 'run_halted', mail_confirmed: false, persisted: false });
-      return { stopped: true, halted: true, sent, persist, report, reports: [report] };
+  const snapshotHalt = data.publication && data.publication.halted ? data.publication : null;
+  const fileHalt = snapshotHalt ? null : readHalt(file);
+  if (snapshotHalt) writeHalt(file, snapshotHalt);
+  if (snapshotHalt || fileHalt) {
+    let held = snapshotHalt;
+    if (!held) {
+      const saved = await persistHalt(data, file, fileHalt, commit, read);
+      if (!saved.ok) return blocked(fileHalt, saved.write);
+      held = saved.record;
     }
-    const logged = receiptForNotice(receiptLog, notice);
-    const receipt = logged || {
-      status: held.status || 'unknown',
-      event_id: held.event_id || notice.delivery && notice.delivery.event_id || null,
-      code: held.code || null,
-      stop_run: held.stop_run
-    };
-    const done = await settle(data, notice, receipt, inspect, commit);
-    done.report.halted = true;
-    persist.push(done.item);
-    reports.push(done.report);
-    return { stopped: true, halted: true, sent, persist, report: done.report, reports, write: done.write };
+    return finishHeld(data, held, receiptLog, inspect, commit, read);
   }
   for (const notice of data.notices) {
     if (notice.status !== 'unknown') continue;
@@ -281,7 +352,7 @@ async function publishPending({ data, router, inspect, commit, receiptLog, runDi
     if (!savedId) continue;
     const logged = receiptForNotice(receiptLog, notice);
     const receipt = logged || { status: 'unknown', event_id: savedId, code: notice.delivery.code || null };
-    const done = await settle(data, notice, receipt, inspect, commit);
+    const done = await settle(data, notice, receipt, inspect, commit, read);
     persist.push(done.item);
     reports.push(done.report);
   }
@@ -309,14 +380,15 @@ async function publishPending({ data, router, inspect, commit, receiptLog, runDi
       fresh = false;
     }
     if (!fresh) {
-      await rememberHalt(data, file, notice, receipt, commit);
-      const done = await settle(data, notice, receipt, inspect, commit);
+      const record = haltRecord(notice, receipt);
+      await persistHalt(data, file, record, commit, read);
+      const done = await settle(data, notice, receipt, inspect, commit, read);
       done.report.halted = true;
       persist.push(done.item);
       reports.push(done.report);
       return { stopped: true, halted: true, sent, persist, report: done.report, reports, write: done.write };
     }
-    const done = await settle(data, notice, receipt, inspect, commit);
+    const done = await settle(data, notice, receipt, inspect, commit, read);
     done.report.halted = false;
     persist.push(done.item);
     reports.push(done.report);

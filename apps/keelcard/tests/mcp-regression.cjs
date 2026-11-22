@@ -1040,6 +1040,7 @@ async function commitDelivery(infra, item) {
           status: item.status || 'unknown',
           stop_run: Boolean(item.stop_run),
           ...(item.code ? { code: item.code } : {}),
+          ...(item.cloud_event_id ? { cloud_event_id: item.cloud_event_id } : {}),
           ...(item.receipt_event_id ? { event_id: item.receipt_event_id } : {})
         }
       }
@@ -1275,5 +1276,251 @@ test('decision-time spend follows capture order in every window', async () => {
     } finally {
       await reversed.session.close();
     }
+  }
+});
+
+function oneMinuteLater(iso) {
+  const match = String(iso).match(/[+-]\d{2}:\d{2}$/);
+  const offset = match ? match[0] : 'Z';
+  const shifted = new Date(Date.parse(iso) + 60000);
+  if (offset === 'Z') return shifted.toISOString();
+  const sign = offset[0] === '-' ? -1 : 1;
+  const hours = Number(offset.slice(1, 3));
+  const minutes = Number(offset.slice(4, 6));
+  const local = new Date(shifted.getTime() + sign * (hours * 60 + minutes) * 60000);
+  const pad = (value) => String(value).padStart(2, '0');
+  return local.getUTCFullYear() + '-' + pad(local.getUTCMonth() + 1) + '-' + pad(local.getUTCDate()) + 'T' + pad(local.getUTCHours()) + ':' + pad(local.getUTCMinutes()) + ':' + pad(local.getUTCSeconds()) + offset;
+}
+
+function commitWithStaleHalt(infra, requestId) {
+  let raced = false;
+  return async item => {
+    if (item.kind === 'halt' && !raced) {
+      raced = true;
+      const current = await infra.call('env.snapshot');
+      const moved = await infra.call('env.advance_time', {
+        expected_version: current.version,
+        request_id: requestId,
+        virtual_now: oneMinuteLater(current.snapshot.virtual_now)
+      });
+      assert.equal(moved.status, 'committed');
+      const payload = {
+        notice_id: item.notice_id,
+        publish_request_id: item.publish_request_id,
+        status: item.status || 'unknown',
+        stop_run: Boolean(item.stop_run)
+      };
+      if (item.code) payload.code = item.code;
+      if (item.cloud_event_id) payload.cloud_event_id = item.cloud_event_id;
+      if (item.receipt_event_id) payload.event_id = item.receipt_event_id;
+      const applied = await infra.call('env.apply_event', {
+        expected_version: current.version,
+        event: {
+          event_id: item.event_id,
+          at: current.snapshot.virtual_now,
+          operation: 'publication.halt',
+          payload
+        }
+      });
+      assert.equal(applied.status, 'stale_version');
+      return applied;
+    }
+    return commitDelivery(infra, item);
+  };
+}
+
+async function graceMail(session, run, virtualNow) {
+  const mail = new Client('mail', 'infra', run, session.dir, run + '-mail', { registry });
+  await mail.initialize();
+  const mailbox = await mail.call('env.snapshot');
+  const data = structuredClone(mailbox.snapshot.data);
+  data.owner_person_id = 'person-grace';
+  const binding = structuredClone(mailbox.snapshot.binding);
+  for (const account of binding.accounts) {
+    if (account.app_id === 'mail' && account.account_id === data.account_id) account.owner_person_id = 'person-grace';
+  }
+  if (!binding.people.some(person => person.person_id === 'person-grace')) binding.people.push({ person_id: 'person-grace', name: 'Grace Adeyemi' });
+  assert.equal((await mail.call('env.load_seed', {
+    expected_version: mailbox.version,
+    request_id: run + '-mailbox',
+    data,
+    binding,
+    policies: mailbox.snapshot.policies,
+    bundle: mailbox.snapshot.resources.bundle
+  })).status, 'ready');
+  assert.equal((await mail.call('env.advance_time', {
+    expected_version: (await mail.call('env.snapshot')).version,
+    request_id: run + '-mail-clock',
+    virtual_now: virtualNow
+  })).status, 'committed');
+  return mail;
+}
+
+test('a stale halt write still blocks a lost reply on the fresh snapshot', async () => {
+  const session = await keel('mcphaltrace');
+  const { create } = require('../../../runtime/messaging/src/router.cjs');
+  const shipped = path.join(root, 'apps/keelcard/examples/mail-publisher.json');
+  let mail;
+  let router;
+  try {
+    const snap = await twoNotices(session);
+    mail = await graceMail(session, 'mcphaltrace', snap.snapshot.virtual_now);
+    const before = (await mail.call('env.snapshot')).snapshot.data.messages.length;
+    router = await create({ config: shipped, publisher: 'keelcard', run: 'mcphaltrace', stateDir: session.dir });
+    let publishes = 0;
+    let sawHalt = false;
+    const dropping = {
+      async call(name, args) {
+        if (name !== 'router.publish') return router.call(name, args);
+        publishes += 1;
+        await router.call(name, args);
+        throw new Error('reply lost');
+      }
+    };
+    const read = async () => {
+      const data = (await session.infra.call('env.snapshot')).snapshot.data;
+      if (data.publication && data.publication.halted) sawHalt = true;
+      return data;
+    };
+    const first = await publishPending({
+      data: snap.snapshot.data,
+      router: dropping,
+      commit: commitWithStaleHalt(session.infra, 'halt-race-lost'),
+      read
+    });
+    assert.equal(publishes, 1);
+    assert.equal(first.stopped, true);
+    assert.equal(first.halted, true);
+    assert.equal(sawHalt, true);
+    assert.equal((await mail.call('env.snapshot')).snapshot.data.messages.length, before + 1);
+    const fresh = await session.infra.call('env.snapshot');
+    assert.equal(fresh.snapshot.data.publication.halted, true);
+    const other = fresh.snapshot.data.notices.find(notice => notice.notice_id !== fresh.snapshot.data.publication.notice_id);
+    assert.equal(other.status, 'pending_delivery');
+    const again = await publishPending({
+      data: fresh.snapshot.data,
+      router: dropping,
+      commit: item => commitDelivery(session.infra, item),
+      read
+    });
+    assert.equal(publishes, 1);
+    assert.equal(again.sent.length, 0);
+    assert.equal(again.stopped, true);
+    assert.equal((await mail.call('env.snapshot')).snapshot.data.messages.length, before + 1);
+    const after = await session.infra.call('env.snapshot');
+    assert.equal(after.snapshot.data.notices.find(notice => notice.notice_id === other.notice_id).status, 'pending_delivery');
+  } finally {
+    if (router) await router.close();
+    if (mail) await mail.close();
+    await session.close();
+  }
+});
+
+test('a stale halt write leaves the other notice pending when the receiver is halted', async () => {
+  const session = await keel('mcphaltstale');
+  try {
+    const snap = await twoNotices(session);
+    let publishes = 0;
+    let sawHalt = false;
+    const router = {
+      async call() {
+        publishes += 1;
+        return { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true, event_id: 'router-halted' };
+      }
+    };
+    const read = async () => {
+      const data = (await session.infra.call('env.snapshot')).snapshot.data;
+      if (data.publication && data.publication.halted) sawHalt = true;
+      return data;
+    };
+    const first = await publishPending({
+      data: snap.snapshot.data,
+      router,
+      commit: commitWithStaleHalt(session.infra, 'halt-race-receiver'),
+      read
+    });
+    assert.equal(publishes, 1);
+    assert.equal(first.stopped, true);
+    assert.equal(sawHalt, true);
+    const fresh = await session.infra.call('env.snapshot');
+    assert.equal(fresh.snapshot.data.publication.halted, true);
+    const held = fresh.snapshot.data.notices.find(notice => notice.notice_id === fresh.snapshot.data.publication.notice_id);
+    const other = fresh.snapshot.data.notices.find(notice => notice.notice_id !== held.notice_id);
+    assert.equal(held.status, 'unknown');
+    assert.equal(other.status, 'pending_delivery');
+    const again = await publishPending({
+      data: fresh.snapshot.data,
+      router,
+      commit: item => commitDelivery(session.infra, item),
+      read
+    });
+    assert.equal(publishes, 1);
+    assert.equal(again.sent.length, 0);
+    assert.equal(again.stopped, true);
+    const after = await session.infra.call('env.snapshot');
+    assert.equal(after.snapshot.data.notices.find(notice => notice.notice_id === other.notice_id).status, 'pending_delivery');
+    assert.equal(after.snapshot.data.notices.find(notice => notice.notice_id === held.notice_id).status, 'unknown');
+  } finally {
+    await session.close();
+  }
+});
+
+test('a reused snapshot is persisted only after Core stores the delivery', async () => {
+  const session = await keel('mcppersist');
+  try {
+    const snap = await twoNotices(session);
+    let publishes = 0;
+    const router = {
+      async call() {
+        publishes += 1;
+        return { status: 'committed', event_id: 'mem-' + publishes, stop_run: false };
+      }
+    };
+    const memory = snap.snapshot.data;
+    const first = await publishPending({ data: memory, router });
+    assert.equal(first.reports.length, 2);
+    assert.equal(first.reports.every(report => report.persisted === false), true);
+    assert.equal(memory.notices.filter(notice => notice.status === 'pending_delivery').length, 0);
+    const pending = await session.infra.call('env.snapshot');
+    assert.equal(pending.snapshot.data.notices.filter(notice => notice.status === 'pending_delivery').length, 2);
+    let writes = 0;
+    const read = async () => (await session.infra.call('env.snapshot')).snapshot.data;
+    const second = await publishPending({
+      data: memory,
+      router,
+      read,
+      commit: async item => {
+        writes += 1;
+        return commitDelivery(session.infra, item);
+      }
+    });
+    assert.equal(publishes, 2);
+    assert.equal(writes, 2);
+    assert.equal(second.reports.every(report => report.persisted === true), true);
+    const saved = await session.infra.call('env.snapshot');
+    assert.equal(saved.snapshot.data.notices.filter(notice => notice.status === 'pending_delivery').length, 0);
+    assert.equal(saved.snapshot.data.notices.every(notice => notice.delivery && notice.delivery.recorded_at), true);
+    const moved = await session.infra.call('env.advance_time', {
+      expected_version: saved.version,
+      request_id: 'persist-clock',
+      virtual_now: oneMinuteLater(saved.snapshot.virtual_now)
+    });
+    assert.equal(moved.status, 'committed');
+    const later = await session.infra.call('env.snapshot');
+    let quietWrites = 0;
+    const quiet = await publishPending({
+      data: later.snapshot.data,
+      router,
+      read,
+      commit: async item => {
+        quietWrites += 1;
+        return commitDelivery(session.infra, item);
+      }
+    });
+    assert.equal(quietWrites, 0);
+    assert.equal(quiet.reports.every(report => report.persisted === true), true);
+    assert.equal(publishes, 2);
+  } finally {
+    await session.close();
   }
 });

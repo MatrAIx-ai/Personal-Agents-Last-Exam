@@ -1148,8 +1148,9 @@ test('each publication fault halts after one publish and leaves the other notice
     onPublish() {
       return { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true, event_id: null };
     },
-    commit: async () => {
+    commit: async (item) => {
       writes += 1;
+      if (item.kind === 'halt') return { status: 'committed' };
       return { status: 'stale_version' };
     },
     secondCommit: async () => {
@@ -1160,7 +1161,7 @@ test('each publication fault halts after one publish and leaves the other notice
   assert.equal(stale.first.report.persisted, false);
   assert.equal(stale.second.report.persisted, true);
   assert.equal(stale.publishes, 1);
-  assert.equal(writes, 3);
+  assert.equal(writes, 4);
   assert.equal(stale.server.notices[0].status, 'unknown');
 
   const outage = await runCase('outage before an event id', {
@@ -1218,6 +1219,7 @@ test('an inspection failure stays in the report and can be confirmed from the sa
   assert.equal(seen.includes('router-1'), true);
   assert.equal(copy.notices[0].status, 'committed');
   let writes = 0;
+  copy.notices[0].delivery.recorded_at = minimal.initial_clock;
   copy.publication = {
     halted: true,
     notice_id: 'notice-0001-aaaa',
@@ -1237,4 +1239,182 @@ test('an inspection failure stays in the report and can be confirmed from the sa
   assert.equal(writes, 0);
   assert.equal(saved.report.persisted, true);
   assert.equal(copy.notices[1].status, 'committed');
+});
+
+test('a stale halt write is repeated until Core keeps it', async () => {
+  const minimal = require('../fixtures/minimal.json');
+  function pair() {
+    const copy = structuredClone(minimal);
+    copy.notices = [
+      { notice_id: 'notice-0001-aaaa', kind: 'code', status: 'pending_delivery', cloud_event_id: 'keelcard-kc-adeyemi-notice-0001-aaaa', publish_request_id: 'notice-notice-0001-aaaa', title: 'Code', body: 'Code 111111', created_at: minimal.initial_clock, source_object: { object_type: 'change_request', object_id: 'cr-1' }, related_id: 'cr-1', delivery: null },
+      { notice_id: 'notice-0002-bbbb', kind: 'decline', status: 'pending_delivery', cloud_event_id: 'keelcard-kc-adeyemi-notice-0002-bbbb', publish_request_id: 'notice-notice-0002-bbbb', title: 'Declined', body: 'Declined', created_at: minimal.initial_clock, source_object: { object_type: 'decline', object_id: 'auth-1' }, related_id: 'auth-1', delivery: null }
+    ];
+    return copy;
+  }
+  let core = null;
+  let haltWrites = 0;
+  let publishes = 0;
+  const read = async () => ({ publication: core, notices: [] });
+  const commit = async (item) => {
+    if (item.kind !== 'halt') return { status: 'committed' };
+    haltWrites += 1;
+    if (haltWrites === 1) return { status: 'stale_version' };
+    core = {
+      halted: true,
+      notice_id: item.notice_id,
+      publish_request_id: item.publish_request_id,
+      cloud_event_id: item.cloud_event_id,
+      event_id: item.receipt_event_id,
+      status: item.status,
+      stop_run: Boolean(item.stop_run),
+      code: item.code || null
+    };
+    return { status: 'committed' };
+  };
+  const lostDir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-halt-lost-'));
+  const lostRouter = { async call() { publishes += 1; throw new Error('reply lost'); } };
+  const lost = await publishPending({ data: pair(), router: lostRouter, commit, read, runDir: lostDir });
+  assert.equal(publishes, 1);
+  assert.equal(lost.stopped, true);
+  assert.equal(haltWrites, 2);
+  assert.equal(core.halted, true);
+  const lostFresh = pair();
+  lostFresh.publication = structuredClone(core);
+  const lostAgain = await publishPending({ data: lostFresh, router: lostRouter, commit, read });
+  assert.equal(publishes, 1);
+  assert.equal(lostAgain.sent.length, 0);
+  assert.equal(lostFresh.notices[1].status, 'pending_delivery');
+
+  publishes = 0;
+  haltWrites = 0;
+  core = null;
+  const receiverDir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-halt-receiver-'));
+  const receiverRouter = {
+    async call() {
+      publishes += 1;
+      return { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true, event_id: 'router-halted' };
+    }
+  };
+  const receiver = await publishPending({ data: pair(), router: receiverRouter, commit, read, runDir: receiverDir });
+  assert.equal(publishes, 1);
+  assert.equal(receiver.stopped, true);
+  assert.equal(haltWrites, 2);
+  const receiverFresh = pair();
+  receiverFresh.publication = structuredClone(core);
+  const receiverAgain = await publishPending({ data: receiverFresh, router: receiverRouter, commit, read });
+  assert.equal(publishes, 1);
+  assert.equal(receiverAgain.sent.length, 0);
+  assert.equal(receiverFresh.notices.find(notice => notice.notice_id !== core.notice_id).status, 'pending_delivery');
+
+  publishes = 0;
+  haltWrites = 0;
+  core = null;
+  const fileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-halt-file-'));
+  fs.writeFileSync(path.join(fileDir, 'keelcard-publication.json'), JSON.stringify({
+    halted: true,
+    notice_id: 'notice-0001-aaaa',
+    publish_request_id: 'notice-notice-0001-aaaa',
+    cloud_event_id: 'keelcard-kc-adeyemi-notice-0001-aaaa',
+    event_id: 'router-1',
+    status: 'unknown',
+    stop_run: true,
+    code: 'receiver_unconfirmed'
+  }));
+  const fromFile = await publishPending({ data: pair(), router: receiverRouter, commit, read, runDir: fileDir });
+  assert.equal(publishes, 0);
+  assert.equal(fromFile.stopped, true);
+  assert.equal(fromFile.sent.length, 0);
+  assert.equal(core.notice_id, 'notice-0001-aaaa');
+
+  let stuckWrites = 0;
+  const stuckDir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-halt-stuck-'));
+  fs.writeFileSync(path.join(stuckDir, 'keelcard-publication.json'), JSON.stringify({
+    halted: true,
+    notice_id: 'notice-0001-aaaa',
+    publish_request_id: 'notice-notice-0001-aaaa',
+    cloud_event_id: 'keelcard-kc-adeyemi-notice-0001-aaaa',
+    event_id: null,
+    status: 'unknown',
+    stop_run: true,
+    code: 'response_lost'
+  }));
+  const refused = await publishPending({
+    data: pair(),
+    router: receiverRouter,
+    read: async () => ({ publication: null, notices: [] }),
+    commit: async () => { stuckWrites += 1; return { status: 'stale_version' }; },
+    runDir: stuckDir
+  });
+  assert.equal(publishes, 0);
+  assert.equal(stuckWrites, 8);
+  assert.equal(refused.stopped, true);
+  assert.equal(refused.sent.length, 0);
+});
+
+test('a reused snapshot reports persisted from a Core receipt or a fresh read', async () => {
+  const minimal = require('../fixtures/minimal.json');
+  const copy = structuredClone(minimal);
+  copy.notices = [
+    { notice_id: 'notice-0001-aaaa', kind: 'code', status: 'pending_delivery', cloud_event_id: 'keelcard-kc-adeyemi-notice-0001-aaaa', publish_request_id: 'notice-notice-0001-aaaa', title: 'Code', body: 'Code 111111', created_at: minimal.initial_clock, source_object: { object_type: 'change_request', object_id: 'cr-1' }, related_id: 'cr-1', delivery: null },
+    { notice_id: 'notice-0002-bbbb', kind: 'decline', status: 'pending_delivery', cloud_event_id: 'keelcard-kc-adeyemi-notice-0002-bbbb', publish_request_id: 'notice-notice-0002-bbbb', title: 'Declined', body: 'Declined', created_at: minimal.initial_clock, source_object: { object_type: 'decline', object_id: 'auth-1' }, related_id: 'auth-1', delivery: null }
+  ];
+  let publishes = 0;
+  const router = {
+    async call() {
+      publishes += 1;
+      return { status: 'committed', event_id: 'mem-' + publishes, stop_run: false };
+    }
+  };
+  const first = await publishPending({ data: copy, router });
+  assert.equal(first.stopped, false);
+  assert.equal(first.reports.length, 2);
+  assert.equal(first.reports.every(report => report.persisted === false), true);
+  assert.equal(copy.notices.every(notice => notice.status === 'unknown'), true);
+  const coreNotices = copy.notices.map(notice => ({ notice_id: notice.notice_id, status: 'pending_delivery', delivery: null }));
+  let writes = 0;
+  const second = await publishPending({
+    data: copy,
+    router,
+    read: async () => ({ publication: null, notices: coreNotices }),
+    commit: async (item) => {
+      writes += 1;
+      const notice = coreNotices.find(row => row.notice_id === item.notice_id);
+      notice.status = item.status;
+      notice.delivery = {
+        publish_request_id: item.publish_request_id,
+        status: item.status,
+        event_id: item.receipt_event_id,
+        code: item.code,
+        recorded_at: minimal.initial_clock
+      };
+      return { status: 'committed' };
+    }
+  });
+  assert.equal(publishes, 2);
+  assert.equal(writes, 2);
+  assert.equal(second.reports.every(report => report.persisted === true), true);
+  assert.equal(coreNotices.every(notice => notice.status === 'unknown'), true);
+  const quietData = structuredClone(minimal);
+  quietData.notices = coreNotices.map(notice => ({
+    notice_id: notice.notice_id,
+    kind: 'code',
+    status: notice.status,
+    cloud_event_id: 'keelcard-kc-adeyemi-' + notice.notice_id,
+    publish_request_id: 'notice-' + notice.notice_id,
+    title: 'Saved',
+    body: 'Saved',
+    created_at: minimal.initial_clock,
+    source_object: { object_type: 'change_request', object_id: 'cr-1' },
+    related_id: 'cr-1',
+    delivery: notice.delivery
+  }));
+  let quietWrites = 0;
+  const quiet = await publishPending({
+    data: quietData,
+    router,
+    commit: async () => { quietWrites += 1; return { status: 'committed' }; }
+  });
+  assert.equal(quietWrites, 0);
+  assert.equal(quiet.stopped, false);
+  assert.equal(quiet.reports.every(report => report.persisted === true), true);
 });
