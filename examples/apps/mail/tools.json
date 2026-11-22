@@ -1,0 +1,2257 @@
+[
+  {
+    "name": "mail.search",
+    "description": "Search authorized messages. Does not change read flags.",
+    "read_only": true,
+    "scope": "mail.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "folder": {
+          "type": "string",
+          "enum": [
+            "inbox",
+            "drafts",
+            "sent",
+            "archive",
+            "trash"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed",
+                "ready"
+              ]
+            },
+            "app_id": {
+              "const": "mail"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "simulated_delivery": {
+              "type": "boolean"
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "messages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "thread_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "account_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "from": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "to": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "subject": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "body": {
+                    "type": "string",
+                    "maxLength": 20000
+                  },
+                  "received_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "folder": {
+                    "enum": [
+                      "inbox",
+                      "archive",
+                      "trash",
+                      "drafts",
+                      "sent"
+                    ]
+                  },
+                  "read": {
+                    "type": "boolean"
+                  },
+                  "attachments": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "uniqueItems": true
+                  },
+                  "event_ref": {
+                    "type": "object",
+                    "properties": {
+                      "app_id": {
+                        "const": "calendar"
+                      },
+                      "account_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "object_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      }
+                    },
+                    "required": [
+                      "app_id",
+                      "account_id",
+                      "object_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "sent_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "id",
+                  "thread_id",
+                  "account_id",
+                  "from",
+                  "to",
+                  "subject",
+                  "body",
+                  "received_at",
+                  "folder",
+                  "read",
+                  "attachments"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "messages"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "mail.get",
+    "description": "Read a message and attachment references without side effects.",
+    "read_only": true,
+    "scope": "mail.get",
+    "resource_target": "id in current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed",
+                "ready"
+              ]
+            },
+            "app_id": {
+              "const": "mail"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "simulated_delivery": {
+              "type": "boolean"
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "message": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "thread_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "account_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "from": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "to": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "subject": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "body": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "received_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "folder": {
+                  "enum": [
+                    "inbox",
+                    "archive",
+                    "trash",
+                    "drafts",
+                    "sent"
+                  ]
+                },
+                "read": {
+                  "type": "boolean"
+                },
+                "attachments": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "uniqueItems": true
+                },
+                "event_ref": {
+                  "type": "object",
+                  "properties": {
+                    "app_id": {
+                      "const": "calendar"
+                    },
+                    "account_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "object_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  },
+                  "required": [
+                    "app_id",
+                    "account_id",
+                    "object_id"
+                  ],
+                  "additionalProperties": false
+                },
+                "sent_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "thread_id",
+                "account_id",
+                "from",
+                "to",
+                "subject",
+                "body",
+                "received_at",
+                "folder",
+                "read",
+                "attachments"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "message"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "mail.draft.create",
+    "description": "Create a local draft; no external delivery.",
+    "read_only": false,
+    "scope": "mail.draft.create",
+    "resource_target": "id in current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "to": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "subject": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "to",
+        "subject",
+        "body",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed",
+                "ready"
+              ]
+            },
+            "app_id": {
+              "const": "mail"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "simulated_delivery": {
+              "type": "boolean"
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "mail.draft.update",
+    "description": "Edit a draft only.",
+    "read_only": false,
+    "scope": "mail.draft.update",
+    "resource_target": "id in current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "to": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "subject": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed",
+                "ready"
+              ]
+            },
+            "app_id": {
+              "const": "mail"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "simulated_delivery": {
+              "type": "boolean"
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "mail.send",
+    "description": "Simulate send by moving a draft to sent; never sends real email.",
+    "read_only": false,
+    "scope": "mail.send",
+    "resource_target": "id in current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed",
+                "ready"
+              ]
+            },
+            "app_id": {
+              "const": "mail"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "simulated_delivery": {
+              "type": "boolean"
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "mail.flags.update",
+    "description": "Explicitly change a message read flag.",
+    "read_only": false,
+    "scope": "mail.flags.update",
+    "resource_target": "id in current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "read": {
+          "type": "boolean"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "read",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed",
+                "ready"
+              ]
+            },
+            "app_id": {
+              "const": "mail"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "simulated_delivery": {
+              "type": "boolean"
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "mail.move",
+    "description": "Move received mail among inbox, archive and trash.",
+    "read_only": false,
+    "scope": "mail.move",
+    "resource_target": "id in current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "folder": {
+          "type": "string",
+          "enum": [
+            "inbox",
+            "archive",
+            "trash"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "folder",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed",
+                "ready"
+              ]
+            },
+            "app_id": {
+              "const": "mail"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "simulated_delivery": {
+              "type": "boolean"
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "mail.trash",
+    "description": "Move a message or draft to trash.",
+    "read_only": false,
+    "scope": "mail.trash",
+    "resource_target": "id in current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed",
+                "ready"
+              ]
+            },
+            "app_id": {
+              "const": "mail"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "simulated_delivery": {
+              "type": "boolean"
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "mail.attachment.add",
+    "description": "Attach validated file bytes to a draft.",
+    "read_only": false,
+    "scope": "mail.draft.create",
+    "resource_target": "id in current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "filename": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160,
+                "pattern": "^[^\\\\/\\u0000-\\u001f\\u007f]+$"
+              },
+              "mime_type": {
+                "enum": [
+                  "application/pdf",
+                  "text/calendar",
+                  "text/plain",
+                  "image/png",
+                  "image/jpeg",
+                  "audio/mpeg",
+                  "audio/wav",
+                  "video/mp4",
+                  "application/json"
+                ]
+              },
+              "base64": {
+                "type": "string",
+                "maxLength": 1398104
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "media": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "object",
+                    "properties": {
+                      "width": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "height": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "animated": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  },
+                  "audio": {
+                    "type": "object",
+                    "properties": {
+                      "duration_ms": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "codec": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "sample_rate_hz": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "channels": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  },
+                  "video": {
+                    "type": "object",
+                    "properties": {
+                      "duration_ms": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "codec": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "width": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "height": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "fps": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "has_audio": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  },
+                  "document": {
+                    "type": "object",
+                    "properties": {
+                      "page_count": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "text_asset_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  },
+                  "sensor": {
+                    "type": "object",
+                    "properties": {
+                      "device_ref": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "unit": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "sample_count": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "coordinate_frame": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "missing_value_rule": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  },
+                  "captured_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "device_ref": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "filename",
+              "mime_type",
+              "base64",
+              "sha256"
+            ],
+            "additionalProperties": false,
+            "$id": "urn:pale:attachment-transfer:1"
+          },
+          "minItems": 1,
+          "maxItems": 8
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id",
+        "files"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed",
+                "ready"
+              ]
+            },
+            "app_id": {
+              "const": "mail"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "simulated_delivery": {
+              "type": "boolean"
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "mail.attachment.remove",
+    "description": "Remove an attachment reference from this record.",
+    "read_only": false,
+    "scope": "mail.draft.create",
+    "resource_target": "id in current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "asset_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id",
+        "asset_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed",
+                "ready"
+              ]
+            },
+            "app_id": {
+              "const": "mail"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "simulated_delivery": {
+              "type": "boolean"
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "mail.attachment.get",
+    "description": "Read an attachment on this record through parent-scoped authorization.",
+    "read_only": true,
+    "scope": "mail.get",
+    "resource_target": "id in current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "asset_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "asset_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed",
+                "ready"
+              ]
+            },
+            "app_id": {
+              "const": "mail"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "simulated_delivery": {
+              "type": "boolean"
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "file": {
+              "type": "object",
+              "properties": {
+                "filename": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160,
+                  "pattern": "^[^\\\\/\\u0000-\\u001f\\u007f]+$"
+                },
+                "mime_type": {
+                  "enum": [
+                    "application/pdf",
+                    "text/calendar",
+                    "text/plain",
+                    "image/png",
+                    "image/jpeg",
+                    "audio/mpeg",
+                    "audio/wav",
+                    "video/mp4",
+                    "application/json"
+                  ]
+                },
+                "base64": {
+                  "type": "string",
+                  "maxLength": 1398104
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "media": {
+                  "type": "object",
+                  "properties": {
+                    "image": {
+                      "type": "object",
+                      "properties": {
+                        "width": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "height": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "animated": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": false
+                    },
+                    "audio": {
+                      "type": "object",
+                      "properties": {
+                        "duration_ms": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "codec": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "sample_rate_hz": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "channels": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": false
+                    },
+                    "video": {
+                      "type": "object",
+                      "properties": {
+                        "duration_ms": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "codec": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "width": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "height": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "fps": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "has_audio": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": false
+                    },
+                    "document": {
+                      "type": "object",
+                      "properties": {
+                        "page_count": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "text_asset_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": false
+                    },
+                    "sensor": {
+                      "type": "object",
+                      "properties": {
+                        "device_ref": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        },
+                        "unit": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "sample_count": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "coordinate_frame": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "missing_value_rule": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": false
+                    },
+                    "captured_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "device_ref": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "filename",
+                "mime_type",
+                "base64",
+                "sha256"
+              ],
+              "additionalProperties": false,
+              "$id": "urn:pale:attachment-transfer:1"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "file"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "type": "object"
+    }
+  }
+]

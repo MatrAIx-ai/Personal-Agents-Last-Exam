@@ -1,0 +1,24 @@
+{
+  "schema_version": 2,
+  "registry": "examples/registry.mail.json",
+  "receiver_state_namespace": "mail-b",
+  "publishers": [
+    {
+      "app_id": "mail",
+      "account_id": "mail-a",
+      "owner_person_id": "person-maya",
+      "package_root": "examples/apps/mail",
+      "contribution_ref": "contribution/contribution.json",
+      "allowed_recipients": [
+        {
+          "app_id": "mail",
+          "account_id": "mail-b",
+          "channel": "channel.email"
+        }
+      ]
+    }
+  ],
+  "authentication": {
+    "mode": "trusted-stdio"
+  }
+}
