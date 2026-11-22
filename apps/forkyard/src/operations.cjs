@@ -147,6 +147,23 @@ const read = {
   }
 };
 
+function closedOverlap(data, repo, paths, openedAt) {
+  const opened = Date.parse(openedAt);
+  const left = paths || [];
+  if (!left.length || Number.isNaN(opened)) return null;
+  const found = data.pulls.filter(item => {
+    if (item.repo !== repo || item.state !== 'closed' || !item.closed_at || Date.parse(item.closed_at) > opened) return false;
+    const right = item.paths || [];
+    if (!right.length) return false;
+    const other = new Set(right);
+    let shared = 0;
+    for (const entry of left) if (other.has(entry)) shared += 1;
+    return shared / left.length >= 0.5;
+  });
+  found.sort((a, b) => Date.parse(b.closed_at) - Date.parse(a.closed_at) || b.number - a.number);
+  return found.length ? found[0].number : null;
+}
+
 function openPull(ctx, data, spec) {
   const baseRepo = store.repoOf(data, spec.repo);
   store.assertActive(baseRepo);
@@ -184,6 +201,7 @@ function openPull(ctx, data, spec) {
     updated_at: ctx.virtual_now,
     reviewers: [],
     paths: diff.paths,
+    earlier_closed_pr: closedOverlap(data, spec.repo, diff.paths, ctx.virtual_now),
     revisions: [store.storedRevision(spec.body, 1, ctx.virtual_now, spec.request_id, spec.event_id)]
   };
   pull.revisions[0].title = pull.title;

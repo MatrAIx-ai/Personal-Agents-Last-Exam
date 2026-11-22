@@ -825,6 +825,17 @@
               "maxLength": 200
             }
           },
+          "earlier_closed_pr": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "revisions": {
             "type": "array",
             "items": {
@@ -1138,6 +1149,17 @@
             ]
           },
           "request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "summary_comment_id": {
             "anyOf": [
               {
                 "type": "string",

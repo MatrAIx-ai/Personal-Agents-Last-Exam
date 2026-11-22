@@ -7,7 +7,7 @@ const {createRuntime} = require('../../../runtime/core/runtime.cjs');
 const {Client} = require('../../../runtime/client.cjs');
 const {create} = require('../../../runtime/messaging/src/router.cjs');
 const {digest} = require('../../../runtime/messaging/src/contracts.cjs');
-const {publishPending, reconcile, messageFor} = require('../src/publisher.cjs');
+const {publishPending, reconcile, inspectReceiver, messageFor} = require('../src/publisher.cjs');
 
 const root = path.resolve(__dirname, '../../..');
 const registry = path.join(root, 'apps.registry.json');
@@ -140,9 +140,32 @@ async function main() {
     clients.push(mail);
     await mail.initialize();
     const receipt = await mail.call('env.event_status', {event_id: sent.attempts[0].result.event_id});
-    const joined = reconcile({messaging: sent.attempts[0].result, mailReceipt: receipt});
+    const joined = reconcile({
+      messaging: sent.attempts[0].result,
+      mailReceipt: receipt,
+      message: sent.attempts[0].message,
+      attempted: {
+        event_id: sent.attempts[0].result.event_id,
+        run_id: run,
+        receiver: sent.attempts[0].result.target,
+        receiver_epoch: sent.attempts[0].result.version.epoch,
+        message: sent.attempts[0].message
+      }
+    });
     assert.equal(joined.delivery, 'confirmed');
     assert.equal(joined.same_run_retry, false);
+    const foreign = reconcile({
+      messaging: {...sent.attempts[0].result, run_id: 'other-run', target: {app_id: 'mail', account_id: 'mail-other'}},
+      message: sent.attempts[0].message,
+      attempted: {
+        event_id: sent.attempts[0].result.event_id,
+        run_id: run,
+        receiver: {app_id: 'mail', account_id: 'mail-maya'},
+        receiver_epoch: sent.attempts[0].result.version.epoch,
+        message: sent.attempts[0].message
+      }
+    });
+    assert.equal(foreign.delivery, 'unresolved');
     await router.close();
 
     const deniedDir = path.join(dir, 'denied');
@@ -188,7 +211,7 @@ async function main() {
       await lostMail.initialize();
       lost = await publishPending({
         notices: lostState.state.data.notices, accountId: 'fy-tomasreyes', router: lostRouter, runId: lostRun,
-        inspectReceipt: (eventId) => mailEvidence(lostMail, eventId),
+        inspectReceipt: (eventId) => inspectReceiver(lostMail, eventId),
         receiver: {app_id: 'mail', account_id: 'mail-maya'}
       });
     } finally {
@@ -209,6 +232,19 @@ async function main() {
     assert.equal(halted.code, 'run_halted');
     const stored = (await inspector.call('env.snapshot')).snapshot.data.messages;
     assert.equal(stored.filter(item => item.thread_id === lost.attempts[0].message.id).length, 1);
+    const statusOnly = reconcile({
+      messaging: lost.attempts[0].result,
+      mailReceipt: persisted,
+      message: lost.attempts[0].message,
+      attempted: {
+        event_id: lost.attempts[0].result.event_id,
+        run_id: lostRun,
+        receiver: {app_id: 'mail', account_id: 'mail-maya'},
+        receiver_epoch: persisted.receipt.version.epoch,
+        message: lost.attempts[0].message
+      }
+    });
+    assert.equal(statusOnly.delivery, 'unresolved');
     const rejectDir = path.join(dir, 'rejected');
     fs.mkdirSync(rejectDir);
     const rejectRun = 'fy_mail_rejected';
@@ -230,7 +266,7 @@ async function main() {
     const occupiedEvent = await rejectMail.call('env.apply_event', {
       expected_version: rejectSnap.version,
       event: {
-        event_id: 'mail-occupy-id',
+        event_id: occupied,
         at: '2026-11-15T09:05:00-08:00',
         operation: 'mail.deliver',
         payload: {
@@ -263,14 +299,19 @@ async function main() {
         const inspector = new Client('mail', 'infra', rejectRun, rejectDir, 'mail-reject-status', {registry: mailRegistry});
         clients.push(inspector);
         await inspector.initialize();
-        return mailEvidence(inspector, eventId);
+        return inspectReceiver(inspector, eventId);
       }
     });
     assert.equal(rejectedLookups, 1);
     assert.equal(refused.attempts.length, 1);
     assert.equal(refused.attempts[0].result.code, 'receiver_rejected');
     assert.equal(refused.attempts[0].outcome.delivery, 'unresolved');
+    assert.equal(refused.attempts[0].outcome.observed.message.thread_id, 'occupied');
+    assert.notEqual(refused.attempts[0].outcome.observed.message.thread_id, refused.attempts[0].outcome.observed.cloud_event.id);
     assert.equal(refused.stopped, true);
+    const occupiedMessages = await messages(rejectDir, rejectRun);
+    assert.equal(occupiedMessages.filter(item => item.thread_id === rejectMessage.id).length, 0);
+    assert.equal(occupiedMessages.filter(item => item.thread_id === 'occupied').length, 1);
     assert.equal(rejectState.state.data.pulls.find(item => item.number === 2318).state, 'closed');
 
     const missDir = path.join(dir, 'missing');
@@ -501,12 +542,16 @@ async function main() {
     let lookupCalls = 0;
     let routerCalls = 0;
     let lookedUp;
+    let releaseLookup;
+    const lookupGate = new Promise(resolve => { releaseLookup = resolve; });
+    let lookupStarted;
+    const lookupReady = new Promise(resolve => { lookupStarted = resolve; });
     try {
       Client.prototype.call = async function(name, args) {
         if (name === 'env.apply_event') throw new Error('dropped before the receiver applied it');
         return lookupOriginal.call(this, name, args);
       };
-      lookedUp = await publishPending({
+      const pendingLookup = publishPending({
         notices: lookupState.state.data.notices, accountId: 'fy-tomasreyes', router: {
           async call(name, args) {
             routerCalls += 1;
@@ -516,11 +561,28 @@ async function main() {
         receiver: {app_id: 'mail', account_id: 'mail-maya'},
         inspectReceipt: async () => {
           lookupCalls += 1;
+          lookupStarted();
+          await lookupGate;
           throw new Error('lookup down');
         }
       });
+      await lookupReady;
+      const concurrent = await publishPending({
+        notices: lookupState.state.data.notices, accountId: 'fy-tomasreyes', router: {
+          async call() {
+            routerCalls += 1;
+            throw new Error('router should stay idle');
+          }
+        }, runId: lookupRun
+      });
+      assert.equal(concurrent.suppressed, true);
+      assert.equal(concurrent.attempts.length, 1);
+      assert.equal(concurrent.attempts[0].notice_id, lookupState.state.data.notices.find(item => item.status === 'pending_delivery').notice_id);
+      releaseLookup();
+      lookedUp = await pendingLookup;
     } finally {
       Client.prototype.call = lookupOriginal;
+      releaseLookup();
     }
     assert.equal(lookedUp.attempts.length, 1);
     assert.equal(lookedUp.attempts[0].outcome.lookup_error, 'lookup down');

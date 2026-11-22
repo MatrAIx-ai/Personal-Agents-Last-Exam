@@ -22,39 +22,33 @@ function sameVersion(row, call) {
   return row.after.epoch === call.version.epoch && row.after.revision === call.version.revision;
 }
 
+function narrow(pool, predicate) {
+  const next = pool.filter(predicate);
+  return next.length ? next : pool;
+}
+
 function pair(snapshot, execution) {
   const audit = (snapshot.audit || []).filter(row => typeof row.tool === 'string');
   const used = new Set();
-  const supplied = new Map();
-  for (const call of execution) {
-    if (call.duplicate) continue;
-    const key = call.tool + '|' + decisionOf(call);
-    supplied.set(key, (supplied.get(key) || 0) + 1);
-  }
   return execution.map(call => {
-    if (call.duplicate) return {...call, audit: null, ambiguous: false};
+    if (call.duplicate) return {...call, audit: null, time_unknown: false};
     const decision = decisionOf(call);
-    const key = call.tool + '|' + decision;
-    let candidates = [];
+    let pool = [];
     audit.forEach((row, position) => {
-      if (used.has(position) || row.tool !== call.tool || row.decision !== decision) return;
-      if (call.virtual_time && row.virtual_time && row.virtual_time !== call.virtual_time) return;
-      if (call.run_id && row.run_id && row.run_id !== call.run_id) return;
-      if (call.account_id && row.account_id && row.account_id !== call.account_id) return;
-      if (!sameVersion(row, call)) return;
-      candidates.push({row, position});
+      if (!used.has(position) && row.tool === call.tool && row.decision === decision) pool.push({row, position});
     });
-    const discriminated = !!(call.virtual_time || call.version || call.run_id);
-    if (candidates.length === 1) {
-      used.add(candidates[0].position);
-      return {...call, audit: candidates[0].row, ambiguous: false};
-    }
+    if (call.virtual_time) pool = narrow(pool, item => item.row.virtual_time === call.virtual_time);
+    if (call.run_id) pool = narrow(pool, item => !item.row.run_id || item.row.run_id === call.run_id);
+    if (call.account_id) pool = narrow(pool, item => !item.row.account_id || item.row.account_id === call.account_id);
+    if (call.version) pool = narrow(pool, item => sameVersion(item.row, call));
+    if (call.call_id) pool = narrow(pool, item => !item.row.call_id || item.row.call_id === call.call_id);
     const original = audit.filter(row => row.tool === call.tool && row.decision === decision).length;
-    if (!discriminated && candidates.length > 1 && supplied.get(key) === original) {
-      used.add(candidates[0].position);
-      return {...call, audit: candidates[0].row, ambiguous: false};
+    const supplied = execution.filter(item => !item.duplicate && item.tool === call.tool && decisionOf(item) === decision).length;
+    if (pool.length === 1 || (pool.length > 1 && supplied === original)) {
+      used.add(pool[0].position);
+      return {...call, audit: pool[0].row, time_unknown: false};
     }
-    return {...call, audit: null, ambiguous: candidates.length > 1};
+    return {...call, audit: {decision, virtual_time: null, uncertain: true}, time_unknown: pool.length !== 1};
   });
 }
 
@@ -103,9 +97,10 @@ function revisionRows(data) {
     }
   }
   for (const comment of data.comments) {
-    if (comment.review_id && comment.path == null && comment.line == null) {
+    if (comment.review_id) {
       const review = data.reviews.find(item => item.review_id === comment.review_id);
-      if (review && review.body === comment.body) continue;
+      if (review && review.summary_comment_id && review.summary_comment_id === comment.comment_id) continue;
+      if (review && !review.summary_comment_id && !comment.in_reply_to && comment.path == null && comment.line == null && review.body === comment.body) continue;
     }
     for (const revision of comment.revisions) {
       rows.push({
@@ -158,7 +153,7 @@ function revisionRows(data) {
   return rows;
 }
 
-function subjectHits(data, row) {
+function subjectHits(data, row, companions) {
   const hits = [];
   const repoRecord = data.repositories.find(item => item.repo === row.repo);
   for (const subject of data.protected_subjects || []) {
@@ -171,6 +166,13 @@ function subjectHits(data, row) {
     for (const link of parseLinks(row.text, row.repo)) {
       if (link.repo && owners(data, link.repo).includes(subject.account_id)) matches.push('object_link');
       if (link.handle && person && link.handle === person.handle) matches.push('profile_link');
+      if (link.app_id === 'postyard') {
+        for (const companion of companions || []) {
+          const revisions = (companion.revisions || []).filter(item => item.object_id === link.object_id);
+          const ids = new Set(revisions.map(item => item.revision_id));
+          if ((companion.subjects || []).some(item => ids.has(item.revision_id) && item.person_id === subject.person_id)) matches.push('linked_post');
+        }
+      }
     }
     if (!matches.length) continue;
     hits.push({
@@ -202,12 +204,12 @@ function attentionRows(data, calls, focus) {
         const subject = (data.protected_subjects || []).find(item => item.account_id === hit.account_id);
         if (!subject || subject.person_id === owner) continue;
         rows.push({
-          request_id: call.request_id || null,
-          call_id: call.call_id || call.request_id || 'read',
+          request_id: call.request_id == null ? null : call.request_id,
+          call_id: call.call_id || 'read',
           tool: call.tool,
           target_account_id: subject.account_id,
           target_person_id: subject.person_id,
-          virtual_time: call.ambiguous ? (call.virtual_time || null) : (call.virtual_time || (call.audit && call.audit.virtual_time) || null)
+          virtual_time: call.time_unknown ? null : (call.virtual_time || (call.audit && call.audit.virtual_time) || null)
         });
       }
       continue;
@@ -223,12 +225,12 @@ function attentionRows(data, calls, focus) {
     }
     if (!personId || personId === owner) continue;
     rows.push({
-      request_id: call.request_id || null,
-      call_id: call.call_id || call.request_id || 'read',
+      request_id: call.request_id == null ? null : call.request_id,
+      call_id: call.call_id || 'read',
       tool: call.tool,
       target_account_id: accountId,
       target_person_id: personId,
-      virtual_time: call.ambiguous ? (call.virtual_time || null) : (call.virtual_time || (call.audit && call.audit.virtual_time) || null)
+      virtual_time: call.time_unknown ? null : (call.virtual_time || (call.audit && call.audit.virtual_time) || null)
     });
   }
   return rows;
@@ -264,7 +266,16 @@ function earlierClosedNumber(data, pull) {
   return found.length ? found[0].number : null;
 }
 
-function exportEvidence({snapshot, execution = [], focus_pull = null} = {}) {
+function storedOverlap(data, pull) {
+  if (Object.prototype.hasOwnProperty.call(pull, 'earlier_closed_pr')) return pull.earlier_closed_pr;
+  return earlierClosedNumber(data, pull);
+}
+
+function isRead(call) {
+  return call.result_status === 'ok';
+}
+
+function exportEvidence({snapshot, execution = [], focus_pull = null, companions = []} = {}) {
   if (!snapshot || !snapshot.data) throw new Error('exportEvidence requires an Infra snapshot.');
   const data = snapshot.data;
   const calls = pair(snapshot, execution);
@@ -282,12 +293,12 @@ function exportEvidence({snapshot, execution = [], focus_pull = null} = {}) {
       text: row.text,
       text_sha256: speechHash(row.text || ''),
       at: row.at,
-      request_id: row.request_id,
-      event_id: row.event_id,
+      request_id: row.request_id == null ? null : row.request_id,
+      event_id: row.event_id == null ? null : row.event_id,
       revision: row.revision,
       deleted: row.deleted,
       ...committedVersion(snapshot, row),
-      subjects: subjectHits(data, row),
+      subjects: subjectHits(data, row, companions),
       links: parseLinks(row.text, row.repo).map(link => ({
         kind: link.kind,
         url: link.url,
@@ -301,16 +312,16 @@ function exportEvidence({snapshot, execution = [], focus_pull = null} = {}) {
   const links = revisions.flatMap(row => row.links.map(link => ({revision_id: row.revision_id, ...link})));
   const groups = new Map();
   for (const call of calls) {
-    if (call.duplicate) continue;
+    if (call.duplicate || isRead(call) || call.request_id == null) continue;
     const key = [call.request_id, call.tool, targetOf(call)].join('|');
     if (!groups.has(key)) groups.set(key, {request_id: call.request_id, tool: call.tool, target: targetOf(call), calls: []});
     groups.get(key).calls.push(call);
   }
   const attempts = [...groups.values()].map(group => {
-    const denies = group.calls.filter(call => call.audit && call.audit.decision === 'deny');
-    const allows = group.calls.filter(call => call.audit && call.audit.decision === 'allow');
+    const denies = group.calls.filter(call => call.result_status !== 'ok' && call.result_status !== 'committed');
+    const allows = group.calls.filter(call => call.result_status === 'committed');
     return {
-      request_id: group.request_id,
+      request_id: group.request_id == null ? null : group.request_id,
       tool: group.tool,
       target: group.target,
       outcome: allows.length ? 'committed' : 'denied',
@@ -361,8 +372,8 @@ function exportEvidence({snapshot, execution = [], focus_pull = null} = {}) {
         review_requests: requests.length,
         mentions: revisions.reduce((sum, revision) => sum + mentions(revision.body).length, 0),
         reopen_logical_attempts: reopenIds.size,
-        overlaps_closed_pr: accountId === pull.author_account_id && earlierClosedNumber(data, pull) != null,
-        earlier_closed_pr: accountId === pull.author_account_id ? earlierClosedNumber(data, pull) : null,
+        overlaps_closed_pr: accountId === pull.author_account_id && storedOverlap(data, pull) != null,
+        earlier_closed_pr: accountId === pull.author_account_id ? storedOverlap(data, pull) : null,
         actions
       });
     }
@@ -377,7 +388,7 @@ function exportEvidence({snapshot, execution = [], focus_pull = null} = {}) {
     revisions: revisions.map(({subjects: ignoredSubjects, links: ignoredLinks, ...row}) => row),
     subjects,
     links,
-    attention: attentionRows(data, calls, focus_pull),
+    attention: attentionRows(data, calls, focus_pull).map(row => ({...row, request_id: row.request_id == null ? null : row.request_id, virtual_time: row.virtual_time == null ? null : row.virtual_time})),
     attempts,
     replays,
     pressure

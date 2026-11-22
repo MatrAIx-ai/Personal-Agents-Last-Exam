@@ -119,31 +119,38 @@ function hunkHeader(oldCount, newCount) {
 }
 
 function unified(path, beforeText, afterText) {
-  const before = contentLines(beforeText);
-  const after = contentLines(afterText);
+  const created = beforeText == null;
+  const deleted = afterText == null;
+  const before = contentLines(created ? '' : beforeText);
+  const after = contentLines(deleted ? '' : afterText);
   const ops = editScript(before.lines, after.lines);
-  const body = ops.map(item => item.op + item.line);
+  if (!created && !deleted && before.newline !== after.newline && before.lines.length && after.lines.length) {
+    const last = before.lines[before.lines.length - 1];
+    if (last === after.lines[after.lines.length - 1]) {
+      let seenOld = 0;
+      let seenNew = 0;
+      let shared = -1;
+      ops.forEach((item, index) => {
+        if (item.op !== '+') seenOld += 1;
+        if (item.op !== '-') seenNew += 1;
+        if (seenOld === before.lines.length && seenNew === after.lines.length) shared = index;
+      });
+      if (shared >= 0 && ops[shared].op === ' ') ops.splice(shared, 1, {op: '-', line: last}, {op: '+', line: last});
+    }
+  }
+  const body = [];
   let seenOld = 0;
   let seenNew = 0;
-  for (let index = 0; index < ops.length; index += 1) {
-    if (ops[index].op !== '+') seenOld += 1;
-    if (ops[index].op !== '-') seenNew += 1;
-    if (seenOld === before.lines.length && !before.newline && before.lines.length) {
-      body.splice(index + 1 + body.length - ops.length, 0, '\\ No newline at end of file');
-      break;
-    }
+  for (const item of ops) {
+    body.push(item.op + item.line);
+    if (item.op !== '+') seenOld += 1;
+    if (item.op !== '-') seenNew += 1;
+    if (item.op !== '+' && seenOld === before.lines.length && before.lines.length && !before.newline) body.push('\\ No newline at end of file');
+    if (item.op !== '-' && seenNew === after.lines.length && after.lines.length && !after.newline) body.push('\\ No newline at end of file');
   }
-  if (!after.newline && after.lines.length) {
-    let cursor = 0;
-    let counted = 0;
-    while (cursor < ops.length && counted < after.lines.length) {
-      if (ops[cursor].op !== '-') counted += 1;
-      cursor += 1;
-    }
-    const markerAt = cursor + body.slice(0, cursor).filter(line => line.startsWith('\\ ')).length;
-    if (!body[markerAt] || !body[markerAt].startsWith('\\ ')) body.splice(markerAt, 0, '\\ No newline at end of file');
-  }
-  return ['--- a/' + path, '+++ b/' + path, hunkHeader(before.lines.length, after.lines.length), ...body].join('\n') + '\n';
+  const headerOld = created ? '--- /dev/null' : '--- a/' + path;
+  const headerNew = deleted ? '+++ /dev/null' : '+++ b/' + path;
+  return [headerOld, headerNew, hunkHeader(before.lines.length, after.lines.length), ...body].join('\n') + '\n';
 }
 
 function sameFile(left, right) {
@@ -190,7 +197,7 @@ function diffTrees(before, after) {
     const leftText = left ? left.content : '';
     const rightText = right ? right.content : '';
     changed += lineChangeCount(leftText, rightText);
-    parts.push(unified(path, leftText, rightText));
+    parts.push(unified(path, left ? leftText : null, right ? rightText : null));
   }
   return {changed_lines: changed, paths: changedPaths, text: parts.join('\n')};
 }

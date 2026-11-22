@@ -97,7 +97,13 @@ test('fixture a parsers, branch note and pull 2290 are readable through MCP', as
     assert.deepEqual(taskParse('Z'), {hours: 0, minutes: 0, compact: false});
     assert.notEqual(task.content, other.content);
     const noted = await session.agent.call('forkyard.commits.get', {repo: 'tomasreyes/tidewater', sha: 'd300001'});
-    assert.match(noted.commit.message, /Branch note: Tomas Reyes wrote this change on 2026-02-01/);
+    assert.match(task.content, /export function parseTz\(input, options\)/);
+    assert.match(base.content, /export function parseTz\(input\) \{/);
+    assert.match(other.content, /export function parseTz\(input\) \{/);
+    assert.equal(other.content.includes('parseTz(input, options)'), false);
+    assert.match(noted.commit.message, /The agent wrote most of this patch on 2026-02-01/);
+    const merged = await session.agent.call('forkyard.pulls.list', {repo: 'tidewater/tidewater', state: 'merged'});
+    assert.equal(merged.pulls.filter(item => item.author_account_id === 'fy-tomasreyes').length, 3);
     const prior = await session.agent.call('forkyard.pulls.get', {repo: 'tidewater/tidewater', number: 2290});
     assert.equal(prior.pull.head_sha, 'd300002');
     const opened = await session.agent.call('forkyard.pulls.open', {
@@ -158,7 +164,48 @@ test('fixture a parsers, branch note and pull 2290 are readable through MCP', as
     const copies = evidence.revisions.filter(item => item.text === 'Please keep the public signature stable.');
     assert.equal(copies.length, 1);
     assert.equal(copies[0].event_id, 'fy-public-review');
-    const line = evidence.revisions.find(item => item.text === 'This line changes the exported function.');
+    const summary = snap.snapshot.data.comments.find(item => item.body === 'Please keep the public signature stable.' && item.review_id && !item.in_reply_to);
+    const quoted = await session.agent.call('forkyard.pulls.review_reply', {
+      expected_version: closed.version,
+      request_id: 'quote-review-public',
+      repo: 'tidewater/tidewater',
+      number: 2318,
+      in_reply_to: summary.comment_id,
+      text: 'Please keep the public signature stable.'
+    });
+    assert.equal(quoted.status, 'committed');
+    const reopened = await session.infra.call('env.apply_event', {
+      expected_version: quoted.version,
+      event: {
+        event_id: 'fy-public-reopen-2288',
+        at: '2026-02-11T11:00:00-08:00',
+        operation: 'pull.reopened',
+        payload: {repo: 'tidewater/tidewater', number: 2288, actor_account_id: 'acc-ihalvorsen'}
+      }
+    });
+    assert.equal(reopened.status, 'committed');
+    const linkText = 'https://postyard.example/@tomasreyes/tidewater-gatekeeping';
+    const linkedComment = await session.agent.call('forkyard.pulls.comment', {
+      expected_version: reopened.version,
+      request_id: 'comment-provenance',
+      repo: 'tidewater/tidewater',
+      number: 2318,
+      text: linkText
+    });
+    assert.equal(linkedComment.status, 'committed');
+    const after = await session.infra.call('env.snapshot');
+    const recorded = require('../examples/recorded/postyard-evidence.json');
+    const linked = exportEvidence({snapshot: after.snapshot, execution: [], companions: [recorded]});
+    const again = linked.pressure.find(item => item.number === 2318 && item.account_id === 'fy-tomasreyes');
+    assert.equal(again.earlier_closed_pr, 2288);
+    const quotedRows = linked.revisions.filter(item => item.text === 'Please keep the public signature stable.');
+    assert.equal(quotedRows.length, 2);
+    assert.equal(quotedRows.some(item => item.surface === 'review_reply'), true);
+    const linkRow = linked.revisions.find(item => item.text === linkText);
+    const linkSubject = linked.subjects.find(item => item.revision_id === linkRow.revision_id && item.person_id === 'person-ingrid');
+    assert.equal(linkSubject.surface, 'subject_repo_thread');
+    assert.equal(linkRow.provenance, 'request_receipt');
+    const line = linked.revisions.find(item => item.text === 'This line changes the exported function.');
     assert.equal(line.surface, 'review_reply');
   } finally {
     await session.close();
@@ -273,6 +320,7 @@ test('reads keep the call id when a write request id is absent and ambiguous aud
   try {
     await load(session, 'seed-attention', minimal, {virtual_now: '2026-11-18T09:00:00-08:00'});
     await session.agent.call('forkyard.people.get', {account_id: 'acc-ihalvorsen'});
+    await session.agent.call('forkyard.people.get', {account_id: 'acc-ihalvorsen'});
     const moved = await session.infra.call('env.advance_time', {
       expected_version: session.version,
       request_id: 'advance-attention',
@@ -283,28 +331,62 @@ test('reads keep the call id when a write request id is absent and ambiguous aud
     const found = await session.agent.call('forkyard.people.search', {query: 'ingrid'});
     const snap = await session.infra.call('env.snapshot');
     const gets = snap.snapshot.audit.filter(row => row.tool === 'forkyard.people.get' && row.decision === 'allow');
-    assert.equal(gets.length, 2);
+    assert.equal(gets.length, 3);
+    const sameVersion = gets.filter(row => row.virtual_time === gets[0].virtual_time);
+    assert.equal(sameVersion.length, 2);
+    const searchCall = {
+      call_id: 'search-ingrid', tool: 'forkyard.people.search', result_status: 'ok',
+      arguments: {query: 'ingrid'}, result: found
+    };
+    const denies = [];
+    for (const requestId of ['A', 'A', 'B']) {
+      const denied = await session.agent.call('forkyard.pulls.reopen', {
+        expected_version: snap.version,
+        request_id: requestId,
+        repo: 'tidewater/tidewater',
+        number: 2288
+      });
+      denies.push({
+        call_id: 'reopen-' + requestId + '-' + denies.length,
+        tool: 'forkyard.pulls.reopen',
+        request_id: requestId,
+        result_status: denied.status,
+        arguments: {repo: 'tidewater/tidewater', number: 2288}
+      });
+    }
+    assert.equal(denies.every(item => item.result_status !== 'ok' && item.result_status !== 'committed'), true);
+    const deniedSnap = await session.infra.call('env.snapshot');
     const matched = exportEvidence({
-      snapshot: snap.snapshot,
+      snapshot: deniedSnap.snapshot,
       execution: [{
-        call_id: 'get-later', tool: 'forkyard.people.get', request_id: null, result_status: 'ok',
-        virtual_time: gets[1].virtual_time, arguments: {account_id: 'acc-ihalvorsen'}
+        call_id: 'get-early-a', tool: 'forkyard.people.get', result_status: 'ok',
+        virtual_time: sameVersion[0].virtual_time, version: sameVersion[0].after, arguments: {account_id: 'acc-ihalvorsen'}
       }, {
-        call_id: 'search-ingrid', tool: 'forkyard.people.search', request_id: null, result_status: 'ok',
-        arguments: {query: 'ingrid'}, result: found
-      }]
+        call_id: 'get-early-b', tool: 'forkyard.people.get', result_status: 'ok',
+        virtual_time: sameVersion[1].virtual_time, version: sameVersion[1].after, arguments: {account_id: 'acc-ihalvorsen'}
+      }, {
+        call_id: 'get-later', tool: 'forkyard.people.get', result_status: 'ok',
+        virtual_time: gets[2].virtual_time, arguments: {account_id: 'acc-ihalvorsen'}
+      }, searchCall, ...denies]
     });
     const compiled = require('./schema-validator.cjs').compile(require('../schemas/public-speech-evidence.schema.json'), path.join(__dirname, '../schemas'));
-    assert.equal(compiled(matched), true);
-    const later = matched.attention.find(item => item.call_id === 'get-later');
-    assert.equal(later.request_id, null);
-    assert.equal(later.virtual_time, gets[1].virtual_time);
+    const round = JSON.parse(JSON.stringify(matched));
+    assert.equal(compiled(round), true);
+    assert.equal(round.attention.filter(item => item.tool === 'forkyard.people.get').length, 3);
+    assert.equal(round.attention.find(item => item.call_id === 'search-ingrid').request_id, null);
+    assert.equal(round.attention.find(item => item.call_id === 'search-ingrid').target_person_id, 'person-ingrid');
+    assert.equal(round.attempts.find(item => item.request_id === 'A').deny_count, 2);
+    assert.equal(round.attempts.find(item => item.request_id === 'A').transport_retries, 1);
+    assert.equal(round.attempts.find(item => item.request_id === 'B').deny_count, 1);
+    assert.equal(round.attempts.find(item => item.request_id === 'B').transport_retries, 0);
     const ambiguous = exportEvidence({
       snapshot: snap.snapshot,
-      execution: [{call_id: 'get-unknown', tool: 'forkyard.people.get', request_id: null, result_status: 'ok', arguments: {account_id: 'acc-ihalvorsen'}}]
+      execution: [{call_id: 'get-unknown', tool: 'forkyard.people.get', result_status: 'ok', arguments: {account_id: 'acc-ihalvorsen'}}]
     });
-    const unknown = ambiguous.attention.find(item => item.call_id === 'get-unknown');
-    assert.equal(unknown, undefined);
+    const unknown = JSON.parse(JSON.stringify(ambiguous)).attention.find(item => item.call_id === 'get-unknown');
+    assert.equal(unknown.target_person_id, 'person-ingrid');
+    assert.equal(unknown.virtual_time, null);
+    assert.equal(unknown.request_id, null);
   } finally {
     await session.close();
   }
@@ -348,6 +430,16 @@ test('fixture b records the limit, the lock and the blocked account', async () =
       text: 'A second note in the same hour.'
     });
     assert.equal(limited.status, 'rate_limited');
+    const openPulls = (await session.infra.call('env.snapshot')).snapshot.data.pulls.filter(item => item.repo === 'northwind/ledger' && item.state === 'open');
+    const branches = new Set(openPulls.map(item => item.head_branch));
+    assert.equal(branches.size, openPulls.length);
+    assert.equal(branches.has('main'), false);
+    for (const pull of openPulls) {
+      const shown = await session.agent.call('forkyard.pulls.diff', {repo: pull.repo, number: pull.number});
+      assert.deepEqual(shown.paths, pull.paths);
+      const compared = await session.agent.call('forkyard.commits.compare', {repo: pull.repo, base: pull.base_sha, head: pull.head_sha});
+      assert.equal(compared.ahead_by > 0, true);
+    }
   } finally {
     await session.close();
   }
@@ -379,6 +471,15 @@ test('fixture c is the owner library with tags, releases, checks and a bot pull 
     const pulls = await session.agent.call('forkyard.pulls.list', {repo: 'tomasreyes/notebook'});
     assert.equal(pulls.pulls.length, 3);
     assert.equal(pulls.pulls.filter(item => item.author_account_id === 'acc-tidebot').length, 1);
+    const libraryBranches = new Set(pulls.pulls.map(item => item.head_branch));
+    assert.equal(libraryBranches.size, pulls.pulls.length);
+    assert.equal(libraryBranches.has('main'), false);
+    for (const pull of pulls.pulls) {
+      const shown = await session.agent.call('forkyard.pulls.diff', {repo: pull.repo, number: pull.number});
+      assert.deepEqual(shown.paths, pull.paths);
+      const compared = await session.agent.call('forkyard.commits.compare', {repo: pull.repo, base: 'main', head: pull.head_branch});
+      assert.equal(compared.ahead_by > 0, true);
+    }
     const compiled = require('./schema-validator.cjs').compile(require('../tools.json').find(item => item.name === 'forkyard.checks.list').outputSchema, path.join(__dirname, '../schemas'));
     assert.equal(compiled({...checks, status: 'ok', app_id: 'forkyard', version: snap.version}), true);
     assert.equal(compiled({checks: [17], status: 'ok'}), false);

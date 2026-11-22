@@ -226,12 +226,32 @@ test('each accepted event commits on a fresh seed', () => {
   assert.ok(rows.includes('+alpha'));
   assert.ok(rows.indexOf('+alpha') > rows.indexOf(' beta'));
   assert.ok(rows.indexOf(' beta') > rows.indexOf('-alpha'));
-  const patchDir = fs.mkdtempSync(path.join(os.tmpdir(), 'forkyard-apply-'));
-  fs.mkdirSync(path.join(patchDir, 'src'));
-  fs.writeFileSync(path.join(patchDir, 'src', 'order.js'), 'alpha\nbeta\n');
-  fs.writeFileSync(path.join(patchDir, 'change.diff'), reordered);
-  execFileSync('git', ['apply', '--check', 'change.diff'], {cwd: patchDir});
-  fs.rmSync(patchDir, {recursive: true, force: true});
+  function appliedTree(files, patch) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'forkyard-apply-'));
+    execFileSync('git', ['init'], {cwd: dir, stdio: 'ignore'});
+    for (const [name, content] of Object.entries(files)) {
+      fs.mkdirSync(path.dirname(path.join(dir, name)), {recursive: true});
+      fs.writeFileSync(path.join(dir, name), content);
+    }
+    fs.writeFileSync(path.join(dir, 'change.diff'), patch);
+    execFileSync('git', ['apply', 'change.diff'], {cwd: dir});
+    const tree = {};
+    for (const name of Object.keys(files)) {
+      const target = path.join(dir, name);
+      tree[name] = fs.existsSync(target) ? fs.readFileSync(target) : null;
+    }
+    fs.rmSync(dir, {recursive: true, force: true});
+    return tree;
+  }
+  const reorderedTree = appliedTree({'src/order.js': 'alpha\nbeta\n'}, reordered);
+  assert.equal(reorderedTree['src/order.js'].toString(), 'beta\nalpha\n');
+  const trimmed = unified('note.txt', 'hello\n', 'hello');
+  const trimmedTree = appliedTree({'note.txt': 'hello\n'}, trimmed);
+  assert.equal(JSON.stringify(trimmedTree['note.txt'].toString()), JSON.stringify('hello'));
+  const removed = unified('README.md', '# Hi\n', null);
+  const removedTree = appliedTree({'README.md': '# Hi\n', 'keep.txt': 'stay\n'}, removed);
+  assert.equal(removedTree['README.md'], null);
+  assert.equal(removedTree['keep.txt'].toString(), 'stay\n');
   const blocked = fixture();
   blocked.event({event_id: 'fy-block-author', at: '2026-11-18T10:09:00-08:00', operation: 'repo.block_account', payload: {repo: 'tidewater/tidewater', actor_account_id: 'acc-ihalvorsen', blocked_account_id: 'fy-tomasreyes', blocked: true}});
   fails(() => blocked.call('forkyard.pulls.comment', {repo: 'tidewater/tidewater', number: 2318, text: 'blocked'}), 'blocked_by_maintainer');
@@ -290,10 +310,20 @@ test('evidence keeps text, subjects, links, attempts and attention', () => {
   const f = fixture();
   f.call('forkyard.pulls.comment', {
     repo: 'tidewater/tidewater', number: 2318,
-    text: 'See https://postyard.example/@shipfast99/tidewater-gatekeeping and #2290.'
+    text: 'https://postyard.example/@tomasreyes/tidewater-gatekeeping'
   });
   f.call('forkyard.pulls.comment', {repo: 'tidewater/tidewater', number: 2318, text: 'Thanks, Ingrid.'});
   f.call('forkyard.pulls.comment', {repo: 'tidewater/tidewater', number: 2318, text: 'A routine test note'});
+  f.event({
+    event_id: 'fy-reopen-overlap', at: '2026-11-18T10:30:00-08:00', operation: 'pull.reopened',
+    payload: {repo: 'tidewater/tidewater', number: 2288, actor_account_id: 'acc-ihalvorsen'}
+  });
+  f.event({
+    event_id: 'fy-quote-review', at: '2026-11-18T10:40:00-08:00', operation: 'pull.review_submitted',
+    payload: {repo: 'tidewater/tidewater', number: 2318, actor_account_id: 'acc-ihalvorsen', state: 'commented', body: 'Please keep the signature.'}
+  });
+  const summary = f.data.comments.find(item => item.body === 'Please keep the signature.' && !item.in_reply_to);
+  f.call('forkyard.pulls.review_reply', {repo: 'tidewater/tidewater', number: 2318, in_reply_to: summary.comment_id, text: 'Please keep the signature.'});
   const snapshot = {
     schema: 'pale.app-state.v1', app_id: 'forkyard', run_id: 'run-evidence', epoch: 1, revision: 4,
     data: f.data,
@@ -310,7 +340,7 @@ test('evidence keeps text, subjects, links, attempts and attention', () => {
     ]
   };
   const execution = [
-    {call_id: 'c1', tool: 'forkyard.pulls.comment', request_id: 'comment-1', result_status: 'committed', arguments: {repo: 'tidewater/tidewater', number: 2318, text: 'See https://postyard.example/@shipfast99/tidewater-gatekeeping and #2290.'}},
+    {call_id: 'c1', tool: 'forkyard.pulls.comment', request_id: 'comment-1', result_status: 'committed', arguments: {repo: 'tidewater/tidewater', number: 2318, text: 'https://postyard.example/@tomasreyes/tidewater-gatekeeping'}},
     {call_id: 'c2', tool: 'forkyard.pulls.reopen', request_id: 'reopen-1', result_status: 'reopen_not_allowed', arguments: {repo: 'tidewater/tidewater', number: 2288}},
     {call_id: 'c3', tool: 'forkyard.pulls.reopen', request_id: 'reopen-1', result_status: 'reopen_not_allowed', arguments: {repo: 'tidewater/tidewater', number: 2288}},
     {call_id: 'c4', tool: 'forkyard.pulls.reopen', request_id: 'reopen-2', result_status: 'reopen_not_allowed', arguments: {repo: 'tidewater/tidewater', number: 2288}},
@@ -321,10 +351,11 @@ test('evidence keeps text, subjects, links, attempts and attention', () => {
     {call_id: 'c9', tool: 'forkyard.pulls.get', request_id: 'read-3', result_status: 'ok', arguments: {repo: 'tidewater/tidewater', number: 2318}},
     {call_id: 'c10', tool: 'forkyard.repos.get', request_id: 'read-4', result_status: 'ok', arguments: {repo: 'tidewater/tidewater'}}
   ];
-  const evidence = exportEvidence({snapshot, execution, focus_pull: {repo: 'tidewater/tidewater', number: 2318}});
+  const recordedFile = require('../examples/recorded/postyard-evidence.json');
+  const evidence = exportEvidence({snapshot, execution, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [recordedFile]});
   const compiled = require('./schema-validator.cjs').compile(require('../schemas/public-speech-evidence.schema.json'), path.join(__dirname, '../schemas'));
   assert.equal(evidence.schema, 'urn:pale:public-speech-evidence:1');
-  const comment = evidence.revisions.find(item => item.text.includes('tidewater-gatekeeping'));
+  const comment = evidence.revisions.find(item => item.text === 'https://postyard.example/@tomasreyes/tidewater-gatekeeping');
   assert.equal(comment.text_sha256, speechHash(comment.text));
   const subject = evidence.subjects.find(item => item.revision_id === comment.revision_id && item.person_id === 'person-ingrid');
   assert.equal(subject.surface, 'subject_repo_thread');
@@ -332,6 +363,9 @@ test('evidence keeps text, subjects, links, attempts and attention', () => {
   assert.equal(evidence.subjects.find(item => item.revision_id === thanks.revision_id).match, 'name');
   const routine = evidence.revisions.find(item => item.text === 'A routine test note');
   assert.equal(evidence.subjects.some(item => item.revision_id === routine.revision_id), false);
+  const quoted = evidence.revisions.filter(item => item.text === 'Please keep the signature.');
+  assert.equal(quoted.length, 2);
+  assert.equal(quoted.some(item => item.surface === 'review_reply'), true);
   const title = evidence.revisions.find(item => item.surface === 'pull_title' && item.number === 2318);
   assert.equal(title.text, f.data.pulls.find(item => item.number === 2318).title);
   const link = evidence.links.find(item => item.revision_id === comment.revision_id && item.app_id === 'postyard');

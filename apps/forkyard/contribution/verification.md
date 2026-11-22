@@ -11,7 +11,7 @@ cd apps/forkyard
 npm test
 ```
 
-8 tests, 8 passed, 0 failed. `tests/business.test.cjs` covers the tools, committed and thrown outcomes, the 15 event fixtures, the rejected-pull-request seed, the release seed, the evidence export, and a unified diff that `git apply --check` accepts.
+8 tests, 8 passed, 0 failed. `tests/business.test.cjs` covers the tools, committed and thrown outcomes, the 15 event fixtures, the rejected-pull-request seed, the release seed, the evidence export, and unified diffs. The diff test applies a reorder, a final-newline removal, and a file deletion with `git apply`, then compares the resulting file bytes.
 
 ## Public MCP regressions
 
@@ -20,7 +20,7 @@ cd apps/forkyard
 npm run test:integration
 ```
 
-8 tests, 8 passed, 0 failed. `tests/public-regressions.cjs` starts Infra through the public MCP server, then the agent. It covers a fresh directory, fixture (a) parsers and the branch note, review-request source and the earlier closed pull request, a blocked reopen, a committed delivery receipt kept after a later unknown result, read attention with a call id, fixtures (b) and (c), and seed keys.
+8 tests, 8 passed, 0 failed. `tests/public-regressions.cjs` starts Infra through the public MCP server, then the agent. It covers a fresh directory, fixture (a) parsers, the branch note that the agent wrote most of the patch, the `parseTz(input, options)` signature on that branch, three merged pull requests by Tomás, review-request source, a review reply that quotes its parent, the earlier closed pull request after that pull is reopened, and the Postyard link on its own. It also covers a blocked reopen, a committed delivery receipt kept after a later unknown result, serialized evidence with an omitted request id, two profile reads at the same Core version, three denied reopens, fixtures (b) and (c) with open branches ahead of main, and seed keys.
 
 ## Core version, replay and reset
 
@@ -62,7 +62,7 @@ npm run test:mail
 }
 ```
 
-A committed publish stored one Mail message. A duplicate request returns the stored receipt. A missing grant returned `recipient_not_authorized`, left pull request 2318 closed, and added no Mail message. A lost acknowledgement returned `unknown`. `publishPending` read the Mail receipt and the stored message for that event id and reported the delivery confirmed. A later publish returned `run_halted`. The same file also covers `receiver_rejected` with a receipt lookup, a lookup that throws, a receipt missing run and epoch evidence, a receipt for a different account, a missing receipt, a committed receipt for a different event, a transport error that keeps the first attempt, and the task #74 closure. That closure is delivered to a February mailbox. The stored message has `received_at` `2026-02-11T10:12:00-08:00` and `to` `tomas.reyes@example.com`.
+A committed publish stored one Mail message. A duplicate request returns the stored receipt. A missing grant returned `recipient_not_authorized`, left pull request 2318 closed, and added no Mail message. A lost acknowledgement returned `unknown`. `publishPending` called `inspectReceiver`, which read the Mail receipt and the stored message, matched them to the outgoing CloudEvent, and reported the delivery confirmed. The same committed receipt passed to `reconcile` from `env.event_status` alone stayed unresolved. A later publish returned `run_halted`. An occupied Mail record whose id equals the router event id returned `receiver_rejected` and stayed unresolved, because the stored thread and sender disagree with the CloudEvent. A Messaging result from a different run and account stayed unresolved. A lookup that is still open is visible to a second `publishPending` for that run. The same file also covers a lookup that throws, a receipt missing run and epoch evidence, a receipt for a different account, a missing receipt, a committed receipt for a different event, a transport error that keeps the first attempt, and the task #74 closure. That closure is delivered to a February mailbox. The stored message has `received_at` `2026-02-11T10:12:00-08:00` and `to` `tomas.reyes@example.com`.
 
 ## Package verifier
 

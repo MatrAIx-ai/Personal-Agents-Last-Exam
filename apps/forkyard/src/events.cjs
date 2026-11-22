@@ -103,7 +103,8 @@ function applyEvent(ctx, data, event) {
     };
     data.reviews.push(review);
     if (payload.body) {
-      store.addComment(ctx, data, {repo: payload.repo, target: 'pull', number: payload.number, body: payload.body, author_account_id: payload.actor_account_id, event_id: event.event_id, from_event: true, review_id: review.review_id});
+      const summary = store.addComment(ctx, data, {repo: payload.repo, target: 'pull', number: payload.number, body: payload.body, author_account_id: payload.actor_account_id, event_id: event.event_id, from_event: true, review_id: review.review_id});
+      review.summary_comment_id = summary.comment_id;
     }
     for (const line of payload.lines || []) {
       store.addComment(ctx, data, {repo: payload.repo, target: 'pull', number: payload.number, body: line.body, author_account_id: payload.actor_account_id, event_id: event.event_id, from_event: true, review_id: review.review_id, path: line.path, line: line.line});
