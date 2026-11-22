@@ -61,7 +61,7 @@ Hopline makes each of these gradable from records. Every plan names the alerts, 
 - TransitWallet ([#149](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/149)) is a reservation and assistance module: equipment verification, held and paid assistance bookings, provider replies, actual physical travel outcomes and a wallet ledger. It does not plan trips over a timetable, publish service alerts, track elevators per station or run a fare card with passes and caps.
   - Hopline does not book assistance or verify equipment.
   - The two can coexist: a task can use Hopline to find that the step-free path is broken, and TransitWallet to arrange assistance. No messages are exchanged.
-- Curbline (the ride App proposed by this author; not yet opened as a PR) covers rides. A task may use it when Hopline has no step-free route. No messages are exchanged.
+- Curbline ([#169](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/169)), by the same author, covers rides. A task may use it when Hopline has no step-free route. No messages are exchanged.
 - No other open environment proposal provides transit planning or fare cards.
 - Task [#110](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/110) "Keep a step-free volunteer delivery promise after an access-route closure" plans "synthetic route and facilities event fixtures" with "route-edge validation". Hopline would replace them with a reusable network.
 
@@ -200,7 +200,7 @@ For internal personal Apps, state which workflow needs each App and whether the 
   - **Contacts:** None. No Hopline workflow needs it; people come from `binding.json`.
 - **Other apps and websites (required):** TransitWallet (#149) and Curbline as optional neighbours with no messages exchanged; nothing else in the first version.
   - TransitWallet ([#149](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/149)): optional, no messages. Hopline exposes station facilities and step-free routing; assistance bookings stay with TransitWallet. Hopline owns its stop and facility IDs. If a task needs another App to point at a Hopline stop, that App uses a seed reference field checked against `binding.objects.hopline`, the way Mail checks `event_ref`; Hopline copies no records.
-  - Curbline (this author's ride App, not yet opened as a PR): optional, no messages.
+  - Curbline ([#169](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/169)), by the same author: optional, no messages.
   - Chat delivery through the Messages App's `channel.chat` receiver (`apps/messages` 1.0.0, `urn:pale:messages:chat-payload:1`) is a possible later channel, not in the first version.
 
 ### Integration details
@@ -309,7 +309,7 @@ Specify how the environment will be built, what will be collected or synthesized
   - Dependencies:
     - The public runtime 1.6.0 and Mail 1.3.0 on `main` are available now.
     - One platform dependency has a fallback described in §3: the runner calling the outbound adapter (fallback: in-app records and explicit invocation).
-    - This author also has Gustline ([#126](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/126)) under review, and Curbline and Homegrid in preparation. First-version windows will be scheduled not to overlap, or an extension will be requested before a deadline.
+    - This author also has Gustline ([#126](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/126)), Curbline ([#169](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/169)) and Homegrid ([#170](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/170)) under review. First-version windows will be scheduled not to overlap, or an extension will be requested before a deadline.
 - **Resources and total effort (required):** 6–7.75 person-days. No paid data, model or API usage, GPU or hosting. Tests run on a laptop CPU in minutes. The repository footprint stays under 1.5 MB, almost all of it fixture JSON.
 - **Scope boundary and open questions (required):** Planning, disruptions, facilities, subscriptions and the fare card only; three open questions to settle with the Environment reviewers.
   - *Excluded:* maps and imagery; live feeds; vehicle positions; crowding; assistance bookings (TransitWallet); paratransit; bike and scooter share; multi-agency fare integration; refunds for delayed trips; physical card shipping; any GUI.
