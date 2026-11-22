@@ -214,6 +214,35 @@ test('a key with a space is rejected before dispatch and does not halt the run',
   }
 });
 
+test('an empty card is rejected before dispatch and the route still accepts a complete card', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-merchant-'));
+  const run = 'keelmerchant-empty';
+  const file = path.join(dir, 'merchant.json');
+  fs.writeFileSync(file, JSON.stringify(config([{ app_id: 'keelcard', account_id: 'kc-adeyemi', channel: 'channel.card.authorization' }])));
+  const router = await create({ config: file, publisher: 'freshcart', run, stateDir: dir });
+  try {
+    const empty = message();
+    empty.id = 'fc-empty-card';
+    empty.data.authorization.card = {};
+    empty.data.authorization.authorization_key = 'freshcart:fc-grace:fc-empty:1';
+    empty.data.source_object.object_id = 'fc-empty';
+    const rejected = await router.call('router.publish', { request_id: 'fc-empty', message: empty });
+    assert.equal(['invalid_arguments', 'incompatible_contract'].includes(rejected.code), true);
+    assert.equal(rejected.stop_run, undefined);
+    const caps = await router.call('router.capabilities', {});
+    assert.equal(caps.halted, false);
+    const accepted = message();
+    accepted.id = 'fc-empty-ok';
+    accepted.data.authorization.authorization_key = 'freshcart:fc-grace:fc-empty:2';
+    accepted.data.source_object.object_id = 'fc-empty-ok';
+    const receipt = await router.call('router.publish', { request_id: 'fc-empty-ok', message: accepted });
+    assert.equal(receipt.status, 'committed');
+  } finally {
+    await router.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('an unbound merchant cannot change Keelcard', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-merchant-'));
   const run = 'keelmerchant2';

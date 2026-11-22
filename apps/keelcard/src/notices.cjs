@@ -4,14 +4,14 @@ const { copy, money, clockLabel, DECLINE_PHRASES, nextSerial } = require('./doma
 const { log } = require('./diagnostics.cjs');
 
 function pushNotice(ctx, data, notice) {
-  const notice_id = notice.notice_id || nextSerial(data.notices, 'notice_id', 'notice-');
-  const publication = crypto.randomBytes(4).toString('hex');
+  const serial = notice.notice_id || nextSerial(data.notices, 'notice_id', 'notice-');
+  const notice_id = serial + '-' + crypto.randomBytes(4).toString('hex');
   const row = {
     notice_id,
     kind: notice.kind,
     status: 'pending_delivery',
-    cloud_event_id: 'keelcard-' + data.account_id + '-' + notice_id + '-' + publication,
-    publish_request_id: 'pub-' + notice_id + '-' + publication,
+    cloud_event_id: 'keelcard-' + data.account_id + '-' + notice_id,
+    publish_request_id: 'notice-' + notice_id,
     title: notice.title,
     body: notice.body,
     created_at: ctx.virtual_now,

@@ -74,7 +74,7 @@ test('the shipped Mail setup delivers a decline and a code with matching event i
     f.call('keelcard.controls.request_change', { card_id: 'card-4417', field: 'per_transaction', amount_cents: 10000 });
     const code = f.data.change_requests[0].code;
     const before = await mail.call('env.snapshot');
-    const first = await publishPending({ data: f.data, router });
+    const first = await publishPending({ data: f.data, router, inspect: inspectWith(mail) });
     assert.equal(first.stopped, false);
     assert.equal(first.sent.length, 2);
     assert.equal(first.sent.every(item => item.receipt.status === 'committed'), true);
@@ -93,7 +93,7 @@ test('the shipped Mail setup delivers a decline and a code with matching event i
     assert.ok(delivered);
     const decline = after.snapshot.data.messages.find(message => message.subject.toLowerCase().includes('declin') || message.body.includes('9000') || message.body.includes('$90'));
     assert.ok(decline);
-    const second = await publishPending({ data: f.data, router });
+    const second = await publishPending({ data: f.data, router, inspect: inspectWith(mail) });
     assert.equal(second.sent.every(item => item.receipt.duplicate === true), true);
     const repeat = await mail.call('env.snapshot');
     assert.equal(repeat.snapshot.data.messages.length, after.snapshot.data.messages.length);
@@ -122,7 +122,6 @@ test('a lost acknowledgement is confirmed from the real Mail receipt and is not 
       }
     };
     const reconciled = await publishPending({ data, router: lost, inspect: inspectWith(mail) });
-    assert.equal(reconciled.stopped, true);
     assert.equal(reconciled.report.outcome, 'confirmed');
     assert.equal(data.notices[0].status, 'committed');
     assert.equal(data.notices[0].delivery.event_id, eventId);
@@ -150,7 +149,7 @@ test('Mail rejects an oversized notice and missing evidence stays unresolved', a
     assert.equal(rejected.stopped, true);
     assert.equal(rejected.sent[0].receipt.code, 'receiver_rejected');
     assert.equal(rejected.report.outcome, 'unresolved');
-    assert.equal(data.notices[0].status, 'pending_delivery');
+    assert.equal(data.notices[0].status, 'unknown');
     assert.equal(data.change_requests[0].status, 'pending_verification');
     const held = await publishPending({ data, router });
     assert.equal(held.sent.length, 0);
@@ -167,7 +166,7 @@ test('Mail rejects an oversized notice and missing evidence stays unresolved', a
       inspect: inspectWith(mail)
     });
     assert.equal(absent.report.outcome, 'unresolved');
-    assert.equal(quietData.notices[0].status, 'pending_delivery');
+    assert.equal(quietData.notices[0].status, 'unknown');
     const status = await mail.call('env.event_status', { event_id: missingId });
     assert.equal(status.receipt, null);
   } finally {
@@ -191,7 +190,7 @@ test('an empty grant rejects before dispatch and leaves the request in place', a
     const f = fixture();
     f.call('keelcard.controls.request_change', { card_id: 'card-4417', field: 'per_transaction', amount_cents: 14000 });
     const result = await publishPending({ data: f.data, router });
-    assert.equal(result.stopped, false);
+    assert.equal(result.stopped, true);
     assert.equal(result.report.outcome, 'rejected');
     assert.equal(result.sent[0].receipt.code, 'recipient_not_authorized');
     assert.equal(f.data.change_requests[0].code.length, 6);

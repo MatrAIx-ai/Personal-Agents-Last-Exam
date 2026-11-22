@@ -533,11 +533,16 @@ test('delivery results and the reviewer renderer keep secrets in their own place
     operation: 'notice.delivery_result',
     payload: { notice_id: notice.notice_id, publish_request_id: notice.publish_request_id, status: 'rejected', code: 'receiver_rejected' }
   })).code, 'delivery_status_conflict');
-  assert.equal(classifyDelivery({ receipt: { status: 'committed', duplicate: true } }).outcome, 'confirmed');
+  assert.equal(classifyDelivery({
+    receipt: { status: 'committed', event_id: 'router-1', duplicate: true },
+    eventStatus: { status: 'ok', receipt: { status: 'committed', event_id: 'router-1' } },
+    expectedEventId: 'router-1'
+  }).outcome, 'confirmed');
   assert.equal(classifyDelivery({ receipt: { status: 'rejected', code: 'recipient_not_authorized' } }).outcome, 'rejected');
   assert.equal(classifyDelivery({ receipt: { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true } }).outcome, 'unresolved');
   assert.equal(classifyDelivery({ eventStatus: { status: 'ok', receipt: { status: 'committed', event_id: 'router-1' } }, expectedEventId: 'router-1' }).outcome, 'confirmed');
   assert.equal(classifyDelivery({ eventStatus: { status: 'ok', receipt: { status: 'committed', event_id: 'router-1' } }, mailRecord: { id: 'other' }, expectedEventId: 'router-1' }).outcome, 'confirmed');
+  assert.equal(classifyDelivery({ receipt: { status: 'unknown', event_id: 'router-attempt', stop_run: true }, eventStatus: { status: 'ok', receipt: { status: 'committed', event_id: 'router-other' } }, expectedEventId: 'router-attempt' }).outcome, 'unresolved');
   assert.equal(classifyDelivery({ receipt: { status: 'unknown', stop_run: true }, eventStatus: { status: 'ok', receipt: null }, mailRecord: { id: 'other' }, expectedEventId: 'router-1' }).outcome, 'unresolved');
   const hits = scan('number 9417220000014417 expires 2028-09 code 317', f.data.fingerprints);
   const groceryHit = hits.find(hit => hit.card_id === CARD);
@@ -972,7 +977,7 @@ test('new cards use private credentials and the other fixtures still validate', 
   const denied = joinEvidence({ data: f.data, audit: [{ tool: 'keelcard.cards.reveal', decision: 'deny', reason: 'card_closed', input: { request_id: 'req-reveal' }, virtual_time: f.ctx.virtual_now }] }, [
     { request_id: 'req-reveal', tool: 'keelcard.cards.reveal', arguments: { card_id: CARD } }
   ]);
-  assert.equal(denied.rejected['req-reveal'][0].reason, 'card_closed');
+  assert.equal(Object.values(denied.rejected).flat()[0].reason, 'card_closed');
   assert.equal(joined.requests.length, f.data.change_requests.length);
   const before = JSON.stringify(f.data);
   joinEvidence({ data: f.data, audit: [] }, []);

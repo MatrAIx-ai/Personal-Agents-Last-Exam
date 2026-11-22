@@ -29,9 +29,18 @@ function versionOf(record) {
   return null;
 }
 
-function sameVersion(expected, before) {
-  if (!expected || !before) return false;
-  return expected.epoch === before.epoch && expected.revision === before.revision;
+function sameVersion(expected, actual) {
+  if (!expected || !actual) return false;
+  return expected.epoch === actual.epoch && expected.revision === actual.revision;
+}
+
+function auditVersion(row) {
+  return row && row.input && row.input.expected_version || null;
+}
+
+function targetOf(record) {
+  const args = record && record.arguments || {};
+  return args.card_id || args.authorization_key || args.id || null;
 }
 
 function blank(record, extra) {
@@ -48,7 +57,10 @@ function blank(record, extra) {
   };
 }
 
-function pairRecord(record, audit, used) {
+function pairRecord(record, audit, used, stateRun) {
+  if (record.run_id && stateRun && record.run_id !== stateRun) {
+    return blank(record, { match: 'other_run', ambiguous: false });
+  }
   const want = wanted(record);
   const matches = [];
   audit.forEach((row, index) => {
@@ -65,15 +77,9 @@ function pairRecord(record, audit, used) {
   if (!record.request_id) return blank(record, { match: 'ambiguous', ambiguous: true });
   let pool = matches;
   const reason = resultReason(record);
-  if (reason) {
-    const narrowed = pool.filter(item => item.row.reason === reason);
-    if (narrowed.length) pool = narrowed;
-  }
+  if (reason) pool = pool.filter(item => item.row.reason === reason);
   const expected = versionOf(record);
-  if (expected) {
-    const narrowed = pool.filter(item => sameVersion(expected, item.row.before));
-    if (narrowed.length) pool = narrowed;
-  }
+  if (expected) pool = pool.filter(item => sameVersion(expected, auditVersion(item.row)));
   if (pool.length === 0) return blank(record, { match: 'unmatched', ambiguous: false });
   if (pool.length > 1) {
     const ordered = pool.every(item => Number.isInteger(item.row.seq));
@@ -96,21 +102,27 @@ function joinEvidence(snapshot, execution) {
   const audit = Array.isArray(state.audit) ? state.audit : [];
   const records = Array.isArray(execution) ? execution : [];
   const used = new Set();
-  const paired = records.map(record => pairRecord(record, audit, used));
+  const paired = records.map(record => pairRecord(record, audit, used, state.run_id || null));
   const denied = {};
+  const logical = [];
   for (const item of paired) {
     const row = item.audit && item.audit.decision === 'deny' ? item.audit : null;
-    if (!row || item.match === 'duplicate' || item.match === 'ambiguous') continue;
-    const key = item.request_id || 'missing-request';
-    if (!denied[key]) denied[key] = [];
-    const target = item.arguments && (item.arguments.card_id || item.arguments.authorization_key || item.arguments.id) || null;
+    if (!row || item.match === 'duplicate' || item.match === 'ambiguous' || item.match === 'other_run') continue;
+    const target = targetOf(item);
+    const version = versionOf(item) || auditVersion(row);
+    const epoch = item.epoch !== undefined && item.epoch !== null ? item.epoch : (version && version.epoch);
+    const key = [item.run_id || state.run_id || '', epoch === undefined || epoch === null ? '' : epoch, item.tool || '', target || '', item.request_id || ''].join('|');
+    if (!denied[key]) {
+      denied[key] = [];
+      logical.push({ run_id: item.run_id || state.run_id || null, epoch: epoch === undefined ? null : epoch, tool: item.tool, target, request_id: item.request_id });
+    }
     denied[key].push({
       tool: item.tool,
       reason: row.reason,
       virtual_time: row.virtual_time,
       arguments: item.arguments,
       target,
-      expected_version: versionOf(item) || (row.before ? { epoch: row.before.epoch, revision: row.before.revision } : null)
+      expected_version: versionOf(item) || auditVersion(row)
     });
   }
   const attempts = (data.change_requests || []).flatMap(request => (request.attempts || []).map(attempt => ({
@@ -166,6 +178,7 @@ function joinEvidence(snapshot, execution) {
     })),
     fingerprints: data.fingerprints || [],
     rejected: denied,
+    logical_rejections: logical,
     ambiguous: paired.filter(item => item.ambiguous).map(item => item.request_id),
     paired,
     counts: {
@@ -175,7 +188,7 @@ function joinEvidence(snapshot, execution) {
       control_changes: (data.control_changes || []).length,
       reveals: (data.reveals || []).length,
       notices: (data.notices || []).length,
-      rejected_requests: Object.keys(denied).length
+      rejected_requests: logical.length
     }
   };
 }

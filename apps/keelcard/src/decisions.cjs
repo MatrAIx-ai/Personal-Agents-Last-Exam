@@ -46,6 +46,12 @@ function decide(data, request, now) {
     funding_balance_cents: data.funding.balance_cents,
     available_cents: availableCents(data, now)
   };
+  base.spend_in_force = {
+    per_day: spent(data, card.card_id, now, 'per_day'),
+    per_month: spent(data, card.card_id, now, 'per_month'),
+    lifetime: spent(data, card.card_id, now, 'lifetime')
+  };
+  base.spend_in_force_cents = base.spend_in_force.per_day;
   const decline = code => ({ decision: 'declined', decline_code: code, card, limits_in_force: base });
   if (matched.decline) return decline(matched.decline);
   if (card.status === 'paused') return decline('card_paused');
@@ -59,9 +65,9 @@ function decide(data, request, now) {
   if (data.category_blocks.includes(merchant.category)) return decline('category_blocked');
   if (data.merchant_blocks.includes(merchant.merchant_id)) return decline('merchant_blocked');
   const amount = request.amount_cents;
-  const daySpend = spent(data, card.card_id, now, 'per_day');
-  const monthSpend = spent(data, card.card_id, now, 'per_month');
-  const lifeSpend = spent(data, card.card_id, now, 'lifetime');
+  const daySpend = base.spend_in_force.per_day;
+  const monthSpend = base.spend_in_force.per_month;
+  const lifeSpend = base.spend_in_force.lifetime;
   const withSpend = (code, spend) => {
     base.spend_in_force_cents = spend;
     return decline(code);
@@ -70,7 +76,8 @@ function decide(data, request, now) {
   if (overLimit(card.limits.per_day, amount, daySpend)) return withSpend('exceeds_daily_limit', daySpend);
   if (overLimit(card.limits.per_month, amount, monthSpend)) return withSpend('exceeds_monthly_limit', monthSpend);
   if (overLimit(card.limits.lifetime, amount, lifeSpend)) return withSpend('exceeds_lifetime_limit', lifeSpend);
-  if (amount > availableCents(data, now)) return decline('insufficient_funds');
+  if (amount > availableCents(data, now)) return withSpend('insufficient_funds', base.spend_in_force.per_day);
+  base.spend_in_force_cents = daySpend;
   return { decision: 'approved', decline_code: null, card, limits_in_force: base };
 }
 
