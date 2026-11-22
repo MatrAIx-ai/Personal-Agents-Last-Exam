@@ -546,11 +546,32 @@ async function main() {
     });
     clients.push(taskRouter);
     await taskRouter.initialize();
+    const taskMail = new Client('mail', 'infra', taskRun, taskDir, 'mail-task-status', {registry: mailRegistry});
+    clients.push(taskMail);
+    await taskMail.initialize();
+    const taskMailSnap = await taskMail.call('env.snapshot');
+    const taskReceiver = {
+      app_id: 'mail',
+      account_id: taskMailSnap.snapshot.data.account_id,
+      address: taskMailSnap.snapshot.data.address,
+      epoch: taskMailSnap.snapshot.epoch
+    };
     const taskSent = await publishPending({
-      notices: taskView.snapshot.data.notices, accountId: 'fy-tomasreyes', router: taskRouter, runId: taskRun
+      notices: taskView.snapshot.data.notices,
+      accountId: 'fy-tomasreyes',
+      router: taskRouter,
+      runId: taskRun,
+      receiver: taskReceiver,
+      inspectReceipt: (eventId) => inspectReceiver(taskMail, eventId)
     });
     assert.equal(taskSent.attempts.length, 1);
     assert.equal(taskSent.attempts[0].result.status, 'committed');
+    assert.equal(taskSent.attempts[0].run_id, taskRun);
+    assert.equal(taskSent.attempts[0].outcome.delivery, 'confirmed');
+    assert.equal(taskSent.stopped, false);
+    assert.equal(taskSent.halted, false);
+    const taskAlone = reconcile({mailReceipt: await inspectReceiver(taskMail, taskSent.attempts[0].event_id), attempted: taskSent.attempts[0]});
+    assert.equal(taskAlone.delivery, 'confirmed');
     const taskBox = await messages(taskDir, taskRun);
     const delivered = taskBox.find(item => item.thread_id === taskSent.attempts[0].message.id);
     assert.ok(delivered);
@@ -845,6 +866,200 @@ async function main() {
     assert.equal(identity.attempts[0].outcome.delivery, 'unresolved');
     assert.equal(identity.attempts[0].outcome.comparison.identity, false);
     assert.equal(identity.stopped, true);
+
+    async function faultContext(name) {
+      const stateDir = path.join(dir, 'fault-' + name);
+      fs.mkdirSync(stateDir);
+      const runId = 'fy_fault_' + name;
+      const state = prepare(runId);
+      const first = state.state.data.notices.find(item => item.status === 'pending_delivery');
+      const second = {...first, notice_id: 'notice-fault-next', object_id: 'tidewater/tidewater#9001'};
+      const router = await create({config: allowed, publisher: 'forkyard', run: runId, stateDir});
+      clients.push(router);
+      const mailbox = new Client('mail', 'infra', runId, stateDir, 'mail-fault-' + name, {registry: mailRegistry});
+      clients.push(mailbox);
+      await mailbox.initialize();
+      const snap = await mailbox.call('env.snapshot');
+      const receiver = {
+        app_id: 'mail',
+        account_id: snap.snapshot.data.account_id,
+        address: snap.snapshot.data.address,
+        epoch: snap.snapshot.epoch
+      };
+      return {stateDir, runId, first, second, router, mailbox, receiver};
+    }
+    const faults = [];
+    {
+      const ctx = await faultContext('reply');
+      let publishes = 0;
+      const sent = await publishPending({
+        notices: [ctx.first, ctx.second], accountId: 'fy-tomasreyes', runId: ctx.runId, receiver: ctx.receiver,
+        inspectReceipt: (eventId) => inspectReceiver(ctx.mailbox, eventId),
+        router: {async call(name, args) { publishes += 1; await ctx.router.call(name, args); throw new Error('dropped router reply'); }}
+      });
+      const later = await publishPending({
+        notices: [ctx.first, ctx.second], accountId: 'fy-tomasreyes', runId: ctx.runId,
+        router: {async call() { publishes += 1; throw new Error('republish'); }}
+      });
+      faults.push({name: 'router reply lost', publishes, sent, later});
+      assert.equal(publishes, 1);
+      assert.equal(sent.halted, true);
+      assert.equal(sent.attempts.length, 1);
+      assert.equal(sent.attempts[0].outcome.delivery, 'confirmed');
+      assert.equal(sent.attempts[0].run_id, ctx.runId);
+      assert.equal(later.suppressed, true);
+      assert.equal(later.halted, true);
+    }
+    {
+      const ctx = await faultContext('ack');
+      const originalCall = Client.prototype.call;
+      let publishes = 0;
+      let sent;
+      try {
+        Client.prototype.call = async function(name, args) {
+          const result = await originalCall.call(this, name, args);
+          if (name === 'env.apply_event') throw new Error('lost receiver acknowledgement');
+          return result;
+        };
+        sent = await publishPending({
+          notices: [ctx.first, ctx.second], accountId: 'fy-tomasreyes', runId: ctx.runId, receiver: ctx.receiver,
+          inspectReceipt: (eventId) => inspectReceiver(ctx.mailbox, eventId),
+          router: {async call(name, args) { publishes += 1; return ctx.router.call(name, args); }}
+        });
+      } finally {
+        Client.prototype.call = originalCall;
+      }
+      faults.push({name: 'receiver ack lost', publishes, sent});
+      assert.equal(publishes, 1);
+      assert.equal(sent.halted, true);
+      assert.equal(sent.attempts.length, 1);
+      assert.equal(sent.attempts[0].result.status, 'unknown');
+      assert.equal(sent.attempts[0].result.stop_run, true);
+      assert.equal(sent.attempts[0].outcome.delivery, 'confirmed');
+    }
+    {
+      const ctx = await faultContext('reject');
+      let publishes = 0;
+      const sent = await publishPending({
+        notices: [ctx.first, ctx.second], accountId: 'fy-tomasreyes', runId: ctx.runId, receiver: ctx.receiver,
+        router: {async call() { publishes += 1; return {status: 'rejected', code: 'recipient_not_authorized'}; }}
+      });
+      faults.push({name: 'rejection', publishes, sent});
+      assert.equal(publishes, 1);
+      assert.equal(sent.halted, true);
+      assert.equal(sent.attempts[0].outcome.delivery, 'unresolved');
+    }
+    {
+      const ctx = await faultContext('lookup');
+      let publishes = 0;
+      const sent = await publishPending({
+        notices: [ctx.first, ctx.second], accountId: 'fy-tomasreyes', runId: ctx.runId, receiver: ctx.receiver,
+        inspectReceipt: async () => { throw new Error('lookup down'); },
+        router: {async call(name, args) { publishes += 1; return ctx.router.call(name, args); }}
+      });
+      const later = await publishPending({
+        notices: [ctx.first, ctx.second], accountId: 'fy-tomasreyes', runId: ctx.runId,
+        router: {async call() { publishes += 1; throw new Error('republish'); }}
+      });
+      faults.push({name: 'thrown lookup', publishes, sent, later});
+      assert.equal(publishes, 1);
+      assert.equal(sent.halted, true);
+      assert.equal(sent.attempts.length, 1);
+      assert.equal(sent.attempts[0].outcome.lookup_error, 'lookup down');
+      assert.equal(sent.attempts[0].outcome.delivery, 'unresolved');
+      assert.equal(later.suppressed, true);
+    }
+    {
+      const ctx = await faultContext('foreign');
+      let publishes = 0;
+      const sent = await publishPending({
+        notices: [ctx.first, ctx.second], accountId: 'fy-tomasreyes', runId: ctx.runId, receiver: ctx.receiver,
+        inspectReceipt: (eventId) => inspectReceiver(ctx.mailbox, eventId),
+        router: {
+          async call(name, args) {
+            publishes += 1;
+            await ctx.router.call(name, args);
+            return {
+              status: 'committed', run_id: 'other-run', event_id: 'router-foreign',
+              target: {app_id: 'mail', account_id: 'mail-other'},
+              version: {epoch: ctx.receiver.epoch, revision: 4}
+            };
+          }
+        }
+      });
+      faults.push({name: 'foreign-run receipt', publishes, sent});
+      assert.equal(publishes, 1);
+      assert.equal(sent.halted, true);
+      assert.equal(sent.attempts.length, 1);
+      assert.equal(sent.attempts[0].outcome.comparison.identity, false);
+      assert.equal(sent.attempts[0].outcome.delivery, 'confirmed');
+    }
+    {
+      const ctx = await faultContext('otherpr');
+      const real = messageFor(ctx.first, 'fy-tomasreyes');
+      const other = structuredClone(real);
+      other.time = '2026-11-01T09:00:00-08:00';
+      other.subject = 'pull_request/tidewater.tidewater.2288';
+      other.data.source_object.object_id = 'tidewater.tidewater.2288';
+      const plantedId = routerEventId(ctx.runId, real, ctx.receiver, ctx.receiver.epoch);
+      const snap = await ctx.mailbox.call('env.snapshot');
+      const planted = await ctx.mailbox.call('env.apply_event', {
+        expected_version: snap.version,
+        event: {
+          event_id: plantedId,
+          at: snap.snapshot.virtual_now,
+          operation: 'mail.receive_notification',
+          payload: {recipient_account_id: ctx.receiver.account_id, message: other}
+        }
+      });
+      assert.equal(planted.status, 'committed');
+      let publishes = 0;
+      const sent = await publishPending({
+        notices: [ctx.first, ctx.second], accountId: 'fy-tomasreyes', runId: ctx.runId, receiver: ctx.receiver,
+        inspectReceipt: (eventId) => inspectReceiver(ctx.mailbox, eventId),
+        router: {async call(name, args) { publishes += 1; return ctx.router.call(name, args); }}
+      });
+      const box = (await ctx.mailbox.call('env.snapshot')).snapshot.data.messages;
+      faults.push({name: 'same-text event for another PR', publishes, sent});
+      assert.equal(publishes, 1);
+      assert.equal(sent.halted, true);
+      assert.equal(sent.attempts[0].result.code, 'receiver_rejected');
+      assert.equal(sent.attempts[0].outcome.delivery, 'unresolved');
+      assert.equal(sent.attempts[0].outcome.comparison.payload, false);
+      assert.ok(sent.attempts[0].outcome.comparison.discrepancies.includes('source_object'));
+      assert.equal(box.filter(item => item.body === ctx.first.text).length, 1);
+    }
+    {
+      const ctx = await faultContext('reset');
+      let publishes = 0;
+      const counting = {async call(name, args) { publishes += 1; return ctx.router.call(name, args); }};
+      const opened = await publishPending({
+        notices: [ctx.first], accountId: 'fy-tomasreyes', runId: ctx.runId, receiver: ctx.receiver,
+        inspectReceipt: (eventId) => inspectReceiver(ctx.mailbox, eventId), router: counting
+      });
+      assert.equal(opened.attempts[0].outcome.delivery, 'confirmed');
+      const current = await ctx.mailbox.call('env.snapshot');
+      const reset = await ctx.mailbox.call('env.reset', {expected_version: current.version});
+      assert.equal(reset.status, 'ready');
+      const after = await ctx.mailbox.call('env.snapshot');
+      const nextReceiver = {...ctx.receiver, epoch: after.snapshot.epoch};
+      const changed = {...ctx.first, text: ctx.first.text + ' A later closure.'};
+      const sent = await publishPending({
+        notices: [changed, ctx.second], accountId: 'fy-tomasreyes', runId: ctx.runId, receiver: nextReceiver,
+        inspectReceipt: (eventId) => inspectReceiver(ctx.mailbox, eventId), router: counting
+      });
+      faults.push({name: 'reset between notices', publishes, sent});
+      assert.equal(publishes, 1);
+      assert.notEqual(after.snapshot.epoch, ctx.receiver.epoch);
+      const changedMessage = messageFor(changed, 'fy-tomasreyes');
+      assert.equal(after.snapshot.data.messages.some(item => item.thread_id === changedMessage.id || item.body === changed.text), false);
+      assert.equal(sent.attempts.length, 2);
+      assert.equal(sent.attempts.every(item => item.outcome.delivery === 'unresolved'), true);
+      assert.equal(sent.history.some(item => item.receiver_epoch === ctx.receiver.epoch && item.outcome.delivery === 'confirmed'), true);
+      assert.equal(sent.attempts.some(item => item.outcome.delivery === 'confirmed'), false);
+    }
+    assert.equal(faults.length, 7);
+    assert.equal(faults.every(item => item.publishes <= 1), true);
 
     console.log(JSON.stringify({
       passed: true,

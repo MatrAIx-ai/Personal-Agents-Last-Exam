@@ -362,9 +362,13 @@ test('reads keep the call id when a write request id is absent and ambiguous aud
     }
     assert.equal(denies.every(item => item.result_status !== 'ok' && item.result_status !== 'committed'), true);
     const deniedSnap = await session.infra.call('env.snapshot');
-    const matched = exportEvidence({
-      snapshot: deniedSnap.snapshot,
-      execution: [{
+    const batch = {
+      run_id: deniedSnap.snapshot.run_id,
+      app_id: deniedSnap.snapshot.app_id,
+      account_id: deniedSnap.snapshot.data.account_id,
+      epoch: deniedSnap.snapshot.epoch
+    };
+    const execution = [{
         call_id: 'get-early-a', tool: 'forkyard.people.get', result_status: 'ok',
         virtual_time: sameVersion[0].virtual_time, version: sameVersion[0].after, arguments: {account_id: 'acc-ihalvorsen'}
       }, {
@@ -373,8 +377,21 @@ test('reads keep the call id when a write request id is absent and ambiguous aud
       }, {
         call_id: 'get-later', tool: 'forkyard.people.get', result_status: 'ok',
         virtual_time: gets[2].virtual_time, arguments: {account_id: 'acc-ihalvorsen'}
-      }, searchCall, ...denies]
+      }, searchCall, ...denies];
+    const matched = exportEvidence({snapshot: deniedSnap.snapshot, execution, batch});
+    const sparse = exportEvidence({snapshot: deniedSnap.snapshot, execution});
+    assert.equal(sparse.attention.length, 0);
+    assert.equal(sparse.attempts.length, 0);
+    const staleEpoch = exportEvidence({
+      snapshot: deniedSnap.snapshot,
+      execution: [{
+        ...execution[0],
+        call_id: 'stale-epoch',
+        result: {version: {epoch: deniedSnap.snapshot.epoch + 1, revision: 0}}
+      }],
+      batch
     });
+    assert.equal(staleEpoch.attention.some(item => item.call_id === 'stale-epoch'), false);
     const compiled = require('./schema-validator.cjs').compile(require('../schemas/public-speech-evidence.schema.json'), path.join(__dirname, '../schemas'));
     const round = JSON.parse(JSON.stringify(matched));
     assert.equal(compiled(round), true);
@@ -387,6 +404,12 @@ test('reads keep the call id when a write request id is absent and ambiguous aud
     assert.equal(round.attempts.find(item => item.request_id === 'B').transport_retries, 0);
     const ambiguous = exportEvidence({
       snapshot: snap.snapshot,
+      batch: {
+        run_id: snap.snapshot.run_id,
+        app_id: snap.snapshot.app_id,
+        account_id: snap.snapshot.data.account_id,
+        epoch: snap.snapshot.epoch
+      },
       execution: [{call_id: 'get-unknown', tool: 'forkyard.people.get', result_status: 'ok', arguments: {account_id: 'acc-ihalvorsen'}}]
     });
     const unknown = JSON.parse(JSON.stringify(ambiguous)).attention.find(item => item.call_id === 'get-unknown');
@@ -606,6 +629,29 @@ test('evidence from another run is excluded', async () => {
       }
     ];
     const foreign = exportEvidence({snapshot: snapB.snapshot, execution});
+    const sparse = exportEvidence({
+      snapshot: snapB.snapshot,
+      execution: execution.map(item => {
+        const copy = {...item, result: item.result};
+        delete copy.run_id;
+        delete copy.app_id;
+        delete copy.account_id;
+        delete copy.epoch;
+        return copy;
+      })
+    });
+    assert.equal(sparse.attention.length, 0);
+    assert.equal(sparse.attempts.length, 0);
+    const nested = exportEvidence({
+      snapshot: snapA.snapshot,
+      batch: {run_id: snapA.snapshot.run_id, app_id: snapA.snapshot.app_id, account_id: snapA.snapshot.data.account_id, epoch: snapA.snapshot.epoch},
+      execution: [{
+        call_id: 'old-epoch', tool: 'forkyard.people.activity', result_status: 'ok',
+        arguments: {account_id: 'acc-ihalvorsen'},
+        result: {version: {epoch: snapA.snapshot.epoch + 1, revision: 0}}
+      }]
+    });
+    assert.equal(nested.attention.some(item => item.call_id === 'old-epoch'), false);
     assert.equal(foreign.attention.some(item => item.call_id === 'activity-a'), false);
     assert.equal(foreign.attempts.some(item => item.request_id === 'reopen-foreign'), false);
     assert.equal(foreign.pressure.find(item => item.number === 2288 && item.account_id === 'fy-tomasreyes').reopen_logical_attempts, 0);

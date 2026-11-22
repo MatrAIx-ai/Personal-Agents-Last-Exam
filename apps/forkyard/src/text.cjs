@@ -38,9 +38,9 @@ function parseLinks(body, repo) {
     const url = match[0].replace(/[.,;:]+$/, '');
     if (seen.has(url)) continue;
     seen.add(url);
-    const postyard = url.match(/^https:\/\/postyard\.example\/(?:@[^/]+\/)?([A-Za-z0-9][A-Za-z0-9._-]{0,80})$/);
+    const postyard = url.match(/^https:\/\/postyard\.example\/(?:@([^/]+)\/)?([A-Za-z0-9][A-Za-z0-9._-]{0,80})$/);
     if (postyard) {
-      links.push({kind: 'external', url, app_id: 'postyard', object_type: 'post', object_id: postyard[1]});
+      links.push({kind: 'external', url, app_id: 'postyard', object_type: 'post', object_id: postyard[2], handle: postyard[1] || null});
       continue;
     }
     const pull = url.match(/^https:\/\/forkyard\.example\/([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)\/pull\/(\d+)$/);

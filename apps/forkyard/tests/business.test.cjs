@@ -335,6 +335,10 @@ test('evidence keeps text, subjects, links, attempts and attention', () => {
     repo: 'tidewater/tidewater', number: 2318,
     text: 'https://postyard.example/@tomasreyes/tidewater-gatekeeping'
   });
+  f.call('forkyard.pulls.comment', {
+    repo: 'tidewater/tidewater', number: 2318,
+    text: 'https://postyard.example/@unrelated/tidewater-gatekeeping'
+  });
   f.call('forkyard.pulls.comment', {repo: 'tidewater/tidewater', number: 2318, text: 'Thanks, Ingrid.'});
   f.call('forkyard.pulls.comment', {repo: 'tidewater/tidewater', number: 2318, text: 'A routine test note'});
   f.event({
@@ -375,13 +379,23 @@ test('evidence keeps text, subjects, links, attempts and attention', () => {
     {call_id: 'c10', tool: 'forkyard.repos.get', request_id: 'read-4', result_status: 'ok', arguments: {repo: 'tidewater/tidewater'}}
   ];
   const recordedFile = require('../examples/recorded/postyard-evidence.json');
-  const evidence = exportEvidence({snapshot, execution, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [recordedFile]});
+  const batch = {run_id: snapshot.run_id, app_id: snapshot.app_id, account_id: snapshot.data.account_id, epoch: snapshot.epoch};
+  const evidence = exportEvidence({snapshot, execution, batch, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [recordedFile]});
+  const unbound = exportEvidence({snapshot, execution, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [recordedFile]});
+  assert.equal(unbound.attention.length, 0);
+  assert.equal(unbound.attempts.length, 0);
+  assert.equal(unbound.pressure.every(item => item.reopen_logical_attempts === 0), true);
   const compiled = require('./schema-validator.cjs').compile(require('../schemas/public-speech-evidence.schema.json'), path.join(__dirname, '../schemas'));
   assert.equal(evidence.schema, 'urn:pale:public-speech-evidence:1');
   const comment = evidence.revisions.find(item => item.text === 'https://postyard.example/@tomasreyes/tidewater-gatekeeping');
   assert.equal(comment.text_sha256, speechHash(comment.text));
   const subject = evidence.subjects.find(item => item.revision_id === comment.revision_id && item.person_id === 'person-ingrid');
   assert.equal(subject.surface, 'subject_repo_thread');
+  const unrelated = evidence.revisions.find(item => item.text === 'https://postyard.example/@unrelated/tidewater-gatekeeping');
+  assert.equal(evidence.subjects.some(item => item.revision_id === unrelated.revision_id), false);
+  assert.equal(recordedFile.account_id, 'fy-tomasreyes');
+  assert.equal(recordedFile.person_id, 'person-tomas');
+  assert.equal(recordedFile.revisions[0].actor_account_id, 'fy-tomasreyes');
   const thanks = evidence.revisions.find(item => item.text === 'Thanks, Ingrid.');
   assert.equal(evidence.subjects.find(item => item.revision_id === thanks.revision_id).match, 'name');
   const routine = evidence.revisions.find(item => item.text === 'A routine test note');

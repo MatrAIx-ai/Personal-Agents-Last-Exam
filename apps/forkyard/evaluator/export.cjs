@@ -166,9 +166,13 @@ function subjectHits(data, row, companions) {
     for (const link of parseLinks(row.text, row.repo)) {
       if (link.repo && owners(data, link.repo).includes(subject.account_id)) matches.push('object_link');
       if (link.handle && person && link.handle === person.handle) matches.push('profile_link');
-      if (link.app_id === 'postyard') {
+      if (link.app_id === 'postyard' && link.handle) {
         for (const companion of companions || []) {
-          const revisions = (companion.revisions || []).filter(item => item.object_id === link.object_id);
+          const revisions = (companion.revisions || []).filter(item => {
+            if (item.object_id !== link.object_id) return false;
+            const author = account(data, item.actor_account_id);
+            return !!(author && author.handle === link.handle);
+          });
           const ids = new Set(revisions.map(item => item.revision_id));
           if ((companion.subjects || []).some(item => ids.has(item.revision_id) && item.person_id === subject.person_id)) matches.push('linked_post');
         }
@@ -275,20 +279,44 @@ function isRead(call) {
   return call.result_status === 'ok';
 }
 
-function callBelongs(snapshot, call) {
+function resultEpochs(value, depth = 0, found = []) {
+  if (!value || typeof value !== 'object' || depth > 5) return found;
+  if (Object.prototype.hasOwnProperty.call(value, 'version') && value.version && value.version.epoch != null) found.push(value.version.epoch);
+  const children = Array.isArray(value) ? value : Object.values(value);
+  for (const child of children) if (child && typeof child === 'object') resultEpochs(child, depth + 1, found);
+  return found;
+}
+
+function callBelongs(snapshot, call, batch) {
   const data = snapshot.data || {};
-  if (call.run_id && call.run_id !== snapshot.run_id) return false;
-  if (call.app_id && call.app_id !== snapshot.app_id) return false;
-  if (call.account_id && call.account_id !== data.account_id) return false;
-  if (call.epoch != null && call.epoch !== snapshot.epoch) return false;
-  if (call.version && call.version.epoch != null && snapshot.epoch != null && call.version.epoch !== snapshot.epoch) return false;
+  const run = call.run_id || (batch && batch.run_id) || null;
+  const epoch = call.epoch != null ? call.epoch : (batch && batch.epoch != null ? batch.epoch : null);
+  if (!run || epoch == null) return false;
+  if (run !== snapshot.run_id || epoch !== snapshot.epoch) return false;
+  const app = call.app_id || (batch && batch.app_id) || null;
+  const account = call.account_id || (batch && batch.account_id) || null;
+  if (app && app !== snapshot.app_id) return false;
+  if (account && account !== data.account_id) return false;
+  if (call.version && call.version.epoch != null && call.version.epoch !== snapshot.epoch) return false;
+  if (resultEpochs(call.result).some(item => item !== snapshot.epoch)) return false;
   return true;
 }
 
-function exportEvidence({snapshot, execution = [], focus_pull = null, companions = []} = {}) {
+function flattenExecution(execution, batch) {
+  const rows = [];
+  for (const item of execution || []) {
+    if (item && Array.isArray(item.calls)) {
+      const nested = {run_id: item.run_id, epoch: item.epoch, app_id: item.app_id, account_id: item.account_id};
+      for (const call of item.calls) rows.push({call, batch: nested});
+    } else rows.push({call: item, batch});
+  }
+  return rows;
+}
+
+function exportEvidence({snapshot, execution = [], batch = null, focus_pull = null, companions = []} = {}) {
   if (!snapshot || !snapshot.data) throw new Error('exportEvidence requires an Infra snapshot.');
   const data = snapshot.data;
-  const localExecution = execution.filter(call => callBelongs(snapshot, call));
+  const localExecution = flattenExecution(execution, batch).filter(item => callBelongs(snapshot, item.call, item.batch)).map(item => item.call);
   const calls = pair(snapshot, localExecution);
   const revisions = revisionRows(data).map((row, index) => {
     const person = account(data, row.actor_account_id);
