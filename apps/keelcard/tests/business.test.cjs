@@ -2,13 +2,14 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const { fixture } = require('./harness.cjs');
 const { compile } = require('./schema-validator.cjs');
 const { addMinutes, parts } = require('../src/domain-utils.cjs');
 const { scan } = require('../src/fingerprints.cjs');
 const { wireFor } = require('../src/publisher.cjs');
-const { classifyDelivery } = require('../src/publisher.cjs');
+const { classifyDelivery, publishPending, receiptForNotice } = require('../src/publisher.cjs');
 
 const GROCERY = '9417220000014417';
 const CARD = 'card-4417';
@@ -544,6 +545,11 @@ test('delivery results and the reviewer renderer keep secrets in their own place
   assert.equal(classifyDelivery({ eventStatus: { status: 'ok', receipt: { status: 'committed', event_id: 'router-1' } }, mailRecord: { id: 'other' }, expectedEventId: 'router-1' }).outcome, 'confirmed');
   assert.equal(classifyDelivery({ receipt: { status: 'unknown', event_id: 'router-attempt', stop_run: true }, eventStatus: { status: 'ok', receipt: { status: 'committed', event_id: 'router-other' } }, expectedEventId: 'router-attempt' }).outcome, 'unresolved');
   assert.equal(classifyDelivery({ receipt: { status: 'unknown', stop_run: true }, eventStatus: { status: 'ok', receipt: null }, mailRecord: { id: 'other' }, expectedEventId: 'router-1' }).outcome, 'unresolved');
+  assert.equal(classifyDelivery({
+    receipt: { status: 'committed', event_id: 'router-b' },
+    eventStatus: { status: 'ok', receipt: { status: 'committed', event_id: 'router-b' } },
+    expectedEventId: 'router-a'
+  }).outcome, 'unresolved');
   const hits = scan('number 9417220000014417 expires 2028-09 code 317', f.data.fingerprints);
   const groceryHit = hits.find(hit => hit.card_id === CARD);
   assert.ok(groceryHit.fields.includes('number'));
@@ -982,4 +988,197 @@ test('new cards use private credentials and the other fixtures still validate', 
   const before = JSON.stringify(f.data);
   joinEvidence({ data: f.data, audit: [] }, []);
   assert.equal(JSON.stringify(f.data), before);
+});
+
+test('imported spend has to match the history in decision order', () => {
+  const { validateSeed } = require('../src/model.cjs');
+  const clock = '2026-11-18T09:00:00-08:00';
+  const ctx = { app_id: 'keelcard', virtual_now: clock, binding: require('../fixtures/binding.json') };
+  const base = require('../fixtures/minimal.json');
+  const daily = structuredClone(base);
+  daily.declines.push({
+    ...base.declines[0],
+    authorization_id: 'auth-0099',
+    authorization_key: 'freshcart:fc-grace:imported-day:1',
+    amount_cents: 1,
+    decline_code: 'exceeds_daily_limit',
+    decided_at: clock,
+    limits_in_force: { per_transaction: 7500, per_day: 20000, per_month: 120000, lifetime: null, spend_in_force: { per_day: 20000 } }
+  });
+  assert.throws(() => validateSeed(ctx, daily), /history does not support/);
+  const transaction = structuredClone(base);
+  transaction.declines.push({
+    ...base.declines[0],
+    authorization_id: 'auth-0098',
+    authorization_key: 'freshcart:fc-grace:imported-tx:1',
+    amount_cents: 1,
+    decline_code: 'exceeds_transaction_limit',
+    decided_at: '2026-10-17T15:05:00.000Z',
+    limits_in_force: { per_transaction: 7500, per_day: 20000, per_month: 120000, lifetime: null, spend_in_force: { per_transaction: 7500 } }
+  });
+  assert.throws(() => validateSeed(ctx, transaction), /per-transaction/);
+});
+
+test('each publication fault halts after one publish and leaves the other notice untouched', async () => {
+  const minimal = require('../fixtures/minimal.json');
+  function notices() {
+    return [
+      { notice_id: 'notice-0001-aaaa', kind: 'code', status: 'pending_delivery', cloud_event_id: 'keelcard-kc-adeyemi-notice-0001-aaaa', publish_request_id: 'notice-notice-0001-aaaa', title: 'Code', body: 'Code 111111', created_at: minimal.initial_clock, source_object: { object_type: 'change_request', object_id: 'cr-1' }, related_id: 'cr-1', delivery: null },
+      { notice_id: 'notice-0002-bbbb', kind: 'decline', status: 'pending_delivery', cloud_event_id: 'keelcard-kc-adeyemi-notice-0002-bbbb', publish_request_id: 'notice-notice-0002-bbbb', title: 'Declined', body: 'Declined', created_at: minimal.initial_clock, source_object: { object_type: 'decline', object_id: 'auth-1' }, related_id: 'auth-1', delivery: null }
+    ];
+  }
+  function data() {
+    const copy = structuredClone(minimal);
+    copy.notices = notices();
+    return copy;
+  }
+  const binding = { run_id: 'run-1', account_id: 'mail-maya', epoch: 2 };
+  const committed = { status: 'committed', event_id: 'router-1', run_id: 'run-1', target: { account_id: 'mail-maya' }, version: { epoch: 2 }, cloud_event: { id: 'keelcard-kc-adeyemi-notice-0001-aaaa' } };
+  async function runCase(name, setup) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-fault-'));
+    const log = path.join(dir, 'messaging.receipts.jsonl');
+    let publishes = 0;
+    const router = {
+      async call() {
+        publishes += 1;
+        return setup.onPublish(log);
+      }
+    };
+    const inspect = setup.inspect || (async () => ({ eventStatus: { status: 'ok', receipt: null }, mailRecord: null }));
+    const firstData = data();
+    const first = await publishPending({
+      data: firstData,
+      router,
+      inspect,
+      commit: setup.commit || (async () => ({ status: 'committed' })),
+      receiptLog: log,
+      binding
+    });
+    const server = data();
+    if (setup.hideLog) fs.rmSync(log, { force: true });
+    const second = await publishPending({
+      data: server,
+      router,
+      inspect,
+      commit: setup.secondCommit || setup.commit || (async () => ({ status: 'committed' })),
+      receiptLog: log,
+      binding
+    });
+    assert.ok(publishes <= 1, name);
+    assert.equal(server.notices[1].status, 'pending_delivery', name);
+    assert.equal(second.sent.filter(item => !item.recovered).length, 0, name);
+    return { first, second, firstData, server, publishes };
+  }
+  const lost = await runCase('lost reply', {
+    onPublish(log) {
+      fs.appendFileSync(log, JSON.stringify({ request_id: 'notice-notice-0001-aaaa', cloud_event: { id: 'keelcard-kc-adeyemi-notice-0001-aaaa' }, result: committed }) + '\n');
+      throw new Error('reply lost');
+    },
+    inspect: async () => ({ eventStatus: { status: 'ok', receipt: { status: 'committed', event_id: 'router-1' } }, mailRecord: { id: 'router-1' } })
+  });
+  assert.equal(lost.first.halted, true);
+  assert.equal(lost.first.report.mail_confirmed, true);
+  assert.equal(lost.first.report.persisted, true);
+  assert.equal(lost.firstData.notices[1].status, 'pending_delivery');
+  assert.equal(lost.publishes, 1);
+
+  const ack = await runCase('lost ack', {
+    onPublish() {
+      return { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true, event_id: 'router-1' };
+    },
+    inspect: async () => ({ eventStatus: { status: 'ok', receipt: { status: 'committed', event_id: 'router-1' } }, mailRecord: { id: 'router-1' } })
+  });
+  assert.equal(ack.first.halted, true);
+  assert.equal(ack.first.report.mail_confirmed, true);
+  assert.equal(ack.first.report.persisted, true);
+  assert.equal(ack.publishes, 1);
+
+  const rejected = await runCase('rejection', {
+    onPublish() {
+      return { status: 'rejected', code: 'recipient_not_authorized' };
+    }
+  });
+  assert.equal(rejected.first.report.outcome, 'rejected');
+  assert.equal(rejected.first.halted, true);
+  assert.equal(rejected.server.notices[0].status, 'rejected');
+  assert.equal(rejected.publishes, 1);
+
+  const lookup = await runCase('thrown lookup', {
+    onPublish() {
+      return { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true, event_id: 'router-1' };
+    },
+    inspect: async () => { throw new Error('lookup failed'); }
+  });
+  assert.equal(lookup.first.report.code, 'inspection_unavailable');
+  assert.equal(lookup.first.halted, true);
+  assert.equal(lookup.server.notices[0].status, 'unknown');
+  assert.equal(lookup.publishes, 1);
+
+  const inspected = [];
+  const missing = await runCase('missing log', {
+    hideLog: true,
+    onPublish(log) {
+      fs.appendFileSync(log, JSON.stringify({ request_id: 'notice-notice-0001-aaaa', cloud_event: { id: 'keelcard-kc-adeyemi-notice-0001-aaaa' }, result: { status: 'unknown', event_id: 'router-1', stop_run: true, code: 'receiver_unconfirmed' } }) + '\n');
+      return { status: 'unknown', event_id: 'router-1', stop_run: true, code: 'receiver_unconfirmed' };
+    },
+    inspect: async (query) => {
+      inspected.push(query.event_id);
+      return { eventStatus: { status: 'ok', receipt: { status: 'committed', event_id: query.event_id } }, mailRecord: { id: query.event_id } };
+    }
+  });
+  assert.equal(missing.publishes, 1);
+  assert.equal(missing.second.halted, true);
+  assert.equal(missing.second.report.mail_confirmed, true);
+  assert.equal(missing.second.report.persisted, true);
+  assert.deepEqual(inspected, ['router-1', 'router-1']);
+  assert.equal(missing.server.notices[1].status, 'pending_delivery');
+
+  const foreign = await runCase('foreign run', {
+    onPublish() {
+      return { ...committed, run_id: 'other-run' };
+    },
+    inspect: async () => ({ eventStatus: { status: 'ok', receipt: { status: 'committed', event_id: 'router-1' } }, mailRecord: { id: 'router-1' } })
+  });
+  assert.equal(foreign.first.halted, true);
+  assert.equal(foreign.publishes, 1);
+  assert.equal(foreign.server.notices[1].status, 'pending_delivery');
+
+  let writes = 0;
+  const stale = await runCase('stale evidence', {
+    onPublish() {
+      return { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true, event_id: null };
+    },
+    commit: async () => {
+      writes += 1;
+      return { status: 'stale_version' };
+    },
+    secondCommit: async () => {
+      writes += 1;
+      return { status: 'committed' };
+    }
+  });
+  assert.equal(stale.first.report.persisted, false);
+  assert.equal(stale.second.report.persisted, true);
+  assert.equal(stale.publishes, 1);
+  assert.equal(writes, 2);
+  assert.equal(stale.server.notices[0].status, 'unknown');
+
+  const outage = await runCase('outage before an event id', {
+    onPublish() {
+      return { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true };
+    }
+  });
+  assert.equal(outage.first.report.event_id, null);
+  assert.equal(outage.first.halted, true);
+  assert.equal(outage.server.notices[0].status, 'unknown');
+  assert.equal(outage.publishes, 1);
+
+  const mixed = path.join(os.tmpdir(), 'keelcard-mixed-' + process.pid + '.jsonl');
+  fs.writeFileSync(mixed, JSON.stringify({
+    request_id: 'notice-notice-0001-aaaa',
+    cloud_event: { id: 'keelcard-kc-adeyemi-notice-0002-bbbb' },
+    result: committed
+  }) + '\n');
+  assert.equal(receiptForNotice(mixed, data().notices[0]), null);
+  fs.rmSync(mixed, { force: true });
 });

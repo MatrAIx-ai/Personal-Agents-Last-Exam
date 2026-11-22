@@ -14,7 +14,12 @@ function assertLoadClock(data, virtualNow) {
   }
 }
 
-function priorSpend(data, cardId, at, field) {
+function decisionOrder(id) {
+  const match = /^auth-(\d+)$/.exec(id || '');
+  return match ? Number(match[1]) : null;
+}
+
+function priorSpend(data, cardId, at, field, beforeId) {
   let start = null;
   let end = null;
   if (field === 'per_day') {
@@ -33,6 +38,11 @@ function priorSpend(data, cardId, at, field) {
     if (auth.card_id !== cardId) continue;
     const when = Date.parse(auth.decided_at);
     if (when > cutoff) continue;
+    if (when === cutoff && beforeId) {
+      const authOrder = decisionOrder(auth.authorization_id);
+      const declineOrder = decisionOrder(beforeId);
+      if (authOrder !== null && declineOrder !== null && authOrder >= declineOrder) continue;
+    }
     if (start !== null && (when < start || when >= end)) continue;
     if (auth.reversed_at && Date.parse(auth.reversed_at) < cutoff) continue;
     if (auth.expired_at && Date.parse(auth.expired_at) < cutoff) continue;
@@ -126,7 +136,15 @@ function validateSeed(ctx, data) {
     const stored = storedWindows && Number.isInteger(storedWindows[field])
       ? storedWindows[field]
       : (field !== 'per_transaction' && Number.isInteger(decline.limits_in_force.spend_in_force_cents) ? decline.limits_in_force.spend_in_force_cents : null);
-    const prior = stored === null ? (field === 'per_transaction' ? 0 : priorSpend(data, decline.card_id, decline.decided_at, field)) : stored;
+    if (field === 'per_transaction' && stored !== null && stored !== 0) {
+      fail('invalid_seed', 'A per-transaction decline has no earlier spend in that window.');
+    }
+    const prior = field === 'per_transaction'
+      ? 0
+      : priorSpend(data, decline.card_id, decline.decided_at, field, stored === null ? null : decline.authorization_id);
+    if (stored !== null && field !== 'per_transaction' && stored !== prior) {
+      fail('invalid_seed', 'A historical decline records spend that the history does not support.');
+    }
     if (decline.amount_cents + prior <= limit) fail('invalid_seed', 'A historical decline does not match the limits in force at that time.');
   }
   for (const statement of data.statements) {

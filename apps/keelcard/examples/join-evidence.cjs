@@ -40,7 +40,7 @@ function auditVersion(row) {
 
 function targetOf(record) {
   const args = record && record.arguments || {};
-  return args.card_id || args.authorization_key || args.id || null;
+  return args.change_request_id || args.card_id || args.authorization_id || args.authorization_key || args.notice_id || args.dispute_id || args.statement_id || args.merchant_id || args.id || null;
 }
 
 function blank(record, extra) {
@@ -80,20 +80,50 @@ function pairRecord(record, audit, used, stateRun) {
   if (reason) pool = pool.filter(item => item.row.reason === reason);
   const expected = versionOf(record);
   if (expected) pool = pool.filter(item => sameVersion(expected, auditVersion(item.row)));
-  if (pool.length === 0) return blank(record, { match: 'unmatched', ambiguous: false });
+  if (pool.length === 0) return blank(record, { match: 'unmatched', ambiguous: false, candidates: [] });
   if (pool.length > 1) {
-    const ordered = pool.every(item => Number.isInteger(item.row.seq));
-    if (!ordered) return blank(record, { match: 'ambiguous', ambiguous: true });
-    pool = pool.slice().sort((a, b) => a.row.seq - b.row.seq);
+    return blank(record, { match: 'pending', ambiguous: true, candidates: pool });
   }
   const chosen = pool[0];
   used.add(chosen.index);
   return blank(record, {
     audit: chosen.row,
     audit_rows: [chosen.row],
-    match: pool.length > 1 ? 'call_order' : 'call',
-    ambiguous: false
+    match: 'call',
+    ambiguous: false,
+    candidates: []
   });
+}
+
+function resolvePending(paired) {
+  const groups = new Map();
+  for (const item of paired) {
+    if (item.match !== 'pending') continue;
+    const key = item.candidates.map(candidate => candidate.index).sort((a, b) => a - b).join(',');
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(item);
+  }
+  for (const group of groups.values()) {
+    const candidates = group[0].candidates;
+    const ordered = candidates.every(candidate => Number.isInteger(candidate.row.seq));
+    if (ordered && group.length === candidates.length) {
+      const rows = candidates.slice().sort((a, b) => a.row.seq - b.row.seq);
+      group.forEach((item, index) => {
+        item.audit = rows[index].row;
+        item.audit_rows = [rows[index].row];
+        item.match = 'call_order';
+        item.ambiguous = false;
+      });
+    } else {
+      for (const item of group) {
+        item.audit = null;
+        item.audit_rows = [];
+        item.match = 'ambiguous';
+        item.ambiguous = true;
+      }
+    }
+  }
+  for (const item of paired) delete item.candidates;
 }
 
 function joinEvidence(snapshot, execution) {
@@ -103,6 +133,7 @@ function joinEvidence(snapshot, execution) {
   const records = Array.isArray(execution) ? execution : [];
   const used = new Set();
   const paired = records.map(record => pairRecord(record, audit, used, state.run_id || null));
+  resolvePending(paired);
   const denied = {};
   const logical = [];
   for (const item of paired) {

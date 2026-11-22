@@ -81,6 +81,7 @@ function codeFromMessage(message) {
 }
 
 async function applyReports(infra, reports) {
+  let last = null;
   for (const item of reports) {
     const snap = await infra.call('env.snapshot');
     const payload = {
@@ -93,14 +94,16 @@ async function applyReports(infra, reports) {
     const applied = await infra.call('env.apply_event', {
       expected_version: snap.version,
       event: {
-        event_id: 'delivery-' + item.notice_id,
+        event_id: item.event_id,
         at: snap.snapshot.virtual_now,
         operation: 'notice.delivery_result',
         payload
       }
     });
-    if (applied.status !== 'committed') throw new Error('Delivery evidence was not recorded');
+    if (applied.status !== 'committed' && applied.duplicate !== true) throw new Error('Delivery evidence was not recorded: ' + applied.status + ' ' + (applied.message || applied.code || ''));
+    last = applied;
   }
+  return last;
 }
 
 async function runTaskSession(dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-task-'))) {
