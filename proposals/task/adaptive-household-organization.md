@@ -64,31 +64,44 @@ In blind unhinted runs, frontier LLMs consistently fail for three reasons:
 
 When the model is explicitly reminded of the dated notes via the standardized hint, it is fully capable of solving the 2D packing constraint and respecting the user's non-negotiables, achieving a 100% pass rate.
 
----
-
 ## 5. Rubrics, reference and hints
 
 ### 5.1 Grader Inputs and Submission Format
+At the conclusion of Session 5, the agent writes its final proposal to `workspace/layout_proposal.json` alongside a `rationale.md`. 
 
-The agent does not submit arbitrary free-form text. At the end of Session 5, the agent writes its final proposal to `workspace/layout_proposal.json` alongside a `rationale.md`.
+Because a dual-purpose room changes state between work hours and sleep hours, the submission specifies object placements across two operational configurations:
+- **`daytime_mode`:** Workspace active, guest cot stowed/folded.
+- **`nighttime_mode`:** Guest cot deployed for sleeping.
 
 ```json
 {
   "room_id": "bedroom_2_multipurpose",
-  "placements": [
-    {
-      "item_id": "armchair_grandfather",
-      "action": "retained",
-      "position_cm": [40, 45],
-      "rotation_deg": 45
-    },
-    {
-      "item_id": "desk_compact",
-      "action": "relocated",
-      "position_cm": [120, 240],
-      "rotation_deg": 0
-    }
-  ],
+  "daytime_mode": {
+    "placements": [
+      {
+        "item_id": "armchair_grandfather",
+        "action": "retained",
+        "position_cm": [40, 45],
+        "rotation_deg": 45
+      },
+      {
+        "item_id": "desk_compact",
+        "action": "relocated",
+        "position_cm": [120, 240],
+        "rotation_deg": 0
+      },
+      {
+        "item_id": "guest_cot_foldable",
+        "action": "stowed_in_closet",
+        "position_cm": [0, 0],
+        "rotation_deg": 0
+      }
+    ]
+  },
+  "nighttime_mode": {
+    "cot_deployed_position_cm": [180, 80],
+    "cot_deployed_rotation_deg": 90
+  },
   "purchases": [
     {
       "item": "tri-fold guest floor mattress",
@@ -103,33 +116,32 @@ The agent does not submit arbitrary free-form text. At the end of Session 5, the
 
 | Metric | Max Points | Evaluation Method | Failure Condition |
 | :--- | :---: | :--- | :--- |
-| **Spatial Feasibility & Clearance** | 30 | Automated bounding-box 2D collision check: $\ge 75\text{ cm}$ walkway width, unobstructed door swing arc, access to outlets. | Any collision or walkway $< 60\text{ cm}$ = 0 pts. |
-| **Heirloom & Constraint Retention** | 25 | Automated check on `workspace/layout_proposal.json`: grandfather armchair is neither discarded nor placed in basement storage. | Armchair removed or stored in basement = 0 pts. |
-| **Call Privacy & Camera Backdrop** | 15 | Vector orientation check: desk seating direction does not have the guest bed in the rear viewing angle. | Bed visible behind desk view vector = 0 pts. |
+| **Spatial Feasibility & Clearance** | 30 | Automated 2D collision check: $\ge 75\text{ cm}$ walkway width and unobstructed door swing arc in **both** daytime and nighttime modes. | Any item collision, blocked door, or walkway $< 75\text{ cm}$ = 0 pts. |
+| **Heirloom Retention** | 25 | Automated check on `workspace/layout_proposal.json`: grandfather armchair is neither discarded nor placed in basement storage. | Armchair removed or moved to basement = 0 pts. |
+| **Call Privacy & Camera Backdrop** | 15 | Vector orientation check during **Daytime Mode**: $90^\circ$ camera view frustum behind the seated desk position contains a neutral wall/bookshelf, with zero guest bed or stowed bedding visible. | Bed/clutter within daytime camera cone = 0 pts. |
 | **Budget Compliance** | 15 | `total_spend_usd` $\le \$250.00$. | Spend $> \$250.00$ = 0 pts. |
-| **Continuity & Rationale** | 15 | Rubric evaluation of `rationale.md` confirming trade-offs and explicit mention of partner's call schedule and brother's visit duration. | Omits explanation of visitor accommodation = 0 pts. |
+| **Continuity & Rationale** | 15 | Rubric evaluation of `rationale.md` verifying the agent explained trade-offs, brother's 3-week stay accommodation, and partner's call schedule. | Omits explanation of visitor accommodation or routines = 0 pts. |
 
 **Full-Pass Rule:** A run passes if and only if:
 - Total score $\ge 85/100$, **AND**
-- Hard Gates passed: 0 spatial bounding box collisions, budget $\le \$250.00$, grandfather armchair retained safely.
-
-The evaluation does not perform an exact-coordinate match against a single reference layout. Instead, it uses property-based validation: an automated script verifies that the agent's proposed layout_proposal.json satisfies all spatial invariants (no bounding-box collisions, unobstructed door swings, ≥75cm pathways), respects personal hard constraints (armchair retention, camera backdrop isolation), and stays within budget. Multiple distinct layouts are valid as long as they satisfy these invariants.
+- All 5 Hard Gates are satisfied (0 tolerance):
+  1. **Zero spatial collisions** across both daytime and nighttime modes.
+  2. **Walkway clearance $\ge 75\text{ cm}$** maintained in both modes (including clear emergency exit path to the door at night).
+  3. **Grandfather armchair retained** in the living/office space.
+  4. **Camera backdrop privacy satisfied** during daytime mode.
+  5. **Budget strictly maintained** (`total_spend_usd` $\le \$250.00$).
 
 ### 5.3 Reference Timeline (5 Sessions)
-
 - **Session 1 (Day 1):** User orientation, space audit, agent reviews `floorplan.png` and `inventory.json`.
 - **Session 2 (Day 8):** Hybrid work setup discussion. User reports monitor glare in bedroom 1. Agent suggests shifting desk to bedroom 2.
 - **Session 3 (Day 20):** Dinner hosting preparation. Checking living room chair configuration.
-- **Session 4 (Day 32 - Critical Gate):** Brother's impending 3-week visit announced. Desk + guest bed dilemma introduced.
+- **Session 4 (Day 32 - Critical Gate):** Brother's impending 3-week visit announced. Dual daytime workspace + guest bed requirement introduced.
 - **Session 5 (Day 38):** Review of user revisions, final layout proposal generated and committed to `workspace/layout_proposal.json`.
 
 ### 5.4 Exact Standard Hint & Injection Point
-
 - **Injection Point:** Turn 1 of Session 4 (when the user requests the multi-purpose layout for the visiting brother).
 - **Exact Hint Text:**
-  > `[SYSTEM HINT: Review 'workspace/notes/move_in_notes_2026_09_15.md' regarding heirloom furniture restrictions and 'workspace/notes/partner_schedule.md' regarding video call framing before proposing furniture rearrangements. Keep total purchases strictly below $250.]`
-
----
+  > `[SYSTEM HINT: Review 'workspace/notes/move_in_notes_2026_09_15.md', 'workspace/notes/partner_schedule.md', and 'workspace/finances/budget.md' before finalizing layout or purchase recommendations.]`
 
 ## 6. Construction plan and effort
 
