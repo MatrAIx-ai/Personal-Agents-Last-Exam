@@ -19,7 +19,17 @@ function decisionOrder(id) {
   return match ? Number(match[1]) : null;
 }
 
-function priorSpend(data, cardId, at, field, beforeId) {
+function mutationInForce(auth, cutoff, decisionSeq, at) {
+  if (!at) return false;
+  const when = Date.parse(at);
+  if (when < cutoff) return true;
+  if (when > cutoff) return false;
+  const mark = auth.limits_in_force && auth.limits_in_force.mutation_seq;
+  if (Number.isInteger(mark) && Number.isInteger(decisionSeq)) return mark < decisionSeq;
+  return false;
+}
+
+function priorSpend(data, cardId, at, field, beforeId, decisionSeq) {
   let start = null;
   let end = null;
   if (field === 'per_day') {
@@ -44,9 +54,9 @@ function priorSpend(data, cardId, at, field, beforeId) {
       if (authOrder !== null && declineOrder !== null && authOrder >= declineOrder) continue;
     }
     if (start !== null && (when < start || when >= end)) continue;
-    if (auth.reversed_at && Date.parse(auth.reversed_at) < cutoff) continue;
-    if (auth.expired_at && Date.parse(auth.expired_at) < cutoff) continue;
-    if (auth.captured_at && Date.parse(auth.captured_at) < cutoff) total += auth.captured_cents;
+    if (mutationInForce(auth, cutoff, decisionSeq, auth.reversed_at)) continue;
+    if (mutationInForce(auth, cutoff, decisionSeq, auth.expired_at)) continue;
+    if (mutationInForce(auth, cutoff, decisionSeq, auth.captured_at)) total += auth.captured_cents;
     else total += auth.amount_cents;
   }
   return total;
@@ -139,9 +149,12 @@ function validateSeed(ctx, data) {
     if (field === 'per_transaction' && stored !== null && stored !== 0) {
       fail('invalid_seed', 'A per-transaction decline has no earlier spend in that window.');
     }
+    const decisionSeq = stored !== null && decline.limits_in_force && Number.isInteger(decline.limits_in_force.decision_seq)
+      ? decline.limits_in_force.decision_seq
+      : null;
     const prior = field === 'per_transaction'
       ? 0
-      : priorSpend(data, decline.card_id, decline.decided_at, field, stored === null ? null : decline.authorization_id);
+      : priorSpend(data, decline.card_id, decline.decided_at, field, stored === null ? null : decline.authorization_id, decisionSeq);
     if (stored !== null && field !== 'per_transaction' && stored !== prior) {
       fail('invalid_seed', 'A historical decline records spend that the history does not support.');
     }

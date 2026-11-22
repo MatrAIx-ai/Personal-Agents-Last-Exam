@@ -14,9 +14,11 @@ function evidenceEventId(noticeId, status, receiptEventId, code) {
   return 'delivery-' + crypto.createHash('sha256').update(raw).digest('hex').slice(0, 40);
 }
 
-function haltPath(receiptLog) {
-  if (!receiptLog) return null;
-  return require('node:path').join(require('node:path').dirname(receiptLog), 'keelcard-publication.json');
+function publicationPath(runDir, receiptLog) {
+  const path = require('node:path');
+  const dir = runDir || (receiptLog ? path.dirname(receiptLog) : null);
+  if (!dir) return null;
+  return path.join(dir, 'keelcard-publication.json');
 }
 
 function readHalt(file) {
@@ -144,6 +146,15 @@ function writeOk(write) {
   return ['committed', 'ok', 'ready'].includes(write.status);
 }
 
+function alreadySaved(notice, report) {
+  const status = deliveryStatus(report);
+  if (!notice || notice.status !== status || !notice.delivery) return false;
+  const savedId = notice.delivery.event_id || null;
+  const nextId = report.event_id || null;
+  if (savedId !== nextId) return false;
+  return (notice.delivery.code || null) === (report.code || null);
+}
+
 async function inspectNotice(inspect, notice, eventId) {
   if (!inspect || !eventId) return null;
   try {
@@ -171,24 +182,29 @@ async function settle(data, notice, receipt, inspect, commit) {
   }));
   if (evidence && evidence.failed && !report.mail_confirmed) report.code = 'inspection_unavailable';
   const item = persistOf(report);
+  if (alreadySaved(notice, report)) {
+    report.persisted = true;
+    report.mail_confirmed = Boolean(report.mail_confirmed);
+    return { report, item, write: { status: 'committed', duplicate: true } };
+  }
+  if (notice.delivery && notice.delivery.recorded_at && notice.delivery.status === item.status && (notice.delivery.event_id || null) === (item.receipt_event_id || null)) {
+    item.recorded_at = notice.delivery.recorded_at;
+  }
   recordEvidence(data, report);
   let write = null;
   if (commit) {
     try { write = await commit(item); }
     catch (error) { write = { status: error && error.code || 'stale_version', message: error && error.message }; }
+    report.persisted = writeOk(write);
+  } else {
+    report.persisted = false;
   }
-  report.persisted = commit ? writeOk(write) : true;
   report.mail_confirmed = Boolean(report.mail_confirmed);
   return { report, item, write };
 }
 
-function rememberHalt(data, file, notice, receipt) {
-  const existing = readHalt(file);
-  if (existing && existing.halted) {
-    data.publication = existing;
-    return existing;
-  }
-  const record = {
+function haltRecord(notice, receipt) {
+  return {
     halted: true,
     notice_id: notice.notice_id,
     publish_request_id: notice.publish_request_id,
@@ -198,25 +214,53 @@ function rememberHalt(data, file, notice, receipt) {
     stop_run: Boolean(receipt && receipt.stop_run),
     code: receipt && receipt.code || (receipt ? 'unconfirmed' : 'response_lost')
   };
+}
+
+function haltItem(record) {
+  return {
+    kind: 'halt',
+    event_id: 'halt-' + record.notice_id,
+    notice_id: record.notice_id,
+    publish_request_id: record.publish_request_id,
+    status: record.status,
+    code: record.code,
+    stop_run: Boolean(record.stop_run),
+    receipt_event_id: record.event_id
+  };
+}
+
+function loadHalt(data, file) {
+  if (data.publication && data.publication.halted) return data.publication;
+  const stored = readHalt(file);
+  if (stored) data.publication = stored;
+  return data.publication && data.publication.halted ? data.publication : null;
+}
+
+async function rememberHalt(data, file, notice, receipt, commit) {
+  const existing = loadHalt(data, file);
+  if (existing) return existing;
+  const record = haltRecord(notice, receipt);
   data.publication = record;
   writeHalt(file, record);
+  if (commit) {
+    try { await commit(haltItem(record)); }
+    catch { /* The snapshot write can be repeated. The halt record stays. */ }
+  }
   return record;
 }
 
-function haltedAlready(data, file) {
-  return readHalt(file) || (data.publication && data.publication.halted ? data.publication : null);
-}
-
-async function publishPending({ data, router, inspect, commit, receiptLog, binding }) {
-  const file = haltPath(receiptLog);
+async function publishPending({ data, router, inspect, commit, receiptLog, runDir, binding }) {
+  const file = publicationPath(runDir, receiptLog);
   const sent = [];
   const persist = [];
-  const held = haltedAlready(data, file);
+  const reports = [];
+  const held = loadHalt(data, file);
   if (held) {
     data.publication = held;
-    const notice = data.notices.find(item => item.notice_id === held.notice_id) || data.notices.find(item => item.status === 'pending_delivery');
-    if (!notice || notice.notice_id !== held.notice_id) {
-      return { stopped: true, halted: true, sent, persist, report: stamp(notice || held, { outcome: 'unresolved', halted: true, event_id: held.event_id || null, code: held.code || 'run_halted', mail_confirmed: false, persisted: false }) };
+    const notice = data.notices.find(item => item.notice_id === held.notice_id);
+    if (!notice) {
+      const report = stamp(held, { outcome: 'unresolved', halted: true, event_id: held.event_id || null, code: held.code || 'run_halted', mail_confirmed: false, persisted: false });
+      return { stopped: true, halted: true, sent, persist, report, reports: [report] };
     }
     const logged = receiptForNotice(receiptLog, notice);
     const receipt = logged || {
@@ -228,10 +272,21 @@ async function publishPending({ data, router, inspect, commit, receiptLog, bindi
     const done = await settle(data, notice, receipt, inspect, commit);
     done.report.halted = true;
     persist.push(done.item);
-    return { stopped: true, halted: true, sent, persist, report: done.report, write: done.write };
+    reports.push(done.report);
+    return { stopped: true, halted: true, sent, persist, report: done.report, reports, write: done.write };
+  }
+  for (const notice of data.notices) {
+    if (notice.status !== 'unknown') continue;
+    const savedId = notice.delivery && notice.delivery.event_id;
+    if (!savedId) continue;
+    const logged = receiptForNotice(receiptLog, notice);
+    const receipt = logged || { status: 'unknown', event_id: savedId, code: notice.delivery.code || null };
+    const done = await settle(data, notice, receipt, inspect, commit);
+    persist.push(done.item);
+    reports.push(done.report);
   }
   const pending = data.notices.filter(notice => notice.status === 'pending_delivery');
-  let report = null;
+  let report = reports.length ? reports[reports.length - 1] : null;
   for (const notice of pending) {
     const logged = receiptForNotice(receiptLog, notice);
     let receipt = logged;
@@ -254,21 +309,23 @@ async function publishPending({ data, router, inspect, commit, receiptLog, bindi
       fresh = false;
     }
     if (!fresh) {
-      rememberHalt(data, file, notice, receipt);
+      await rememberHalt(data, file, notice, receipt, commit);
       const done = await settle(data, notice, receipt, inspect, commit);
       done.report.halted = true;
       persist.push(done.item);
-      return { stopped: true, halted: true, sent, persist, report: done.report, write: done.write };
+      reports.push(done.report);
+      return { stopped: true, halted: true, sent, persist, report: done.report, reports, write: done.write };
     }
     const done = await settle(data, notice, receipt, inspect, commit);
     done.report.halted = false;
     persist.push(done.item);
+    reports.push(done.report);
     report = done.report;
     if (commit && !done.report.persisted) {
-      return { stopped: true, halted: false, sent, persist, report: done.report, write: done.write };
+      return { stopped: true, halted: false, sent, persist, report: done.report, reports, write: done.write };
     }
   }
-  return { stopped: false, halted: false, sent, persist, report };
+  return { stopped: false, halted: false, sent, persist, report, reports };
 }
 
 module.exports = { classifyDelivery, publishPending, receiptForNotice, evidenceEventId, isFresh, wireFor };

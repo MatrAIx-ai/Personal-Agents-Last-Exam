@@ -1726,6 +1726,21 @@
     "initial_clock": {
       "type": "string",
       "format": "date-time"
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["halted", "notice_id"],
+      "properties": {
+        "halted": { "const": true },
+        "notice_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$" },
+        "publish_request_id": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "cloud_event_id": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "event_id": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "status": { "type": "string" },
+        "stop_run": { "type": "boolean" },
+        "code": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+      }
     }
   },
   "required": [

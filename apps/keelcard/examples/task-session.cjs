@@ -84,6 +84,32 @@ async function applyReports(infra, reports) {
   let last = null;
   for (const item of reports) {
     const snap = await infra.call('env.snapshot');
+    if (item.kind === 'halt') {
+      if (snap.snapshot.data.publication && snap.snapshot.data.publication.halted) {
+        last = { status: 'committed', duplicate: true };
+        continue;
+      }
+      const payload = {
+        notice_id: item.notice_id,
+        publish_request_id: item.publish_request_id,
+        status: item.status || 'unknown'
+      };
+      if (item.code) payload.code = item.code;
+      if (item.receipt_event_id) payload.event_id = item.receipt_event_id;
+      payload.stop_run = Boolean(item.stop_run);
+      const applied = await infra.call('env.apply_event', {
+        expected_version: snap.version,
+        event: {
+          event_id: item.event_id,
+          at: snap.snapshot.virtual_now,
+          operation: 'publication.halt',
+          payload
+        }
+      });
+      if (applied.status !== 'committed' && applied.duplicate !== true) throw new Error('Publication halt was not recorded: ' + applied.status + ' ' + (applied.message || applied.code || ''));
+      last = applied;
+      continue;
+    }
     const payload = {
       notice_id: item.notice_id,
       publish_request_id: item.publish_request_id,
@@ -95,7 +121,7 @@ async function applyReports(infra, reports) {
       expected_version: snap.version,
       event: {
         event_id: item.event_id,
-        at: snap.snapshot.virtual_now,
+        at: item.recorded_at || snap.snapshot.virtual_now,
         operation: 'notice.delivery_result',
         payload
       }
@@ -156,7 +182,8 @@ async function runTaskSession(dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelc
       router,
       inspect: inspectWith(mail),
       commit: item => applyReports(infra, [item]),
-      receiptLog
+      receiptLog,
+      runDir: path.join(dir, run)
     });
     const recorded = await infra.call('env.snapshot');
     const mailboxSnap = await mail.call('env.snapshot');
@@ -301,7 +328,8 @@ async function emptyGrantRoute() {
     const published = await publishPending({
       data: snap.snapshot.data,
       router,
-      commit: item => applyReports(infra, [item])
+      commit: item => applyReports(infra, [item]),
+      runDir: path.join(dir, run)
     });
     const after = await infra.call('env.snapshot');
     const attemptedId = published.sent[0] && published.sent[0].notice_id;
@@ -419,7 +447,8 @@ async function oneAckLoss() {
     const published = await publishPending({
       data: snap.snapshot.data,
       router,
-      receiptLog: path.join(dir, run, 'messaging.receipts.jsonl')
+      receiptLog: path.join(dir, run, 'messaging.receipts.jsonl'),
+      runDir: path.join(dir, run)
     });
     if (watcher) watcher.kill('SIGTERM');
     watcher = null;
@@ -442,7 +471,8 @@ async function oneAckLoss() {
       router,
       inspect: inspectWith(mail),
       commit: item => applyReports(infra, [item]),
-      receiptLog: path.join(dir, run, 'messaging.receipts.jsonl')
+      receiptLog: path.join(dir, run, 'messaging.receipts.jsonl'),
+      runDir: path.join(dir, run)
     });
     const after = await infra.call('env.snapshot');
     const saved = after.snapshot.data.notices.find(item => item.notice_id === target.notice_id);
@@ -450,7 +480,8 @@ async function oneAckLoss() {
       data: after.snapshot.data,
       router,
       inspect: inspectWith(mail),
-      receiptLog: path.join(dir, run, 'messaging.receipts.jsonl')
+      receiptLog: path.join(dir, run, 'messaging.receipts.jsonl'),
+      runDir: path.join(dir, run)
     });
     await infra.close();
     await agent.close();

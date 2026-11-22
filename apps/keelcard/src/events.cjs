@@ -105,6 +105,22 @@ function applyEvent(ctx, data, event) {
     }
     return data;
   }
+  if (event.operation === 'publication.halt') {
+    if (!payload.notice_id) fail('invalid_event', 'Publication halt needs a notice id.');
+    if (data.publication && data.publication.halted) return data;
+    data.publication = {
+      halted: true,
+      notice_id: payload.notice_id,
+      publish_request_id: payload.publish_request_id || null,
+      cloud_event_id: payload.cloud_event_id || null,
+      event_id: payload.event_id || null,
+      status: payload.status || 'unknown',
+      stop_run: Boolean(payload.stop_run),
+      code: payload.code || null
+    };
+    log(ctx, 'keelcard.publication_halted', { notice_id: payload.notice_id });
+    return data;
+  }
   if (event.operation === 'notice.delivery_result') {
     if (!payload.notice_id) fail('invalid_event', 'Delivery result needs a notice id.');
     if (!payload.publish_request_id) fail('invalid_event', 'Delivery result needs the publish request id.');

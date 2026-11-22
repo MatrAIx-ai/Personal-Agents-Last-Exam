@@ -4,7 +4,7 @@ const { fail, copy, addMinutes, addHours, addDays, codeDigits, nextSerial, money
 const { log } = require('./diagnostics.cjs');
 const { maybe, codeBody, declineBody } = require('./notices.cjs');
 const { decide, contentKey, findDecision } = require('./decisions.cjs');
-const { postLedger, settleTouched, settleRequest, availableCents } = require('./ledger.cjs');
+const { postLedger, settleTouched, settleRequest, availableCents, eventMark, stampMutation } = require('./ledger.cjs');
 
 function findCard(data, cardId) {
   const card = data.cards.find(item => item.card_id === cardId);
@@ -322,6 +322,7 @@ function commitAuthorization(ctx, data, payload, eventId) {
   const cardId = payload.card.card_id || data.cards.find(item => item.number === payload.card.number)?.card_id;
   if (cardId) settleTouched(data, now, { cardId });
   const outcome = decide(data, request, now);
+  outcome.limits_in_force.decision_seq = eventMark(data);
   const common = {
     authorization_id: nextSerial([...data.authorizations, ...data.declines], 'authorization_id', 'auth-'),
     authorization_key: payload.authorization_key,
@@ -399,6 +400,7 @@ function captureAuthorization(ctx, data, payload) {
   row.hold_cents = 0;
   row.captured_at = ctx.virtual_now;
   row.capture_key = payload.capture_key;
+  stampMutation(data, row);
   postLedger(data, {
     at: ctx.virtual_now, kind: 'capture', direction: 'debit', amount_cents: payload.amount_cents,
     authorization_id: row.authorization_id, card_id: row.card_id
@@ -436,6 +438,7 @@ function reverseAuthorization(ctx, data, payload) {
   row.hold_cents = 0;
   row.reversed_at = ctx.virtual_now;
   row.reverse_reason = payload.reason;
+  stampMutation(data, row);
   log(ctx, 'keelcard.reversed', { authorization_id: row.authorization_id });
   return { authorization_id: row.authorization_id, status: 'reversed', amount_cents: row.amount_cents };
 }

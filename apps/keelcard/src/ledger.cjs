@@ -58,6 +58,21 @@ function postLedger(data, entry) {
   return row;
 }
 
+function eventMark(data) {
+  let max = 0;
+  for (const row of data.authorizations.concat(data.declines)) {
+    const limits = row.limits_in_force || {};
+    if (Number.isInteger(limits.decision_seq) && limits.decision_seq > max) max = limits.decision_seq;
+    if (Number.isInteger(limits.mutation_seq) && limits.mutation_seq > max) max = limits.mutation_seq;
+  }
+  return max + 1;
+}
+
+function stampMutation(data, row) {
+  if (!row.limits_in_force || typeof row.limits_in_force !== 'object') row.limits_in_force = {};
+  row.limits_in_force.mutation_seq = eventMark(data);
+}
+
 function settleAuthorization(data, auth, now, effectiveAt) {
   if (auth.status !== 'pending') return false;
   if (!due(now, auth.expires_at)) return false;
@@ -65,6 +80,7 @@ function settleAuthorization(data, auth, now, effectiveAt) {
   auth.expired_at = effectiveAt || auth.expires_at;
   auth.settled_at = now;
   auth.hold_cents = 0;
+  stampMutation(data, auth);
   return true;
 }
 
@@ -176,5 +192,5 @@ function settleTouched(data, now, { cardId, requestId, authorizationId } = {}) {
 
 module.exports = {
   effectiveStatus, spendAmount, openHolds, availableCents, spent, postLedger,
-  settleAuthorization, settleRequest, settleDue, settleTouched, completedMonths
+  eventMark, stampMutation, settleAuthorization, settleRequest, settleDue, settleTouched, completedMonths
 };

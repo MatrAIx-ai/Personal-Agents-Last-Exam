@@ -337,8 +337,27 @@ test('an inspection failure is unresolved and is recorded through Infra', async 
       router: { async call() { calls += 1; return { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true, event_id: receiverId }; } },
       inspect: async () => { throw new Error('inspection is down'); },
       commit: async item => {
-        savedItem = item;
         const current = await session.infra.call('env.snapshot');
+        if (item.kind === 'halt') {
+          const applied = await session.infra.call('env.apply_event', {
+            expected_version: current.version,
+            event: {
+              event_id: item.event_id,
+              at: current.snapshot.virtual_now,
+              operation: 'publication.halt',
+              payload: {
+                notice_id: item.notice_id,
+                publish_request_id: item.publish_request_id,
+                status: item.status || 'unknown',
+                ...(item.code ? { code: item.code } : {}),
+                ...(item.receipt_event_id ? { event_id: item.receipt_event_id } : {})
+              }
+            }
+          });
+          assert.equal(applied.status, 'committed');
+          return applied;
+        }
+        savedItem = item;
         const payload = { notice_id: item.notice_id, publish_request_id: item.publish_request_id, status: item.status };
         if (item.code) payload.code = item.code;
         if (item.receipt_event_id) payload.event_id = item.receipt_event_id;
@@ -797,6 +816,27 @@ test('a stale evidence write can be repeated, and a lost response is recovered f
       }
     };
     const commit = async item => {
+      if (item.kind === 'halt') {
+        const current = await session.infra.call('env.snapshot');
+        if (current.snapshot.data.publication && current.snapshot.data.publication.halted) return { status: 'committed', duplicate: true };
+        const applied = await session.infra.call('env.apply_event', {
+          expected_version: current.version,
+          event: {
+            event_id: item.event_id,
+            at: current.snapshot.virtual_now,
+            operation: 'publication.halt',
+            payload: {
+              notice_id: item.notice_id,
+              publish_request_id: item.publish_request_id,
+              status: item.status || 'unknown',
+              ...(item.code ? { code: item.code } : {}),
+              ...(item.receipt_event_id ? { event_id: item.receipt_event_id } : {})
+            }
+          }
+        });
+        assert.equal(applied.status, 'committed');
+        return applied;
+      }
       writes += 1;
       if (writes === 1) return { status: 'stale_version' };
       const current = await session.infra.call('env.snapshot');
@@ -981,5 +1021,259 @@ test('two stale calls keep their own versions and a second run does not consume 
     assert.equal(joined.paired[2].audit.input.request_id, 'stale-23');
   } finally {
     await session.close();
+  }
+});
+
+async function commitDelivery(infra, item) {
+  const current = await infra.call('env.snapshot');
+  if (item.kind === 'halt') {
+    if (current.snapshot.data.publication && current.snapshot.data.publication.halted) return { status: 'committed', duplicate: true };
+    return infra.call('env.apply_event', {
+      expected_version: current.version,
+      event: {
+        event_id: item.event_id,
+        at: current.snapshot.virtual_now,
+        operation: 'publication.halt',
+        payload: {
+          notice_id: item.notice_id,
+          publish_request_id: item.publish_request_id,
+          status: item.status || 'unknown',
+          stop_run: Boolean(item.stop_run),
+          ...(item.code ? { code: item.code } : {}),
+          ...(item.receipt_event_id ? { event_id: item.receipt_event_id } : {})
+        }
+      }
+    });
+  }
+  const payload = { notice_id: item.notice_id, publish_request_id: item.publish_request_id, status: item.status };
+  if (item.code) payload.code = item.code;
+  if (item.receipt_event_id) payload.event_id = item.receipt_event_id;
+  return infra.call('env.apply_event', {
+    expected_version: current.version,
+    event: { event_id: item.event_id, at: item.recorded_at || current.snapshot.virtual_now, operation: 'notice.delivery_result', payload }
+  });
+}
+
+async function twoNotices(session) {
+  const policies = require('../examples/task-data/policies.json');
+  const opened = await load(session.infra, minimal, householdBinding, minimal.initial_clock, policies);
+  assert.equal(opened.status, 'ready');
+  const declined = await session.infra.call('env.apply_event', {
+    expected_version: (await session.infra.call('env.snapshot')).version,
+    event: authEvent('halt-decline', 'freshcart:fc-grace:halt:1', 12438, minimal.initial_clock)
+  });
+  assert.equal(declined.status, 'committed');
+  const requested = await session.agent.call('keelcard.controls.request_change', {
+    card_id: 'card-4417', field: 'per_transaction', amount_cents: 10000,
+    expected_version: (await session.infra.call('env.snapshot')).version,
+    request_id: 'halt-open'
+  });
+  assert.equal(requested.status, 'committed');
+  const snap = await session.infra.call('env.snapshot');
+  assert.equal(snap.snapshot.data.notices.filter(notice => notice.status === 'pending_delivery').length, 2);
+  return snap;
+}
+
+test('a lost reply without a receipt log still halts the fresh snapshot', async () => {
+  const session = await keel('mcphaltlost');
+  const { create } = require('../../../runtime/messaging/src/router.cjs');
+  const shipped = path.join(root, 'apps/keelcard/examples/mail-publisher.json');
+  let mail;
+  let router;
+  try {
+    const snap = await twoNotices(session);
+    mail = new Client('mail', 'infra', 'mcphaltlost', session.dir, 'halt-mail', { registry });
+    await mail.initialize();
+    const mailbox = await mail.call('env.snapshot');
+    const data = structuredClone(mailbox.snapshot.data);
+    data.owner_person_id = 'person-grace';
+    const binding = structuredClone(mailbox.snapshot.binding);
+    for (const account of binding.accounts) {
+      if (account.app_id === 'mail' && account.account_id === data.account_id) account.owner_person_id = 'person-grace';
+    }
+    if (!binding.people.some(person => person.person_id === 'person-grace')) binding.people.push({ person_id: 'person-grace', name: 'Grace Adeyemi' });
+    assert.equal((await mail.call('env.load_seed', {
+      expected_version: mailbox.version, request_id: 'halt-mailbox', data, binding,
+      policies: mailbox.snapshot.policies, bundle: mailbox.snapshot.resources.bundle
+    })).status, 'ready');
+    const clock = await mail.call('env.advance_time', {
+      expected_version: (await mail.call('env.snapshot')).version,
+      request_id: 'halt-mail-clock',
+      virtual_now: snap.snapshot.virtual_now
+    });
+    assert.equal(clock.status, 'committed');
+    const before = (await mail.call('env.snapshot')).snapshot.data.messages.length;
+    router = await create({ config: shipped, publisher: 'keelcard', run: 'mcphaltlost', stateDir: session.dir });
+    let publishes = 0;
+    const dropping = {
+      async call(name, args) {
+        if (name !== 'router.publish') return router.call(name, args);
+        publishes += 1;
+        await router.call(name, args);
+        throw new Error('reply lost');
+      }
+    };
+    const first = await publishPending({
+      data: snap.snapshot.data,
+      router: dropping,
+      commit: item => commitDelivery(session.infra, item)
+    });
+    assert.equal(publishes, 1);
+    assert.equal(first.halted, true);
+    assert.equal(first.report.persisted, true);
+    const mid = await mail.call('env.snapshot');
+    assert.equal(mid.snapshot.data.messages.length, before + 1);
+    const fresh = await session.infra.call('env.snapshot');
+    assert.equal(fresh.snapshot.data.publication.halted, true);
+    const secondNotice = fresh.snapshot.data.notices.find(notice => notice.notice_id !== fresh.snapshot.data.publication.notice_id);
+    assert.equal(secondNotice.status, 'pending_delivery');
+    const again = await publishPending({
+      data: fresh.snapshot.data,
+      router: dropping,
+      commit: item => commitDelivery(session.infra, item)
+    });
+    assert.equal(publishes, 1);
+    assert.equal(again.sent.length, 0);
+    const after = await mail.call('env.snapshot');
+    assert.equal(after.snapshot.data.messages.length, before + 1);
+    const kept = await session.infra.call('env.snapshot');
+    assert.equal(kept.snapshot.data.notices.find(notice => notice.notice_id === secondNotice.notice_id).status, 'pending_delivery');
+    const recovered = await publishPending({
+      data: kept.snapshot.data,
+      router: dropping,
+      inspect: async ({ event_id }) => {
+        const eventStatus = await mail.call('env.event_status', { event_id });
+        const box = await mail.call('env.snapshot');
+        return { eventStatus, mailRecord: box.snapshot.data.messages.find(message => message.id === event_id) || null };
+      },
+      commit: item => commitDelivery(session.infra, item),
+      receiptLog: path.join(session.dir, 'mcphaltlost', 'messaging.receipts.jsonl')
+    });
+    assert.equal(publishes, 1);
+    assert.equal(recovered.report.mail_confirmed, true);
+    assert.equal(recovered.report.persisted, true);
+    const done = await session.infra.call('env.snapshot');
+    const saved = done.snapshot.data.notices.find(notice => notice.notice_id === done.snapshot.data.publication.notice_id);
+    assert.equal(saved.status, 'committed');
+    assert.equal(done.snapshot.data.notices.find(notice => notice.notice_id === secondNotice.notice_id).status, 'pending_delivery');
+  } finally {
+    if (router) await router.close();
+    if (mail) await mail.close();
+    await session.close();
+  }
+});
+
+test('a halted receiver leaves the other notice pending when the log path is omitted', async () => {
+  const session = await keel('mcphaltro');
+  try {
+    const snap = await twoNotices(session);
+    let publishes = 0;
+    const router = {
+      async call() {
+        publishes += 1;
+        return { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true, event_id: 'router-halted' };
+      }
+    };
+    const first = await publishPending({
+      data: snap.snapshot.data,
+      router,
+      commit: item => commitDelivery(session.infra, item)
+    });
+    assert.equal(publishes, 1);
+    assert.equal(first.halted, true);
+    const fresh = await session.infra.call('env.snapshot');
+    const held = fresh.snapshot.data.notices.find(notice => notice.notice_id === fresh.snapshot.data.publication.notice_id);
+    const other = fresh.snapshot.data.notices.find(notice => notice.notice_id !== held.notice_id);
+    assert.equal(held.status, 'unknown');
+    assert.equal(other.status, 'pending_delivery');
+    const again = await publishPending({
+      data: fresh.snapshot.data,
+      router,
+      commit: item => commitDelivery(session.infra, item)
+    });
+    assert.equal(publishes, 1);
+    assert.equal(again.sent.length, 0);
+    const after = await session.infra.call('env.snapshot');
+    assert.equal(after.snapshot.data.notices.find(notice => notice.notice_id === other.notice_id).status, 'pending_delivery');
+    assert.equal(after.snapshot.data.notices.find(notice => notice.notice_id === held.notice_id).status, 'unknown');
+  } finally {
+    await session.close();
+  }
+});
+
+test('decision-time spend follows capture order in every window', async () => {
+  const { spent } = require('../src/ledger.cjs');
+  const at = minimal.initial_clock;
+  async function apply(infra, event) {
+    const snap = await infra.call('env.snapshot');
+    return infra.call('env.apply_event', { expected_version: snap.version, event });
+  }
+  async function prepare(run, field) {
+    const session = await keel(run);
+    const data = structuredClone(minimal);
+    const card = data.cards.find(item => item.card_id === 'card-4417');
+    const base = spent(data, 'card-4417', at, field);
+    if (field === 'per_month') {
+      card.limits.per_day = 1000000;
+      card.limits.per_month = base + 20000;
+    }
+    if (field === 'lifetime') {
+      card.limits.per_day = 1000000;
+      card.limits.per_month = 1000000;
+      card.limits.lifetime = base + 20000;
+    }
+    const loaded = await load(session.infra, data, householdBinding, at);
+    assert.equal(loaded.status, 'ready');
+    return { session, base };
+  }
+  const fields = [
+    ['per_day', 'exceeds_daily_limit'],
+    ['per_month', 'exceeds_monthly_limit'],
+    ['lifetime', 'exceeds_lifetime_limit']
+  ];
+  for (const [field, code] of fields) {
+    const captured = await prepare('ordercap-' + field, field);
+    try {
+      const prefix = field + '-cap';
+      assert.equal((await apply(captured.session.infra, authEvent(prefix + '-a', 'freshcart:fc-grace:' + prefix + ':1', 7000, at))).status, 'committed');
+      assert.equal((await apply(captured.session.infra, {
+        event_id: prefix + '-capture', at, operation: 'authorization.capture',
+        payload: { authorization_key: 'freshcart:fc-grace:' + prefix + ':1', capture_key: prefix + '-cap', amount_cents: 6500 }
+      })).status, 'committed');
+      assert.equal((await apply(captured.session.infra, authEvent(prefix + '-b', 'freshcart:fc-grace:' + prefix + ':2', 7000, at))).status, 'committed');
+      const declined = await apply(captured.session.infra, authEvent(prefix + '-c', 'freshcart:fc-grace:' + prefix + ':3', 7000, at));
+      assert.equal(declined.status, 'committed');
+      const snap = await captured.session.infra.call('env.snapshot');
+      const row = snap.snapshot.data.declines.find(item => item.authorization_key === 'freshcart:fc-grace:' + prefix + ':3');
+      assert.equal(row.decline_code, code);
+      assert.equal(row.limits_in_force.spend_in_force[field], captured.base + 13500);
+    } finally {
+      await captured.session.close();
+    }
+    const reversed = await prepare('orderdec-' + field, field);
+    try {
+      const data = (await reversed.session.infra.call('env.snapshot')).snapshot.data;
+      const card = data.cards.find(item => item.card_id === 'card-4417');
+      card.limits[field] = reversed.base + 10000;
+      const reloaded = await load(reversed.session.infra, data, householdBinding, at);
+      assert.equal(reloaded.status, 'ready');
+      const prefix = field + '-dec';
+      assert.equal((await apply(reversed.session.infra, authEvent(prefix + '-a', 'freshcart:fc-grace:' + prefix + ':1', 6000, at))).status, 'committed');
+      const declined = await apply(reversed.session.infra, authEvent(prefix + '-b', 'freshcart:fc-grace:' + prefix + ':2', 6000, at));
+      assert.equal(declined.status, 'committed');
+      assert.equal((await apply(reversed.session.infra, {
+        event_id: prefix + '-capture', at, operation: 'authorization.capture',
+        payload: { authorization_key: 'freshcart:fc-grace:' + prefix + ':1', capture_key: prefix + '-cap', amount_cents: 1000 }
+      })).status, 'committed');
+      const follow = await apply(reversed.session.infra, authEvent(prefix + '-c', 'freshcart:fc-grace:' + prefix + ':3', 100, at));
+      assert.equal(follow.status, 'committed');
+      const snap = await reversed.session.infra.call('env.snapshot');
+      const row = snap.snapshot.data.declines.find(item => item.authorization_key === 'freshcart:fc-grace:' + prefix + ':2');
+      assert.equal(row.decline_code, code);
+      assert.equal(row.limits_in_force.spend_in_force[field], reversed.base + 6000);
+      assert.equal(snap.snapshot.data.authorizations.find(item => item.authorization_key === 'freshcart:fc-grace:' + prefix + ':3').status, 'pending');
+    } finally {
+      await reversed.session.close();
+    }
   }
 });

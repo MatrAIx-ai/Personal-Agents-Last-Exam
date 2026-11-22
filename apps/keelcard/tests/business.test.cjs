@@ -1160,7 +1160,7 @@ test('each publication fault halts after one publish and leaves the other notice
   assert.equal(stale.first.report.persisted, false);
   assert.equal(stale.second.report.persisted, true);
   assert.equal(stale.publishes, 1);
-  assert.equal(writes, 2);
+  assert.equal(writes, 3);
   assert.equal(stale.server.notices[0].status, 'unknown');
 
   const outage = await runCase('outage before an event id', {
@@ -1181,4 +1181,60 @@ test('each publication fault halts after one publish and leaves the other notice
   }) + '\n');
   assert.equal(receiptForNotice(mixed, data().notices[0]), null);
   fs.rmSync(mixed, { force: true });
+});
+
+test('an inspection failure stays in the report and can be confirmed from the saved receiver id', async () => {
+  const minimal = require('../fixtures/minimal.json');
+  const copy = structuredClone(minimal);
+  copy.notices = [
+    { notice_id: 'notice-0001-aaaa', kind: 'code', status: 'pending_delivery', cloud_event_id: 'keelcard-kc-adeyemi-notice-0001-aaaa', publish_request_id: 'notice-notice-0001-aaaa', title: 'Code', body: 'Code 111111', created_at: minimal.initial_clock, source_object: { object_type: 'change_request', object_id: 'cr-1' }, related_id: 'cr-1', delivery: null },
+    { notice_id: 'notice-0002-bbbb', kind: 'decline', status: 'pending_delivery', cloud_event_id: 'keelcard-kc-adeyemi-notice-0002-bbbb', publish_request_id: 'notice-notice-0002-bbbb', title: 'Declined', body: 'Declined', created_at: minimal.initial_clock, source_object: { object_type: 'decline', object_id: 'auth-1' }, related_id: 'auth-1', delivery: null }
+  ];
+  let publishes = 0;
+  let failInspection = true;
+  const seen = [];
+  const router = {
+    async call() {
+      publishes += 1;
+      return { status: 'committed', event_id: 'router-' + publishes, stop_run: false };
+    }
+  };
+  const inspect = async ({ event_id }) => {
+    seen.push(event_id);
+    if (failInspection && event_id === 'router-1') throw new Error('inspection is down');
+    return { eventStatus: { status: 'ok', receipt: { status: 'committed', event_id } }, mailRecord: { id: event_id } };
+  };
+  const first = await publishPending({ data: copy, router, inspect });
+  assert.equal(first.halted, false);
+  assert.equal(first.reports[0].outcome, 'unresolved');
+  assert.equal(first.reports[0].persisted, false);
+  assert.equal(first.reports[1].mail_confirmed, true);
+  assert.equal(copy.notices[0].status, 'unknown');
+  assert.equal(copy.notices[0].delivery.event_id, 'router-1');
+  failInspection = false;
+  const again = await publishPending({ data: copy, router, inspect });
+  assert.equal(publishes, 2);
+  assert.equal(again.sent.length, 0);
+  assert.equal(seen.includes('router-1'), true);
+  assert.equal(copy.notices[0].status, 'committed');
+  let writes = 0;
+  copy.publication = {
+    halted: true,
+    notice_id: 'notice-0001-aaaa',
+    publish_request_id: 'notice-notice-0001-aaaa',
+    cloud_event_id: 'keelcard-kc-adeyemi-notice-0001-aaaa',
+    event_id: 'router-1',
+    status: 'committed',
+    stop_run: false,
+    code: null
+  };
+  const saved = await publishPending({
+    data: copy,
+    router,
+    inspect,
+    commit: async () => { writes += 1; return { status: 'committed' }; }
+  });
+  assert.equal(writes, 0);
+  assert.equal(saved.report.persisted, true);
+  assert.equal(copy.notices[1].status, 'committed');
 });
