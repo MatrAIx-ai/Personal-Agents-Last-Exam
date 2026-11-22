@@ -1,0 +1,89 @@
+'use strict';
+const { copy } = require('./domain-utils.cjs');
+const { spent, availableCents, effectiveStatus } = require('./ledger.cjs');
+
+function matchCard(data, cardInput) {
+  if (!cardInput || typeof cardInput !== 'object') return { decline: 'card_not_found' };
+  if (cardInput.card_id) {
+    const card = data.cards.find(item => item.card_id === cardInput.card_id);
+    if (!card) return { decline: 'card_not_found' };
+    if (cardInput.number && cardInput.number !== card.number) return { decline: 'card_details_mismatch', card };
+    if (cardInput.expiry && cardInput.expiry !== card.expiry) return { decline: 'card_details_mismatch', card };
+    if (cardInput.security_code && cardInput.security_code !== card.security_code) return { decline: 'card_details_mismatch', card };
+    return { card };
+  }
+  if (cardInput.number) {
+    const card = data.cards.find(item => item.number === cardInput.number);
+    if (!card) return { decline: 'card_not_found' };
+    if (card.expiry !== cardInput.expiry || card.security_code !== cardInput.security_code) return { decline: 'card_details_mismatch', card };
+    return { card };
+  }
+  return { decline: 'card_not_found' };
+}
+
+function overLimit(limit, amount, already) {
+  if (limit === null || limit === undefined) return false;
+  return amount + (already || 0) > limit;
+}
+
+function decide(data, request, now) {
+  const matched = matchCard(data, request.card);
+  if (matched.decline && !matched.card) {
+    return { decision: 'declined', decline_code: matched.decline, card: null, limits_in_force: { funding_balance_cents: data.funding.balance_cents } };
+  }
+  const card = matched.card;
+  const merchant = request.merchant;
+  const base = {
+    per_transaction: card.limits.per_transaction,
+    per_day: card.limits.per_day,
+    per_month: card.limits.per_month,
+    lifetime: card.limits.lifetime,
+    merchant_lock: card.merchant_lock,
+    categories: copy(card.categories),
+    category_blocks: copy(data.category_blocks),
+    merchant_blocked: data.merchant_blocks.includes(merchant.merchant_id),
+    funding_balance_cents: data.funding.balance_cents,
+    available_cents: availableCents(data, now)
+  };
+  const decline = code => ({ decision: 'declined', decline_code: code, card, limits_in_force: base });
+  if (matched.decline) return decline(matched.decline);
+  if (card.status === 'paused') return decline('card_paused');
+  if (card.status === 'closed') return decline(card.closure_reason === 'single_use' ? 'single_use_spent' : 'card_closed');
+  if (card.type === 'single_use') {
+    const used = data.authorizations.some(auth => auth.card_id === card.card_id && ['pending', 'captured', 'refunded', 'partially_refunded'].includes(effectiveStatus(auth, now)));
+    if (used) return decline('single_use_spent');
+  }
+  if (card.type === 'merchant_locked' && card.merchant_lock && card.merchant_lock !== merchant.merchant_id) return decline('merchant_not_allowed');
+  if (card.type === 'category_locked' && !card.categories.includes(merchant.category)) return decline('category_blocked');
+  if (data.category_blocks.includes(merchant.category)) return decline('category_blocked');
+  if (data.merchant_blocks.includes(merchant.merchant_id)) return decline('merchant_blocked');
+  const amount = request.amount_cents;
+  if (overLimit(card.limits.per_transaction, amount, 0)) return decline('exceeds_transaction_limit');
+  if (overLimit(card.limits.per_day, amount, spent(data, card.card_id, now, 'per_day'))) return decline('exceeds_daily_limit');
+  if (overLimit(card.limits.per_month, amount, spent(data, card.card_id, now, 'per_month'))) return decline('exceeds_monthly_limit');
+  if (overLimit(card.limits.lifetime, amount, spent(data, card.card_id, now, 'lifetime'))) return decline('exceeds_lifetime_limit');
+  if (amount > availableCents(data, now)) return decline('insufficient_funds');
+  return { decision: 'approved', decline_code: null, card, limits_in_force: base };
+}
+
+function contentKey(payload) {
+  return JSON.stringify({
+    authorization_key: payload.authorization_key,
+    card_id: payload.card.card_id || null,
+    number: payload.card.number || null,
+    expiry: payload.card.expiry || null,
+    security_code: payload.card.security_code || null,
+    merchant_id: payload.merchant.merchant_id,
+    merchant_name: payload.merchant.name,
+    category: payload.merchant.category,
+    amount_cents: payload.amount_cents,
+    currency: payload.currency,
+    merchant_ref: payload.merchant_ref || null
+  });
+}
+
+function findDecision(data, key) {
+  return data.authorizations.find(item => item.authorization_key === key) || data.declines.find(item => item.authorization_key === key) || null;
+}
+
+module.exports = { decide, contentKey, findDecision };
