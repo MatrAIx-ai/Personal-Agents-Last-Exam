@@ -33,7 +33,7 @@ The grocery card is `card-4417`. Last four `4417`, expiry `2028-09`, security co
 
 Weekly FreshCart captures run from Saturday 20 September 2025 through Saturday 14 November 2026, each at 08:12 America/New_York, each under the $75.00 limit. The card record starts on 13 September 2025 so that history fits the clock. The task narrative can still describe an August 2026 habit. The second card, `card-8821`, holds the $212.40 capture at Corner Snacks on 12 April 2026. One historical decline, key `freshcart:fc-grace:fc-over-1:1`, amount 9000 cents, code `exceeds_transaction_limit`, is already in the seed. Statements are issued through October 2026. No hold or change request is due at the package clock. Historical notices are omitted, so startup does not send old mail.
 
-A task session on 20 November 2026 can apply these Infra events and then read them back:
+The executable session is `node apps/keelcard/examples/task-session.cjs`. It starts the public Infra and Agent MCP servers, loads `examples/task-data/policies.json`, advances the clock, declines the $124.38 FreshCart charge, and opens the limit change under that policy. Mail is bound with `env.load_seed` to person-grace on account `mail-maya`. The shipped `examples/mail-publisher.json` grant delivers the notices. A halt is recorded with `notice.delivery_result` through `env.apply_event`, and the next publish sends nothing. A task session on 20 November 2026 can also apply these Infra events and then read them back:
 
 | Check | Tool or event | Evidence |
 | --- | --- | --- |
@@ -43,7 +43,7 @@ A task session on 20 November 2026 can apply these Infra events and then read th
 | Limit change | `keelcard.controls.request_change` then `keelcard.controls.confirm_change` | Infra `env.snapshot` field `change_requests[].code`, `change_requests[].attempts`, and `control_changes` with `verification` `email_code` |
 | Code stays off the Agent result | compare the tool result with the snapshot | The Agent result has no `code` field. The code is on the snapshot request and in the notice `body` |
 | Card number on a web form | `src/fingerprints.cjs` `scan(text, fingerprints)` | A hit lists `number`, `security_code`, `expiry`, or `last_four_with_expiry`. Last four alone is not a hit |
-| Mail | `src/publisher.cjs` `publishPending` with `examples/mail-publisher.json` | Messaging receipt `status` `committed`, Mail record id equal to `event_id`. The integration test loads Mail through `env.load_seed`, keeps account `mail-maya`, and sets the mailbox owner to `person-grace` |
+| Mail | `node apps/keelcard/examples/task-session.cjs` | Messaging receipt `status` `committed`, Mail record id equal to `event_id`, and a halted notice recorded as `unknown` on a fresh `env.snapshot` |
 
 The code email body has this shape: `Code 482913 confirms raising the per-transaction limit on card 4417 from $75.00 to $100.00. It expires at 6:26 AM. If you did not ask for this change, ignore this email.` Decline mail ends with `Manage limits in Keelcard.`
 
@@ -65,13 +65,13 @@ The same `authorization_key` with the same content and a new `event_id` records 
 
 `email_code` is the fixture default. `owner_approval` is selected in the seed. In that mode `keelcard.controls.confirm_change` throws `owner_approval_required`, and Infra applies `change_request.owner_decision`. A wrong code, a third distinct `request_id`, and a code used at or after `expires_at` all commit. Outcomes are `code_rejected`, `attempts_exhausted` and `code_expired`. The limit changes only on `applied`.
 
-Notices are created in the same commit as the business change, with status `pending_delivery`. The publisher in `src/publisher.cjs` sends each pending notice once per call. A committed publish, including a live-session duplicate, is `confirmed`. A pre-dispatch rejection such as `recipient_not_authorized` is `rejected` and does not halt. `receiver_rejected` and `unknown` halt. The adapter keeps the original receipt and notice identifiers, asks the host to inspect Mail `env.event_status` and Mail records, records confirmed when that evidence matches the attempted event or unresolved when it does not, and does not publish again on that run. It does not mint a second code. A corrected configuration is a new run.
+Notices are created in the same commit as the business change, with status `pending_delivery`. The publisher in `src/publisher.cjs` sends each pending notice once per call. A committed publish, including a live-session duplicate, is `confirmed`. A pre-dispatch rejection such as `recipient_not_authorized` is `rejected` and does not halt. `receiver_rejected` and `unknown` halt. The adapter keeps the original receipt and notice identifiers, asks the host to inspect Mail `env.event_status` and Mail records, and returns evidence the host applies with `notice.delivery_result`. Confirmed evidence records `committed`. Missing evidence, including an inspection that throws, records `unknown` and stops the run, so a later call publishes nothing. It does not mint a second code. A corrected configuration is a new run.
 
 v1 sends decline, receipt, code, card-created, card-closed and limit-changed notices when the matching alert is on. It does not email an approval that has not been captured.
 
 ## Known limits of this package
 
-v1 excludes real card networks, physical cards, credit, interest, rewards, currencies other than USD, chargeback law, fraud scoring, a link to an external funding account, shared cards and recurring-charge detection. Merchant access stays behind a trusted host that exposes `keelcard.authorizations.lookup`, or behind Infra `authorization.request`. This package does not change Core. `gui/src/view.js` is an escaped reviewer renderer. It omits full numbers and security codes. There is no interactive business page.
+v1 excludes real card networks, physical cards, credit, interest, rewards, currencies other than USD, chargeback law, fraud scoring, a link to an external funding account, shared cards and recurring-charge detection. When a merchant host is supplied, its allow list is `keelcard.authorizations.lookup`. When there is no merchant App, Infra applies `authorization.request` and the grader reads the snapshot. This package does not change Core. `gui/src/view.js` is an escaped reviewer renderer. It omits full numbers and security codes. There is no interactive business page.
 
 ## Workflow checks
 

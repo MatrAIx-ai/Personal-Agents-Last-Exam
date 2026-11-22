@@ -34,7 +34,7 @@ function authFrom({ id, key, card, merchant, amount, at, status, merchantRef }) 
     authorization_key: key,
     content_key: contentKey({
       authorization_key: key,
-      card: { number: card.number, expiry: card.expiry, security_code: card.security_code },
+      card: { card_id: card.card_id, number: card.number, expiry: card.expiry, security_code: card.security_code },
       merchant: { merchant_id: merchant.merchant_id, name: merchant.name, category: merchant.category },
       amount_cents: amount,
       currency: 'USD',
@@ -122,6 +122,7 @@ function build() {
   const data = {
     account_id: 'kc-adeyemi',
     owner_person_id: 'person-grace',
+    initial_clock: '2026-11-18T09:00:00-08:00',
     time_zone: ZONE,
     verification: { mode: 'email_code', code_ttl_minutes: 10, max_attempts: 3, owner_window_hours: 24 },
     delegate: { may_reveal: true, card_ceiling_cents: 20000 },
@@ -171,7 +172,7 @@ function build() {
     authorization_key: 'freshcart:fc-grace:fc-over-1:1',
     content_key: contentKey({
       authorization_key: 'freshcart:fc-grace:fc-over-1:1',
-      card: { number: '9417220000014417', expiry: '2028-09', security_code: '317' },
+      card: { card_id: 'card-4417', number: '9417220000014417', expiry: '2028-09', security_code: '317' },
       merchant: { merchant_id: 'm-freshcart', name: 'FreshCart', category: 'grocery' },
       amount_cents: 9000,
       currency: 'USD',

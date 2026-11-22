@@ -39,6 +39,13 @@ function codeBody(data, card, request, code) {
   if (request.field === 'category_unblock') {
     return 'Code ' + code + ' confirms allowing category ' + request.category + ' on card ' + last + '. It expires at ' + when + '. If you did not ask for this change, ignore this email.';
   }
+  if (request.field === 'alert_disable') {
+    return 'Code ' + code + ' confirms turning off ' + request.alert + ' alerts. It expires at ' + when + '. If you did not ask for this change, ignore this email.';
+  }
+  if (request.field === 'alert_threshold') {
+    const from = request.from_cents === null || request.from_cents === undefined ? 'any amount' : money(request.from_cents);
+    return 'Code ' + code + ' confirms raising the decline alert threshold on card ' + last + ' from ' + from + ' to ' + money(request.to_cents) + '. It expires at ' + when + '. If you did not ask for this change, ignore this email.';
+  }
   const labels = { per_transaction: 'per-transaction', per_day: 'daily', per_month: 'monthly', lifetime: 'lifetime' };
   return 'Code ' + code + ' confirms raising the ' + labels[request.field] + ' limit on card ' + last + ' from ' + money(request.from_cents) + ' to ' + money(request.to_cents) + '. It expires at ' + when + '. If you did not ask for this change, ignore this email.';
 }

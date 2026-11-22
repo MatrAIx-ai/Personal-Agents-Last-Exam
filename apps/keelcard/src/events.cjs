@@ -83,8 +83,13 @@ function applyEvent(ctx, data, event) {
     return data;
   }
   if (event.operation === 'change_request.owner_decision') {
+    if (!payload.change_request_id) fail('invalid_event', 'Owner decision needs a change request id.');
+    if (payload.decision !== 'approved' && payload.decision !== 'denied') fail('invalid_event', 'Owner decision must be approved or denied.');
     const request = data.change_requests.find(item => item.change_request_id === payload.change_request_id);
     if (!request) fail('not_pending', 'There is no open owner request with that id.');
+    if (data.verification.mode !== 'owner_approval' && request.mode !== 'owner_approval') {
+      fail('invalid_event', 'Owner decisions apply only in owner_approval mode.');
+    }
     const wasOpen = request.status === 'pending_owner' || request.status === 'pending_verification';
     settleTouched(data, ctx.virtual_now, { requestId: request.change_request_id });
     if (wasOpen && request.status === 'expired') {
@@ -92,20 +97,23 @@ function applyEvent(ctx, data, event) {
       return data;
     }
     if (request.status !== 'pending_owner') fail('not_pending', 'That request is not waiting for an owner decision.');
-    if (payload.decision === 'approved') applyRequest(ctx, data, request, 'owner', 'owner_approval');
-    else if (payload.decision === 'denied') {
+    if (payload.decision === 'approved') applyRequest(ctx, data, request, 'owner', 'owner_approval', event.event_id);
+    else {
       request.status = 'denied';
       request.resolved_at = ctx.virtual_now;
       log(ctx, 'keelcard.owner_decision_denied', { change_request_id: request.change_request_id });
-    } else fail('invalid_event', 'Owner decision must be approved or denied.');
+    }
     return data;
   }
   if (event.operation === 'notice.delivery_result') {
-    const notice = data.notices.find(item => item.notice_id === payload.notice_id);
-    if (!notice) fail('notice_not_found', 'Notice does not exist.');
+    if (!payload.notice_id) fail('invalid_event', 'Delivery result needs a notice id.');
+    if (!payload.publish_request_id) fail('invalid_event', 'Delivery result needs the publish request id.');
     const next = payload.status;
     if (!['committed', 'rejected', 'unknown'].includes(next)) fail('invalid_event', 'Unknown delivery status.');
-    if (payload.publish_request_id && payload.publish_request_id !== notice.publish_request_id) {
+    if (next === 'rejected' && !payload.code) fail('invalid_event', 'A rejected delivery needs a rejection code.');
+    const notice = data.notices.find(item => item.notice_id === payload.notice_id);
+    if (!notice) fail('notice_not_found', 'Notice does not exist.');
+    if (payload.publish_request_id !== notice.publish_request_id) {
       fail('delivery_status_conflict', 'Delivery evidence names a different publish request.');
     }
     if (notice.delivery && notice.delivery.event_id && payload.event_id && notice.delivery.event_id !== payload.event_id) {

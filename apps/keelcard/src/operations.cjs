@@ -4,7 +4,7 @@ const { log } = require('./diagnostics.cjs');
 const { maskCard, transactionView, lookupView, requestView, summary } = require('./views.cjs');
 const { findDecision } = require('./decisions.cjs');
 const {
-  findCard, touch, assertActive, recordChange, createCard, openChange, applyRequest, limitNotice
+  findCard, touch, assertActive, recordChange, createCard, openChange, applyRequest, limitNotice, cancelOpenRequests
 } = require('./changes.cjs');
 
 function requestsFor(data, cardId, now) {
@@ -128,12 +128,7 @@ function handleTool(ctx, data, name, args) {
     card.closure_reason = 'closed';
     card.closed_at = ctx.virtual_now;
     touch(ctx, card);
-    for (const request of data.change_requests) {
-      if (request.card_id === card.card_id && (request.status === 'pending_verification' || request.status === 'pending_owner')) {
-        request.status = 'cancelled';
-        request.resolved_at = ctx.virtual_now;
-      }
-    }
+    cancelOpenRequests(ctx, data, card.card_id);
     if (data.alerts.card_events) {
       require('./notices.cjs').maybe(ctx, data, true, {
         kind: 'card_closed',
@@ -214,7 +209,7 @@ function handleTool(ctx, data, name, args) {
     request.attempts.push({ request_id: args.request_id, at: ctx.virtual_now, code_matched: matched, outcome, connection_role: ctx.role || 'agent' });
     request.attempts_used += 1;
     if (matched) {
-      applyRequest(ctx, data, request, 'delegate', 'email_code');
+      applyRequest(ctx, data, request, 'delegate', 'email_code', args.request_id);
     } else if (outcome === 'attempts_exhausted') {
       request.status = 'failed';
       request.resolved_at = ctx.virtual_now;

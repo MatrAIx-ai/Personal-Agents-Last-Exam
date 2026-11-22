@@ -187,6 +187,8 @@ test('email codes commit rejections, expiry and a successful raise', () => {
   assert.equal(applied.outcome, 'applied');
   assert.equal(applied.limit_cents, 10000);
   assert.equal(f.data.cards[0].limits.per_transaction, 10000);
+  assert.equal(f.data.control_changes.at(-1).request_id, stored.request_id);
+  assert.notEqual(f.data.control_changes.at(-1).applied_request_id, stored.request_id);
   const change = f.data.control_changes.at(-1);
   assert.equal(change.changed_by, 'delegate');
   assert.equal(change.verification, 'email_code');
@@ -233,6 +235,7 @@ test('owner approval applies, denies and expires without an email code', () => {
   assert.equal(f.data.cards[0].limits.per_transaction, 15000);
   assert.equal(f.data.control_changes.at(-1).verification, 'owner_approval');
   assert.equal(f.data.control_changes.at(-1).changed_by, 'owner');
+  assert.equal(f.data.control_changes.at(-1).applied_request_id, 'owner-approve-1');
   const denied = fixture();
   denied.mutate(data => { data.verification.mode = 'owner_approval'; });
   const denyId = denied.call('keelcard.controls.request_change', { card_id: CARD, field: 'per_transaction', amount_cents: 16000 }).change_request_id;
@@ -265,7 +268,7 @@ test('owner approval applies, denies and expires without an email code', () => {
     operation: 'change_request.owner_decision',
     payload: { change_request_id: emailId, decision: 'approved' }
   }));
-  assert.equal(rejected.code, 'not_pending');
+  assert.equal(rejected.code, 'invalid_event');
   assert.equal(email.data.cards[0].limits.per_transaction, 7500);
 });
 
@@ -406,11 +409,19 @@ test('decision order covers card state, locks, blocks, limits and funding', () =
   pay('once-1', 'once:kc:once:1', 500, at);
   pay('once-2', 'once:kc:once:2', 500, '2026-11-19T10:05:00-05:00');
   assert.equal(f.data.declines.at(-1).decline_code, 'single_use_spent');
+  f.mutate(data => {
+    const held = data.cards.find(item => item.card_id === created.card_id);
+    held.status = 'paused';
+    held.paused_by = 'owner';
+  });
+  f.call('keelcard.controls.request_change', { card_id: created.card_id, field: 'unpause' });
+  assert.equal(f.data.change_requests.at(-1).status, 'pending_verification');
   f.event({
     event_id: 'once-cap', at: '2026-11-19T10:06:00-05:00', operation: 'authorization.capture',
     payload: { authorization_key: 'once:kc:once:1', capture_key: 'cap-once', amount_cents: 500 }
   });
   assert.equal(f.data.cards.find(item => item.card_id === created.card_id).closure_reason, 'single_use');
+  assert.equal(f.data.change_requests.at(-1).status, 'cancelled');
   pay('once-3', 'once:kc:once:3', 500, '2026-11-19T10:07:00-05:00');
   assert.equal(f.data.declines.at(-1).decline_code, 'single_use_spent');
   const locked = f.call('keelcard.cards.create', {
@@ -519,7 +530,7 @@ test('delivery results and the reviewer renderer keep secrets in their own place
     event_id: 'delivery-conflict',
     at: addMinutes(f.ctx.virtual_now, 1),
     operation: 'notice.delivery_result',
-    payload: { notice_id: notice.notice_id, publish_request_id: notice.publish_request_id, status: 'rejected' }
+    payload: { notice_id: notice.notice_id, publish_request_id: notice.publish_request_id, status: 'rejected', code: 'receiver_rejected' }
   })).code, 'delivery_status_conflict');
   assert.equal(classifyDelivery({ receipt: { status: 'committed', duplicate: true } }).outcome, 'confirmed');
   assert.equal(classifyDelivery({ receipt: { status: 'rejected', code: 'recipient_not_authorized' } }).outcome, 'rejected');
@@ -624,10 +635,11 @@ test('runtime replays, stale versions, reset and the clock', { skip: !fs.existsS
   const raiseTool = require('../tools.json').find(tool => tool.name === 'keelcard.controls.request_change');
   const replayValid = compile(raiseTool.outputSchema, path.resolve(__dirname, '..'));
   assert.equal(replayValid(replay.result), true);
-  const emptyCard = groceryEvent('empty-card', 'freshcart:fc-grace:fc-empty:1', 1000, '2026-11-21T12:00:00-05:00', { card: {} });
+  const emptyCard = groceryEvent('empty-card', 'freshcart:fc-grace:fc-empty:1', 1000, ahead, { card: {} });
   const beforeEmpty = JSON.stringify(settled.state.data);
   const empty = model.execute(settled.state, 'infra', 'env.apply_event', { expected_version: model.version(settled.state), event: emptyCard });
   assert.equal(empty.result.status, 'invalid_event');
+  assert.match(JSON.stringify(empty.result), /card id or the full card details/);
   assert.equal(JSON.stringify(empty.state.data), beforeEmpty);
   assert.equal(empty.state.virtual_now, settled.state.virtual_now);
   assert.equal(empty.state.audit.at(-1).decision, 'deny');
@@ -660,9 +672,10 @@ test('runtime replays, stale versions, reset and the clock', { skip: !fs.existsS
   const openedWrong = model.execute(firstRace.state, 'agent', 'keelcard.controls.request_change', {
     card_id: CARD, field: 'per_transaction', amount_cents: 12000, expected_version: model.version(firstRace.state), request_id: 'open-wrong'
   });
+  const storedWrong = openedWrong.state.data.change_requests.at(-1).code;
   const wrongArgs = {
     change_request_id: openedWrong.state.data.change_requests.at(-1).change_request_id,
-    code: '000000',
+    code: storedWrong === '010101' ? '010102' : '010101',
     expected_version: model.version(openedWrong.state),
     request_id: 'wrong-once'
   };
@@ -794,10 +807,19 @@ test('fingerprints match grouped numbers and short expiry forms', () => {
 
 test('a seeded authorization is redelivered with the shared digest', () => {
   const f = fixture();
-  f.event(groceryEvent('seed-again', 'freshcart:fc-grace:fc-week-01:1', 4200, '2026-11-20T16:00:00-05:00'));
+  const sameCard = { card_id: CARD, number: GROCERY, expiry: '2028-09', security_code: '317' };
+  f.event(groceryEvent('seed-again', 'freshcart:fc-grace:fc-week-01:1', 4200, '2026-11-20T16:00:00-05:00', { card: sameCard }));
   const row = f.data.authorizations.find(item => item.authorization_key === 'freshcart:fc-grace:fc-week-01:1');
   assert.equal(row.redelivered_at.length, 1);
   assert.equal(f.data.authorizations.filter(item => item.authorization_key === 'freshcart:fc-grace:fc-week-01:1').length, 1);
+  const changed = boom(() => f.event(groceryEvent('seed-other-card', 'freshcart:fc-grace:fc-week-01:1', 4200, '2026-11-20T16:01:00-05:00', {
+    card: { card_id: 'card-8821', number: GROCERY, expiry: '2028-09', security_code: '317' }
+  })));
+  assert.equal(changed.code, 'authorization_key_conflict');
+  f.event(groceryEvent('fresh-mismatch', 'freshcart:fc-grace:fc-fresh-card:1', 1000, '2026-11-20T16:02:00-05:00', {
+    card: { card_id: 'card-8821', number: GROCERY, expiry: '2028-09', security_code: '317' }
+  }));
+  assert.equal(f.data.declines.at(-1).decline_code, 'card_details_mismatch');
 });
 
 test('a direct lower sends a limit notice and email verification requires code alerts', () => {
@@ -901,6 +923,10 @@ test('disputes, refunds, top-ups and alert writes follow the approved rules', ()
   const off = alerts.call('keelcard.alerts.preferences.update', { alert: 'declines', enabled: false });
   assert.equal(off.outcome, 'request_opened');
   assert.equal(alerts.data.alerts.declines, true);
+  assert.match(alerts.data.notices.at(-1).body, /turning off declines alerts/);
+  assert.equal(alerts.data.notices.at(-1).body.includes('undefined'), false);
+  assert.equal(boom(() => alerts.call('keelcard.alerts.preferences.update', { alert: 'codes', enabled: false })).code, 'invalid_arguments');
+  assert.equal(alerts.data.change_requests.filter(request => request.alert === 'codes').length, 0);
   assert.equal(alerts.call('keelcard.alerts.preferences.update', { decline_threshold_cents: 1000 }).outcome, 'request_opened');
   const threshold = fixture();
   threshold.mutate(data => { data.alerts.decline_threshold_cents = 5000; });
@@ -909,6 +935,8 @@ test('disputes, refunds, top-ups and alert writes follow the approved rules', ()
   assert.equal(threshold.data.alerts.decline_threshold_cents, 1000);
   const raise = threshold.call('keelcard.alerts.preferences.update', { decline_threshold_cents: 8000 });
   assert.equal(raise.outcome, 'request_opened');
+  assert.match(threshold.data.notices.at(-1).body, /decline alert threshold/);
+  assert.equal(threshold.data.notices.at(-1).body.includes('undefined'), false);
   assert.equal(threshold.data.alerts.decline_threshold_cents, 1000);
 });
 
@@ -934,15 +962,17 @@ test('new cards use private credentials and the other fixtures still validate', 
   assert.equal(delegate.verification.mode, 'owner_approval');
   assert.equal(delegate.change_requests[0].status, 'pending_owner');
   const { joinEvidence } = require('../examples/join-evidence.cjs');
-  const joined = joinEvidence({ data: f.data, audit: [{ tool: 'keelcard.cards.create', decision: 'allow', virtual_time: f.ctx.virtual_now }] }, [
+  const joined = joinEvidence({ data: f.data, audit: [{ tool: 'keelcard.cards.create', decision: 'allow', input: { request_id: 'local-create' }, virtual_time: f.ctx.virtual_now }] }, [
     { request_id: 'local-create', tool: 'keelcard.cards.create', arguments: { type: 'general' }, result: created }
   ]);
   assert.equal(joined.counts.authorizations, f.data.authorizations.length + f.data.declines.length);
+  assert.equal(joined.authorizations[0].limits_in_force.per_transaction, 7500);
   assert.equal(joined.rejected.missing_request, undefined);
-  const denied = joinEvidence({ data: f.data, audit: [{ tool: 'keelcard.cards.reveal', decision: 'deny', reason: 'card_closed', virtual_time: f.ctx.virtual_now }] }, [
+  const denied = joinEvidence({ data: f.data, audit: [{ tool: 'keelcard.cards.reveal', decision: 'deny', reason: 'card_closed', input: { request_id: 'req-reveal' }, virtual_time: f.ctx.virtual_now }] }, [
     { request_id: 'req-reveal', tool: 'keelcard.cards.reveal', arguments: { card_id: CARD } }
   ]);
   assert.equal(denied.rejected['req-reveal'][0].reason, 'card_closed');
+  assert.equal(joined.requests.length, f.data.change_requests.length);
   const before = JSON.stringify(f.data);
   joinEvidence({ data: f.data, audit: [] }, []);
   assert.equal(JSON.stringify(f.data), before);

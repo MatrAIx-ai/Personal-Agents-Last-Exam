@@ -1250,6 +1250,18 @@
                 "type": "null"
               }
             ]
+          },
+          "applied_request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -1710,11 +1722,16 @@
           }
         }
       }
+    },
+    "initial_clock": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [
     "account_id",
     "owner_person_id",
+    "initial_clock",
     "time_zone",
     "verification",
     "delegate",

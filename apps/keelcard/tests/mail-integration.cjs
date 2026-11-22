@@ -152,6 +152,9 @@ test('Mail rejects an oversized notice and missing evidence stays unresolved', a
     assert.equal(rejected.report.outcome, 'unresolved');
     assert.equal(data.notices[0].status, 'pending_delivery');
     assert.equal(data.change_requests[0].status, 'pending_verification');
+    const held = await publishPending({ data, router });
+    assert.equal(held.sent.length, 0);
+    assert.equal(held.stopped, true);
     const after = await mail.call('env.snapshot');
     assert.equal(after.snapshot.data.messages.length, before.snapshot.data.messages.length);
     const quiet = fixture();

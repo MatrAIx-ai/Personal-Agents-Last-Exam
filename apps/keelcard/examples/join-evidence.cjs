@@ -5,24 +5,91 @@ function stateOf(snapshot) {
   return snapshot;
 }
 
+function requestIdOf(row) {
+  return row && row.input && row.input.request_id || null;
+}
+
+function wanted(record) {
+  if (record.result && record.result.duplicate === true) return 'allow';
+  if (!record.result) return 'deny';
+  if (record.result.status && !['committed', 'ok', 'ready'].includes(record.result.status)) return 'deny';
+  return 'allow';
+}
+
+function pairRecord(record, audit, used) {
+  const want = wanted(record);
+  const matches = [];
+  audit.forEach((row, index) => {
+    if (used.has(index) || row.tool !== record.tool || row.decision !== want) return;
+    const auditRequest = requestIdOf(row);
+    if (!record.request_id || auditRequest !== record.request_id) return;
+    matches.push({ index, row });
+  });
+  if (record.result && record.result.duplicate === true) {
+    return {
+      request_id: record.request_id || null,
+      tool: record.tool || null,
+      arguments: record.arguments || null,
+      result: record.result,
+      audit: matches[0] ? matches[0].row : null,
+      audit_rows: matches.map(item => item.row),
+      match: 'duplicate',
+      ambiguous: false
+    };
+  }
+  if (!record.request_id) {
+    return {
+      request_id: null,
+      tool: record.tool || null,
+      arguments: record.arguments || null,
+      result: record.result || null,
+      audit: null,
+      audit_rows: [],
+      match: 'ambiguous',
+      ambiguous: true
+    };
+  }
+  if (matches.length === 0) {
+    return {
+      request_id: record.request_id,
+      tool: record.tool || null,
+      arguments: record.arguments || null,
+      result: record.result || null,
+      audit: null,
+      audit_rows: [],
+      match: 'unmatched',
+      ambiguous: false
+    };
+  }
+  for (const item of matches) used.add(item.index);
+  return {
+    request_id: record.request_id,
+    tool: record.tool || null,
+    arguments: record.arguments || null,
+    result: record.result || null,
+    audit: matches[0].row,
+    audit_rows: matches.map(item => item.row),
+    match: 'request_id',
+    ambiguous: false
+  };
+}
+
 function joinEvidence(snapshot, execution) {
   const state = stateOf(snapshot || {});
   const data = state.data || {};
   const audit = Array.isArray(state.audit) ? state.audit : [];
   const records = Array.isArray(execution) ? execution : [];
   const used = new Set();
-  const paired = records.map(record => {
-    const index = audit.findIndex((row, i) => !used.has(i) && row.tool === record.tool);
-    const row = index >= 0 ? audit[index] : null;
-    if (index >= 0) used.add(index);
-    return { request_id: record.request_id || null, tool: record.tool || null, arguments: record.arguments || null, result: record.result || null, audit: row };
-  });
+  const paired = records.map(record => pairRecord(record, audit, used));
   const denied = {};
   for (const item of paired) {
-    if (!item.audit || item.audit.decision !== 'deny') continue;
+    const rows = (item.audit_rows || []).filter(row => row.decision === 'deny');
+    if (!rows.length || item.match === 'duplicate' || item.match === 'ambiguous') continue;
     const key = item.request_id || 'missing-request';
     if (!denied[key]) denied[key] = [];
-    denied[key].push({ tool: item.tool, reason: item.audit.reason, virtual_time: item.audit.virtual_time, arguments: item.arguments });
+    for (const row of rows) {
+      denied[key].push({ tool: item.tool, reason: row.reason, virtual_time: row.virtual_time, arguments: item.arguments });
+    }
   }
   const attempts = (data.change_requests || []).flatMap(request => (request.attempts || []).map(attempt => ({
     change_request_id: request.change_request_id,
@@ -31,6 +98,13 @@ function joinEvidence(snapshot, execution) {
     code_matched: attempt.code_matched,
     at: attempt.at
   })));
+  const requests = (data.change_requests || []).map(request => ({
+    change_request_id: request.change_request_id,
+    request_id: request.request_id || null,
+    status: request.status,
+    field: request.field,
+    attempts: request.attempts || []
+  }));
   return {
     run_id: state.run_id || null,
     app_id: state.app_id || 'keelcard',
@@ -41,22 +115,41 @@ function joinEvidence(snapshot, execution) {
       decision: row.decision,
       decline_code: row.decline_code || null,
       amount_cents: row.amount_cents,
+      card_id: row.card_id || null,
+      merchant_id: row.merchant_id || null,
+      category: row.category || null,
+      limits_in_force: row.limits_in_force || null,
       source_event_id: row.source_event_id || null,
       merchant_ref: row.merchant_ref || null
     })),
+    requests,
     attempts,
     control_changes: (data.control_changes || []).map(row => ({
-      control_change_id: row.control_change_id, request_id: row.request_id || null, field: row.field, changed_by: row.changed_by, change_request_id: row.change_request_id || null
+      control_change_id: row.control_change_id,
+      request_id: row.request_id || null,
+      applied_request_id: row.applied_request_id || null,
+      field: row.field,
+      changed_by: row.changed_by,
+      verification: row.verification || null,
+      change_request_id: row.change_request_id || null
     })),
     reveals: (data.reveals || []).map(row => ({ reveal_id: row.reveal_id, card_id: row.card_id, request_id: row.request_id || null, at: row.at })),
     notices: (data.notices || []).map(row => ({
-      notice_id: row.notice_id, kind: row.kind, cloud_event_id: row.cloud_event_id, publish_request_id: row.publish_request_id, status: row.status
+      notice_id: row.notice_id,
+      kind: row.kind,
+      cloud_event_id: row.cloud_event_id,
+      publish_request_id: row.publish_request_id,
+      status: row.status,
+      event_id: row.delivery && row.delivery.event_id || null
     })),
     fingerprints: data.fingerprints || [],
     rejected: denied,
+    ambiguous: paired.filter(item => item.ambiguous).map(item => item.request_id),
+    paired,
     counts: {
       authorizations: (data.authorizations || []).length + (data.declines || []).length,
       attempts: attempts.length,
+      requests: requests.length,
       control_changes: (data.control_changes || []).length,
       reveals: (data.reveals || []).length,
       notices: (data.notices || []).length,

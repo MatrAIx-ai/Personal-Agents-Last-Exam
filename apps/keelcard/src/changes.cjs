@@ -22,12 +22,22 @@ function assertActive(card) {
   return card;
 }
 
+function cancelOpenRequests(ctx, data, cardId) {
+  for (const request of data.change_requests) {
+    if (request.card_id === cardId && (request.status === 'pending_verification' || request.status === 'pending_owner')) {
+      request.status = 'cancelled';
+      request.resolved_at = ctx.virtual_now;
+    }
+  }
+}
+
 function recordChange(ctx, data, row) {
   const entry = {
     control_change_id: nextSerial(data.control_changes, 'control_change_id', 'cc-'),
     at: ctx.virtual_now,
+    ...row,
     request_id: row.request_id || null,
-    ...row
+    applied_request_id: row.applied_request_id || row.request_id || null
   };
   data.control_changes.push(entry);
   log(ctx, 'keelcard.control_changed', { control_change_id: entry.control_change_id, card_id: entry.card_id, field: entry.field });
@@ -158,6 +168,9 @@ function openChange(ctx, data, spec) {
     if (!data.category_blocks.includes(spec.category)) fail('invalid_arguments', 'That category is not blocked.');
   }
   if (spec.field === 'alert_disable' && !spec.alert) fail('invalid_arguments', 'Turning an alert off needs the alert name.');
+  if (spec.field === 'alert_disable' && spec.alert === 'codes' && data.verification.mode === 'email_code') {
+    fail('invalid_arguments', 'email_code mode keeps the code alert on.');
+  }
   if (spec.field === 'alert_threshold' && !Number.isInteger(spec.to_cents)) fail('invalid_arguments', 'A threshold change needs amount_cents.');
   rejectIrrelevant(spec);
   for (const open of data.change_requests) {
@@ -219,41 +232,45 @@ function limitNotice(ctx, data, card, field, amount, related) {
   });
 }
 
-function applyRequest(ctx, data, request, changedBy, verification) {
+function applyRequest(ctx, data, request, changedBy, verification, appliedId) {
   const card = findCard(data, request.card_id);
   if (card.status === 'closed') fail('card_closed', 'This card is closed.');
+  if (request.field === 'alert_disable' && request.alert === 'codes' && data.verification.mode === 'email_code') {
+    fail('invalid_arguments', 'email_code mode keeps the code alert on.');
+  }
+  const applied_request_id = appliedId || request.request_id || null;
   if (LIMIT_FIELDS.includes(request.field)) {
     const previous = card.limits[request.field];
     card.limits[request.field] = request.to_cents;
     touch(ctx, card);
     recordChange(ctx, data, {
       card_id: card.card_id, field: request.field, from_cents: previous, to_cents: request.to_cents,
-      merchant_id: null, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id
+      merchant_id: null, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id, applied_request_id
     });
     limitNotice(ctx, data, card, request.field, request.to_cents, request.change_request_id);
   } else if (request.field === 'merchant_unblock') {
     data.merchant_blocks = data.merchant_blocks.filter(id => id !== request.merchant_id);
     recordChange(ctx, data, {
       card_id: card.card_id, field: request.field, from_cents: null, to_cents: null,
-      merchant_id: request.merchant_id, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id
+      merchant_id: request.merchant_id, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id, applied_request_id
     });
   } else if (request.field === 'category_unblock') {
     data.category_blocks = data.category_blocks.filter(id => id !== request.category);
     recordChange(ctx, data, {
       card_id: card.card_id, field: request.field, from_cents: null, to_cents: null,
-      merchant_id: null, category: request.category, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id
+      merchant_id: null, category: request.category, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id, applied_request_id
     });
   } else if (request.field === 'alert_disable') {
     data.alerts[request.alert] = false;
     recordChange(ctx, data, {
       card_id: card.card_id, field: request.field, from_cents: null, to_cents: null,
-      merchant_id: null, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id
+      merchant_id: null, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id, applied_request_id
     });
   } else if (request.field === 'alert_threshold') {
     data.alerts.decline_threshold_cents = request.to_cents;
     recordChange(ctx, data, {
       card_id: card.card_id, field: request.field, from_cents: request.from_cents, to_cents: request.to_cents,
-      merchant_id: null, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id
+      merchant_id: null, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id, applied_request_id
     });
   } else if (request.field === 'unpause') {
     card.status = 'active';
@@ -261,7 +278,7 @@ function applyRequest(ctx, data, request, changedBy, verification) {
     touch(ctx, card);
     recordChange(ctx, data, {
       card_id: card.card_id, field: 'unpause', from_cents: null, to_cents: null,
-      merchant_id: null, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id
+      merchant_id: null, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id, applied_request_id
     });
   }
   request.status = 'applied';
@@ -390,6 +407,7 @@ function captureAuthorization(ctx, data, payload) {
     card.closure_reason = 'single_use';
     card.closed_at = ctx.virtual_now;
     touch(ctx, card);
+    cancelOpenRequests(ctx, data, card.card_id);
   }
   maybe(ctx, data, data.alerts.receipts, {
     kind: 'receipt',
@@ -414,6 +432,6 @@ function reverseAuthorization(ctx, data, payload) {
 }
 
 module.exports = {
-  findCard, touch, assertActive, recordChange, createCard, openChange, applyRequest, findOpen, limitNotice,
+  findCard, touch, assertActive, recordChange, cancelOpenRequests, createCard, openChange, applyRequest, findOpen, limitNotice,
   commitAuthorization, captureAuthorization, reverseAuthorization, availableCents
 };

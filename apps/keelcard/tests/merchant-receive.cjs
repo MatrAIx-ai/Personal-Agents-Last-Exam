@@ -92,6 +92,85 @@ test('a granted merchant authorization is recorded and can be looked up without 
   }
 });
 
+test('authorization keys follow the 100 character storage limit', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-merchant-'));
+  const run = 'keelmerchant3';
+  const file = path.join(dir, 'merchant.json');
+  fs.writeFileSync(file, JSON.stringify(config([{ app_id: 'keelcard', account_id: 'kc-adeyemi', channel: 'channel.card.authorization' }])));
+  const router = await create({ config: file, publisher: 'freshcart', run, stateDir: dir });
+  try {
+    const tooLong = message();
+    tooLong.id = 'fc-auth-long';
+    tooLong.data.authorization.authorization_key = 'k' + 'a'.repeat(100);
+    tooLong.data.source_object.object_id = 'fc-long';
+    const rejected = await router.call('router.publish', { request_id: 'fc-long', message: tooLong });
+    assert.ok(rejected.code === 'incompatible_contract' || rejected.code === 'invalid_arguments');
+    assert.equal(rejected.stop_run, undefined);
+    const accepted = message();
+    accepted.id = 'fc-auth-fit';
+    accepted.data.authorization.authorization_key = 'k' + 'a'.repeat(99);
+    accepted.data.source_object.object_id = 'fc-fit';
+    const receipt = await router.call('router.publish', { request_id: 'fc-fit', message: accepted });
+    assert.equal(receipt.status, 'committed');
+  } finally {
+    await router.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('a lookup-only host reads the decision and Infra can apply the request itself', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-merchant-'));
+  const run = 'keelmerchant4';
+  try {
+    const result = await publish(dir, run, [{ app_id: 'keelcard', account_id: 'kc-adeyemi', channel: 'channel.card.authorization' }]);
+    assert.equal(result.receipt.status, 'committed');
+    const infra = new Client('keelcard', 'infra', run, dir, 'lookup-infra', { registry });
+    await infra.initialize();
+    const agent = new Client('keelcard', 'agent', run, dir, 'lookup-agent', { registry });
+    await agent.initialize();
+    try {
+      const snap = await infra.call('env.snapshot');
+      const policies = structuredClone(snap.snapshot.policies);
+      policies.scenario.allow = ['keelcard.authorizations.lookup'];
+      const loaded = await infra.call('env.load_seed', {
+        expected_version: snap.version,
+        request_id: 'lookup-only',
+        data: snap.snapshot.data,
+        binding: snap.snapshot.binding,
+        policies,
+        bundle: snap.snapshot.resources.bundle
+      });
+      assert.equal(loaded.status, 'ready');
+      const denied = await agent.call('keelcard.cards.list', {});
+      assert.equal(denied.status, 'permission_denied');
+      const lookup = await agent.call('keelcard.authorizations.lookup', { authorization_key: 'freshcart:fc-grace:fc-merchant-1:1' });
+      assert.equal(lookup.authorization.decision, 'approved');
+      assert.equal(JSON.stringify(lookup).includes('9417220000014417'), false);
+      const applied = await infra.call('env.apply_event', {
+        expected_version: (await infra.call('env.snapshot')).version,
+        event: {
+          event_id: 'infra-auth-1',
+          at: '2026-11-18T14:00:00-05:00',
+          operation: 'authorization.request',
+          payload: {
+            authorization_key: 'freshcart:fc-grace:fc-infra:1',
+            amount_cents: 1800,
+            currency: 'USD',
+            card: { number: '9417220000014417', expiry: '2028-09', security_code: '317' },
+            merchant: { merchant_id: 'm-freshcart', name: 'FreshCart', category: 'grocery' }
+          }
+        }
+      });
+      assert.equal(applied.status, 'committed');
+    } finally {
+      await agent.close();
+      await infra.close();
+    }
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('an unbound merchant cannot change Keelcard', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-merchant-'));
   const run = 'keelmerchant2';

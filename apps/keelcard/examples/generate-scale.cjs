@@ -2,7 +2,7 @@
 // Builds fixtures (b) and (c). Amounts, dates and card numbers are deterministic.
 const fs = require('node:fs');
 const path = require('node:path');
-const { zonedToIso, luhnComplete, luhnOk, CATEGORIES } = require('../src/domain-utils.cjs');
+const { zonedToIso, luhnComplete, luhnOk, CATEGORIES, addDays } = require('../src/domain-utils.cjs');
 const { postLedger, settleDue } = require('../src/ledger.cjs');
 const { contentKey } = require('../src/decisions.cjs');
 
@@ -63,7 +63,7 @@ function captured({ id, key, card, merchant, amount, at, merchantRef }) {
     authorization_key: key,
     content_key: contentKey({
       authorization_key: key,
-      card: { number: card.number, expiry: card.expiry, security_code: card.security_code },
+      card: { card_id: card.card_id, number: card.number, expiry: card.expiry, security_code: card.security_code },
       merchant: { merchant_id: merchant.merchant_id, name: merchant.name, category: merchant.category },
       amount_cents: amount,
       currency: 'USD',
@@ -86,7 +86,7 @@ function captured({ id, key, card, merchant, amount, at, merchantRef }) {
     hold_cents: 0,
     captured_cents: amount,
     refunded_cents: 0,
-    expires_at: zonedToIso(2026, 12, 1, 0, 0, 0, ZONE),
+    expires_at: addDays(at, 7),
     captured_at: at,
     expired_at: null,
     reversed_at: null,
@@ -112,6 +112,7 @@ function freelancer() {
   const data = {
     account_id: account,
     owner_person_id: 'person-amadi',
+    initial_clock: zonedToIso(2026, 11, 18, 12, 0, 0, ZONE),
     time_zone: ZONE,
     verification: { mode: 'email_code', code_ttl_minutes: 10, max_attempts: 3, owner_window_hours: 24 },
     delegate: { may_reveal: true, card_ceiling_cents: 20000 },
@@ -147,7 +148,7 @@ function freelancer() {
       if (merchant.category === 'telecom') {
         data.declines.push({
           authorization_id: id, authorization_key: key,
-          content_key: contentKey({ authorization_key: key, card: { number: card.number, expiry: card.expiry, security_code: card.security_code }, merchant, amount_cents: amount, currency: 'USD', merchant_ref: merchantRef }),
+          content_key: contentKey({ authorization_key: key, card: { card_id: card.card_id, number: card.number, expiry: card.expiry, security_code: card.security_code }, merchant, amount_cents: amount, currency: 'USD', merchant_ref: merchantRef }),
           card_id: card.card_id, merchant_id: merchant.merchant_id, merchant_name: merchant.name, category: merchant.category,
           amount_cents: amount, currency: 'USD', merchant_ref: merchantRef, source_event_id: 'seed-' + id, decided_at: at,
           limits_in_force: { ...card.limits }, redelivered_at: [], decision: 'declined', decline_code: 'category_blocked', hold_cents: 0, status: 'declined'
@@ -186,6 +187,7 @@ function delegateAccount() {
   return {
     account_id: 'kc-cole',
     owner_person_id: 'person-nia',
+    initial_clock: zonedToIso(2026, 11, 18, 10, 0, 0, ZONE),
     time_zone: ZONE,
     verification: { mode: 'owner_approval', code_ttl_minutes: 10, max_attempts: 3, owner_window_hours: 24 },
     delegate: { may_reveal: false, card_ceiling_cents: 20000 },

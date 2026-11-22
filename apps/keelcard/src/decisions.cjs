@@ -78,7 +78,7 @@ function canonical(value) {
 function contentKey(payload) {
   const body = {
     authorization_key: payload.authorization_key || null,
-    card_id: payload.card && payload.card.number ? null : (payload.card && payload.card.card_id || null),
+    card_id: payload.card && payload.card.card_id || null,
     number: payload.card && payload.card.number || null,
     expiry: payload.card && payload.card.expiry || null,
     security_code: payload.card && payload.card.security_code || null,
