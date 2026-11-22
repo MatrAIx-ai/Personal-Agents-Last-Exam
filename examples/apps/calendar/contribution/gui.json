@@ -1,0 +1,62 @@
+{
+  "schema_version": "pale.gui.v1",
+  "status": "implemented",
+  "surface_id": "calendar-web",
+  "audience": [
+    "reviewer"
+  ],
+  "state_connection": {
+    "app_ids": [
+      "calendar"
+    ],
+    "adapter": "pale.mcp_bridge",
+    "authoritative_state": "app_runtime"
+  },
+  "routes": [
+    {
+      "route_id": "main",
+      "path": "/",
+      "asset_bindings": [
+        {
+          "slot": "header.logo",
+          "asset_id": "calendar-logo",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "content_policy": {
+    "untrusted_html": "text_only",
+    "svg": "disabled",
+    "remote_fetch": "disabled",
+    "remote_allowlist": [],
+    "missing_asset_behavior": "placeholder"
+  },
+  "observation": {
+    "mechanism": "screen_observation",
+    "payload_policy": "visible_surface_only"
+  },
+  "extensions": [
+    {
+      "namespace": "pale.web",
+      "version": "1",
+      "required": false,
+      "data": {
+        "page": "gui/index.html",
+        "controller": "gui/src/app.js",
+        "audience": [
+          "agent",
+          "user"
+        ],
+        "host": "runtime/web/server.cjs",
+        "transport": "agent-mcp-bridge",
+        "status": "implemented"
+      }
+    }
+  ],
+  "entrypoint": {
+    "kind": "local_web",
+    "location": "#example"
+  },
+  "renderer_ref": "gui/src/view.js"
+}
