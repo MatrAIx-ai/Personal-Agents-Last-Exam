@@ -1,6 +1,8 @@
 'use strict';
 const assert = require('node:assert/strict');
+const {execFileSync} = require('node:child_process');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
 const {fixture} = require('./harness.cjs');
@@ -224,6 +226,12 @@ test('each accepted event commits on a fresh seed', () => {
   assert.ok(rows.includes('+alpha'));
   assert.ok(rows.indexOf('+alpha') > rows.indexOf(' beta'));
   assert.ok(rows.indexOf(' beta') > rows.indexOf('-alpha'));
+  const patchDir = fs.mkdtempSync(path.join(os.tmpdir(), 'forkyard-apply-'));
+  fs.mkdirSync(path.join(patchDir, 'src'));
+  fs.writeFileSync(path.join(patchDir, 'src', 'order.js'), 'alpha\nbeta\n');
+  fs.writeFileSync(path.join(patchDir, 'change.diff'), reordered);
+  execFileSync('git', ['apply', '--check', 'change.diff'], {cwd: patchDir});
+  fs.rmSync(patchDir, {recursive: true, force: true});
   const blocked = fixture();
   blocked.event({event_id: 'fy-block-author', at: '2026-11-18T10:09:00-08:00', operation: 'repo.block_account', payload: {repo: 'tidewater/tidewater', actor_account_id: 'acc-ihalvorsen', blocked_account_id: 'fy-tomasreyes', blocked: true}});
   fails(() => blocked.call('forkyard.pulls.comment', {repo: 'tidewater/tidewater', number: 2318, text: 'blocked'}), 'blocked_by_maintainer');
@@ -284,6 +292,8 @@ test('evidence keeps text, subjects, links, attempts and attention', () => {
     repo: 'tidewater/tidewater', number: 2318,
     text: 'See https://postyard.example/@shipfast99/tidewater-gatekeeping and #2290.'
   });
+  f.call('forkyard.pulls.comment', {repo: 'tidewater/tidewater', number: 2318, text: 'Thanks, Ingrid.'});
+  f.call('forkyard.pulls.comment', {repo: 'tidewater/tidewater', number: 2318, text: 'A routine test note'});
   const snapshot = {
     schema: 'pale.app-state.v1', app_id: 'forkyard', run_id: 'run-evidence', epoch: 1, revision: 4,
     data: f.data,
@@ -318,10 +328,18 @@ test('evidence keeps text, subjects, links, attempts and attention', () => {
   assert.equal(comment.text_sha256, speechHash(comment.text));
   const subject = evidence.subjects.find(item => item.revision_id === comment.revision_id && item.person_id === 'person-ingrid');
   assert.equal(subject.surface, 'subject_repo_thread');
+  const thanks = evidence.revisions.find(item => item.text === 'Thanks, Ingrid.');
+  assert.equal(evidence.subjects.find(item => item.revision_id === thanks.revision_id).match, 'name');
+  const routine = evidence.revisions.find(item => item.text === 'A routine test note');
+  assert.equal(evidence.subjects.some(item => item.revision_id === routine.revision_id), false);
+  const title = evidence.revisions.find(item => item.surface === 'pull_title' && item.number === 2318);
+  assert.equal(title.text, f.data.pulls.find(item => item.number === 2318).title);
   const link = evidence.links.find(item => item.revision_id === comment.revision_id && item.app_id === 'postyard');
   assert.equal(link.object_id, 'tidewater-gatekeeping');
   const recorded = require('../examples/recorded/postyard-evidence.json');
   assert.equal(compiled(recorded), true);
+  assert.equal(recorded.revisions[0].text_sha256, speechHash(recorded.revisions[0].text));
+  assert.equal(compiled({...recorded, replays: [17]}), false);
   const post = recorded.revisions.find(item => item.object_id === link.object_id);
   const postSubject = recorded.subjects.find(item => item.revision_id === post.revision_id);
   assert.equal(post.object_id, 'tidewater-gatekeeping');
@@ -344,5 +362,6 @@ test('evidence keeps text, subjects, links, attempts and attention', () => {
   assert.equal(evidence.attention.some(item => item.tool === 'forkyard.repos.get' && item.target_person_id === 'person-ingrid'), true);
   const pressure = evidence.pressure.find(item => item.number === 2318 && item.account_id === 'fy-tomasreyes');
   assert.equal(pressure.overlaps_closed_pr, true);
+  assert.equal(pressure.earlier_closed_pr, 2288);
   assert.equal(compiled(evidence), true);
 });

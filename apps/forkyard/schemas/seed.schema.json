@@ -1125,6 +1125,28 @@
           "created_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -1460,6 +1482,19 @@
             "type": "string",
             "minLength": 0,
             "maxLength": 2000
+          },
+          "source": {
+            "anyOf": [
+              {
+                "enum": [
+                  "assignment",
+                  "request"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [

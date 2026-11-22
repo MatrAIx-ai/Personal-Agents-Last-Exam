@@ -14,11 +14,15 @@ function speechHash(value) {
   return crypto.createHash('sha256').update(normalized, 'utf8').digest('hex');
 }
 
+function words(value) {
+  return fold(value).replace(/[^\p{L}\p{N}]+/gu, ' ').replace(/\s+/g, ' ').trim();
+}
+
 function containsFolded(haystack, needle) {
-  const text = fold(haystack);
-  const target = fold(needle);
+  const text = words(haystack);
+  const target = words(needle);
   if (!target) return false;
-  return (' ' + text + ' ').includes(' ' + target + ' ') || text === target;
+  return (' ' + text + ' ').includes(' ' + target + ' ');
 }
 
 function clockHm(at) {

@@ -104,11 +104,46 @@ function editScript(before, after) {
   return ops;
 }
 
+function contentLines(text) {
+  const value = String(text);
+  if (!value.length) return {lines: [], newline: false};
+  const newline = value.endsWith('\n');
+  const body = newline ? value.slice(0, -1) : value;
+  return {lines: body.length ? body.split('\n') : [], newline};
+}
+
+function hunkHeader(oldCount, newCount) {
+  const oldRange = oldCount ? '1,' + oldCount : '0,0';
+  const newRange = newCount ? '1,' + newCount : '0,0';
+  return '@@ -' + oldRange + ' +' + newRange + ' @@';
+}
+
 function unified(path, beforeText, afterText) {
-  const before = String(beforeText).split('\n');
-  const after = String(afterText).split('\n');
-  const body = editScript(before, after).map(item => item.op + item.line);
-  return ['--- a/' + path, '+++ b/' + path, '@@ -1,' + before.length + ' +1,' + after.length + ' @@', ...body].join('\n');
+  const before = contentLines(beforeText);
+  const after = contentLines(afterText);
+  const ops = editScript(before.lines, after.lines);
+  const body = ops.map(item => item.op + item.line);
+  let seenOld = 0;
+  let seenNew = 0;
+  for (let index = 0; index < ops.length; index += 1) {
+    if (ops[index].op !== '+') seenOld += 1;
+    if (ops[index].op !== '-') seenNew += 1;
+    if (seenOld === before.lines.length && !before.newline && before.lines.length) {
+      body.splice(index + 1 + body.length - ops.length, 0, '\\ No newline at end of file');
+      break;
+    }
+  }
+  if (!after.newline && after.lines.length) {
+    let cursor = 0;
+    let counted = 0;
+    while (cursor < ops.length && counted < after.lines.length) {
+      if (ops[cursor].op !== '-') counted += 1;
+      cursor += 1;
+    }
+    const markerAt = cursor + body.slice(0, cursor).filter(line => line.startsWith('\\ ')).length;
+    if (!body[markerAt] || !body[markerAt].startsWith('\\ ')) body.splice(markerAt, 0, '\\ No newline at end of file');
+  }
+  return ['--- a/' + path, '+++ b/' + path, hunkHeader(before.lines.length, after.lines.length), ...body].join('\n') + '\n';
 }
 
 function sameFile(left, right) {

@@ -46,7 +46,8 @@
           "additionalProperties": false
         },
         "repository": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": true
         }
       },
       "required": [
@@ -104,7 +105,11 @@
           "additionalProperties": false
         },
         "repositories": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         }
       },
       "required": [
@@ -178,7 +183,11 @@
           "pattern": "^[0-9a-f]{7,40}$"
         },
         "files": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         }
       },
       "required": [
@@ -335,7 +344,11 @@
           "additionalProperties": false
         },
         "issues": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         }
       },
       "required": [
@@ -399,10 +412,15 @@
           "additionalProperties": false
         },
         "issue": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": true
         },
         "comments": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         },
         "url": {
           "type": "string",
@@ -476,7 +494,11 @@
           "additionalProperties": false
         },
         "pulls": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         }
       },
       "required": [
@@ -540,13 +562,22 @@
           "additionalProperties": false
         },
         "pull": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": true
         },
         "comments": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         },
         "reviews": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         },
         "url": {
           "type": "string",
@@ -630,7 +661,12 @@
           "minimum": 0
         },
         "paths": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 200
+          }
         },
         "text": {
           "type": "string",
@@ -703,7 +739,11 @@
           "additionalProperties": false
         },
         "entries": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         }
       },
       "required": [
@@ -765,7 +805,8 @@
           "additionalProperties": false
         },
         "account": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": true
         },
         "url": {
           "type": "string",
@@ -852,7 +893,11 @@
           "additionalProperties": false
         },
         "items": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         },
         "next_cursor": {
           "anyOf": [
@@ -925,7 +970,11 @@
           "additionalProperties": false
         },
         "accounts": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         }
       },
       "required": [
@@ -981,7 +1030,11 @@
           "additionalProperties": false
         },
         "notifications": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         }
       },
       "required": [
@@ -1060,7 +1113,11 @@
           "pattern": "^[0-9a-f]{7,40}$"
         },
         "items": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         },
         "next_cursor": {
           "anyOf": [
@@ -1138,7 +1195,8 @@
           "additionalProperties": false
         },
         "commit": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": true
         }
       },
       "required": [
@@ -1307,7 +1365,11 @@
           "additionalProperties": false
         },
         "tags": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         }
       },
       "required": [
@@ -1634,7 +1696,65 @@
           "additionalProperties": false
         },
         "checks": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "repo": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+              },
+              "sha": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{7,40}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 120
+              },
+              "status": {
+                "enum": [
+                  "queued",
+                  "in_progress",
+                  "completed"
+                ]
+              },
+              "conclusion": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "success",
+                      "failure",
+                      "neutral",
+                      "cancelled"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "completed_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "repo",
+              "sha",
+              "name",
+              "status"
+            ],
+            "additionalProperties": true
+          }
         }
       },
       "required": [
@@ -1869,7 +1989,12 @@
           "minimum": 0
         },
         "paths": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 200
+          }
         },
         "url": {
           "type": "string",
@@ -4130,7 +4255,8 @@
           "format": "date-time"
         },
         "receipt": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": true
         },
         "url": {
           "type": "string",

@@ -211,7 +211,7 @@ function openPull(ctx, data, spec) {
     if (role.role !== 'owner' && role.role !== 'maintainer') continue;
     if (role.account_id === author) continue;
     pull.reviewers.push(role.account_id);
-    store.addTimeline(ctx, data, {repo: spec.repo, number, actor_account_id: author, kind: 'review_requested', text: role.account_id});
+    store.addTimeline(ctx, data, {repo: spec.repo, number, actor_account_id: author, kind: 'review_requested', text: role.account_id, source: 'assignment'});
     store.addNotification(ctx, data, {
       account_id: role.account_id,
       kind: 'review_requested',
@@ -371,7 +371,7 @@ const write = {
     store.account(data, args.reviewer);
     if (!pull.reviewers.includes(args.reviewer)) pull.reviewers.push(args.reviewer);
     store.touch(ctx, pull);
-    store.addTimeline(ctx, data, {repo: args.repo, number: args.number, actor_account_id: data.account_id, kind: 'review_requested', text: args.reviewer});
+    store.addTimeline(ctx, data, {repo: args.repo, number: args.number, actor_account_id: data.account_id, kind: 'review_requested', text: args.reviewer, source: 'request'});
     store.addNotification(ctx, data, {
       account_id: args.reviewer,
       kind: 'review_requested',
@@ -395,6 +395,7 @@ const write = {
     if (!data.branches.some(item => item.repo === pull.head_repo && item.name === pull.head_branch)) {
       fail('head_branch_deleted', 'head_branch_deleted: The head branch is gone.');
     }
+    store.assertNotBlocked(repo, data.account_id);
     const role = store.roleOf(data, repo, data.account_id);
     const allowed = repo.reopen_policy === 'author_or_maintainer'
       ? (pull.author_account_id === data.account_id || store.isMaintainer(role))

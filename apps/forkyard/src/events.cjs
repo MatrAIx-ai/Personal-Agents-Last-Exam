@@ -97,7 +97,9 @@ function applyEvent(ctx, data, event) {
       author_account_id: payload.actor_account_id,
       state: payload.state,
       body: store.text.nfc(payload.body),
-      created_at: at
+      created_at: at,
+      event_id: event.event_id,
+      request_id: null
     };
     data.reviews.push(review);
     if (payload.body) {
@@ -242,9 +244,21 @@ function applyEvent(ctx, data, event) {
     const notice = data.notices.find(item => item.notice_id === payload.notice_id);
     if (!notice) fail('notice_not_found', 'notice_not_found: Notice ' + payload.notice_id + ' does not exist.');
     if (notice.status === 'committed' && payload.status === 'rejected') fail('delivery_status_conflict', 'delivery_status_conflict: A committed notice cannot be marked rejected.');
-    notice.status = payload.status;
-    notice.publish_request_id = payload.publish_request_id;
-    notice.messaging_event_id = payload.event_id || null;
+    if (notice.status === 'committed' && payload.status === 'unknown') {
+      log(ctx, 'forkyard.' + event.operation, {event_id: event.event_id, kept: notice.messaging_event_id});
+      return data;
+    }
+    if (notice.status === 'committed' && payload.status === 'committed') {
+      if (payload.event_id && notice.messaging_event_id && payload.event_id !== notice.messaging_event_id) {
+        fail('delivery_status_conflict', 'delivery_status_conflict: The committed event id stays on the notice.');
+      }
+      if (!notice.messaging_event_id && payload.event_id) notice.messaging_event_id = payload.event_id;
+      if (!notice.publish_request_id && payload.publish_request_id) notice.publish_request_id = payload.publish_request_id;
+    } else {
+      notice.status = payload.status;
+      notice.publish_request_id = payload.publish_request_id;
+      notice.messaging_event_id = payload.event_id || null;
+    }
   } else fail('invalid_event', 'invalid_event: Unsupported operation.');
   log(ctx, 'forkyard.' + event.operation, {event_id: event.event_id});
   return data;

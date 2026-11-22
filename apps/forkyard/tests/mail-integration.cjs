@@ -69,6 +69,22 @@ function config(file, recipients) {
   }));
 }
 
+async function mailEvidence(mail, eventId) {
+  const status = await mail.call('env.event_status', {event_id: eventId});
+  const snap = await mail.call('env.snapshot');
+  const message = snap.snapshot.data.messages.find(item => item.id === eventId) || null;
+  const receipt = status.receipt;
+  return {
+    ...status,
+    receiver_record: message ? {
+      app_id: 'mail',
+      account_id: message.account_id,
+      run_id: receipt && receipt.trace ? receipt.trace.run_id : null,
+      epoch: receipt && receipt.version ? receipt.version.epoch : null
+    } : null
+  };
+}
+
 async function messages(stateDir, run) {
   const mail = new Client('mail', 'infra', run, stateDir, 'mail-inspector', {registry: mailRegistry});
   await mail.initialize();
@@ -172,7 +188,7 @@ async function main() {
       await lostMail.initialize();
       lost = await publishPending({
         notices: lostState.state.data.notices, accountId: 'fy-tomasreyes', router: lostRouter, runId: lostRun,
-        inspectReceipt: (eventId) => lostMail.call('env.event_status', {event_id: eventId}),
+        inspectReceipt: (eventId) => mailEvidence(lostMail, eventId),
         receiver: {app_id: 'mail', account_id: 'mail-maya'}
       });
     } finally {
@@ -239,9 +255,18 @@ async function main() {
     });
     clients.push(rejectRouter);
     await rejectRouter.initialize();
+    let rejectedLookups = 0;
     const refused = await publishPending({
-      notices: rejectState.state.data.notices, accountId: 'fy-tomasreyes', router: rejectRouter, runId: rejectRun
+      notices: rejectState.state.data.notices, accountId: 'fy-tomasreyes', router: rejectRouter, runId: rejectRun,
+      inspectReceipt: async (eventId) => {
+        rejectedLookups += 1;
+        const inspector = new Client('mail', 'infra', rejectRun, rejectDir, 'mail-reject-status', {registry: mailRegistry});
+        clients.push(inspector);
+        await inspector.initialize();
+        return mailEvidence(inspector, eventId);
+      }
     });
+    assert.equal(rejectedLookups, 1);
     assert.equal(refused.attempts.length, 1);
     assert.equal(refused.attempts[0].result.code, 'receiver_rejected');
     assert.equal(refused.attempts[0].outcome.delivery, 'unresolved');
@@ -369,6 +394,17 @@ async function main() {
     }));
     const mailSeed = structuredClone(require('../../../examples/apps/mail/fixtures/minimal.json'));
     mailSeed.owner_person_id = 'person-tomas';
+    mailSeed.address = 'tomas.reyes@example.com';
+    const rewriteTimes = value => {
+      if (Array.isArray(value)) return value.map(rewriteTimes);
+      if (!value || typeof value !== 'object') return value;
+      const copy = {};
+      for (const [key, item] of Object.entries(value)) {
+        copy[key] = (key === 'at' || key.endsWith('_at')) && typeof item === 'string' ? '2026-02-01T09:00:00-08:00' : rewriteTimes(item);
+      }
+      return copy;
+    };
+    const februaryMail = rewriteTimes(mailSeed);
     const mailBinding = structuredClone(require('../../../examples/apps/mail/fixtures/binding.json'));
     mailBinding.people.push({person_id: 'person-tomas', name: 'Tomas Reyes'});
     mailBinding.accounts[0].owner_person_id = 'person-tomas';
@@ -378,11 +414,17 @@ async function main() {
     const mailReady = await mailPrep.call('env.load_seed', {
       expected_version: (await mailPrep.call('env.snapshot')).version,
       request_id: 'mail-owner-tomas',
-      data: mailSeed,
+      data: februaryMail,
       binding: mailBinding,
-      virtual_now: '2026-11-15T09:00:00-08:00'
+      virtual_now: '2026-02-11T09:00:00-08:00'
     });
     assert.equal(mailReady.status, 'ready');
+    const advanced = await mailPrep.call('env.advance_time', {
+      expected_version: mailReady.version,
+      request_id: 'mail-february-closure',
+      virtual_now: '2026-02-11T10:12:00-08:00'
+    });
+    assert.equal(advanced.status, 'committed');
     await mailPrep.close();
     const taskInfra = new Client('forkyard', 'infra', taskRun, taskDir, 'fy-task-infra', {registry});
     const taskAgent = new Client('forkyard', 'agent', taskRun, taskDir, 'fy-task-agent', {registry});
@@ -443,7 +485,87 @@ async function main() {
     assert.equal(taskSent.attempts.length, 1);
     assert.equal(taskSent.attempts[0].result.status, 'committed');
     const taskBox = await messages(taskDir, taskRun);
-    assert.equal(taskBox.filter(item => item.thread_id === taskSent.attempts[0].message.id).length, 1);
+    const delivered = taskBox.find(item => item.thread_id === taskSent.attempts[0].message.id);
+    assert.ok(delivered);
+    assert.equal(delivered.received_at, '2026-02-11T10:12:00-08:00');
+    assert.deepEqual(delivered.to, ['tomas.reyes@example.com']);
+    assert.equal(delivered.account_id, 'mail-maya');
+
+    const lookupDir = path.join(dir, 'lookup');
+    fs.mkdirSync(lookupDir);
+    const lookupRun = 'fy_mail_lookup';
+    const lookupState = prepare(lookupRun);
+    const lookupRouter = await create({config: allowed, publisher: 'forkyard', run: lookupRun, stateDir: lookupDir});
+    clients.push(lookupRouter);
+    const lookupOriginal = Client.prototype.call;
+    let lookupCalls = 0;
+    let routerCalls = 0;
+    let lookedUp;
+    try {
+      Client.prototype.call = async function(name, args) {
+        if (name === 'env.apply_event') throw new Error('dropped before the receiver applied it');
+        return lookupOriginal.call(this, name, args);
+      };
+      lookedUp = await publishPending({
+        notices: lookupState.state.data.notices, accountId: 'fy-tomasreyes', router: {
+          async call(name, args) {
+            routerCalls += 1;
+            return lookupRouter.call(name, args);
+          }
+        }, runId: lookupRun,
+        receiver: {app_id: 'mail', account_id: 'mail-maya'},
+        inspectReceipt: async () => {
+          lookupCalls += 1;
+          throw new Error('lookup down');
+        }
+      });
+    } finally {
+      Client.prototype.call = lookupOriginal;
+    }
+    assert.equal(lookedUp.attempts.length, 1);
+    assert.equal(lookedUp.attempts[0].outcome.lookup_error, 'lookup down');
+    assert.equal(lookedUp.attempts[0].outcome.delivery, 'unresolved');
+    assert.equal(lookedUp.stopped, true);
+    const heldLookup = await publishPending({
+      notices: lookupState.state.data.notices, accountId: 'fy-tomasreyes', router: {
+        async call() {
+          routerCalls += 1;
+          throw new Error('router should stay idle');
+        }
+      }, runId: lookupRun
+    });
+    assert.equal(heldLookup.suppressed, true);
+    assert.equal(lookupCalls, 1);
+    assert.equal(routerCalls, 1);
+
+    const storedReceipt = await mail.call('env.event_status', {event_id: sent.attempts[0].result.event_id});
+    const stripped = structuredClone(storedReceipt);
+    delete stripped.receipt.trace;
+    delete stripped.receipt.version;
+    delete stripped.receipt.run_id;
+    delete stripped.receipt.account_id;
+    const bare = reconcile({
+      messaging: {status: 'unknown', event_id: sent.attempts[0].result.event_id, run_id: run},
+      mailReceipt: stripped,
+      attempted: {
+        event_id: sent.attempts[0].result.event_id,
+        run_id: run,
+        receiver: {app_id: 'mail', account_id: 'mail-maya'},
+        receiver_epoch: storedReceipt.receipt.version.epoch
+      }
+    });
+    assert.equal(bare.delivery, 'unresolved');
+    const wrongAccount = reconcile({
+      messaging: {status: 'unknown', event_id: sent.attempts[0].result.event_id, run_id: run},
+      mailReceipt: {...storedReceipt, receiver_record: {app_id: 'mail', account_id: 'mail-maya'}},
+      attempted: {
+        event_id: sent.attempts[0].result.event_id,
+        run_id: run,
+        receiver: {app_id: 'mail', account_id: 'mail-other'},
+        receiver_epoch: storedReceipt.receipt.version.epoch
+      }
+    });
+    assert.equal(wrongAccount.delivery, 'unresolved');
 
     console.log(JSON.stringify({
       passed: true,

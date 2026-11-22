@@ -254,9 +254,6 @@
         "type": "object",
         "properties": {
           "request_id": {
-            "type": "string"
-          },
-          "call_id": {
             "anyOf": [
               {
                 "type": "string"
@@ -265,6 +262,9 @@
                 "type": "null"
               }
             ]
+          },
+          "call_id": {
+            "type": "string"
           },
           "tool": {
             "type": "string"
@@ -306,7 +306,14 @@
         "type": "object",
         "properties": {
           "request_id": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "tool": {
             "type": "string"
@@ -342,7 +349,34 @@
       }
     },
     "replays": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tool": {
+            "type": "string"
+          },
+          "duplicate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "request_id",
+          "tool",
+          "duplicate"
+        ],
+        "additionalProperties": true
+      }
     },
     "pressure": {
       "type": "array",
@@ -379,6 +413,17 @@
           "overlaps_closed_pr": {
             "type": "boolean"
           },
+          "earlier_closed_pr": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "actions": {
             "type": "array",
             "items": {
@@ -392,6 +437,9 @@
                   "format": "date-time"
                 },
                 "target": {
+                  "type": "string"
+                },
+                "source": {
                   "type": "string"
                 }
               },
@@ -413,6 +461,7 @@
           "mentions",
           "reopen_logical_attempts",
           "overlaps_closed_pr",
+          "earlier_closed_pr",
           "actions"
         ],
         "additionalProperties": true

@@ -127,7 +127,8 @@ function addTimeline(ctx, data, entry) {
     at: ctx.virtual_now,
     actor_account_id: entry.actor_account_id,
     kind: entry.kind,
-    text: text.nfc(entry.text || '')
+    text: text.nfc(entry.text || ''),
+    source: entry.source || null
   });
 }
 

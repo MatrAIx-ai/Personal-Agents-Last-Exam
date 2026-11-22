@@ -11,7 +11,16 @@ cd apps/forkyard
 npm test
 ```
 
-17 tests, 17 passed, 0 failed. `tests/business.test.cjs` covers the tools, committed and thrown outcomes, the 15 event fixtures, the rejected-pull-request seed, the release seed, and the evidence export. `tests/review-regressions.cjs` loads real Core snapshots for the review findings: delivery correlation, per-person pressure, search attention, receipt versions, the task #74 policy and reviewers, fixture (a) and a future-dated seed, release and block and profile checks, a divergent merge, the Postyard join, tool output fields, and parent ids on load.
+8 tests, 8 passed, 0 failed. `tests/business.test.cjs` covers the tools, committed and thrown outcomes, the 15 event fixtures, the rejected-pull-request seed, the release seed, the evidence export, and a unified diff that `git apply --check` accepts.
+
+## Public MCP regressions
+
+```sh
+cd apps/forkyard
+npm run test:integration
+```
+
+8 tests, 8 passed, 0 failed. `tests/public-regressions.cjs` starts Infra through the public MCP server, then the agent. It covers a fresh directory, fixture (a) parsers and the branch note, review-request source and the earlier closed pull request, a blocked reopen, a committed delivery receipt kept after a later unknown result, read attention with a call id, fixtures (b) and (c), and seed keys.
 
 ## Core version, replay and reset
 
@@ -53,7 +62,7 @@ npm run test:mail
 }
 ```
 
-A committed publish stored one Mail message. A duplicate request returns the stored receipt. A missing grant returned `recipient_not_authorized`, left pull request 2318 closed, and added no Mail message. A lost acknowledgement returned `unknown`. `publishPending` read Mail `env.event_status` for that event id and reported the delivery confirmed. A later publish returned `run_halted`. The same file also covers `receiver_rejected`, a missing receipt, a committed receipt for a different event, a transport error that keeps the first attempt, and the task #74 seed opened through MCP with reviewers `acc-ihalvorsen`, `acc-praman` and `acc-msolis` and one Mail message.
+A committed publish stored one Mail message. A duplicate request returns the stored receipt. A missing grant returned `recipient_not_authorized`, left pull request 2318 closed, and added no Mail message. A lost acknowledgement returned `unknown`. `publishPending` read the Mail receipt and the stored message for that event id and reported the delivery confirmed. A later publish returned `run_halted`. The same file also covers `receiver_rejected` with a receipt lookup, a lookup that throws, a receipt missing run and epoch evidence, a receipt for a different account, a missing receipt, a committed receipt for a different event, a transport error that keeps the first attempt, and the task #74 closure. That closure is delivered to a February mailbox. The stored message has `received_at` `2026-02-11T10:12:00-08:00` and `to` `tomas.reyes@example.com`.
 
 ## Package verifier
 

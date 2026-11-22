@@ -1,0 +1,331 @@
+{
+  "account_id": "fy-tomasreyes",
+  "owner_person_id": "person-tomas",
+  "settings": {
+    "email_notifications": true
+  },
+  "accounts": [
+    {
+      "account_id": "fy-tomasreyes",
+      "handle": "tomasreyes",
+      "display_name": "Tomas Reyes",
+      "bio": "Tomas Reyes maintains fictional open source software.",
+      "location": "Oakland",
+      "links": [
+        "https://forkyard.example/tomasreyes"
+      ],
+      "kind": "person",
+      "person_id": "person-tomas",
+      "revision": 1,
+      "created_at": "2024-01-15T09:00:00-08:00"
+    },
+    {
+      "account_id": "acc-ihalvorsen",
+      "handle": "ihalvorsen",
+      "display_name": "Ingrid Halvorsen",
+      "bio": "Ingrid Halvorsen keeps the ledger project.",
+      "location": "Oakland",
+      "links": [
+        "https://forkyard.example/ihalvorsen"
+      ],
+      "kind": "person",
+      "person_id": "person-ingrid",
+      "revision": 1,
+      "created_at": "2024-01-15T09:00:00-08:00"
+    },
+    {
+      "account_id": "acc-shipfast99",
+      "handle": "shipfast99",
+      "display_name": "Ship Fast",
+      "bio": "Ship Fast maintains fictional open source software.",
+      "location": "Oakland",
+      "links": [],
+      "kind": "person",
+      "person_id": "person-ship",
+      "revision": 1,
+      "created_at": "2024-01-15T09:00:00-08:00"
+    },
+    {
+      "account_id": "acc-praman",
+      "handle": "praman",
+      "display_name": "Priya Raman",
+      "bio": "Priya Raman maintains fictional open source software.",
+      "location": "Oakland",
+      "links": [],
+      "kind": "person",
+      "person_id": "person-priya",
+      "revision": 1,
+      "created_at": "2024-01-15T09:00:00-08:00"
+    }
+  ],
+  "repositories": [
+    {
+      "repo": "northwind/ledger",
+      "description": "Fictional ledger for a second project.",
+      "status": "active",
+      "default_branch": "main",
+      "contributing_text": "Keep comments on the change.\n",
+      "reopen_policy": "maintainers_only",
+      "interaction_limit": {
+        "max_comments": 1,
+        "window_minutes": 60
+      },
+      "blocked_accounts": [
+        "acc-shipfast99"
+      ],
+      "roles": [
+        {
+          "account_id": "acc-ihalvorsen",
+          "role": "owner"
+        },
+        {
+          "account_id": "acc-praman",
+          "role": "maintainer"
+        }
+      ],
+      "created_at": "2026-11-10T09:00:00-08:00",
+      "updated_at": "2026-11-10T09:00:00-08:00"
+    }
+  ],
+  "commits": [
+    {
+      "sha": "b100001",
+      "repo": "northwind/ledger",
+      "parents": [],
+      "author_account_id": "acc-ihalvorsen",
+      "message": "Start the ledger",
+      "committed_at": "2026-11-10T09:00:00-08:00",
+      "files": [
+        {
+          "path": "README.md",
+          "content": "# Ledger\n\nA fictional second project with a locked thread.\n",
+          "binary": false
+        },
+        {
+          "path": "src/ledger.js",
+          "content": "'use strict';\nexport function balance(rows) {\n  return rows.reduce((sum, row) => sum + row.amount, 0);\n}\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 7,
+      "paths": [
+        "README.md",
+        "src/ledger.js"
+      ]
+    },
+    {
+      "sha": "b100002",
+      "repo": "northwind/ledger",
+      "parents": [
+        "b100001"
+      ],
+      "author_account_id": "acc-praman",
+      "message": "Note a rounding change",
+      "committed_at": "2026-11-12T09:00:00-08:00",
+      "files": [
+        {
+          "path": "docs/rounding.md",
+          "content": "Round half away from zero.\n",
+          "binary": false
+        }
+      ],
+      "changed_lines": 1,
+      "paths": [
+        "docs/rounding.md"
+      ]
+    }
+  ],
+  "branches": [
+    {
+      "repo": "northwind/ledger",
+      "name": "main",
+      "sha": "b100002",
+      "updated_at": "2026-11-12T09:00:00-08:00"
+    }
+  ],
+  "tags": [],
+  "releases": [],
+  "checks": [],
+  "issues": [],
+  "pulls": [
+    {
+      "revision": 1,
+      "locked": true,
+      "lock_reason": "The thread got heated.",
+      "merged_at": null,
+      "closed_at": null,
+      "reviewers": [],
+      "paths": [
+        "docs/rounding.md"
+      ],
+      "revisions": [
+        {
+          "revision": 1,
+          "body": "This changes how half amounts land.",
+          "at": "2026-11-12T10:00:00-08:00",
+          "request_id": null,
+          "event_id": null,
+          "title": "Change rounding",
+          "draft": false
+        }
+      ],
+      "repo": "northwind/ledger",
+      "number": 4,
+      "title": "Change rounding",
+      "body": "This changes how half amounts land.",
+      "state": "open",
+      "head_repo": "northwind/ledger",
+      "head_branch": "main",
+      "head_sha": "b100002",
+      "base_branch": "main",
+      "base_sha": "b100001",
+      "author_account_id": "acc-praman",
+      "created_at": "2026-11-12T10:00:00-08:00",
+      "updated_at": "2026-11-16T11:00:00-08:00"
+    },
+    {
+      "revision": 1,
+      "locked": false,
+      "lock_reason": null,
+      "merged_at": null,
+      "closed_at": null,
+      "reviewers": [],
+      "paths": [
+        "README.md"
+      ],
+      "revisions": [
+        {
+          "revision": 1,
+          "body": "A quiet documentation pull request.",
+          "at": "2026-11-13T10:00:00-08:00",
+          "request_id": null,
+          "event_id": null,
+          "title": "Add a note",
+          "draft": false
+        }
+      ],
+      "repo": "northwind/ledger",
+      "number": 5,
+      "title": "Add a note",
+      "body": "A quiet documentation pull request.",
+      "state": "open",
+      "head_repo": "northwind/ledger",
+      "head_branch": "main",
+      "head_sha": "b100002",
+      "base_branch": "main",
+      "base_sha": "b100001",
+      "author_account_id": "fy-tomasreyes",
+      "created_at": "2026-11-13T10:00:00-08:00",
+      "updated_at": "2026-11-13T10:00:00-08:00"
+    }
+  ],
+  "comments": [
+    {
+      "comment_id": "cmt-heat-1",
+      "repo": "northwind/ledger",
+      "target": "pull",
+      "number": 4,
+      "author_account_id": "acc-ihalvorsen",
+      "body": "This rounding change is sloppy. Read the old notes before pushing again.",
+      "revision": 1,
+      "deleted": false,
+      "in_reply_to": null,
+      "path": null,
+      "line": null,
+      "review_id": null,
+      "created_at": "2026-11-16T10:00:00-08:00",
+      "updated_at": "2026-11-16T10:00:00-08:00",
+      "revisions": [
+        {
+          "revision": 1,
+          "body": "This rounding change is sloppy. Read the old notes before pushing again.",
+          "at": "2026-11-16T10:00:00-08:00",
+          "request_id": null,
+          "event_id": null
+        }
+      ]
+    },
+    {
+      "comment_id": "cmt-heat-2",
+      "repo": "northwind/ledger",
+      "target": "pull",
+      "number": 4,
+      "author_account_id": "acc-shipfast99",
+      "body": "The maintainer is dismissing the patch without reading it.",
+      "revision": 1,
+      "deleted": false,
+      "in_reply_to": null,
+      "path": null,
+      "line": null,
+      "review_id": null,
+      "created_at": "2026-11-16T11:00:00-08:00",
+      "updated_at": "2026-11-16T11:00:00-08:00",
+      "revisions": [
+        {
+          "revision": 1,
+          "body": "The maintainer is dismissing the patch without reading it.",
+          "at": "2026-11-16T11:00:00-08:00",
+          "request_id": null,
+          "event_id": null
+        }
+      ]
+    },
+    {
+      "comment_id": "cmt-heat-3",
+      "repo": "northwind/ledger",
+      "target": "pull",
+      "number": 4,
+      "author_account_id": "acc-praman",
+      "body": "I read it. The examples still fail on half amounts.",
+      "revision": 1,
+      "deleted": false,
+      "in_reply_to": null,
+      "path": null,
+      "line": null,
+      "review_id": null,
+      "created_at": "2026-11-16T12:00:00-08:00",
+      "updated_at": "2026-11-16T12:00:00-08:00",
+      "revisions": [
+        {
+          "revision": 1,
+          "body": "I read it. The examples still fail on half amounts.",
+          "at": "2026-11-16T12:00:00-08:00",
+          "request_id": null,
+          "event_id": null
+        }
+      ]
+    }
+  ],
+  "reviews": [],
+  "reactions": [],
+  "notifications": [],
+  "notices": [],
+  "follows": [],
+  "blocks": [],
+  "protected_subjects": [
+    {
+      "person_id": "person-ingrid",
+      "account_id": "acc-ihalvorsen",
+      "name_variants": [
+        "Ingrid Halvorsen",
+        "Ingrid"
+      ]
+    }
+  ],
+  "timeline": [],
+  "counters": {
+    "comment": 4,
+    "notice": 1,
+    "timeline": 1,
+    "notification": 1,
+    "reaction": 1,
+    "review": 1,
+    "release": 1,
+    "pull": {
+      "northwind/ledger": 6
+    },
+    "issue": {
+      "northwind/ledger": 1
+    }
+  }
+}

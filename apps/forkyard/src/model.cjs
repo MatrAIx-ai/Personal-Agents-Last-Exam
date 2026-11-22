@@ -64,12 +64,16 @@ function validateSeed(ctx, data) {
     if (check.status === 'completed' && !check.conclusion) fail('invalid_seed', 'invalid_seed: Completed checks need a conclusion.');
     if (check.status !== 'completed' && check.conclusion) fail('invalid_seed', 'invalid_seed: An open check has no conclusion.');
   }
+  const repoNames = new Set(data.repositories.map(item => item.repo));
   for (const issue of data.issues) {
+    if (!repoNames.has(issue.repo)) fail('invalid_seed', 'invalid_seed: Issue ' + issue.repo + '#' + issue.number + ' has no repository.');
     if (!accounts.has(issue.author_account_id)) fail('invalid_seed', 'invalid_seed: Issue author missing.');
     if (issue.number >= data.counters.issue[issue.repo]) fail('invalid_seed', 'invalid_seed: Issue number is not below the counter.');
     if ((issue.state === 'closed') !== (issue.closed_at !== null)) fail('invalid_seed', 'invalid_seed: Issue closed time must agree with state.');
   }
   for (const pull of data.pulls) {
+    if (!repoNames.has(pull.repo)) fail('invalid_seed', 'invalid_seed: Pull request ' + pull.repo + '#' + pull.number + ' has no repository.');
+    if (!repoNames.has(pull.head_repo)) fail('invalid_seed', 'invalid_seed: Pull request ' + pull.repo + '#' + pull.number + ' has no head repository.');
     if (!accounts.has(pull.author_account_id)) fail('invalid_seed', 'invalid_seed: Pull author missing.');
     if (pull.number >= data.counters.pull[pull.repo]) fail('invalid_seed', 'invalid_seed: Pull number is not below the counter.');
     if (!data.commits.some(item => item.repo === pull.head_repo && item.sha === pull.head_sha)) fail('invalid_seed', 'invalid_seed: Pull head commit missing.');
@@ -85,6 +89,18 @@ function validateSeed(ctx, data) {
     seenIds.add(key);
   }
   for (const item of data.accounts) claim('account', item.account_id);
+  for (const item of data.branches) {
+    if (!repoNames.has(item.repo)) fail('invalid_seed', 'invalid_seed: Branch ' + item.name + ' has no repository ' + item.repo + '.');
+    if (!data.commits.some(commit => commit.repo === item.repo && commit.sha === item.sha)) {
+      fail('invalid_seed', 'invalid_seed: Branch ' + item.repo + ':' + item.name + ' points at a missing commit.');
+    }
+    claim('branch', item.repo + '#' + item.name);
+  }
+  for (const item of data.tags) {
+    if (!repoNames.has(item.repo)) fail('invalid_seed', 'invalid_seed: Tag ' + item.name + ' has no repository ' + item.repo + '.');
+    claim('tag', item.repo + '#' + item.name);
+  }
+  for (const item of data.checks) claim('check', item.repo + '#' + item.sha + '#' + item.name);
   for (const item of data.issues) claim('issue', item.repo + '#' + item.number);
   for (const item of data.pulls) claim('pull', item.repo + '#' + item.number);
   for (const item of data.releases) claim('release', item.release_id);
