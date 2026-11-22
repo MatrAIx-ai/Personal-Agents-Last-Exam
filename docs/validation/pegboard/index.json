@@ -1,0 +1,126 @@
+{
+  "schema": "pegboard.v1-evidence-index",
+  "recorded_at": "2026-11-22T04:44:07Z",
+  "app_id": "pegboard",
+  "app_version": "1.0.0",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "mail_version": "1.3.0",
+  "proposal_commit": "aa98311bef207f31440e1d67082580b519d5f752",
+  "proposal_status": "plan approved for implementation (/approve-plan on PR #173); the proposal file is unchanged since that commit",
+  "public_runtime_base_commit": "61b637164e4abddf81536bb48935cdb688a69ff1",
+  "app_package_commit": "70c014687f353dee747a13f98409d209e9190a58",
+  "app_package_sha256": "65c57b8e0fcfa0402d37063ce2b849ea6737831b420a8cf7382b3a1f068217a0",
+  "app_package_git_tree": "80da54f46ac2f584168cb670f3caf020cfeaaf31",
+  "package_hash_agrees_in": [
+    "public-runtime.node22.json",
+    "public-runtime.node18.json",
+    "base-runtime.json"
+  ],
+  "tested_node": {
+    "22": "v22.23.4",
+    "18": "v18.20.8"
+  },
+  "tested_os": "Linux 6.18.44-fc-v726 x86_64",
+  "interface": {
+    "operations": 22,
+    "read": 12,
+    "write": 10,
+    "events": 8
+  },
+  "checks": {
+    "standalone_business": {
+      "node22": {
+        "tests": 24,
+        "pass": 22,
+        "fail": 0,
+        "skipped": 2
+      },
+      "node18": {
+        "tests": 24,
+        "pass": 22,
+        "fail": 0,
+        "skipped": 2
+      }
+    },
+    "business_with_runtime": {
+      "node22": {
+        "tests": 24,
+        "pass": 24,
+        "fail": 0,
+        "skipped": 0
+      },
+      "node18": {
+        "tests": 24,
+        "pass": 24,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    "standalone_event_example": "passed on both Node versions",
+    "fixture_and_generated_contract_checks": "dev/check-fixture.cjs, dev/build.cjs --check and dev/build-fixture.cjs --check passed on both Node versions",
+    "random_walk": {
+      "node22": {
+        "walks": 30,
+        "steps_per_walk": 160,
+        "operations": 4800
+      },
+      "node18": {
+        "walks": 10,
+        "steps_per_walk": 160,
+        "operations": 1600
+      }
+    },
+    "package_and_runtime_only_copy": "tests/mcp.integration.cjs passed in a copy holding only apps/pegboard and runtime, on both Node versions",
+    "public_app_verifier": {
+      "node22": 55,
+      "node18": 55
+    },
+    "mcp_integration": {
+      "node22": 108,
+      "node18": 108
+    },
+    "mail_integration": {
+      "node22": 29,
+      "node18": 29
+    },
+    "base_runtime_verifier": {
+      "checks": 55,
+      "selection": {
+        "full": false,
+        "ids": [
+          "pegboard"
+        ]
+      }
+    },
+    "reference_suite_stages": {
+      "node22": "22/22",
+      "node18": "22/22"
+    },
+    "shared_contract_copies": "runtime/sdk/sync.cjs --check and runtime/build-contracts.cjs --check passed on both Node versions"
+  },
+  "reports": [
+    "base-runtime.json",
+    "mail-integration.node18.json",
+    "mail-integration.node22.json",
+    "mcp-integration.node18.json",
+    "mcp-integration.node22.json",
+    "public-runtime.node18.json",
+    "public-runtime.node22.json",
+    "random-walk.node18.json",
+    "random-walk.node22.json",
+    "reference-suite.node18.json",
+    "reference-suite.node22.json"
+  ],
+  "not_claimed": [
+    "No agent trials or model runs.",
+    "No GUI or Web/CUA evidence: the first version is MCP only.",
+    "No acceptance, merge or authorship credit.",
+    "The two skipped standalone tests are the real-MCP scripts, which need the runtime; they pass in business_with_runtime."
+  ],
+  "remaining": [
+    "Independent maintainer reproduction and acceptance.",
+    "Official PR CI (public-runtime 18 and 22, base-runtime-compatibility) on the implementation commit.",
+    "Human review of realism and of the invented workplace and names."
+  ]
+}
