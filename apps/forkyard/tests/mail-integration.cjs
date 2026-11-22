@@ -7,7 +7,7 @@ const {createRuntime} = require('../../../runtime/core/runtime.cjs');
 const {Client} = require('../../../runtime/client.cjs');
 const {create} = require('../../../runtime/messaging/src/router.cjs');
 const {digest} = require('../../../runtime/messaging/src/contracts.cjs');
-const {publishPending, reconcile, inspectReceiver, messageFor} = require('../src/publisher.cjs');
+const {publishPending, reconcile, inspectReceiver, routerEventId, messageFor, resetDelivery} = require('../src/publisher.cjs');
 
 const root = path.resolve(__dirname, '../../..');
 const registry = path.join(root, 'apps.registry.json');
@@ -110,14 +110,19 @@ async function main() {
     });
     clients.push(router);
     await router.initialize();
+    const mailbox = new Client('mail', 'infra', run, dir, 'mail-commit-status', {registry: mailRegistry});
+    clients.push(mailbox);
+    await mailbox.initialize();
+    const mailboxSnap = await mailbox.call('env.snapshot');
+    const receiver = {
+      app_id: 'mail',
+      account_id: mailboxSnap.snapshot.data.account_id,
+      address: mailboxSnap.snapshot.data.address,
+      epoch: mailboxSnap.snapshot.epoch
+    };
     const sent = await publishPending({
-      notices: prepared.state.data.notices, accountId: 'fy-tomasreyes', router, runId: run,
-      inspectReceipt: async (eventId) => {
-        const inspector = new Client('mail', 'infra', run, dir, 'mail-commit-status', {registry: mailRegistry});
-        clients.push(inspector);
-        await inspector.initialize();
-        return inspector.call('env.event_status', {event_id: eventId});
-      }
+      notices: prepared.state.data.notices, accountId: 'fy-tomasreyes', router, runId: run, receiver,
+      inspectReceipt: (eventId) => inspectReceiver(mailbox, eventId)
     });
     assert.equal(sent.attempts.length, 1);
     assert.equal(sent.attempts[0].result.status, 'committed');
@@ -126,9 +131,18 @@ async function main() {
     const again = await router.call('router.publish', {request_id: sent.attempts[0].request_id, message: sent.attempts[0].message});
     assert.equal(again.duplicate, true);
     assert.equal(again.event_id, sent.attempts[0].result.event_id);
+    const duplicateEvidence = await inspectReceiver(mailbox, again.event_id);
     const duplicate = reconcile({
       messaging: again,
-      attempted: {event_id: again.event_id, run_id: run, receiver: again.target, receiver_epoch: again.version && again.version.epoch}
+      mailReceipt: duplicateEvidence,
+      message: sent.attempts[0].message,
+      attempted: {
+        event_id: again.event_id,
+        run_id: run,
+        receiver,
+        receiver_epoch: receiver.epoch,
+        message: sent.attempts[0].message
+      }
     });
     assert.equal(duplicate.delivery, 'confirmed');
     assert.equal(duplicate.duplicate_within_run, true);
@@ -139,7 +153,7 @@ async function main() {
     const mail = new Client('mail', 'infra', run, dir, 'mail-status', {registry: mailRegistry});
     clients.push(mail);
     await mail.initialize();
-    const receipt = await mail.call('env.event_status', {event_id: sent.attempts[0].result.event_id});
+    const receipt = await inspectReceiver(mail, sent.attempts[0].result.event_id);
     const joined = reconcile({
       messaging: sent.attempts[0].result,
       mailReceipt: receipt,
@@ -147,8 +161,8 @@ async function main() {
       attempted: {
         event_id: sent.attempts[0].result.event_id,
         run_id: run,
-        receiver: sent.attempts[0].result.target,
-        receiver_epoch: sent.attempts[0].result.version.epoch,
+        receiver,
+        receiver_epoch: receiver.epoch,
         message: sent.attempts[0].message
       }
     });
@@ -306,8 +320,8 @@ async function main() {
     assert.equal(refused.attempts.length, 1);
     assert.equal(refused.attempts[0].result.code, 'receiver_rejected');
     assert.equal(refused.attempts[0].outcome.delivery, 'unresolved');
-    assert.equal(refused.attempts[0].outcome.observed.message.thread_id, 'occupied');
-    assert.notEqual(refused.attempts[0].outcome.observed.message.thread_id, refused.attempts[0].outcome.observed.cloud_event.id);
+    assert.equal(refused.attempts[0].outcome.comparison.observed.message.thread_id, 'occupied');
+    assert.notEqual(refused.attempts[0].outcome.comparison.observed.message.thread_id, refused.attempts[0].message.id);
     assert.equal(refused.stopped, true);
     const occupiedMessages = await messages(rejectDir, rejectRun);
     assert.equal(occupiedMessages.filter(item => item.thread_id === rejectMessage.id).length, 0);
@@ -401,13 +415,25 @@ async function main() {
         return transportRouter.call(name, args);
       }
     };
+    const transportMail = new Client('mail', 'infra', transportRun, transportDir, 'mail-transport', {registry: mailRegistry});
+    clients.push(transportMail);
+    await transportMail.initialize();
+    const transportSnap = await transportMail.call('env.snapshot');
+    const transportReceiver = {
+      app_id: 'mail',
+      account_id: transportSnap.snapshot.data.account_id,
+      address: transportSnap.snapshot.data.address,
+      epoch: transportSnap.snapshot.epoch
+    };
     const firstNotice = transportState.state.data.notices.find(item => item.status === 'pending_delivery');
     const transported = await publishPending({
       notices: [firstNotice, {...firstNotice, notice_id: 'notice-extra', object_id: 'tidewater.tidewater.extra'}],
-      accountId: 'fy-tomasreyes', router: flaky, runId: transportRun
+      accountId: 'fy-tomasreyes', router: flaky, runId: transportRun, receiver: transportReceiver,
+      inspectReceipt: (eventId) => inspectReceiver(transportMail, eventId)
     });
     assert.equal(transported.attempts.length, 2);
     assert.equal(transported.attempts[0].result.status, 'committed');
+    assert.equal(transported.attempts[0].outcome.delivery, 'confirmed');
     assert.equal(transported.attempts[1].result.code, 'transport_error');
     assert.equal(transported.stopped, true);
     const held = await publishPending({
@@ -628,6 +654,197 @@ async function main() {
       }
     });
     assert.equal(wrongAccount.delivery, 'unresolved');
+
+    const clashDir = path.join(dir, 'clash');
+    fs.mkdirSync(clashDir);
+    const clashRun = 'fy_mail_clash';
+    const clashState = prepare(clashRun);
+    const clashNotice = clashState.state.data.notices.find(item => item.status === 'pending_delivery');
+    const clashMessage = messageFor(clashNotice, 'fy-tomasreyes');
+    const clashMail = new Client('mail', 'infra', clashRun, clashDir, 'mail-clash', {registry: mailRegistry});
+    clients.push(clashMail);
+    await clashMail.initialize();
+    const clashSnap = await clashMail.call('env.snapshot');
+    const clashReceiver = {
+      app_id: 'mail',
+      account_id: clashSnap.snapshot.data.account_id,
+      address: clashSnap.snapshot.data.address,
+      epoch: clashSnap.snapshot.epoch
+    };
+    const clashId = routerEventId(clashRun, clashMessage, clashReceiver, clashReceiver.epoch);
+    const planted = await clashMail.call('env.apply_event', {
+      expected_version: clashSnap.version,
+      event: {
+        event_id: clashId,
+        at: '2026-11-15T09:07:00-08:00',
+        operation: 'mail.deliver',
+        payload: {
+          id: clashId,
+          thread_id: clashMessage.id,
+          account_id: 'mail-maya',
+          from: 'forkyard@pale.example',
+          to: [clashReceiver.address],
+          subject: 'Review requested',
+          body: 'An earlier review notice occupies this event.',
+          received_at: '2026-11-15T09:07:00-08:00',
+          folder: 'inbox',
+          read: false,
+          attachments: []
+        }
+      }
+    });
+    assert.equal(planted.status, 'committed');
+    const clashRouter = new Client(null, null, null, null, 'forkyard-clash', {
+      commandArgs: [path.join(root, 'runtime/messaging/service.cjs'), '--config', allowed, '--publisher', 'forkyard', '--run', clashRun, '--state-dir', clashDir]
+    });
+    clients.push(clashRouter);
+    await clashRouter.initialize();
+    let clashPublishes = 0;
+    const clashExtra = {...clashNotice, notice_id: 'notice-clash-extra', object_id: 'tidewater.tidewater.extra'};
+    const clashed = await publishPending({
+      notices: [clashNotice, clashExtra],
+      accountId: 'fy-tomasreyes',
+      router: {
+        async call(name, args) {
+          if (name === 'router.publish') clashPublishes += 1;
+          return clashRouter.call(name, args);
+        }
+      },
+      runId: clashRun,
+      receiver: clashReceiver,
+      inspectReceipt: (eventId) => inspectReceiver(clashMail, eventId)
+    });
+    assert.equal(clashPublishes, 1);
+    assert.equal(clashed.attempts.length, 1);
+    assert.equal(clashed.attempts[0].result.code, 'receiver_rejected');
+    assert.equal(clashed.attempts[0].outcome.delivery, 'unresolved');
+    assert.equal(clashed.attempts[0].outcome.comparison.payload, false);
+    assert.equal(clashed.stopped, true);
+    const clashBox = (await clashMail.call('env.snapshot')).snapshot.data.messages;
+    assert.equal(clashBox.filter(item => item.body === clashNotice.text).length, 0);
+    const clashAgain = await publishPending({
+      notices: [clashNotice, clashExtra],
+      accountId: 'fy-tomasreyes',
+      router: {async call() { clashPublishes += 1; throw new Error('republish'); }},
+      runId: clashRun
+    });
+    assert.equal(clashAgain.suppressed, true);
+    assert.equal(clashPublishes, 1);
+
+    const dropDir = path.join(dir, 'dropped');
+    fs.mkdirSync(dropDir);
+    const dropRun = 'fy_mail_dropped';
+    const dropState = prepare(dropRun);
+    const dropRouter = new Client(null, null, null, null, 'forkyard-dropped', {
+      commandArgs: [path.join(root, 'runtime/messaging/service.cjs'), '--config', allowed, '--publisher', 'forkyard', '--run', dropRun, '--state-dir', dropDir]
+    });
+    clients.push(dropRouter);
+    await dropRouter.initialize();
+    const dropMail = new Client('mail', 'infra', dropRun, dropDir, 'mail-dropped', {registry: mailRegistry});
+    clients.push(dropMail);
+    await dropMail.initialize();
+    const dropSnap = await dropMail.call('env.snapshot');
+    const dropReceiver = {
+      app_id: 'mail',
+      account_id: dropSnap.snapshot.data.account_id,
+      address: dropSnap.snapshot.data.address,
+      epoch: dropSnap.snapshot.epoch
+    };
+    let dropInspections = 0;
+    let seenDuringPublish = null;
+    const dropped = await publishPending({
+      notices: dropState.state.data.notices,
+      accountId: 'fy-tomasreyes',
+      router: {
+        async call(name, args) {
+          seenDuringPublish = await publishPending({
+            notices: dropState.state.data.notices,
+            accountId: 'fy-tomasreyes',
+            router: {async call() { throw new Error('republish'); }},
+            runId: dropRun
+          });
+          const result = await dropRouter.call(name, args);
+          throw new Error('dropped router reply');
+          return result;
+        }
+      },
+      runId: dropRun,
+      receiver: dropReceiver,
+      inspectReceipt: async (eventId) => {
+        dropInspections += 1;
+        return inspectReceiver(dropMail, eventId);
+      }
+    });
+    assert.equal(seenDuringPublish.suppressed, true);
+    assert.equal(seenDuringPublish.attempts[0].event_id, routerEventId(dropRun, seenDuringPublish.attempts[0].message, dropReceiver, dropReceiver.epoch));
+    assert.equal(seenDuringPublish.receiver.account_id, 'mail-maya');
+    assert.equal(dropInspections, 1);
+    assert.equal(dropped.attempts[0].result.code, 'transport_error');
+    assert.equal(dropped.attempts[0].outcome.delivery, 'confirmed');
+    assert.equal(dropped.attempts[0].outcome.comparison.payload, true);
+    const dropBox = (await dropMail.call('env.snapshot')).snapshot.data.messages;
+    assert.equal(dropBox.filter(item => item.thread_id === dropped.attempts[0].message.id).length, 1);
+    let dropRepublish = 0;
+    const dropHeld = await publishPending({
+      notices: dropState.state.data.notices,
+      accountId: 'fy-tomasreyes',
+      router: {async call() { dropRepublish += 1; throw new Error('republish'); }},
+      runId: dropRun,
+      inspectReceipt: (eventId) => inspectReceiver(dropMail, eventId)
+    });
+    assert.equal(dropHeld.suppressed, true);
+    assert.equal(dropRepublish, 0);
+    assert.equal(dropHeld.attempts[0].outcome.delivery, 'confirmed');
+
+    resetDelivery('fy_mail_identity');
+    const identityRun = 'fy_mail_identity';
+    const identityState = prepare(identityRun);
+    const identityNotice = identityState.state.data.notices.find(item => item.status === 'pending_delivery');
+    const identityExtra = {...identityNotice, notice_id: 'notice-identity-extra'};
+    let identityCalls = 0;
+    const identity = await publishPending({
+      notices: [identityNotice, identityExtra],
+      accountId: 'fy-tomasreyes',
+      router: {
+        async call() {
+          identityCalls += 1;
+          return {
+            status: 'committed',
+            run_id: 'other-run',
+            event_id: 'router-other-identity',
+            target: {app_id: 'mail', account_id: 'mail-other'},
+            version: {epoch: 1, revision: 2},
+            cloud_event: {id: 'other', source: 'urn:pale:app:forkyard:account:other'}
+          };
+        }
+      },
+      runId: identityRun,
+      receiver: {app_id: 'mail', account_id: 'mail-maya', address: 'maya.main@example.com', epoch: 1},
+      inspectReceipt: async () => ({
+        receipt: {
+          status: 'committed',
+          event_id: 'router-other-identity',
+          app_id: 'mail',
+          version: {epoch: 1, revision: 2},
+          trace: {run_id: 'other-run', app_id: 'mail'}
+        },
+        receiver_record: {
+          app_id: 'mail',
+          account_id: 'mail-other',
+          id: 'router-other-identity',
+          thread_id: 'other',
+          from: 'forkyard@pale.example',
+          to: ['other@example.com'],
+          subject: identityNotice.title,
+          body: identityNotice.text
+        }
+      })
+    });
+    assert.equal(identityCalls, 1);
+    assert.equal(identity.attempts.length, 1);
+    assert.equal(identity.attempts[0].outcome.delivery, 'unresolved');
+    assert.equal(identity.attempts[0].outcome.comparison.identity, false);
+    assert.equal(identity.stopped, true);
 
     console.log(JSON.stringify({
       passed: true,

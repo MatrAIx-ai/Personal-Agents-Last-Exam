@@ -226,7 +226,7 @@ test('each accepted event commits on a fresh seed', () => {
   assert.ok(rows.includes('+alpha'));
   assert.ok(rows.indexOf('+alpha') > rows.indexOf(' beta'));
   assert.ok(rows.indexOf(' beta') > rows.indexOf('-alpha'));
-  function appliedTree(files, patch) {
+  function appliedTree(files, patch, names = Object.keys(files)) {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'forkyard-apply-'));
     execFileSync('git', ['init'], {cwd: dir, stdio: 'ignore'});
     for (const [name, content] of Object.entries(files)) {
@@ -236,7 +236,7 @@ test('each accepted event commits on a fresh seed', () => {
     fs.writeFileSync(path.join(dir, 'change.diff'), patch);
     execFileSync('git', ['apply', 'change.diff'], {cwd: dir});
     const tree = {};
-    for (const name of Object.keys(files)) {
+    for (const name of names) {
       const target = path.join(dir, name);
       tree[name] = fs.existsSync(target) ? fs.readFileSync(target) : null;
     }
@@ -252,6 +252,29 @@ test('each accepted event commits on a fresh seed', () => {
   const removedTree = appliedTree({'README.md': '# Hi\n', 'keep.txt': 'stay\n'}, removed);
   assert.equal(removedTree['README.md'], null);
   assert.equal(removedTree['keep.txt'].toString(), 'stay\n');
+  const created = appliedTree({}, [
+    unified('empty.txt', null, ''),
+    unified('blank.txt', null, '\n'),
+    unified('note.txt', null, 'hello\n')
+  ].join(''), ['empty.txt', 'blank.txt', 'note.txt']);
+  assert.equal(created['empty.txt'].toString(), '');
+  assert.equal(created['blank.txt'].toString(), '\n');
+  assert.equal(created['note.txt'].toString(), 'hello\n');
+  const emptyBranch = fixture();
+  const emptyPush = emptyBranch.call('forkyard.commits.push', {
+    repo: 'tomasreyes/tidewater', branch: 'empty/file', message: 'Add an empty file', create_branch: true,
+    files: [{path: 'empty.txt', content: ''}, {path: 'blank.txt', content: '\n'}, {path: 'note.txt', content: 'hello\n'}]
+  });
+  assert.deepEqual(emptyPush.paths, ['blank.txt', 'empty.txt', 'note.txt']);
+  const emptyPull = emptyBranch.call('forkyard.pulls.open', {
+    repo: 'tidewater/tidewater', head: 'tomasreyes/tidewater:empty/file', base: 'main', title: 'Empty files', body: 'Add empty and blank files.'
+  });
+  const emptyDiff = emptyBranch.call('forkyard.pulls.diff', {repo: 'tidewater/tidewater', number: emptyPull.number});
+  assert.deepEqual(emptyDiff.paths, ['blank.txt', 'empty.txt', 'note.txt']);
+  const emptyTree = appliedTree({}, emptyDiff.text, emptyDiff.paths);
+  assert.equal(emptyTree['empty.txt'].toString(), '');
+  assert.equal(emptyTree['blank.txt'].toString(), '\n');
+  assert.equal(emptyTree['note.txt'].toString(), 'hello\n');
   const blocked = fixture();
   blocked.event({event_id: 'fy-block-author', at: '2026-11-18T10:09:00-08:00', operation: 'repo.block_account', payload: {repo: 'tidewater/tidewater', actor_account_id: 'acc-ihalvorsen', blocked_account_id: 'fy-tomasreyes', blocked: true}});
   fails(() => blocked.call('forkyard.pulls.comment', {repo: 'tidewater/tidewater', number: 2318, text: 'blocked'}), 'blocked_by_maintainer');

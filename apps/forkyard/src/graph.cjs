@@ -109,7 +109,7 @@ function contentLines(text) {
   if (!value.length) return {lines: [], newline: false};
   const newline = value.endsWith('\n');
   const body = newline ? value.slice(0, -1) : value;
-  return {lines: body.length ? body.split('\n') : [], newline};
+  return {lines: body.split('\n'), newline};
 }
 
 function hunkHeader(oldCount, newCount) {
@@ -118,11 +118,23 @@ function hunkHeader(oldCount, newCount) {
   return '@@ -' + oldRange + ' +' + newRange + ' @@';
 }
 
+function emptyFilePatch(path, created) {
+  return [
+    'diff --git a/' + path + ' b/' + path,
+    created ? 'new file mode 100644' : 'deleted file mode 100644',
+    created ? 'index 0000000..e69de29' : 'index e69de29..0000000',
+    created ? '--- /dev/null' : '--- a/' + path,
+    created ? '+++ b/' + path : '+++ /dev/null'
+  ].join('\n') + '\n';
+}
+
 function unified(path, beforeText, afterText) {
   const created = beforeText == null;
   const deleted = afterText == null;
   const before = contentLines(created ? '' : beforeText);
   const after = contentLines(deleted ? '' : afterText);
+  if (created && !after.lines.length) return emptyFilePatch(path, true);
+  if (deleted && !before.lines.length) return emptyFilePatch(path, false);
   const ops = editScript(before.lines, after.lines);
   if (!created && !deleted && before.newline !== after.newline && before.lines.length && after.lines.length) {
     const last = before.lines[before.lines.length - 1];
@@ -150,7 +162,8 @@ function unified(path, beforeText, afterText) {
   }
   const headerOld = created ? '--- /dev/null' : '--- a/' + path;
   const headerNew = deleted ? '+++ /dev/null' : '+++ b/' + path;
-  return [headerOld, headerNew, hunkHeader(before.lines.length, after.lines.length), ...body].join('\n') + '\n';
+  const mode = created ? ['new file mode 100644'] : deleted ? ['deleted file mode 100644'] : [];
+  return ['diff --git a/' + path + ' b/' + path, ...mode, headerOld, headerNew, hunkHeader(before.lines.length, after.lines.length), ...body].join('\n') + '\n';
 }
 
 function sameFile(left, right) {

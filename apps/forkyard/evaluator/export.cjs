@@ -275,10 +275,21 @@ function isRead(call) {
   return call.result_status === 'ok';
 }
 
+function callBelongs(snapshot, call) {
+  const data = snapshot.data || {};
+  if (call.run_id && call.run_id !== snapshot.run_id) return false;
+  if (call.app_id && call.app_id !== snapshot.app_id) return false;
+  if (call.account_id && call.account_id !== data.account_id) return false;
+  if (call.epoch != null && call.epoch !== snapshot.epoch) return false;
+  if (call.version && call.version.epoch != null && snapshot.epoch != null && call.version.epoch !== snapshot.epoch) return false;
+  return true;
+}
+
 function exportEvidence({snapshot, execution = [], focus_pull = null, companions = []} = {}) {
   if (!snapshot || !snapshot.data) throw new Error('exportEvidence requires an Infra snapshot.');
   const data = snapshot.data;
-  const calls = pair(snapshot, execution);
+  const localExecution = execution.filter(call => callBelongs(snapshot, call));
+  const calls = pair(snapshot, localExecution);
   const revisions = revisionRows(data).map((row, index) => {
     const person = account(data, row.actor_account_id);
     const id = row.object_id + ':' + row.revision + ':' + index;

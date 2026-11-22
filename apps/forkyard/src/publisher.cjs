@@ -68,70 +68,131 @@ function receiptAccount(receipt, record) {
   return null;
 }
 
-function messageAgrees(record, message, eventId) {
-  if (!record || !message) return false;
-  if (record.thread_id !== message.id) return false;
-  if (filled(eventId) && filled(record.id) && record.id !== eventId) return false;
+function routerEventId(runId, message, receiver, epoch) {
+  if (!message || !receiver || !filled(receiver.app_id) || !filled(receiver.account_id) || epoch == null) return null;
+  return 'router-' + digest({
+    run: runId,
+    source: message.source,
+    id: message.id,
+    target: receiver.app_id,
+    account: receiver.account_id,
+    epoch
+  }).slice(0, 32);
+}
+
+function expectedPayload(message) {
+  const data = message && message.data;
+  const content = data && data.content;
+  return {
+    recipient: data && data.recipient ? data.recipient : null,
+    subject: content ? content.title : null,
+    body: content && content.body ? content.body.text : null
+  };
+}
+
+function observedMessage(record) {
+  if (!record) return null;
+  return {
+    id: record.id || null,
+    thread_id: record.thread_id || null,
+    from: record.from || null,
+    to: Array.isArray(record.to) ? record.to.slice() : [],
+    subject: record.subject == null ? null : record.subject,
+    body: record.body == null ? null : record.body,
+    account_id: record.account_id || null
+  };
+}
+
+function payloadAgrees(record, message, receiver) {
+  const expected = expectedPayload(message);
+  const observed = observedMessage(record);
+  if (!observed || expected.subject == null || expected.body == null) return false;
+  if (observed.subject !== expected.subject || observed.body !== expected.body) return false;
+  if (!observed.to.length) return false;
+  if (receiver && filled(receiver.address) && !observed.to.includes(receiver.address)) return false;
   const app = message.data && message.data.source_object && message.data.source_object.app_id;
-  if (app && filled(record.from) && record.from !== app + '@pale.example') return false;
-  if (filled(message.source) && app && message.source !== 'urn:pale:app:' + app + ':account:' + message.data.source_object.account_id) return false;
+  if (app && filled(observed.from) && observed.from !== app + '@pale.example') return false;
+  if (filled(message.id) && filled(observed.thread_id) && observed.thread_id !== message.id) return false;
   return true;
 }
 
-function messagingAgrees(messaging, attempt, message) {
-  if (!messaging || messaging.status !== 'committed') return false;
-  if (!filled(messaging.event_id) || !filled(messaging.run_id) || !filled(attempt.run_id)) return false;
-  if (messaging.event_id !== attempt.event_id || messaging.run_id !== attempt.run_id) return false;
-  const target = messaging.target;
-  if (!target || !filled(target.app_id) || !filled(target.account_id)) return false;
-  if (attempt.receiver && (target.app_id !== attempt.receiver.app_id || target.account_id !== attempt.receiver.account_id)) return false;
-  if (!messaging.version || messaging.version.epoch == null) return false;
-  if (attempt.receiver_epoch != null && messaging.version.epoch !== attempt.receiver_epoch) return false;
-  if (message && messaging.cloud_event && (messaging.cloud_event.id !== message.id || messaging.cloud_event.source !== message.source)) return false;
-  return true;
-}
-
-function mailAgrees(receipt, record, attempt, message) {
-  if (!receipt || receipt.status !== 'committed' || !messageAgrees(record, message, attempt.event_id)) return false;
-  if (!filled(attempt.event_id) || receipt.event_id !== attempt.event_id || !filled(attempt.run_id)) return false;
+function identityAgrees(receipt, record, binding, eventId) {
+  if (!receipt || receipt.status !== 'committed' || !filled(eventId) || receipt.event_id !== eventId) return false;
+  if (!binding || !filled(binding.run_id)) return false;
   const run = receiptRun(receipt) || (record && record.run_id) || null;
-  if (run !== attempt.run_id) return false;
-  const receiver = attempt.receiver;
-  if (!receiver || !filled(receiver.app_id) || !filled(receiver.account_id)) return false;
+  if (run !== binding.run_id) return false;
+  if (!binding.receiver || !filled(binding.receiver.app_id) || !filled(binding.receiver.account_id)) return false;
   const account = receiptAccount(receipt, record);
   const appId = receipt.app_id || (record && record.app_id) || null;
-  if (account !== receiver.account_id || appId !== receiver.app_id) return false;
+  if (account !== binding.receiver.account_id || appId !== binding.receiver.app_id) return false;
   const epoch = receipt.version && receipt.version.epoch != null ? receipt.version.epoch : (record && record.epoch != null ? record.epoch : null);
-  if (attempt.receiver_epoch == null || epoch !== attempt.receiver_epoch) return false;
+  if (epoch == null) return false;
+  const expected = routerEventId(binding.run_id, binding.message, binding.receiver, epoch);
+  if (expected !== eventId) return false;
+  if (binding.receiver.epoch != null && binding.receiver.epoch !== epoch) return false;
   return true;
 }
 
-function reconcile({messaging, mailReceipt, attempted, message} = {}) {
-  const attempt = attempted || {};
-  const eventId = attempt.event_id || null;
+function judge({messaging, mailReceipt, binding, eventId}) {
   const receipt = receiptOf(mailReceipt);
   const record = (mailReceipt && mailReceipt.receiver_record) || null;
-  const cloud = message || attempt.message || null;
-  const messagingConfirms = messagingAgrees(messaging, {...attempt, event_id: eventId}, cloud);
-  const mailConfirms = mailAgrees(receipt, record, {...attempt, event_id: eventId}, cloud);
-  const observed = {
-    run_id: attempt.run_id || null,
-    receiver: attempt.receiver || null,
-    cloud_event: cloud ? {id: cloud.id, source: cloud.source} : null,
-    message: record ? {id: record.id || null, thread_id: record.thread_id || null, from: record.from || null} : null
+  const message = binding && binding.message;
+  const identity = identityAgrees(receipt, record, binding, eventId);
+  const payload = payloadAgrees(record, message, binding && binding.receiver);
+  const comparison = {
+    expected: {
+      run_id: binding && binding.run_id || null,
+      receiver: binding && binding.receiver || null,
+      event_id: eventId || null,
+      ...expectedPayload(message)
+    },
+    observed: {
+      run_id: receiptRun(receipt),
+      app_id: receipt && (receipt.app_id || (record && record.app_id)) || null,
+      account_id: receiptAccount(receipt, record),
+      epoch: receipt && receipt.version ? receipt.version.epoch : null,
+      event_id: receipt && receipt.event_id || null,
+      message: observedMessage(record)
+    },
+    identity,
+    payload
   };
-  if (messagingConfirms || mailConfirms) {
+  if (identity && payload) {
     return {
       delivery: 'confirmed',
       source_committed: true,
       same_run_retry: false,
-      duplicate_within_run: !!(messagingConfirms && messaging && messaging.duplicate === true && messaging.run_id === attempt.run_id),
+      duplicate_within_run: !!(messaging && messaging.duplicate === true && messaging.run_id === binding.run_id),
       event_id: eventId,
       correlated: true,
-      observed
+      comparison
     };
   }
-  return {delivery: 'unresolved', source_committed: true, same_run_retry: false, duplicate_within_run: false, event_id: eventId, correlated: false, observed};
+  const reason = !identity ? 'identity_mismatch' : 'payload_mismatch';
+  return {
+    delivery: 'unresolved',
+    source_committed: true,
+    same_run_retry: false,
+    duplicate_within_run: false,
+    event_id: eventId,
+    correlated: false,
+    reason,
+    comparison
+  };
+}
+
+function reconcile({messaging, mailReceipt, attempted, message} = {}) {
+  const attempt = attempted || {};
+  const cloud = message || attempt.message || null;
+  const receiver = attempt.receiver || null;
+  const binding = {
+    run_id: attempt.run_id || null,
+    receiver: receiver ? {...receiver, epoch: attempt.receiver_epoch != null ? attempt.receiver_epoch : receiver.epoch} : null,
+    message: cloud
+  };
+  if (binding.receiver && attempt.receiver_epoch != null) binding.receiver.epoch = attempt.receiver_epoch;
+  const eventId = attempt.event_id || routerEventId(binding.run_id, cloud, binding.receiver, binding.receiver && binding.receiver.epoch);
+  return judge({messaging, mailReceipt, binding, eventId});
 }
 
 async function inspectReceiver(client, eventId) {
@@ -151,90 +212,105 @@ async function inspectReceiver(client, eventId) {
       thread_id: stored.thread_id,
       from: stored.from,
       subject: stored.subject,
-      body: stored.body
+      body: stored.body,
+      to: stored.to
     } : null
   };
 }
 
-function stopped(result) {
-  if (!result) return true;
-  if (result.status === 'committed') return false;
-  return true;
+function bindingFrom(runId, receiver, message) {
+  return {
+    run_id: runId,
+    receiver: receiver ? {
+      app_id: receiver.app_id || null,
+      account_id: receiver.account_id || null,
+      address: receiver.address || null,
+      epoch: receiver.epoch == null ? null : receiver.epoch
+    } : null,
+    message
+  };
+}
+
+async function settleAttempt(attempt, {messaging, inspectReceipt, binding, eventId}) {
+  let mailReceipt = null;
+  let lookupError = null;
+  if (eventId && typeof inspectReceipt === 'function') {
+    try {
+      mailReceipt = await inspectReceipt(eventId);
+    } catch (error) {
+      lookupError = error && error.message ? error.message : 'lookup_failed';
+    }
+  }
+  const outcome = judge({messaging, mailReceipt, binding, eventId});
+  if (lookupError) outcome.lookup_error = lookupError;
+  attempt.outcome = outcome;
+  attempt.event_id = eventId;
+  return outcome;
 }
 
 async function publishPending({notices, accountId, router, runId, inspectReceipt, receiver} = {}) {
   if (!runId) throw new Error('publishPending requires the run id.');
   const prior = stoppedRuns.get(runId);
-  if (prior) return {attempts: prior.attempts.slice(), stopped: true, stop_reason: prior.reason, suppressed: true};
-  const attempts = [];
+  if (prior && (prior.phase === 'halted' || prior.phase === 'in_flight')) {
+    return {attempts: prior.attempts.slice(), stopped: true, stop_reason: prior.reason, suppressed: true, receiver: prior.receiver};
+  }
+  const done = new Set((prior && prior.attempts || []).map(item => item.notice_id));
+  const pending = (notices || []).filter(item => item.status === 'pending_delivery' && !done.has(item.notice_id));
+  if (prior && prior.phase === 'settled' && !pending.length) {
+    return {attempts: prior.attempts.slice(), stopped: false, stop_reason: null, suppressed: true, receiver: prior.receiver};
+  }
+  const attempts = prior && prior.attempts ? prior.attempts : [];
+  const state = {
+    phase: 'in_flight',
+    reason: 'awaiting_router',
+    receiver: receiver ? {
+      app_id: receiver.app_id || null,
+      account_id: receiver.account_id || null,
+      address: receiver.address || null,
+      epoch: receiver.epoch == null ? null : receiver.epoch
+    } : null,
+    attempts
+  };
+  stoppedRuns.set(runId, state);
   let stopReason = null;
-  for (const notice of (notices || []).filter(item => item.status === 'pending_delivery')) {
+  for (const notice of pending) {
     const args = publishArgs(notice, accountId);
+    const binding = bindingFrom(runId, state.receiver, args.message);
+    const plannedId = routerEventId(runId, args.message, state.receiver, state.receiver && state.receiver.epoch);
+    const attempt = {
+      notice_id: notice.notice_id,
+      request_id: args.request_id,
+      message: args.message,
+      receiver: state.receiver,
+      event_id: plannedId,
+      result: null,
+      outcome: null
+    };
+    attempts.push(attempt);
     let result;
     try {
       result = await router.call('router.publish', args);
     } catch (error) {
       result = {status: 'unknown', code: 'transport_error', message: error && error.message ? error.message : 'transport_error'};
-      const outcome = reconcile({messaging: result, message: args.message, attempted: {event_id: null, run_id: runId, receiver: receiver || null, message: args.message}});
-      attempts.push({notice_id: notice.notice_id, request_id: args.request_id, message: args.message, result, outcome});
-      stopReason = 'transport_error';
-      break;
     }
-    const needsInspection = !!(result.event_id && result.status !== 'committed');
-    const pending = {notice_id: notice.notice_id, request_id: args.request_id, message: args.message, result, outcome: null};
-    attempts.push(pending);
-    if (needsInspection) {
-      stopReason = result.code || result.status || 'unconfirmed';
-      stoppedRuns.set(runId, {reason: stopReason, attempts});
-    }
-    let mailReceipt = null;
-    let lookupError = null;
-    if (needsInspection && typeof inspectReceipt === 'function') {
-      try {
-        mailReceipt = await inspectReceipt(result.event_id);
-      } catch (error) {
-        lookupError = error && error.message ? error.message : 'lookup_failed';
-      }
-    }
-    const receiverTarget = receiver || result.target || null;
-    let receiverEpoch = result.version && result.run_id === runId ? result.version.epoch : null;
-    if (receiverEpoch == null && result.event_id && receiverTarget && args.message) {
-      const receipt = receiptOf(mailReceipt);
-      const epoch = receipt && receipt.version ? receipt.version.epoch : null;
-      if (epoch != null) {
-        const expected = 'router-' + digest({
-          run: runId,
-          source: args.message.source,
-          id: args.message.id,
-          target: receiverTarget.app_id,
-          account: receiverTarget.account_id,
-          epoch
-        }).slice(0, 32);
-        if (expected === result.event_id) receiverEpoch = epoch;
-      }
-    }
-    const outcome = reconcile({
-      messaging: result,
-      mailReceipt,
-      message: args.message,
-      attempted: {
-        event_id: result.event_id || null,
-        run_id: runId,
-        receiver: receiverTarget,
-        receiver_epoch: receiverEpoch,
-        message: args.message
-      }
-    });
-    if (lookupError) outcome.lookup_error = lookupError;
-    pending.outcome = outcome;
-    if (stopped(result)) {
-      stopReason = result.code || result.status || 'unconfirmed';
-      stoppedRuns.set(runId, {reason: stopReason, attempts});
+    attempt.result = result;
+    const eventId = plannedId || (result && result.event_id) || null;
+    const outcome = await settleAttempt(attempt, {messaging: result, inspectReceipt, binding, eventId});
+    if (outcome.delivery !== 'confirmed') {
+      stopReason = outcome.reason || (result && (result.code || result.status)) || 'unresolved';
+      state.phase = 'halted';
+      state.reason = stopReason;
       break;
     }
   }
-  if (stopReason) stoppedRuns.set(runId, {reason: stopReason, attempts});
-  return {attempts, stopped: !!stopReason, stop_reason: stopReason, suppressed: false};
+  if (stopReason) {
+    state.phase = 'halted';
+    state.reason = stopReason;
+  } else {
+    state.phase = 'settled';
+    state.reason = null;
+  }
+  return {attempts: attempts.slice(), stopped: !!stopReason, stop_reason: stopReason, suppressed: false, receiver: state.receiver};
 }
 
 function resetDelivery(runId) {
@@ -242,4 +318,4 @@ function resetDelivery(runId) {
   else stoppedRuns.clear();
 }
 
-module.exports = {payloadFor, messageFor, publishArgs, reconcile, inspectReceiver, publishPending, resetDelivery};
+module.exports = {payloadFor, messageFor, publishArgs, reconcile, inspectReceiver, routerEventId, publishPending, resetDelivery};

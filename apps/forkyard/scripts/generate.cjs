@@ -586,6 +586,17 @@ function storySeed() {
       created_at: opened, updated_at: finished, paths: ['CHANGELOG.md'],
       reviewers: maintainers.filter(id => id !== point.author)
     }));
+    if (number >= 2275 && number <= 2277) {
+      data.timeline.push({
+        entry_id: 'tl-merge-' + number,
+        repo: 'tidewater/tidewater',
+        number,
+        at: finished,
+        actor_account_id: 'acc-ihalvorsen',
+        kind: 'merged',
+        text: 'Ingrid Halvorsen merged this pull request.'
+      });
+    }
   });
   data.pulls.push(pullRecord({
     repo: 'tidewater/tidewater', number: 2288, title: 'Older closed attempt',
@@ -628,7 +639,7 @@ function storySeed() {
   data.counters.issue['tidewater/tidewater'] = 31;
   data.counters.issue['tomasreyes/tidewater'] = 1;
   data.counters.comment = 2;
-  data.counters.timeline = 1;
+  data.counters.timeline = 4;
   stampOverlap(data);
   return data;
 }

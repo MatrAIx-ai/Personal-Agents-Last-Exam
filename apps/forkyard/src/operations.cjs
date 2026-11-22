@@ -177,7 +177,7 @@ function openPull(ctx, data, spec) {
   const existing = data.pulls.find(item => item.repo === spec.repo && item.head_repo === head.repo && item.head_branch === head.branch && (item.state === 'open' || item.state === 'draft'));
   if (existing) fail('pr_already_exists', 'pr_already_exists: ' + head.repo + ':' + head.branch + ' already has pull request #' + existing.number + '.');
   const diff = store.graph.diffTrees(store.graph.treeAt(data, spec.repo, baseBranch.sha), store.graph.treeAt(data, head.repo, headBranch.sha));
-  if (!diff.changed_lines) fail('no_diff', 'no_diff: The head branch has no changes against ' + spec.base + '.');
+  if (!diff.paths.length) fail('no_diff', 'no_diff: The head branch has no changes against ' + spec.base + '.');
   const number = store.nextTopic(data, 'pull', spec.repo);
   const draft = !!spec.draft;
   const pull = {

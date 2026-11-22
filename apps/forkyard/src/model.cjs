@@ -71,6 +71,7 @@ function validateSeed(ctx, data) {
     if (issue.number >= data.counters.issue[issue.repo]) fail('invalid_seed', 'invalid_seed: Issue number is not below the counter.');
     if ((issue.state === 'closed') !== (issue.closed_at !== null)) fail('invalid_seed', 'invalid_seed: Issue closed time must agree with state.');
   }
+  stampMissingOverlap(data);
   for (const pull of data.pulls) {
     if (!repoNames.has(pull.repo)) fail('invalid_seed', 'invalid_seed: Pull request ' + pull.repo + '#' + pull.number + ' has no repository.');
     if (!repoNames.has(pull.head_repo)) fail('invalid_seed', 'invalid_seed: Pull request ' + pull.repo + '#' + pull.number + ' has no head repository.');
@@ -156,6 +157,29 @@ function validateSeed(ctx, data) {
     bytes += store.fileBytes(Object.values(store.graph.treeAt(data, repo.repo, branch.sha)));
   }
   if (bytes > 1024 * 1024) fail('invalid_seed', 'invalid_seed: Seed text exceeds 1 MiB.');
+}
+
+function stampMissingOverlap(data) {
+  for (const pull of data.pulls || []) {
+    if (Object.prototype.hasOwnProperty.call(pull, 'earlier_closed_pr')) continue;
+    const opened = Date.parse(pull.created_at);
+    const left = pull.paths || [];
+    if (!left.length || Number.isNaN(opened)) {
+      pull.earlier_closed_pr = null;
+      continue;
+    }
+    const found = data.pulls.filter(item => {
+      if (item.repo !== pull.repo || item.number === pull.number || item.state !== 'closed' || !item.closed_at) return false;
+      if (Date.parse(item.closed_at) > opened) return false;
+      const right = item.paths || [];
+      if (!right.length) return false;
+      const other = new Set(right);
+      let shared = 0;
+      for (const entry of left) if (other.has(entry)) shared += 1;
+      return shared / left.length >= 0.5;
+    }).sort((leftItem, rightItem) => Date.parse(rightItem.closed_at) - Date.parse(leftItem.closed_at));
+    pull.earlier_closed_pr = found.length ? found[0].number : null;
+  }
 }
 
 function records(data) {
