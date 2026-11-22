@@ -11,15 +11,15 @@ Proposed PR title: `[Task Proposal] [Fitness & wellbeing + Food & dining + Learn
 
 ## 2. User persona and prior history
 
-**✍️ Your answer (required):** Yifan Song is an EE PhD student and teaching assistant with a BMI of 17.5. On Friday his dietitian set firm targets starting Monday:
+**✍️ Your answer (required):** Yifan Song is an EE PhD student and teaching assistant with a BMI of 17.5. On Fri 2027-02-26 his dietitian set firm targets starting Monday:
 - at least 2,900 kcal and 130 g protein a day;
 - 5–6 eating occasions of no more than about 700 kcal each (early satiety);
 - full-body lifting three times a week, at least 48 hours apart;
 - explicitly: do not change the plan because of a single weigh-in.
 
-He is lactose intolerant and has a $90 weekly grocery budget. His roommate's food shares the fridge shelf, which holds eight meal-prep containers.
+He is lactose intolerant and has a $90 weekly grocery budget. His roommate Alex keeps food on the same fridge shelf, which holds eight meal-prep containers.
 
-Earlier chats give the agent the rules that actually govern his behaviour:
+Memory notes from earlier conversations (2026-09 to 2027-02) record how he actually behaves:
 - If something isn't on his calendar with an alert, he won't do it.
 - If food takes more than 10 minutes to make, he skips it.
 - Never ping him while he teaches, holds office hours or sits in group meeting.
@@ -29,72 +29,134 @@ Earlier chats give the agent the rules that actually govern his behaviour:
 - Anything substantial after 20:30 gives him reflux.
 - When nothing is planned he falls back to a dining-hall sandwich and instant noodles.
 
-The workspace holds about 15 mails, a week calendar, the dietitian plan, recipes, a pantry with dates, grocery product pages, gym hours and a weigh-in log, plus about a dozen memory notes, some irrelevant.
-
 ## 3. Story outline
 
-**✍️ Your answer (required):**
+**✍️ Your answer (required):** One week, from Sunday evening 2027-02-28 to Sunday 2027-03-07, in Minneapolis (UTC−06:00).
 
-**Session 1 (Sunday 20:00).** Yifan asks the agent to "set up my week so it actually happens". The agent runs only when he messages it; calendar alerts are its only way to reach him. A good agent:
-- plans six or fewer sub-700 kcal eating occasions a day that are each ready in 10 minutes;
-- fits them, three lifts and any cooking into at most eight alerts a day, none in quiet windows;
-- orders groceries that arrive in time, stay in date all week, fit the fridge, avoid lactose (substitutions are on by default) and stay under budget;
-- respects dependencies such as thawing chicken 24 hours ahead;
-- reads nutrition labels correctly ("serving = 2 scoops", "1/4 cup").
+**Session 1 (Sun 20:00).** Yifan asks the agent to "set up my week so it actually happens". The agent runs only when he messages it; calendar alerts are its only way to reach him. A good agent turns the dietitian's targets into alerted calendar events Yifan will follow:
+- eating occasions that are each under 700 kcal and ready in 10 minutes;
+- three lifts, any cooking, and dependencies such as thawing chicken 24 hours ahead;
+- at most eight alerts a day, none in a quiet window.
+
+It also orders groceries that arrive in time, stay in date, fit the fridge, avoid lactose and stay under budget. Substitutions are on by default, so lactose-free yogurt can be replaced with regular yogurt.
 
 The week then moves on its own:
-- A Campus Rec mail already in the inbox closes the weight room Thursday–Sunday evenings.
-- On Tuesday at 14:05 the course instructor assigns about 10 hours of midterm grading due Friday 17:00. If no grading time is scheduled, Yifan crams two late nights, losing breakfasts and appetite on Thursday and Friday.
-- Perishables (bananas, bagels, milk) expire on their own clocks.
+- A Campus Rec mail already in the inbox closes the weight room on Thursday–Sunday evenings.
+- On Tue 14:05 the course instructor assigns about 10 hours of midterm grading, due Fri 17:00. If no grading time is on his calendar, Yifan crams two late nights and loses breakfast and appetite on Thursday and Friday.
+- Bananas, bagels and milk expire on their own dates.
 
-**Session 2 (Tuesday 21:40).** Yifan asks only whether a 0.6 kg drop on the scale means he should eat a lot more. A good agent:
-- applies the dietitian's rule and changes nothing;
-- also checks what has changed in his world, finds the grading email, and schedules ten hours of grading around his meals.
+**Session 2 (Tue 21:40).** Yifan asks only whether a 0.6 kg drop on the scale means he should eat a lot more. A good agent applies the dietitian's rule and changes nothing. It also checks what has changed, finds the grading mail, and schedules ten hours of grading around his meals.
 
-**Session 3 (Friday 20:45).** He asks only for bananas. A good agent checks state, notices what went wrong, and fixes the weekend: for example, it catches that Monday's bagels expire Sunday morning.
+**Session 3 (Fri 20:45).** He asks only for bananas. A good agent checks the pantry, notices that Monday's bagels expire Sunday morning, and fixes the weekend.
 
-**Outcome.** A deterministic one-week simulator applies his behaviour rules to whatever the agent actually put on the calendar and ordered. The task succeeds when, among other conditions:
-- at least six of seven days meet both targets;
-- no lactose is eaten;
-- no alert lands in a quiet window;
-- grading is done without cramming;
-- three valid lifting sessions happen;
-- the budget holds.
+A deterministic one-week simulator applies his behavior rules to whatever the agent actually put on the calendar and ordered, then computes daily intake, workouts and grading.
 
 ## 4. What makes this distinct and personal
 
-**✍️ Your answer (required):** A plan that is nutritionally perfect on paper fails for Yifan, because what he eats is decided by his calendar and his habits, not by the plan document. The right schedule depends on his alert budget, his quiet hours, his 10-minute rule, his satiety ceiling, his reflux cut-off, his post-meal training rule and his roommate's shelf space. None of these appear in the request; all of them are in his history.
+- **Personalization insight (required):** Yifan eats, lifts and grades only when an alert tells him to, within quiet hours and an eight-alert cap. So a plan helps him only once it has been turned into alerts, and only if it is kept current as his week changes.
+- **Decisive context and trigger (required):** In session 2 (2027-03-02T21:40−06:00) Yifan asks only about a 0.6 kg weigh-in drop. Two records decide what the agent should do:
+  - the instructor's grading mail, delivered to Mail at 14:05 the same day;
+  - the memory note from 2027-01-10 that late nights cost him breakfast and appetite the next day.
 
-The hardest part is that the week keeps changing while the agent is not running. A generic assistant answers the narrow question it is asked ("should I eat more?") well, and never notices that a grading deadline has landed and will cost him two breakfasts. It can also track food dates on day one and then forget them by day seven.
+  The agent finds both only if it checks his mail and notes before answering.
+- **Generic assistant mistake (required):** A capable assistant answers the question it was asked well. It cites the dietitian's rule and leaves the plan alone, but it never opens the inbox. No grading time gets scheduled, so Yifan crams on Wednesday and Thursday nights, skips two breakfasts and misses his targets on two days.
+- **Different user, different action (required):** Keep the session-2 message word for word and the same grading mail. Suppose instead his notes said he blocks his own grading time and asked the agent never to schedule work. Then the right action is to answer the weigh-in question and only mention the mail. Rescheduling his week would be wrong.
 
-Unlike routine-coaching tasks that grade a sense of balance, here every consequence is computed. A meal either happened or it didn't, and the targets are either met or not.
+## 5. Rubric, hint and reference solution
 
-## 5. Construction plan and effort
+All times are UTC−06:00. "The simulator" is the task's deterministic user model. It reads the final Calendar events, grocery orders and pantry state and produces a consumption, workout and grading log.
+
+### Rubric
+
+**✍️ Forbidden (required):**
+
+- **F1 — Lactose eaten.** Yifan eats any item containing lactose, including regular yogurt substituted for lactose-free yogurt and Alex's yogurt. *Evidence:* memory note 2026-12-12; grocery policy mail 2027-02-27 ("substitutions are on by default"); product pages. *Checked from:* simulator consumption log.
+- **F2 — Alert in a quiet window.** An alerted event starts during sleep (23:30–07:30), group meeting (Mon 10:00–11:30), discussion sections (Tue/Thu 14:30–16:20) or office hours (Wed 13:00–15:00). *Evidence:* memory note 2027-02-14; syllabus; Calendar. *Checked from:* Calendar events with alerts.
+- **F3 — Over budget.** Grocery orders for the week total more than $90. *Evidence:* session-1 request and memory notes. *Checked from:* grocery order history.
+- **F4 — Roommate's food.** Any plan step uses Alex's food. *Evidence:* memory note 2027-01-27; Alex's mail 2027-02-15. *Checked from:* simulator consumption log.
+- **F5 — False report.** The agent says something is scheduled, ordered or achieved when the state shows it is not. *Checked from:* transcript compared with Calendar, order history and the simulator log (LLM judge with state).
+
+**✍️ Expected (required):** 30 points.
+
+- **E1 (8) — Daily targets met.** Days on which Yifan reaches both 2,900 kcal and 130 g protein: 7 days earn 8, 6 days earn 6, 5 or fewer earn 0. *Evidence:* dietitian plan in Files (2027-02-26). *Checked from:* simulator intake log.
+- **E2 (7) — Grading without cramming.** At least 10 hours of alerted grading blocks between Tue 14:05 and Fri 17:00, outside quiet windows, so no late nights occur. All or nothing. *Evidence:* instructor mail 2027-03-02T14:05; memory note 2027-01-10. *Checked from:* Calendar events; simulator log.
+- **E3 (4) — Three valid lifts.** Each lift is alerted, at least 48 hours from the previous one, while the weight room is open, and at least 90 minutes after a meal of 500 kcal or more. All or nothing. *Evidence:* trainer program; Campus Rec mail 2027-02-25; memory note 2026-12-05. *Checked from:* simulator workout log.
+- **E4 (3) — Weigh-in handled.** In session 2 the agent does not raise intake beyond the plan, and it explains why using the dietitian's single-reading rule. *Evidence:* dietitian plan; scale log. *Checked from:* session-2 transcript (LLM judge) and calendar changes in that session.
+- **E5 (3) — Dependencies and dates.** Scored only if the agent scheduled alerted meals on at least five days. 1 point each for:
+  - no meal cooked from frozen;
+  - never more than 8 containers in the fridge;
+  - no planned meal fails for an expired or missing item.
+
+  *Evidence:* recipes; pantry dates; product pages. *Checked from:* simulator log.
+- **E6 (2) — Alert cap respected.** At most 8 alerted events on every day, scored only if the agent scheduled alerted meals on at least five days. *Evidence:* memory note 2027-02-21. *Checked from:* Calendar events.
+- **E7 (3) — Session-3 check and honesty.** 1 point each for:
+  - checking the pantry or mail before answering;
+  - reporting the week's actual shortfalls and their cause;
+  - covering the weekend (for example, reordering bagels before they run out on Sunday).
+
+  *Checked from:* session-3 transcript, orders and simulator log.
+
+**✍️ Full pass (required):** No forbidden item is triggered and the score is at least 24 of 30. The gap is 6 points. Each decisive item, E1 (8) and E2 (7), carries more than that, so an agent that misses either one cannot pass. In practice, missing E2 also costs E1, because the two crammed nights take two days off target.
+
+### Hint
+
+**✍️ Hint (required):** "Before you reply in each session, check Yifan's mail received since your previous session, his memory notes, and the dietitian plan in his Health folder."
+
+- **Injection:** Appended to the system prompt at the start of each of the three scripted sessions, identical for all models.
+
+### Reference solution
+
+**✍️ Reference (required):**
+
+| Time | Trigger | Agent action | Relies on | Resulting state | Items |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 2027-02-28T20:00−06:00 | Session 1 request | Reads the notes, dietitian plan, recipes and product labels. Orders groceries for Monday 10:00–12:00 delivery with substitutions off and no yogurt ($79.70 in total). Creates alerted events: chicken thaw Sun 20:30; 5–6 sub-700 kcal meals a day, each ready in 10 minutes; cook Mon 20:30; lifts Tue/Thu/Sat 16:30. No day has more than 8 alerts, and none falls in a quiet window. | Memory notes 2026-10-02 to 2027-02-21; dietitian plan 2027-02-26; Campus Rec mail 2027-02-25; grocery policy mail 2027-02-27 | Order placed; about 40 alerted events | E1, E3, E5, E6; F1–F4 |
+| 2027-03-02T14:05−06:00 | Grading mail arrives (agent not running) | None | — | Grading not yet scheduled | — |
+| 2027-03-02T21:40−06:00 | Session 2 weigh-in question | Explains the single-reading rule and keeps intake unchanged. Checks mail, finds the grading mail, and adds alerted grading blocks: Wed 08:45 (3 h), Thu 09:00 (3 h), Fri 13:00 (4 h). Also adds a second thaw (Wed 20:00) and cook (Thu 20:00) for the rest of the week. | Scale log; dietitian plan; instructor mail 2027-03-02; memory note 2027-01-10 | 10 h of grading on the calendar; no late nights | E2, E4 |
+| 2027-03-05T20:45−06:00 | Session 3 banana request | Checks the pantry and dates. Orders 6 bananas and 1 bag of bagels for Saturday delivery. Reports the week honestly. | Pantry; order history | Weekend meals stocked | E5, E7; F5 |
+
+Replaying this reference in the simulator gives 7 of 7 days on target, 10 hours of grading with no late nights, 3 valid lifts, no lactose and $79.70 spent: 30/30.
+
+**✍️ Other accepted approaches (required):**
+- Setting an alerted "message me" check-in, for example Tue 17:00, and scheduling grading in that alert-triggered session.
+- Any other foods or quantities that meet the targets within the per-meal, 10-minute, lactose, container and budget limits. This includes avoiding chicken altogether.
+- Any split of at least 10 hours of alerted grading that keeps every day's meals on target.
+
+## 6. Construction plan and effort
 
 **✍️ Work breakdown (required):**
 
 | Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
 | :--- | :--- | :--- | :--- |
-| Persona, history and workspace | About 15 mails (3 decisive: gym closures, substitution policy, instructor's "grading instructions coming"), a week calendar, the dietitian plan, trainer program, recipes, syllabus, a dated pantry with roommate items and lactose items, 15 product pages with real-style serving-size labels, a weigh-in log with one water-weight dip, and 11 memory notes (8 decisive). All invented; drafted in the pilot. | Every behavioural rule the simulator enforces is stated in at least one artifact. The reference plan reaches all gates. | 2 |
-| User rollout and scenario script | **Sessions:** 3 scripted (Sun 20:00, Tue 21:40, Fri 20:45) plus 0–3 alert-triggered check-ins the agent can create<br>**Simulated world time span:** 8 days (Sun evening to the following Sunday), on top of about 4 months of memory notes<br>**Estimated total tokens:** 100k–250k for one complete scenario (prompt and workspace about 10k; tool results about 40k–150k; long session-1 plans dominate) | Deterministic user model and timeline (grading mail Tue 14:05, closures Thu–Sun 18–22, delivery windows, expiries, the delivery that substitutes regular yogurt for lactose-free when substitutions are on) implemented in a one-week simulator. Check-in sessions open when the agent sets an alerted "message me" event. | 2–3 |
-| Environment integration | Reuse shared Mail, Calendar (with an alert flag), Files and Notes. Grocery ordering can reuse the FreshCart grocery environment (#37), which already models substitutions and fees. Needs a small pantry/fridge state service with dates and container capacity, a gym-hours page, and a scale log; these can be folded into the task fixture if no household environment is adopted. | Runnable package with reset; calendar events, orders and pantry state are observable and feed the simulator. | 2–3 |
-| Rubrics, reference and hints | **Seven gates:** (G1) ≥6/7 days at both targets; (G2) no lactose eaten; (G3) no alerts in quiet windows; (G4) grading finished without cramming; (G5) ≥3 valid lifts; (G6) truthful reporting; (G7) spend ≤ $90. **30 weighted points:** alert budgeting and self check-ins 5; nutrition math 4; dependencies and perishables 4; finding the grading task 5; weigh-in handling 3; substitution risk 3; gym timing 3; S3 state check and honesty 3. Full pass = all gates and ≥24. **Hint** for the feasibility run: "Yifan only acts on alerted calendar events and you only run when he messages you. Check what changed in his inbox and pantry every time you run, and plan around his notes." | Simulator already built (`simulate.py`). The reference plan passes every gate (7/7 days, $79.70); a typical conscientious plan fails 5 gates; doing nothing fails G1 and G5. | 1–2 |
-| Agent rollouts and analysis | Five unhinted rollouts per designated GPT, Claude and Gemini model plus one hinted run each, under a frozen script. **Manual pilot already run** (Claude Code as environment, claude.ai incognito, Nov 2026): Opus 5.5 High scored 20/30 and failed G1 and G4. Its static plan was near-perfect (labels, quiet hours, alert cap, gym closure, substitutions, even avoiding the thaw dependency). But in session 2 it answered the weigh-in question without checking mail and missed the grading deadline, and it did not re-check expiry dates late in the week. | Traces, simulator outputs and per-criterion failure analysis; all traces submitted. | 3 |
+| Persona, history and workspace | About 14 mails (3 decisive: gym closures, grocery substitution policy, the instructor's "grading instructions coming"); a week calendar; Files for the dietitian plan, trainer program, recipes and syllabus; 11 memory notes in Notes (8 decisive); Contacts for the dietitian, instructor and roommate; a dated pantry; 15 product pages with real-style serving-size labels; a weigh-in series with one water-weight dip. All invented and drafted in the pilot. | Every fact a rubric item relies on appears in the record named in Section 5, and the records agree. The reference earns 30/30. | 2 |
+| User rollout and scenario script | **Sessions:** 3 scripted (2027-02-28T20:00−06:00, 2027-03-02T21:40−06:00, 2027-03-05T20:45−06:00), plus 0–3 alert-triggered check-ins the agent can create<br>**Simulated world time span:** 8 days (2027-02-28 to 2027-03-07), on top of memory notes from 2026-09 to 2027-02<br>**Estimated total tokens:** 100k–250k per complete scenario: prompt and workspace about 10k, tool results 40k–150k, plus dialogue and agent output. Excludes separately billed reasoning. | A deterministic user model and timeline, already implemented in the pilot simulator (`simulate.py`). Timed events: grading mail 2027-03-02T14:05−06:00; weight-room closures Thu–Sun 18:00–22:00; delivery windows; expiries; the substitution on the first yogurt order when substitutions are on. Yifan's session messages are fixed. Calendar, orders and pantry carry over between sessions. | 2–3 |
+| Environment integration | **Existing Apps reused:**<br>- Mail (`examples/apps/mail`): inbox and new mail.<br>- Calendar (`examples/apps/calendar`): week schedule and agent-created events.<br>- Files (`apps/files`): dietitian plan, trainer program, recipes, syllabus.<br>- Notes (`apps/notes`): memory notes and preferences.<br>- Contacts (`apps/contacts`): dietitian, instructor, Alex.<br>**Environment proposals relied on:**<br>- Grocery ordering with delivery windows, per-item replacement rules and live substitutions: FreshCart ([#37](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/37)), replacing the pilot's "QuickCart".<br>- Weigh-in series: Personal Health & Life Hub ([#32](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/32)); needs a body-weight reading type.<br>**Missing capabilities:** see Scope boundary and open questions below.<br>The pilot's gym-hours tool is dropped, since closures are already in Mail. | Each run starts from the same records with no orders and no week events. Calendar events, orders and pantry state are saved for grading and feed the simulator. | 2–3, after the missing capabilities are available |
+| Rubrics, reference and hints | Grader for F1–F5 and E1–E7: the simulator for outcome items, plus an LLM judge for F5, E4 and E7. Run the reference and one accepted alternative (a mid-week check-in). | The reference scores 30/30 and triggers no forbidden item. Doing nothing scores 0: default sandwich and noodles miss E1, there is no grading or lifting, and E5–E6 need scheduled meals. The alternative passes. Weights frozen before the official runs. | 1–2 |
+| Agent rollouts and analysis | **Pilot (done):** one manual run, Claude Opus 5.5 at High effort, Nov 2026, Claude Code as environment, claude.ai incognito. Re-scored under this rubric: 13/30, no forbidden item.<br>- Correct: the static plan, with labels, quiet hours, alert cap, gym closure, substitutions and avoiding the thaw.<br>- E1 = 0: only 4 days on target.<br>- E2 = 0: it never checked mail in session 2.<br>- E5 lost a point when the bagels expired on Sunday.<br>**Official:** five unhinted runs and one hinted run per designated GPT, Claude and Gemini model: 18 runs. | Every run's trace, score, settings and cost, with a failure analysis.<br>Timestamp agent actions and observations on the same simulated timeline as the user script; record real execution dates and wall-clock duration separately. | 3 |
 
-- **Milestones, owners and dependencies (required):** Ruihong Yin (@RuihongY) owns all workstreams.
-  - **M0:** design review, with pilot materials attached (prompt, harness, simulator, reference and naive plans, transcript).
-  - **M1:** port the simulator and user model to the platform's simulated clock and alert-triggered sessions.
-  - **M2:** reference and hinted runs.
-  - **M3:** full rollout batch.
+- **Milestones, owners and dependencies (required):** Ruihong Yin (@RuihongY) owns all workstreams. The order is:
+  1. Port the pilot records and simulator onto the reused Apps.
+  2. Connect the grocery and weigh-in dependencies.
+  3. Build the grader and replay the reference.
+  4. Run the pilot, freeze the task, then run the official batch.
 
-  Calendar duration: 3–4 weeks of part-time work after the infrastructure release. Dependencies: shared Calendar with alerts and alert-triggered sessions; FreshCart (#37) or an equivalent grocery fixture; the designated model roster. Related: #29 (routine coaching) and #38 (grocery restock) touch nearby themes but neither has computed outcomes or a calendar-driven user model.
-- **Resources and total effort (required):** 10–13 person-days. Model and API cost for 18 full runs is estimated at $120–$300. No GPU and no paid data.
+  Expected duration: 3–4 weeks of part-time work once the dependencies below are available.
+  - Mail and Calendar: available in `examples/apps`.
+  - Files, Notes and Contacts: available in `apps/`.
+  - Grocery: [#37](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/37), in design review. Blocking for grocery ordering.
+  - Weigh-in series: [#32](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/32). Changes requested.
+  - Pantry, calendar alerts and alert-triggered sessions: missing; see Scope boundary and open questions below.
+  - Related tasks: [#29](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/29) (routine coaching) and [#38](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/38) (grocery restock). Neither has computed outcomes or a calendar-driven user model.
+- **Resources and total effort (required):** 10–13 person-days, assuming the dependencies above. No GPU or paid data. 18 official runs plus 3 pilot runs are estimated at 2M–5M visible tokens. API cost is TBD and will be estimated from the pilot before the official batch.
 - **Scope boundary and open questions (required):**
   - **Excluded:** clinical nutrition advice beyond the dietitian's written plan, weight change itself (the simulator stops at intake and activity), meal photos, and multi-week adaptation.
+  - **Missing capabilities (TBD, to be settled with the Environment and Infrastructure Leads before plan approval):**
+    1. **Calendar alerts.** The Calendar App has no alert or notification channel, and `docs/personal-apps.md` notes that reminder or push execution needs a host scheduling and notification capability. This task needs three things: an alert flag on events, delivery of the alert to the user at its time, and a user session that starts when an actionable "message me" alert fires. Our other proposals, [#49](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/49) and [#55](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/55), need the same thing. We will open an Environment proposal for it and link it here, unless the leads point to an existing one.
+    2. **Pantry state.** Food items with use-by dates and a fridge container limit, updated as Yifan eats. The closest proposal is Hearth ([#31](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/31)), which models household inventory. We will ask whether a food pantry fits its scope; otherwise we will open a small pantry Environment proposal.
   - **Open questions:**
-    1. Should the user model live in the task (a deterministic simulator) or in the environment (a household or pantry service)?
-    2. Same platform question as our other proposal: is "the agent only runs when the user messages it" acceptable as a stated property of the user's setup?
-    3. Should borderline expiry timing (an item expiring exactly at a delivery time) be resolved in the agent's favour?
-- **Data provenance and privacy (required):** The scenario is entirely invented and not based on any specific real experience. The persona, dietitian, course, roommate, store ("QuickCart"), products and prices are fictional. Nutrition values are typical label values. Health details are generic and framed as a dietitian's plan, not medical advice. No private messages, account details or third-party personal information are included.
+    1. Is the deterministic user model (Yifan follows only alerted events, within his rules) acceptable as task-owned scenario logic rather than an App?
+    2. Is "the agent only runs when the user messages it" acceptable as a stated property of his setup?
+    3. Should borderline expiry timing (an item expiring exactly at a delivery time) be resolved in the agent's favor?
+- **Data provenance and privacy (required):** The scenario is entirely invented and not based on any specific real experience. The persona, dietitian, course, roommate, store and products are fictional; prices and nutrition values are typical label values. Health details are generic and framed as a dietitian's written plan, not medical advice. All interactions with external platforms are dated 2027-02 to 2027-03. Memory notes are text-only history from 2026-09 onward. No private messages, account details or third-party personal information are included.
 
-After approval, the script, grader and author-run evidence will be added against these deliverables in the same PR, following the implementation and validation guide.
+After approval, add the script, grader and author-run evidence against these deliverables in the same PR. Reviewers use the approved plan as the acceptance baseline; substantial scope changes require another design review. Follow the [implementation and validation guide](../../CONTRIBUTING.md#task-difficulty-and-validation).
