@@ -7,6 +7,10 @@ function atSeedClock(ctx, data) {
   return Date.parse(ctx.virtual_now) === Date.parse(data.initial_clock);
 }
 
+function ingesting(ctx) {
+  return Boolean(ctx.initial_virtual_now) && Date.parse(ctx.virtual_now) === Date.parse(ctx.initial_virtual_now);
+}
+
 function priorSpend(data, cardId, at, field) {
   let start = null;
   let end = null;
@@ -27,9 +31,9 @@ function priorSpend(data, cardId, at, field) {
     const when = Date.parse(auth.decided_at);
     if (when > cutoff) continue;
     if (start !== null && (when < start || when >= end)) continue;
-    if (auth.reversed_at && Date.parse(auth.reversed_at) <= cutoff) continue;
-    if (auth.expired_at && Date.parse(auth.expired_at) <= cutoff) continue;
-    if (auth.captured_at && Date.parse(auth.captured_at) <= cutoff) total += auth.captured_cents;
+    if (auth.reversed_at && Date.parse(auth.reversed_at) < cutoff) continue;
+    if (auth.expired_at && Date.parse(auth.expired_at) < cutoff) continue;
+    if (auth.captured_at && Date.parse(auth.captured_at) < cutoff) total += auth.captured_cents;
     else total += auth.amount_cents;
   }
   return total;
@@ -103,7 +107,11 @@ function validateSeed(ctx, data) {
     }
   }
   if (balance !== data.funding.balance_cents) fail('invalid_seed', 'Funding balance does not match the ledger.');
-  if (atSeedClock(ctx, data) && completedMonths(data, ctx.virtual_now).length) fail('invalid_seed', 'A completed month is missing its statement.');
+  if (ingesting(ctx) && data.initial_clock && Date.parse(ctx.virtual_now) !== Date.parse(data.initial_clock)) {
+    fail('invalid_seed', 'The requested clock does not match the seed initial clock.');
+  }
+  const baseline = atSeedClock(ctx, data) || ingesting(ctx);
+  if (baseline && completedMonths(data, ctx.virtual_now).length) fail('invalid_seed', 'A completed month is missing its statement.');
   const limitField = {
     exceeds_transaction_limit: 'per_transaction',
     exceeds_daily_limit: 'per_day',
@@ -116,6 +124,8 @@ function validateSeed(ctx, data) {
     const limit = decline.limits_in_force[field];
     if (!Number.isInteger(limit) || limit < 0) fail('invalid_seed', 'A historical decline names a limit that was not in force.');
     const prior = field === 'per_transaction' ? 0 : priorSpend(data, decline.card_id, decline.decided_at, field);
+    const recorded = decline.limits_in_force.spend_in_force_cents;
+    if (recorded !== undefined && recorded !== null && recorded !== prior) fail('invalid_seed', 'A historical decline records a different spend than the limits in force.');
     if (decline.amount_cents + prior <= limit) fail('invalid_seed', 'A historical decline does not match the limits in force at that time.');
   }
   for (const statement of data.statements) {
@@ -134,7 +144,7 @@ function validateSeed(ctx, data) {
     fingerprints.add(print.card_id);
   }
   if (fingerprints.size !== data.cards.length) fail('invalid_seed', 'Each card has one fingerprint.');
-  if (atSeedClock(ctx, data)) {
+  if (baseline) {
     for (const auth of data.authorizations) {
       if (auth.status === 'pending' && Date.parse(auth.expires_at) <= Date.parse(ctx.virtual_now)) {
         fail('invalid_seed', 'A seeded hold is already due.');

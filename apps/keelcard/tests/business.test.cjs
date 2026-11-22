@@ -422,6 +422,7 @@ test('decision order covers card state, locks, blocks, limits and funding', () =
   });
   assert.equal(f.data.cards.find(item => item.card_id === created.card_id).closure_reason, 'single_use');
   assert.equal(f.data.change_requests.at(-1).status, 'cancelled');
+  assert.equal(f.data.notices.some(notice => notice.kind === 'card_closed' && notice.related_id === created.card_id), true);
   pay('once-3', 'once:kc:once:3', 500, '2026-11-19T10:07:00-05:00');
   assert.equal(f.data.declines.at(-1).decline_code, 'single_use_spent');
   const locked = f.call('keelcard.cards.create', {

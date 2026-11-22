@@ -363,7 +363,408 @@ test('the task session uses Infra, the Agent, Mail and reconciliation', async ()
   assert.equal(summary.mail_ids_match, true);
   assert.equal(summary.notices_committed, true);
   assert.equal(summary.confirmed, 'applied');
-  assert.equal(summary.lost_ack, 'unresolved');
-  assert.equal(summary.lost_status, 'unknown');
+  assert.equal(summary.mail_clock, summary.keelcard_clock);
+  assert.equal(summary.rejection, 'rejected');
+  assert.equal(summary.rejection_code, 'recipient_not_authorized');
+  assert.equal(summary.rejection_ids_unchanged, true);
+  assert.equal(summary.lost_ack, 'confirmed');
+  assert.equal(summary.lost_status, 'committed');
   assert.equal(summary.second_send, 0);
+});
+
+function authEvent(id, key, amount, at) {
+  return {
+    event_id: id,
+    at,
+    operation: 'authorization.request',
+    payload: {
+      authorization_key: key,
+      amount_cents: amount,
+      currency: 'USD',
+      card: { card_id: 'card-4417', number: '9417220000014417', expiry: '2028-09', security_code: '317' },
+      merchant: { merchant_id: 'm-freshcart', name: 'FreshCart', category: 'grocery' }
+    }
+  };
+}
+
+test('a same-instant reversal or partial capture keeps the decline', async () => {
+  const at = '2026-11-18T09:00:00-08:00';
+  async function prepare(run) {
+    const session = await keel(run);
+    const data = structuredClone(minimal);
+    data.cards.find(card => card.card_id === 'card-4417').limits.per_day = 10000;
+    const loaded = await load(session.infra, data, householdBinding, at);
+    assert.equal(loaded.status, 'ready');
+    const held = await session.infra.call('env.apply_event', {
+      expected_version: (await session.infra.call('env.snapshot')).version,
+      event: authEvent(run + '-hold', 'freshcart:fc-grace:tie:1', 6000, at)
+    });
+    assert.equal(held.status, 'committed');
+    const declined = await session.infra.call('env.apply_event', {
+      expected_version: (await session.infra.call('env.snapshot')).version,
+      event: authEvent(run + '-decline', 'freshcart:fc-grace:tie:2', 6000, at)
+    });
+    assert.equal(declined.status, 'committed');
+    return session;
+  }
+  const reversed = await prepare('mcptie-reverse');
+  try {
+    const version = (await reversed.infra.call('env.snapshot')).version;
+    const result = await reversed.infra.call('env.apply_event', {
+      expected_version: version,
+      event: {
+        event_id: 'tie-reverse',
+        at,
+        operation: 'authorization.reverse',
+        payload: { authorization_key: 'freshcart:fc-grace:tie:1', reason: 'same instant' }
+      }
+    });
+    assert.equal(result.status, 'committed');
+    const snap = await reversed.infra.call('env.snapshot');
+    const decline = snap.snapshot.data.declines.find(row => row.authorization_key === 'freshcart:fc-grace:tie:2');
+    assert.equal(decline.decline_code, 'exceeds_daily_limit');
+    assert.equal(decline.limits_in_force.spend_in_force_cents, 6000);
+    assert.equal(snap.snapshot.data.authorizations.find(row => row.authorization_key === 'freshcart:fc-grace:tie:1').status, 'reversed');
+  } finally {
+    await reversed.close();
+  }
+  const captured = await prepare('mcptie-capture');
+  try {
+    const version = (await captured.infra.call('env.snapshot')).version;
+    const result = await captured.infra.call('env.apply_event', {
+      expected_version: version,
+      event: {
+        event_id: 'tie-capture',
+        at,
+        operation: 'authorization.capture',
+        payload: { authorization_key: 'freshcart:fc-grace:tie:1', capture_key: 'tie-cap', amount_cents: 1000 }
+      }
+    });
+    assert.equal(result.status, 'committed');
+    const snap = await captured.infra.call('env.snapshot');
+    const row = snap.snapshot.data.authorizations.find(item => item.authorization_key === 'freshcart:fc-grace:tie:1');
+    assert.equal(row.status, 'captured');
+    assert.equal(row.captured_cents, 1000);
+    assert.equal(snap.snapshot.data.declines.some(item => item.authorization_key === 'freshcart:fc-grace:tie:2'), true);
+  } finally {
+    await captured.close();
+  }
+});
+
+test('each denial keeps its own target and reason, and identical calls report ambiguity', async () => {
+  const session = await keel('mcppair');
+  try {
+    const policies = require('../examples/task-data/policies.json');
+    const opening = await session.infra.call('env.snapshot');
+    await session.infra.call('env.load_seed', {
+      expected_version: opening.version,
+      request_id: 'pair-policy',
+      data: opening.snapshot.data,
+      binding: opening.snapshot.binding,
+      policies,
+      bundle: opening.snapshot.resources.bundle
+    });
+    const version = (await session.infra.call('env.snapshot')).version;
+    const firstArgs = { card_id: 'first-card', field: 'per_transaction', amount_cents: 10000, expected_version: version, request_id: 'pair-both' };
+    const first = await session.agent.call('keelcard.controls.request_change', firstArgs);
+    const stale = { epoch: version.epoch - 1, revision: 0 };
+    const secondArgs = { card_id: 'second-card', field: 'per_transaction', amount_cents: 10000, expected_version: stale, request_id: 'pair-both' };
+    const second = await session.agent.call('keelcard.controls.request_change', secondArgs);
+    const snap = await session.infra.call('env.snapshot');
+    const joined = joinEvidence(snap.snapshot, [
+      { request_id: 'pair-both', tool: 'keelcard.controls.request_change', run_id: snap.snapshot.run_id, epoch: version.epoch, arguments: firstArgs, result: first },
+      { request_id: 'pair-both', tool: 'keelcard.controls.request_change', run_id: snap.snapshot.run_id, epoch: version.epoch, arguments: secondArgs, result: second }
+    ]);
+    assert.equal(first.status, 'not_found');
+    assert.equal(second.status, 'stale_version');
+    assert.equal(joined.rejected['pair-both'].length, 2);
+    assert.equal(joined.rejected['pair-both'][0].target, 'first-card');
+    assert.equal(joined.rejected['pair-both'][0].reason, 'not_found');
+    assert.equal(joined.rejected['pair-both'][0].arguments.card_id, 'first-card');
+    assert.equal(joined.rejected['pair-both'][1].target, 'second-card');
+    assert.equal(joined.rejected['pair-both'][1].reason, 'stale_version');
+    assert.equal(joined.rejected['pair-both'][1].arguments.card_id, 'second-card');
+    const ambiguous = joinEvidence({
+      run_id: 'pair',
+      app_id: 'keelcard',
+      data: { account_id: 'kc-adeyemi', authorizations: [], declines: [], change_requests: [], control_changes: [], reveals: [], notices: [], fingerprints: [] },
+      audit: [
+        { tool: 'keelcard.cards.get', decision: 'deny', reason: 'not_found', input: { request_id: 'amb' } },
+        { tool: 'keelcard.cards.get', decision: 'deny', reason: 'not_found', input: { request_id: 'amb' } }
+      ]
+    }, [
+      { request_id: 'amb', tool: 'keelcard.cards.get', arguments: { card_id: 'a' }, result: { status: 'not_found' } },
+      { request_id: 'amb', tool: 'keelcard.cards.get', arguments: { card_id: 'b' }, result: { status: 'not_found' } }
+    ]);
+    assert.equal(ambiguous.ambiguous.length, 2);
+    assert.equal(ambiguous.rejected.amb, undefined);
+    assert.equal(ambiguous.paired[0].arguments.card_id, 'a');
+    assert.equal(ambiguous.paired[1].arguments.card_id, 'b');
+  } finally {
+    await session.close();
+  }
+});
+
+test('loading a seed at a later clock is rejected and a live advance still reads', async () => {
+  const session = await keel('mcpclockseed');
+  try {
+    const deadline = await load(session.infra, delegate, delegateBinding, '2026-11-19T08:00:00-05:00');
+    assert.equal(deadline.status, 'invalid_seed');
+    assert.equal(deadline.applied, false);
+    const december = await load(session.infra, minimal, householdBinding, '2026-12-01T00:00:00-05:00');
+    assert.equal(december.status, 'invalid_seed');
+    const opened = await load(session.infra, minimal, householdBinding, '2026-11-18T09:00:00-08:00');
+    assert.equal(opened.status, 'ready');
+    const advanced = await session.infra.call('env.advance_time', {
+      expected_version: (await session.infra.call('env.snapshot')).version,
+      request_id: 'seed-clock-live',
+      virtual_now: '2026-12-01T00:00:00-05:00'
+    });
+    assert.equal(advanced.status, 'committed');
+    const cards = await session.agent.call('keelcard.cards.list', {});
+    assert.equal(cards.cards.length, 2);
+    const snap = await session.infra.call('env.snapshot');
+    assert.equal(snap.snapshot.data.statements.some(statement => statement.statement_id === 'stmt-2026-11'), false);
+  } finally {
+    await session.close();
+  }
+});
+
+test('closing at a deadline records expiry, and a sender reset mints a new publication id', async () => {
+  const session = await keel('mcpclose');
+  const { create } = require('../../../runtime/messaging/src/router.cjs');
+  const shipped = path.join(root, 'apps/keelcard/examples/mail-publisher.json');
+  let mail;
+  let router;
+  try {
+    const policies = structuredClone(require('../fixtures/policies.json'));
+    policies.scenario.allow = policies.sandbox.allow;
+    const loaded = await load(session.infra, delegate, delegateBinding, '2026-11-18T10:00:00-05:00', policies);
+    assert.equal(loaded.status, 'ready');
+    await session.infra.call('env.advance_time', {
+      expected_version: (await session.infra.call('env.snapshot')).version,
+      request_id: 'close-deadline',
+      virtual_now: '2026-11-19T08:00:00-05:00'
+    });
+    const closed = await session.agent.call('keelcard.cards.close', {
+      card_id: 'card-cole',
+      expected_version: (await session.infra.call('env.snapshot')).version,
+      request_id: 'close-cole'
+    });
+    assert.equal(closed.status, 'committed');
+    const afterClose = await session.infra.call('env.snapshot');
+    assert.equal(afterClose.snapshot.data.change_requests[0].status, 'expired');
+    const household = await load(session.infra, minimal, householdBinding, '2026-11-18T09:00:00-08:00', policies);
+    assert.equal(household.status, 'ready');
+    const opened = await session.agent.call('keelcard.controls.request_change', {
+      card_id: 'card-4417', field: 'per_transaction', amount_cents: 10000,
+      expected_version: (await session.infra.call('env.snapshot')).version,
+      request_id: 'reset-open-1'
+    });
+    assert.equal(opened.status, 'committed');
+    mail = new Client('mail', 'infra', 'mcpclose', session.dir, 'reset-mail', { registry });
+    await mail.initialize();
+    const mailbox = await mail.call('env.snapshot');
+    const data = structuredClone(mailbox.snapshot.data);
+    data.owner_person_id = 'person-grace';
+    const binding = structuredClone(mailbox.snapshot.binding);
+    for (const account of binding.accounts) {
+      if (account.app_id === 'mail' && account.account_id === data.account_id) account.owner_person_id = 'person-grace';
+    }
+    if (!binding.people.some(person => person.person_id === 'person-grace')) binding.people.push({ person_id: 'person-grace', name: 'Grace Adeyemi' });
+    assert.equal((await mail.call('env.load_seed', {
+      expected_version: mailbox.version, request_id: 'reset-mailbox', data, binding,
+      policies: mailbox.snapshot.policies, bundle: mailbox.snapshot.resources.bundle
+    })).status, 'ready');
+    router = await create({ config: shipped, publisher: 'keelcard', run: 'mcpclose', stateDir: session.dir });
+    const firstSnap = await session.infra.call('env.snapshot');
+    const first = await publishPending({ data: firstSnap.snapshot.data, router, commit: async () => ({ status: 'committed' }) });
+    assert.equal(first.sent[0].receipt.status, 'committed');
+    const firstId = firstSnap.snapshot.data.notices[0].cloud_event_id;
+    const reset = await session.infra.call('env.reset', {
+      expected_version: (await session.infra.call('env.snapshot')).version
+    });
+    assert.equal(reset.status, 'ready');
+    const again = await session.agent.call('keelcard.controls.request_change', {
+      card_id: 'card-4417', field: 'per_transaction', amount_cents: 11000,
+      expected_version: (await session.infra.call('env.snapshot')).version,
+      request_id: 'reset-open-2'
+    });
+    assert.equal(again.status, 'committed');
+    const secondSnap = await session.infra.call('env.snapshot');
+    const secondId = secondSnap.snapshot.data.notices[0].cloud_event_id;
+    assert.notEqual(secondId, firstId);
+    const second = await publishPending({ data: secondSnap.snapshot.data, router });
+    assert.equal(second.sent[0].receipt.status, 'committed');
+    const letters = await mail.call('env.snapshot');
+    const ids = letters.snapshot.data.messages.map(message => message.id);
+    assert.equal(ids.includes(first.sent[0].receipt.event_id), true);
+    assert.equal(ids.includes(second.sent[0].receipt.event_id), true);
+  } finally {
+    if (router) await router.close();
+    if (mail) await mail.close();
+    await session.close();
+  }
+});
+
+test('a stale evidence write can be repeated, and a lost response is recovered from the receipt log', async () => {
+  const session = await keel('mcprecover');
+  const { create } = require('../../../runtime/messaging/src/router.cjs');
+  const shipped = path.join(root, 'apps/keelcard/examples/mail-publisher.json');
+  let mail;
+  let router;
+  try {
+    const policies = require('../examples/task-data/policies.json');
+    const opening = await session.infra.call('env.snapshot');
+    await session.infra.call('env.load_seed', {
+      expected_version: opening.version,
+      request_id: 'recover-policy',
+      data: opening.snapshot.data,
+      binding: opening.snapshot.binding,
+      policies,
+      bundle: opening.snapshot.resources.bundle
+    });
+    await session.infra.call('env.advance_time', {
+      expected_version: (await session.infra.call('env.snapshot')).version,
+      request_id: 'recover-clock',
+      virtual_now: '2026-11-20T06:14:00-05:00'
+    });
+    await session.agent.call('keelcard.controls.request_change', {
+      card_id: 'card-4417', field: 'per_transaction', amount_cents: 10000,
+      expected_version: (await session.infra.call('env.snapshot')).version,
+      request_id: 'recover-open'
+    });
+    await session.infra.call('env.apply_event', {
+      expected_version: (await session.infra.call('env.snapshot')).version,
+      event: authEvent('recover-decline', 'freshcart:fc-grace:fc-recover:1', 12438, '2026-11-20T06:14:00-05:00')
+    });
+    mail = new Client('mail', 'infra', 'mcprecover', session.dir, 'recover-mail', { registry });
+    await mail.initialize();
+    const mailbox = await mail.call('env.snapshot');
+    const data = structuredClone(mailbox.snapshot.data);
+    data.owner_person_id = 'person-grace';
+    const binding = structuredClone(mailbox.snapshot.binding);
+    for (const account of binding.accounts) {
+      if (account.app_id === 'mail' && account.account_id === data.account_id) account.owner_person_id = 'person-grace';
+    }
+    if (!binding.people.some(person => person.person_id === 'person-grace')) binding.people.push({ person_id: 'person-grace', name: 'Grace Adeyemi' });
+    assert.equal((await mail.call('env.load_seed', {
+      expected_version: mailbox.version, request_id: 'recover-mailbox', data, binding,
+      policies: mailbox.snapshot.policies, bundle: mailbox.snapshot.resources.bundle
+    })).status, 'ready');
+    await mail.call('env.advance_time', {
+      expected_version: (await mail.call('env.snapshot')).version,
+      request_id: 'recover-mail-clock',
+      virtual_now: '2026-11-20T06:14:00-05:00'
+    });
+    router = await create({ config: shipped, publisher: 'keelcard', run: 'mcprecover', stateDir: session.dir });
+    const receiptLog = path.join(session.dir, 'mcprecover', 'messaging.receipts.jsonl');
+    const inspect = async ({ event_id }) => {
+      const eventStatus = await mail.call('env.event_status', { event_id });
+      const snap = await mail.call('env.snapshot');
+      return { eventStatus, mailRecord: snap.snapshot.data.messages.find(message => message.id === event_id) || null };
+    };
+    let writes = 0;
+    let publishCalls = 0;
+    let halted = false;
+    const dropping = {
+      async call(name, args) {
+        if (name === 'router.capabilities') {
+          const caps = await router.call(name, args);
+          return halted ? { ...caps, halted: true } : caps;
+        }
+        publishCalls += 1;
+        const result = await router.call(name, args);
+        halted = true;
+        return { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true, event_id: result.event_id };
+      }
+    };
+    const commit = async item => {
+      writes += 1;
+      if (writes === 1) return { status: 'stale_version' };
+      const current = await session.infra.call('env.snapshot');
+      const payload = { notice_id: item.notice_id, publish_request_id: item.publish_request_id, status: item.status };
+      if (item.code) payload.code = item.code;
+      if (item.receipt_event_id) payload.event_id = item.receipt_event_id;
+      const applied = await session.infra.call('env.apply_event', {
+        expected_version: current.version,
+        event: { event_id: item.event_id, at: current.snapshot.virtual_now, operation: 'notice.delivery_result', payload }
+      });
+      assert.equal(applied.status, 'committed');
+      return applied;
+    };
+    const snap = await session.infra.call('env.snapshot');
+    const firstNotice = snap.snapshot.data.notices.find(notice => notice.status === 'pending_delivery');
+    const first = await publishPending({ data: snap.snapshot.data, router: dropping, inspect, commit, receiptLog });
+    assert.equal(first.report.outcome, 'confirmed');
+    assert.equal(first.report.publish_request_id, firstNotice.publish_request_id);
+    assert.equal(first.report.cloud_event_id, firstNotice.cloud_event_id);
+    assert.ok(first.report.event_id);
+    assert.equal(publishCalls, 1);
+    const pending = await session.infra.call('env.snapshot');
+    assert.equal(pending.snapshot.data.notices.find(notice => notice.notice_id === firstNotice.notice_id).status, 'pending_delivery');
+    const fresh = pending.snapshot.data;
+    const second = await publishPending({ data: fresh, router: dropping, inspect, commit, receiptLog });
+    assert.equal(second.sent.length, 0);
+    assert.equal(second.report.outcome, 'confirmed');
+    assert.equal(second.report.event_id, first.report.event_id);
+    assert.equal(publishCalls, 1);
+    const saved = await session.infra.call('env.snapshot');
+    assert.equal(saved.snapshot.data.notices.find(notice => notice.notice_id === firstNotice.notice_id).status, 'committed');
+    const quiet = await publishPending({ data: saved.snapshot.data, router: dropping, inspect, commit, receiptLog });
+    assert.equal(quiet.sent.length, 0);
+    assert.equal(publishCalls, 1);
+    const afterQuiet = await session.infra.call('env.snapshot');
+    assert.equal(afterQuiet.snapshot.data.notices.some(notice => notice.status === 'pending_delivery'), true);
+    const extra = await session.infra.call('env.apply_event', {
+      expected_version: afterQuiet.version,
+      event: authEvent('recover-decline-2', 'freshcart:fc-grace:fc-recover:2', 13000, afterQuiet.snapshot.virtual_now)
+    });
+    assert.equal(extra.status, 'committed');
+    const lossSnap = await session.infra.call('env.snapshot');
+    const lossData = lossSnap.snapshot.data;
+    const lossNotice = lossData.notices.find(notice => notice.status === 'pending_delivery');
+    const savedCloudId = lossNotice.cloud_event_id;
+    lossNotice.cloud_event_id = 'n' + 'x'.repeat(120);
+    let thrown = 0;
+    const losing = {
+      async call(name, args) {
+        if (name === 'router.capabilities') return router.call(name, args);
+        thrown += 1;
+        await router.call(name, args);
+        throw new Error('response lost');
+      }
+    };
+    const lost = await publishPending({
+      data: lossData,
+      router: losing,
+      inspect,
+      commit: async () => ({ status: 'stale_version' }),
+      receiptLog
+    });
+    assert.equal(thrown, 1);
+    assert.equal(lost.sent.length, 1);
+    assert.equal(lost.report.outcome, 'unresolved');
+    assert.equal(lost.report.halted, true);
+    assert.ok(lost.report.event_id);
+    assert.equal(lost.report.publish_request_id, lossNotice.publish_request_id);
+    assert.equal(lost.report.cloud_event_id, lossNotice.cloud_event_id);
+    const untouched = await session.infra.call('env.snapshot');
+    const stored = untouched.snapshot.data.notices.find(notice => notice.notice_id === lossNotice.notice_id);
+    assert.equal(stored.cloud_event_id, savedCloudId);
+    assert.equal(stored.status, 'pending_delivery');
+    const follow = await publishPending({
+      data: untouched.snapshot.data,
+      router,
+      inspect,
+      commit: async () => ({ status: 'stale_version' }),
+      receiptLog
+    });
+    assert.equal(follow.sent.length, 0);
+    assert.equal(follow.stopped, true);
+  } finally {
+    if (router) await router.close();
+    if (mail) await mail.close();
+    await session.close();
+  }
 });

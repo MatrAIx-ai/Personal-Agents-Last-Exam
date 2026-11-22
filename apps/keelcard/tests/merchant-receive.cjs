@@ -118,7 +118,7 @@ test('authorization keys follow the 100 character storage limit', async () => {
   }
 });
 
-test('a lookup-only host reads the decision and Infra can apply the request itself', async () => {
+test('an instance policy can leave only lookup allowed, and Infra authorization.request is the delivered path', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-merchant-'));
   const run = 'keelmerchant4';
   try {
@@ -165,6 +165,49 @@ test('a lookup-only host reads the decision and Infra can apply the request itse
     } finally {
       await agent.close();
       await infra.close();
+    }
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('a key with a space is rejected before dispatch and does not halt the run', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-merchant-'));
+  const run = 'keelmerchant-space';
+  try {
+    const file = path.join(dir, 'merchant.json');
+    fs.writeFileSync(file, JSON.stringify(config([{ app_id: 'keelcard', account_id: 'kc-adeyemi', channel: 'channel.card.authorization' }])));
+    const router = await create({ config: file, publisher: 'freshcart', run, stateDir: dir });
+    try {
+      const before = await (async () => {
+        const infra = new Client('keelcard', 'infra', run, dir, 'space-before', { registry });
+        await infra.initialize();
+        const snap = await infra.call('env.snapshot');
+        await infra.close();
+        return snap.snapshot.data.authorizations.length;
+      })();
+      const spaced = message();
+      spaced.id = 'fc-space';
+      spaced.data.authorization.authorization_key = 'order 1';
+      spaced.data.source_object.object_id = 'fc-space';
+      const rejected = await router.call('router.publish', { request_id: 'fc-space', message: spaced });
+      assert.equal(['invalid_arguments', 'incompatible_contract'].includes(rejected.code), true);
+      assert.equal(rejected.stop_run, undefined);
+      const caps = await router.call('router.capabilities', {});
+      assert.equal(caps.halted, false);
+      spaced.id = 'fc-space-ok';
+      spaced.data.authorization.authorization_key = 'freshcart:fc-grace:fc-space:1';
+      spaced.data.source_object.object_id = 'fc-space-ok';
+      const accepted = await router.call('router.publish', { request_id: 'fc-space-ok', message: spaced });
+      assert.equal(accepted.status, 'committed');
+      const infra = new Client('keelcard', 'infra', run, dir, 'space-after', { registry });
+      await infra.initialize();
+      const after = await infra.call('env.snapshot');
+      await infra.close();
+      assert.equal(after.snapshot.data.authorizations.length, before + 1);
+      assert.equal(after.snapshot.data.authorizations.some(row => row.authorization_key === 'order 1'), false);
+    } finally {
+      await router.close();
     }
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });

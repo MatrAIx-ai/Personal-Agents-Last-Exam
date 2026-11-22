@@ -21,7 +21,7 @@
           "properties": {
             "kind": { "const": "app_account_ref" },
             "app_id": { "const": "keelcard" },
-            "id": { "type": "string", "minLength": 1, "maxLength": 100 }
+            "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$" }
           },
           "required": ["kind", "app_id", "id"],
           "additionalProperties": false
@@ -29,10 +29,10 @@
         "source_object": {
           "type": "object",
           "properties": {
-            "app_id": { "type": "string", "minLength": 1, "maxLength": 80 },
-            "account_id": { "type": "string", "minLength": 1, "maxLength": 100 },
+            "app_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$" },
+            "account_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$" },
             "object_type": { "type": "string", "minLength": 1, "maxLength": 80 },
-            "object_id": { "type": "string", "minLength": 1, "maxLength": 100 }
+            "object_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$" }
           },
           "required": ["app_id", "account_id", "object_type", "object_id"],
           "additionalProperties": false
@@ -40,28 +40,46 @@
         "authorization": {
           "type": "object",
           "properties": {
-            "authorization_key": { "type": "string", "minLength": 1, "maxLength": 100 },
+            "authorization_key": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$" },
             "card": {
               "type": "object",
               "properties": {
-                "card_id": { "type": "string" },
-                "number": { "type": "string" },
-                "expiry": { "type": "string" },
-                "security_code": { "type": "string" }
+                "card_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$" },
+                "number": { "type": "string", "pattern": "^9[0-9]{15}$" },
+                "expiry": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}$" },
+                "security_code": { "type": "string", "pattern": "^[0-9]{3,4}$" }
               },
               "additionalProperties": false
             },
             "merchant": {
               "type": "object",
               "properties": {
-                "merchant_id": { "type": "string" },
-                "name": { "type": "string" },
-                "category": { "type": "string" }
+                "merchant_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$" },
+                "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+                "category": {
+                  "type": "string",
+                  "enum": [
+                    "grocery",
+                    "restaurants",
+                    "travel",
+                    "telecom",
+                    "domains_hosting",
+                    "digital_goods",
+                    "crypto",
+                    "gift_cards",
+                    "healthcare",
+                    "utilities",
+                    "entertainment",
+                    "education",
+                    "transport",
+                    "general_merchandise"
+                  ]
+                }
               },
               "required": ["merchant_id", "name", "category"],
               "additionalProperties": false
             },
-            "amount_cents": { "type": "integer" },
+            "amount_cents": { "type": "integer", "minimum": 1 },
             "currency": { "const": "USD" }
           },
           "required": ["authorization_key", "card", "merchant", "amount_cents", "currency"],

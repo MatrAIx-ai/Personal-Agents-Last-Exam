@@ -16,6 +16,38 @@ function wanted(record) {
   return 'allow';
 }
 
+function resultReason(record) {
+  if (!record.result) return null;
+  if (record.result.reason) return record.result.reason;
+  if (record.result.status && !['committed', 'ok', 'ready'].includes(record.result.status)) return record.result.status;
+  return null;
+}
+
+function versionOf(record) {
+  if (record.expected_version) return record.expected_version;
+  if (record.arguments && record.arguments.expected_version) return record.arguments.expected_version;
+  return null;
+}
+
+function sameVersion(expected, before) {
+  if (!expected || !before) return false;
+  return expected.epoch === before.epoch && expected.revision === before.revision;
+}
+
+function blank(record, extra) {
+  return {
+    request_id: record.request_id || null,
+    tool: record.tool || null,
+    run_id: record.run_id || null,
+    epoch: record.epoch !== undefined ? record.epoch : null,
+    arguments: record.arguments || null,
+    result: record.result || null,
+    audit: null,
+    audit_rows: [],
+    ...extra
+  };
+}
+
 function pairRecord(record, audit, used) {
   const want = wanted(record);
   const matches = [];
@@ -23,55 +55,39 @@ function pairRecord(record, audit, used) {
     if (used.has(index) || row.tool !== record.tool || row.decision !== want) return;
     const auditRequest = requestIdOf(row);
     if (!record.request_id || auditRequest !== record.request_id) return;
+    if (record.run_id && row.run_id && row.run_id !== record.run_id) return;
+    if (record.epoch !== undefined && row.before && row.before.epoch !== record.epoch) return;
     matches.push({ index, row });
   });
   if (record.result && record.result.duplicate === true) {
-    return {
-      request_id: record.request_id || null,
-      tool: record.tool || null,
-      arguments: record.arguments || null,
-      result: record.result,
-      audit: matches[0] ? matches[0].row : null,
-      audit_rows: matches.map(item => item.row),
-      match: 'duplicate',
-      ambiguous: false
-    };
+    return blank(record, { result: record.result, audit: null, audit_rows: [], match: 'duplicate', ambiguous: false });
   }
-  if (!record.request_id) {
-    return {
-      request_id: null,
-      tool: record.tool || null,
-      arguments: record.arguments || null,
-      result: record.result || null,
-      audit: null,
-      audit_rows: [],
-      match: 'ambiguous',
-      ambiguous: true
-    };
+  if (!record.request_id) return blank(record, { match: 'ambiguous', ambiguous: true });
+  let pool = matches;
+  const reason = resultReason(record);
+  if (reason) {
+    const narrowed = pool.filter(item => item.row.reason === reason);
+    if (narrowed.length) pool = narrowed;
   }
-  if (matches.length === 0) {
-    return {
-      request_id: record.request_id,
-      tool: record.tool || null,
-      arguments: record.arguments || null,
-      result: record.result || null,
-      audit: null,
-      audit_rows: [],
-      match: 'unmatched',
-      ambiguous: false
-    };
+  const expected = versionOf(record);
+  if (expected) {
+    const narrowed = pool.filter(item => sameVersion(expected, item.row.before));
+    if (narrowed.length) pool = narrowed;
   }
-  for (const item of matches) used.add(item.index);
-  return {
-    request_id: record.request_id,
-    tool: record.tool || null,
-    arguments: record.arguments || null,
-    result: record.result || null,
-    audit: matches[0].row,
-    audit_rows: matches.map(item => item.row),
-    match: 'request_id',
+  if (pool.length === 0) return blank(record, { match: 'unmatched', ambiguous: false });
+  if (pool.length > 1) {
+    const ordered = pool.every(item => Number.isInteger(item.row.seq));
+    if (!ordered) return blank(record, { match: 'ambiguous', ambiguous: true });
+    pool = pool.slice().sort((a, b) => a.row.seq - b.row.seq);
+  }
+  const chosen = pool[0];
+  used.add(chosen.index);
+  return blank(record, {
+    audit: chosen.row,
+    audit_rows: [chosen.row],
+    match: pool.length > 1 ? 'call_order' : 'call',
     ambiguous: false
-  };
+  });
 }
 
 function joinEvidence(snapshot, execution) {
@@ -83,13 +99,19 @@ function joinEvidence(snapshot, execution) {
   const paired = records.map(record => pairRecord(record, audit, used));
   const denied = {};
   for (const item of paired) {
-    const rows = (item.audit_rows || []).filter(row => row.decision === 'deny');
-    if (!rows.length || item.match === 'duplicate' || item.match === 'ambiguous') continue;
+    const row = item.audit && item.audit.decision === 'deny' ? item.audit : null;
+    if (!row || item.match === 'duplicate' || item.match === 'ambiguous') continue;
     const key = item.request_id || 'missing-request';
     if (!denied[key]) denied[key] = [];
-    for (const row of rows) {
-      denied[key].push({ tool: item.tool, reason: row.reason, virtual_time: row.virtual_time, arguments: item.arguments });
-    }
+    const target = item.arguments && (item.arguments.card_id || item.arguments.authorization_key || item.arguments.id) || null;
+    denied[key].push({
+      tool: item.tool,
+      reason: row.reason,
+      virtual_time: row.virtual_time,
+      arguments: item.arguments,
+      target,
+      expected_version: versionOf(item) || (row.before ? { epoch: row.before.epoch, revision: row.before.revision } : null)
+    });
   }
   const attempts = (data.change_requests || []).flatMap(request => (request.attempts || []).map(attempt => ({
     change_request_id: request.change_request_id,

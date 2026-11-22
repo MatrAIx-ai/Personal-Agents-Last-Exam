@@ -24,10 +24,12 @@ function assertActive(card) {
 
 function cancelOpenRequests(ctx, data, cardId) {
   for (const request of data.change_requests) {
-    if (request.card_id === cardId && (request.status === 'pending_verification' || request.status === 'pending_owner')) {
-      request.status = 'cancelled';
-      request.resolved_at = ctx.virtual_now;
-    }
+    if (request.card_id !== cardId) continue;
+    if (request.status !== 'pending_verification' && request.status !== 'pending_owner') continue;
+    settleRequest(data, request, ctx.virtual_now);
+    if (request.status !== 'pending_verification' && request.status !== 'pending_owner') continue;
+    request.status = 'cancelled';
+    request.resolved_at = ctx.virtual_now;
   }
 }
 
@@ -408,6 +410,13 @@ function captureAuthorization(ctx, data, payload) {
     card.closed_at = ctx.virtual_now;
     touch(ctx, card);
     cancelOpenRequests(ctx, data, card.card_id);
+    maybe(ctx, data, data.alerts.card_events, {
+      kind: 'card_closed',
+      title: 'Keelcard card closed',
+      body: 'Card ' + card.last_four + ' is closed.',
+      source_object: { object_type: 'card', object_id: card.card_id },
+      related_id: card.card_id
+    });
   }
   maybe(ctx, data, data.alerts.receipts, {
     kind: 'receipt',

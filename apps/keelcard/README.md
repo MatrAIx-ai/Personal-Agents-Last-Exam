@@ -11,7 +11,7 @@ Requires Node.js 18 or newer. No package install, private Core, account or remot
 ```sh
 node --test apps/keelcard/tests/business.test.cjs
 node apps/keelcard/examples/run.cjs
-node apps/keelcard/tests/mail-integration.cjs
+npm --prefix apps/keelcard run test:checkout
 node runtime/cli.cjs verify --app apps/keelcard --output .artifacts/keelcard.json
 ```
 
@@ -33,7 +33,7 @@ The grocery card is `card-4417`. Last four `4417`, expiry `2028-09`, security co
 
 Weekly FreshCart captures run from Saturday 20 September 2025 through Saturday 14 November 2026, each at 08:12 America/New_York, each under the $75.00 limit. The card record starts on 13 September 2025 so that history fits the clock. The task narrative can still describe an August 2026 habit. The second card, `card-8821`, holds the $212.40 capture at Corner Snacks on 12 April 2026. One historical decline, key `freshcart:fc-grace:fc-over-1:1`, amount 9000 cents, code `exceeds_transaction_limit`, is already in the seed. Statements are issued through October 2026. No hold or change request is due at the package clock. Historical notices are omitted, so startup does not send old mail.
 
-The executable session is `node apps/keelcard/examples/task-session.cjs`. It starts the public Infra and Agent MCP servers, loads `examples/task-data/policies.json`, advances the clock, declines the $124.38 FreshCart charge, and opens the limit change under that policy. Mail is bound with `env.load_seed` to person-grace on account `mail-maya`. The shipped `examples/mail-publisher.json` grant delivers the notices. A halt is recorded with `notice.delivery_result` through `env.apply_event`, and the next publish sends nothing. A task session on 20 November 2026 can also apply these Infra events and then read them back:
+The executable session is `node apps/keelcard/examples/task-session.cjs`. It starts the public Infra and Agent MCP servers, loads `examples/task-data/policies.json`, advances the clock, declines the $124.38 FreshCart charge, and opens the limit change under that policy. Mail is bound with `env.load_seed` to person-grace on account `mail-maya`. Before each delivery the session moves the Mail clock to the Keelcard clock. The confirmation code is read from the Mail message. A pre-dispatch rejection and a lost acknowledgement are separate cases, and both keep the notice's original publication ids. A halt is recorded with `notice.delivery_result` through `env.apply_event`, and the next publish sends nothing. A task session on 20 November 2026 can also apply these Infra events and then read them back:
 
 | Check | Tool or event | Evidence |
 | --- | --- | --- |
@@ -71,7 +71,7 @@ v1 sends decline, receipt, code, card-created, card-closed and limit-changed not
 
 ## Known limits of this package
 
-v1 excludes real card networks, physical cards, credit, interest, rewards, currencies other than USD, chargeback law, fraud scoring, a link to an external funding account, shared cards and recurring-charge detection. When a merchant host is supplied, its allow list is `keelcard.authorizations.lookup`. When there is no merchant App, Infra applies `authorization.request` and the grader reads the snapshot. This package does not change Core. `gui/src/view.js` is an escaped reviewer renderer. It omits full numbers and security codes. There is no interactive business page.
+v1 excludes real card networks, physical cards, credit, interest, rewards, currencies other than USD, chargeback law, fraud scoring, a link to an external funding account, shared cards and recurring-charge detection. When a merchant host is supplied, its allow list is `keelcard.authorizations.lookup`. The checkout case that narrows the scenario policy to that one tool is an instance-policy test. Until a trusted merchant host exists, the delivered path is Infra applying `authorization.request`, and the grader reads the snapshot. `gui/src/view.js` is an escaped reviewer renderer. It omits full numbers and security codes. There is no interactive business page.
 
 ## Workflow checks
 

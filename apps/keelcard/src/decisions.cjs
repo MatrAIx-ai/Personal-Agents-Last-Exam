@@ -59,10 +59,17 @@ function decide(data, request, now) {
   if (data.category_blocks.includes(merchant.category)) return decline('category_blocked');
   if (data.merchant_blocks.includes(merchant.merchant_id)) return decline('merchant_blocked');
   const amount = request.amount_cents;
-  if (overLimit(card.limits.per_transaction, amount, 0)) return decline('exceeds_transaction_limit');
-  if (overLimit(card.limits.per_day, amount, spent(data, card.card_id, now, 'per_day'))) return decline('exceeds_daily_limit');
-  if (overLimit(card.limits.per_month, amount, spent(data, card.card_id, now, 'per_month'))) return decline('exceeds_monthly_limit');
-  if (overLimit(card.limits.lifetime, amount, spent(data, card.card_id, now, 'lifetime'))) return decline('exceeds_lifetime_limit');
+  const daySpend = spent(data, card.card_id, now, 'per_day');
+  const monthSpend = spent(data, card.card_id, now, 'per_month');
+  const lifeSpend = spent(data, card.card_id, now, 'lifetime');
+  const withSpend = (code, spend) => {
+    base.spend_in_force_cents = spend;
+    return decline(code);
+  };
+  if (overLimit(card.limits.per_transaction, amount, 0)) return withSpend('exceeds_transaction_limit', 0);
+  if (overLimit(card.limits.per_day, amount, daySpend)) return withSpend('exceeds_daily_limit', daySpend);
+  if (overLimit(card.limits.per_month, amount, monthSpend)) return withSpend('exceeds_monthly_limit', monthSpend);
+  if (overLimit(card.limits.lifetime, amount, lifeSpend)) return withSpend('exceeds_lifetime_limit', lifeSpend);
   if (amount > availableCents(data, now)) return decline('insufficient_funds');
   return { decision: 'approved', decline_code: null, card, limits_in_force: base };
 }

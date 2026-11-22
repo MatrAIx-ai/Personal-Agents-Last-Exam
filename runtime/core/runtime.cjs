@@ -18,7 +18,7 @@ function createRuntime({registryFile,assemblyFile}={}){
   for(const id of configs.keys())if(!used.has(id))configs.delete(id);
  }
  const get=id=>{if(!configs.has(id))fail('invalid_configuration','App not enabled in assembly');return registry.apps.get(id);};
- function context(s,log,withAssets=false){const ctx=copy({app_id:s.app_id,run_id:s.run_id,role:'agent',binding:s.binding,policy:s.policies[s.profile],virtual_now:s.virtual_now});if(typeof log==='function')ctx.log=log;if(withAssets)ctx.assets=require('./attachment-context.cjs').create(s,get(s.app_id));return freeze(ctx);}
+ function context(s,log,withAssets=false){const ctx=copy({app_id:s.app_id,run_id:s.run_id,role:'agent',binding:s.binding,policy:s.policies[s.profile],virtual_now:s.virtual_now,initial_virtual_now:s.initial_virtual_now});if(typeof log==='function')ctx.log=log;if(withAssets)ctx.assets=require('./attachment-context.cjs').create(s,get(s.app_id));return freeze(ctx);}
  const validBinding=compile(bindingSchema,__dirname),validPolicies=compile(policySchema,__dirname);
  function checkConfig(pkg,binding,policies){
   if(!validBinding(binding)||new Set(binding.people.map(x=>x.person_id)).size!==binding.people.length||new Set(binding.accounts.map(x=>x.app_id+':'+x.account_id)).size!==binding.accounts.length||binding.accounts.some(x=>!binding.people.some(p=>p.person_id===x.owner_person_id)))fail('invalid_seed','Invalid identity binding');
