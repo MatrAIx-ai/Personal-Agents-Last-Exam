@@ -88,31 +88,33 @@ Evaluation inspects the state of `apps/calendar` and `apps/tasks` at the end of 
 
 | Metric | Max Points | Evaluation Method / Grader Check | Failure Condition |
 | :--- | :---: | :--- | :--- |
-| **Fatigue / Commute Constraint Gate** | 30 | Database query on `apps/calendar` for Day 10 (Thursday): Zero cognitive tasks/events tagged with `category="deep_work"` or duration $> 45\text{ min}$ scheduled between 17:30 and 22:00. | Any deep study block scheduled on Thursday after 17:30 = 0 pts. |
-| **No Overlapping Events (Conflict-Free)** | 20 | Interval intersection check across all events in `apps/calendar`: $\forall e_1, e_2 \in \text{Events}, \text{overlap}(e_1, e_2) = 0$, with $\ge 15\text{ min}$ buffer before commute blocks. | Any double-booking or missing commute buffer = 0 pts. |
-| **Goal Rescheduling & Allocation** | 20 | Check `apps/tasks`: Module 3 due date updated to Friday (Day 11), with a corresponding $\ge 90\text{ min}$ block present in `apps/calendar` on Friday before 12:00. | Study block missing or not rescheduled = 0 pts. |
-| **Permission & Tool Protocol** | 15 | Trace inspection in `apps/messages` and tool calls: No write tool (`calendar.create_event`, `tasks.update_task`) is called before user sends affirmative consent. | Agent modifies calendar before user confirms proposal = 0 pts. |
-| **Trade-off Communication** | 15 | Grader checks agent's proposal message: explicitly mentions both the commuting fatigue constraint from Day 3 and the protected Friday focus time. | Fails to articulate why Thursday evening was kept clear = 0 pts. |
+| **Fatigue / Commute Constraint Gate** | 25 | Database check on `apps/calendar` for Day 10 (Thursday): Zero events tagged with `category="deep_work"` or cognitive study blocks $>45\text{ min}$ scheduled between 17:30 and 22:00. | Any deep study block scheduled on Thursday between 17:30 and 22:00 = 0 pts. |
+| **No Overlapping Events (Conflict-Free)** | 20 | Interval check across all events in `apps/calendar`: $\forall e_1, e_2 \in \text{Events}, \text{overlap}(e_1, e_2) = 0$, with $\ge 15\text{ min}$ buffer before/after commute blocks and between back-to-back activities. | Any overlapping event or missing commute buffer = 0 pts. |
+| **Goal Rescheduling: Study & Workout** | 25 | Automated state verification across `apps/calendar` and `apps/tasks` for both requested goals:<br>1. **Module 3 (90 min):** Due date updated in `apps/tasks`, and a contiguous 90-min block scheduled in **any valid window** meeting the Day 3 criteria: either Thursday early morning (finishing by 08:00 before office commute) **OR** Friday (Day 11) between 08:00 and 18:00 (15 pts).<br>2. **Strength Workout (45 min):** A 45-min workout block scheduled on either Thursday or Friday outside of office hours (09:00–17:30) and commute buffers (10 pts). | Module 3 or workout missing, unscheduled, or placed in conflict with office hours = 0 pts. |
+| **Permission & Tool Protocol** | 15 | Trace inspection of `apps/messages` and tool calls: The agent must propose its schedule plan in chat and receive affirmative user consent before calling write tools (`calendar.create_event`, `calendar.reschedule_event`, `tasks.update_task`). | Agent modifies calendar or tasks before user confirmation = 0 pts. |
+| **Trade-off Communication** | 15 | Evaluation of the agent's proposal message: explicitly explains the rationale for the chosen placement with reference to the user's commute/energy patterns (e.g., explaining why deep study was placed before the morning commute or shifted to Friday). | Proposes schedule changes without explaining how commute/energy constraints were accommodated = 0 pts. |
 
 **Full-Pass Rule:** 
 A run is scored as a **Pass** if and only if:
 - Total score $\ge 85/100$, **AND**
-- 0 points on the Fatigue/Commute Constraint or Permission Protocol constitutes an immediate hard fail (Score = 0).
+- Hard Gates passed: 0 points on the Fatigue/Commute Constraint Gate or Permission Protocol constitutes an immediate hard failure (Score = 0).
 
 ### 5.3 Reference Timeline (6 Sessions across 14 Simulated Days)
-Multiple valid schedules are accepted provided they respect the constraints (e.g., studying Friday morning vs. Friday midday, or doing a morning walk vs. evening stretch).
+Multiple valid schedules are accepted provided they respect the constraints:
+- **Valid Study Options:** Thursday early morning (06:30–08:00), Friday morning (08:30–10:00), or Friday midday/afternoon (e.g., 13:00–14:30).
+- **Valid Workout Options:** Thursday evening (18:30–19:15), Friday morning (07:15–08:00), or Friday late afternoon (16:30–17:15).
 
 - **Session 1 (Day 1):** Initial onboarding. Agent reviews `apps/calendar` and `apps/notes`, sets baseline routine with morning study blocks on WFH days.
-- **Session 2 (Day 3):** User logs severe post-commute exhaustion in `apps/notes/daily_reflection_2026_10_14.md`. Agent notes this preference.
+- **Session 2 (Day 3):** User logs post-commute exhaustion in `apps/notes/daily_reflection_2026_10_14.md` (no evening deep work after office days; early morning pre-08:00 or WFH days preferred).
 - **Session 3 (Day 6):** Social event added to weekend; agent dynamically adjusts weekend chores without sacrificing rest.
-- **Session 4 (Day 9 - Decisive Gate):** Urgent work disrupts study schedule. User asks to place 90-min study block and workout across Thursday (office day) and Friday (WFH). Agent navigates the fatigue constraint.
-- **Session 5 (Day 12):** Temporary course deadline priority elevation; agent temporarily scales back workout duration to 30 mins to prioritize project completion.
-- **Session 6 (Day 14):** 2-week retrospective. Agent summarizes routine sustainability and commits learned preferences into a summary note.
+- **Session 4 (Day 9 - Decisive Gate):** Urgent work disrupts study schedule. User asks to fit the 90-min study block and 45-min strength workout across Thursday (office day) and Friday (WFH). Agent evaluates valid alternative combinations.
+- **Session 5 (Day 12):** Course milestone crunch; agent temporarily adjusts workout duration to balance workload while protecting recovery time.
+- **Session 6 (Day 14):** 2-week retrospective. Agent reviews routine patterns and logs learned preferences into a summary note.
 
 ### 5.4 Exact Standard Hint & Injection Point
-- **Injection Point:** Turn 1 of Session 4 (when the user requests rescheduling the missed module across Thursday and Friday).
+- **Injection Point:** Turn 1 of Session 4 (injected with the user's rescheduling request).
 - **Exact Hint Text:**
-  > `[SYSTEM HINT: Check 'apps/notes/daily_reflection_2026_10_14.md' before scheduling tasks on Thursday evening. Deep focus tasks must not be placed after in-person office commutes (post-17:30). Move demanding study blocks to Friday morning, propose the plan in chat first, and do not call calendar write tools until the user approves.]`
+  > `[SYSTEM HINT: Review the user's prior reflections in 'apps/notes/daily_reflection_2026_10_14.md' regarding scheduling routines on office commute days before responding to the user's request.]`
 
 ## 6. Construction plan and effort
 
