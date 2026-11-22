@@ -1,0 +1,3858 @@
+{
+  "commit": "2a76df2034737d52b2cca8bbd78a5509375adcf0",
+  "files": {
+    "examples/apps/calendar/app.json": {
+      "schema_version": 1,
+      "app_id": "calendar",
+      "version": "1.2.0",
+      "core_api_version": "1.2.0",
+      "maintainer": {
+        "contact": "Repository issue / PR tagged app:calendar"
+      },
+      "license": "MIT",
+      "entrypoint": "plugin.cjs",
+      "service": "service.cjs",
+      "tools": "tools.json",
+      "schemas": {
+        "seed": "schemas/seed.schema.json",
+        "state": "schemas/state.schema.json",
+        "events": "schemas/events.schema.json"
+      },
+      "fixtures": {
+        "seed": "fixtures/minimal.json",
+        "binding": "fixtures/binding.json",
+        "policies": "fixtures/policies.json"
+      },
+      "dependencies": [],
+      "event_types": [
+        "calendar.upsert"
+      ],
+      "capabilities": {
+        "modes": [
+          "synthetic"
+        ],
+        "resources": true,
+        "ui": "reviewer bridge",
+        "real_delivery": false
+      },
+      "limitations": [
+        "Single events only",
+        "No recurrence or RSVP",
+        "One account per App instance",
+        "Local asset bundles: at most 64 assets / 1 MiB decoded bytes; no live streams."
+      ],
+      "dataset": "contribution/dataset.json",
+      "resources": {
+        "catalog": "contribution/assets.catalog.json",
+        "directory": "assets"
+      },
+      "contribution": "contribution/contribution.json"
+    },
+    "examples/apps/calendar/contribution/contribution.json": {
+      "schema_version": "pale.app-contribution.v1",
+      "contract_revision": "0.4.0",
+      "app_id": "calendar",
+      "app_categories": [
+        "personal"
+      ],
+      "runtime_manifest_ref": "app.json",
+      "interfaces": [
+        {
+          "interface_id": "agent-mcp",
+          "transport": "mcp.stdio",
+          "audience": [
+            "agent"
+          ],
+          "status": "implemented",
+          "entrypoint_ref": "service.cjs --role agent",
+          "operations": [
+            {
+              "name": "calendar.list",
+              "effect": "read",
+              "caller": "agent"
+            },
+            {
+              "name": "calendar.get",
+              "effect": "read",
+              "caller": "agent"
+            },
+            {
+              "name": "calendar.freebusy",
+              "effect": "read",
+              "caller": "agent"
+            },
+            {
+              "name": "calendar.create",
+              "effect": "write",
+              "caller": "agent"
+            },
+            {
+              "name": "calendar.update",
+              "effect": "write",
+              "caller": "agent"
+            },
+            {
+              "name": "calendar.cancel",
+              "effect": "write",
+              "caller": "agent"
+            },
+            {
+              "name": "calendar.export_ics",
+              "effect": "read",
+              "caller": "agent"
+            }
+          ]
+        },
+        {
+          "interface_id": "infra-mcp",
+          "transport": "mcp.stdio",
+          "audience": [
+            "infra"
+          ],
+          "status": "implemented",
+          "entrypoint_ref": "service.cjs --role infra",
+          "operations": [
+            {
+              "name": "env.reset",
+              "effect": "admin",
+              "caller": "infra"
+            },
+            {
+              "name": "env.load_seed",
+              "effect": "admin",
+              "caller": "infra"
+            },
+            {
+              "name": "env.apply_event",
+              "effect": "admin",
+              "caller": "infra"
+            },
+            {
+              "name": "env.snapshot",
+              "effect": "admin",
+              "caller": "infra"
+            },
+            {
+              "name": "env.event_status",
+              "effect": "admin",
+              "caller": "infra"
+            },
+            {
+              "name": "env.validate_bundle",
+              "effect": "admin",
+              "caller": "infra"
+            }
+          ]
+        }
+      ],
+      "state": {
+        "owner": "app",
+        "isolation_keys": [
+          "run_id",
+          "app_id"
+        ],
+        "seed_schema_ref": "schemas/seed.schema.json",
+        "snapshot_includes_assets": true,
+        "reset_scope": "app_instance",
+        "version_checks": "implemented",
+        "idempotent_writes": "implemented",
+        "concurrency_control": "per-App file lock; source outbox is not implemented",
+        "commit_confirmation": "committed + epoch/revision; failures preserve business state",
+        "outbox_atomic_with_business_state": "unsupported"
+      },
+      "events": {
+        "accepts": [
+          {
+            "type": "calendar.upsert",
+            "schema_ref": "schemas/events.schema.json",
+            "status": "implemented"
+          }
+        ],
+        "emits": [],
+        "trigger_owner": "task_and_infra"
+      },
+      "shared_data": {
+        "identity_binding_ref": "fixtures/binding.json",
+        "account_model_ref": "schemas/seed.schema.json",
+        "cross_app_references": true,
+        "asset_catalog_refs": [
+          "assets.catalog.json"
+        ]
+      },
+      "gui_ref": "gui.json",
+      "notification_channels": [],
+      "subscriptions": {
+        "business_owner": "source_app",
+        "routing_owner": "infra",
+        "task_binding_required": true,
+        "preferences_seed_ref": null,
+        "status": "unsupported"
+      },
+      "dependencies": {
+        "core_api": "1.2.0",
+        "required_apps": [],
+        "services": []
+      },
+      "extensions": [],
+      "asset_runtime": {
+        "implemented_descriptor_versions": [
+          "pale.asset-descriptor.v1"
+        ],
+        "implemented_mime_types": [
+          "image/png",
+          "image/jpeg",
+          "audio/mpeg",
+          "audio/wav",
+          "video/mp4",
+          "application/json"
+        ],
+        "implemented_storage_adapters": [
+          "storage.file",
+          "storage.inline"
+        ],
+        "max_assets": 64,
+        "max_bundle_bytes": 1048576
+      },
+      "messaging": {
+        "publishes": [],
+        "receives": [],
+        "envelope": "cloudevents/1.0"
+      }
+    },
+    "examples/apps/calendar/fixtures/policies.json": {
+      "scenario": {
+        "allow": [
+          "calendar.list",
+          "calendar.get",
+          "calendar.freebusy",
+          "calendar.update",
+          "calendar.export_ics"
+        ],
+        "constraints": {
+          "calendar.update": {
+            "ids": [
+              "evt-review"
+            ],
+            "fields": [
+              "start",
+              "end"
+            ]
+          }
+        }
+      },
+      "sandbox": {
+        "allow": [
+          "calendar.list",
+          "calendar.get",
+          "calendar.freebusy",
+          "calendar.create",
+          "calendar.update",
+          "calendar.cancel",
+          "calendar.export_ics"
+        ],
+        "constraints": {}
+      }
+    },
+    "examples/apps/calendar/package.json": {
+      "name": "pale-example-calendar",
+      "version": "1.2.0",
+      "private": true,
+      "engines": {
+        "node": ">=18"
+      },
+      "scripts": {
+        "test": "node --test tests/business.test.cjs",
+        "example": "node examples/run.cjs"
+      },
+      "license": "MIT"
+    },
+    "examples/apps/calendar/schemas/state.schema.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "pale.app-state.v1"
+        },
+        "schema_version": {
+          "const": 1
+        },
+        "package_version": {
+          "const": "1.2.0"
+        },
+        "core_api_version": {
+          "const": "1.2.0"
+        },
+        "app_id": {
+          "const": "calendar"
+        },
+        "run_id": {
+          "type": "string",
+          "pattern": "^[-a-zA-Z0-9_]{1,80}$"
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "profile": {
+          "type": "string"
+        },
+        "next_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "binding": {
+          "type": "object",
+          "properties": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "person_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "person_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "accounts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "app_id": {
+                    "type": "string"
+                  },
+                  "account_id": {
+                    "type": "string"
+                  },
+                  "owner_person_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "app_id",
+                  "account_id",
+                  "owner_person_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "objects": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": [
+            "people",
+            "accounts",
+            "objects"
+          ],
+          "additionalProperties": false
+        },
+        "policies": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "allow": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
+              },
+              "constraints": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "allow",
+              "constraints"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "initial_data": {
+          "$ref": "seed.schema.json"
+        },
+        "data": {
+          "$ref": "seed.schema.json"
+        },
+        "receipts": {
+          "type": "object"
+        },
+        "audit": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "resources": {
+          "$ref": "resources.schema.json"
+        },
+        "initial_resources": {
+          "$ref": "resources.schema.json"
+        }
+      },
+      "required": [
+        "schema",
+        "schema_version",
+        "package_version",
+        "core_api_version",
+        "app_id",
+        "run_id",
+        "epoch",
+        "revision",
+        "profile",
+        "next_id",
+        "virtual_now",
+        "binding",
+        "policies",
+        "initial_data",
+        "data",
+        "receipts",
+        "audit",
+        "resources",
+        "initial_resources"
+      ],
+      "additionalProperties": false
+    },
+    "examples/apps/calendar/tools.json": [
+      {
+        "name": "calendar.list",
+        "description": "List single events. Dates are ISO timestamps with offsets.",
+        "read_only": true,
+        "scope": "calendar.list",
+        "resource_target": "current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "include_cancelled": {
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "calendar"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                },
+                "events": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "uid": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 150
+                      },
+                      "account_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "calendar_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "start": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "end": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "timezone": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "organizer_person_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "attendees": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "uniqueItems": true
+                      },
+                      "location": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "enum": [
+                          "confirmed",
+                          "cancelled"
+                        ]
+                      },
+                      "sequence": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "attachments": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "uniqueItems": true
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "uid",
+                      "account_id",
+                      "calendar_id",
+                      "title",
+                      "start",
+                      "end",
+                      "timezone",
+                      "organizer_person_id",
+                      "attendees",
+                      "location",
+                      "status",
+                      "sequence"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "events"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "calendar.get",
+        "description": "Read one authorized calendar event.",
+        "read_only": true,
+        "scope": "calendar.get",
+        "resource_target": "id in current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "calendar"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                },
+                "event": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "uid": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 150
+                    },
+                    "account_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "calendar_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "start": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "end": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "timezone": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "organizer_person_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "attendees": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "uniqueItems": true
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": [
+                        "confirmed",
+                        "cancelled"
+                      ]
+                    },
+                    "sequence": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "attachments": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "uniqueItems": true
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "uid",
+                    "account_id",
+                    "calendar_id",
+                    "title",
+                    "start",
+                    "end",
+                    "timezone",
+                    "organizer_person_id",
+                    "attendees",
+                    "location",
+                    "status",
+                    "sequence"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "calendar.freebusy",
+        "description": "Check overlap, optionally excluding the event being edited.",
+        "read_only": true,
+        "scope": "calendar.freebusy",
+        "resource_target": "id in current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "exclude_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "start",
+            "end"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "calendar"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                },
+                "busy": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "start": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "end": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "start",
+                      "end"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "busy"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "calendar.create",
+        "description": "Create a single, non-recurring local event if conflict-free.",
+        "read_only": false,
+        "scope": "calendar.create",
+        "resource_target": "id in current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "timezone": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "expected_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "request_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "title",
+            "start",
+            "end",
+            "timezone",
+            "expected_version",
+            "request_id"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "calendar"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "calendar.update",
+        "description": "Update permitted fields; scenario policy limits this to evt-review start/end. Checks current App version and conflicts.",
+        "read_only": false,
+        "scope": "calendar.update",
+        "resource_target": "id in current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "patch": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "start": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "end": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "location": {
+                  "type": "string"
+                },
+                "attendees": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "expected_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "request_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "patch",
+            "expected_version",
+            "request_id"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "calendar"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "calendar.cancel",
+        "description": "Cancel a local event. Does not send invitations.",
+        "read_only": false,
+        "scope": "calendar.cancel",
+        "resource_target": "id in current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "expected_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "request_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "expected_version",
+            "request_id"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "calendar"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "calendar.export_ics",
+        "description": "Export one event as iCalendar text.",
+        "read_only": true,
+        "scope": "calendar.export_ics",
+        "resource_target": "id in current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "calendar"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                },
+                "mime_type": {
+                  "const": "text/calendar"
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "mime_type",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      }
+    ],
+    "examples/apps/mail/app.json": {
+      "schema_version": 1,
+      "app_id": "mail",
+      "version": "1.2.0",
+      "core_api_version": "1.2.0",
+      "maintainer": {
+        "contact": "Repository issue / PR tagged app:mail"
+      },
+      "license": "MIT",
+      "entrypoint": "plugin.cjs",
+      "service": "service.cjs",
+      "tools": "tools.json",
+      "schemas": {
+        "seed": "schemas/seed.schema.json",
+        "state": "schemas/state.schema.json",
+        "events": "schemas/events.schema.json"
+      },
+      "fixtures": {
+        "seed": "fixtures/minimal.json",
+        "binding": "fixtures/binding.json",
+        "policies": "fixtures/policies.json"
+      },
+      "dependencies": [],
+      "event_types": [
+        "mail.deliver",
+        "mail.receive_notification"
+      ],
+      "capabilities": {
+        "modes": [
+          "synthetic"
+        ],
+        "resources": true,
+        "ui": "reviewer bridge",
+        "real_delivery": false
+      },
+      "limitations": [
+        "No SMTP or IMAP",
+        "Attachments supplied through package catalog",
+        "One account per App instance",
+        "Local asset bundles: at most 64 assets / 1 MiB decoded bytes; no live streams."
+      ],
+      "resources": {
+        "catalog": "contribution/assets.catalog.json",
+        "directory": "assets"
+      },
+      "dataset": "contribution/dataset.json",
+      "contribution": "contribution/contribution.json"
+    },
+    "examples/apps/mail/contribution/contribution.json": {
+      "schema_version": "pale.app-contribution.v1",
+      "contract_revision": "0.4.0",
+      "app_id": "mail",
+      "app_categories": [
+        "personal"
+      ],
+      "runtime_manifest_ref": "app.json",
+      "interfaces": [
+        {
+          "interface_id": "agent-mcp",
+          "transport": "mcp.stdio",
+          "audience": [
+            "agent"
+          ],
+          "status": "implemented",
+          "entrypoint_ref": "service.cjs --role agent",
+          "operations": [
+            {
+              "name": "mail.search",
+              "effect": "read",
+              "caller": "agent"
+            },
+            {
+              "name": "mail.get",
+              "effect": "read",
+              "caller": "agent"
+            },
+            {
+              "name": "mail.draft.create",
+              "effect": "write",
+              "caller": "agent"
+            },
+            {
+              "name": "mail.draft.update",
+              "effect": "write",
+              "caller": "agent"
+            },
+            {
+              "name": "mail.send",
+              "effect": "write",
+              "caller": "agent"
+            },
+            {
+              "name": "mail.flags.update",
+              "effect": "write",
+              "caller": "agent"
+            },
+            {
+              "name": "mail.move",
+              "effect": "write",
+              "caller": "agent"
+            },
+            {
+              "name": "mail.trash",
+              "effect": "write",
+              "caller": "agent"
+            }
+          ]
+        },
+        {
+          "interface_id": "infra-mcp",
+          "transport": "mcp.stdio",
+          "audience": [
+            "infra"
+          ],
+          "status": "implemented",
+          "entrypoint_ref": "service.cjs --role infra",
+          "operations": [
+            {
+              "name": "env.reset",
+              "effect": "admin",
+              "caller": "infra"
+            },
+            {
+              "name": "env.load_seed",
+              "effect": "admin",
+              "caller": "infra"
+            },
+            {
+              "name": "env.apply_event",
+              "effect": "admin",
+              "caller": "infra"
+            },
+            {
+              "name": "env.snapshot",
+              "effect": "admin",
+              "caller": "infra"
+            },
+            {
+              "name": "env.event_status",
+              "effect": "admin",
+              "caller": "infra"
+            },
+            {
+              "name": "env.validate_bundle",
+              "effect": "admin",
+              "caller": "infra"
+            }
+          ]
+        }
+      ],
+      "state": {
+        "owner": "app",
+        "isolation_keys": [
+          "run_id",
+          "app_id"
+        ],
+        "seed_schema_ref": "schemas/seed.schema.json",
+        "snapshot_includes_assets": true,
+        "reset_scope": "app_instance",
+        "version_checks": "implemented",
+        "idempotent_writes": "implemented",
+        "concurrency_control": "per-App file lock; source outbox is not implemented",
+        "commit_confirmation": "committed + epoch/revision; failures preserve business state",
+        "outbox_atomic_with_business_state": "unsupported"
+      },
+      "events": {
+        "accepts": [
+          {
+            "type": "mail.deliver",
+            "schema_ref": "schemas/events.schema.json",
+            "status": "implemented"
+          },
+          {
+            "type": "mail.receive_notification",
+            "schema_ref": "schemas/events.schema.json",
+            "status": "implemented"
+          }
+        ],
+        "emits": [],
+        "trigger_owner": "task_and_infra"
+      },
+      "shared_data": {
+        "identity_binding_ref": "fixtures/binding.json",
+        "account_model_ref": "schemas/seed.schema.json",
+        "cross_app_references": true,
+        "asset_catalog_refs": [
+          "assets.catalog.json"
+        ]
+      },
+      "gui_ref": "gui.json",
+      "notification_channels": [
+        "channel.email"
+      ],
+      "subscriptions": {
+        "business_owner": "source_app",
+        "routing_owner": "infra",
+        "task_binding_required": true,
+        "preferences_seed_ref": null,
+        "status": "unsupported"
+      },
+      "dependencies": {
+        "core_api": "1.2.0",
+        "required_apps": [],
+        "services": []
+      },
+      "extensions": [],
+      "asset_runtime": {
+        "implemented_descriptor_versions": [
+          "pale.asset-descriptor.v1"
+        ],
+        "implemented_mime_types": [
+          "image/png",
+          "image/jpeg",
+          "audio/mpeg",
+          "audio/wav",
+          "video/mp4",
+          "application/json"
+        ],
+        "implemented_storage_adapters": [
+          "storage.file",
+          "storage.inline"
+        ],
+        "max_assets": 64,
+        "max_bundle_bytes": 1048576
+      },
+      "messaging": {
+        "publishes": [
+          {
+            "channel": "channel.email",
+            "schema_id": "urn:pale:email-message:2",
+            "schema_ref": "schemas/router-message.schema.json",
+            "status": "implemented",
+            "event_type": "org.pale.mail.notification.v1",
+            "payload_schema_id": "urn:pale:email-payload:1"
+          }
+        ],
+        "receives": [
+          {
+            "channel": "channel.email",
+            "schema_id": "urn:pale:email-message:2",
+            "schema_ref": "schemas/router-message.schema.json",
+            "status": "implemented",
+            "mcp_tool": "env.apply_event",
+            "operation": "mail.receive_notification",
+            "event_type": "org.pale.mail.notification.v1",
+            "payload_schema_id": "urn:pale:email-payload:1"
+          }
+        ],
+        "envelope": "cloudevents/1.0"
+      }
+    },
+    "examples/apps/mail/fixtures/policies.json": {
+      "scenario": {
+        "allow": [
+          "mail.search",
+          "mail.get"
+        ],
+        "constraints": {}
+      },
+      "sandbox": {
+        "allow": [
+          "mail.search",
+          "mail.get",
+          "mail.draft.create",
+          "mail.draft.update",
+          "mail.send",
+          "mail.flags.update",
+          "mail.move",
+          "mail.trash"
+        ],
+        "constraints": {}
+      }
+    },
+    "examples/apps/mail/package.json": {
+      "name": "pale-example-mail",
+      "version": "1.2.0",
+      "private": true,
+      "engines": {
+        "node": ">=18"
+      },
+      "scripts": {
+        "test": "node --test tests/business.test.cjs",
+        "example": "node examples/run.cjs"
+      },
+      "license": "MIT"
+    },
+    "examples/apps/mail/schemas/events.schema.json": {
+      "oneOf": [
+        {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "urn:pale:mail:events:1",
+          "type": "object",
+          "properties": {
+            "event_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "operation": {
+              "const": "mail.deliver"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "thread_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "account_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "from": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "to": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "subject": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "body": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "received_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "folder": {
+                  "enum": [
+                    "inbox",
+                    "archive",
+                    "trash",
+                    "drafts",
+                    "sent"
+                  ]
+                },
+                "read": {
+                  "type": "boolean"
+                },
+                "attachments": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "uniqueItems": true
+                },
+                "event_ref": {
+                  "type": "object",
+                  "properties": {
+                    "app_id": {
+                      "const": "calendar"
+                    },
+                    "account_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "object_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  },
+                  "required": [
+                    "app_id",
+                    "account_id",
+                    "object_id"
+                  ],
+                  "additionalProperties": false
+                },
+                "sent_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "thread_id",
+                "account_id",
+                "from",
+                "to",
+                "subject",
+                "body",
+                "received_at",
+                "folder",
+                "read",
+                "attachments"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "event_id",
+            "at",
+            "operation",
+            "payload"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "operation": {
+              "const": "mail.receive_notification"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "recipient_account_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "message": {
+                  "$ref": "router-message.schema.json"
+                }
+              },
+              "required": [
+                "recipient_account_id",
+                "message"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "event_id",
+            "at",
+            "operation",
+            "payload"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "examples/apps/mail/schemas/state.schema.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "pale.app-state.v1"
+        },
+        "schema_version": {
+          "const": 1
+        },
+        "package_version": {
+          "const": "1.2.0"
+        },
+        "core_api_version": {
+          "const": "1.2.0"
+        },
+        "app_id": {
+          "const": "mail"
+        },
+        "run_id": {
+          "type": "string",
+          "pattern": "^[-a-zA-Z0-9_]{1,80}$"
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "profile": {
+          "type": "string"
+        },
+        "next_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "virtual_now": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "binding": {
+          "type": "object",
+          "properties": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "person_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "person_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "accounts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "app_id": {
+                    "type": "string"
+                  },
+                  "account_id": {
+                    "type": "string"
+                  },
+                  "owner_person_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "app_id",
+                  "account_id",
+                  "owner_person_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "objects": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": [
+            "people",
+            "accounts",
+            "objects"
+          ],
+          "additionalProperties": false
+        },
+        "policies": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "allow": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
+              },
+              "constraints": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "allow",
+              "constraints"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "initial_data": {
+          "$ref": "seed.schema.json"
+        },
+        "data": {
+          "$ref": "seed.schema.json"
+        },
+        "receipts": {
+          "type": "object"
+        },
+        "audit": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "resources": {
+          "$ref": "resources.schema.json"
+        },
+        "initial_resources": {
+          "$ref": "resources.schema.json"
+        }
+      },
+      "required": [
+        "schema",
+        "schema_version",
+        "package_version",
+        "core_api_version",
+        "app_id",
+        "run_id",
+        "epoch",
+        "revision",
+        "profile",
+        "next_id",
+        "virtual_now",
+        "binding",
+        "policies",
+        "initial_data",
+        "data",
+        "receipts",
+        "audit",
+        "resources",
+        "initial_resources"
+      ],
+      "additionalProperties": false
+    },
+    "examples/apps/mail/tools.json": [
+      {
+        "name": "mail.search",
+        "description": "Search authorized messages. Does not change read flags.",
+        "read_only": true,
+        "scope": "mail.search",
+        "resource_target": "current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string"
+            },
+            "folder": {
+              "type": "string",
+              "enum": [
+                "inbox",
+                "drafts",
+                "sent",
+                "archive",
+                "trash"
+              ]
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "mail"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                },
+                "messages": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "thread_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "account_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "from": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "to": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "subject": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "body": {
+                        "type": "string",
+                        "maxLength": 20000
+                      },
+                      "received_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "folder": {
+                        "enum": [
+                          "inbox",
+                          "archive",
+                          "trash",
+                          "drafts",
+                          "sent"
+                        ]
+                      },
+                      "read": {
+                        "type": "boolean"
+                      },
+                      "attachments": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "uniqueItems": true
+                      },
+                      "event_ref": {
+                        "type": "object",
+                        "properties": {
+                          "app_id": {
+                            "const": "calendar"
+                          },
+                          "account_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "object_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          }
+                        },
+                        "required": [
+                          "app_id",
+                          "account_id",
+                          "object_id"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "sent_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "thread_id",
+                      "account_id",
+                      "from",
+                      "to",
+                      "subject",
+                      "body",
+                      "received_at",
+                      "folder",
+                      "read",
+                      "attachments"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "messages"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "mail.get",
+        "description": "Read a message and attachment references without side effects.",
+        "read_only": true,
+        "scope": "mail.get",
+        "resource_target": "id in current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "mail"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "thread_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "account_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "from": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "to": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "subject": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "body": {
+                      "type": "string",
+                      "maxLength": 20000
+                    },
+                    "received_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "folder": {
+                      "enum": [
+                        "inbox",
+                        "archive",
+                        "trash",
+                        "drafts",
+                        "sent"
+                      ]
+                    },
+                    "read": {
+                      "type": "boolean"
+                    },
+                    "attachments": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "uniqueItems": true
+                    },
+                    "event_ref": {
+                      "type": "object",
+                      "properties": {
+                        "app_id": {
+                          "const": "calendar"
+                        },
+                        "account_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "object_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "required": [
+                        "app_id",
+                        "account_id",
+                        "object_id"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "sent_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "thread_id",
+                    "account_id",
+                    "from",
+                    "to",
+                    "subject",
+                    "body",
+                    "received_at",
+                    "folder",
+                    "read",
+                    "attachments"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "message"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "mail.draft.create",
+        "description": "Create a local draft; no external delivery.",
+        "read_only": false,
+        "scope": "mail.draft.create",
+        "resource_target": "id in current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "to": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "subject": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string"
+            },
+            "expected_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "request_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "to",
+            "subject",
+            "body",
+            "expected_version",
+            "request_id"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "mail"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "mail.draft.update",
+        "description": "Edit a draft only.",
+        "read_only": false,
+        "scope": "mail.draft.update",
+        "resource_target": "id in current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "patch": {
+              "type": "object",
+              "properties": {
+                "to": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "subject": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "expected_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "request_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "patch",
+            "expected_version",
+            "request_id"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "mail"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "mail.send",
+        "description": "Simulate send by moving a draft to sent; never sends real email.",
+        "read_only": false,
+        "scope": "mail.send",
+        "resource_target": "id in current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "expected_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "request_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "expected_version",
+            "request_id"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "mail"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "mail.flags.update",
+        "description": "Explicitly change a message read flag.",
+        "read_only": false,
+        "scope": "mail.flags.update",
+        "resource_target": "id in current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "read": {
+              "type": "boolean"
+            },
+            "expected_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "request_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "read",
+            "expected_version",
+            "request_id"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "mail"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "mail.move",
+        "description": "Move received mail among inbox, archive and trash.",
+        "read_only": false,
+        "scope": "mail.move",
+        "resource_target": "id in current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "folder": {
+              "type": "string",
+              "enum": [
+                "inbox",
+                "archive",
+                "trash"
+              ]
+            },
+            "expected_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "request_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "folder",
+            "expected_version",
+            "request_id"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "mail"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "name": "mail.trash",
+        "description": "Move a message or draft to trash.",
+        "read_only": false,
+        "scope": "mail.trash",
+        "resource_target": "id in current account",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "expected_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "request_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "expected_version",
+            "request_id"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "ok",
+                    "committed",
+                    "ready"
+                  ]
+                },
+                "app_id": {
+                  "const": "mail"
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "simulated_delivery": {
+                  "type": "boolean"
+                },
+                "duplicate": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "status",
+                "app_id",
+                "version",
+                "id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "applied": {
+                  "const": false
+                },
+                "version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_version": {
+                  "type": "object",
+                  "properties": {
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "epoch",
+                    "revision"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "status",
+                "message",
+                "applied",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "type": "object"
+        }
+      }
+    ]
+  }
+}
