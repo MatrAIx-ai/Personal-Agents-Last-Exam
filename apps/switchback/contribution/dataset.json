@@ -1,0 +1,44 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "switchback-minimal",
+  "version": "0.1.0",
+  "description": "Hand-authored synthetic campground, account and reservation records for reproducible checks; not a benchmark task. No real facility, person or payment data.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-authored synthetic records. Workflow rules modelled on Recreation.gov public help pages (15-minute cart hold, $10 change fee); the release schedule, refund ladders, cutoffs and alert effects are Switchback's own.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.1.0",
+        "seed": null,
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Fixed UTC-07:00 facility times; amounts in cents; IDs stable across resets."
+  ],
+  "expected_counts": {
+    "records": 3,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}

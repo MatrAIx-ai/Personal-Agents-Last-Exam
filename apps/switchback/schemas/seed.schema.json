@@ -1,0 +1,1136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Switchback account and campground records",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "holder": {
+      "type": "object",
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "display_name"
+      ],
+      "additionalProperties": false
+    },
+    "facilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "region": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 2000
+          },
+          "utc_offset": {
+            "type": "string",
+            "pattern": "^[+-]\\d{2}:\\d{2}$"
+          },
+          "policy_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "region",
+          "description",
+          "utc_offset",
+          "policy_id"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "rungs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ends": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "days_before": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 365
+                        },
+                        "time": {
+                          "type": "string",
+                          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                        }
+                      },
+                      "required": [
+                        "days_before",
+                        "time"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "cancel": {
+                  "type": "object",
+                  "properties": {
+                    "fee_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 10000000
+                    },
+                    "first_night": {
+                      "type": "boolean"
+                    },
+                    "percent_kept": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100
+                    }
+                  },
+                  "required": [
+                    "fee_cents",
+                    "first_night",
+                    "percent_kept"
+                  ],
+                  "additionalProperties": false
+                },
+                "change": {
+                  "type": "object",
+                  "properties": {
+                    "allowed": {
+                      "type": "boolean"
+                    },
+                    "fee_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 10000000
+                    },
+                    "percent": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100
+                    }
+                  },
+                  "required": [
+                    "allowed",
+                    "fee_cents",
+                    "percent"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "ends",
+                "cancel",
+                "change"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 8
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "rungs"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 50
+    },
+    "sites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "facility_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "loop": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "electric_amps": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "max_vehicle_ft": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ada_accessible": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "walk_in_ft": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "max_occupancy": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "pets_allowed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "nightly_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000
+          }
+        },
+        "required": [
+          "id",
+          "facility_id",
+          "name",
+          "loop",
+          "electric_amps",
+          "max_vehicle_ft",
+          "ada_accessible",
+          "walk_in_ft",
+          "max_occupancy",
+          "pets_allowed",
+          "nightly_cents"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "wallet": {
+      "type": "object",
+      "properties": {
+        "default_card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "brand": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 30
+              },
+              "last4": {
+                "type": "string",
+                "pattern": "^\\d{4}$"
+              },
+              "holder_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "holder_person_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "exp_month": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 12
+              },
+              "exp_year": {
+                "type": "integer",
+                "minimum": 2000,
+                "maximum": 2100
+              }
+            },
+            "required": [
+              "id",
+              "brand",
+              "last4",
+              "holder_name",
+              "holder_person_id",
+              "exp_month",
+              "exp_year"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "default_card_id",
+        "cards"
+      ],
+      "additionalProperties": false
+    },
+    "equipment": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "kind": {
+            "enum": [
+              "tent",
+              "trailer",
+              "rv",
+              "van"
+            ]
+          },
+          "length_ft": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "kind",
+          "length_ft",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20
+    },
+    "default_equipment_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "companions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "person_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "default_party": {
+            "type": "boolean"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "person_id",
+          "default_party",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 50
+    },
+    "holds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "site_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "facility_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "arrival": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "departure": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "nights": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "maxItems": 14
+          },
+          "purpose": {
+            "enum": [
+              "book",
+              "modify"
+            ]
+          },
+          "reservation_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "expired",
+              "released",
+              "converted"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "site_id",
+          "facility_id",
+          "arrival",
+          "departure",
+          "nights",
+          "purpose",
+          "reservation_id",
+          "created_at",
+          "expires_at",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "previews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "book",
+              "modify",
+              "cancel"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "consumed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "created_at",
+          "expires_at",
+          "consumed_at"
+        ]
+      },
+      "maxItems": 2000
+    },
+    "reservations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "facility_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "site_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "arrival": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "departure": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "nights": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "maxItems": 14
+          },
+          "nightly_cents": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "maxItems": 14
+          },
+          "total_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000000
+          },
+          "policy_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "primary_occupant": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "enum": [
+                  "holder",
+                  "companion"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "display_name"
+            ],
+            "additionalProperties": false
+          },
+          "equipment": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "kind": {
+                    "enum": [
+                      "tent",
+                      "trailer",
+                      "rv",
+                      "van"
+                    ]
+                  },
+                  "length_ft": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 60
+                  },
+                  "updated_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "kind",
+                  "length_ft",
+                  "updated_at"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "companions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "display_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "person_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "display_name",
+                "person_id"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 50
+          },
+          "party_size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "pets": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 20
+          },
+          "card_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "state": {
+            "enum": [
+              "confirmed",
+              "checked_in",
+              "completed",
+              "cancelled",
+              "no_show",
+              "closure_cancelled"
+            ]
+          },
+          "late_arrival": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ]
+            },
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "id",
+          "facility_id",
+          "site_id",
+          "arrival",
+          "departure",
+          "nights",
+          "nightly_cents",
+          "total_cents",
+          "policy_id",
+          "primary_occupant",
+          "equipment",
+          "companions",
+          "party_size",
+          "pets",
+          "card_id",
+          "state",
+          "late_arrival",
+          "created_at",
+          "updated_at",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "payments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "reservation_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "card_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "amount_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000000
+          },
+          "kind": {
+            "enum": [
+              "charge",
+              "refund"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "posts_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "posted",
+              "pending"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "reservation_id",
+          "card_id",
+          "amount_cents",
+          "kind",
+          "reason",
+          "created_at",
+          "posts_at",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "alerts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "fire_restriction",
+              "road_restriction",
+              "trail_restriction",
+              "water_outage",
+              "electrical_outage",
+              "smoke_advisory"
+            ]
+          },
+          "facility_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "site_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 500,
+            "uniqueItems": true
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "posted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revisions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "facility_id",
+          "site_ids",
+          "from",
+          "to",
+          "text",
+          "posted_at",
+          "cancelled_at",
+          "revisions"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "closures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "facility_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "site_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 500,
+            "uniqueItems": true
+          },
+          "from": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "ordered_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "facility_id",
+          "site_ids",
+          "from",
+          "to",
+          "reason",
+          "ordered_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "site_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "nights": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "maxItems": 14
+          },
+          "claimed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "site_id",
+          "nights",
+          "claimed_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "object_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "object_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "message": {
+            "$ref": "router-message.schema.json"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "created_at",
+          "object_type",
+          "object_id",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "holder",
+    "facilities",
+    "policies",
+    "sites",
+    "wallet",
+    "equipment",
+    "default_equipment_id",
+    "companions",
+    "holds",
+    "previews",
+    "reservations",
+    "payments",
+    "alerts",
+    "closures",
+    "claims",
+    "notices"
+  ],
+  "additionalProperties": false
+}
