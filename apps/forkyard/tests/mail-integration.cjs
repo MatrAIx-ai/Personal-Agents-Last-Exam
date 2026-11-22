@@ -205,6 +205,33 @@ async function main() {
     assert.equal(suppressed.suppressed, true);
     assert.equal(deniedState.state.data.pulls.find(item => item.number === 2318).state, 'closed');
     assert.equal((await messages(deniedDir, deniedRun)).length, deniedBefore.length);
+    const deniedMail = new Client('mail', 'infra', deniedRun, deniedDir, 'mail-denied-status', {registry: mailRegistry});
+    clients.push(deniedMail);
+    await deniedMail.initialize();
+    const deniedSnap = await deniedMail.call('env.snapshot');
+    const deniedNotice = deniedState.state.data.notices.find(item => item.status === 'pending_delivery');
+    const deniedReceiver = {
+      app_id: 'mail',
+      account_id: deniedSnap.snapshot.data.account_id,
+      address: deniedSnap.snapshot.data.address,
+      epoch: deniedSnap.snapshot.epoch
+    };
+    const deniedMessage = messageFor(deniedNotice, 'fy-tomasreyes');
+    const crossRun = reconcile({
+      messaging: rejected.attempts[0].result,
+      mailReceipt: await inspectReceiver(mailbox, sent.attempts[0].result.event_id),
+      attempted: {
+        run_id: deniedRun,
+        event_id: routerEventId(deniedRun, deniedMessage, deniedReceiver, deniedReceiver.epoch),
+        receiver: deniedReceiver,
+        receiver_epoch: deniedReceiver.epoch,
+        message: deniedMessage
+      }
+    });
+    assert.equal(crossRun.delivery, 'unresolved');
+    assert.equal(crossRun.event_id, routerEventId(deniedRun, deniedMessage, deniedReceiver, deniedReceiver.epoch));
+    assert.notEqual(crossRun.event_id, sent.attempts[0].result.event_id);
+    assert.equal(deniedSnap.snapshot.data.messages.some(item => item.thread_id === deniedMessage.id), false);
 
     const lostDir = path.join(dir, 'lost');
     fs.mkdirSync(lostDir);
@@ -212,6 +239,16 @@ async function main() {
     const lostState = prepare(lostRun);
     const lostRouter = await create({config: allowed, publisher: 'forkyard', run: lostRun, stateDir: lostDir});
     clients.push(lostRouter);
+    const lostMail = new Client('mail', 'infra', lostRun, lostDir, 'mail-lost-inline', {registry: mailRegistry});
+    clients.push(lostMail);
+    await lostMail.initialize();
+    const lostSnap = await lostMail.call('env.snapshot');
+    const lostReceiver = {
+      app_id: 'mail',
+      account_id: lostSnap.snapshot.data.account_id,
+      address: lostSnap.snapshot.data.address,
+      epoch: lostSnap.snapshot.epoch
+    };
     const original = Client.prototype.call;
     let lost;
     try {
@@ -220,13 +257,10 @@ async function main() {
         if (name === 'env.apply_event') throw new Error('Simulated lost acknowledgement');
         return result;
       };
-      const lostMail = new Client('mail', 'infra', lostRun, lostDir, 'mail-lost-inline', {registry: mailRegistry});
-      clients.push(lostMail);
-      await lostMail.initialize();
       lost = await publishPending({
         notices: lostState.state.data.notices, accountId: 'fy-tomasreyes', router: lostRouter, runId: lostRun,
         inspectReceipt: (eventId) => inspectReceiver(lostMail, eventId),
-        receiver: {app_id: 'mail', account_id: 'mail-maya'}
+        receiver: lostReceiver
       });
     } finally {
       Client.prototype.call = original;
@@ -236,6 +270,7 @@ async function main() {
     assert.equal(lost.attempts[0].outcome.delivery, 'confirmed');
     assert.equal(lost.attempts[0].outcome.same_run_retry, false);
     assert.equal(lost.attempts[0].outcome.correlated, true);
+    assert.equal(lost.attempts[0].outcome.event_id, lost.attempts[0].result.event_id);
     const inspector = new Client('mail', 'infra', lostRun, lostDir, 'mail-lost', {registry: mailRegistry});
     clients.push(inspector);
     await inspector.initialize();
@@ -993,6 +1028,14 @@ async function main() {
       assert.equal(sent.attempts.length, 1);
       assert.equal(sent.attempts[0].outcome.comparison.identity, false);
       assert.equal(sent.attempts[0].outcome.delivery, 'confirmed');
+      const localId = routerEventId(ctx.runId, sent.attempts[0].message, ctx.receiver, ctx.receiver.epoch);
+      assert.equal(sent.attempts[0].outcome.event_id, localId);
+      assert.equal(sent.attempts[0].event_id, localId);
+      assert.equal(sent.attempts[0].result.event_id, 'router-foreign');
+      const localReceipt = await ctx.mailbox.call('env.event_status', {event_id: sent.attempts[0].outcome.event_id});
+      assert.equal(localReceipt.receipt.status, 'committed');
+      const foreignReceipt = await ctx.mailbox.call('env.event_status', {event_id: 'router-foreign'});
+      assert.equal(foreignReceipt.receipt, null);
     }
     {
       const ctx = await faultContext('otherpr');
@@ -1058,7 +1101,49 @@ async function main() {
       assert.equal(sent.history.some(item => item.receiver_epoch === ctx.receiver.epoch && item.outcome.delivery === 'confirmed'), true);
       assert.equal(sent.attempts.some(item => item.outcome.delivery === 'confirmed'), false);
     }
-    assert.equal(faults.length, 7);
+    {
+      const ctx = await faultContext('haltreset');
+      let publishes = 0;
+      const opened = await publishPending({
+        notices: [ctx.first], accountId: 'fy-tomasreyes', runId: ctx.runId, receiver: ctx.receiver,
+        inspectReceipt: (eventId) => inspectReceiver(ctx.mailbox, eventId),
+        router: {
+          async call(name, args) {
+            publishes += 1;
+            await ctx.router.call(name, args);
+            throw new Error('dropped router reply');
+          }
+        }
+      });
+      assert.equal(opened.halted, true);
+      assert.equal(opened.attempts[0].outcome.delivery, 'confirmed');
+      assert.equal(opened.attempts[0].receiver_epoch, ctx.receiver.epoch);
+      const current = await ctx.mailbox.call('env.snapshot');
+      const reset = await ctx.mailbox.call('env.reset', {expected_version: current.version});
+      assert.equal(reset.status, 'ready');
+      const after = await ctx.mailbox.call('env.snapshot');
+      const nextReceiver = {...ctx.receiver, epoch: after.snapshot.epoch};
+      const changed = {...ctx.first, text: ctx.first.text + ' After the halt.'};
+      const sent = await publishPending({
+        notices: [changed], accountId: 'fy-tomasreyes', runId: ctx.runId, receiver: nextReceiver,
+        inspectReceipt: (eventId) => inspectReceiver(ctx.mailbox, eventId),
+        router: {async call() { publishes += 1; throw new Error('republish'); }}
+      });
+      const changedMessage = messageFor(changed, 'fy-tomasreyes');
+      faults.push({name: 'halted reset', publishes, sent});
+      assert.equal(publishes, 1);
+      assert.equal(sent.halted, true);
+      assert.equal(sent.stopped, true);
+      assert.equal(sent.receiver.epoch, after.snapshot.epoch);
+      assert.equal(sent.attempts.length, 1);
+      assert.equal(sent.attempts[0].outcome.delivery, 'unresolved');
+      assert.equal(sent.attempts[0].receiver_epoch, after.snapshot.epoch);
+      assert.equal(sent.history.length, 1);
+      assert.equal(sent.history[0].outcome.delivery, 'confirmed');
+      assert.equal(sent.history[0].receiver_epoch, ctx.receiver.epoch);
+      assert.equal(after.snapshot.data.messages.some(item => item.body === changed.text || item.thread_id === changedMessage.id), false);
+    }
+    assert.equal(faults.length, 8);
     assert.equal(faults.every(item => item.publishes <= 1), true);
 
     console.log(JSON.stringify({

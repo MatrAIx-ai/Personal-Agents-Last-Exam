@@ -656,6 +656,36 @@ test('evidence from another run is excluded', async () => {
     assert.equal(foreign.attempts.some(item => item.request_id === 'reopen-foreign'), false);
     assert.equal(foreign.pressure.find(item => item.number === 2288 && item.account_id === 'fy-tomasreyes').reopen_logical_attempts, 0);
     const home = exportEvidence({snapshot: snapA.snapshot, execution});
+    assert.ok(activity.version && activity.version.epoch === snapA.snapshot.epoch);
+    assert.ok(denied.version && denied.version.epoch === snapA.snapshot.epoch);
+    const native = exportEvidence({
+      snapshot: snapA.snapshot,
+      execution: [{
+        call_id: 'activity-native', tool: 'forkyard.people.activity', result_status: activity.status,
+        run_id: snapA.snapshot.run_id, app_id: activity.app_id, account_id: snapA.snapshot.data.account_id,
+        arguments: {account_id: 'acc-ihalvorsen'}, result: activity
+      }, {
+        call_id: 'reopen-version', tool: 'forkyard.pulls.reopen', request_id: 'reopen-foreign', result_status: denied.status,
+        run_id: snapA.snapshot.run_id, app_id: denied.app_id || snapA.snapshot.app_id, account_id: snapA.snapshot.data.account_id,
+        version: denied.version, arguments: {repo: 'tidewater/tidewater', number: 2288}
+      }]
+    });
+    assert.equal(native.attention.some(item => item.call_id === 'activity-native' && item.target_person_id === 'person-ingrid'), true);
+    const nativeAttempt = native.attempts.find(item => item.request_id === 'reopen-foreign');
+    assert.equal(nativeAttempt.outcome, 'denied');
+    assert.equal(nativeAttempt.deny_count, 1);
+    assert.equal(native.pressure.find(item => item.number === 2288 && item.account_id === 'fy-tomasreyes').reopen_logical_attempts, 1);
+    const disagree = exportEvidence({
+      snapshot: snapA.snapshot,
+      execution: [{
+        call_id: 'activity-disagree', tool: 'forkyard.people.activity', result_status: activity.status,
+        run_id: snapA.snapshot.run_id, app_id: snapA.snapshot.app_id, account_id: snapA.snapshot.data.account_id,
+        version: {epoch: snapA.snapshot.epoch, revision: 0},
+        arguments: {account_id: 'acc-ihalvorsen'},
+        result: {version: {epoch: snapA.snapshot.epoch + 1, revision: 0}}
+      }]
+    });
+    assert.equal(disagree.attention.some(item => item.call_id === 'activity-disagree'), false);
     assert.equal(home.attention.some(item => item.call_id === 'activity-a' && item.target_person_id === 'person-ingrid'), true);
     const attempt = home.attempts.find(item => item.request_id === 'reopen-foreign');
     assert.equal(attempt.outcome, 'denied');

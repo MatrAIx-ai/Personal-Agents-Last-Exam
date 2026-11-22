@@ -135,19 +135,65 @@ function renderedMessage(record) {
   };
 }
 
-function judge({messaging, mailReceipt, binding}) {
+function receiptOf(mailReceipt) {
+  if (!mailReceipt || typeof mailReceipt !== 'object') return null;
+  if (Object.prototype.hasOwnProperty.call(mailReceipt, 'receipt')) return mailReceipt.receipt;
+  if (mailReceipt.event_id || mailReceipt.trace) return mailReceipt;
+  return null;
+}
+
+function receiptRun(receipt) {
+  if (!receipt) return null;
+  if (filled(receipt.run_id)) return receipt.run_id;
+  if (receipt.trace && filled(receipt.trace.run_id)) return receipt.trace.run_id;
+  return null;
+}
+
+function receiptApp(receipt) {
+  if (!receipt) return null;
+  if (filled(receipt.app_id)) return receipt.app_id;
+  if (receipt.trace && filled(receipt.trace.app_id)) return receipt.trace.app_id;
+  return null;
+}
+
+function expectedEventId(binding) {
+  if (!binding || !binding.message || !binding.receiver) return null;
+  return routerEventId(binding.run_id, binding.message, binding.receiver, binding.receiver.epoch);
+}
+
+function receiptDiffs(receipt, record, binding, inspectedEventId) {
+  const diffs = [];
+  const expectedId = expectedEventId(binding);
+  if (!receipt || receipt.status !== 'committed') diffs.push('receipt_status');
+  else {
+    if (!inspectedEventId || receipt.event_id !== inspectedEventId) diffs.push('receipt_event_id');
+    if (!expectedId || receipt.event_id !== expectedId) diffs.push('receipt_event_id');
+    if (receiptRun(receipt) !== (binding && binding.run_id)) diffs.push('receipt_run');
+    if (!binding || !binding.receiver || receiptApp(receipt) !== binding.receiver.app_id) diffs.push('receipt_app');
+    const epoch = receipt.version && receipt.version.epoch;
+    if (!binding || !binding.receiver || epoch !== binding.receiver.epoch) diffs.push('receipt_epoch');
+  }
+  if (!record || !binding || !binding.receiver || record.account_id !== binding.receiver.account_id) diffs.push('receiver_account');
+  return diffs;
+}
+
+function judge({messaging, mailReceipt, binding, inspectedEventId}) {
   const message = binding && binding.message;
   const retained = retainedCloudEvent(mailReceipt);
-  const diffs = envelopeDiff(message, retained);
-  const identity = routerMatches(messaging, binding);
+  const record = mailReceipt && mailReceipt.receiver_record;
+  const receipt = receiptOf(mailReceipt);
+  const envelope = envelopeDiff(message, retained);
+  const diffs = envelope.slice();
+  for (const item of receiptDiffs(receipt, record, binding, inspectedEventId)) {
+    if (!diffs.includes(item)) diffs.push(item);
+  }
   const confirmed = diffs.length === 0;
-  const eventId = (messaging && messaging.event_id) || (binding && binding.receiver ? routerEventId(binding.run_id, message, binding.receiver, binding.receiver.epoch) : null);
   return {
     delivery: confirmed ? 'confirmed' : 'unresolved',
     source_committed: true,
     same_run_retry: false,
     duplicate_within_run: !!(confirmed && messaging && messaging.duplicate === true && binding && messaging.run_id === binding.run_id && messaging.version && binding.receiver && messaging.version.epoch === binding.receiver.epoch),
-    event_id: eventId,
+    event_id: inspectedEventId || null,
     correlated: confirmed,
     reason: confirmed ? null : diffs[0],
     comparison: {
@@ -158,7 +204,12 @@ function judge({messaging, mailReceipt, binding}) {
         source_object: sourceObject(message),
         time: message.time,
         recipient: message.data && message.data.recipient || null,
-        payload_hash: payloadHash(message)
+        payload_hash: payloadHash(message),
+        event_id: expectedEventId(binding),
+        run_id: binding && binding.run_id || null,
+        app_id: binding && binding.receiver && binding.receiver.app_id || null,
+        account_id: binding && binding.receiver && binding.receiver.account_id || null,
+        epoch: binding && binding.receiver ? binding.receiver.epoch : null
       } : null,
       observed: {
         id: retained && retained.id || null,
@@ -168,10 +219,16 @@ function judge({messaging, mailReceipt, binding}) {
         time: retained && retained.time || null,
         recipient: retained && retained.data && retained.data.recipient || null,
         payload_hash: payloadHash(retained),
-        message: renderedMessage(mailReceipt && mailReceipt.receiver_record)
+        event_id: receipt && receipt.event_id || null,
+        run_id: receiptRun(receipt),
+        app_id: receiptApp(receipt),
+        account_id: record && record.account_id || null,
+        epoch: receipt && receipt.version ? receipt.version.epoch : null,
+        message: renderedMessage(record),
+        router_event_id: messaging && messaging.event_id || null
       },
-      identity,
-      payload: confirmed,
+      identity: routerMatches(messaging, binding),
+      payload: envelope.length === 0,
       discrepancies: diffs
     }
   };
@@ -182,11 +239,9 @@ function reconcile({messaging, mailReceipt, attempted, message} = {}) {
   const cloud = message || attempt.message || null;
   const receiver = copyReceiver(attempt.receiver);
   if (receiver && attempt.receiver_epoch != null) receiver.epoch = attempt.receiver_epoch;
-  return judge({
-    messaging,
-    mailReceipt,
-    binding: {run_id: attempt.run_id || null, receiver, message: cloud}
-  });
+  const binding = {run_id: attempt.run_id || null, receiver, message: cloud};
+  const inspectedEventId = attempt.event_id || expectedEventId(binding);
+  return judge({messaging, mailReceipt, binding, inspectedEventId});
 }
 
 function retainedEvent(snapshot, eventId) {
@@ -277,7 +332,7 @@ function project(state, notices, accountId, runId, receiver) {
 }
 
 async function settle(attempt, binding, messaging, inspectReceipt) {
-  const eventId = attempt.event_id || (messaging && messaging.event_id) || null;
+  const eventId = attempt.event_id || expectedEventId(binding) || (messaging && messaging.event_id) || null;
   let mailReceipt = null;
   let lookupError = null;
   if (eventId && typeof inspectReceipt === 'function') {
@@ -287,7 +342,7 @@ async function settle(attempt, binding, messaging, inspectReceipt) {
       lookupError = error && error.message ? error.message : 'lookup_failed';
     }
   }
-  const outcome = judge({messaging, mailReceipt, binding});
+  const outcome = judge({messaging, mailReceipt, binding, inspectedEventId: eventId});
   if (lookupError) {
     outcome.lookup_error = lookupError;
     outcome.delivery = 'unresolved';
@@ -308,8 +363,18 @@ async function publishPending({notices, accountId, router, runId, inspectReceipt
   state.receiver = copied || state.receiver;
   runs.set(runId, state);
   const pending = (notices || []).filter(item => item.status === 'pending_delivery');
-  if (state.halted || state.in_flight) {
+  if (state.in_flight) {
     return {attempts: state.attempts.slice(), history: [], stopped: true, stop_reason: state.reason, suppressed: true, halted: state.halted, receiver: state.receiver};
+  }
+  if (state.halted) {
+    const bindingReceiver = copied || state.receiver;
+    for (const notice of pending) {
+      const attempt = blankAttempt(notice, accountId, runId, bindingReceiver);
+      if (state.attempts.some(item => item.key === attempt.key)) continue;
+      state.attempts.push(unresolved(attempt, 'binding_changed'));
+    }
+    const view = project(state, pending, accountId, runId, bindingReceiver);
+    return {attempts: view.attempts, history: view.history, stopped: true, stop_reason: state.reason, suppressed: true, halted: true, receiver: state.receiver};
   }
   let published = false;
   for (const notice of pending) {

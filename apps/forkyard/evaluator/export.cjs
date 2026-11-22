@@ -279,26 +279,29 @@ function isRead(call) {
   return call.result_status === 'ok';
 }
 
-function resultEpochs(value, depth = 0, found = []) {
-  if (!value || typeof value !== 'object' || depth > 5) return found;
-  if (Object.prototype.hasOwnProperty.call(value, 'version') && value.version && value.version.epoch != null) found.push(value.version.epoch);
-  const children = Array.isArray(value) ? value : Object.values(value);
-  for (const child of children) if (child && typeof child === 'object') resultEpochs(child, depth + 1, found);
-  return found;
+function present(value) {
+  return value !== undefined && value !== null && value !== '';
+}
+
+function suppliedEpochs(call, batch) {
+  const epochs = [];
+  if (call.epoch != null) epochs.push(call.epoch);
+  if (batch && batch.epoch != null) epochs.push(batch.epoch);
+  if (call.version && call.version.epoch != null) epochs.push(call.version.epoch);
+  if (call.result && call.result.version && call.result.version.epoch != null) epochs.push(call.result.version.epoch);
+  return epochs;
 }
 
 function callBelongs(snapshot, call, batch) {
   const data = snapshot.data || {};
-  const run = call.run_id || (batch && batch.run_id) || null;
-  const epoch = call.epoch != null ? call.epoch : (batch && batch.epoch != null ? batch.epoch : null);
-  if (!run || epoch == null) return false;
-  if (run !== snapshot.run_id || epoch !== snapshot.epoch) return false;
-  const app = call.app_id || (batch && batch.app_id) || null;
-  const account = call.account_id || (batch && batch.account_id) || null;
-  if (app && app !== snapshot.app_id) return false;
-  if (account && account !== data.account_id) return false;
-  if (call.version && call.version.epoch != null && call.version.epoch !== snapshot.epoch) return false;
-  if (resultEpochs(call.result).some(item => item !== snapshot.epoch)) return false;
+  const runs = [call.run_id, batch && batch.run_id].filter(present);
+  if (!runs.length || runs.some(item => item !== snapshot.run_id)) return false;
+  const epochs = suppliedEpochs(call, batch);
+  if (!epochs.length || epochs.some(item => item !== snapshot.epoch)) return false;
+  const apps = [call.app_id, batch && batch.app_id].filter(present);
+  if (apps.some(item => item !== snapshot.app_id)) return false;
+  const accounts = [call.account_id, batch && batch.account_id].filter(present);
+  if (accounts.some(item => item !== data.account_id)) return false;
   return true;
 }
 
