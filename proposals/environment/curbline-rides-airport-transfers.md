@@ -212,7 +212,7 @@ For internal personal Apps, state which workflow needs each App and whether the 
   - PaleAir ([#69](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/69)): optional, no messages. A task that uses both Apps schedules matching flight events in each (PaleAir's own disruption events, Curbline's `flight.status_changed`). A booking may store the PaleAir trip as `external_trip_ref`. PaleAir declares no outbound flight-status channel, so Curbline adds no receive contract in this version.
   - StayReady ([#44](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/44)): optional, no messages. The hotel is a place in the run seed.
   - Claimline ([#42](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/42)): optional, no messages. Receipts reach the person's Mail with the expense profile and memo, where an agent can use them.
-  - Hopline (this author's transit App, not yet opened as a PR): optional, no messages. A task can fall back to a Curbline ride when Hopline finds no step-free route.
+  - Hopline ([#171](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/171)), by the same author: optional, no messages. A task can fall back to a Curbline ride when Hopline finds no step-free route.
   - Keelcard ([#87](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/87)): a possible later payment path through its proposed card-authorization contract once it merges. The first version uses Curbline's own masked payment methods.
 
 ### Integration details
@@ -342,7 +342,7 @@ Specify how the environment will be built, what will be collected or synthesized
   - Dependencies:
     - The public runtime and Mail 1.3.0 on `main` are available now.
     - One platform dependency has a fallback described in §3: the runner invoking the outbound adapter (fallback: in-app records and explicit invocation). Time synchronization uses runtime 1.6.0's `env.advance_time`, which is available now.
-    - This author also has Gustline ([#126](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/126)) under review and other environments in preparation. First-version windows will be scheduled not to overlap, or an extension will be requested before a deadline.
+    - This author also has Gustline ([#126](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/126)), Homegrid ([#170](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/170)) and Hopline ([#171](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/171)) under review. First-version windows will be scheduled not to overlap, or an extension will be requested before a deadline.
 - **Resources and total effort (required):** 6.25–8 person-days. No paid data, model or API usage, GPU or hosting. Tests run on a laptop CPU in minutes. The repository footprint stays under 1.5 MB, almost all of it fixture JSON.
 - **Scope boundary and open questions (required):** Rides, airport pickups, payments and shares only; three open questions to settle with the Environment reviewers.
   - *Excluded:* on-demand rides; live maps, routing and vehicle movement; real payments or card networks; surge-pricing realism beyond a zone multiplier; multi-stop routes; ride pooling; rentals; driver-side apps; ratings; lost-item logistics beyond a support case; any GUI.
