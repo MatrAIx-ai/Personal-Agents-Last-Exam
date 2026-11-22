@@ -4,124 +4,197 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { createRuntime } = require('../../../runtime/core/runtime.cjs');
+const { Client } = require('../../../runtime/client.cjs');
 const { create } = require('../../../runtime/messaging/src/router.cjs');
 const { fixture } = require('./harness.cjs');
 const { publishPending } = require('../src/publisher.cjs');
 
 const root = path.resolve(__dirname, '../../..');
 const registry = path.join(root, 'apps.registry.json');
+const shipped = path.join(root, 'apps/keelcard/examples/mail-publisher.json');
 
-function graceState(model, run) {
-  const state = model.create('mail', run, 'sandbox');
-  state.data.owner_person_id = 'person-grace';
-  state.initial_data.owner_person_id = 'person-grace';
-  for (const account of state.binding.accounts) {
-    if (account.app_id === 'mail' && account.account_id === state.data.account_id) account.owner_person_id = 'person-grace';
-  }
-  state.binding.people.push({ person_id: 'person-grace', name: 'Grace Adeyemi' });
-  return model.normalize(state);
-}
-
-function writeMail(dir, run, state) {
-  const folder = path.join(dir, run);
-  fs.mkdirSync(folder, { recursive: true, mode: 0o700 });
-  fs.writeFileSync(path.join(folder, 'mail.json'), JSON.stringify(state), { mode: 0o600 });
-}
-
-function publisherConfig(file, recipients) {
-  fs.writeFileSync(file, JSON.stringify({
-    schema_version: 2,
-    registry: 'apps.registry.json',
-    publishers: [{
-      app_id: 'keelcard',
-      account_id: 'kc-adeyemi',
-      owner_person_id: 'person-grace',
-      package_root: 'apps/keelcard',
-      contribution_ref: 'contribution/contribution.json',
-      allowed_recipients: recipients
-    }],
-    authentication: { mode: 'trusted-stdio' }
-  }, null, 2));
-}
-
-function openRequest() {
-  const f = fixture();
-  f.call('keelcard.controls.request_change', { card_id: 'card-4417', field: 'per_transaction', amount_cents: 10000 });
-  return f;
-}
-
-test('a committed code email is delivered once and a repeat is a duplicate', async () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-mail-'));
-  const run = 'keelmail1';
-  const model = createRuntime({ registryFile: registry });
-  const mailbox = graceState(model, run);
-  writeMail(dir, run, mailbox);
-  const config = path.join(dir, 'publisher.json');
-  publisherConfig(config, [{ app_id: 'mail', account_id: mailbox.data.account_id, channel: 'channel.email' }]);
-  const router = await create({ config, publisher: 'keelcard', run, stateDir: dir });
-  try {
-    const f = openRequest();
-    const code = f.data.change_requests[0].code;
-    const first = await publishPending({ data: f.data, router });
-    assert.equal(first.stopped, false);
-    assert.equal(first.sent.length, 1);
-    assert.equal(first.sent[0].receipt.status, 'committed');
-    const stored = JSON.parse(fs.readFileSync(path.join(dir, run, 'mail.json'), 'utf8'));
-    assert.equal(stored.data.messages.length, mailbox.data.messages.length + 1);
-    const delivered = stored.data.messages.find(message => message.id === first.sent[0].receipt.event_id);
-    assert.equal(delivered.body.includes(code), true);
-    const second = await publishPending({ data: f.data, router });
-    assert.equal(second.sent[0].receipt.duplicate, true);
-    assert.equal(second.sent[0].receipt.event_id, first.sent[0].receipt.event_id);
-    const after = JSON.parse(fs.readFileSync(path.join(dir, run, 'mail.json'), 'utf8'));
-    assert.equal(after.data.messages.length, stored.data.messages.length);
-    assert.equal(f.data.change_requests[0].code, code);
-  } finally {
-    await router.close();
-  }
-});
-
-test('a missing grant rejects before dispatch and leaves the code in place', async () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-mail-'));
-  const run = 'keelmail2';
-  const model = createRuntime({ registryFile: registry });
-  const mailbox = graceState(model, run);
-  writeMail(dir, run, mailbox);
-  const config = path.join(dir, 'publisher.json');
-  publisherConfig(config, []);
-  const router = await create({ config, publisher: 'keelcard', run, stateDir: dir });
-  try {
-    const f = openRequest();
-    const code = f.data.change_requests[0].code;
-    const report = await publishPending({ data: f.data, router });
-    assert.equal(report.stopped, false);
-    assert.equal(report.report.outcome, 'rejected');
-    assert.equal(report.sent[0].receipt.code, 'recipient_not_authorized');
-    assert.equal(report.sent[0].receipt.stop_run, undefined);
-    const stored = JSON.parse(fs.readFileSync(path.join(dir, run, 'mail.json'), 'utf8'));
-    assert.equal(stored.data.messages.length, mailbox.data.messages.length);
-    assert.equal(f.data.change_requests[0].code, code);
-    assert.equal(f.data.change_requests[0].status, 'pending_verification');
-  } finally {
-    await router.close();
-  }
-});
-
-test('a halted acknowledgement stops the publisher without a second send', async () => {
-  const f = openRequest();
-  const data = f.data;
-  data.notices.push({ ...data.notices[0], notice_id: 'notice-extra', publish_request_id: 'notice-extra', cloud_event_id: 'keelcard-kc-adeyemi-notice-extra' });
-  let calls = 0;
-  const router = {
-    async call() {
-      calls += 1;
-      return { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true, event_id: 'router-halted1' };
+function groceryDecline(id) {
+  return {
+    event_id: id,
+    at: '2026-11-20T13:00:00-05:00',
+    operation: 'authorization.request',
+    payload: {
+      authorization_key: 'freshcart:fc-grace:fc-mail-over:1',
+      amount_cents: 9000,
+      currency: 'USD',
+      card: { number: '9417220000014417', expiry: '2028-09', security_code: '317' },
+      merchant: { merchant_id: 'm-freshcart', name: 'FreshCart', category: 'grocery' }
     }
   };
-  const report = await publishPending({ data, router });
-  assert.equal(calls, 1);
-  assert.equal(report.stopped, true);
-  assert.equal(report.report.outcome, 'unresolved');
-  assert.equal(f.data.change_requests[0].status, 'pending_verification');
+}
+
+async function mailbox(dir, run) {
+  const mail = new Client('mail', 'infra', run, dir, 'keel-mail-setup', { registry });
+  await mail.initialize();
+  const snap = await mail.call('env.snapshot');
+  const data = structuredClone(snap.snapshot.data);
+  data.owner_person_id = 'person-grace';
+  const binding = structuredClone(snap.snapshot.binding);
+  for (const account of binding.accounts) {
+    if (account.app_id === 'mail' && account.account_id === data.account_id) account.owner_person_id = 'person-grace';
+  }
+  if (!binding.people.some(person => person.person_id === 'person-grace')) {
+    binding.people.push({ person_id: 'person-grace', name: 'Grace Adeyemi' });
+  }
+  const loaded = await mail.call('env.load_seed', {
+    expected_version: snap.version,
+    request_id: 'grace-mailbox',
+    data,
+    binding,
+    policies: snap.snapshot.policies,
+    bundle: snap.snapshot.resources.bundle
+  });
+  assert.equal(loaded.status, 'ready');
+  assert.equal(data.account_id, 'mail-maya');
+  return mail;
+}
+
+function inspectWith(mail) {
+  return async ({ event_id }) => {
+    const eventStatus = await mail.call('env.event_status', { event_id });
+    const snap = await mail.call('env.snapshot');
+    const mailRecord = snap.snapshot.data.messages.find(message => message.id === event_id) || null;
+    return { eventStatus, mailRecord };
+  };
+}
+
+test('the shipped Mail setup delivers a decline and a code with matching event ids', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-mail-'));
+  const run = 'keelmail1';
+  const mail = await mailbox(dir, run);
+  const router = await create({ config: shipped, publisher: 'keelcard', run, stateDir: dir });
+  try {
+    const f = fixture();
+    f.event(groceryDecline('mail-decline'));
+    f.call('keelcard.controls.request_change', { card_id: 'card-4417', field: 'per_transaction', amount_cents: 10000 });
+    const code = f.data.change_requests[0].code;
+    const before = await mail.call('env.snapshot');
+    const first = await publishPending({ data: f.data, router });
+    assert.equal(first.stopped, false);
+    assert.equal(first.sent.length, 2);
+    assert.equal(first.sent.every(item => item.receipt.status === 'committed'), true);
+    const after = await mail.call('env.snapshot');
+    assert.equal(after.snapshot.data.messages.length, before.snapshot.data.messages.length + 2);
+    for (const item of first.sent) {
+      const status = await mail.call('env.event_status', { event_id: item.receipt.event_id });
+      assert.equal(status.status, 'ok');
+      assert.equal(status.receipt.status, 'committed');
+      assert.equal(status.receipt.event_id, item.receipt.event_id);
+      const message = after.snapshot.data.messages.find(row => row.id === item.receipt.event_id);
+      assert.ok(message);
+      assert.equal(message.id, item.receipt.event_id);
+    }
+    const delivered = after.snapshot.data.messages.find(message => message.body.includes(code));
+    assert.ok(delivered);
+    const decline = after.snapshot.data.messages.find(message => message.subject.toLowerCase().includes('declin') || message.body.includes('9000') || message.body.includes('$90'));
+    assert.ok(decline);
+    const second = await publishPending({ data: f.data, router });
+    assert.equal(second.sent.every(item => item.receipt.duplicate === true), true);
+    const repeat = await mail.call('env.snapshot');
+    assert.equal(repeat.snapshot.data.messages.length, after.snapshot.data.messages.length);
+  } finally {
+    await router.close();
+    await mail.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('a lost acknowledgement is confirmed from the real Mail receipt and is not sent again', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-mail-'));
+  const run = 'keelmail2';
+  const mail = await mailbox(dir, run);
+  const router = await create({ config: shipped, publisher: 'keelcard', run, stateDir: dir });
+  try {
+    const f = fixture();
+    f.call('keelcard.controls.request_change', { card_id: 'card-4417', field: 'per_transaction', amount_cents: 11000 });
+    const data = f.data;
+    const real = await publishPending({ data, router });
+    const eventId = real.sent[0].receipt.event_id;
+    data.notices[0].status = 'pending_delivery';
+    const lost = {
+      async call() {
+        return { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true, event_id: eventId };
+      }
+    };
+    const reconciled = await publishPending({ data, router: lost, inspect: inspectWith(mail) });
+    assert.equal(reconciled.stopped, true);
+    assert.equal(reconciled.report.outcome, 'confirmed');
+    assert.equal(data.notices[0].status, 'committed');
+    assert.equal(data.notices[0].delivery.event_id, eventId);
+    const again = await publishPending({ data, router });
+    assert.equal(again.sent.length, 0);
+  } finally {
+    await router.close();
+    await mail.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('Mail rejects an oversized notice and missing evidence stays unresolved', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-mail-'));
+  const run = 'keelmail3';
+  const mail = await mailbox(dir, run);
+  const router = await create({ config: shipped, publisher: 'keelcard', run, stateDir: dir });
+  try {
+    const f = fixture();
+    f.call('keelcard.controls.request_change', { card_id: 'card-4417', field: 'per_transaction', amount_cents: 12000 });
+    const before = await mail.call('env.snapshot');
+    const data = f.data;
+    data.notices[0].cloud_event_id = 'n' + 'x'.repeat(120);
+    const rejected = await publishPending({ data, router, inspect: inspectWith(mail) });
+    assert.equal(rejected.stopped, true);
+    assert.equal(rejected.sent[0].receipt.code, 'receiver_rejected');
+    assert.equal(rejected.report.outcome, 'unresolved');
+    assert.equal(data.notices[0].status, 'pending_delivery');
+    assert.equal(data.change_requests[0].status, 'pending_verification');
+    const after = await mail.call('env.snapshot');
+    assert.equal(after.snapshot.data.messages.length, before.snapshot.data.messages.length);
+    const quiet = fixture();
+    quiet.call('keelcard.controls.request_change', { card_id: 'card-4417', field: 'per_transaction', amount_cents: 13000 });
+    const quietData = quiet.data;
+    const missingId = 'router-' + 'b'.repeat(32);
+    const absent = await publishPending({
+      data: quietData,
+      router: { async call() { return { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true, event_id: missingId }; } },
+      inspect: inspectWith(mail)
+    });
+    assert.equal(absent.report.outcome, 'unresolved');
+    assert.equal(quietData.notices[0].status, 'pending_delivery');
+    const status = await mail.call('env.event_status', { event_id: missingId });
+    assert.equal(status.receipt, null);
+  } finally {
+    await router.close();
+    await mail.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('an empty grant rejects before dispatch and leaves the request in place', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'keelcard-mail-'));
+  const run = 'keelmail4';
+  const config = JSON.parse(fs.readFileSync(shipped, 'utf8'));
+  config.publishers[0].allowed_recipients = [];
+  const file = path.join(dir, 'publisher.json');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(config));
+  const mail = await mailbox(dir, run);
+  const router = await create({ config: file, publisher: 'keelcard', run, stateDir: dir });
+  try {
+    const f = fixture();
+    f.call('keelcard.controls.request_change', { card_id: 'card-4417', field: 'per_transaction', amount_cents: 14000 });
+    const result = await publishPending({ data: f.data, router });
+    assert.equal(result.stopped, false);
+    assert.equal(result.report.outcome, 'rejected');
+    assert.equal(result.sent[0].receipt.code, 'recipient_not_authorized');
+    assert.equal(f.data.change_requests[0].code.length, 6);
+  } finally {
+    await router.close();
+    await mail.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

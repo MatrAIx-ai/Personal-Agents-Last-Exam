@@ -30,9 +30,10 @@ function readInput(extra, required = []) {
   return { type: 'object', properties: extra, required, additionalProperties: false };
 }
 function out(status, properties, required) {
+  const replay = status === 'committed' ? { duplicate: { type: 'boolean' } } : {};
   return {
     type: 'object',
-    properties: { status: { const: status }, app_id: { const: 'keelcard' }, version, ...properties },
+    properties: { status: { const: status }, app_id: { const: 'keelcard' }, version, ...properties, ...replay },
     required: ['status', 'app_id', 'version', ...required],
     additionalProperties: false
   };
@@ -67,7 +68,7 @@ const transaction = {
   properties: {
     authorization_id: id, authorization_key: id, card_id: id, merchant_id: id, merchant_name: { type: 'string' }, category,
     amount_cents: cents, currency: { const: 'USD' }, decision: { const: 'approved' },
-    status: { enum: ['pending', 'captured', 'reversed', 'expired'] }, effective_status: { enum: ['pending', 'captured', 'reversed', 'expired'] },
+    status: { enum: ['pending', 'captured', 'reversed', 'expired', 'refunded', 'partially_refunded'] }, effective_status: { enum: ['pending', 'captured', 'reversed', 'expired', 'refunded', 'partially_refunded'] },
     hold_cents: cents, captured_cents: cents, expires_at: time, decided_at: time, captured_at: nullable(time), expired_at: nullable(time), reversed_at: nullable(time), merchant_ref: merchantRef
   },
   required: ['authorization_id', 'authorization_key', 'card_id', 'merchant_id', 'merchant_name', 'category', 'amount_cents', 'currency', 'decision', 'status', 'effective_status', 'hold_cents', 'captured_cents', 'expires_at', 'decided_at', 'captured_at', 'expired_at', 'reversed_at', 'merchant_ref'],
@@ -77,12 +78,13 @@ const request = {
   type: 'object',
   properties: {
     change_request_id: id, card_id: id, field: { type: 'string' }, merchant_id: nullable(id), category: nullable(category),
-    from_cents: nullable(cents), to_cents: nullable(cents),
+    from_cents: nullable(cents), to_cents: nullable(cents), alert: nullable({ type: 'string' }),
     status: { enum: ['pending_verification', 'pending_owner', 'applied', 'failed', 'expired', 'cancelled', 'denied'] },
+    effective_status: { enum: ['pending_verification', 'pending_owner', 'applied', 'failed', 'expired', 'cancelled', 'denied'] },
     mode: { enum: ['email_code', 'owner_approval'] }, attempts_used: { type: 'integer', minimum: 0 }, max_attempts: { type: 'integer', minimum: 1 },
     created_at: time, expires_at: time, resolved_at: nullable(time)
   },
-  required: ['change_request_id', 'card_id', 'field', 'merchant_id', 'category', 'from_cents', 'to_cents', 'status', 'mode', 'attempts_used', 'max_attempts', 'created_at', 'expires_at', 'resolved_at'],
+    required: ['change_request_id', 'card_id', 'field', 'merchant_id', 'category', 'alert', 'from_cents', 'to_cents', 'status', 'effective_status', 'mode', 'attempts_used', 'max_attempts', 'created_at', 'expires_at', 'resolved_at'],
   additionalProperties: false
 };
 const window = {
@@ -126,7 +128,30 @@ const tools = [
     change_request_id: id, outcome: { enum: ['applied', 'code_rejected', 'attempts_exhausted', 'code_expired'] },
     attempts_used: { type: 'integer', minimum: 0 }, attempts_remaining: { type: 'integer', minimum: 0 }, limit_cents: nullable(cents)
   }, ['change_request_id', 'outcome', 'attempts_used', 'attempts_remaining', 'limit_cents'])],
-  ['keelcard.controls.cancel_request', false, 'Cancel an open change request.', writeInput({ change_request_id: id }, ['change_request_id']), out('committed', { change_request_id: id, request_status: { const: 'cancelled' } }, ['change_request_id', 'request_status'])]
+  ['keelcard.controls.cancel_request', false, 'Cancel an open change request. A request that is already due settles to expired instead.', writeInput({ change_request_id: id }, ['change_request_id']), out('committed', { change_request_id: id, request_status: { enum: ['cancelled', 'expired'] } }, ['change_request_id', 'request_status'])],
+  ['keelcard.disputes.list', true, 'List disputes on this account.', readInput({ authorization_id: id }), out('ok', { disputes: { type: 'array', items: { type: 'object' } } }, ['disputes'])],
+  ['keelcard.funding.get', true, 'Read the local funding balance and the amount still available after open holds.', readInput({}), out('ok', { funding: { type: 'object' } }, ['funding'])],
+  ['keelcard.statements.get', true, 'Read one issued statement.', readInput({ statement_id: id }, ['statement_id']), out('ok', { statement: { type: 'object' } }, ['statement'])],
+  ['keelcard.alerts.preferences.get', true, 'Read alert preferences. Codes are not included.', readInput({}), out('ok', { alerts: { type: 'object' } }, ['alerts'])],
+  ['keelcard.merchants.block', false, 'Block a merchant on this account immediately.', writeInput({ merchant_id: id, card_id: id }, ['merchant_id']), out('committed', { merchant_id: id, blocked: { type: 'boolean' } }, ['merchant_id', 'blocked'])],
+  ['keelcard.merchants.unblock', false, 'Ask to remove a merchant block. A delegate request waits for verification.', writeInput({ merchant_id: id, card_id: id }, ['merchant_id']), out('committed', { change_request_id: id, request_status: { type: 'string' }, merchant_id: id }, ['change_request_id', 'request_status', 'merchant_id'])],
+  ['keelcard.disputes.open', false, 'Open a dispute on a captured charge inside the 120-day window.', writeInput({
+    authorization_id: id,
+    reason: { enum: ['unauthorized_by_cardholder', 'duplicate_charge', 'incorrect_amount', 'goods_not_received', 'cancelled_recurring'] },
+    note: { type: 'string', minLength: 1, maxLength: 500 }
+  }, ['authorization_id', 'reason', 'note']), out('committed', { dispute_id: id, dispute_status: { const: 'submitted' }, authorization_id: id }, ['dispute_id', 'dispute_status', 'authorization_id'])],
+  ['keelcard.disputes.withdraw', false, 'Withdraw a dispute that is still submitted.', writeInput({ dispute_id: id }, ['dispute_id']), out('committed', { dispute_id: id, dispute_status: { const: 'withdrawn' } }, ['dispute_id', 'dispute_status'])],
+  ['keelcard.alerts.preferences.update', false, 'Add an alert or lower a decline threshold immediately. Turning an alert off or raising the threshold opens a change request.', writeInput({
+    alert: { enum: ['declines', 'receipts', 'codes', 'card_events', 'disputes'] },
+    enabled: { type: 'boolean' },
+    decline_threshold_cents: nullable(cents)
+  }, []), out('committed', {
+    outcome: { enum: ['applied', 'request_opened'] },
+    alert: nullable({ type: 'string' }),
+    enabled: nullable({ type: 'boolean' }),
+    change_request_id: nullable(id),
+    decline_threshold_cents: nullable(cents)
+  }, ['outcome', 'alert', 'enabled', 'change_request_id', 'decline_threshold_cents'])]
 ];
 const document = tools.map(([name, readOnly, description, inputSchema, outputSchema]) => ({
   name, description, read_only: readOnly, scope: name, resource_target: 'current account', inputSchema, outputSchema

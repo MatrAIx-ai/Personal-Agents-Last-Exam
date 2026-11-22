@@ -83,6 +83,8 @@ test('fixture (a) matches the household grocery task', () => {
   assert.equal(data.notices.length, 0);
   assert.equal(data.authorizations.some(row => row.status === 'pending'), false);
   assert.equal(data.funding.balance_cents, 441170);
+  const april = data.ledger.find(entry => entry.authorization_id === 'auth-snack');
+  assert.equal(april.balance_after_cents, 613905);
 });
 
 test('reads hide card numbers, security codes and verification codes', () => {
@@ -503,9 +505,16 @@ test('delivery results and the reviewer renderer keep secrets in their own place
     event_id: 'delivery-committed',
     at: addMinutes(f.ctx.virtual_now, 1),
     operation: 'notice.delivery_result',
-    payload: { notice_id: notice.notice_id, publish_request_id: notice.publish_request_id, status: 'committed', event_id: 'router-committed1' }
+    payload: { notice_id: notice.notice_id, publish_request_id: notice.publish_request_id, status: 'committed', event_id: 'router-unknown1' }
   });
   assert.equal(f.data.notices[0].status, 'committed');
+  assert.equal(f.data.notices[0].delivery.event_id, 'router-unknown1');
+  assert.equal(boom(() => f.event({
+    event_id: 'delivery-other-event',
+    at: addMinutes(f.ctx.virtual_now, 1),
+    operation: 'notice.delivery_result',
+    payload: { notice_id: notice.notice_id, publish_request_id: notice.publish_request_id, status: 'committed', event_id: 'router-committed1' }
+  })).code, 'delivery_status_conflict');
   assert.equal(boom(() => f.event({
     event_id: 'delivery-conflict',
     at: addMinutes(f.ctx.virtual_now, 1),
@@ -515,7 +524,9 @@ test('delivery results and the reviewer renderer keep secrets in their own place
   assert.equal(classifyDelivery({ receipt: { status: 'committed', duplicate: true } }).outcome, 'confirmed');
   assert.equal(classifyDelivery({ receipt: { status: 'rejected', code: 'recipient_not_authorized' } }).outcome, 'rejected');
   assert.equal(classifyDelivery({ receipt: { status: 'unknown', code: 'receiver_unconfirmed', stop_run: true } }).outcome, 'unresolved');
-  assert.equal(classifyDelivery({ mailStatus: 'committed' }).outcome, 'confirmed');
+  assert.equal(classifyDelivery({ eventStatus: { status: 'ok', receipt: { status: 'committed', event_id: 'router-1' } }, expectedEventId: 'router-1' }).outcome, 'confirmed');
+  assert.equal(classifyDelivery({ eventStatus: { status: 'ok', receipt: { status: 'committed', event_id: 'router-1' } }, mailRecord: { id: 'other' }, expectedEventId: 'router-1' }).outcome, 'confirmed');
+  assert.equal(classifyDelivery({ receipt: { status: 'unknown', stop_run: true }, eventStatus: { status: 'ok', receipt: null }, mailRecord: { id: 'other' }, expectedEventId: 'router-1' }).outcome, 'unresolved');
   const hits = scan('number 9417220000014417 expires 2028-09 code 317', f.data.fingerprints);
   const groceryHit = hits.find(hit => hit.card_id === CARD);
   assert.ok(groceryHit.fields.includes('number'));
@@ -610,4 +621,329 @@ test('runtime replays, stale versions, reset and the clock', { skip: !fs.existsS
     event: { event_id: 'rt-settle', at: ahead, operation: 'ledger.settle_due', payload: {} }
   });
   assert.equal(settled.state.data.authorizations.find(item => item.authorization_key === 'freshcart:fc-grace:fc-rt:1').status, 'expired');
+  const raiseTool = require('../tools.json').find(tool => tool.name === 'keelcard.controls.request_change');
+  const replayValid = compile(raiseTool.outputSchema, path.resolve(__dirname, '..'));
+  assert.equal(replayValid(replay.result), true);
+  const emptyCard = groceryEvent('empty-card', 'freshcart:fc-grace:fc-empty:1', 1000, '2026-11-21T12:00:00-05:00', { card: {} });
+  const beforeEmpty = JSON.stringify(settled.state.data);
+  const empty = model.execute(settled.state, 'infra', 'env.apply_event', { expected_version: model.version(settled.state), event: emptyCard });
+  assert.equal(empty.result.status, 'invalid_event');
+  assert.equal(JSON.stringify(empty.state.data), beforeEmpty);
+  assert.equal(empty.state.virtual_now, settled.state.virtual_now);
+  assert.equal(empty.state.audit.at(-1).decision, 'deny');
+  const raceSeed = model.create('keelcard', 'keel-race', 'sandbox');
+  const raceData = structuredClone(raceSeed.data);
+  const raceCard = raceData.cards.find(card => card.card_id === CARD);
+  raceCard.limits.per_transaction = 10000;
+  raceCard.limits.per_day = 10000;
+  const raceLoaded = model.execute(raceSeed, 'infra', 'env.load_seed', {
+    expected_version: model.version(raceSeed), request_id: 'race-limits', data: raceData, bundle: raceSeed.resources.bundle
+  });
+  assert.equal(raceLoaded.result.status, 'ready');
+  const raceBase = raceLoaded.state;
+  const raceVersion = model.version(raceBase);
+  const firstRace = model.execute(raceBase, 'infra', 'env.apply_event', {
+    expected_version: raceVersion,
+    event: groceryEvent('race-a', 'freshcart:fc-grace:fc-race-a:1', 6000, '2026-11-21T13:00:00-05:00')
+  });
+  const secondRace = model.execute(firstRace.state, 'infra', 'env.apply_event', {
+    expected_version: raceVersion,
+    event: groceryEvent('race-b', 'freshcart:fc-grace:fc-race-b:1', 6000, '2026-11-21T13:05:00-05:00')
+  });
+  assert.equal(firstRace.result.status, 'committed');
+  assert.equal(secondRace.result.status, 'stale_version');
+  const retried = model.execute(firstRace.state, 'infra', 'env.apply_event', {
+    expected_version: model.version(firstRace.state),
+    event: groceryEvent('race-b', 'freshcart:fc-grace:fc-race-b:1', 6000, '2026-11-21T13:05:00-05:00')
+  });
+  assert.equal(retried.state.data.declines.at(-1).decline_code, 'exceeds_daily_limit');
+  const openedWrong = model.execute(firstRace.state, 'agent', 'keelcard.controls.request_change', {
+    card_id: CARD, field: 'per_transaction', amount_cents: 12000, expected_version: model.version(firstRace.state), request_id: 'open-wrong'
+  });
+  const wrongArgs = {
+    change_request_id: openedWrong.state.data.change_requests.at(-1).change_request_id,
+    code: '000000',
+    expected_version: model.version(openedWrong.state),
+    request_id: 'wrong-once'
+  };
+  const wrong = model.execute(openedWrong.state, 'agent', 'keelcard.controls.confirm_change', wrongArgs);
+  const wrongAgain = model.execute(wrong.state, 'agent', 'keelcard.controls.confirm_change', wrongArgs);
+  assert.equal(wrong.result.status, 'committed');
+  assert.equal(wrong.result.outcome, 'code_rejected');
+  assert.equal(wrong.state.data.change_requests.at(-1).attempts_used, 1);
+  assert.equal(wrongAgain.result.duplicate, true);
+  assert.equal(wrongAgain.state.data.change_requests.at(-1).attempts_used, 1);
+  const resetAgain = model.execute(reset.state, 'infra', 'env.reset', { expected_version: model.version(reset.state) });
+  assert.equal(JSON.stringify(resetAgain.state.data), JSON.stringify(reset.state.data));
+});
+
+test('monthly and lifetime limits, a closed card and an over-capture decline', () => {
+  const monthly = fixture();
+  monthly.mutate(data => {
+    const card = data.cards.find(item => item.card_id === CARD);
+    card.limits.per_transaction = 200000;
+    card.limits.per_month = 20000;
+  });
+  monthly.event(groceryEvent('month-over', 'freshcart:fc-grace:fc-month:1', 9000, '2026-11-20T15:00:00-05:00'));
+  assert.equal(monthly.data.declines.at(-1).decline_code, 'exceeds_monthly_limit');
+  const lifetime = fixture();
+  lifetime.mutate(data => {
+    const card = data.cards.find(item => item.card_id === CARD);
+    card.limits.per_transaction = 200000;
+    card.limits.per_day = 200000;
+    card.limits.per_month = 2000000;
+    card.limits.lifetime = 1;
+  });
+  lifetime.event(groceryEvent('life-over', 'freshcart:fc-grace:fc-life:1', 1000, '2026-11-20T15:10:00-05:00'));
+  assert.equal(lifetime.data.declines.at(-1).decline_code, 'exceeds_lifetime_limit');
+  const closed = fixture();
+  closed.call('keelcard.cards.close', { card_id: CARD });
+  closed.event(groceryEvent('closed-auth', 'freshcart:fc-grace:fc-closed:1', 1000, '2026-11-20T15:20:00-05:00'));
+  assert.equal(closed.data.declines.at(-1).decline_code, 'card_closed');
+  const over = fixture();
+  over.event(groceryEvent('over-hold', 'freshcart:fc-grace:fc-over-hold:1', 1000, '2026-11-20T15:30:00-05:00'));
+  const held = over.data.authorizations.find(row => row.authorization_key === 'freshcart:fc-grace:fc-over-hold:1');
+  assert.equal(boom(() => over.event({
+    event_id: 'over-cap', at: '2026-11-20T15:40:00-05:00', operation: 'authorization.capture',
+    payload: { authorization_id: held.authorization_id, capture_key: 'cap-over', amount_cents: 1001 }
+  })).code, 'amount_exceeds_hold');
+});
+
+test('request identity, expiry, cancellation and a closed card stay consistent in both modes', () => {
+  const email = fixture();
+  assert.equal(boom(() => email.call('keelcard.controls.request_change', {
+    card_id: CARD, field: 'per_transaction', amount_cents: 10000, merchant_id: 'm-freshcart'
+  })).code, 'invalid_arguments');
+  const opened = email.call('keelcard.controls.request_change', { card_id: CARD, field: 'per_transaction', amount_cents: 10000 });
+  assert.equal(boom(() => email.call('keelcard.controls.request_change', { card_id: CARD, field: 'per_transaction', amount_cents: 11000 })).code, 'request_already_open');
+  const request = email.data.change_requests.find(item => item.change_request_id === opened.change_request_id);
+  email.advance(request.expires_at);
+  const listed = email.call('keelcard.controls.requests.list', { card_id: CARD }).requests.find(item => item.change_request_id === request.change_request_id);
+  assert.equal(listed.effective_status, 'expired');
+  assert.equal(email.data.change_requests.find(item => item.change_request_id === request.change_request_id).status, 'pending_verification');
+  const replacement = email.call('keelcard.controls.request_change', { card_id: CARD, field: 'per_transaction', amount_cents: 12000 });
+  assert.equal(email.data.change_requests.find(item => item.change_request_id === request.change_request_id).status, 'expired');
+  assert.notEqual(replacement.change_request_id, request.change_request_id);
+  const cancel = fixture();
+  const cancelOpen = cancel.call('keelcard.controls.request_change', { card_id: CARD, field: 'per_transaction', amount_cents: 13000 });
+  cancel.advance(cancel.data.change_requests[0].expires_at);
+  const cancelled = cancel.call('keelcard.controls.cancel_request', { change_request_id: cancelOpen.change_request_id });
+  assert.equal(cancelled.request_status, 'expired');
+  assert.equal(cancel.data.change_requests[0].status, 'expired');
+  const expiredCode = fixture();
+  const codeOpen = expiredCode.call('keelcard.controls.request_change', { card_id: CARD, field: 'per_transaction', amount_cents: 14000 });
+  const saved = expiredCode.data.change_requests[0];
+  expiredCode.advance(saved.expires_at);
+  const confirmed = expiredCode.call('keelcard.controls.confirm_change', { change_request_id: codeOpen.change_request_id, code: saved.code });
+  assert.equal(confirmed.outcome, 'code_expired');
+  assert.equal(expiredCode.data.change_requests[0].attempts_used, 0);
+  assert.equal(expiredCode.data.cards.find(card => card.card_id === CARD).limits.per_transaction, 7500);
+  for (const mode of ['email_code', 'owner_approval']) {
+    const account = fixture();
+    if (mode === 'owner_approval') {
+      account.mutate(data => { data.verification.mode = mode; data.change_requests = []; data.notices = []; });
+    }
+    account.mutate(data => {
+      const card = data.cards.find(item => item.card_id === CARD);
+      card.status = 'paused';
+      card.paused_by = 'owner';
+    });
+    const pauseRequest = account.call('keelcard.controls.request_change', { card_id: CARD, field: 'unpause' });
+    account.call('keelcard.cards.close', { card_id: CARD });
+    assert.equal(account.data.change_requests.find(item => item.change_request_id === pauseRequest.change_request_id).status, 'cancelled');
+    assert.equal(account.data.cards.find(item => item.card_id === CARD).status, 'closed');
+    account.mutate(data => {
+      const row = data.change_requests.find(item => item.change_request_id === pauseRequest.change_request_id);
+      row.status = mode === 'owner_approval' ? 'pending_owner' : 'pending_verification';
+      row.resolved_at = null;
+    });
+    if (mode === 'email_code') {
+      assert.equal(boom(() => account.call('keelcard.controls.confirm_change', {
+        change_request_id: pauseRequest.change_request_id, code: account.data.change_requests[0].code
+      })).code, 'card_closed');
+    } else {
+      assert.equal(boom(() => account.event({
+        event_id: 'owner-unpause-' + mode, at: account.ctx.virtual_now, operation: 'change_request.owner_decision',
+        payload: { change_request_id: pauseRequest.change_request_id, decision: 'approved' }
+      })).code, 'card_closed');
+    }
+    assert.equal(account.data.cards.find(item => item.card_id === CARD).status, 'closed');
+  }
+});
+
+test('clock windows keep both civil days and fractional seconds', () => {
+  const { dayWindow, isoWithOffset } = require('../src/domain-utils.cjs');
+  const fall = dayWindow('2026-11-01T15:00:00Z', 'America/New_York');
+  const spring = dayWindow('2026-03-08T15:00:00Z', 'America/New_York');
+  assert.equal(Date.parse(fall.end) - Date.parse(fall.start), 25 * 60 * 60 * 1000);
+  assert.equal(Date.parse(spring.end) - Date.parse(spring.start), 23 * 60 * 60 * 1000);
+  assert.equal(isoWithOffset(Date.parse('2026-11-18T19:00:00.250Z'), '-05:00').includes('.250'), true);
+  assert.equal(isoWithOffset(Date.parse('2026-11-18T19:00:00.000Z'), '-05:00').includes('.'), false);
+});
+
+test('fingerprints match grouped numbers and short expiry forms', () => {
+  const prints = fixture().data.fingerprints;
+  assert.ok(scan('9417 2200 0001 4417', prints).some(hit => hit.card_id === CARD && hit.fields.includes('number')));
+  assert.ok(scan('9417-2200-0001-4417', prints).some(hit => hit.card_id === CARD && hit.fields.includes('number')));
+  assert.ok(scan('expires 09/28', prints).some(hit => hit.card_id === CARD && hit.fields.includes('expiry')));
+  assert.ok(scan('expires 09/2028', prints).some(hit => hit.card_id === CARD && hit.fields.includes('expiry')));
+  assert.equal(scan('4417', prints).length, 0);
+  assert.equal(scan('4417', prints).some(hit => hit.fields.includes('security_code')), false);
+  assert.ok(scan('code 441', prints).some(hit => hit.card_id === 'card-8821' && hit.fields.includes('security_code')));
+});
+
+test('a seeded authorization is redelivered with the shared digest', () => {
+  const f = fixture();
+  f.event(groceryEvent('seed-again', 'freshcart:fc-grace:fc-week-01:1', 4200, '2026-11-20T16:00:00-05:00'));
+  const row = f.data.authorizations.find(item => item.authorization_key === 'freshcart:fc-grace:fc-week-01:1');
+  assert.equal(row.redelivered_at.length, 1);
+  assert.equal(f.data.authorizations.filter(item => item.authorization_key === 'freshcart:fc-grace:fc-week-01:1').length, 1);
+});
+
+test('a direct lower sends a limit notice and email verification requires code alerts', () => {
+  const f = fixture();
+  f.call('keelcard.controls.lower', { card_id: CARD, field: 'per_transaction', amount_cents: 7000 });
+  assert.ok(f.data.notices.some(notice => notice.kind === 'limit_changed'));
+  const broken = fixture();
+  assert.equal(boom(() => broken.mutate(data => { data.alerts.codes = false; })).code, 'invalid_seed');
+});
+
+test('settlement records mixed deadlines in one time order', () => {
+  const { settleDue } = require('../src/ledger.cjs');
+  const f = fixture();
+  f.event(groceryEvent('mix-auth', 'freshcart:fc-grace:fc-mix:1', 1000, '2026-11-20T17:00:00-05:00'));
+  f.call('keelcard.controls.request_change', { card_id: CARD, field: 'per_transaction', amount_cents: 10000 });
+  const data = f.data;
+  const auth = data.authorizations.find(item => item.authorization_key === 'freshcart:fc-grace:fc-mix:1');
+  auth.expires_at = '2026-11-25T12:00:00-05:00';
+  data.change_requests[0].expires_at = '2026-11-30T12:00:00-05:00';
+  const transitions = settleDue(data, '2026-12-02T12:00:00-05:00');
+  const relevant = transitions.filter(item => item.id === auth.authorization_id || item.id === data.change_requests[0].change_request_id || item.kind === 'statement_issued');
+  const authAt = relevant.findIndex(item => item.id === auth.authorization_id);
+  const requestAt = relevant.findIndex(item => item.id === data.change_requests[0].change_request_id);
+  const statementAt = relevant.findIndex(item => item.kind === 'statement_issued');
+  assert.ok(authAt >= 0 && authAt < requestAt && requestAt < statementAt);
+});
+
+test('disputes, refunds, top-ups and alert writes follow the approved rules', () => {
+  const f = fixture();
+  assert.equal(boom(() => f.call('keelcard.disputes.open', {
+    authorization_id: 'auth-snack', reason: 'unauthorized_by_cardholder', note: 'The April snack charge.'
+  })).code, 'dispute_window_closed');
+  f.event({
+    event_id: 'snack-live', at: '2026-11-20T18:00:00-05:00', operation: 'authorization.request',
+    payload: {
+      authorization_key: 'corner-snacks:kc-adeyemi:snack-live:1', amount_cents: 21240, currency: 'USD',
+      card: { card_id: 'card-8821' },
+      merchant: { merchant_id: 'm-corner-snacks', name: 'Corner Snacks', category: 'grocery' }
+    }
+  });
+  const live = f.data.authorizations.find(item => item.authorization_key === 'corner-snacks:kc-adeyemi:snack-live:1');
+  f.event({
+    event_id: 'snack-live-cap', at: '2026-11-20T18:05:00-05:00', operation: 'authorization.capture',
+    payload: { authorization_id: live.authorization_id, capture_key: 'cap-snack-live', amount_cents: 21240 }
+  });
+  const opened = f.call('keelcard.disputes.open', { authorization_id: live.authorization_id, reason: 'unauthorized_by_cardholder', note: 'Snack charge was not mine.' });
+  const withdrawn = f.call('keelcard.disputes.withdraw', { dispute_id: opened.dispute_id });
+  assert.equal(withdrawn.dispute_status, 'withdrawn');
+  const again = f.call('keelcard.disputes.open', { authorization_id: live.authorization_id, reason: 'duplicate_charge', note: 'Charged twice.' });
+  f.event({
+    event_id: 'dispute-review', at: '2026-11-20T18:10:00-05:00', operation: 'dispute.update',
+    payload: { dispute_id: again.dispute_id, status: 'under_review' }
+  });
+  assert.equal(boom(() => f.call('keelcard.disputes.withdraw', { dispute_id: again.dispute_id })).code, 'not_withdrawable');
+  const early = fixture();
+  early.event(groceryEvent('dispute-early', 'freshcart:fc-grace:fc-dearly:1', 1000, '2026-11-20T18:00:00-05:00'));
+  const earlyAuth = early.data.authorizations.find(item => item.authorization_key === 'freshcart:fc-grace:fc-dearly:1');
+  early.event({ event_id: 'dispute-early-cap', at: '2026-11-20T18:20:00-05:00', operation: 'authorization.capture', payload: { authorization_id: earlyAuth.authorization_id, capture_key: 'cap-early', amount_cents: 1000 } });
+  const submitted = early.call('keelcard.disputes.open', { authorization_id: earlyAuth.authorization_id, reason: 'incorrect_amount', note: 'Too high.' });
+  assert.equal(boom(() => early.event({
+    event_id: 'dispute-won-early', at: '2026-11-20T18:30:00-05:00', operation: 'dispute.update',
+    payload: { dispute_id: submitted.dispute_id, status: 'won', refund_cents: 1000 }
+  })).code, 'invalid_transition');
+  const before = f.data.funding.balance_cents;
+  f.event({
+    event_id: 'dispute-won', at: '2026-11-20T18:40:00-05:00', operation: 'dispute.update',
+    payload: { dispute_id: again.dispute_id, status: 'won', refund_cents: 21240 }
+  });
+  assert.equal(f.data.funding.balance_cents, before + 21240);
+  assert.equal(f.data.refunds[0].refund_key, 'dispute:' + again.dispute_id);
+  const refunded = fixture();
+  refunded.event(groceryEvent('refund-auth', 'freshcart:fc-grace:fc-refund:1', 3000, '2026-11-20T19:00:00-05:00'));
+  const refundAuth = refunded.data.authorizations.find(item => item.authorization_key === 'freshcart:fc-grace:fc-refund:1');
+  assert.equal(boom(() => refunded.event({
+    event_id: 'refund-pending', at: '2026-11-20T19:05:00-05:00', operation: 'refund.issue',
+    payload: { authorization_id: refundAuth.authorization_id, refund_key: 'rf-1', amount_cents: 1000 }
+  })).code, 'not_refundable');
+  refunded.event({ event_id: 'refund-cap', at: '2026-11-20T19:06:00-05:00', operation: 'authorization.capture', payload: { authorization_id: refundAuth.authorization_id, capture_key: 'cap-refund', amount_cents: 3000 } });
+  assert.equal(boom(() => refunded.event({
+    event_id: 'refund-too-much', at: '2026-11-20T19:07:00-05:00', operation: 'refund.issue',
+    payload: { authorization_id: refundAuth.authorization_id, refund_key: 'rf-big', amount_cents: 30000 }
+  })).code, 'refund_exceeds_captured');
+  const balance = refunded.data.funding.balance_cents;
+  refunded.event({ event_id: 'refund-ok', at: '2026-11-20T19:08:00-05:00', operation: 'refund.issue', payload: { authorization_id: refundAuth.authorization_id, refund_key: 'rf-ok', amount_cents: 1000 } });
+  refunded.event({ event_id: 'refund-ok-again', at: '2026-11-20T19:09:00-05:00', operation: 'refund.issue', payload: { authorization_id: refundAuth.authorization_id, refund_key: 'rf-ok', amount_cents: 1000 } });
+  assert.equal(refunded.data.funding.balance_cents, balance + 1000);
+  assert.equal(boom(() => refunded.event({
+    event_id: 'refund-conflict', at: '2026-11-20T19:10:00-05:00', operation: 'refund.issue',
+    payload: { authorization_id: refundAuth.authorization_id, refund_key: 'rf-ok', amount_cents: 500 }
+  })).code, 'refund_key_conflict');
+  const funded = fixture();
+  const start = funded.data.funding.balance_cents;
+  funded.event({ event_id: 'top-1', at: '2026-11-20T20:00:00-05:00', operation: 'funding.top_up', payload: { top_up_key: 'bank-1', amount_cents: 5000 } });
+  funded.event({ event_id: 'top-1b', at: '2026-11-20T20:01:00-05:00', operation: 'funding.top_up', payload: { top_up_key: 'bank-1', amount_cents: 5000 } });
+  assert.equal(funded.data.funding.balance_cents, start + 5000);
+  assert.equal(boom(() => funded.event({
+    event_id: 'top-conflict', at: '2026-11-20T20:02:00-05:00', operation: 'funding.top_up',
+    payload: { top_up_key: 'bank-1', amount_cents: 4000 }
+  })).code, 'top_up_key_conflict');
+  const alerts = fixture();
+  const off = alerts.call('keelcard.alerts.preferences.update', { alert: 'declines', enabled: false });
+  assert.equal(off.outcome, 'request_opened');
+  assert.equal(alerts.data.alerts.declines, true);
+  assert.equal(alerts.call('keelcard.alerts.preferences.update', { decline_threshold_cents: 1000 }).outcome, 'request_opened');
+  const threshold = fixture();
+  threshold.mutate(data => { data.alerts.decline_threshold_cents = 5000; });
+  const lower = threshold.call('keelcard.alerts.preferences.update', { decline_threshold_cents: 1000 });
+  assert.equal(lower.outcome, 'applied');
+  assert.equal(threshold.data.alerts.decline_threshold_cents, 1000);
+  const raise = threshold.call('keelcard.alerts.preferences.update', { decline_threshold_cents: 8000 });
+  assert.equal(raise.outcome, 'request_opened');
+  assert.equal(threshold.data.alerts.decline_threshold_cents, 1000);
+});
+
+test('new cards use private credentials and the other fixtures still validate', () => {
+  const { luhnOk } = require('../src/domain-utils.cjs');
+  const { validateSeed } = require('../src/model.cjs');
+  const f = fixture();
+  const created = f.call('keelcard.cards.create', {
+    type: 'general', nickname: 'Spare', limits: { per_transaction: 1000, per_day: 1000, per_month: 1000, lifetime: 1000 }
+  });
+  assert.match(created.card_id, /^card-[0-9a-f]{8}$/);
+  const card = f.data.cards.find(item => item.card_id === created.card_id);
+  assert.match(card.number, /^9\d{15}$/);
+  assert.equal(luhnOk(card.number), true);
+  assert.notEqual(card.number, '9417220000014417');
+  const freelancer = require('../fixtures/freelancer.json');
+  const delegate = require('../fixtures/delegate.json');
+  validateSeed({ app_id: 'keelcard', virtual_now: '2026-11-18T12:00:00-05:00', binding: require('../fixtures/freelancer-binding.json') }, freelancer);
+  validateSeed({ app_id: 'keelcard', virtual_now: '2026-11-18T10:00:00-05:00', binding: require('../fixtures/delegate-binding.json') }, delegate);
+  assert.equal(freelancer.cards.length, 6);
+  assert.equal(freelancer.merchants.length, 60);
+  assert.ok(freelancer.authorizations.length + freelancer.declines.length >= 500);
+  assert.equal(delegate.verification.mode, 'owner_approval');
+  assert.equal(delegate.change_requests[0].status, 'pending_owner');
+  const { joinEvidence } = require('../examples/join-evidence.cjs');
+  const joined = joinEvidence({ data: f.data, audit: [{ tool: 'keelcard.cards.create', decision: 'allow', virtual_time: f.ctx.virtual_now }] }, [
+    { request_id: 'local-create', tool: 'keelcard.cards.create', arguments: { type: 'general' }, result: created }
+  ]);
+  assert.equal(joined.counts.authorizations, f.data.authorizations.length + f.data.declines.length);
+  assert.equal(joined.rejected.missing_request, undefined);
+  const denied = joinEvidence({ data: f.data, audit: [{ tool: 'keelcard.cards.reveal', decision: 'deny', reason: 'card_closed', virtual_time: f.ctx.virtual_now }] }, [
+    { request_id: 'req-reveal', tool: 'keelcard.cards.reveal', arguments: { card_id: CARD } }
+  ]);
+  assert.equal(denied.rejected['req-reveal'][0].reason, 'card_closed');
+  const before = JSON.stringify(f.data);
+  joinEvidence({ data: f.data, audit: [] }, []);
+  assert.equal(JSON.stringify(f.data), before);
 });

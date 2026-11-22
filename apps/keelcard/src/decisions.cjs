@@ -1,4 +1,5 @@
 'use strict';
+const crypto = require('node:crypto');
 const { copy } = require('./domain-utils.cjs');
 const { spent, availableCents, effectiveStatus } = require('./ledger.cjs');
 
@@ -66,20 +67,29 @@ function decide(data, request, now) {
   return { decision: 'approved', decline_code: null, card, limits_in_force: base };
 }
 
+function canonical(value) {
+  if (Array.isArray(value)) return value.map(canonical);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])]));
+  }
+  return value;
+}
+
 function contentKey(payload) {
-  return JSON.stringify({
-    authorization_key: payload.authorization_key,
-    card_id: payload.card.card_id || null,
-    number: payload.card.number || null,
-    expiry: payload.card.expiry || null,
-    security_code: payload.card.security_code || null,
-    merchant_id: payload.merchant.merchant_id,
-    merchant_name: payload.merchant.name,
-    category: payload.merchant.category,
+  const body = {
+    authorization_key: payload.authorization_key || null,
+    card_id: payload.card && payload.card.number ? null : (payload.card && payload.card.card_id || null),
+    number: payload.card && payload.card.number || null,
+    expiry: payload.card && payload.card.expiry || null,
+    security_code: payload.card && payload.card.security_code || null,
+    merchant_id: payload.merchant && payload.merchant.merchant_id || null,
+    merchant_name: payload.merchant && payload.merchant.name || null,
+    category: payload.merchant && payload.merchant.category || null,
     amount_cents: payload.amount_cents,
-    currency: payload.currency,
+    currency: payload.currency || null,
     merchant_ref: payload.merchant_ref || null
-  });
+  };
+  return crypto.createHash('sha256').update(JSON.stringify(canonical(body))).digest('hex');
 }
 
 function findDecision(data, key) {

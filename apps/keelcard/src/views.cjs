@@ -1,5 +1,5 @@
 'use strict';
-const { copy } = require('./domain-utils.cjs');
+const { copy, due } = require('./domain-utils.cjs');
 const { effectiveStatus, spent, availableCents, openHolds } = require('./ledger.cjs');
 const { dayWindow, monthWindow } = require('./domain-utils.cjs');
 
@@ -75,13 +75,16 @@ function lookupView(row, now) {
   };
 }
 
-function requestView(request) {
+function requestView(request, now) {
+  const open = request.status === 'pending_verification' || request.status === 'pending_owner';
   return {
     change_request_id: request.change_request_id,
     card_id: request.card_id,
     field: request.field,
     merchant_id: request.merchant_id,
     category: request.category,
+    alert: request.alert || null,
+    effective_status: open && now && due(now, request.expires_at) ? 'expired' : request.status,
     from_cents: request.from_cents,
     to_cents: request.to_cents,
     status: request.status,

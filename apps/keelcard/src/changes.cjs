@@ -1,9 +1,10 @@
 'use strict';
-const { fail, copy, addMinutes, addHours, addDays, codeDigits, nextSerial, money, CATEGORIES, LIMIT_FIELDS } = require('./domain-utils.cjs');
+const crypto = require('node:crypto');
+const { fail, copy, addMinutes, addHours, addDays, codeDigits, nextSerial, money, luhnComplete, CATEGORIES, LIMIT_FIELDS } = require('./domain-utils.cjs');
 const { log } = require('./diagnostics.cjs');
 const { maybe, codeBody, declineBody } = require('./notices.cjs');
 const { decide, contentKey, findDecision } = require('./decisions.cjs');
-const { postLedger, settleTouched, availableCents } = require('./ledger.cjs');
+const { postLedger, settleTouched, settleRequest, availableCents } = require('./ledger.cjs');
 
 function findCard(data, cardId) {
   const card = data.cards.find(item => item.card_id === cardId);
@@ -25,6 +26,7 @@ function recordChange(ctx, data, row) {
   const entry = {
     control_change_id: nextSerial(data.control_changes, 'control_change_id', 'cc-'),
     at: ctx.virtual_now,
+    request_id: row.request_id || null,
     ...row
   };
   data.control_changes.push(entry);
@@ -45,16 +47,16 @@ function createCard(ctx, data, args) {
   const categories = args.categories || [];
   if (args.type === 'category_locked' && !categories.length) fail('invalid_arguments', 'A category-locked card needs at least one category.');
   for (const category of categories) if (!CATEGORIES.includes(category)) fail('invalid_arguments', 'Unknown category.');
-  const number = require('./domain-utils.cjs').luhnComplete('9417' + String(data.cards.length + 1).padStart(11, '0'));
+  const issued = issueCredentials(data);
   const card = {
-    card_id: 'card-' + number.slice(-4) + '-' + String(data.cards.length + 1),
+    card_id: issued.card_id,
     account_id: data.account_id,
     type: args.type,
     nickname: args.nickname,
-    last_four: number.slice(-4),
-    number,
+    last_four: issued.last_four,
+    number: issued.number,
     expiry: '2029-12',
-    security_code: String((data.cards.length * 97 + 100) % 900 + 100),
+    security_code: issued.security_code,
     status: 'active',
     paused_by: null,
     closure_reason: null,
@@ -85,8 +87,50 @@ function createCard(ctx, data, args) {
   return card;
 }
 
+function issueCredentials(data) {
+  const numbers = new Set(data.cards.map(card => card.number));
+  const ids = new Set(data.cards.map(card => card.card_id));
+  let number = '';
+  let cardId = '';
+  do {
+    number = luhnComplete('9' + String(crypto.randomInt(0, 100000000000000)).padStart(14, '0'));
+  } while (numbers.has(number));
+  do {
+    cardId = 'card-' + crypto.randomBytes(4).toString('hex');
+  } while (ids.has(cardId));
+  return { number, card_id: cardId, last_four: number.slice(-4), security_code: String(crypto.randomInt(100, 1000)) };
+}
+
 function requestIdentity(spec) {
-  return [spec.card_id, spec.field, spec.merchant_id || '', spec.category || ''].join('|');
+  if (LIMIT_FIELDS.includes(spec.field)) return spec.card_id + '|' + spec.field;
+  if (spec.field === 'merchant_unblock') return spec.card_id + '|merchant_unblock|' + (spec.merchant_id || '');
+  if (spec.field === 'category_unblock') return spec.card_id + '|category_unblock|' + (spec.category || '');
+  if (spec.field === 'unpause') return spec.card_id + '|unpause';
+  if (spec.field === 'alert_disable') return 'alert_disable|' + (spec.alert || '');
+  if (spec.field === 'alert_threshold') return 'alert_threshold';
+  return spec.card_id + '|' + spec.field;
+}
+
+function rejectIrrelevant(spec) {
+  const extraMerchant = Boolean(spec.merchant_id);
+  const extraCategory = Boolean(spec.category);
+  const extraAlert = Boolean(spec.alert);
+  const extraAmount = spec.to_cents !== undefined && spec.to_cents !== null;
+  if (LIMIT_FIELDS.includes(spec.field) && (extraMerchant || extraCategory || extraAlert)) {
+    fail('invalid_arguments', 'A limit change names only the card, the limit and the amount.');
+  }
+  if (spec.field === 'merchant_unblock' && (extraCategory || extraAlert || extraAmount)) {
+    fail('invalid_arguments', 'Merchant unblock names only the card and the merchant.');
+  }
+  if (spec.field === 'category_unblock' && (extraMerchant || extraAlert || extraAmount)) {
+    fail('invalid_arguments', 'Category unblock names only the card and the category.');
+  }
+  if (spec.field === 'unpause' && (extraMerchant || extraCategory || extraAlert || extraAmount)) {
+    fail('invalid_arguments', 'Unpause names only the card.');
+  }
+  if (spec.field === 'alert_disable' && (extraMerchant || extraCategory || extraAmount)) {
+    fail('invalid_arguments', 'Turning an alert off names only that alert.');
+  }
 }
 
 function findOpen(data, spec) {
@@ -96,7 +140,7 @@ function findOpen(data, spec) {
 function openChange(ctx, data, spec) {
   const card = findCard(data, spec.card_id);
   assertActive(card);
-  const allowed = [...LIMIT_FIELDS, 'merchant_unblock', 'category_unblock', 'unpause'];
+  const allowed = [...LIMIT_FIELDS, 'merchant_unblock', 'category_unblock', 'unpause', 'alert_disable', 'alert_threshold'];
   if (!allowed.includes(spec.field)) fail('invalid_arguments', 'Unknown change field.');
   if (spec.field === 'unpause' && card.status !== 'paused') fail('invalid_arguments', 'The card is not paused.');
   if (spec.field === 'unpause' && card.paused_by !== 'owner') fail('invalid_arguments', 'A delegate pause can be cleared directly.');
@@ -113,6 +157,14 @@ function openChange(ctx, data, spec) {
     if (!CATEGORIES.includes(spec.category)) fail('invalid_arguments', 'Unknown category.');
     if (!data.category_blocks.includes(spec.category)) fail('invalid_arguments', 'That category is not blocked.');
   }
+  if (spec.field === 'alert_disable' && !spec.alert) fail('invalid_arguments', 'Turning an alert off needs the alert name.');
+  if (spec.field === 'alert_threshold' && !Number.isInteger(spec.to_cents)) fail('invalid_arguments', 'A threshold change needs amount_cents.');
+  rejectIrrelevant(spec);
+  for (const open of data.change_requests) {
+    if ((open.status === 'pending_verification' || open.status === 'pending_owner') && requestIdentity(open) === requestIdentity(spec)) {
+      settleRequest(data, open, ctx.virtual_now);
+    }
+  }
   if (findOpen(data, spec)) fail('request_already_open', 'That card and control already have an open request.');
   const mode = data.verification.mode;
   const created = ctx.virtual_now;
@@ -127,6 +179,7 @@ function openChange(ctx, data, spec) {
     category: spec.category || null,
     from_cents: spec.from_cents ?? null,
     to_cents: spec.to_cents ?? null,
+    alert: spec.alert || null,
     status: mode === 'owner_approval' ? 'pending_owner' : 'pending_verification',
     mode,
     code: mode === 'email_code' ? codeDigits() : null,
@@ -137,10 +190,11 @@ function openChange(ctx, data, spec) {
     expires_at: expires,
     resolved_at: null,
     settled_at: null,
-    notice_id: null
+    notice_id: null,
+    request_id: spec.request_id || null
   };
   data.change_requests.push(request);
-  if (mode === 'email_code' && data.alerts.codes) {
+  if (mode === 'email_code') {
     const notice = maybe(ctx, data, true, {
       notice_id: 'notice-' + request.change_request_id + '-code',
       kind: 'code',
@@ -151,38 +205,55 @@ function openChange(ctx, data, spec) {
     });
     request.notice_id = notice.notice_id;
   }
-  log(ctx, 'keelcard.change_requested', { change_request_id: request.change_request_id, mode, field: request.field });
+  log(ctx, 'keelcard.change_requested', { change_request_id: request.change_request_id, request_id: request.request_id, mode, field: request.field });
   return request;
+}
+
+function limitNotice(ctx, data, card, field, amount, related) {
+  maybe(ctx, data, data.alerts.card_events, {
+    kind: 'limit_changed',
+    title: 'Keelcard limit updated',
+    body: 'The ' + field.replaceAll('_', ' ') + ' limit on card ' + card.last_four + ' is now ' + money(amount) + '.',
+    source_object: { object_type: 'card', object_id: card.card_id },
+    related_id: related
+  });
 }
 
 function applyRequest(ctx, data, request, changedBy, verification) {
   const card = findCard(data, request.card_id);
+  if (card.status === 'closed') fail('card_closed', 'This card is closed.');
   if (LIMIT_FIELDS.includes(request.field)) {
     const previous = card.limits[request.field];
     card.limits[request.field] = request.to_cents;
     touch(ctx, card);
     recordChange(ctx, data, {
       card_id: card.card_id, field: request.field, from_cents: previous, to_cents: request.to_cents,
-      merchant_id: null, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id
+      merchant_id: null, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id
     });
-    maybe(ctx, data, data.alerts.card_events, {
-      kind: 'limit_changed',
-      title: 'Keelcard limit updated',
-      body: 'The ' + request.field.replaceAll('_', ' ') + ' limit on card ' + card.last_four + ' is now ' + money(request.to_cents) + '.',
-      source_object: { object_type: 'card', object_id: card.card_id },
-      related_id: request.change_request_id
-    });
+    limitNotice(ctx, data, card, request.field, request.to_cents, request.change_request_id);
   } else if (request.field === 'merchant_unblock') {
     data.merchant_blocks = data.merchant_blocks.filter(id => id !== request.merchant_id);
     recordChange(ctx, data, {
       card_id: card.card_id, field: request.field, from_cents: null, to_cents: null,
-      merchant_id: request.merchant_id, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id
+      merchant_id: request.merchant_id, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id
     });
   } else if (request.field === 'category_unblock') {
     data.category_blocks = data.category_blocks.filter(id => id !== request.category);
     recordChange(ctx, data, {
       card_id: card.card_id, field: request.field, from_cents: null, to_cents: null,
-      merchant_id: null, category: request.category, changed_by: changedBy, verification, change_request_id: request.change_request_id
+      merchant_id: null, category: request.category, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id
+    });
+  } else if (request.field === 'alert_disable') {
+    data.alerts[request.alert] = false;
+    recordChange(ctx, data, {
+      card_id: card.card_id, field: request.field, from_cents: null, to_cents: null,
+      merchant_id: null, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id
+    });
+  } else if (request.field === 'alert_threshold') {
+    data.alerts.decline_threshold_cents = request.to_cents;
+    recordChange(ctx, data, {
+      card_id: card.card_id, field: request.field, from_cents: request.from_cents, to_cents: request.to_cents,
+      merchant_id: null, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id
     });
   } else if (request.field === 'unpause') {
     card.status = 'active';
@@ -190,7 +261,7 @@ function applyRequest(ctx, data, request, changedBy, verification) {
     touch(ctx, card);
     recordChange(ctx, data, {
       card_id: card.card_id, field: 'unpause', from_cents: null, to_cents: null,
-      merchant_id: null, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id
+      merchant_id: null, category: null, changed_by: changedBy, verification, change_request_id: request.change_request_id, request_id: request.request_id
     });
   }
   request.status = 'applied';
@@ -251,7 +322,9 @@ function commitAuthorization(ctx, data, payload, eventId) {
   if (outcome.decision === 'declined') {
     const row = { ...common, decision: 'declined', decline_code: outcome.decline_code, hold_cents: 0, status: 'declined' };
     data.declines.push(row);
-    maybe(ctx, data, data.alerts.declines, {
+    const threshold = data.alerts.decline_threshold_cents;
+    const notify = data.alerts.declines && (threshold === null || threshold === undefined || payload.amount_cents >= threshold);
+    maybe(ctx, data, notify, {
       kind: 'decline',
       title: 'Keelcard decline',
       body: declineBody(payload.merchant.name, payload.amount_cents, outcome.decline_code),
@@ -341,6 +414,6 @@ function reverseAuthorization(ctx, data, payload) {
 }
 
 module.exports = {
-  findCard, touch, assertActive, recordChange, createCard, openChange, applyRequest, findOpen,
+  findCard, touch, assertActive, recordChange, createCard, openChange, applyRequest, findOpen, limitNotice,
   commitAuthorization, captureAuthorization, reverseAuthorization, availableCents
 };

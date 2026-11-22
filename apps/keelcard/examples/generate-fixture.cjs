@@ -3,6 +3,7 @@
 // FreshCart captures, and the earlier snack capture. Output is deterministic.
 const { zonedToIso, addDays, luhnOk } = require('../src/domain-utils.cjs');
 const { postLedger, settleDue } = require('../src/ledger.cjs');
+const { contentKey } = require('../src/decisions.cjs');
 
 const ZONE = 'America/New_York';
 const GROCERY_NUMBER = '9417220000014417';
@@ -26,18 +27,26 @@ function saturdaySeries(startYear, startMonth, startDay, untilYear, untilMonth, 
   return dates;
 }
 
-function authFrom({ id, key, card, merchant, amount, at, status }) {
+function authFrom({ id, key, card, merchant, amount, at, status, merchantRef }) {
+  const merchant_ref = merchantRef || { app_id: 'freshcart', account_id: 'fc-grace', object_type: 'order', object_id: key.split(':')[2] };
   return {
     authorization_id: id,
     authorization_key: key,
-    content_key: key + ':' + amount,
+    content_key: contentKey({
+      authorization_key: key,
+      card: { number: card.number, expiry: card.expiry, security_code: card.security_code },
+      merchant: { merchant_id: merchant.merchant_id, name: merchant.name, category: merchant.category },
+      amount_cents: amount,
+      currency: 'USD',
+      merchant_ref
+    }),
     card_id: card.card_id,
     merchant_id: merchant.merchant_id,
     merchant_name: merchant.name,
     category: merchant.category,
     amount_cents: amount,
     currency: 'USD',
-    merchant_ref: { app_id: 'freshcart', account_id: 'fc-grace', object_type: 'order', object_id: key.split(':')[2] },
+    merchant_ref,
     source_event_id: 'seed-' + id,
     decided_at: at,
     limits_in_force: {
@@ -117,7 +126,7 @@ function build() {
     verification: { mode: 'email_code', code_ttl_minutes: 10, max_attempts: 3, owner_window_hours: 24 },
     delegate: { may_reveal: true, card_ceiling_cents: 20000 },
     funding: { opening_balance_cents: 800000, balance_cents: 800000, currency: 'USD' },
-    alerts: { declines: true, receipts: true, codes: true, card_events: true },
+    alerts: { declines: true, receipts: true, codes: true, card_events: true, disputes: true, decline_threshold_cents: null },
     category_blocks: [],
     merchant_blocks: [],
     merchants: [freshcart, snacks, linetalk, { merchant_id: 'm-harbor-domains', name: 'Harbor Domains', category: 'domains_hosting' }],
@@ -132,26 +141,42 @@ function build() {
     fingerprints: [grocery, snack].map(card => ({
       card_id: card.card_id, number: card.number, expiry: card.expiry, security_code: card.security_code, last_four: card.last_four
     })),
-    statements: []
+    statements: [],
+    disputes: [],
+    refunds: [],
+    top_ups: []
   };
   const weeks = saturdaySeries(2025, 9, 20, 2026, 11, 14);
-  weeks.forEach((at, index) => {
+  const posts = weeks.map((at, index) => {
     const amount = 4200 + ((index * 173) % 2800);
     const id = 'auth-w' + String(index + 1).padStart(2, '0');
     const key = 'freshcart:fc-grace:fc-week-' + String(index + 1).padStart(2, '0') + ':1';
-    data.authorizations.push(authFrom({ id, key, card: grocery, merchant: freshcart, amount, at, status: 'captured' }));
-    postLedger(data, { at, kind: 'capture', direction: 'debit', amount_cents: amount, authorization_id: id, card_id: grocery.card_id });
+    return { at, amount, id, card: grocery, auth: authFrom({ id, key, card: grocery, merchant: freshcart, amount, at, status: 'captured' }) };
   });
   const snackAt = zonedToIso(2026, 4, 12, 15, 4, 0, ZONE);
-  data.authorizations.push(authFrom({
-    id: 'auth-snack', key: 'corner-snacks:kc-adeyemi:snack-212:1', card: snack, merchant: snacks, amount: 21240, at: snackAt, status: 'captured'
-  }));
-  data.authorizations.at(-1).merchant_ref = { app_id: 'keelcard', account_id: 'kc-adeyemi', object_type: 'order', object_id: 'snack-212' };
-  postLedger(data, { at: snackAt, kind: 'capture', direction: 'debit', amount_cents: 21240, authorization_id: 'auth-snack', card_id: snack.card_id });
+  posts.push({
+    at: snackAt, amount: 21240, id: 'auth-snack', card: snack,
+    auth: authFrom({
+      id: 'auth-snack', key: 'corner-snacks:kc-adeyemi:snack-212:1', card: snack, merchant: snacks, amount: 21240, at: snackAt, status: 'captured',
+      merchantRef: { app_id: 'keelcard', account_id: 'kc-adeyemi', object_type: 'order', object_id: 'snack-212' }
+    })
+  });
+  posts.sort((a, b) => Date.parse(a.at) - Date.parse(b.at) || a.id.localeCompare(b.id));
+  for (const post of posts) {
+    data.authorizations.push(post.auth);
+    postLedger(data, { at: post.at, kind: 'capture', direction: 'debit', amount_cents: post.amount, authorization_id: post.id, card_id: post.card.card_id });
+  }
   data.declines.push({
     authorization_id: 'auth-over',
     authorization_key: 'freshcart:fc-grace:fc-over-1:1',
-    content_key: 'freshcart:fc-grace:fc-over-1:1:9000',
+    content_key: contentKey({
+      authorization_key: 'freshcart:fc-grace:fc-over-1:1',
+      card: { number: '9417220000014417', expiry: '2028-09', security_code: '317' },
+      merchant: { merchant_id: 'm-freshcart', name: 'FreshCart', category: 'grocery' },
+      amount_cents: 9000,
+      currency: 'USD',
+      merchant_ref: { app_id: 'freshcart', account_id: 'fc-grace', object_type: 'order', object_id: 'fc-over-1' }
+    }),
     card_id: 'card-4417',
     merchant_id: 'm-freshcart',
     merchant_name: 'FreshCart',

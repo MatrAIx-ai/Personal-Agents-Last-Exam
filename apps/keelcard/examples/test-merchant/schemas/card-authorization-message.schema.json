@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:card-authorization-message:1",
+  "title": "CloudEvents 1.0 card authorization message",
+  "type": "object",
+  "properties": {
+    "specversion": { "const": "1.0" },
+    "id": { "type": "string", "minLength": 1, "maxLength": 150 },
+    "source": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$", "maxLength": 512 },
+    "type": { "const": "org.pale.card.authorization.v1" },
+    "time": { "type": "string", "format": "date-time" },
+    "subject": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "datacontenttype": { "const": "application/json" },
+    "dataschema": { "const": "urn:pale:card-authorization-payload:1" },
+    "data": {
+      "type": "object",
+      "properties": {
+        "channel": { "const": "channel.card.authorization" },
+        "recipient": {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "app_account_ref" },
+            "app_id": { "const": "keelcard" },
+            "id": { "type": "string", "minLength": 1, "maxLength": 100 }
+          },
+          "required": ["kind", "app_id", "id"],
+          "additionalProperties": false
+        },
+        "source_object": {
+          "type": "object",
+          "properties": {
+            "app_id": { "type": "string", "minLength": 1, "maxLength": 80 },
+            "account_id": { "type": "string", "minLength": 1, "maxLength": 100 },
+            "object_type": { "type": "string", "minLength": 1, "maxLength": 80 },
+            "object_id": { "type": "string", "minLength": 1, "maxLength": 100 }
+          },
+          "required": ["app_id", "account_id", "object_type", "object_id"],
+          "additionalProperties": false
+        },
+        "authorization": {
+          "type": "object",
+          "properties": {
+            "authorization_key": { "type": "string", "minLength": 1, "maxLength": 160 },
+            "card": {
+              "type": "object",
+              "properties": {
+                "card_id": { "type": "string" },
+                "number": { "type": "string" },
+                "expiry": { "type": "string" },
+                "security_code": { "type": "string" }
+              },
+              "additionalProperties": false
+            },
+            "merchant": {
+              "type": "object",
+              "properties": {
+                "merchant_id": { "type": "string" },
+                "name": { "type": "string" },
+                "category": { "type": "string" }
+              },
+              "required": ["merchant_id", "name", "category"],
+              "additionalProperties": false
+            },
+            "amount_cents": { "type": "integer" },
+            "currency": { "const": "USD" }
+          },
+          "required": ["authorization_key", "card", "merchant", "amount_cents", "currency"],
+          "additionalProperties": false
+        },
+        "extensions": { "type": "array", "maxItems": 0 }
+      },
+      "required": ["channel", "recipient", "source_object", "authorization", "extensions"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["specversion", "id", "source", "type", "datacontenttype", "dataschema", "data"],
+  "additionalProperties": false
+}

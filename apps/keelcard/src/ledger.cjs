@@ -129,21 +129,33 @@ function issueStatement(data, spec, settledAt) {
 
 function settleDue(data, now) {
   const transitions = [];
-  const auths = data.authorizations.filter(auth => auth.status === 'pending' && due(now, auth.expires_at))
-    .sort((a, b) => Date.parse(a.expires_at) - Date.parse(b.expires_at) || a.authorization_id.localeCompare(b.authorization_id));
-  for (const auth of auths) {
-    settleAuthorization(data, auth, now, auth.expires_at);
-    transitions.push({ kind: 'authorization_expired', id: auth.authorization_id, effective_at: auth.expires_at, settled_at: now });
+  const queue = [];
+  for (const auth of data.authorizations) {
+    if (auth.status === 'pending' && due(now, auth.expires_at)) queue.push({ at: auth.expires_at, id: auth.authorization_id, kind: 'authorization' });
   }
-  const requests = data.change_requests.filter(request => (request.status === 'pending_verification' || request.status === 'pending_owner') && due(now, request.expires_at))
-    .sort((a, b) => Date.parse(a.expires_at) - Date.parse(b.expires_at) || a.change_request_id.localeCompare(b.change_request_id));
-  for (const request of requests) {
-    settleRequest(data, request, now);
-    transitions.push({ kind: 'change_request_expired', id: request.change_request_id, effective_at: request.expires_at, settled_at: now });
+  for (const request of data.change_requests) {
+    if ((request.status === 'pending_verification' || request.status === 'pending_owner') && due(now, request.expires_at)) {
+      queue.push({ at: request.expires_at, id: request.change_request_id, kind: 'change_request' });
+    }
   }
   for (const spec of completedMonths(data, now)) {
-    issueStatement(data, spec, now);
-    transitions.push({ kind: 'statement_issued', id: spec.id, effective_at: data.statements.at(-1).effective_at, settled_at: now });
+    const end = zonedToIso(spec.month === 12 ? spec.year + 1 : spec.year, spec.month === 12 ? 1 : spec.month + 1, 1, 0, 0, 0, data.time_zone);
+    queue.push({ at: end, id: spec.id, kind: 'statement', spec });
+  }
+  queue.sort((a, b) => Date.parse(a.at) - Date.parse(b.at) || a.id.localeCompare(b.id));
+  for (const item of queue) {
+    if (item.kind === 'authorization') {
+      const auth = data.authorizations.find(row => row.authorization_id === item.id);
+      settleAuthorization(data, auth, now, auth.expires_at);
+      transitions.push({ kind: 'authorization_expired', id: auth.authorization_id, effective_at: auth.expires_at, settled_at: now });
+    } else if (item.kind === 'change_request') {
+      const request = data.change_requests.find(row => row.change_request_id === item.id);
+      settleRequest(data, request, now);
+      transitions.push({ kind: 'change_request_expired', id: request.change_request_id, effective_at: request.expires_at, settled_at: now });
+    } else {
+      issueStatement(data, item.spec, now);
+      transitions.push({ kind: 'statement_issued', id: item.id, effective_at: data.statements.at(-1).effective_at, settled_at: now });
+    }
   }
   return transitions;
 }
@@ -164,5 +176,5 @@ function settleTouched(data, now, { cardId, requestId, authorizationId } = {}) {
 
 module.exports = {
   effectiveStatus, spendAmount, openHolds, availableCents, spent, postLedger,
-  settleAuthorization, settleRequest, settleDue, settleTouched
+  settleAuthorization, settleRequest, settleDue, settleTouched, completedMonths
 };

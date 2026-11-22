@@ -1,10 +1,12 @@
 'use strict';
 const { fail, CATEGORIES, LIMIT_FIELDS, luhnOk, references } = require('./domain-utils.cjs');
+const { completedMonths } = require('./ledger.cjs');
 
 function validateSeed(ctx, data) {
   references(ctx, data);
   if (data.time_zone !== 'America/New_York') fail('invalid_seed', 'v1 fixtures use America/New_York.');
   if (!['email_code', 'owner_approval'].includes(data.verification.mode)) fail('invalid_seed', 'Unknown verification mode.');
+  if (data.verification.mode === 'email_code' && data.alerts.codes !== true) fail('invalid_seed', 'email_code mode requires the code alert so the code has a delivery path.');
   if (data.verification.code_ttl_minutes < 1 || data.verification.owner_window_hours < 1 || data.verification.max_attempts < 1) {
     fail('invalid_seed', 'Verification windows must be positive.');
   }
@@ -52,7 +54,8 @@ function validateSeed(ctx, data) {
   }
   let balance = data.funding.opening_balance_cents;
   const seenLedger = new Set();
-  for (const entry of data.ledger) {
+  const orderedLedger = data.ledger.slice().sort((a, b) => Date.parse(a.at) - Date.parse(b.at) || a.entry_id.localeCompare(b.entry_id));
+  for (const entry of orderedLedger) {
     if (seenLedger.has(entry.entry_id)) fail('invalid_seed', 'Duplicate ledger entry.');
     seenLedger.add(entry.entry_id);
     balance += entry.direction === 'debit' ? -entry.amount_cents : entry.amount_cents;
@@ -63,6 +66,20 @@ function validateSeed(ctx, data) {
     }
   }
   if (balance !== data.funding.balance_cents) fail('invalid_seed', 'Funding balance does not match the ledger.');
+  if (completedMonths(data, ctx.virtual_now).length) fail('invalid_seed', 'A completed month is missing its statement.');
+  const limitField = {
+    exceeds_transaction_limit: 'per_transaction',
+    exceeds_daily_limit: 'per_day',
+    exceeds_monthly_limit: 'per_month',
+    exceeds_lifetime_limit: 'lifetime'
+  };
+  for (const decline of data.declines) {
+    const field = limitField[decline.decline_code];
+    if (!field || !decline.limits_in_force) continue;
+    const limit = decline.limits_in_force[field];
+    if (!Number.isInteger(limit) || limit < 0) fail('invalid_seed', 'A historical decline names a limit that was not in force.');
+    if (field === 'per_transaction' && decline.amount_cents <= limit) fail('invalid_seed', 'A historical decline does not match the limits in force at that time.');
+  }
   for (const statement of data.statements) {
     const entries = data.ledger.filter(entry => statement.entry_ids.includes(entry.entry_id));
     const debits = entries.filter(entry => entry.direction === 'debit').reduce((sum, entry) => sum + entry.amount_cents, 0);
@@ -79,6 +96,29 @@ function validateSeed(ctx, data) {
     fingerprints.add(print.card_id);
   }
   if (fingerprints.size !== data.cards.length) fail('invalid_seed', 'Each card has one fingerprint.');
+  for (const auth of data.authorizations) {
+    if (auth.status === 'pending' && String(auth.source_event_id || '').startsWith('seed-') && Date.parse(auth.expires_at) <= Date.parse(ctx.virtual_now)) {
+      fail('invalid_seed', 'A seeded hold is already due.');
+    }
+  }
+  for (const request of data.change_requests) {
+    if (!/^cr-\d{4,}$/.test(request.change_request_id) && (request.status === 'pending_verification' || request.status === 'pending_owner') && Date.parse(request.expires_at) <= Date.parse(ctx.virtual_now)) {
+      fail('invalid_seed', 'A seeded change request is already due.');
+    }
+  }
+  for (const refund of data.refunds) {
+    const auth = data.authorizations.find(item => item.authorization_id === refund.authorization_id);
+    const entry = data.ledger.find(item => item.entry_id === refund.entry_id);
+    if (!auth || !entry || entry.kind !== 'refund' || entry.direction !== 'credit' || entry.amount_cents !== refund.amount_cents) {
+      fail('invalid_seed', 'A refund must match its authorization and ledger credit.');
+    }
+  }
+  for (const top of data.top_ups) {
+    const entry = data.ledger.find(item => item.entry_id === top.entry_id);
+    if (!entry || entry.kind !== 'top_up' || entry.direction !== 'credit' || entry.amount_cents !== top.amount_cents) {
+      fail('invalid_seed', 'A top-up must match its ledger credit.');
+    }
+  }
   for (const request of data.change_requests) {
     if (!cardIds.has(request.card_id)) fail('invalid_seed', 'Change request card is missing.');
     if (request.attempts.length !== request.attempts.filter(item => item.request_id).length) fail('invalid_seed', 'Attempt rows need a request id.');

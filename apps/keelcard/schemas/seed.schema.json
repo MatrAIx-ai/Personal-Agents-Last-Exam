@@ -99,13 +99,29 @@
         },
         "card_events": {
           "type": "boolean"
+        },
+        "disputes": {
+          "type": "boolean"
+        },
+        "decline_threshold_cents": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
         "declines",
         "receipts",
         "codes",
-        "card_events"
+        "card_events",
+        "disputes",
+        "decline_threshold_cents"
       ],
       "additionalProperties": false
     },
@@ -514,7 +530,9 @@
               "pending",
               "captured",
               "reversed",
-              "expired"
+              "expired",
+              "refunded",
+              "partially_refunded"
             ]
           },
           "hold_cents": {
@@ -1060,6 +1078,30 @@
                 "type": "null"
               }
             ]
+          },
+          "alert": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -1196,6 +1238,18 @@
                 "type": "null"
               }
             ]
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -1235,6 +1289,18 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 40
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -1491,6 +1557,159 @@
         ],
         "additionalProperties": false
       }
+    },
+    "disputes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "dispute_id",
+          "authorization_id",
+          "reason",
+          "note",
+          "status",
+          "submitted_at",
+          "window_closes_at",
+          "updated_at",
+          "refund_cents"
+        ],
+        "properties": {
+          "dispute_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "authorization_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "status": {
+            "enum": [
+              "submitted",
+              "under_review",
+              "won",
+              "lost",
+              "withdrawn"
+            ]
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "window_closes_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "refund_cents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "refunds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "refund_id",
+          "refund_key",
+          "authorization_id",
+          "amount_cents",
+          "at",
+          "source",
+          "entry_id"
+        ],
+        "properties": {
+          "refund_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "refund_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "authorization_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "amount_cents": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "enum": [
+              "refund.issue",
+              "dispute.update"
+            ]
+          },
+          "entry_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          }
+        }
+      }
+    },
+    "top_ups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "top_up_id",
+          "top_up_key",
+          "amount_cents",
+          "at",
+          "entry_id"
+        ],
+        "properties": {
+          "top_up_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "top_up_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "amount_cents": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "entry_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          }
+        }
+      }
     }
   },
   "required": [
@@ -1513,7 +1732,10 @@
     "reveals",
     "notices",
     "fingerprints",
-    "statements"
+    "statements",
+    "disputes",
+    "refunds",
+    "top_ups"
   ],
   "additionalProperties": false
 }

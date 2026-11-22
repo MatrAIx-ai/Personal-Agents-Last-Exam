@@ -10,6 +10,10 @@ const CATEGORIES = Object.freeze([
   'transport', 'general_merchandise'
 ]);
 const LIMIT_FIELDS = Object.freeze(['per_transaction', 'per_day', 'per_month', 'lifetime']);
+const ALERT_FIELDS = Object.freeze(['declines', 'receipts', 'codes', 'card_events', 'disputes']);
+const DISPUTE_REASONS = Object.freeze([
+  'unauthorized_by_cardholder', 'duplicate_charge', 'incorrect_amount', 'goods_not_received', 'cancelled_recurring'
+]);
 const DECLINE_PHRASES = Object.freeze({
   card_not_found: 'the card was not found',
   card_details_mismatch: 'the card details do not match',
@@ -108,7 +112,9 @@ function isoWithOffset(ms, offset) {
   const hours = offset === 'Z' ? 0 : Number(offset.slice(1, 3));
   const minutes = offset === 'Z' ? 0 : Number(offset.slice(4, 6));
   const shifted = new Date(ms + sign * (hours * 60 + minutes) * 60000);
-  return shifted.toISOString().slice(0, 19) + (offset === 'Z' ? 'Z' : offset);
+  const iso = shifted.toISOString();
+  const fraction = iso.slice(19, 23) === '.000' ? '' : iso.slice(19, 23);
+  return iso.slice(0, 19) + fraction + (offset === 'Z' ? 'Z' : offset);
 }
 
 function addMinutes(iso, minutes) {
@@ -123,11 +129,17 @@ function addDays(iso, days) {
   return addMinutes(iso, days * 24 * 60);
 }
 
+function nextCivilDay(year, month, day) {
+  const next = new Date(Date.UTC(year, month - 1, day + 1));
+  return { year: next.getUTCFullYear(), month: next.getUTCMonth() + 1, day: next.getUTCDate() };
+}
+
 function dayWindow(iso, timeZone) {
   const p = parts(iso, timeZone);
   const start = zonedToIso(p.year, p.month, p.day, 0, 0, 0, timeZone);
-  const endMs = Date.parse(start) + 24 * 60 * 60000;
-  return { start, end: isoWithOffset(endMs, offsetOf(start)) };
+  const next = nextCivilDay(p.year, p.month, p.day);
+  const end = zonedToIso(next.year, next.month, next.day, 0, 0, 0, timeZone);
+  return { start, end };
 }
 
 function monthWindow(iso, timeZone) {
@@ -152,7 +164,7 @@ function due(now, deadline) {
 }
 
 module.exports = {
-  fail, copy, ID, CATEGORIES, LIMIT_FIELDS, DECLINE_PHRASES, luhnOk, luhnComplete, money,
+  fail, copy, ID, CATEGORIES, LIMIT_FIELDS, ALERT_FIELDS, DISPUTE_REASONS, DECLINE_PHRASES, luhnOk, luhnComplete, money,
   nextSerial, codeDigits, references, parts, zonedToIso, addMinutes, addHours, addDays,
   dayWindow, monthWindow, clockLabel, due, isoWithOffset
 };

@@ -17,7 +17,10 @@
         "authorization.reverse",
         "ledger.settle_due",
         "change_request.owner_decision",
-        "notice.delivery_result"
+        "notice.delivery_result",
+        "refund.issue",
+        "funding.top_up",
+        "dispute.update"
       ]
     },
     "payload": {
@@ -38,7 +41,14 @@
         "publish_request_id": { "type": "string" },
         "status": { "type": "string" },
         "event_id": { "type": "string" },
-        "code": { "type": "string" }
+        "code": { "type": "string" },
+        "transaction_id": { "type": "string" },
+        "refund_key": { "type": "string" },
+        "top_up_key": { "type": "string" },
+        "dispute_id": { "type": "string" },
+        "refund_cents": { "type": "integer" },
+        "recipient_account_id": { "type": "string" },
+        "message": { "type": "object" }
       },
       "additionalProperties": false
     }

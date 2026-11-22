@@ -43,9 +43,15 @@ A task session on 20 November 2026 can apply these Infra events and then read th
 | Limit change | `keelcard.controls.request_change` then `keelcard.controls.confirm_change` | Infra `env.snapshot` field `change_requests[].code`, `change_requests[].attempts`, and `control_changes` with `verification` `email_code` |
 | Code stays off the Agent result | compare the tool result with the snapshot | The Agent result has no `code` field. The code is on the snapshot request and in the notice `body` |
 | Card number on a web form | `src/fingerprints.cjs` `scan(text, fingerprints)` | A hit lists `number`, `security_code`, `expiry`, or `last_four_with_expiry`. Last four alone is not a hit |
-| Mail | `src/publisher.cjs` `publishPending` with `examples/mail-publisher.json` | Messaging receipt `status` `committed`, Mail record id equal to `event_id`. The integration test points Mail's packaged mailbox at `person-grace` and grants `mail-maya` |
+| Mail | `src/publisher.cjs` `publishPending` with `examples/mail-publisher.json` | Messaging receipt `status` `committed`, Mail record id equal to `event_id`. The integration test loads Mail through `env.load_seed`, keeps account `mail-maya`, and sets the mailbox owner to `person-grace` |
 
 The code email body has this shape: `Code 482913 confirms raising the per-transaction limit on card 4417 from $75.00 to $100.00. It expires at 6:26 AM. If you did not ask for this change, ignore this email.` Decline mail ends with `Manage limits in Keelcard.`
+
+`examples/task-data/narrative.json` records the one date the story and the seed do not share. The seed opens card 4417 on 13 September 2025 so the Saturday history fits. The task narrative's August 2026 opening is not a field the seed or the grader checks. Limits, the card number, FreshCart and the authorization keys stay as the task states them.
+
+Further tools for later tasks: `keelcard.disputes.list`, `keelcard.disputes.open`, `keelcard.disputes.withdraw`, `keelcard.funding.get`, `keelcard.statements.get`, `keelcard.statements.list`, `keelcard.alerts.preferences.get`, `keelcard.alerts.preferences.update`, `keelcard.merchants.block` and `keelcard.merchants.unblock`. Infra events also include `refund.issue`, `funding.top_up` and `dispute.update`. `examples/join-evidence.cjs` reads a snapshot, the Core audit and a supplied execution list and prints the evidence rows. It does not write back.
+
+Fixture (b) is `fixtures/freelancer.json` with `fixtures/freelancer-binding.json`: Amadi Okonkwo, six cards, 60 merchants, nine months. Fixture (c) is `fixtures/delegate.json` with `fixtures/delegate-binding.json`: Nia Cole, `owner_approval`, one request that is still open at `2026-11-18T10:00:00-05:00`. The package seed remains fixture (a), so the dataset record count stays 2.
 
 `keelcard.cards.reveal` is the only Agent tool that returns a full number, expiry and security code. Infra snapshots include numbers, security codes, fingerprints and verification codes. Core audit records the tool name and the decision. It does not copy the code or the card number into the audit summary.
 
@@ -59,13 +65,24 @@ The same `authorization_key` with the same content and a new `event_id` records 
 
 `email_code` is the fixture default. `owner_approval` is selected in the seed. In that mode `keelcard.controls.confirm_change` throws `owner_approval_required`, and Infra applies `change_request.owner_decision`. A wrong code, a third distinct `request_id`, and a code used at or after `expires_at` all commit. Outcomes are `code_rejected`, `attempts_exhausted` and `code_expired`. The limit changes only on `applied`.
 
-Notices are created in the same commit as the business change, with status `pending_delivery`. The publisher in `src/publisher.cjs` sends each pending notice once per call. A committed publish, including a live-session duplicate, is `confirmed`. A pre-dispatch rejection such as `recipient_not_authorized` is `rejected` and does not halt. `receiver_rejected` and `unknown` halt. The adapter stops on the first result that is not confirmed. It does not mint a second code. Infra inspects Mail `env.event_status` and Mail records, reports confirmed or unresolved, and records `notice.delivery_result`. Duplicate publication is guaranteed for the live session that has not halted. A corrected configuration is a new run.
+Notices are created in the same commit as the business change, with status `pending_delivery`. The publisher in `src/publisher.cjs` sends each pending notice once per call. A committed publish, including a live-session duplicate, is `confirmed`. A pre-dispatch rejection such as `recipient_not_authorized` is `rejected` and does not halt. `receiver_rejected` and `unknown` halt. The adapter keeps the original receipt and notice identifiers, asks the host to inspect Mail `env.event_status` and Mail records, records confirmed when that evidence matches the attempted event or unresolved when it does not, and does not publish again on that run. It does not mint a second code. A corrected configuration is a new run.
 
 v1 sends decline, receipt, code, card-created, card-closed and limit-changed notices when the matching alert is on. It does not email an approval that has not been captured.
 
 ## Known limits of this package
 
-Disputes, refunds, funding top-ups, alert-preference writes, fixtures (b) and (c), the full generator, the merchant receive contract, the evaluator join script and an interactive web page stay out of v1. Merchant access stays behind a trusted host that exposes `keelcard.authorizations.lookup`, or behind Infra `authorization.request`. This package does not change Core. `gui/src/view.js` is an escaped reviewer renderer. It omits full numbers and security codes.
+v1 excludes real card networks, physical cards, credit, interest, rewards, currencies other than USD, chargeback law, fraud scoring, a link to an external funding account, shared cards and recurring-charge detection. Merchant access stays behind a trusted host that exposes `keelcard.authorizations.lookup`, or behind Infra `authorization.request`. This package does not change Core. `gui/src/view.js` is an escaped reviewer renderer. It omits full numbers and security codes. There is no interactive business page.
+
+## Workflow checks
+
+| Proposal workflow | Test |
+| --- | --- |
+| Grocery decline, approvals and the limit code | `tests/business.test.cjs` FreshCart task amounts, and email code outcomes |
+| Owner approval | `tests/business.test.cjs` owner approval applies, denies and expires |
+| Disputes, refunds, top-ups and alerts | `tests/business.test.cjs` disputes, refunds, top-ups and alert writes |
+| Mail delivery and halt inspection | `tests/mail-integration.cjs` |
+| Merchant receive and lookup | `tests/merchant-receive.cjs` |
+| Evidence join | `examples/join-evidence.cjs`, checked in the fixture test |
 
 ## Package map
 
@@ -79,7 +96,7 @@ schemas/                     Seed, state, events and copied public contracts
 contribution/                Capabilities, GUI declaration, catalog and provenance
 fixtures/minimal.json        Fixture (a), the household grocery seed
 examples/task-data/          Binding, policies and the task session clock
-examples/mail-publisher.json Publisher grant from kc-adeyemi to mail-grace
+examples/mail-publisher.json Publisher grant from kc-adeyemi to mail-maya
 gui/src/view.js              Reviewer renderer
 tests/                       Business tests, harness and Mail integration
 ```

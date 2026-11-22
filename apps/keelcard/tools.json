@@ -893,7 +893,28 @@
                   }
                 ]
               },
+              "alert": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "status": {
+                "enum": [
+                  "pending_verification",
+                  "pending_owner",
+                  "applied",
+                  "failed",
+                  "expired",
+                  "cancelled",
+                  "denied"
+                ]
+              },
+              "effective_status": {
                 "enum": [
                   "pending_verification",
                   "pending_owner",
@@ -944,9 +965,11 @@
               "field",
               "merchant_id",
               "category",
+              "alert",
               "from_cents",
               "to_cents",
               "status",
+              "effective_status",
               "mode",
               "attempts_used",
               "max_attempts",
@@ -1069,7 +1092,9 @@
                   "pending",
                   "captured",
                   "reversed",
-                  "expired"
+                  "expired",
+                  "refunded",
+                  "partially_refunded"
                 ]
               },
               "effective_status": {
@@ -1077,7 +1102,9 @@
                   "pending",
                   "captured",
                   "reversed",
-                  "expired"
+                  "expired",
+                  "refunded",
+                  "partially_refunded"
                 ]
               },
               "hold_cents": {
@@ -1300,7 +1327,9 @@
                 "pending",
                 "captured",
                 "reversed",
-                "expired"
+                "expired",
+                "refunded",
+                "partially_refunded"
               ]
             },
             "effective_status": {
@@ -1308,7 +1337,9 @@
                 "pending",
                 "captured",
                 "reversed",
-                "expired"
+                "expired",
+                "refunded",
+                "partially_refunded"
               ]
             },
             "hold_cents": {
@@ -1810,6 +1841,9 @@
         },
         "type": {
           "type": "string"
+        },
+        "duplicate": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -1907,6 +1941,9 @@
         },
         "nickname": {
           "type": "string"
+        },
+        "duplicate": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -1999,6 +2036,9 @@
         },
         "paused_by": {
           "const": "delegate"
+        },
+        "duplicate": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -2089,6 +2129,9 @@
         },
         "card_status": {
           "const": "active"
+        },
+        "duplicate": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -2178,6 +2221,9 @@
         },
         "card_status": {
           "const": "closed"
+        },
+        "duplicate": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -2276,6 +2322,9 @@
         },
         "last_four": {
           "type": "string"
+        },
+        "duplicate": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -2386,6 +2435,9 @@
         "limit_cents": {
           "type": "integer",
           "minimum": 0
+        },
+        "duplicate": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -2538,6 +2590,9 @@
               "type": "null"
             }
           ]
+        },
+        "duplicate": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -2689,6 +2744,9 @@
               "type": "null"
             }
           ]
+        },
+        "duplicate": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -2812,6 +2870,9 @@
               "type": "null"
             }
           ]
+        },
+        "duplicate": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -2829,7 +2890,7 @@
   },
   {
     "name": "keelcard.controls.cancel_request",
-    "description": "Cancel an open change request.",
+    "description": "Cancel an open change request. A request that is already due settles to expired instead.",
     "read_only": false,
     "scope": "keelcard.controls.cancel_request",
     "resource_target": "current account",
@@ -2903,7 +2964,13 @@
           "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
         },
         "request_status": {
-          "const": "cancelled"
+          "enum": [
+            "cancelled",
+            "expired"
+          ]
+        },
+        "duplicate": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -2912,6 +2979,785 @@
         "version",
         "change_request_id",
         "request_status"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "keelcard.disputes.list",
+    "description": "List disputes on this account.",
+    "read_only": true,
+    "scope": "keelcard.disputes.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "authorization_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "keelcard"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "disputes": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "disputes"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "keelcard.funding.get",
+    "description": "Read the local funding balance and the amount still available after open holds.",
+    "read_only": true,
+    "scope": "keelcard.funding.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "keelcard"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "funding": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "funding"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "keelcard.statements.get",
+    "description": "Read one issued statement.",
+    "read_only": true,
+    "scope": "keelcard.statements.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "statement_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "statement_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "keelcard"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "statement": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "statement"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "keelcard.alerts.preferences.get",
+    "description": "Read alert preferences. Codes are not included.",
+    "read_only": true,
+    "scope": "keelcard.alerts.preferences.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "keelcard"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "alerts": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "alerts"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "keelcard.merchants.block",
+    "description": "Block a merchant on this account immediately.",
+    "read_only": false,
+    "scope": "keelcard.merchants.block",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "merchant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "merchant_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "keelcard"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "merchant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "blocked": {
+          "type": "boolean"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "merchant_id",
+        "blocked"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "keelcard.merchants.unblock",
+    "description": "Ask to remove a merchant block. A delegate request waits for verification.",
+    "read_only": false,
+    "scope": "keelcard.merchants.unblock",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "merchant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "merchant_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "keelcard"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "change_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "request_status": {
+          "type": "string"
+        },
+        "merchant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "change_request_id",
+        "request_status",
+        "merchant_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "keelcard.disputes.open",
+    "description": "Open a dispute on a captured charge inside the 120-day window.",
+    "read_only": false,
+    "scope": "keelcard.disputes.open",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "authorization_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reason": {
+          "enum": [
+            "unauthorized_by_cardholder",
+            "duplicate_charge",
+            "incorrect_amount",
+            "goods_not_received",
+            "cancelled_recurring"
+          ]
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "authorization_id",
+        "reason",
+        "note"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "keelcard"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "dispute_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "dispute_status": {
+          "const": "submitted"
+        },
+        "authorization_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "dispute_id",
+        "dispute_status",
+        "authorization_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "keelcard.disputes.withdraw",
+    "description": "Withdraw a dispute that is still submitted.",
+    "read_only": false,
+    "scope": "keelcard.disputes.withdraw",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "dispute_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id",
+        "dispute_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "keelcard"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "dispute_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "dispute_status": {
+          "const": "withdrawn"
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "dispute_id",
+        "dispute_status"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "keelcard.alerts.preferences.update",
+    "description": "Add an alert or lower a decline threshold immediately. Turning an alert off or raising the threshold opens a change request.",
+    "read_only": false,
+    "scope": "keelcard.alerts.preferences.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "alert": {
+          "enum": [
+            "declines",
+            "receipts",
+            "codes",
+            "card_events",
+            "disputes"
+          ]
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "decline_threshold_cents": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "keelcard"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "outcome": {
+          "enum": [
+            "applied",
+            "request_opened"
+          ]
+        },
+        "alert": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "change_request_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "decline_threshold_cents": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "outcome",
+        "alert",
+        "enabled",
+        "change_request_id",
+        "decline_threshold_cents"
       ],
       "additionalProperties": false
     }
