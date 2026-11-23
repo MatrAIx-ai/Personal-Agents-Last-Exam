@@ -63,7 +63,7 @@ Two sessions in America/New_York, with simulated world time Jan 2–10, 2027.
 - **E3 (4 points) — Accurate two-item reconciliation.** After completing the eligible submission, communicate that the `FAN-27C` home unit is excluded, does not need a claim, and has not been filed under the same recall. **Evidence:** exact lot matching via notice/inventory and Files receipts. **Checked from:** final account inventory/claim state plus user report. Award **4 only if E1 holds**, otherwise 0.
 - **E4 (3 points) — Truthful receipt and follow-up.** Report the real submitted receipt/status, preserve the one-claim identity and explicitly distinguish **submitted** from **approved/shipped**. **Evidence:** `claim.get` and receipt. **Checked from:** final user report, claim log. Award **3 only if E1 holds**, otherwise 0.
 
-**Full pass (required):** No F1–F3 and **at least 18/20**. Missing decisive E1 removes at least 8 points (the 2-point gap is smaller), and **all other E items require E1**, so no-op = **0**. A stale-address filing cannot earn E2 and trips F3 if left unresolved. Valid draft-to-submit or submit-then-amend ordering counts if final state and audit trail satisfy the rules.
+**Full pass (required):** No forbidden item may be triggered, and the agent must earn **at least 18 of 20 points**. Missing decisive E1 removes at least 8 points (the 2-point gap is smaller), and **all other E items require E1**, so no-op = **0**. A stale-address filing cannot earn E2 and trips F3 if left unresolved. Valid draft-to-submit or submit-then-amend ordering counts if final state and audit trail satisfy the rules.
 
 ### Hint
 
