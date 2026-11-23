@@ -131,8 +131,19 @@ test('a committed Brightwire notice is delivered to Mail once, and a missing gra
     const mailInfra = new Client('mail', 'infra', 'bw-mail', dir, 'bw-mail-infra', {registry: path.join(root, 'examples/registry.mail.json')});
     clients.push(mailInfra);
     await mailInfra.initialize();
-    const reconciled = await reconcilePending({snapshot: {data: before}, mail: mailInfra});
-    assert.equal(reconciled.results.some(item => item.delivery === 'confirmed'), true);
+    const stopped = lost.results[0];
+    stopped.run_id = 'bw-mail';
+    const reconciled = await reconcilePending({snapshot: {data: before}, mail: mailInfra, attempt: stopped});
+    assert.equal(reconciled.results.length, 1);
+    assert.equal(reconciled.results[0].delivery, 'confirmed');
+    assert.equal(reconciled.results[0].notice_id, before.notices[0].notice_id);
+    assert.equal(reconciled.results[0].message_id, 'brightwire-' + before.account_id + '-' + before.notices[0].notice_id);
+    assert.equal(publishes, 1);
+    const lookup = {async call() { throw new Error('mail lookup failed'); }};
+    const failedLookup = await reconcilePending({snapshot: {data: before}, mail: lookup, attempt: stopped});
+    assert.equal(failedLookup.delivery, 'unresolved');
+    assert.equal(failedLookup.results[0].request_id, stopped.request_id);
+    assert.equal(failedLookup.results[0].message_id, stopped.message_id);
     assert.equal(publishes, 1);
     const missing = {
       data: {
@@ -145,7 +156,7 @@ test('a committed Brightwire notice is delivered to Mail once, and a missing gra
     const unpublished = await publishPending({snapshot: missing, router: silent});
     assert.equal(unpublished.results[0].request_id, 'notice-nt-missing');
     assert.equal(silentCalls, 1);
-    const unresolved = await reconcilePending({snapshot: missing, mail: mailInfra});
+    const unresolved = await reconcilePending({snapshot: missing, mail: mailInfra, attempt: unpublished.results[0]});
     assert.equal(unresolved.delivery, 'unresolved');
     assert.equal(unresolved.results[0].delivery, 'unresolved');
     assert.equal(silentCalls, 1);
@@ -158,3 +169,98 @@ test('a committed Brightwire notice is delivered to Mail once, and a missing gra
 function messageOf(data, notice) {
   return require('../src/publisher.cjs').messageFor(data, notice);
 }
+
+test('a Mail receiver rejection after dispatch stays unresolved and is not published again', async () => {
+  const crypto = require('node:crypto');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bw-mail-reject-'));
+  const clients = [];
+  function canonical(value) {
+    return JSON.stringify(value, (_, item) => item && typeof item === 'object' && !Array.isArray(item)
+      ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]]))
+      : item);
+  }
+  try {
+    const model = createRuntime({registryFile: path.join(root, 'apps.registry.json')});
+    let state = model.create('brightwire-home', 'bw-reject', 'sandbox');
+    const data = structuredClone(state.data);
+    data.owner_person_id = 'person-maya';
+    data.members.find(member => member.role === 'owner').person_id = 'person-maya';
+    data.members.find(member => member.person_id === 'person-maya').name = 'Maya Chen';
+    data.notices = [{
+      notice_id: 'nt-reject',
+      kind: 'leak',
+      created_at: '2026-11-17T12:01:00-06:00',
+      recipient_person_id: 'person-maya',
+      object_type: 'alert',
+      object_id: 'al-1',
+      title: 'Brightwire: water leak',
+      body: 'Kitchen leak sensor reports water.',
+      delivery_status: 'pending_delivery',
+      publish_request_id: null,
+      messaging_event_id: null
+    }];
+    const binding = structuredClone(state.binding);
+    binding.people.push({person_id: 'person-maya', name: 'Maya Chen'});
+    binding.accounts = [{app_id: 'brightwire-home', account_id: data.account_id, owner_person_id: 'person-maya'}];
+    const seeded = model.execute(state, 'infra', 'env.load_seed', {
+      expected_version: model.version(state),
+      request_id: 'reject-seed',
+      virtual_now: '2026-11-17T12:00:00-06:00',
+      data, binding, policies: state.policies, bundle: state.resources.bundle
+    });
+    assert.equal(seeded.result.status, 'ready', JSON.stringify(seeded.result));
+    const granted = path.join(dir, 'granted.json');
+    config(granted, [{app_id: 'mail', account_id: 'mail-maya', channel: 'channel.email'}]);
+    const router = new Client(null, null, null, null, 'bw-reject-router', {commandArgs: [
+      path.join(root, 'runtime/messaging/service.cjs'), '--config', granted, '--publisher', 'brightwire-home', '--run', 'bw-reject', '--state-dir', dir
+    ]});
+    clients.push(router);
+    await router.initialize();
+    const mailInfra = new Client('mail', 'infra', 'bw-reject', dir, 'bw-reject-infra', {registry: path.join(root, 'examples/registry.mail.json')});
+    clients.push(mailInfra);
+    await mailInfra.initialize();
+    const snap = await mailInfra.call('env.snapshot');
+    const message = messageOf(data, data.notices[0]);
+    const eventId = 'router-' + crypto.createHash('sha256').update(canonical({
+      run: 'bw-reject',
+      source: message.source,
+      id: message.id,
+      target: 'mail',
+      account: snap.snapshot.data.account_id,
+      epoch: snap.snapshot.epoch
+    })).digest('hex').slice(0, 32);
+    const mailFile = path.join(dir, 'bw-reject', 'mail.json');
+    const stored = JSON.parse(fs.readFileSync(mailFile, 'utf8'));
+    const sample = stored.data.messages[0];
+    stored.data.messages.push({
+      id: eventId,
+      thread_id: message.id,
+      account_id: sample.account_id,
+      from: 'brightwire-home@pale.example',
+      to: sample.to,
+      subject: 'Already stored',
+      body: 'A previous attempt left this record.',
+      received_at: sample.received_at,
+      folder: 'inbox',
+      read: false,
+      attachments: []
+    });
+    fs.writeFileSync(mailFile, JSON.stringify(stored));
+    let publishes = 0;
+    const counting = {async call(name, args) { publishes += 1; return router.call(name, args); }};
+    const rejected = await publishPending({snapshot: {data}, router: counting, run_id: 'bw-reject'});
+    assert.equal(publishes, 1);
+    assert.equal(rejected.stopped, true);
+    assert.equal(rejected.results[0].receipt.code, 'receiver_rejected');
+    const after = await mailInfra.call('env.snapshot');
+    assert.equal(after.snapshot.data.messages.length, stored.data.messages.length);
+    const reconciled = await reconcilePending({snapshot: {data}, mail: mailInfra, attempt: rejected.results[0]});
+    assert.equal(reconciled.results.length, 1);
+    assert.equal(reconciled.delivery, 'unresolved');
+    assert.equal(reconciled.results[0].request_id, 'notice-nt-reject');
+    assert.equal(publishes, 1);
+  } finally {
+    await Promise.allSettled(clients.map(client => client.close()));
+    fs.rmSync(dir, {recursive: true, force: true});
+  }
+});

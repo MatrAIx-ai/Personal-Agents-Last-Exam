@@ -1931,6 +1931,156 @@
                       },
                       "last_edited_by": {
                         "type": "string"
+                      },
+                      "actions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "enum": [
+                                "device",
+                                "set_mode"
+                              ]
+                            },
+                            "device_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            "command": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 80
+                            },
+                            "args": {
+                              "type": "object",
+                              "properties": {
+                                "brightness": {
+                                  "type": "integer"
+                                },
+                                "color_temperature": {
+                                  "type": "integer"
+                                },
+                                "position": {
+                                  "type": "integer"
+                                },
+                                "mode": {
+                                  "type": "string"
+                                },
+                                "setpoint": {
+                                  "type": "number"
+                                },
+                                "privacy": {
+                                  "type": "string"
+                                },
+                                "volume": {
+                                  "type": "integer"
+                                },
+                                "text": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "additionalProperties": false
+                            },
+                            "mode": {
+                              "enum": [
+                                "home",
+                                "away",
+                                "night"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "kind"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "trigger": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "clock",
+                              "sunrise",
+                              "sunset",
+                              "sensor",
+                              "device_state",
+                              "member_arrives",
+                              "member_leaves",
+                              "manual"
+                            ]
+                          },
+                          "time": {
+                            "type": "string",
+                            "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                          },
+                          "device_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "state": {
+                            "type": "string"
+                          },
+                          "person_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "equals": {
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "kind"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "conditions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "enum": [
+                                "time_window",
+                                "home_mode",
+                                "device_state"
+                              ]
+                            },
+                            "start": {
+                              "type": "string",
+                              "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                            },
+                            "end": {
+                              "type": "string",
+                              "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                            },
+                            "mode": {
+                              "enum": [
+                                "home",
+                                "away",
+                                "night"
+                              ]
+                            },
+                            "device_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            "equals": {
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "kind"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "catch_up_minutes": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 180
                       }
                     },
                     "required": [
@@ -2209,6 +2359,156 @@
                       },
                       "last_edited_by": {
                         "type": "string"
+                      },
+                      "actions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "enum": [
+                                "device",
+                                "set_mode"
+                              ]
+                            },
+                            "device_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            "command": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 80
+                            },
+                            "args": {
+                              "type": "object",
+                              "properties": {
+                                "brightness": {
+                                  "type": "integer"
+                                },
+                                "color_temperature": {
+                                  "type": "integer"
+                                },
+                                "position": {
+                                  "type": "integer"
+                                },
+                                "mode": {
+                                  "type": "string"
+                                },
+                                "setpoint": {
+                                  "type": "number"
+                                },
+                                "privacy": {
+                                  "type": "string"
+                                },
+                                "volume": {
+                                  "type": "integer"
+                                },
+                                "text": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "additionalProperties": false
+                            },
+                            "mode": {
+                              "enum": [
+                                "home",
+                                "away",
+                                "night"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "kind"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "trigger": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "clock",
+                              "sunrise",
+                              "sunset",
+                              "sensor",
+                              "device_state",
+                              "member_arrives",
+                              "member_leaves",
+                              "manual"
+                            ]
+                          },
+                          "time": {
+                            "type": "string",
+                            "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                          },
+                          "device_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "state": {
+                            "type": "string"
+                          },
+                          "person_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "equals": {
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "kind"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "conditions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "enum": [
+                                "time_window",
+                                "home_mode",
+                                "device_state"
+                              ]
+                            },
+                            "start": {
+                              "type": "string",
+                              "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                            },
+                            "end": {
+                              "type": "string",
+                              "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                            },
+                            "mode": {
+                              "enum": [
+                                "home",
+                                "away",
+                                "night"
+                              ]
+                            },
+                            "device_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            "equals": {
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "kind"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "catch_up_minutes": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 180
                       }
                     },
                     "required": [
@@ -2512,7 +2812,6 @@
     "utc_offset",
     "home_mode",
     "assistant_carried_modes",
-    "approver_person_ids",
     "committed_through",
     "door_open_alert_minutes",
     "quiet_hours",

@@ -1,6 +1,6 @@
 'use strict';
 const {references, fail} = require('./domain-utils.cjs');
-const {project} = require('./house.cjs');
+const {project, codeStatus} = require('./house.cjs');
 
 const CLASSES = ['light', 'blind', 'thermostat', 'switch', 'lock', 'garage', 'camera', 'speaker', 'automations', 'modes', 'access_codes'];
 const SENSORS = ['contact', 'motion', 'temperature', 'leak', 'smoke'];
@@ -48,7 +48,13 @@ function validateSeed(ctx, data) {
       if (!devices.has(action.device_id)) fail('invalid_seed', 'A scene action names an unknown device.');
     }
   }
-  const windows = data.access_codes.filter(code => !code.revoked && code.schedule.kind === 'window');
+  const nowMs = Date.parse(ctx.virtual_now || data.committed_through);
+  const windows = data.access_codes.filter(code => {
+    if (code.schedule.kind !== 'window') return false;
+    const status = codeStatus(code, nowMs, data.utc_offset, data);
+    return status !== 'revoked' && status !== 'expired';
+  });
+  checkSnapshots(ctx, data);
   if (!data.allow_overlapping_codes) {
     for (let index = 0; index < windows.length; index += 1) {
       for (let other = index + 1; other < windows.length; other += 1) {
@@ -74,6 +80,18 @@ function validateSeed(ctx, data) {
       checkEnergy(device);
       checkEnergyHistory(device, data.activity);
     } else if (device.energy.length) fail('invalid_seed', 'Only switches carry energy intervals.');
+  }
+}
+
+function checkSnapshots(ctx, data) {
+  const catalog = ctx && (ctx.catalog || (ctx.bundle && ctx.bundle.catalog));
+  const assets = catalog && catalog.assets;
+  if (!Array.isArray(assets)) return;
+  for (const id of data.available_snapshots || []) {
+    const asset = assets.find(item => item.asset_id === id);
+    if (!asset || !asset.availability || asset.availability.status !== 'ready') {
+      fail('invalid_seed', 'available_snapshots lists ' + id + ' without a ready catalog asset.');
+    }
   }
 }
 

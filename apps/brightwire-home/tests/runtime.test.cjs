@@ -127,22 +127,21 @@ test('task 73 loads with its bundle, and a missing snapshot stays controllable',
   });
   assert.equal(loaded.result.status, 'ready', JSON.stringify(loaded.result));
   state = loaded.state;
+  state.data.available_snapshots = state.data.available_snapshots.filter(id => id !== 'snap-nursery');
   state.resources.bundle.catalog.assets = state.resources.bundle.catalog.assets.filter(asset => asset.asset_id !== 'snap-nursery');
+  delete state.resources.bundle.blobs['snap-nursery'];
   const view = model.execute(state, 'agent', 'brightwire-home.devices.get', {device_id: 'camera-nursery'});
   assert.equal(view.result.status, 'ok');
   assert.equal(view.result.device.snapshot_status, 'asset_missing');
-  const plugin = require('../plugin.cjs');
-  const changed = plugin.handleTool({
-    app_id: 'brightwire-home',
-    virtual_now: state.virtual_now,
-    binding: state.binding,
-    asset_ids: state.resources.bundle.catalog.assets.map(asset => asset.asset_id),
-    request_id: 'privacy-without-snapshot'
-  }, structuredClone(state.data), 'brightwire-home.devices.command', {
-    device_id: 'camera-nursery', command: 'set_privacy', args: {privacy: 'privacy_off'}
+  const changed = model.execute(view.state, 'agent', 'brightwire-home.devices.command', {
+    expected_version: model.version(view.state),
+    request_id: 'privacy-without-snapshot',
+    device_id: 'camera-nursery',
+    command: 'set_privacy',
+    args: {privacy: 'privacy_off'}
   });
-  assert.equal(changed.result.outcome, 'applied');
-  assert.equal(changed.data.devices.find(device => device.device_id === 'camera-nursery').privacy, 'privacy_off');
+  assert.equal(changed.result.status, 'committed', JSON.stringify(changed.result));
+  assert.equal(changed.state.data.devices.find(device => device.device_id === 'camera-nursery').privacy, 'privacy_off');
 });
 
 test('evidence joins the later allow row and keeps each client name', async () => {

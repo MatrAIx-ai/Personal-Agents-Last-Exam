@@ -84,6 +84,22 @@ const schedule = {
   ]
 };
 
+const automationHistory = obj({
+  kind: enumOf(['routine', 'scene']),
+  id: id(),
+  name: {type: 'string'},
+  enabled: {type: 'boolean'},
+  deleted: {type: 'boolean'},
+  run_as: enumOf(['assistant', 'owner']),
+  created_by: {type: 'string'},
+  created_by_person_id: nil(id()),
+  last_edited_by: {type: 'string'},
+  actions: arr(action),
+  trigger,
+  conditions: arr(condition),
+  catch_up_minutes: {type: 'integer', minimum: 0, maximum: 180}
+}, ['kind', 'id', 'name', 'enabled', 'deleted', 'run_as', 'created_by', 'created_by_person_id', 'last_edited_by']);
+
 const projection = obj({
   type: {type: 'string'},
   power: nil(enumOf(['on', 'off'])),
@@ -114,8 +130,8 @@ const activity = obj({
   device_id: nil(id()),
   command: nil({type: 'string'}),
   summary: {type: 'string', minLength: 1, maxLength: 400},
-  before: nil({anyOf: [projection, obj({home_mode: enumOf(['home', 'away', 'night']), assistant_carried_modes: arr(enumOf(['home', 'away', 'night']))}), obj({kind: enumOf(['routine', 'scene']), id: id(), name: {type: 'string'}, enabled: {type: 'boolean'}, deleted: {type: 'boolean'}, run_as: enumOf(['assistant', 'owner']), created_by: {type: 'string'}, created_by_person_id: nil(id()), last_edited_by: {type: 'string'}})]}),
-  after: nil({anyOf: [projection, obj({home_mode: enumOf(['home', 'away', 'night']), assistant_carried_modes: arr(enumOf(['home', 'away', 'night']))}), obj({kind: enumOf(['routine', 'scene']), id: id(), name: {type: 'string'}, enabled: {type: 'boolean'}, deleted: {type: 'boolean'}, run_as: enumOf(['assistant', 'owner']), created_by: {type: 'string'}, created_by_person_id: nil(id()), last_edited_by: {type: 'string'}})]})
+  before: nil({anyOf: [projection, obj({home_mode: enumOf(['home', 'away', 'night']), assistant_carried_modes: arr(enumOf(['home', 'away', 'night']))}), automationHistory]}),
+  after: nil({anyOf: [projection, obj({home_mode: enumOf(['home', 'away', 'night']), assistant_carried_modes: arr(enumOf(['home', 'away', 'night']))}), automationHistory]})
 });
 
 const device = obj({
@@ -308,6 +324,7 @@ const seedSchema = obj({
   }),
   available_snapshots: arr(id())
 });
+seedSchema.required = seedSchema.required.filter(name => name !== 'approver_person_ids');
 
 function event(operation, payload, required) {
   return obj({
@@ -945,6 +962,14 @@ const tools = [
 ];
 
 function draw(file, spec) {
+  const probe = spawnSync('ffmpeg', ['-version'], {stdio: 'pipe'});
+  if (probe.error || probe.status !== 0) {
+    throw new Error('ffmpeg is not available. Install ffmpeg before regenerating Brightwire images.');
+  }
+  const font = '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf';
+  if (String(spec.filter || '').includes('drawtext') && !fs.existsSync(font)) {
+    throw new Error('Liberation Sans was not found at ' + font + '. Install that font before regenerating Brightwire images.');
+  }
   fs.mkdirSync(path.dirname(file), {recursive: true});
   const jpeg = file.endsWith('.jpg') || file.endsWith('.jpeg');
   const args = ['-y'];
@@ -953,7 +978,8 @@ function draw(file, spec) {
   if (jpeg) args.push('-map_metadata', '-1', '-flags:v', '+bitexact', '-update', '1');
   args.push(file);
   const result = spawnSync('ffmpeg', args, {stdio: 'pipe'});
-  if (result.status !== 0) throw new Error(result.stderr.toString());
+  if (result.error) throw new Error('ffmpeg failed to start: ' + result.error.message);
+  if (result.status !== 0) throw new Error(result.stderr ? result.stderr.toString() : 'ffmpeg exited without a status');
 }
 
 function images() {

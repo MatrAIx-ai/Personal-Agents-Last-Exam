@@ -50,14 +50,18 @@ function addDays(value, count) {
   return {year: next.getUTCFullYear(), month: next.getUTCMonth() + 1, day: next.getUTCDate(), hour: 0, minute: 0, second: 0};
 }
 
-// Dates whose local day can contain an instant strictly after `fromMs` and at or before `nowMs`.
+function dayNumber(value) {
+  return Math.floor(Date.UTC(value.year, value.month - 1, value.day) / 86400000);
+}
+
+// Local dates from the day of `fromMs` through the day of `nowMs`, inclusive.
 function datesTouched(offset, fromMs, nowMs) {
   const dates = [];
-  let cursor = parts(offset, fromMs + 1);
+  if (!(nowMs > fromMs)) return dates;
+  let cursor = parts(offset, fromMs);
   const end = dateKey(parts(offset, nowMs));
-  let guard = 0;
-  while (guard < 800) {
-    guard += 1;
+  const span = dayNumber(parts(offset, nowMs)) - dayNumber(cursor);
+  for (let index = 0; index <= span; index += 1) {
     const day = {year: cursor.year, month: cursor.month, day: cursor.day};
     dates.push(day);
     if (dateKey(day) >= end) break;
@@ -89,4 +93,4 @@ function weekday(offset, ms) {
   return WEEKDAYS[parts(offset, ms).day ? new Date(ms + offsetMinutes(offset) * 60000).getUTCDay() : 0];
 }
 
-module.exports = {offsetMinutes, parts, formatInstant, instant, datesTouched, clockMinutes, inSpan, weekday, dateText, WEEKDAYS};
+module.exports = {offsetMinutes, parts, formatInstant, instant, datesTouched, clockMinutes, inSpan, weekday, dateText, addDays, dayNumber, WEEKDAYS};

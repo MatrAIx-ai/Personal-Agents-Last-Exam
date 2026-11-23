@@ -308,9 +308,12 @@ function recurringWeekday(offset, nowMs, schedule) {
   return time.weekday(offset, when);
 }
 
-function codeStatus(code, nowMs, offset) {
+function codeStatus(code, nowMs, offset, data) {
   if (code.revoked) return 'revoked';
-  if (code.approval === 'pending') return 'scheduled';
+  if (code.approval === 'pending') {
+    if (data && pendingCodeClosed(data, code, nowMs)) return 'expired';
+    return 'scheduled';
+  }
   const schedule = code.schedule;
   if (schedule.kind === 'always') return 'active';
   if (schedule.kind === 'window') {
@@ -411,7 +414,7 @@ function presentRoutine(data, routine, nowMs) {
   };
 }
 
-function maskCode(code, nowMs, offset) {
+function maskCode(code, nowMs, offset, data) {
   return {
     code_id: code.code_id,
     name: code.name,
@@ -420,7 +423,7 @@ function maskCode(code, nowMs, offset) {
     digits_masked: '******',
     schedule: copy(code.schedule),
     locks: copy(code.locks),
-    status: codeStatus(code, nowMs, offset),
+    status: codeStatus(code, nowMs, offset, data),
     approval: code.approval
   };
 }
@@ -572,7 +575,7 @@ function runAction(ctx, data, action, meta) {
     } else if (meta.run_as === 'assistant' && effectiveScope(data, 'modes') !== 'operate') {
       return {kind: 'set_mode', outcome: 'scope_insufficient', mode: action.mode};
     }
-    setMode(ctx, data, action.mode, meta.run_as !== 'assistant');
+    setMode(ctx, data, action.mode, meta.run_as !== 'assistant', meta);
     return {kind: 'set_mode', outcome: 'applied', mode: action.mode};
   }
   const device = findDevice(data, action.device_id);
@@ -601,19 +604,21 @@ function runAction(ctx, data, action, meta) {
   }
 }
 
-function setMode(ctx, data, mode, clearCarry) {
+function setMode(ctx, data, mode, clearCarry, meta) {
   const previous = data.home_mode;
   const previousCarry = carriedModes(data);
   data.home_mode = mode;
   if (clearCarry) data.assistant_carried_modes = [];
   else if (previous !== mode && !previousCarry.includes(previous)) data.assistant_carried_modes = previousCarry.concat(previous);
   else data.assistant_carried_modes = previousCarry;
+  const fromRoutine = meta && meta.actor_kind === 'routine';
   activity(ctx, data, {
-    actor_kind: clearCarry ? 'member' : 'assistant',
-    actor_id: clearCarry ? (ctx.actor_id || data.owner_person_id) : 'assistant',
-    cause: ctx.cause || 'direct_command',
-    event_id: ctx.event_id || null,
-    request_id: ctx.request_id || null,
+    at: meta && meta.at,
+    actor_kind: fromRoutine ? 'routine' : (clearCarry ? 'member' : 'assistant'),
+    actor_id: fromRoutine ? meta.actor_id : (clearCarry ? (ctx.actor_id || data.owner_person_id) : 'assistant'),
+    cause: fromRoutine ? (meta.cause || 'routine') : (ctx.cause || 'direct_command'),
+    event_id: (meta && meta.event_id) || ctx.event_id || null,
+    request_id: (meta && meta.request_id) || ctx.request_id || null,
     command: 'set_mode',
     summary: 'Mode ' + previous + ' to ' + mode,
     before: {home_mode: previous, assistant_carried_modes: previousCarry},
@@ -653,31 +658,107 @@ function openConfirmation(ctx, data, fields) {
   return confirmation;
 }
 
+function dayCount(offset, fromAt, toAt) {
+  return time.dayNumber(time.parts(offset, toAt)) - time.dayNumber(time.parts(offset, fromAt)) + 1;
+}
+
+function clockOn(offset, day, minute) {
+  return time.instant(offset, day.year, day.month, day.day, Math.floor(minute / 60), minute % 60);
+}
+
+function clockSpan(offset, fromMs, nowMs, minute) {
+  const start = time.parts(offset, fromMs);
+  let firstDay = {year: start.year, month: start.month, day: start.day};
+  let first = clockOn(offset, firstDay, minute);
+  if (first <= fromMs) {
+    firstDay = time.addDays(firstDay, 1);
+    first = clockOn(offset, firstDay, minute);
+  }
+  const end = time.parts(offset, nowMs);
+  let lastDay = {year: end.year, month: end.month, day: end.day};
+  let last = clockOn(offset, lastDay, minute);
+  if (last > nowMs) {
+    lastDay = time.addDays(lastDay, -1);
+    last = clockOn(offset, lastDay, minute);
+  }
+  return {first, last};
+}
+
+function occurrenceOnOrAfter(offset, atMs, minute) {
+  const part = time.parts(offset, atMs);
+  let day = {year: part.year, month: part.month, day: part.day};
+  let at = clockOn(offset, day, minute);
+  if (at < atMs) {
+    day = time.addDays(day, 1);
+    at = clockOn(offset, day, minute);
+  }
+  return at;
+}
+
+function sunPlaceholder(offset, day, fromMs, nowMs) {
+  const placeholder = time.instant(offset, day.year, day.month, day.day, 12, 0);
+  if (placeholder > fromMs && placeholder <= nowMs) return placeholder;
+  const now = time.parts(offset, nowMs);
+  const sameDay = now.year === day.year && now.month === day.month && now.day === day.day;
+  const dayStart = time.instant(offset, day.year, day.month, day.day, 0, 0);
+  if (sameDay && fromMs <= placeholder && nowMs > placeholder && fromMs >= dayStart) return placeholder;
+  return null;
+}
+
 function scheduledOccurrences(data, routine, fromMs, nowMs) {
   if (!routine.enabled || routine.deleted) return [];
   const kind = routine.trigger.kind;
   if (!['clock', 'sunrise', 'sunset'].includes(kind)) return [];
+  const offset = data.utc_offset;
+  const allowance = routine.catch_up_minutes * 60000;
   const found = [];
-  for (const day of time.datesTouched(data.utc_offset, fromMs, nowMs)) {
-    let minute = null;
-    let missing = false;
-    if (kind === 'clock') minute = time.clockMinutes(routine.trigger.time);
-    else {
-      const row = data.sun_table.find(item => item.date === time.dateText(day));
-      if (!row || !row[kind]) missing = true;
-      else minute = time.clockMinutes(row[kind]);
+  if (kind === 'clock') {
+    const minute = time.clockMinutes(routine.trigger.time);
+    if (minute === null) return [];
+    const span = clockSpan(offset, fromMs, nowMs, minute);
+    if (!(span.last > fromMs) || span.last < span.first) return [];
+    const earliestFire = nowMs - allowance;
+    if (span.first < earliestFire) {
+      const probe = occurrenceOnOrAfter(offset, span.first, minute);
+      let missTo = probe;
+      const boundary = occurrenceOnOrAfter(offset, earliestFire, minute);
+      if (boundary >= earliestFire) {
+        const part = time.parts(offset, boundary);
+        const previous = time.addDays({year: part.year, month: part.month, day: part.day}, -1);
+        missTo = clockOn(offset, previous, minute);
+      }
+      if (missTo >= span.first && missTo < earliestFire && missTo <= span.last) {
+        found.push({
+          at: span.first,
+          disposition: 'miss',
+          reason: 'late',
+          count: dayCount(offset, span.first, missTo),
+          from: span.first,
+          to: missTo
+        });
+      }
     }
-    if (missing || minute === null) {
-      const placeholder = time.instant(data.utc_offset, day.year, day.month, day.day, 12, 0);
-      if (placeholder > fromMs && placeholder <= nowMs) {
+    const fireAt = span.first >= earliestFire ? span.first : occurrenceOnOrAfter(offset, earliestFire, minute);
+    if (fireAt >= earliestFire && fireAt <= span.last && fireAt > fromMs && fireAt <= nowMs) {
+      found.push({at: fireAt, disposition: 'fire', reason: null});
+    }
+    return found;
+  }
+  for (const day of time.datesTouched(offset, fromMs, nowMs)) {
+    const row = data.sun_table.find(item => item.date === time.dateText(day));
+    const text = row && row[kind];
+    if (!row || !text) {
+      const placeholder = sunPlaceholder(offset, day, fromMs, nowMs);
+      if (placeholder !== null) {
         found.push({at: placeholder, disposition: 'miss', reason: 'no_sun_time', date: time.dateText(day)});
       }
       continue;
     }
-    const at = time.instant(data.utc_offset, day.year, day.month, day.day, Math.floor(minute / 60), minute % 60);
+    const minute = time.clockMinutes(text);
+    if (minute === null) continue;
+    const at = clockOn(offset, day, minute);
     if (at <= fromMs || at > nowMs) continue;
     const late = nowMs - at;
-    const allowance = routine.catch_up_minutes * 60000;
     found.push({at, disposition: late <= allowance ? 'fire' : 'miss', reason: late <= allowance ? null : 'late'});
   }
   return found;
@@ -688,7 +769,7 @@ function collectDue(data, fromMs, nowMs) {
   for (const device of data.devices) {
     if (device.type === 'lock' && device.lock === 'unlocked' && device.unlocked_at && device.auto_relock_minutes && device.fault !== 'jammed') {
       const at = Date.parse(device.unlocked_at) + device.auto_relock_minutes * 60000;
-      if (at > fromMs && at <= nowMs) effects.push({at, kind: 'relock', id: device.device_id});
+      if (at > fromMs && at <= nowMs) effects.push({at, kind: 'relock', id: device.device_id, unlocked_at: device.unlocked_at});
     }
     if (device.type === 'contact' && device.sensor === 'open' && device.opened_at && data.door_open_alert_minutes) {
       const at = Date.parse(device.opened_at) + data.door_open_alert_minutes * 60000;
@@ -699,7 +780,16 @@ function collectDue(data, fromMs, nowMs) {
   }
   for (const routine of data.routines) {
     for (const item of scheduledOccurrences(data, routine, fromMs, nowMs)) {
-      effects.push({at: item.at, kind: item.disposition === 'fire' ? 'fire' : 'miss', id: routine.routine_id, reason: item.reason});
+      effects.push({
+        at: item.at,
+        kind: item.disposition === 'fire' ? 'fire' : 'miss',
+        id: routine.routine_id,
+        reason: item.reason,
+        count: item.count || 1,
+        from: item.from || item.at,
+        to: item.to || item.at,
+        date: item.date || null
+      });
     }
   }
   effects.sort((left, right) => left.at - right.at || String(left.id).localeCompare(String(right.id)) || left.kind.localeCompare(right.kind));
@@ -714,14 +804,18 @@ function collapseLateMisses(effects) {
       rest.push(effect);
       continue;
     }
-    const current = grouped.get(effect.id) || {at: effect.at, kind: 'miss', id: effect.id, reason: 'late', count: 0, from: effect.at, to: effect.at};
-    current.count += 1;
-    current.from = Math.min(current.from, effect.at);
-    current.to = Math.max(current.to, effect.at);
+    const current = grouped.get(effect.id) || {at: effect.at, kind: 'miss', id: effect.id, reason: 'late', count: 0, from: effect.from || effect.at, to: effect.to || effect.at};
+    current.count += effect.count || 1;
+    current.from = Math.min(current.from, effect.from || effect.at);
+    current.to = Math.max(current.to, effect.to || effect.at);
     current.at = current.from;
     grouped.set(effect.id, current);
   }
   return rest.concat([...grouped.values()]);
+}
+
+function dueRank(effect, nowMs) {
+  return effect.kind === 'relock' && effect.at <= nowMs ? 0 : 1;
 }
 
 function commitDue(ctx, data) {
@@ -731,16 +825,19 @@ function commitDue(ctx, data) {
   const pending = collapseLateMisses(collectDue(data, fromMs, nowMs));
   const seen = new Set();
   let guard = 0;
+  let recordedMs = fromMs;
   while (pending.length && guard < 4000) {
     guard += 1;
-    pending.sort((left, right) => left.at - right.at || String(left.id).localeCompare(String(right.id)) || left.kind.localeCompare(right.kind));
+    pending.sort((left, right) => dueRank(left, nowMs) - dueRank(right, nowMs) || left.at - right.at || String(left.id).localeCompare(String(right.id)) || left.kind.localeCompare(right.kind));
     const effect = pending.shift();
-    const key = effect.kind + ':' + effect.id + ':' + effect.at + ':' + (effect.date || '');
+    const key = effect.kind + ':' + effect.id + ':' + effect.at + ':' + (effect.date || '') + ':' + (effect.unlocked_at || '');
     if (seen.has(key)) continue;
     seen.add(key);
     applyDue(ctx, data, effect, nowMs, pending, fromMs);
+    const covered = Math.max(effect.at || 0, effect.to || 0);
+    if (covered > recordedMs) recordedMs = covered;
   }
-  data.committed_through = ctx.virtual_now;
+  data.committed_through = pending.length ? time.formatInstant(data.utc_offset, recordedMs) : ctx.virtual_now;
   data.runtime_seen = [];
 }
 
@@ -748,7 +845,9 @@ function applyDue(ctx, data, effect, nowMs, pending, fromMs) {
   const at = time.formatInstant(data.utc_offset, effect.at);
   if (effect.kind === 'relock') {
     const device = findDevice(data, effect.id);
-    if (!device || device.lock !== 'unlocked') return;
+    if (!device || device.lock !== 'unlocked' || !device.unlocked_at || !device.auto_relock_minutes) return;
+    if (effect.unlocked_at && device.unlocked_at !== effect.unlocked_at) return;
+    if (Date.parse(device.unlocked_at) + device.auto_relock_minutes * 60000 !== effect.at) return;
     const before = project(device);
     device.lock = 'locked';
     device.unlocked_at = null;
@@ -808,7 +907,7 @@ function applyDue(ctx, data, effect, nowMs, pending, fromMs) {
     if (device.type !== 'lock' || device.lock !== 'unlocked' || !device.unlocked_at || !device.auto_relock_minutes) continue;
     if (beforeLocks.includes(device.device_id)) continue;
     const relockAt = Date.parse(device.unlocked_at) + device.auto_relock_minutes * 60000;
-    if (relockAt > fromMs && relockAt <= nowMs) pending.push({at: relockAt, kind: 'relock', id: device.device_id});
+    if (relockAt > fromMs && relockAt <= nowMs) pending.push({at: relockAt, kind: 'relock', id: device.device_id, unlocked_at: device.unlocked_at});
   }
 }
 
@@ -880,7 +979,7 @@ function pendingCodeClosed(data, code, nowMs) {
 }
 
 function activeCodeCount(data, nowMs) {
-  return data.access_codes.filter(code => !code.revoked && !pendingCodeClosed(data, code, nowMs) && codeStatus(code, nowMs, data.utc_offset) !== 'expired').length;
+  return data.access_codes.filter(code => codeStatus(code, nowMs, data.utc_offset, data) !== 'revoked' && codeStatus(code, nowMs, data.utc_offset, data) !== 'expired').length;
 }
 
 function rangesOverlap(left, right) {
@@ -905,7 +1004,7 @@ function assertCodeSchedule(data, schedule, nowMs, ignoreId) {
   if (data.allow_overlapping_codes || schedule.kind !== 'window') return;
   for (const code of data.access_codes) {
     if (code.code_id === ignoreId || code.revoked || code.schedule.kind !== 'window') continue;
-    if (codeStatus(code, nowMs, data.utc_offset) === 'expired') continue;
+    if (codeStatus(code, nowMs, data.utc_offset, data) === 'expired') continue;
     if (!code.locks.some(lock => (schedule.locks || []).includes(lock))) continue;
     if (rangesOverlap(code.schedule, schedule)) fail('invalid_arguments', 'That window overlaps another code on the same lock.');
   }
@@ -1103,9 +1202,9 @@ function confirmationOrder(id) {
 function approverAllowed(data, personId) {
   const member = memberById(data, personId);
   if (!member || member.role === 'assistant' || member.role === 'child' || member.role === 'guest') return false;
+  if (personId === data.owner_person_id) return true;
   const listed = Array.isArray(data.approver_person_ids) ? data.approver_person_ids : [];
-  const allowed = listed.length ? listed : [data.owner_person_id];
-  return allowed.includes(personId);
+  return listed.includes(personId);
 }
 
 function resolveConfirmation(ctx, data, payload) {
@@ -1148,13 +1247,13 @@ function useCode(ctx, data, payload) {
   } else if (payload.digits) pool = pool.filter(code => code.digits === payload.digits);
   else fail('invalid_event', 'A code use needs a holder, a code id or digits.');
   pool.sort((left, right) => left.code_id.localeCompare(right.code_id));
-  const active = pool.filter(code => codeStatus(code, nowMs, data.utc_offset) === 'active');
+  const active = pool.filter(code => codeStatus(code, nowMs, data.utc_offset, data) === 'active');
   const chosen = active[0] || pool[0] || null;
   let reason = null;
   if (!chosen) reason = 'no_matching_code';
   else if (chosen.revoked) reason = 'revoked';
-  else if (codeStatus(chosen, nowMs, data.utc_offset) === 'expired') reason = 'outside_window';
-  else if (codeStatus(chosen, nowMs, data.utc_offset) !== 'active') reason = 'outside_window';
+  else if (codeStatus(chosen, nowMs, data.utc_offset, data) === 'expired') reason = 'outside_window';
+  else if (codeStatus(chosen, nowMs, data.utc_offset, data) !== 'active') reason = 'outside_window';
   const use = {
     use_id: nextId(data, 'code_use', 'use'),
     at: stamp(ctx),
@@ -1240,14 +1339,14 @@ function applySensor(ctx, data, payload) {
   considerDeviceTriggers(ctx, data, device, {at: stamp(ctx), event_id: ctx.event_id, actor_kind: 'manual', actor_id: 'sensor'}, 0);
 }
 
-function snapshotReady(ctx, data, assetId) {
+function snapshotReady(data, assetId) {
   if (!assetId) return null;
-  const ids = ctx && Array.isArray(ctx.asset_ids) ? ctx.asset_ids : (data.available_snapshots || []);
-  return ids.includes(assetId) ? 'ready' : 'asset_missing';
+  const listed = Array.isArray(data.available_snapshots) ? data.available_snapshots : [];
+  return listed.includes(assetId) ? 'ready' : 'asset_missing';
 }
 
 function automationSnap(record, kind) {
-  return {
+  const snap = {
     kind,
     id: record.routine_id || record.scene_id,
     name: record.name,
@@ -1256,8 +1355,15 @@ function automationSnap(record, kind) {
     run_as: record.run_as,
     created_by: record.created_by,
     created_by_person_id: record.created_by_person_id || null,
-    last_edited_by: record.last_edited_by
+    last_edited_by: record.last_edited_by,
+    actions: copy(record.actions || [])
   };
+  if (record.routine_id) {
+    snap.trigger = copy(record.trigger);
+    snap.conditions = copy(record.conditions || []);
+    snap.catch_up_minutes = record.catch_up_minutes;
+  }
+  return snap;
 }
 
 function recordAutomation(ctx, data, kind, before, after, summary) {
@@ -1281,7 +1387,7 @@ function reads(ctx, data, name, args) {
   if (name === 'devices.get') {
     const device = requireDevice(data, args.device_id);
     const view = presentDevice(data, device, nowMs);
-    view.snapshot_status = snapshotReady(ctx, data, device.snapshot_asset_id);
+    view.snapshot_status = snapshotReady(data, device.snapshot_asset_id);
     return {device: view};
   }
   if (name === 'devices.history') {
@@ -1299,7 +1405,7 @@ function reads(ctx, data, name, args) {
   if (name === 'modes.get') {
     return {home_mode: data.home_mode, assistant_carried_modes: carriedModes(data), mode_rules: copy(data.mode_rules)};
   }
-  if (name === 'access_codes.list') return {codes: data.access_codes.map(code => maskCode(code, nowMs, data.utc_offset))};
+  if (name === 'access_codes.list') return {codes: data.access_codes.map(code => maskCode(code, nowMs, data.utc_offset, data))};
   if (name === 'permissions.get') {
     const effective = {};
     for (const className of Object.keys(data.scopes)) effective[className] = effectiveScope(data, className);
@@ -1607,6 +1713,7 @@ function handleTool(ctx, data, name, args) {
   const local = name.slice(PREFIX.length);
   const read = reads(ctx, data, local, args);
   if (read) return {data, result: read};
+  ctx.request_id = args.request_id || ctx.request_id || null;
   commitDue(ctx, data);
   const result = writes(ctx, data, local, args);
   delete data.runtime_seen;

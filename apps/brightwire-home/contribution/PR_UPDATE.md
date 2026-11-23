@@ -20,7 +20,7 @@ The approved plan is the baseline. The file blob is still `cfddc0d8f33af72932281
 
 ## Summary and dependencies
 
-**Summary (required):** Brightwire Home v1 is a resettable household: lights, blinds, thermostats, switches, a lock with guest codes, a garage door, cameras, a speaker and sensors, plus scenes, routines, modes, confirmations, alerts and energy. All 35 Agent tools are named `brightwire-home.*`. Time-derived statuses are computed from `ctx.virtual_now`. Due routines and relocks commit on the next write or event. `apps/brightwire-home/evaluator/export.cjs` joins history to the last matching Core allow row, including connection and client name. Task 73 answers live in `apps/brightwire-home/examples/task-73-grade.cjs`. `apps/brightwire-home/src/publisher.cjs` sends owner notices to Mail and can reconcile a lost acknowledgement without sending again.
+**Summary (required):** Brightwire Home v1 is a resettable household: lights, blinds, thermostats, switches, a lock with guest codes, a garage door, cameras, a speaker and sensors, plus scenes, routines, modes, confirmations, alerts and energy. All 35 Agent tools are named `brightwire-home.*`. Time-derived statuses are computed from `ctx.virtual_now`. Due routines and relocks commit on the next write or event. `apps/brightwire-home/evaluator/export.cjs` joins history to the last matching Core allow row, including connection and client name. Task 73 answers live in `apps/brightwire-home/examples/task-73-grade.cjs`. `apps/brightwire-home/src/publisher.cjs` sends owner notices to Mail and reconciles the stopped attempt from Mail's receipt.
 
 **Dependencies / questions (optional):** Public runtime 1.6.0 and Mail 1.3.0. Verified against upstream `main` `a4bce023953061483c41de5a287ba5e43f4a5648`. First consumer is task #73, which should load `apps/brightwire-home/fixtures/task-73.json`. Hearth (#31) and Home Repair Slots (#5) are shared id strings only. Calendar is read by the agent with Calendar's own tools.
 
@@ -46,14 +46,24 @@ npm run app:verify -- --app apps/brightwire-home
 npm test
 ```
 
-Observed on 2026-11-23 UTC, Node v22.23.4, runtime 1.6.0, Core API 1.2.0, app 1.0.0, against upstream main `a4bce023953061483c41de5a287ba5e43f4a5648`. Node 18 is the public-runtime CI version and was not installed in this checkout, so these commands ran on Node 22.
+Evidence link for this SHA: replace this line with the HTTPS URL of the CI run for the exact commit before `/submit-implementation`.
 
-- App tests: 42 passed, 0 failed (`tests/business.test.cjs`, `tests/images.test.cjs`, `tests/mail-integration.test.cjs`, `tests/runtime.test.cjs`).
+Candidate suite and base-validator results are separate.
+
+Observed on 2026-11-23 UTC, runtime 1.6.0, Core API 1.2.0, app 1.0.0, against upstream main `a4bce023953061483c41de5a287ba5e43f4a5648`.
+
+Candidate suite (`npm test`):
+
+- Node v22.23.4: 24/24 stages passed.
+- Node v18.20.8 (`npx -p node@18`): 24/24 stages passed.
+
+Base validator (`npm run app:verify -- --app apps/brightwire-home`), Node v22.23.4: passed. The report is `.artifacts/brightwire-home.json`.
+
+App tests on both Node v22.23.4 and Node v18.20.8: 54 passed, 0 failed (`tests/business.test.cjs` 44, `tests/images.test.cjs` 2, `tests/mail-integration.test.cjs` 2, `tests/runtime.test.cjs` 6).
+
 - Example: `{"app":"brightwire-home","contact":"open","alerts":0,"committed_through":"2026-11-17T12:05:00-06:00"}`.
-- Runtime tests: 6 passed. Replay, stale version, reset, catch-up rollback, a task 73 load with the package bundle, and an MCP join of two clients.
-- Mail integration: 1 passed. A confirmation request and a camera share each produce one Mail message. A second publish of the same request id returns `duplicate: true`. A publisher with no grant returns `recipient_not_authorized` with the lock still locked. A dropped acknowledgement is reconciled through Infra `env.event_status` without a second publish, and a notice that never committed stays unresolved.
-- `app:verify` passed. The report is `.artifacts/brightwire-home.json`.
-- `npm test`: 24/24 stages passed, including contracts, the clock contract for each registered App, the Brightwire verify stage, and `brightwire-home-runtime`.
+- Runtime tests: 6 passed. Replay, stale version, reset, catch-up rollback, a task 73 load with the package bundle on unchanged Core, and an MCP join of two clients.
+- Mail integration: 2 passed. A confirmation request and a camera share each produce one Mail message. A second publish of the same request id returns `duplicate: true`. A publisher with no grant returns `recipient_not_authorized` with the lock still locked. A dropped acknowledgement is reconciled from the stopped attempt. A receiver rejection after Mail accepts the dispatch stays unresolved, with one publish.
 
 ## Implementation progress
 
@@ -94,12 +104,12 @@ Every Agent tool is prefixed with `brightwire-home.`. The proposal file was not 
 - `records()` returns one household summary, so bundles should keep `expected_counts.records` at 1.
 - In-process `execute` audit rows omit `input.request_id`. The MCP server adds it, along with `connection_id` and `client_name`. The helper keeps `request_id` on the activity either way.
 - Assistant mode carry is the list `assistant_carried_modes`. A member mode change or an owner routine clears the whole list.
-- A caught-up routine records device changes at `fired_at`. Only the auto-relock row is stamped at its due time.
+- A caught-up routine records device changes at `fired_at`. An auto-relock that was already due is stored at its due time, before that routine. A relock whose unlock was replaced by a later unlock is skipped.
 - Mail reconciliation uses an Infra Mail client. `env.event_status` and `env.snapshot` are not Agent tools.
 - `env.reset` clears the previous audit and then records the reset itself.
-- There is no business web page. `node runtime/web/server.cjs --app brightwire-home` has nothing to mount.
+- There is no business web page. `node runtime/web/server.cjs --registry apps.registry.json --app brightwire-home` has nothing to mount.
 - Family chat is not sent.
 
 ## Comment draft
 
-@Jasonya Brightwire Home v1 is on `environment-proposal/brightwire-home-devices`. It implements the approved plan: 35 `brightwire-home.*` tools, the 10 events, four household fixtures, the evidence helper, the task 73 grader, and the Mail publisher. `npm run app:verify -- --app apps/brightwire-home` passed, and `npm test` passed 24/24 against upstream main `a4bce023953061483c41de5a287ba5e43f4a5648`. The proposal file is unchanged (`cfddc0d8f33af729322817b56620876474509d9d`). Task 73 can load `apps/brightwire-home/fixtures/task-73.json`. The suggested PR text and the limits are in `apps/brightwire-home/contribution/PR_UPDATE.md`.
+@Jasonya Brightwire Home v1 is on `environment-proposal/brightwire-home-devices`. It implements the approved plan: 35 `brightwire-home.*` tools, the 10 events, four household fixtures, the evidence helper, the task 73 grader, and the Mail publisher. The base validator `npm run app:verify -- --app apps/brightwire-home` passed. The candidate suite `npm test` passed 24/24 on Node 22 and on Node 18.20.8, against upstream main `a4bce023953061483c41de5a287ba5e43f4a5648`. The proposal file is unchanged (`cfddc0d8f33af729322817b56620876474509d9d`). Task 73 can load `apps/brightwire-home/fixtures/task-73.json`. The suggested PR text and the limits are in `apps/brightwire-home/contribution/PR_UPDATE.md`. The evidence link for the exact SHA is still a placeholder in that file.

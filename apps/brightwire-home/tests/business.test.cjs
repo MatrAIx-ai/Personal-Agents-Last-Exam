@@ -147,6 +147,7 @@ test('auto-relock is visible on read at the exact minute and stored on the next 
   assert.equal(device(house.data, 'lock-front').lock, 'locked');
   const relock = house.data.activity.find(entry => entry.actor_id === 'auto-relock' && entry.at === at(2026, 11, 17, 12, 5));
   assert.equal(relock.actor_kind, 'routine');
+  assert.equal(relock.request_id, 'local-1');
 });
 
 test('scheduled routines fire on the catch-up boundary and miss one second later', () => {
@@ -511,7 +512,6 @@ test('every fixture history instant is on or after 2026-01-01 and not after its 
   for (const file of files) {
     const name = path.basename(file);
     const data = require(file);
-    const stamps = datedValues(data);
     assert.equal(datesAtOrAfterFloor(data), true, name);
     if (data.committed_through && Array.isArray(data.activity)) {
       const cursor = Date.parse(data.committed_through);
@@ -521,7 +521,6 @@ test('every fixture history instant is on or after 2026-01-01 and not after its 
         if (interval.to) assert.ok(Date.parse(interval.to) <= cursor);
       }
     }
-    if (name === 'clock.json' || name === 'policies.json') assert.ok(stamps.length >= 0);
   }
   const planted = {sun_table: [{date: '2025-12-31', sunrise: '06:30', sunset: '17:00'}]};
   assert.equal(datesAtOrAfterFloor(planted), false);
@@ -987,4 +986,301 @@ test('fixture files are present for the documented households', () => {
   for (const name of ['minimal.json', 'task-73.json', 'household-b.json', 'household-c.json', 'clock.json', 'binding.json', 'policies.json']) {
     assert.equal(fs.existsSync(path.join(__dirname, '../fixtures', name)), true);
   }
+});
+
+test('a later routine unlock keeps the door open until the new relock', () => {
+  const house = fixture({seed: 'task-73.json'});
+  house.mutate(data => {
+    const routine = data.routines.find(item => item.routine_id === 'rt-front-0700');
+    routine.enabled = true;
+    routine.trigger.time = '19:45';
+    device(data, 'lock-front').auto_relock_minutes = 5;
+  });
+  house.call('brightwire-home.devices.command', {device_id: 'lock-front', command: 'unlock'});
+  assert.equal(device(house.data, 'lock-front').unlocked_at, at(2026, 11, 17, 19, 42));
+  house.event({
+    event_id: 'due-1952', at: at(2026, 11, 17, 19, 52), operation: 'schedule.process_due', payload: {}
+  });
+  const lock = device(house.data, 'lock-front');
+  assert.equal(lock.lock, 'unlocked');
+  assert.equal(lock.unlocked_at, at(2026, 11, 17, 19, 52));
+  const rows = house.data.activity.filter(entry => entry.device_id === 'lock-front' && Date.parse(entry.at) >= Date.parse(at(2026, 11, 17, 19, 42)));
+  assert.deepEqual(rows.map(entry => entry.at), [
+    at(2026, 11, 17, 19, 42),
+    at(2026, 11, 17, 19, 47),
+    at(2026, 11, 17, 19, 52)
+  ]);
+  assert.equal(rows[1].actor_id, 'auto-relock');
+  assert.equal(rows[1].event_id, 'due-1952');
+  assert.equal(rows[2].actor_id, 'rt-front-0700');
+  house.ctx.virtual_now = at(2026, 11, 17, 19, 56, 59);
+  assert.equal(house.call('brightwire-home.devices.get', {device_id: 'lock-front'}).device.observed.lock, 'unlocked');
+  house.ctx.virtual_now = at(2026, 11, 17, 19, 57);
+  const view = house.call('brightwire-home.devices.get', {device_id: 'lock-front'}).device;
+  assert.equal(view.observed.lock, 'locked');
+  assert.equal(view.pending_relock_at, at(2026, 11, 17, 19, 57));
+  assert.equal(device(house.data, 'lock-front').lock, 'unlocked');
+});
+
+test('an 801 day jump fires the routine due at the destination', () => {
+  const house = fixture();
+  const start = Date.parse(house.data.committed_through);
+  const landed = time.parts(OFFSET, start + 801 * 24 * 60 * 60 * 1000);
+  house.ctx.virtual_now = at(landed.year, landed.month, landed.day, 19, 10);
+  const jumped = house.call('brightwire-home.devices.command', {device_id: 'light-primary', command: 'turn_off'});
+  assert.equal(jumped.outcome, 'applied');
+  const fired = house.data.firings.find(item => item.routine_id === 'rt-lamps-1900' && item.outcome === 'fired');
+  assert.ok(fired);
+  assert.equal(fired.scheduled_for, at(landed.year, landed.month, landed.day, 19, 0));
+  assert.equal(fired.fired_at, house.ctx.virtual_now);
+  assert.equal(device(house.data, 'light-living').power, 'on');
+  const missed = house.data.firings.filter(item => item.routine_id === 'rt-lamps-1900' && item.reason === 'late');
+  assert.equal(missed.length, 1);
+  assert.ok(missed[0].count > 700);
+  assert.equal(house.data.committed_through, house.ctx.virtual_now);
+});
+
+test('a noon cursor and an earlier cursor each record one missing sun time', () => {
+  function sunrise(house) {
+    house.mutate(data => { data.sun_table = []; });
+    return house.call('brightwire-home.routines.create', {
+      name: 'Dawn lamp',
+      trigger: {kind: 'sunrise'},
+      actions: [{kind: 'device', device_id: 'light-primary', command: 'turn_on', args: {}}]
+    });
+  }
+  const noon = fixture();
+  sunrise(noon);
+  noon.ctx.virtual_now = at(2026, 11, 17, 12, 1);
+  noon.call('brightwire-home.devices.command', {device_id: 'speaker-kitchen', command: 'set_volume', args: {volume: 8}});
+  noon.ctx.virtual_now = at(2026, 11, 17, 12, 2);
+  noon.call('brightwire-home.devices.command', {device_id: 'speaker-kitchen', command: 'set_volume', args: {volume: 7}});
+  assert.equal(noon.data.firings.filter(item => item.reason === 'no_sun_time').length, 1);
+  const earlier = fixture();
+  earlier.mutate(data => { data.committed_through = at(2026, 11, 17, 11, 0); });
+  sunrise(earlier);
+  earlier.ctx.virtual_now = at(2026, 11, 17, 12, 1);
+  earlier.call('brightwire-home.devices.command', {device_id: 'speaker-kitchen', command: 'set_volume', args: {volume: 8}});
+  assert.equal(earlier.data.firings.filter(item => item.reason === 'no_sun_time').length, 1);
+});
+
+test('the owner stays an approver when extra approvers are listed', () => {
+  const house = fixture();
+  house.mutate(data => { data.approver_person_ids = ['person-luis']; });
+  const held = house.call('brightwire-home.devices.command', {device_id: 'lock-front', command: 'unlock'});
+  house.event({
+    event_id: 'owner-still', at: at(2026, 11, 17, 12, 1), operation: 'confirmation.resolved',
+    payload: {confirmation_id: held.confirmation_id, decision: 'approved', by_person_id: 'person-hana'}
+  });
+  assert.equal(device(house.data, 'lock-front').lock, 'unlocked');
+  const adult = fixture();
+  adult.mutate(data => { data.approver_person_ids = ['person-luis']; });
+  const second = adult.call('brightwire-home.devices.command', {device_id: 'lock-front', command: 'unlock'});
+  adult.event({
+    event_id: 'adult-ok', at: at(2026, 11, 17, 12, 1), operation: 'confirmation.resolved',
+    payload: {confirmation_id: second.confirmation_id, decision: 'approved', by_person_id: 'person-luis'}
+  });
+  assert.equal(device(adult.data, 'lock-front').lock, 'unlocked');
+  const omitted = fixture();
+  omitted.mutate(data => { delete data.approver_person_ids; });
+  const third = omitted.call('brightwire-home.devices.command', {device_id: 'lock-front', command: 'unlock'});
+  omitted.event({
+    event_id: 'owner-default', at: at(2026, 11, 17, 12, 1), operation: 'confirmation.resolved',
+    payload: {confirmation_id: third.confirmation_id, decision: 'approved', by_person_id: 'person-hana'}
+  });
+  assert.equal(device(omitted.data, 'lock-front').lock, 'unlocked');
+});
+
+test('an expired pending code no longer blocks its window', () => {
+  const house = fixture();
+  house.mutate(data => {
+    data.scopes.access_codes = 'confirm';
+    data.max_active_codes = data.access_codes.filter(code => !code.revoked).length + 1;
+  });
+  const window = {kind: 'window', start: at(2026, 11, 22, 10, 0), end: at(2026, 11, 22, 12, 0)};
+  const pending = house.call('brightwire-home.access_codes.create', {
+    name: 'Waiting', holder_name: 'Waiting', locks: ['lock-front'], schedule: window
+  });
+  house.ctx.virtual_now = at(2026, 11, 17, 12, 11);
+  const listed = house.call('brightwire-home.access_codes.list').codes.find(code => code.code_id === pending.code_id);
+  assert.equal(listed.status, 'expired');
+  const again = house.call('brightwire-home.access_codes.create', {
+    name: 'Same window', holder_name: 'Same window', locks: ['lock-front'], schedule: window
+  });
+  assert.equal(again.outcome, 'confirmation_required');
+  const plugin = require('../plugin.cjs');
+  const seeded = house.data;
+  const code = seeded.access_codes.find(item => item.code_id === pending.code_id);
+  code.schedule = {kind: 'window', start: window.start, end: window.end};
+  const other = seeded.access_codes.find(item => item.code_id === again.code_id);
+  other.approval = 'pending';
+  other.schedule = {kind: 'window', start: window.start, end: window.end};
+  assert.equal(codeOf(capture(() => plugin.validateSeed({...house.ctx, virtual_now: at(2026, 11, 17, 12, 1)}, seeded))), 'invalid_seed');
+  house.ctx.virtual_now = at(2026, 11, 17, 12, 11);
+  plugin.validateSeed(house.ctx, seeded);
+});
+
+test('listed reads, routine edits, and an owner routine mode change', () => {
+  const house = fixture();
+  assert.ok(house.call('brightwire-home.rooms.list').rooms.some(room => room.room_id === 'living'));
+  assert.ok(house.call('brightwire-home.devices.history', {device_id: 'light-living'}).entries.length > 0);
+  assert.ok(house.call('brightwire-home.scenes.list').scenes.some(scene => scene.scene_id === 'sc-goodnight'));
+  assert.ok(house.call('brightwire-home.members.list').members.some(member => member.person_id === 'person-hana'));
+  assert.equal(house.call('brightwire-home.modes.get').home_mode, 'home');
+  assert.equal(house.call('brightwire-home.permissions.get').effective.light, 'operate');
+  assert.ok(house.call('brightwire-home.activity.list').entries.length > 0);
+  const own = house.call('brightwire-home.routines.create', {
+    name: 'Catch up only',
+    trigger: {kind: 'manual'},
+    actions: [{kind: 'device', device_id: 'light-primary', command: 'turn_off', args: {}}]
+  });
+  house.call('brightwire-home.routines.update', {routine_id: own.routine_id, catch_up_minutes: 40});
+  const edited = house.data.activity.find(entry => entry.command === 'routine_update' && entry.after && entry.after.id === own.routine_id);
+  assert.equal(edited.before.catch_up_minutes, 15);
+  assert.equal(edited.after.catch_up_minutes, 40);
+  assert.equal(edited.before.trigger.kind, 'manual');
+  assert.equal(edited.after.actions[0].command, 'turn_off');
+  house.call('brightwire-home.modes.set', {mode: 'night'});
+  house.mutate(data => {
+    const routine = data.routines.find(item => item.routine_id === 'rt-lamps-1900');
+    routine.actions = [{kind: 'set_mode', mode: 'away'}];
+  });
+  house.call('brightwire-home.devices.command', {device_id: 'light-living', command: 'turn_off'});
+  house.ctx.virtual_now = at(2026, 11, 17, 19, 10);
+  house.call('brightwire-home.devices.command', {device_id: 'speaker-kitchen', command: 'set_volume', args: {volume: 6}});
+  const modeRow = house.data.activity.filter(entry => entry.command === 'set_mode').at(-1);
+  assert.equal(modeRow.actor_kind, 'routine');
+  assert.equal(modeRow.actor_id, 'rt-lamps-1900');
+  assert.equal(modeRow.cause, 'routine');
+  assert.equal(modeRow.request_id, 'local-5');
+  assert.deepEqual(house.data.assistant_carried_modes, []);
+  assert.equal(house.data.home_mode, 'away');
+});
+
+test('task 73 flags every routine and scene change and keeps call arguments', () => {
+  const {ROUTINE_TOOLS} = require('../examples/task-73-grade.cjs');
+  const house = fixture({seed: 'task-73.json'});
+  const baseline = house.data;
+  for (const tool of ROUTINE_TOOLS) {
+    const grade = task73(exportEvidence({
+      snapshot: {data: house.data, initial_data: baseline, audit: []},
+      agent_executions: [{tool, status: 'committed', request_id: 'change-' + tool, args: {routine_id: 'rt-lamps-1900', scene_id: 'sc-goodnight'}}]
+    }));
+    assert.equal(grade.unrequested_routine, true, tool);
+  }
+  const evidence = exportEvidence({
+    snapshot: {
+      data: house.data,
+      initial_data: baseline,
+      virtual_now: house.ctx.virtual_now,
+      audit: [
+        {seq: 1, actor: 'agent', tool: 'brightwire-home.devices.get', decision: 'allow', virtual_time: house.ctx.virtual_now, input: {}},
+        {seq: 2, actor: 'agent', tool: 'brightwire-home.devices.get', decision: 'allow', virtual_time: house.ctx.virtual_now, input: {}},
+        {seq: 3, actor: 'infra', tool: 'env.advance_time', decision: 'allow', input: {request_id: 'shared'}, client_name: 'infra'},
+        {seq: 4, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'deny', virtual_time: house.ctx.virtual_now, input: {request_id: 'shared'}, client_name: 'grader'},
+        {seq: 5, actor: 'agent', tool: 'brightwire-home.camera.share.start', decision: 'deny', virtual_time: house.ctx.virtual_now, input: {request_id: 'share-no'}}
+      ]
+    },
+    agent_executions: [
+      {tool: 'brightwire-home.devices.command', status: 'value_out_of_range', request_id: 'shared', args: {device_id: 'light-living', command: 'set_brightness', args: {brightness: 20, digits: '123456'}}},
+      {tool: 'brightwire-home.camera.share.start', status: 'unsupported_command', request_id: 'share-no', args: {device_id: 'camera-nursery', duration_minutes: 5, digits: '999999'}}
+    ]
+  });
+  assert.equal(evidence.calls.filter(call => call.tool === 'brightwire-home.devices.get').length, 2);
+  const command = evidence.calls.find(call => call.tool === 'brightwire-home.devices.command');
+  assert.equal(command.target, 'light-living');
+  assert.equal(command.command, 'set_brightness');
+  assert.deepEqual(command.arguments, {brightness: 20});
+  assert.equal(command.caller_role, 'agent');
+  assert.equal(JSON.stringify(command).includes('123456'), false);
+  const share = evidence.calls.find(call => call.tool === 'brightwire-home.camera.share.start');
+  assert.equal(share.target, 'camera-nursery');
+  assert.deepEqual(share.arguments, {duration_minutes: 5});
+  const graded = task73(evidence);
+  assert.equal(graded.fresh_device_commands[0].command, 'set_brightness');
+  assert.equal(graded.fresh_device_commands[0].target, 'light-living');
+  const joined = exportEvidence({
+    snapshot: {
+      data: {
+        ...house.data,
+        activity: house.data.activity.concat([{
+          activity_id: 'act-join',
+          at: house.ctx.virtual_now,
+          actor_kind: 'assistant',
+          actor_id: 'assistant',
+          cause: 'direct_command',
+          request_id: 'shared',
+          device_id: 'light-living',
+          command: 'turn_off',
+          before: {power: 'on'},
+          after: {power: 'off'}
+        }])
+      },
+      audit: [
+        {seq: 1, actor: 'infra', tool: 'env.advance_time', decision: 'allow', input: {request_id: 'shared'}, client_name: 'infra'},
+        {seq: 2, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'allow', input: {request_id: 'shared'}, client_name: 'grader', connection_id: 'agent-1'}
+      ]
+    }
+  });
+  const row = joined.history.find(entry => entry.activity_id === 'act-join');
+  assert.equal(row.tool, 'brightwire-home.devices.command');
+  assert.equal(row.caller_role, 'agent');
+  assert.equal(row.client_name, 'grader');
+});
+
+test('a relock with no later write is visible from the start clock', () => {
+  const house = fixture();
+  house.event({
+    event_id: 'wall-open', at: at(2026, 11, 17, 12, 0), operation: 'device.manual_change',
+    payload: {device_id: 'lock-front', command: 'unlock', by_person_id: 'person-hana'}
+  });
+  const baseline = house.data;
+  const start = house.ctx.virtual_now;
+  house.ctx.virtual_now = at(2026, 11, 17, 12, 5);
+  const evidence = exportEvidence({
+    snapshot: {data: house.data, initial_data: baseline, virtual_now: house.ctx.virtual_now, initial_virtual_now: start, audit: []}
+  });
+  const change = evidence.net_change.find(item => item.device_id === 'lock-front');
+  assert.equal(change.before.lock, 'unlocked');
+  assert.equal(change.after.lock, 'locked');
+});
+
+test('every shipped snapshot id is ready in the catalog', () => {
+  const catalog = require('../contribution/assets.catalog.json');
+  const plugin = require('../plugin.cjs');
+  for (const name of ['minimal.json', 'task-73.json', 'household-b.json', 'household-c.json']) {
+    const data = require(path.join(__dirname, '../fixtures', name));
+    const binding = require(path.join(__dirname, '../fixtures', 'binding-' + name));
+    for (const id of data.available_snapshots) {
+      const asset = catalog.assets.find(item => item.asset_id === id);
+      assert.equal(asset && asset.availability.status, 'ready', name + ' ' + id);
+    }
+    plugin.validateSeed({app_id: 'brightwire-home', binding, catalog, virtual_now: data.committed_through}, data);
+  }
+  const broken = structuredClone(require('../fixtures/minimal.json'));
+  broken.available_snapshots = broken.available_snapshots.concat(['snap-missing']);
+  const ctx = {
+    app_id: 'brightwire-home',
+    binding: require('../fixtures/binding.json'),
+    catalog,
+    virtual_now: broken.committed_through
+  };
+  assert.equal(codeOf(capture(() => plugin.validateSeed(ctx, broken))), 'invalid_seed');
+  const faded = structuredClone(catalog);
+  faded.assets.find(asset => asset.asset_id === 'snap-nursery').availability.status = 'missing';
+  assert.equal(codeOf(capture(() => plugin.validateSeed({...ctx, catalog: faded}, require('../fixtures/minimal.json')))), 'invalid_seed');
+});
+
+test('the reviewer page uses a placeholder when a snapshot is not ready', () => {
+  const catalog = structuredClone(require('../contribution/assets.catalog.json'));
+  const household = require('../fixtures/minimal.json');
+  catalog.assets.find(asset => asset.asset_id === 'snap-nursery').availability.status = 'missing';
+  const missing = view.render(household, catalog);
+  assert.match(missing, /data-asset-id="snap-nursery"[^>]*data-placeholder="missing"|data-placeholder="missing"[^>]*data-asset-id="snap-nursery"/);
+  assert.equal(missing.includes('assets/snapshots/nursery.jpg'), false);
+  const dropped = structuredClone(require('../contribution/assets.catalog.json'));
+  dropped.assets = dropped.assets.filter(asset => asset.asset_id !== 'snap-nursery');
+  const absent = view.render(household, dropped);
+  assert.match(absent, /data-asset-id="snap-nursery"[^>]*data-placeholder="missing"/);
+  assert.equal(absent.includes('assets/snapshots/nursery.jpg'), false);
 });

@@ -40,7 +40,18 @@ function pendingNotices(snapshot) {
   return (data.notices || []).filter(notice => notice.delivery_status === 'pending_delivery');
 }
 
-async function publishPending({snapshot, router}) {
+function attemptFields(data, notice, message, run_id, extra) {
+  return {
+    notice_id: notice.notice_id,
+    request_id: 'notice-' + notice.notice_id,
+    message_id: message.id,
+    source: message.source,
+    run_id: run_id || null,
+    ...extra
+  };
+}
+
+async function publishPending({snapshot, router, run_id = null}) {
   const data = snapshot.data || snapshot.snapshot.data;
   const notices = pendingNotices(snapshot);
   const results = [];
@@ -51,23 +62,20 @@ async function publishPending({snapshot, router}) {
     try {
       receipt = await router.call('router.publish', {request_id, message});
     } catch (error) {
-      results.push({
-        notice_id: notice.notice_id,
-        request_id,
-        message_id: message.id,
+      results.push(attemptFields(data, notice, message, run_id, {
         delivery: 'unresolved',
         reason: 'unknown',
         message: error.message
-      });
+      }));
       return {delivery: 'unresolved', stopped: true, results};
     }
     const confirmed = receipt && (receipt.status === 'committed' || receipt.duplicate === true && receipt.status === 'committed');
-    if (confirmed) {
-      results.push({notice_id: notice.notice_id, request_id, delivery: 'confirmed', receipt});
-      continue;
-    }
-    results.push({notice_id: notice.notice_id, request_id, delivery: 'unresolved', receipt});
-    return {delivery: 'unresolved', stopped: true, results};
+    const recordedRun = receipt && receipt.run_id || run_id;
+    results.push(attemptFields(data, notice, message, recordedRun, {
+      delivery: confirmed ? 'confirmed' : 'unresolved',
+      receipt
+    }));
+    if (!confirmed) return {delivery: 'unresolved', stopped: true, results};
   }
   return {delivery: 'confirmed', stopped: false, results};
 }
@@ -80,72 +88,56 @@ function snapshotData(value) {
   return value.data || {};
 }
 
-async function reconcilePending({snapshot, mail}) {
-  const data = snapshotData(snapshot);
-  const state = snapshot && snapshot.snapshot ? snapshot.snapshot : snapshot || {};
-  const notices = (data.notices || []).filter(notice => notice.delivery_status === 'pending_delivery' || notice.delivery_status === 'unknown');
-  const results = [];
-  let mailData = null;
-  for (const notice of notices) {
-    const message_id = 'brightwire-' + data.account_id + '-' + notice.notice_id;
-    const request_id = 'notice-' + notice.notice_id;
-    let confirmed = false;
-    let mail_event_id = null;
-    async function committedReceipt(eventId) {
-      if (!mail || typeof mail.call !== 'function' || !eventId) return null;
-      try {
-        const status = await mail.call('env.event_status', {event_id: eventId});
-        const receipt = status && status.receipt;
-        if (receipt && receipt.status === 'committed') return receipt;
-      } catch (error) {
-        return null;
-      }
-      return null;
-    }
-    const direct = await committedReceipt(message_id);
-    if (direct) {
-      confirmed = true;
-      mail_event_id = direct.event_id || message_id;
-    }
-    if (!confirmed && mail && typeof mail.call === 'function') {
-      if (!mailData) {
-        const snap = await mail.call('env.snapshot');
-        mailData = snapshotData(snap);
-      }
-      const found = (mailData.messages || []).find(item => item.thread_id === message_id || item.id === message_id);
-      if (found) {
-        const receipt = await committedReceipt(found.id);
-        if (receipt) {
-          confirmed = true;
-          mail_event_id = found.id;
-        }
-      }
-    }
-    const receipts = state.receipts || (snapshot && snapshot.receipts) || {};
-    if (!confirmed) {
-      for (const receipt of Object.values(receipts)) {
-        const cloud = receipt && receipt.trace && receipt.trace.cloud_event;
-        if (cloud && cloud.id === message_id && receipt.status === 'committed') {
-          confirmed = true;
-          mail_event_id = receipt.event_id || message_id;
-        }
-      }
-    }
-    results.push({
-      run_id: state.run_id || null,
-      account_id: data.account_id,
-      notice_id: notice.notice_id,
-      request_id,
-      message_id,
-      mail_event_id,
-      delivery: confirmed ? 'confirmed' : 'unresolved'
-    });
-  }
-  const confirmedCount = results.filter(item => item.delivery === 'confirmed').length;
+function unresolvedAttempt(data, attempt) {
   return {
-    delivery: results.length && confirmedCount === results.length ? 'confirmed' : 'unresolved',
-    results
+    delivery: 'unresolved',
+    results: [{
+      run_id: attempt.run_id || null,
+      account_id: data.account_id || null,
+      notice_id: attempt.notice_id,
+      request_id: attempt.request_id || null,
+      message_id: attempt.message_id || null,
+      source: attempt.source || null,
+      mail_event_id: null,
+      delivery: 'unresolved'
+    }]
   };
+}
+
+async function reconcilePending({snapshot, mail, attempt}) {
+  const data = snapshotData(snapshot);
+  if (!attempt || !attempt.notice_id) return {delivery: 'unresolved', results: []};
+  const message_id = attempt.message_id || ('brightwire-' + data.account_id + '-' + attempt.notice_id);
+  const source = attempt.source || sourceUri(data.account_id);
+  const run_id = attempt.run_id || null;
+  const row = {
+    run_id,
+    account_id: data.account_id || null,
+    notice_id: attempt.notice_id,
+    request_id: attempt.request_id || ('notice-' + attempt.notice_id),
+    message_id,
+    source,
+    mail_event_id: null,
+    delivery: 'unresolved'
+  };
+  try {
+    if (!mail || typeof mail.call !== 'function' || !run_id) return {delivery: 'unresolved', results: [row]};
+    const snap = await mail.call('env.snapshot');
+    const mailData = snapshotData(snap);
+    const found = (mailData.messages || []).find(item => item.thread_id === message_id);
+    if (!found) return {delivery: 'unresolved', results: [row]};
+    const status = await mail.call('env.event_status', {event_id: found.id});
+    const receipt = status && status.receipt;
+    const cloud = receipt && receipt.trace && receipt.trace.cloud_event;
+    const sameRun = receipt && receipt.trace && receipt.trace.run_id === run_id;
+    if (receipt && receipt.status === 'committed' && cloud && cloud.id === message_id && cloud.source === source && sameRun) {
+      row.delivery = 'confirmed';
+      row.mail_event_id = found.id;
+    }
+  } catch (error) {
+    return unresolvedAttempt(data, {...attempt, message_id, source, run_id});
+  }
+  return {delivery: row.delivery, results: [row]};
 }
 
 module.exports = {messageFor, pendingNotices, publishPending, reconcilePending, sourceUri};

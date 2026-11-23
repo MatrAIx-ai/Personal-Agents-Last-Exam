@@ -25,19 +25,72 @@ function observed(data, device, nowMs) {
   return presentDevice(data, device, nowMs).observed;
 }
 
-function auditKey(row) {
-  const input = row && row.input || {};
-  return input.request_id || input.event_id || null;
+function idsMatch(entry, row) {
+  const input = row.input || {};
+  const request = entry.request_id && (input.request_id === entry.request_id || row.request_id === entry.request_id);
+  const event = entry.event_id && (input.event_id === entry.event_id || (row.trace && row.trace.event_id === entry.event_id));
+  return Boolean(request || event);
+}
+
+function roleMatches(entry, row) {
+  if (!row.actor || !entry.actor_kind) return true;
+  if (entry.actor_kind === 'assistant') return row.actor === 'agent';
+  if (entry.actor_kind === 'routine') return row.actor === 'agent' || row.actor === 'infra';
+  return row.actor === 'infra';
+}
+
+function operationMatches(entry, row) {
+  const tool = row.tool || '';
+  if (!tool) return true;
+  if (tool.startsWith('env.')) return entry.actor_kind !== 'assistant';
+  if (tool === 'brightwire-home.devices.command') return Boolean(entry.device_id) || entry.actor_kind === 'assistant' || entry.actor_kind === 'routine';
+  if (tool === 'brightwire-home.modes.set') return entry.command === 'set_mode' || entry.cause === 'routine';
+  if (tool.startsWith('brightwire-home.scenes.')) return entry.cause === 'scene' || String(entry.command || '').startsWith('scene');
+  if (tool.startsWith('brightwire-home.routines.')) return entry.cause === 'routine' || String(entry.command || '').startsWith('routine') || entry.actor_kind === 'assistant';
+  if (tool.startsWith('brightwire-home.camera.share')) return String(entry.command || '').startsWith('camera_share') || entry.actor_kind === 'assistant';
+  if (tool.startsWith('brightwire-home.access_codes')) return String(entry.command || '').startsWith('access_code') || entry.actor_kind === 'assistant';
+  return true;
 }
 
 function joinAudit(entry, audit) {
-  const rows = audit.filter(row => {
-    const input = row.input || {};
-    return (entry.request_id && input.request_id === entry.request_id) || (entry.event_id && input.event_id === entry.event_id);
-  });
+  const rows = audit.filter(row => idsMatch(entry, row) && roleMatches(entry, row) && operationMatches(entry, row));
   if (!rows.length) return null;
   const allow = [...rows].reverse().find(row => row.decision === 'allow');
   return allow || rows[rows.length - 1];
+}
+
+const ARGUMENT_KEYS = ['brightness', 'color_temperature', 'position', 'setpoint', 'volume', 'privacy', 'mode', 'duration_minutes', 'text'];
+
+function allowArguments(args) {
+  const out = {};
+  if (!args || typeof args !== 'object' || Array.isArray(args)) return out;
+  for (const key of ARGUMENT_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(args, key)) out[key] = args[key];
+  }
+  if (args.args && typeof args.args === 'object') {
+    for (const key of ARGUMENT_KEYS) {
+      if (Object.prototype.hasOwnProperty.call(args.args, key)) out[key] = args.args[key];
+    }
+  }
+  return out;
+}
+
+function callTarget(linked, row, execution) {
+  if (linked && (linked.device_id || linked.command)) return linked.device_id || linked.command;
+  const input = row && row.input || {};
+  if (input.device_id || input.routine_id || input.scene_id) return input.device_id || input.routine_id || input.scene_id;
+  const args = execution && execution.args;
+  if (args && (args.device_id || args.routine_id || args.scene_id)) return args.device_id || args.routine_id || args.scene_id;
+  return null;
+}
+
+function callCommand(linked, row, execution) {
+  const args = execution && execution.args;
+  if (args && args.command) return args.command;
+  const input = row && row.input || {};
+  if (input.command) return input.command;
+  if (linked && linked.command) return linked.command;
+  return null;
 }
 
 function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} = {}) {
@@ -48,6 +101,7 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
   const baselineActivity = new Set((initial.activity || []).map(entry => entry.activity_id));
   const baselineSessions = new Set((initial.sessions || []).map(session => session.session_id));
   const nowMs = Date.parse(state.virtual_now || data.committed_through || 0);
+  const startMs = Date.parse(state.initial_virtual_now || (baseline && baseline.initial_virtual_now) || (initial && initial.committed_through) || state.virtual_now || data.committed_through || 0);
   const history = (data.activity || []).map(entry => {
     const match = joinAudit(entry, audit);
     return {
@@ -82,7 +136,7 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
     const device = (data.devices || []).find(item => item.device_id === deviceId);
     const prior = (initial.devices || []).find(item => item.device_id === deviceId);
     const after = device ? observed(data, device, nowMs) : null;
-    const before = prior ? observed(initial, prior, nowMs) : null;
+    const before = prior ? observed(initial, prior, startMs) : null;
     const touched = fresh.filter(entry => entry.device_id === deviceId);
     if (!actor_kind) {
       if (!same(before, after)) net_change.push({device_id: deviceId, before, after});
@@ -111,17 +165,23 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
   const calls = [];
   const seenCalls = new Set();
   function pushCall(call) {
-    const key = [call.request_id || '', call.tool || '', call.decision || '', call.virtual_time || ''].join('|');
+    const key = call.seq != null
+      ? 'audit:' + call.seq
+      : ['exec', call.request_id || '', call.tool || '', call.decision || '', call.virtual_time || '', call.target || '', call.command || '', String(call.index)].join('|');
     if (seenCalls.has(key)) return;
     seenCalls.add(key);
     calls.push(call);
   }
   for (const row of audit) {
     const requestId = row.input ? row.input.request_id || null : null;
-    const linked = history.find(entry => entry.request_id && entry.request_id === requestId);
+    const execution = agent_executions.find(item => item.request_id && item.request_id === requestId && (item.tool || item.name) === row.tool);
+    const linked = history.find(entry => entry.request_id && entry.request_id === requestId && (!entry.device_id || !execution || !execution.args || execution.args.device_id === entry.device_id));
     pushCall({
+      seq: row.seq,
       tool: row.tool || null,
-      target: linked ? linked.device_id || linked.command || null : null,
+      target: callTarget(linked, row, execution),
+      command: callCommand(linked, row, execution),
+      arguments: allowArguments(execution && execution.args),
       outcome: row.result && row.result.status || row.reason || row.decision,
       actor: linked ? linked.actor_kind : row.actor || null,
       caller_role: row.actor || null,
@@ -132,20 +192,33 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
       client_name: row.client_name || null
     });
   }
-  for (const item of agent_executions) {
+  agent_executions.forEach((item, index) => {
+    const tool = item.tool || item.name || null;
+    const decision = ['ok', 'committed', 'ready'].includes(item.status) ? 'allow' : 'deny';
+    const existing = calls.find(call => call.request_id && call.request_id === item.request_id && call.tool === tool && call.decision === decision);
+    if (existing) {
+      if (!existing.target) existing.target = callTarget(null, null, item);
+      if (!existing.command) existing.command = callCommand(null, null, item);
+      existing.arguments = Object.assign(existing.arguments || {}, allowArguments(item.args));
+      if (item.status && (existing.outcome === 'deny' || existing.outcome === 'allow')) existing.outcome = item.status;
+      return;
+    }
     pushCall({
-      tool: item.tool || item.name || null,
-      target: item.args && (item.args.device_id || item.args.routine_id || item.args.scene_id) || null,
+      index,
+      tool,
+      target: callTarget(null, null, item),
+      command: callCommand(null, null, item),
+      arguments: allowArguments(item.args),
       outcome: item.status || null,
       actor: item.actor || 'agent',
       caller_role: 'agent',
       virtual_time: item.virtual_time || null,
       request_id: item.request_id || null,
-      decision: ['ok', 'committed', 'ready'].includes(item.status) ? 'allow' : 'deny',
+      decision,
       connection_id: item.connection_id || null,
       client_name: item.client_name || null
     });
-  }
+  });
   const rejected = [];
   const seenRejected = new Set();
   function pushRejected(item) {
