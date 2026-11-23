@@ -1,5 +1,7 @@
 # Environment Track proposal
 
+> **Scope update:** The fine-dining workflows in this proposal are now included in [the combined restaurant environment in PR #40](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/40). Implementation and acceptance will be tracked there as one environment. This PR remains open during combined-scope review. The original design below is retained for history.
+
 Proposed PR title: `[Environment Proposal] [Food & dining] Sitting fine-dining releases and backup reservations`
 
 ## 1. App and domains
