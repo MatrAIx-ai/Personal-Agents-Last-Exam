@@ -24,7 +24,7 @@ The original implementation was submitted in PR #103. Its maintainer-branch cont
 | Tasks | Recurring tasks, hierarchical subtasks and automatic due-time reminders; `due_at` is stored data, not a scheduled callback |
 | Contacts | vCard import/export, duplicate-contact merging and CardDAV/device synchronization |
 
-Reminder/push execution also needs a host scheduling/notification capability. A local interactive Web App is delivered for the seven business Apps in this suite. Brightwire Home is a separate registry App with a reviewer renderer and no business page. Verify the specific operations and timing semantics a Task needs before treating an App dependency as fulfilled.
+Reminder/push execution also needs a host scheduling/notification capability. A local interactive Web App is delivered for the Apps that ship `gui/index.html`. Brightwire Home is registered beside them; see `apps/brightwire-home/README.md`. Verify the specific operations and timing semantics a Task needs before treating an App dependency as fulfilled.
 
 ## Open-source references and reuse decision
 
@@ -98,7 +98,7 @@ The working surfaces are local MCP and App-owned interactive Web pages through t
 
 ## Interactive App interfaces
 
-Each of the seven business Apps has `gui/index.html` and `gui/src/app.js`, declaring its business actions, fields and record presentation. Brightwire Home is not one of those pages. The shared Host serves these files and connects only to Agent-authorized tools. It has no browser reset/history/event endpoint. Use `node runtime/web/server.cjs --app mail --run web-demo --profile sandbox` from the public checkout, or choose another App ID. See [startup, architecture and browser verification](../runtime/web/README.md).
+Each App that ships `gui/index.html` and `gui/src/app.js` declares its business actions, fields and record presentation there. The shared Host serves these files and connects only to Agent-authorized tools. It has no browser reset/history/event endpoint. Use `node runtime/web/server.cjs --app mail --run web-demo --profile sandbox` from the public checkout, or choose another App ID. See [startup, architecture and browser verification](../runtime/web/README.md).
 
 The optional `pale.web` GUI extension enables this public Host while preserving the existing reviewer-renderer contract and all business schemas. Missing host support must be reported separately; the legacy renderer alone is not the interactive interface.
 

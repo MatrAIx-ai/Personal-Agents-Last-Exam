@@ -6,7 +6,7 @@ const os = require('node:os');
 const path = require('node:path');
 const {Client} = require('../../../runtime/client.cjs');
 const {createRuntime} = require('../../../runtime/core/runtime.cjs');
-const {publishPending} = require('../src/publisher.cjs');
+const {publishPending, reconcilePending} = require('../src/publisher.cjs');
 
 const root = path.resolve(__dirname, '../../..');
 
@@ -116,6 +116,39 @@ test('a committed Brightwire notice is delivered to Mail once, and a missing gra
     assert.equal(denied.stopped, true);
     assert.equal(denied.results[0].receipt.code, 'recipient_not_authorized');
     assert.deepEqual(created.state.data.devices, before.devices);
+    let publishes = 0;
+    const dropping = {
+      async call(name, args) {
+        publishes += 1;
+        await router.call(name, args);
+        throw new Error('acknowledgement dropped');
+      }
+    };
+    const lost = await publishPending({snapshot: {data: before}, router: dropping});
+    assert.equal(lost.delivery, 'unresolved');
+    assert.equal(lost.results[0].request_id, 'notice-' + before.notices[0].notice_id);
+    assert.equal(publishes, 1);
+    const mailInfra = new Client('mail', 'infra', 'bw-mail', dir, 'bw-mail-infra', {registry: path.join(root, 'examples/registry.mail.json')});
+    clients.push(mailInfra);
+    await mailInfra.initialize();
+    const reconciled = await reconcilePending({snapshot: {data: before}, mail: mailInfra});
+    assert.equal(reconciled.results.some(item => item.delivery === 'confirmed'), true);
+    assert.equal(publishes, 1);
+    const missing = {
+      data: {
+        account_id: before.account_id,
+        notices: [{...before.notices[0], notice_id: 'nt-missing', delivery_status: 'pending_delivery'}]
+      }
+    };
+    let silentCalls = 0;
+    const silent = {async call() { silentCalls += 1; throw new Error('receiver down'); }};
+    const unpublished = await publishPending({snapshot: missing, router: silent});
+    assert.equal(unpublished.results[0].request_id, 'notice-nt-missing');
+    assert.equal(silentCalls, 1);
+    const unresolved = await reconcilePending({snapshot: missing, mail: mailInfra});
+    assert.equal(unresolved.delivery, 'unresolved');
+    assert.equal(unresolved.results[0].delivery, 'unresolved');
+    assert.equal(silentCalls, 1);
   } finally {
     await Promise.allSettled(clients.map(client => client.close()));
     fs.rmSync(dir, {recursive: true, force: true});

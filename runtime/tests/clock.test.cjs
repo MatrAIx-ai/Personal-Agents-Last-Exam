@@ -1,5 +1,5 @@
 'use strict';
-const test=require('node:test'),assert=require('node:assert/strict'),path=require('node:path');
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {createRuntime}=require('../core/runtime.cjs');
 const target='2026-11-20T12:00:00-08:00';
 const request=(m,s,id='session-3',time=target)=>({request_id:id,virtual_now:time,expected_version:m.version(s)});
@@ -59,9 +59,11 @@ test('clock retries retain their first receipt even after later operations, with
  assert.equal(conflict.result.status,'idempotency_conflict');assert.deepEqual(stable(conflict.state),stable(later.state));
 });
 
-test('all eight existing App packages consume a platform clock without new declarations or schema',()=>{
- const m=createRuntime({registryFile:path.resolve(__dirname,'../../apps.registry.json')});
- assert.equal(m.configs.size,8);
+test('each registered App consumes a platform clock without new declarations or schema',()=>{
+ const registryPath=path.resolve(__dirname,'../../apps.registry.json');
+ const registered=JSON.parse(fs.readFileSync(registryPath,'utf8')).apps.length;
+ const m=createRuntime({registryFile:registryPath});
+ assert.equal(m.configs.size,registered);
  for(const app of m.configs.keys()){
   const s=m.create(app,'shared','sandbox'),peer=m.create(app,'other','sandbox'),args=request(m,s);
   const out=m.execute(s,'infra','env.advance_time',args);

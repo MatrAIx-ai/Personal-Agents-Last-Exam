@@ -17,7 +17,7 @@ function fixture({seed = 'minimal.json', binding = null, now = null} = {}) {
   const ctx = {
     app_id: app,
     role: 'agent',
-    virtual_now: now || require('../fixtures/clock.json').initial_time,
+    virtual_now: now || data.committed_through || require('../fixtures/clock.json').initial_time,
     binding: structuredClone(require(path.join(__dirname, '../fixtures', bindingFile)))
   };
   function validate(value) {

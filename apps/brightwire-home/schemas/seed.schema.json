@@ -30,19 +30,22 @@
         "night"
       ]
     },
-    "assistant_carried_mode": {
-      "anyOf": [
-        {
-          "enum": [
-            "home",
-            "away",
-            "night"
-          ]
-        },
-        {
-          "type": "null"
-        }
-      ]
+    "assistant_carried_modes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "home",
+          "away",
+          "night"
+        ]
+      }
+    },
+    "approver_person_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+      }
     },
     "committed_through": {
       "type": "string",
@@ -773,13 +776,26 @@
           "created_by": {
             "enum": [
               "assistant",
-              "member"
+              "member",
+              "owner"
+            ]
+          },
+          "created_by_person_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
             ]
           },
           "last_edited_by": {
             "enum": [
               "assistant",
-              "member"
+              "member",
+              "owner"
             ]
           },
           "run_as": {
@@ -861,6 +877,7 @@
           "scene_id",
           "name",
           "created_by",
+          "created_by_person_id",
           "last_edited_by",
           "run_as",
           "deleted",
@@ -892,13 +909,26 @@
           "created_by": {
             "enum": [
               "assistant",
-              "member"
+              "member",
+              "owner"
+            ]
+          },
+          "created_by_person_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
             ]
           },
           "last_edited_by": {
             "enum": [
               "assistant",
-              "member"
+              "member",
+              "owner"
             ]
           },
           "run_as": {
@@ -1064,6 +1094,7 @@
           "enabled",
           "deleted",
           "created_by",
+          "created_by_person_id",
           "last_edited_by",
           "run_as",
           "trigger",
@@ -1839,24 +1870,79 @@
                           "night"
                         ]
                       },
-                      "assistant_carried_mode": {
+                      "assistant_carried_modes": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "home",
+                            "away",
+                            "night"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "home_mode",
+                      "assistant_carried_modes"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "routine",
+                          "scene"
+                        ]
+                      },
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "deleted": {
+                        "type": "boolean"
+                      },
+                      "run_as": {
+                        "enum": [
+                          "assistant",
+                          "owner"
+                        ]
+                      },
+                      "created_by": {
+                        "type": "string"
+                      },
+                      "created_by_person_id": {
                         "anyOf": [
                           {
-                            "enum": [
-                              "home",
-                              "away",
-                              "night"
-                            ]
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
                           },
                           {
                             "type": "null"
                           }
                         ]
+                      },
+                      "last_edited_by": {
+                        "type": "string"
                       }
                     },
                     "required": [
-                      "home_mode",
-                      "assistant_carried_mode"
+                      "kind",
+                      "id",
+                      "name",
+                      "enabled",
+                      "deleted",
+                      "run_as",
+                      "created_by",
+                      "created_by_person_id",
+                      "last_edited_by"
                     ],
                     "additionalProperties": false
                   }
@@ -2062,24 +2148,79 @@
                           "night"
                         ]
                       },
-                      "assistant_carried_mode": {
+                      "assistant_carried_modes": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "home",
+                            "away",
+                            "night"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "home_mode",
+                      "assistant_carried_modes"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "routine",
+                          "scene"
+                        ]
+                      },
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "deleted": {
+                        "type": "boolean"
+                      },
+                      "run_as": {
+                        "enum": [
+                          "assistant",
+                          "owner"
+                        ]
+                      },
+                      "created_by": {
+                        "type": "string"
+                      },
+                      "created_by_person_id": {
                         "anyOf": [
                           {
-                            "enum": [
-                              "home",
-                              "away",
-                              "night"
-                            ]
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
                           },
                           {
                             "type": "null"
                           }
                         ]
+                      },
+                      "last_edited_by": {
+                        "type": "string"
                       }
                     },
                     "required": [
-                      "home_mode",
-                      "assistant_carried_mode"
+                      "kind",
+                      "id",
+                      "name",
+                      "enabled",
+                      "deleted",
+                      "run_as",
+                      "created_by",
+                      "created_by_person_id",
+                      "last_edited_by"
                     ],
                     "additionalProperties": false
                   }
@@ -2159,6 +2300,21 @@
             "items": {
               "type": "object"
             }
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "range_end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -2168,7 +2324,9 @@
           "fired_at",
           "outcome",
           "reason",
-          "results"
+          "results",
+          "count",
+          "range_end"
         ],
         "additionalProperties": false
       }
@@ -2353,7 +2511,8 @@
     "timezone",
     "utc_offset",
     "home_mode",
-    "assistant_carried_mode",
+    "assistant_carried_modes",
+    "approver_person_ids",
     "committed_through",
     "door_open_alert_minutes",
     "quiet_hours",

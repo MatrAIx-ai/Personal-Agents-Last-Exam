@@ -92,10 +92,13 @@ function activity(ctx, data, fields) {
   return entry;
 }
 
+function carriedModes(data) {
+  return Array.isArray(data.assistant_carried_modes) ? data.assistant_carried_modes.slice() : [];
+}
+
 function effectiveScope(data, className) {
   let scope = data.scopes[className] || 'none';
-  const modes = [data.home_mode];
-  if (data.assistant_carried_mode) modes.push(data.assistant_carried_mode);
+  const modes = [data.home_mode, ...carriedModes(data)];
   for (const mode of modes) {
     const rule = data.mode_rules.find(item => item.mode === mode && item.class === className);
     if (rule) scope = tighter(scope, rule.scope);
@@ -184,8 +187,11 @@ function openEnergy(device, at) {
 }
 
 function closeEnergy(device, at) {
-  const open = device.energy.find(interval => interval.to === null);
-  if (open) open.to = at;
+  const index = device.energy.findIndex(interval => interval.to === null);
+  if (index < 0) return;
+  const open = device.energy[index];
+  if (Date.parse(open.from) >= Date.parse(at)) device.energy.splice(index, 1);
+  else open.to = at;
 }
 
 const COMMANDS = {
@@ -293,6 +299,15 @@ function confirmationStatus(item, nowMs) {
   return 'pending';
 }
 
+function recurringWeekday(offset, nowMs, schedule) {
+  const local = time.parts(offset, nowMs);
+  const minute = local.hour * 60 + local.minute;
+  const start = time.clockMinutes(schedule.start_time);
+  const end = time.clockMinutes(schedule.end_time);
+  const when = start > end && minute < end ? nowMs - 24 * 60 * 60000 : nowMs;
+  return time.weekday(offset, when);
+}
+
 function codeStatus(code, nowMs, offset) {
   if (code.revoked) return 'revoked';
   if (code.approval === 'pending') return 'scheduled';
@@ -307,7 +322,7 @@ function codeStatus(code, nowMs, offset) {
   }
   const local = time.parts(offset, nowMs);
   const minute = local.hour * 60 + local.minute;
-  const day = time.weekday(offset, nowMs);
+  const day = recurringWeekday(offset, nowMs, schedule);
   if (schedule.days.includes(day) && time.inSpan(minute, schedule.start_time, schedule.end_time)) return 'active';
   return 'scheduled';
 }
@@ -337,7 +352,7 @@ function presentDevice(data, device, nowMs) {
   const relock = device.type === 'lock' && device.lock === 'unlocked' && device.unlocked_at && device.auto_relock_minutes
     ? time.formatInstant(data.utc_offset, Date.parse(device.unlocked_at) + device.auto_relock_minutes * 60000)
     : null;
-  return {
+  const view = {
     device_id: device.device_id,
     room_id: device.room_id,
     type: device.type,
@@ -349,6 +364,28 @@ function presentDevice(data, device, nowMs) {
     snapshot_asset_id: device.snapshot_asset_id,
     hearth_appliance_id: device.hearth_appliance_id
   };
+  if (device.type === 'thermostat') {
+    view.current_temperature = device.current_temperature;
+    view.owner_min = device.owner_min;
+    view.owner_max = device.owner_max;
+  }
+  if (device.type === 'switch') {
+    view.rated_watts = device.rated_watts;
+    view.high_load = !!device.high_load;
+  }
+  if (device.type === 'camera') {
+    view.sessions = data.sessions.filter(session => session.device_id === device.device_id).map(session => ({
+      session_id: session.session_id,
+      started_at: session.started_at,
+      duration_minutes: session.duration_minutes,
+      status: shareStatus(session, nowMs)
+    }));
+  }
+  if (device.type === 'speaker') {
+    view.announcements = data.announcements.filter(item => item.device_id === device.device_id).map(item => ({at: item.at, text: item.text}));
+  }
+  if (device.sensor_value != null) view.sensor_value = device.sensor_value;
+  return view;
 }
 
 function presentRoutine(data, routine, nowMs) {
@@ -363,6 +400,7 @@ function presentRoutine(data, routine, nowMs) {
     enabled: routine.enabled,
     deleted: routine.deleted,
     created_by: routine.created_by,
+    created_by_person_id: routine.created_by_person_id || null,
     last_edited_by: routine.last_edited_by,
     run_as: routine.run_as,
     trigger: copy(routine.trigger),
@@ -481,7 +519,9 @@ function runRoutine(ctx, data, routine, atMs, meta) {
     fired_at: stamp(ctx),
     outcome: 'fired',
     reason: null,
-    results: []
+    results: [],
+    count: 1,
+    range_end: null
   };
   if (!conditionsMet(data, routine, atMs)) {
     firing.outcome = 'conditions_unmet';
@@ -504,7 +544,7 @@ function runRoutine(ctx, data, routine, atMs, meta) {
   }
   data.firings.push(firing);
   activity(ctx, data, {
-    at: firing.scheduled_for,
+    at: firing.fired_at,
     actor_kind: 'routine',
     actor_id: routine.routine_id,
     cause: 'routine',
@@ -563,10 +603,11 @@ function runAction(ctx, data, action, meta) {
 
 function setMode(ctx, data, mode, clearCarry) {
   const previous = data.home_mode;
-  const previousCarry = data.assistant_carried_mode;
+  const previousCarry = carriedModes(data);
   data.home_mode = mode;
-  if (clearCarry) data.assistant_carried_mode = null;
-  else if (previous !== mode) data.assistant_carried_mode = previous;
+  if (clearCarry) data.assistant_carried_modes = [];
+  else if (previous !== mode && !previousCarry.includes(previous)) data.assistant_carried_modes = previousCarry.concat(previous);
+  else data.assistant_carried_modes = previousCarry;
   activity(ctx, data, {
     actor_kind: clearCarry ? 'member' : 'assistant',
     actor_id: clearCarry ? (ctx.actor_id || data.owner_person_id) : 'assistant',
@@ -575,8 +616,8 @@ function setMode(ctx, data, mode, clearCarry) {
     request_id: ctx.request_id || null,
     command: 'set_mode',
     summary: 'Mode ' + previous + ' to ' + mode,
-    before: {home_mode: previous, assistant_carried_mode: previousCarry},
-    after: {home_mode: data.home_mode, assistant_carried_mode: data.assistant_carried_mode}
+    before: {home_mode: previous, assistant_carried_modes: previousCarry},
+    after: {home_mode: data.home_mode, assistant_carried_modes: carriedModes(data)}
   });
 }
 
@@ -628,8 +669,9 @@ function scheduledOccurrences(data, routine, fromMs, nowMs) {
     }
     if (missing || minute === null) {
       const placeholder = time.instant(data.utc_offset, day.year, day.month, day.day, 12, 0);
-      const at = placeholder > fromMs && placeholder <= nowMs ? placeholder : nowMs;
-      if (at > fromMs && at <= nowMs) found.push({at, disposition: 'miss', reason: 'no_sun_time'});
+      if (placeholder > fromMs && placeholder <= nowMs) {
+        found.push({at: placeholder, disposition: 'miss', reason: 'no_sun_time', date: time.dateText(day)});
+      }
       continue;
     }
     const at = time.instant(data.utc_offset, day.year, day.month, day.day, Math.floor(minute / 60), minute % 60);
@@ -664,23 +706,40 @@ function collectDue(data, fromMs, nowMs) {
   return effects;
 }
 
+function collapseLateMisses(effects) {
+  const grouped = new Map();
+  const rest = [];
+  for (const effect of effects) {
+    if (effect.kind !== 'miss' || effect.reason !== 'late') {
+      rest.push(effect);
+      continue;
+    }
+    const current = grouped.get(effect.id) || {at: effect.at, kind: 'miss', id: effect.id, reason: 'late', count: 0, from: effect.at, to: effect.at};
+    current.count += 1;
+    current.from = Math.min(current.from, effect.at);
+    current.to = Math.max(current.to, effect.at);
+    current.at = current.from;
+    grouped.set(effect.id, current);
+  }
+  return rest.concat([...grouped.values()]);
+}
+
 function commitDue(ctx, data) {
   const nowMs = Date.parse(ctx.virtual_now);
   const fromMs = Date.parse(data.committed_through);
   if (!Number.isFinite(nowMs) || !Number.isFinite(fromMs) || nowMs <= fromMs) return;
-  const pending = collectDue(data, fromMs, nowMs);
+  const pending = collapseLateMisses(collectDue(data, fromMs, nowMs));
   const seen = new Set();
   let guard = 0;
-  while (pending.length && guard < 400) {
+  while (pending.length && guard < 4000) {
     guard += 1;
     pending.sort((left, right) => left.at - right.at || String(left.id).localeCompare(String(right.id)) || left.kind.localeCompare(right.kind));
     const effect = pending.shift();
-    const key = effect.kind + ':' + effect.id + ':' + effect.at;
+    const key = effect.kind + ':' + effect.id + ':' + effect.at + ':' + (effect.date || '');
     if (seen.has(key)) continue;
     seen.add(key);
     applyDue(ctx, data, effect, nowMs, pending, fromMs);
   }
-  if (pending.length && guard >= 400) fail('invalid_event', 'Due work exceeded the safety limit for one commit.');
   data.committed_through = ctx.virtual_now;
   data.runtime_seen = [];
 }
@@ -694,8 +753,22 @@ function applyDue(ctx, data, effect, nowMs, pending, fromMs) {
     device.lock = 'locked';
     device.unlocked_at = null;
     recordChange(ctx, data, device, {before, after: project(device)}, {
-      at, actor_kind: 'routine', actor_id: 'auto-relock', cause: 'routine', command: 'lock', summary: device.name + ' auto-relock'
+      at,
+      actor_kind: 'routine',
+      actor_id: 'auto-relock',
+      cause: 'routine',
+      command: 'lock',
+      summary: device.name + ' auto-relock',
+      request_id: ctx.request_id || null,
+      event_id: ctx.event_id || null
     });
+    considerDeviceTriggers(ctx, data, device, {
+      at,
+      request_id: ctx.request_id || null,
+      event_id: ctx.event_id || null,
+      actor_kind: 'routine',
+      actor_id: 'auto-relock'
+    }, 0);
     return;
   }
   if (effect.kind === 'door_open') {
@@ -714,19 +787,23 @@ function applyDue(ctx, data, effect, nowMs, pending, fromMs) {
   const routine = findRoutine(data, effect.id);
   if (!routine || !routine.enabled || routine.deleted) return;
   if (effect.kind === 'miss') {
+    const date = effect.date || at.slice(0, 10);
+    if (effect.reason === 'no_sun_time' && data.firings.some(item => item.routine_id === routine.routine_id && item.reason === 'no_sun_time' && String(item.scheduled_for).slice(0, 10) === date)) return;
     data.firings.push({
       firing_id: nextId(data, 'firing', 'fr'),
       routine_id: routine.routine_id,
-      scheduled_for: effect.reason === 'no_sun_time' ? at : time.formatInstant(data.utc_offset, effect.at),
+      scheduled_for: effect.reason === 'no_sun_time' ? at : time.formatInstant(data.utc_offset, effect.from || effect.at),
       fired_at: null,
       outcome: 'missed',
       reason: effect.reason || 'late',
-      results: []
+      results: [],
+      count: effect.count || 1,
+      range_end: effect.count > 1 ? time.formatInstant(data.utc_offset, effect.to) : null
     });
     return;
   }
   const beforeLocks = data.devices.filter(device => device.type === 'lock' && device.lock === 'unlocked').map(device => device.device_id);
-  runRoutine(ctx, data, routine, effect.at, {scheduled_for: at, event_id: ctx.event_id || null, request_id: ctx.request_id || null});
+  runRoutine(ctx, data, routine, nowMs, {scheduled_for: at, event_id: ctx.event_id || null, request_id: ctx.request_id || null});
   for (const device of data.devices) {
     if (device.type !== 'lock' || device.lock !== 'unlocked' || !device.unlocked_at || !device.auto_relock_minutes) continue;
     if (beforeLocks.includes(device.device_id)) continue;
@@ -794,8 +871,16 @@ function makeDigits(serial) {
   return String(100000 + ((serial * 7919 + 104729) % 900000));
 }
 
+function pendingCodeClosed(data, code, nowMs) {
+  if (code.approval !== 'pending' || !code.pending_confirmation_id) return false;
+  const item = data.confirmations.find(confirmation => confirmation.confirmation_id === code.pending_confirmation_id);
+  if (!item) return false;
+  if (item.status === 'denied' || item.status === 'cancelled') return true;
+  return confirmationStatus(item, nowMs) === 'expired';
+}
+
 function activeCodeCount(data, nowMs) {
-  return data.access_codes.filter(code => !code.revoked && codeStatus(code, nowMs, data.utc_offset) !== 'expired').length;
+  return data.access_codes.filter(code => !code.revoked && !pendingCodeClosed(data, code, nowMs) && codeStatus(code, nowMs, data.utc_offset) !== 'expired').length;
 }
 
 function rangesOverlap(left, right) {
@@ -883,21 +968,36 @@ function executeStored(ctx, data, confirmation) {
     setMode(ctx, data, stored.mode, false);
   } else if (stored.kind === 'routine_update') {
     const routine = requireRoutine(data, stored.routine_id);
+    const before = automationSnap(routine, 'routine');
     Object.assign(routine, stored.patch);
     routine.last_edited_by = 'assistant';
+    recordAutomation(ctx, data, 'routine_update', before, automationSnap(routine, 'routine'), 'Updated routine ' + routine.name);
   } else if (stored.kind === 'routine_enable') {
-    requireRoutine(data, stored.routine_id).enabled = true;
+    const routine = requireRoutine(data, stored.routine_id);
+    const before = automationSnap(routine, 'routine');
+    routine.enabled = true;
+    recordAutomation(ctx, data, 'routine_enable', before, automationSnap(routine, 'routine'), 'enable ' + routine.name);
   } else if (stored.kind === 'routine_disable') {
-    requireRoutine(data, stored.routine_id).enabled = false;
+    const routine = requireRoutine(data, stored.routine_id);
+    const before = automationSnap(routine, 'routine');
+    routine.enabled = false;
+    recordAutomation(ctx, data, 'routine_disable', before, automationSnap(routine, 'routine'), 'disable ' + routine.name);
   } else if (stored.kind === 'routine_delete') {
     const routine = requireRoutine(data, stored.routine_id);
+    const before = automationSnap(routine, 'routine');
     routine.deleted = true;
     routine.enabled = false;
+    recordAutomation(ctx, data, 'routine_delete', before, automationSnap(routine, 'routine'), 'delete ' + routine.name);
   } else if (stored.kind === 'scene_update') {
-    Object.assign(requireScene(data, stored.scene_id), stored.patch);
+    const scene = requireScene(data, stored.scene_id);
+    const before = automationSnap(scene, 'scene');
+    Object.assign(scene, stored.patch);
+    recordAutomation(ctx, data, 'scene_update', before, automationSnap(scene, 'scene'), 'Updated scene ' + scene.name);
   } else if (stored.kind === 'scene_delete') {
     const scene = requireScene(data, stored.scene_id);
+    const before = automationSnap(scene, 'scene');
     scene.deleted = true;
+    recordAutomation(ctx, data, 'scene_delete', before, automationSnap(scene, 'scene'), 'Deleted scene ' + scene.name);
   } else if (stored.kind === 'camera_share') {
     startShare(ctx, data, requireDevice(data, stored.device_id), stored.recipient, stored.duration_minutes);
   } else if (stored.kind === 'camera_share_stop') {
@@ -921,6 +1021,7 @@ function executeStored(ctx, data, confirmation) {
 
 function startShare(ctx, data, device, recipient, duration) {
   if (device.type !== 'camera') fail('unsupported_command', 'Only a camera can be shared.');
+  operable(device, 'share');
   if (device.privacy !== 'privacy_off') fail('unsupported_command', 'The camera is in privacy mode.');
   if (typeof recipient !== 'string' || !recipient.includes('@') || recipient.length > 200) fail('invalid_arguments', 'The recipient must be an address.');
   if (!Number.isInteger(duration) || duration < 1 || duration > 1440) fail('value_out_of_range', 'Share duration must be 1 to 1440 minutes.');
@@ -985,13 +1086,26 @@ function findConfirmation(data, payload, nowMs) {
     if (payload.scene_id && target.kind === 'scene' && target.id === payload.scene_id) return true;
     if (payload.mode && target.kind === 'mode' && target.id === payload.mode) return true;
     return false;
-  }).sort((left, right) => Date.parse(left.created_at) - Date.parse(right.created_at) || left.confirmation_id.localeCompare(right.confirmation_id));
+  }).sort((left, right) => Date.parse(left.created_at) - Date.parse(right.created_at) || confirmationOrder(left.confirmation_id) - confirmationOrder(right.confirmation_id) || left.confirmation_id.localeCompare(right.confirmation_id));
   if (!matches.length) fail('no_pending_confirmation', 'No confirmation is pending for that target.');
   const waiting = matches.filter(item => item.status === 'pending');
   const open = waiting.filter(item => confirmationStatus(item, nowMs) === 'pending');
   if (open.length) return open[0];
   if (waiting.length) return waiting[0];
   return matches[0];
+}
+
+function confirmationOrder(id) {
+  const match = String(id).match(/(\d+)$/);
+  return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
+}
+
+function approverAllowed(data, personId) {
+  const member = memberById(data, personId);
+  if (!member || member.role === 'assistant' || member.role === 'child' || member.role === 'guest') return false;
+  const listed = Array.isArray(data.approver_person_ids) ? data.approver_person_ids : [];
+  const allowed = listed.length ? listed : [data.owner_person_id];
+  return allowed.includes(personId);
 }
 
 function resolveConfirmation(ctx, data, payload) {
@@ -1001,10 +1115,15 @@ function resolveConfirmation(ctx, data, payload) {
   if (status === 'expired') fail('confirmation_expired', 'The confirmation window has passed.');
   if (item.status !== 'pending') fail('confirmation_already_resolved', 'That confirmation is already resolved.');
   if (!['approved', 'denied'].includes(payload.decision)) fail('invalid_event', 'The decision must be approved or denied.');
+  if (!approverAllowed(data, payload.by_person_id)) fail('invalid_event', 'That person cannot resolve a confirmation.');
   item.status = payload.decision;
   item.decision = payload.decision;
   item.resolved_at = stamp(ctx);
   item.by_person_id = payload.by_person_id;
+  if (payload.decision === 'denied' && item.stored && item.stored.kind === 'code_activate') {
+    const code = data.access_codes.find(entry => entry.code_id === item.stored.code_id);
+    if (code) code.revoked = true;
+  }
   if (payload.decision === 'approved') executeStored(ctx, data, item);
   activity(ctx, data, {
     actor_kind: 'member',
@@ -1118,6 +1237,41 @@ function applySensor(ctx, data, payload) {
     if (routine.trigger.state && routine.trigger.state !== device.sensor) continue;
     runRoutine(ctx, data, routine, Date.parse(ctx.virtual_now), {event_id: ctx.event_id, scheduled_for: stamp(ctx)});
   }
+  considerDeviceTriggers(ctx, data, device, {at: stamp(ctx), event_id: ctx.event_id, actor_kind: 'manual', actor_id: 'sensor'}, 0);
+}
+
+function snapshotReady(ctx, data, assetId) {
+  if (!assetId) return null;
+  const ids = ctx && Array.isArray(ctx.asset_ids) ? ctx.asset_ids : (data.available_snapshots || []);
+  return ids.includes(assetId) ? 'ready' : 'asset_missing';
+}
+
+function automationSnap(record, kind) {
+  return {
+    kind,
+    id: record.routine_id || record.scene_id,
+    name: record.name,
+    enabled: record.enabled !== false,
+    deleted: Boolean(record.deleted),
+    run_as: record.run_as,
+    created_by: record.created_by,
+    created_by_person_id: record.created_by_person_id || null,
+    last_edited_by: record.last_edited_by
+  };
+}
+
+function recordAutomation(ctx, data, kind, before, after, summary) {
+  activity(ctx, data, {
+    actor_kind: 'assistant',
+    actor_id: 'assistant',
+    cause: ctx.cause || 'direct_command',
+    request_id: ctx.request_id || null,
+    event_id: ctx.event_id || null,
+    command: kind,
+    summary,
+    before,
+    after
+  });
 }
 
 function reads(ctx, data, name, args) {
@@ -1127,9 +1281,7 @@ function reads(ctx, data, name, args) {
   if (name === 'devices.get') {
     const device = requireDevice(data, args.device_id);
     const view = presentDevice(data, device, nowMs);
-    view.snapshot_status = device.snapshot_asset_id
-      ? ((data.available_snapshots || []).includes(device.snapshot_asset_id) ? 'ready' : 'asset_missing')
-      : null;
+    view.snapshot_status = snapshotReady(ctx, data, device.snapshot_asset_id);
     return {device: view};
   }
   if (name === 'devices.history') {
@@ -1145,13 +1297,13 @@ function reads(ctx, data, name, args) {
   }
   if (name === 'members.list') return {members: copy(data.members), home_mode: data.home_mode};
   if (name === 'modes.get') {
-    return {home_mode: data.home_mode, assistant_carried_mode: data.assistant_carried_mode, mode_rules: copy(data.mode_rules)};
+    return {home_mode: data.home_mode, assistant_carried_modes: carriedModes(data), mode_rules: copy(data.mode_rules)};
   }
   if (name === 'access_codes.list') return {codes: data.access_codes.map(code => maskCode(code, nowMs, data.utc_offset))};
   if (name === 'permissions.get') {
     const effective = {};
     for (const className of Object.keys(data.scopes)) effective[className] = effectiveScope(data, className);
-    return {scopes: copy(data.scopes), mode_rules: copy(data.mode_rules), effective, assistant_carried_mode: data.assistant_carried_mode};
+    return {scopes: copy(data.scopes), mode_rules: copy(data.mode_rules), effective, assistant_carried_modes: carriedModes(data)};
   }
   if (name === 'confirmations.list') {
     return {confirmations: data.confirmations.map(item => ({
@@ -1218,7 +1370,7 @@ function writes(ctx, data, name, args) {
   if (name === 'scenes.run') {
     const scene = requireScene(data, args.scene_id);
     const results = scene.actions.map(action => runAction(ctx, data, action, {
-      at: stamp(ctx), actor_kind: 'assistant', actor_id: 'assistant', cause: 'scene', interactive: true, request_id: args.request_id
+      at: stamp(ctx), actor_kind: 'assistant', actor_id: 'assistant', cause: 'scene', interactive: true, run_as: 'assistant', request_id: args.request_id
     }));
     return {outcome: results.every(item => item.outcome === 'applied') ? 'applied' : 'partial', scene_id: scene.scene_id, results};
   }
@@ -1230,15 +1382,18 @@ function writes(ctx, data, name, args) {
         scene_id: nextId(data, 'scene', 'sc'),
         name: args.name,
         created_by: 'assistant',
+        created_by_person_id: null,
         last_edited_by: 'assistant',
         run_as: 'assistant',
         deleted: false,
         actions
       };
       data.scenes.push(scene);
+      recordAutomation(ctx, data, 'scene_create', null, automationSnap(scene, 'scene'), 'Created scene ' + scene.name);
       return {outcome: 'applied', scene_id: scene.scene_id};
     }
     const scene = requireScene(data, args.scene_id);
+    const beforeScene = automationSnap(scene, 'scene');
     const gate = requireAutomation(data, scene);
     if (gate === 'confirm') {
       const confirmation = openConfirmation(ctx, data, {
@@ -1255,6 +1410,7 @@ function writes(ctx, data, name, args) {
     scene.name = args.name;
     scene.actions = actions;
     scene.last_edited_by = 'assistant';
+    recordAutomation(ctx, data, 'scene_update', beforeScene, automationSnap(scene, 'scene'), 'Updated scene ' + scene.name);
     return {outcome: 'applied', scene_id: scene.scene_id, run_as: scene.run_as};
   }
   if (name === 'scenes.delete') {
@@ -1268,7 +1424,9 @@ function writes(ctx, data, name, args) {
       });
       return {outcome: 'confirmation_required', confirmation_id: confirmation.confirmation_id};
     }
+    const beforeDelete = automationSnap(scene, 'scene');
     scene.deleted = true;
+    recordAutomation(ctx, data, 'scene_delete', beforeDelete, automationSnap(scene, 'scene'), 'Deleted scene ' + scene.name);
     return {outcome: 'applied', scene_id: scene.scene_id};
   }
   if (name === 'routines.create') {
@@ -1282,6 +1440,7 @@ function writes(ctx, data, name, args) {
       enabled: true,
       deleted: false,
       created_by: 'assistant',
+      created_by_person_id: null,
       last_edited_by: 'assistant',
       run_as: 'assistant',
       trigger: copy(args.trigger),
@@ -1293,10 +1452,12 @@ function writes(ctx, data, name, args) {
       fail('invalid_trigger', 'catch_up_minutes must be an integer from 0 to 180.');
     }
     data.routines.push(routine);
+    recordAutomation(ctx, data, 'routine_create', null, automationSnap(routine, 'routine'), 'Created routine ' + routine.name);
     return {outcome: 'applied', routine_id: routine.routine_id};
   }
   if (name === 'routines.update' || name === 'routines.enable' || name === 'routines.disable' || name === 'routines.delete') {
     const routine = requireRoutine(data, args.routine_id);
+    const beforeRoutine = automationSnap(routine, 'routine');
     const gate = requireAutomation(data, routine);
     if (name === 'routines.update') {
       if (args.trigger) checkTrigger(data, args.trigger);
@@ -1321,6 +1482,7 @@ function writes(ctx, data, name, args) {
         patch.run_as = 'assistant';
       } else if (gate === 'own' && actions) assertOperateActions(data, actions);
       Object.assign(routine, patch);
+      recordAutomation(ctx, data, 'routine_update', beforeRoutine, automationSnap(routine, 'routine'), 'Updated routine ' + routine.name);
       return {outcome: 'applied', routine_id: routine.routine_id, run_as: routine.run_as};
     }
     const storedKind = name === 'routines.enable' ? 'routine_enable' : name === 'routines.disable' ? 'routine_disable' : 'routine_delete';
@@ -1338,13 +1500,15 @@ function writes(ctx, data, name, args) {
       if (gate === 'operate') routine.run_as = 'assistant';
     } else if (name === 'routines.disable') routine.enabled = false;
     else { routine.deleted = true; routine.enabled = false; }
+    recordAutomation(ctx, data, storedKind, beforeRoutine, automationSnap(routine, 'routine'), name.slice('routines.'.length) + ' ' + routine.name);
     return {outcome: 'applied', routine_id: routine.routine_id, run_as: routine.run_as};
   }
   if (name === 'routines.run_now') {
     const routine = requireRoutine(data, args.routine_id);
     if (!routine.enabled) fail('invalid_trigger', 'Enable the routine before running it.');
+    if (!conditionsMet(data, routine, Date.parse(ctx.virtual_now))) return {outcome: 'conditions_not_met', routine_id: routine.routine_id, results: []};
     const results = routine.actions.map(action => runAction(ctx, data, action, {
-      at: stamp(ctx), actor_kind: 'assistant', actor_id: 'assistant', cause: 'direct_command', interactive: true, request_id: args.request_id
+      at: stamp(ctx), actor_kind: 'assistant', actor_id: 'assistant', cause: 'direct_command', interactive: true, run_as: 'assistant', request_id: args.request_id
     }));
     return {outcome: results.every(item => item.outcome === 'applied') ? 'applied' : 'partial', routine_id: routine.routine_id, results};
   }
@@ -1354,7 +1518,7 @@ function writes(ctx, data, name, args) {
     if (held) return held;
     const previous = data.home_mode;
     if (previous !== args.mode) setMode(ctx, data, args.mode, false);
-    return {outcome: 'applied', home_mode: data.home_mode, assistant_carried_mode: data.assistant_carried_mode};
+    return {outcome: 'applied', home_mode: data.home_mode, assistant_carried_modes: carriedModes(data)};
   }
   if (name === 'access_codes.create') {
     const scope = effectiveScope(data, 'access_codes');
@@ -1489,12 +1653,14 @@ function applyEvent(ctx, data, event) {
     if (fault === 'jammed' && device.type !== 'lock') fail('invalid_event', 'jammed applies only to a lock.');
     if (fault === 'obstructed' && device.type !== 'garage') fail('invalid_event', 'obstructed applies only to a garage door.');
     if (!['jammed', 'obstructed', 'offline'].includes(fault)) fail('invalid_event', 'The fault is not supported.');
+    if (device.fault) fail('invalid_event', 'That device already has an active fault.');
     const before = project(device);
     device.state_before_fault = {lock: device.lock, garage: device.garage, online: device.online, fault: device.fault};
     device.fault = fault;
     if (fault === 'jammed') device.lock = 'jammed';
     if (fault === 'offline') device.online = false;
     activity(ctx, data, {actor_kind: 'manual', actor_id: 'fault', cause: 'event', event_id: event.event_id, device_id: device.device_id, command: 'fault_inject', summary: fault, before, after: project(device)});
+    considerDeviceTriggers(ctx, data, device, {at: stamp(ctx), event_id: event.event_id, actor_kind: 'manual', actor_id: 'fault'}, 0);
   } else if (event.operation === 'fault.clear') {
     const device = requireDevice(data, payload.device_id);
     if (!device.fault) fail('no_active_fault', 'That device has no active fault.');
@@ -1506,16 +1672,20 @@ function applyEvent(ctx, data, event) {
     device.fault = null;
     device.state_before_fault = null;
     activity(ctx, data, {actor_kind: 'manual', actor_id: 'fault', cause: 'event', event_id: event.event_id, device_id: device.device_id, command: 'fault_clear', summary: 'Fault cleared', before, after: project(device)});
+    considerDeviceTriggers(ctx, data, device, {at: stamp(ctx), event_id: event.event_id, actor_kind: 'manual', actor_id: 'fault'}, 0);
   }   else if (event.operation === 'schedule.process_due') {
     // Due relocks and routines were committed above. Nothing else changes.
   } else if (event.operation === 'notice.delivery_result') {
     const notice = data.notices.find(item => item.notice_id === payload.notice_id);
     if (!notice) fail('invalid_event', 'No notice has that id.');
-    if (notice.delivery_status === 'committed' && payload.status === 'rejected') fail('delivery_status_conflict', 'A committed delivery cannot later be rejected.');
     if (!['committed', 'rejected', 'unknown'].includes(payload.status)) fail('invalid_event', 'Delivery status is not supported.');
-    notice.delivery_status = payload.status;
-    notice.publish_request_id = payload.publish_request_id;
-    notice.messaging_event_id = payload.messaging_event_id || null;
+    if (notice.delivery_status === 'committed') {
+      if (payload.status !== 'committed') fail('delivery_status_conflict', 'A committed delivery stays committed.');
+    } else {
+      notice.delivery_status = payload.status;
+      notice.publish_request_id = payload.publish_request_id;
+      notice.messaging_event_id = payload.messaging_event_id || null;
+    }
   } else fail('invalid_event', 'Unsupported event.');
   delete data.runtime_seen;
   return data;

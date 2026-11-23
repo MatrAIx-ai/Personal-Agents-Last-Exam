@@ -112,3 +112,85 @@ test('a rejected command rolls the catch-up back with the command', () => {
   assert.deepEqual(failed.state.data, moved.state.data);
   assert.equal(failed.state.data.committed_through, clock);
 });
+
+test('task 73 loads with its bundle, and a missing snapshot stays controllable', () => {
+  const model = createRuntime({registryFile: registry});
+  let state = model.create('brightwire-home', 'task-73-load', 'sandbox');
+  const loaded = model.execute(state, 'infra', 'env.load_seed', {
+    expected_version: model.version(state),
+    request_id: 'task-73-seed',
+    virtual_now: '2026-11-17T19:42:00-06:00',
+    data: require('../fixtures/task-73.json'),
+    binding: require('../fixtures/binding-task-73.json'),
+    policies: state.policies,
+    bundle: state.resources.bundle
+  });
+  assert.equal(loaded.result.status, 'ready', JSON.stringify(loaded.result));
+  state = loaded.state;
+  state.resources.bundle.catalog.assets = state.resources.bundle.catalog.assets.filter(asset => asset.asset_id !== 'snap-nursery');
+  const view = model.execute(state, 'agent', 'brightwire-home.devices.get', {device_id: 'camera-nursery'});
+  assert.equal(view.result.status, 'ok');
+  assert.equal(view.result.device.snapshot_status, 'asset_missing');
+  const plugin = require('../plugin.cjs');
+  const changed = plugin.handleTool({
+    app_id: 'brightwire-home',
+    virtual_now: state.virtual_now,
+    binding: state.binding,
+    asset_ids: state.resources.bundle.catalog.assets.map(asset => asset.asset_id),
+    request_id: 'privacy-without-snapshot'
+  }, structuredClone(state.data), 'brightwire-home.devices.command', {
+    device_id: 'camera-nursery', command: 'set_privacy', args: {privacy: 'privacy_off'}
+  });
+  assert.equal(changed.result.outcome, 'applied');
+  assert.equal(changed.data.devices.find(device => device.device_id === 'camera-nursery').privacy, 'privacy_off');
+});
+
+test('evidence joins the later allow row and keeps each client name', async () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const {Client} = require('../../../runtime/client.cjs');
+  const {exportEvidence} = require('../evaluator/export.cjs');
+  const dir = fs.mkdtempSync(require('node:path').join(os.tmpdir(), 'bw-join-'));
+  const clients = [];
+  try {
+    const infra = new Client('brightwire-home', 'infra', 'bw-join', dir, 'infra-loader', {registry, initialProfile: 'sandbox'});
+    const left = new Client('brightwire-home', 'agent', 'bw-join', dir, 'grader-a', {registry});
+    const right = new Client('brightwire-home', 'agent', 'bw-join', dir, 'grader-b', {registry});
+    clients.push(infra, left, right);
+    await infra.initialize();
+    await left.initialize();
+    await right.initialize();
+    const snap = await infra.call('env.snapshot');
+    const version = snap.version;
+    const denied = await left.call('brightwire-home.devices.command', {
+      expected_version: version, request_id: 'same-light', device_id: 'light-living', command: 'set_brightness', args: {brightness: 500}
+    });
+    assert.equal(denied.status, 'value_out_of_range');
+    const committed = await left.call('brightwire-home.devices.command', {
+      expected_version: version, request_id: 'same-light', device_id: 'light-living', command: 'turn_off'
+    });
+    assert.equal(committed.status, 'committed');
+    const other = await right.call('brightwire-home.devices.command', {
+      expected_version: committed.version, request_id: 'other-light', device_id: 'light-hallway', command: 'turn_off'
+    });
+    assert.equal(other.status, 'committed');
+    const after = await infra.call('env.snapshot');
+    const evidence = exportEvidence({
+      snapshot: after,
+      agent_executions: [{tool: 'brightwire-home.devices.command', status: 'value_out_of_range', request_id: 'same-light'}]
+    });
+    const row = evidence.history.find(entry => entry.request_id === 'same-light' && entry.device_id === 'light-living');
+    assert.equal(row.audit_decision, 'allow');
+    assert.equal(row.client_name, 'grader-a');
+    assert.ok(row.connection_id);
+    assert.equal(row.caller_role, 'agent');
+    assert.equal(row.tool, 'brightwire-home.devices.command');
+    const second = evidence.history.find(entry => entry.request_id === 'other-light');
+    assert.equal(second.client_name, 'grader-b');
+    assert.notEqual(second.connection_id, row.connection_id);
+    assert.equal(evidence.rejected.filter(item => item.request_id === 'same-light').length, 1);
+  } finally {
+    await Promise.allSettled(clients.map(client => client.close()));
+    fs.rmSync(dir, {recursive: true, force: true});
+  }
+});

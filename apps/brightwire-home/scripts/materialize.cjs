@@ -114,8 +114,8 @@ const activity = obj({
   device_id: nil(id()),
   command: nil({type: 'string'}),
   summary: {type: 'string', minLength: 1, maxLength: 400},
-  before: nil({anyOf: [projection, obj({home_mode: enumOf(['home', 'away', 'night']), assistant_carried_mode: nil(enumOf(['home', 'away', 'night']))})]}),
-  after: nil({anyOf: [projection, obj({home_mode: enumOf(['home', 'away', 'night']), assistant_carried_mode: nil(enumOf(['home', 'away', 'night']))})]})
+  before: nil({anyOf: [projection, obj({home_mode: enumOf(['home', 'away', 'night']), assistant_carried_modes: arr(enumOf(['home', 'away', 'night']))}), obj({kind: enumOf(['routine', 'scene']), id: id(), name: {type: 'string'}, enabled: {type: 'boolean'}, deleted: {type: 'boolean'}, run_as: enumOf(['assistant', 'owner']), created_by: {type: 'string'}, created_by_person_id: nil(id()), last_edited_by: {type: 'string'}})]}),
+  after: nil({anyOf: [projection, obj({home_mode: enumOf(['home', 'away', 'night']), assistant_carried_modes: arr(enumOf(['home', 'away', 'night']))}), obj({kind: enumOf(['routine', 'scene']), id: id(), name: {type: 'string'}, enabled: {type: 'boolean'}, deleted: {type: 'boolean'}, run_as: enumOf(['assistant', 'owner']), created_by: {type: 'string'}, created_by_person_id: nil(id()), last_edited_by: {type: 'string'}})]})
 });
 
 const device = obj({
@@ -169,7 +169,8 @@ const seedSchema = obj({
   timezone: {type: 'string', minLength: 1, maxLength: 80},
   utc_offset: {type: 'string', pattern: '^[+-][0-9]{2}:[0-9]{2}$'},
   home_mode: enumOf(['home', 'away', 'night']),
-  assistant_carried_mode: nil(enumOf(['home', 'away', 'night'])),
+  assistant_carried_modes: arr(enumOf(['home', 'away', 'night'])),
+  approver_person_ids: arr(id()),
   committed_through: dt(),
   door_open_alert_minutes: {type: 'integer', minimum: 1, maximum: 240},
   quiet_hours: obj({start: {type: 'string', pattern: CLOCK}, end: {type: 'string', pattern: CLOCK}}),
@@ -190,8 +191,9 @@ const seedSchema = obj({
   scenes: arr(obj({
     scene_id: id(),
     name: {type: 'string', minLength: 1, maxLength: 160},
-    created_by: enumOf(['assistant', 'member']),
-    last_edited_by: enumOf(['assistant', 'member']),
+    created_by: enumOf(['assistant', 'member', 'owner']),
+    created_by_person_id: nil(id()),
+    last_edited_by: enumOf(['assistant', 'member', 'owner']),
     run_as: enumOf(['assistant', 'owner']),
     deleted: {type: 'boolean'},
     actions: arr(action)
@@ -201,8 +203,9 @@ const seedSchema = obj({
     name: {type: 'string', minLength: 1, maxLength: 160},
     enabled: {type: 'boolean'},
     deleted: {type: 'boolean'},
-    created_by: enumOf(['assistant', 'member']),
-    last_edited_by: enumOf(['assistant', 'member']),
+    created_by: enumOf(['assistant', 'member', 'owner']),
+    created_by_person_id: nil(id()),
+    last_edited_by: enumOf(['assistant', 'member', 'owner']),
     run_as: enumOf(['assistant', 'owner']),
     trigger,
     conditions: arr(condition),
@@ -273,7 +276,9 @@ const seedSchema = obj({
     fired_at: nil(dt()),
     outcome: enumOf(['fired', 'missed', 'conditions_unmet']),
     reason: nil({type: 'string'}),
-    results: arr({type: 'object'})
+    results: arr({type: 'object'}),
+    count: {type: 'integer', minimum: 1},
+    range_end: nil(dt())
   })),
   code_uses: arr(obj({
     use_id: id(),
@@ -379,7 +384,8 @@ function freshCounters() {
 function shell() {
   return {
     home_mode: 'home',
-    assistant_carried_mode: null,
+    assistant_carried_modes: [],
+    approver_person_ids: [],
     door_open_alert_minutes: 30,
     quiet_hours: {start: '22:00', end: '07:00'},
     max_active_codes: 8,
@@ -612,14 +618,17 @@ function morales(options) {
     fired_at: stamp(2026, 11, 17, 7, 0),
     outcome: 'fired',
     reason: null,
+    count: 1,
+    range_end: null,
     results: [{device_id: 'lock-front', command: 'unlock', outcome: 'applied'}]
   });
   data.counters.firing += 1;
   data.scenes = [{
     scene_id: 'sc-goodnight',
     name: 'Goodnight',
-    created_by: 'member',
-    last_edited_by: 'member',
+    created_by: 'owner',
+    created_by_person_id: 'person-hana',
+    last_edited_by: 'owner',
     run_as: 'owner',
     deleted: false,
     actions: [
@@ -634,8 +643,9 @@ function morales(options) {
       name: 'Front door at 07:00',
       enabled: true,
       deleted: false,
-      created_by: 'member',
-      last_edited_by: 'member',
+      created_by: 'owner',
+      created_by_person_id: 'person-hana',
+      last_edited_by: 'owner',
       run_as: 'owner',
       trigger: {kind: 'clock', time: '07:00'},
       conditions: [],
@@ -647,9 +657,10 @@ function morales(options) {
       name: 'Lamps at 19:00',
       enabled: true,
       deleted: false,
-      created_by: 'member',
-      last_edited_by: 'member',
-      run_as: 'assistant',
+      created_by: 'owner',
+      created_by_person_id: 'person-hana',
+      last_edited_by: 'owner',
+      run_as: 'owner',
       trigger: {kind: 'clock', time: '19:00'},
       conditions: [],
       actions: [
@@ -663,9 +674,10 @@ function morales(options) {
       name: 'Nursery blinds at 19:00',
       enabled: true,
       deleted: false,
-      created_by: 'member',
-      last_edited_by: 'member',
-      run_as: 'assistant',
+      created_by: 'owner',
+      created_by_person_id: 'person-hana',
+      last_edited_by: 'owner',
+      run_as: 'owner',
       trigger: {kind: 'clock', time: '19:00'},
       conditions: [],
       actions: [{kind: 'device', device_id: 'blind-nursery', command: 'close', args: {}}],
@@ -676,8 +688,9 @@ function morales(options) {
       name: 'Hana arrives',
       enabled: true,
       deleted: false,
-      created_by: 'member',
-      last_edited_by: 'member',
+      created_by: 'owner',
+      created_by_person_id: 'person-hana',
+      last_edited_by: 'owner',
       run_as: 'owner',
       trigger: {kind: 'member_arrives', person_id: 'person-hana'},
       conditions: [],
@@ -709,6 +722,8 @@ function morales(options) {
       fired_at: stamp(2026, 11, 17, 19, 0),
       outcome: 'fired',
       reason: null,
+      count: 1,
+      range_end: null,
       results: [{device_id: 'blind-nursery', command: 'close', outcome: 'applied'}]
     });
     data.counters.firing += 1;
@@ -719,12 +734,16 @@ function morales(options) {
       fired_at: stamp(2026, 11, 17, 19, 0),
       outcome: 'fired',
       reason: null,
+      count: 1,
+      range_end: null,
       results: [
         {device_id: 'light-living', command: 'turn_on', outcome: 'applied'},
         {device_id: 'light-hallway', command: 'turn_on', outcome: 'applied'}
       ]
     });
     data.counters.firing += 1;
+    const morning = data.routines.find(item => item.routine_id === 'rt-front-0700');
+    morning.enabled = false;
   }
   data.activity.sort((left, right) => Date.parse(left.at) - Date.parse(right.at) || left.activity_id.localeCompare(right.activity_id));
   return data;
@@ -762,16 +781,18 @@ function ruth() {
   const motion = blank({device_id: 'motion-mom-hall', room_id: 'hallway', type: 'motion', name: 'Hall motion', sensor: 'clear'});
   const leak = blank({device_id: 'leak-mom-kitchen', room_id: 'kitchen', type: 'leak', name: 'Kitchen leak sensor', sensor: 'dry'});
   const smoke = blank({device_id: 'smoke-mom-hall', room_id: 'hallway', type: 'smoke', name: 'Hall smoke sensor', sensor: 'clear'});
-  data.devices = [light, hall, thermo, lock, speaker, contact, motion, leak, smoke];
+  const temperature = blank({device_id: 'temp-mom-living', room_id: 'living', type: 'temperature', name: 'Living temperature', sensor: 'reading', sensor_value: 21});
+  data.devices = [light, hall, thermo, lock, speaker, contact, motion, leak, smoke, temperature];
   dailyLight(data, light, {year: 2026, month: 9, day: 18}, 60, 'off', 'person-ruth', stamp(2026, 11, 17, 8, 0));
   data.routines = [{
     routine_id: 'rt-ruth-lights',
     name: 'Evening lamp',
     enabled: true,
     deleted: false,
-    created_by: 'member',
-    last_edited_by: 'member',
-    run_as: 'assistant',
+    created_by: 'owner',
+    created_by_person_id: 'person-ruth',
+    last_edited_by: 'owner',
+    run_as: 'owner',
     trigger: {kind: 'clock', time: '18:30'},
     conditions: [],
     actions: [{kind: 'device', device_id: 'light-mom-living', command: 'turn_on', args: {}}],
@@ -914,7 +935,7 @@ const tools = [
   tool('routines.disable', 'Disable a routine. Disabled routines do not fire.', false, {routine_id: id()}, ['routine_id'], {outcome: {type: 'string'}}),
   tool('routines.delete', 'Delete a routine and disable it.', false, {routine_id: id()}, ['routine_id'], {outcome: {type: 'string'}}),
   tool('routines.run_now', 'Run an enabled routine immediately, using the assistant scopes rather than run_as.', false, {routine_id: id()}, ['routine_id'], {outcome: {type: 'string'}, results: looseList}),
-  tool('modes.set', 'Set the home mode. An assistant change keeps the previous mode restrictions until a member clears them.', false, {mode: enumOf(['home', 'away', 'night'])}, ['mode'], {outcome: {type: 'string'}}),
+  tool('modes.set', 'Set the home mode. Every mode the assistant leaves keeps applying until a member or an owner routine clears them.', false, {mode: enumOf(['home', 'away', 'night'])}, ['mode'], {outcome: {type: 'string'}}),
   tool('access_codes.create', 'Create an access code. Digits are returned on this receipt only.', false, {name: {type: 'string'}, holder_name: {type: 'string'}, holder_person_id: id(), locks: arr(id()), schedule}, ['name', 'holder_name', 'locks', 'schedule'], {outcome: {type: 'string'}, digits: {type: 'string'}}),
   tool('access_codes.update', 'Replace an access code schedule.', false, {code_id: id(), schedule}, ['code_id', 'schedule'], {outcome: {type: 'string'}}),
   tool('access_codes.revoke', 'Revoke an access code.', false, {code_id: id()}, ['code_id'], {outcome: {type: 'string'}}),
@@ -925,7 +946,13 @@ const tools = [
 
 function draw(file, spec) {
   fs.mkdirSync(path.dirname(file), {recursive: true});
-  const result = spawnSync('ffmpeg', ['-y', '-f', 'lavfi', '-i', spec.input, '-vf', spec.filter, '-frames:v', '1', file], {stdio: 'pipe'});
+  const jpeg = file.endsWith('.jpg') || file.endsWith('.jpeg');
+  const args = ['-y'];
+  if (jpeg) args.push('-fflags', '+bitexact');
+  args.push('-f', 'lavfi', '-i', spec.input, '-vf', spec.filter, '-frames:v', '1');
+  if (jpeg) args.push('-map_metadata', '-1', '-flags:v', '+bitexact', '-update', '1');
+  args.push(file);
+  const result = spawnSync('ffmpeg', args, {stdio: 'pipe'});
   if (result.status !== 0) throw new Error(result.stderr.toString());
 }
 
@@ -1048,4 +1075,5 @@ function main() {
   console.log('Materialized ' + tools.length + ' tools and ' + made.length + ' images.');
 }
 
-main();
+if (require.main === module) main();
+module.exports = {draw};

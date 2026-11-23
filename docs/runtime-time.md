@@ -76,4 +76,4 @@ The existing Core API **1.2.0**, App business/state schemas, tool responses and 
 
 Old packages run on the new host without edits. An old host does not gain clock support from those packages; Infra must discover the operation or require runtime 1.6.0+. Independent base-runtime checks prove App package compatibility, not support for this new host capability.
 
-`env.load_seed` continues to define the initial/reset clock, and `env.reset` restores it. Neither is a session synchronization substitute: they replace lifecycle/history state. Initial clocks in `fixtures/clock.json` remain useful for App-only examples. All eight existing Apps are checked against the same new Core operation. Brightwire Home uses that host clock and does not declare its own.
+`env.load_seed` continues to define the initial/reset clock, and `env.reset` restores it. Neither is a session synchronization substitute: they replace lifecycle/history state. Initial clocks in `fixtures/clock.json` remain useful for App-only examples. Each registered App is checked against the same new Core operation.

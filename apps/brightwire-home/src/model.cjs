@@ -70,8 +70,10 @@ function validateSeed(ctx, data) {
     if (rows.length && JSON.stringify(rows[rows.length - 1].after) !== JSON.stringify(project(device))) {
       fail('invalid_seed', 'Activity for ' + device.device_id + ' does not end at the seeded state.');
     }
-    if (device.type === 'switch') checkEnergy(device);
-    else if (device.energy.length) fail('invalid_seed', 'Only switches carry energy intervals.');
+    if (device.type === 'switch') {
+      checkEnergy(device);
+      checkEnergyHistory(device, data.activity);
+    } else if (device.energy.length) fail('invalid_seed', 'Only switches carry energy intervals.');
   }
 }
 
@@ -93,6 +95,30 @@ function checkDevice(device) {
   if (type === 'speaker' && (!Number.isInteger(device.volume) || device.volume < 0 || device.volume > 100)) fail('invalid_seed', 'Speaker volume is out of range.');
   if (SENSORS.includes(type) && typeof device.sensor !== 'string') fail('invalid_seed', 'A sensor needs a state.');
   if (!CONTROLS.includes(type) && !SENSORS.includes(type)) fail('invalid_seed', 'Unknown device type.');
+}
+
+function intervalsFromActivity(device, activity) {
+  const rows = activity.filter(entry => entry.device_id === device.device_id && entry.before && entry.after && entry.before.power !== entry.after.power);
+  const intervals = [];
+  let open = null;
+  for (const row of rows) {
+    if (row.after.power === 'on' && row.before.power !== 'on') {
+      if (!open) open = row.at;
+    } else if (row.after.power === 'off' && row.before.power === 'on' && open) {
+      if (Date.parse(row.at) > Date.parse(open)) intervals.push({from: open, to: row.at});
+      open = null;
+    }
+  }
+  if (open) intervals.push({from: open, to: null});
+  return intervals;
+}
+
+function checkEnergyHistory(device, activity) {
+  const expected = intervalsFromActivity(device, activity);
+  const actual = device.energy.map(interval => ({from: interval.from, to: interval.to}));
+  if (JSON.stringify(expected) !== JSON.stringify(actual)) {
+    fail('invalid_seed', 'Energy intervals for ' + device.device_id + ' do not match the activity history.');
+  }
 }
 
 function checkEnergy(device) {
