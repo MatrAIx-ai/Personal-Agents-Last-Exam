@@ -128,7 +128,7 @@ List **forbidden** items (lines the agent must not cross; crossing any one fails
 - **E6 (1 point) — Tess not left hanging.** Between Tess's June 4 message and the final statement, the agent replies to her without giving an amount.
 - **E7 (1 point) — The wall charge is flagged.** In session 5 or 6, Mira is told the north-wall holes were on the move-in checklist and the charge can be disputed.
 
-**✍️ Full pass (required):** No forbidden item is triggered and the score is at least 18 of 20. E0 carries 11 points, more than the 2-point gap, so an agent that misses Dee's deadline cannot pass. Baselines on the official runtime: doing nothing scores 0; a perfect settlement that ignores Dee scores 9; the reference scores 20.
+**✍️ Full pass (required):** No forbidden item is triggered and the score is at least 18 of 20. E0 carries 11 points, more than the 2-point gap, so an agent that misses Dee's deadline cannot pass. Scripted baselines: doing nothing scores 0; a perfect settlement that ignores Dee scores 9; the reference scores 20.
 
 ### Hint
 
@@ -173,25 +173,15 @@ Specify the work needed to turn the story into an executable, scoreable task. In
 | Persona, history and workspace | A seeded generator for the records in Section 2 plus about 45 hand-written key records. Exported to official App seeds, bindings and policies for all seven Apps (files as inline text assets) and timed `messages.upsert` / `mail.deliver` / `notes.upsert` events. **Done in a first version**; all seven seeds load and validate on the official runtime. | An independent script recomputes $388.70 from the records. **Discovery check:** a scripted, hint-free path through the ordinary Apps (list new mail; search messages for "Palisades") finds Dee's request and the park email. No record is worded or placed to avoid common searches. | 1–2 |
 | User rollout and scenario script | **Sessions:** 6, at the times in Section 3<br>**Simulated world time span:** May 24 to June 15, 2027, on top of history from June 2025<br>**Estimated total tokens:** 1M–2M for one complete scenario (dialogue, tool instructions, full-body list results, agent output; excluding grading and billed reasoning). | Before each session the orchestrator applies due events and `env.advance_time` on every App; Mira's and Tess's scripted replies are fixed; no memory is injected. **Done in a first version.** | 1 |
 | Environment integration | Reuse Mail, Messages, Calendar, Notes, Tasks, Contacts and Files from `main`. No task-owned service: Greywick, ComEd, Xfinity, Venmo and the park appear only as emails. | Each run starts from the same seeds; all outgoing mail and messages carry App virtual time. | 1 |
-| Rubrics, reference and hints | Rules for E0, E1, E2, E5–E7; LLM-judge questions for F1 and the direction in E1. | Reference 20, nothing 0, settlement-only 9 (pilot grader). | 1–2 |
+| Rubrics, reference and hints | Rules for E0, E1, E2, E5–E7; LLM-judge questions for F1 and the direction in E1. | Reference 20, nothing 0, settlement-only 9. | 1–2 |
 | Agent rollouts and analysis | Five unhinted runs and one hinted run per designated GPT, Claude and Gemini model, 18 runs, through each provider's API on the official runtime. | Every run's trace, score, settings and cost, with a failure analysis of session 3: whether the agent kept Mira's instruction, listed new mail, opened the park email and searched for who was waiting. | 2–3 |
 
 Estimate token volume for **one complete scenario across all sessions** and state what is included, such as dialogue, prior context and tool outputs. The simulated time span is the time elapsed in the user's world; development duration is recorded below.
 
-**Pilot evidence so far (official runtime at `61b6371`, all seven Apps).** E0 is decided in session 3; a run that misses it cannot exceed 9/20.
-
-| Model | Runs | E0 (Dee by June 2) | Notes |
-| :--- | :--- | :--- | :--- |
-| GPT-6.2 Astra, API, effort high | 1 unhinted, complete | missed | 8/20: settlement $388.70 right, Tess's June 4 ping unanswered. |
-| GPT-6.2 Astra, API, effort high | 1 hinted | kept (June 1) | Settlement right; the run hit my cost cap in session 5 before its last report (18/20 graded). To be rerun to completion. |
-| GPT-6.2 Astra, API, effort xhigh | 1 unhinted, sessions 1–4 | missed | Opened the park email in session 3; forwarded it on June 5. |
-| Claude Fable 5.2 | 2 unhinted, sessions 1–3 | missed both | Both listed every message; neither linked the park email to Dee. |
-| Claude Opus 5.5 | 2 unhinted, sessions 1–3 | 1 of 2 | One run noticed and asked Mira; its send was then blocked by my local harness. |
-
-Claude runs above used a local agent harness, not the provider API; Gemini has not been run. Earlier versions of this proposal relied on old debts kept off common searches; following review, that design was dropped. All decisive records are now reachable by ordinary search, and the difficulty is recognizing that a found record is Mira's to act on. The validation batch will use each provider's API with frozen model identifiers and settings.
+**Changes after review.** Earlier versions relied on two old debts kept off the first page of common searches; that design and its seed checks are removed. Every decisive record is reachable by ordinary search, the discovery path is described in Section 4, and the difficulty is recognizing that a found record is Mira's to act on. Validation runs will use each provider's API with frozen model identifiers and settings.
 
 - **Milestones, owners and dependencies (required):** I own all workstreams. Order: freeze seeds and grader; reference and baselines; one complete run per designated model; freeze; official batch. All seven Apps are on `main`; the orchestrator uses only public runtime operations (`env.load_seed`, `env.apply_event`, `env.advance_time`, Agent tools).
-- **Resources and total effort (required):** 6–9 person-days. Text records only; runs locally without a GPU or paid data. A complete GPT-6.2 Astra run cost about $1.5 at effort high in the pilot; the 18 official runs are estimated at $60–$200 depending on the roster.
+- **Resources and total effort (required):** 6–9 person-days. Text records only; runs locally without a GPU or paid data. The 18 official runs are estimated at $60–$200 depending on the roster and reasoning settings.
 - **Scope boundary and open questions (required):** One household, one settlement, one promise. Excluded: sending the Venmo itself, Tess's deposit refund, Sam's share of June bills, and filing the Greywick dispute (Mira is told; the agent may draft it). Open questions for reviewers:
   1. whether "no memory injected" is the intended runner default, so that Mira's session-1 instruction must be kept by the agent;
   2. how scripted counterparts (Tess) are delivered on the official runner;
