@@ -63,7 +63,7 @@ Confirmations, changes, cancellations, closures, alerts, no-show releases and po
 
 ## Data
 
-[`fixtures/minimal.json`](fixtures/minimal.json) is one hand-authored account (Dana Okafor) at three fictional facilities with 12 sites, two policy records, three cards and three reservations. The saved defaults are stale on purpose. The default card belongs to Dana's mother, one card is expired, the default equipment is an old 18 ft trailer, and one site has an unknown vehicle length. No real facility, person or payment data is used. See [`contribution/dataset.json`](contribution/dataset.json).
+[`fixtures/minimal.json`](fixtures/minimal.json) is one hand-authored account (Dana Okafor) at three fictional facilities with 12 sites, two policy records, three cards and three reservations. The saved defaults are stale on purpose. The default card belongs to Dana's mother, one card is expired, the default equipment is an old 18 ft trailer, and one site has an unknown vehicle length. Seeded history starts on or after 2026-01-01, and a test enforces it. No real facility, person or payment data is used. See [`contribution/dataset.json`](contribution/dataset.json).
 
 ## Checks
 
