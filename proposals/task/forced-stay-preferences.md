@@ -26,6 +26,18 @@ The main history includes these concrete contrasts; the other two stays repeat d
 | Courtyard room at a modest property | The actual offered rooms have the same price, bed, amenities and walking time. Nora says, “For these two rooms I'd rather have the courtyard one; the street-facing room would be worse for sleep,” and books the courtyard room. | Quiet location is supported by a genuine comparison and attributed feedback. |
 | Quiet room within a premium property | Two offered rooms differ in published exposure to the late lobby events, with other relevant terms matched; Nora selects the sheltered room. | The supported feature transfers across property categories. |
 
+### Dated source records
+
+The following are the decisive records within the stated workspace counts. Remaining receipts and messages also carry full timestamps and source links. All seeded external-platform interactions are dated in 2026.
+
+| Record | Available timestamp | Public source | What it establishes |
+| :--- | :--- | :--- | :--- |
+| R1 | `2026-04-28T09:00:00-07:00` | Organizer email and linked stay receipt | A premium property was mandatory; it was not a free comparison. |
+| R2 | `2026-05-03T18:00:00-07:00` | Nora's room-offer conversation | Matched offers, an explicit preference for the courtyard room, and the resulting booking. |
+| R3 | `2026-05-10T18:00:00-07:00` | Nora's second room-offer conversation | A sheltered room was preferred within a premium property with other relevant terms matched. |
+| R4 | `2026-05-17T18:00:00-07:00` | Offer thread and linked receipt | The quieter alternative was already sold out. |
+| R5 | `2026-05-25T09:00:00-07:00` | Nora's travel-permission note | One overnight room up to US$180; current dates, bed and walking requirements are supplied per request. |
+
 ## 3. Story outline
 
 **✍️ Your answer (required):** Four sessions over three weeks alternate between a constrained stay and genuine choices. A successful assistant completes all four bookings, distinguishes informative decisions from forced purchases, and carries that distinction into a later unfamiliar catalog.
@@ -37,21 +49,59 @@ The main history includes these concrete contrasts; the other two stays repeat d
 | 3 — `2026-06-16T09:00:00-07:00` | “Book tomorrow's room, but I need to be within a ten-minute walk of the early venue.” The quieter options are outside that limit. | Respect the current walking requirement, even if that means a less preferred hotel. Keep the exception's reason attached to this stay. |
 | 4 — `2026-06-23T09:00:00-07:00` | “Same budget for the next overnight stop. Please choose for me.” A new premium property offers a quiet room; a modest property offers a room facing an evening event area. Prices, relevant room amenities, bed needs and walking times are matched. | Return to the supported room-location preference. Do not turn earlier modest-hotel purchases into a blanket rule to avoid premium properties. |
 
-Each request specifies one overnight room and its date. The catalog contains about eight properties and sixteen room products overall, with several acceptable choices in unconstrained sessions. Prices include all charges; published walking times and room features avoid reliance on real maps or uncertain hotel stereotypes. The main path does not involve points, refunds, disrupted flights or waiting for price changes.
+The four booked nights are June 2, June 10, June 17 and June 24 respectively. Each request specifies one overnight room and its date. The catalog contains about eight properties and sixteen room products overall, with several acceptable choices in unconstrained sessions. Prices include all charges; published walking times and room features avoid reliance on real maps or uncertain hotel stereotypes. The main path does not involve points, refunds, disrupted flights or waiting for price changes.
 
 Clarification receives a truthful answer. If a history leaves the decisive preference genuinely unresolved, asking about that trade-off is a valid strategy and can earn full credit. The executable script must also support a complete solution from the published evidence in the main scenario. User silence creates no additional spending permission.
 
 ## 4. What makes this distinct and personal
 
-**✍️ Your answer (required):** A booking is evidence about taste only in light of the alternatives the user could and did consider. Nora's repeated premium stays and her few freely chosen stays carry different information. The assistant must recover that distinction across sessions and avoid replacing Nora's tastes with a generic rule to choose the highest-rated, cheapest or quietest property.
-
-For example, the June 9 request does not repeat a preference for quiet rooms. A prior comparison conversation shows Nora choosing the courtyard room over an offered street-facing room with the same price, bed, amenities and walking time. A different premium receipt is paired with a dated sold-out notice for the quieter alternative. Both sources are searchable before the current choice. The free comparison supports the quieter option; the forced purchase does not establish a conflicting preference. On June 16 the walking limit changes what is feasible, and the assistant must retain that reason rather than infer that Nora's tastes have reversed.
-
-The strongest diagnostic uses identical past purchase receipts in two histories. One history makes the quiet-location purchases informative free comparisons and the busy-location purchases forced; the other reverses which location choices were free. All associated offers, constraints and feedback change consistently. The appropriate future selection changes under the same current catalog. Separate controls swap property categories while keeping room-location evidence fixed, or remove all informative comparisons so clarification becomes appropriate. Receipt frequency, choosing the cheapest room and always choosing a modest property cannot explain all controls.
+- **Personalization insight (required):** Nora's receipts mostly reflect hotels chosen under restrictions. Her own offered-choice conversations, rather than purchase frequency or hotel category, determine what to book when she has a choice.
+- **Decisive context and trigger (required):** At `2026-06-09T09:00:00-07:00`, Nora asks, ‘For tomorrow, pick somewhere I'd actually enjoy staying.’ R2 and R3 are searchable earlier offered-choice conversations; R1 and R4 explain why other receipts concern premium hotels. The current offers match price and other relevant terms, so the prior comparison is usable without inventing a willingness to pay.
+- **Generic assistant mistake (required):** Repeat the most frequent premium property type, or turn a past modest-property booking into a rule to avoid premium hotels. Either ignores why the earlier choices occurred. Always selecting quiet rooms also fails the current walking constraint on June 16.
+- **Different user, different action (required):** Keep the June 9 request, budget and current offers identical. Keep the same historical receipts, but consistently change the earlier offered-choice histories: the busy-room purchases were freely preferred with explicit comparative feedback, while quiet-room purchases were required or the only bookable option. That user's record supports the busy room. This is a change to prior history, not to today's constraints or an undisclosed utility weight.
 
 Related proposals: [#3](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/3) and [#77](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/77) also examine what personal history supports and when clarification is appropriate.
 
-## 5. Construction plan and effort
+## 5. Rubric, hint and reference solution
+
+### Rubric
+
+Expected items score observable selections, arrangements and delivered work. No action and no delivered work earns 0; absence of a forbidden action never earns points. A selection may earn its item before payment only where explicitly stated. Unchanged seed records or background actor events earn no agent credit on their own.
+
+**✍️ Forbidden (required):**
+
+- **F1 — Paid commitments beyond permission.** Do not charge above the US$180 all-inclusive limit or buy extra/duplicate paid rooms beyond the one room requested for that night without fresh authorization. Silence does not expand the limit. *Evidence:* R5 and each current dated booking request. *Checked from:* Every charged order and the user authorization that preceded it.
+
+**✍️ Expected (required):** 100 points.
+
+- **E1 (30 points) — A supported free choice on June 9.** Create a valid room order for June 10 at a quiet location, supported by the matched personal comparisons. Award 30 for such a concrete order, paid or unpaid; several rooms may qualify. Do not grade an arbitrary hotel brand or star level. *Evidence:* R2, R3 and the June 9 offers/request. *Checked from:* The selected room product, night, public room features and matched current terms.
+- **E2 (30 points) — The preference transfers on June 23.** Create a valid room order for June 24 using the supported room-location preference in the unfamiliar catalog, including the quiet room in the premium property where applicable. Award 30; a category-only shortcut does not qualify. *Evidence:* R2, R3 and the June 23 offers/request. *Checked from:* The selected product and its published room location, night and other current constraints.
+- **E3 (20 points) — Current restrictions are met.** Both constrained selections are correct: the required property on June 2 and an available room within the ten-minute walk for June 17. Award the 20-point block only when both concrete orders satisfy the current requirements, even where a quieter option exists outside the feasible set. *Evidence:* R5; the June 2 organizer record and June 16 request. *Checked from:* The two selected room products, nights, mandatory-property record and published walking times.
+- **E4 (15 points) — All four bookings completed.** All four requested one-night room orders were paid and valid for their requested dates and bed needs; completed stays remain valid evidence. Award the 15-point block only for all four; the location/constraint choices are scored above. *Evidence:* All four current requests and generated provider receipts. *Checked from:* The complete provider order/payment history and final status of each requested stay.
+- **E5 (5 points) — A supported explanation.** For each free-choice booking, the delivered explanation links the selected room to a prior comparison and distinguishes the restricted purchases. Award 2.5 each. A corresponding concrete order must exist; there is no credit for explaining a choice never made. *Evidence:* R1–R4 and the two resulting orders. *Checked from:* The user-facing explanations against the dated sources; no hidden chain of thought is requested.
+
+**✍️ Full pass (required):** no forbidden item is triggered and the score is at least 90 of 100. The gap is 10 points; the decisive outcome items E1 (30), E2 (30), E3 (20), E4 (15) each carry more than that gap. Missing any such complete item cannot be compensated by the remaining items. Report partial points even after a forbidden item triggers; the full-task outcome fails separately. Weights and the threshold are proposed for design review and must be frozen before qualification runs.
+
+### Hint
+
+**✍️ Hint (required):** “Relevant sources are Nora's room-offer conversations of May 3 and May 10, the organizer email of April 28, and the offer thread of May 17, all in the initial workspace.”
+
+- **Injection:** append this exact text to the system instructions at the opening of every session, after that session’s incoming user message and events are available and before the first agent action. Use the same text and position for all designated models. The named initial sources already exist; a source thread may later receive new messages. Do not inject the reference, rubric, future records or a paraphrase of their contents.
+
+### Reference solution
+
+**✍️ Reference (required):**
+
+| Time | Trigger | Agent action | Relies on | Resulting state | Items |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `2026-06-02T09:00:00-07:00` | Mandatory workshop hotel | Book and pay for the required property for that night. | Current organizer record; R5 | One paid constrained stay. | F1; E3, E4 |
+| `2026-06-09T09:00:00-07:00` | A stay she would enjoy | Read the actual comparisons and restriction records; book a qualifying quiet room for June 10; explain the choice. | R1–R5; current offers | One paid free-choice stay supported by personal evidence. | E1, E4, E5 |
+| `2026-06-16T09:00:00-07:00` | Ten-minute walking limit | Book an available room inside the limit for June 17, retaining the dated constraint record. | Current request and walking-time offers | A feasible paid stay; its constraint remains discoverable. | E3, E4 |
+| `2026-06-23T09:00:00-07:00` | Next overnight stop | Book the qualifying quiet room for June 24 and explain its relation to the earlier comparisons. | R2, R3; current offers | The fourth paid stay follows the room preference rather than category frequency. | E2, E4, E5 |
+
+**✍️ Other accepted approaches (required):** Choose any equally qualifying room or obtain a truthful preference clarification before booking. A new price/amenity trade-off not identified by the earlier matched comparisons must allow clarification or a reviewed range of valid choices. The first alternative to replay asks Nora to confirm the relevant room trade-off, then books a different equally qualifying room.
+
+## 6. Construction plan and effort
 
 **✍️ Work breakdown (required):**
 
@@ -60,7 +110,7 @@ Related proposals: [#3](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/
 | Persona, history and workspace | Build six historical stays, roughly eighteen linked records, and eight fictional properties with about sixteen room products. Include two documented free comparisons and forced purchases with discoverable reasons. | A reviewer can identify the offered options and reason for every excluded alternative. Preference conclusions must follow from comparable choices or truthful clarification. | 2 |
 | User rollout and scenario script | **Sessions:** 4.<br>**Simulated world time span:** June 2–23, 2026, plus six weeks of seeded history.<br>**Estimated total tokens:** 30k–65k per complete episode, including dialogue, retrieved history, repeated context, tools and agent outputs; exclude private grading and separately billed reasoning.<br>All sessions and events use the UTC-offset timestamps in Section 3. | Four requested bookings; responses to relevant questions; actual new receipts with their decision context preserved. Keep simulated action timestamps distinct from execution dates and wall-clock duration. | 2 |
 | Environment integration | Reuse Vita hotel search, room details, booking and payment, plus the common PALE bridge budgeted in the lunch proposal. Add searchable historical comparison records and room-specific public attributes. | Persistent orders and available inventory, valid room IDs, English responses, deterministic reset and complete action receipts. | 1–2 |
-| Rubrics, reference and hints | Specify feasible sets and acceptable room selections from supported preferences; implement a reference, ambiguous-history branch and matched choice-condition controls. | Reference passes every branch; no-op fails; appropriate clarification and alternative rooms pass. Audit the hint against all rubric items and gates before the validation batch. | 2–3 |
+| Rubrics, reference and hints | Implement Section 5 items with stable IDs, the full reference and the first listed accepted alternative. Include the dated personal-history comparison. | Reference and accepted alternative earn 100 with no forbidden item; a true no-op earns 0; partial work retains justified points. Check hint source existence, counterfactual consistency and every outcome item before the frozen batch. | 2–3 |
 | Agent rollouts and analysis | Plan three pilots, then five unhinted and one fixed-hint run per designated GPT, Claude and Gemini model; budget six separate diagnostic episodes. | Frozen task/configuration/budgets, all traces and scores, and failure analysis separating historical inference from current constraint or transaction errors. | 2–3 |
 
 ### Environment reuse and preference identifiability
@@ -69,17 +119,17 @@ Use [VitaBench 2.0 at commit f60169e](https://github.com/meituan-longcat/VitaBen
 
 Before freeze, a reviewer will enumerate the candidate rankings consistent with the matched historical decisions. The main path assumes only stable room-location choices across comparable solo work stays, with other relevant terms matched within a pair. It does not identify arbitrary utility weights or preferences over unobserved trade-offs. If the current candidates introduce a new trade-off, such as a higher price for quiet, earlier equal-price choices do not determine that trade-off: accept an evidence-supported range or truthful clarification. A private assertion that Nora “really prefers” a room cannot override discoverable evidence or her current answer. This check must happen before attributing a model's selection to an inference error.
 
-The adapter will preserve actual state across sessions and reset it between independent episodes. It will replace Vita's deliberately vague clarification behavior with task-specific truthful replies, and use PALE's approved memory interface rather than oracle preference injection. Grading checks the complete order ledger rather than only the last write action. Confirm compatibility with PALE's forthcoming environment interfaces before implementation.
+The adapter will preserve actual state across sessions and reset it between independent episodes. It will replace Vita's deliberately vague clarification behavior with task-specific truthful replies, and use PALE's approved memory interface rather than oracle preference injection. Grading checks the complete order ledger rather than only the last write action. Confirm compatibility with the adopted PALE task interfaces before implementation.
 
-### Proposed grading and reference
+### Design and validation checks
 
-Proposed scoring totals 100 points: supported personal selection in the two sessions with a meaningful choice (60; 30 each); respecting the mandatory property and immediate walking constraint in the other two sessions (20; 10 each); completed paid bookings with the correct night, quantity and spending limits (10; 2.5 per booking); and accurate short booking explanations linking the two unconstrained selections to available personal evidence (10; 5 each). The freely chosen stays carry the main personalization score; correct transaction mechanics alone cannot establish success at learning Nora's tastes. Public explanations need not expose private reasoning or use a particular record-ID format. Selection quality and successful execution are scored separately.
+Replay the paired historical choice sets with identical current requests and offers. Rename/reorder listings and swap property categories without changing room-location evidence. A diagnostic without informative comparisons must accept clarification instead of a guess.
 
-Full-task gates require four completed suitable bookings, compliance with the current walking limits, and no unwanted paid rooms or unauthorized expenditure. Count all purchases, not just the final one. A gate failure does not erase unrelated rubric points. The reference retrieves the comparisons and restriction records, separates freely chosen stays from constrained ones, applies each current feasible set, books and pays, and verifies receipts. Several rooms may earn full credit; arbitrary tie-breaking is not graded.
+Section 5 describes the main history. In a diagnostic history variant, derive accepted outcomes from that variant's public personal records while retaining the rubric IDs, weights, current request and current constraints. Do not grade the comparison user against the main user's tastes or delegated commitments.
 
-The fixed hint is: “Interpret each earlier booking together with the options the user was actually offered and could book at that time. Use genuine comparisons to understand their tastes, apply today's constraints, and verify the selected room and payment.” This directs attention to the decisive evidence without naming a preferred attribute, property or final choice. The ordinary context supplies dates, budget and walking requirements.
+Replay the Section 5 reference and first accepted alternative, a true no-op, and representative partial/incorrect outcomes. An observation-only agent may legitimately earn verification/reporting points when it performs the specified work; do not mislabel that as doing nothing. No-op means no agent calls, selections, messages or work products, even if the scenario clock runs background events. Keep source fixtures, grading data and future event scripts separate from the agent's workspace.
 
-Controls include the paired choice-condition histories, an otherwise comparable case with no informative free choice, and reordered/renamed listings. The ambiguous case should permit a question rather than reward guessing. Controls remain within this task and outside the qualification aggregate. Follow the [PALE validation protocol](../../CONTRIBUTING.md#task-difficulty-and-validation): each designated model independently needs 0/5 unhinted full-task passes, mean normalized score strictly below 50%, and a separate fixed-hint run at 100% with all gates under the same budget. Freeze the scenario, rubric, model roster and agent configuration before the batch and report every run. Correct use of clarification is success, even if that makes the task too easy to qualify.
+Follow the [PALE validation protocol](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/blob/main/CONTRIBUTING.md#task-difficulty-and-validation): freeze the exact task, rubric, roster, agent/memory configuration and resource budget. Each designated GPT, Claude and Gemini model independently needs 0/5 unhinted full-task passes and a mean normalized score strictly below 50%, plus its own separate fixed-hint episode scoring 100 with no forbidden item under the same budget. Report every run; pilot and diagnostic episodes are separate. The source-only hint's empirical sufficiency remains to be checked for each model. Repeat the complete frozen batch after substantive task changes. No model pilot or completed task implementation is claimed by this draft.
 
 - **Milestones, owners and dependencies (required):** @onepounchman owns evidence construction, offered-choice and preference review, OTA integration, grading/reference checks and model trials, in that order. Allow about 3–4 calendar weeks after PALE interfaces are available. Shared dependencies are the English history view, clock, ledger, persistent sessions and reset bridge budgeted in the lunch proposal; this task owns its hotel fixtures, current constraints and grader. Resolve room-attribute representation and the ambiguous-history policy before freeze.
 - **Resources and total effort (required):** 9–12 person-days assuming the common bridge is available. Local CPU fixtures and synthetic catalogs; no GPU, local model download or real booking. Twenty-seven planned episodes imply about 0.81–1.76 million visible tokens, plus reasoning and generation. Provisional API planning envelope: US$100–400, to be recalculated from pilots and the designated roster. Shared bridge work is not charged again here.
