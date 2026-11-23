@@ -25,14 +25,14 @@ The Hub package is completely standalone and runs on the shared runtime (Runtime
    - The agent inspects historical sleep metrics, resting heart rate (RHR), heart rate variability (HRV), and daily exertion/strain scores over a requested date range to evaluate physical readiness.
    - *Checkable outcome:* Agent returns accurate recovery summaries or detects data gaps without hallucinating values.
 2. **Workout Lifecycle Management (Read/Write):**
-   - The agent logs completed workouts or transitions planned workouts across states (`planned` → `completed`, `skipped`, or `cancelled`).
+   - Workouts originate either from seed fixtures (as `planned` sessions) or are dynamically planned/logged by the agent. The agent transitions workouts across states: `planned` → `completed`, `skipped`, or `cancelled`.
    - *Checkable outcome:* Workout records persist in the Hub store with sport type, duration, perceived exertion, and average heart rate.
 3. **Habit & Wellness Goal Tracking (Read/Write):**
-   - The agent inspects and updates target wellness metrics (e.g., daily hydration, minimum sleep duration, weekly cardio targets).
+   - The agent inspects, creates, and updates target wellness metrics (e.g., daily hydration, minimum sleep duration, weekly cardio targets).
    - *Checkable outcome:* Goals progress through states (`active` → `achieved`, `missed`, `abandoned`).
-4. **Routine Template Definition (Read/Write):**
-   - The agent inspects and modifies reusable weekly routine templates (e.g., "Monday Morning Strength Window", "Post-Work Decompression Routine"). Note: Concrete schedule placement is delegated to Calendar 1.3.0.
-   - *Checkable outcome:* Stored routine template records update their component blocks and version counters.
+4. **Routine Template Lifecycle Management (Read/Write):**
+   - The agent creates, inspects, updates, activates, and archives reusable routine templates (e.g., "Monday Morning Strength Window", "Post-Work Decompression Routine"). Note: Concrete scheduling into specific calendar slots is executed via Calendar 1.3.0.
+   - *Checkable outcome:* Routine records progress through states (`draft` → `active` → `archived`), updating component blocks and record versions.
 
 ## 3. Potential app connections
 
@@ -58,39 +58,41 @@ The Hub does not store or shadow records owned by other apps. The Agent calls se
 ### Integration details
 
 - **Operations and access (required):**
-  The Hub provides an agent-facing MCP interface in `tools.json` consisting strictly of verbs on Hub-owned entities. All write tools require `request_id` and `expected_version` for optimistic concurrency.
-  
-  *Agent MCP Tools:*
-  - `health_hub.get_daily_summary(date: string) -> DailySummary` (Read-only)
-  - `health_hub.list_metrics(metric_type: string, start_date: string, end_date: string) -> MetricSeries` (Read-only)
-  - `health_hub.list_workouts(start_date: string, end_date: string, status?: string) -> WorkoutList` (Read-only)
-  - `health_hub.log_workout(workout_data: WorkoutInput, request_id: string) -> WorkoutRecord` (Write)
-  - `health_hub.update_workout(workout_id: string, status: string, expected_version: int, request_id: string) -> WorkoutRecord` (Write)
-  - `health_hub.list_goals(status?: string) -> GoalList` (Read-only)
-  - `health_hub.create_goal(goal_data: GoalInput, request_id: string) -> GoalRecord` (Write)
-  - `health_hub.update_goal(goal_id: string, status: string, expected_version: int, request_id: string) -> GoalRecord` (Write)
-  - `health_hub.get_routine_template(routine_id: string) -> RoutineRecord` (Read-only)
-  - `health_hub.update_routine_template(routine_id: string, blocks: BlockList, expected_version: int, request_id: string) -> RoutineRecord` (Write)
-  - `health_hub.list_notifications() -> NotificationList` (Read-only)
+  The Hub provides an agent-facing MCP interface in `tools.json`. App ID is `health-hub`. All tools are prefixed with `health-hub.`. All write operations require `request_id` (string) and Core's version object `expected_version: { epoch: number, revision: number }` for optimistic concurrency.
 
-  *Platform Infra Operations:*
-  Platform operations (`env.load_seed`, `env.reset`, `env.snapshot`, `env.apply_event`) are Core-managed infrastructure operations served on a separate connection inaccessible to the Agent.
+  *Agent MCP Tools:*
+  - `health-hub.get_daily_summary(date: string) -> DailySummary` (Read-only)
+  - `health-hub.list_metrics(metric_type: string, start_date: string, end_date: string) -> MetricSeries` (Read-only)
+  - `health-hub.list_workouts(start_date: string, end_date: string, status?: string) -> WorkoutList` (Read-only)
+  - `health-hub.plan_workout(workout_data: WorkoutPlanInput, expected_version: VersionObj, request_id: string) -> WorkoutRecord` (Write: creates workout in `planned` state)
+  - `health-hub.log_workout(workout_data: WorkoutLogInput, expected_version: VersionObj, request_id: string) -> WorkoutRecord` (Write: creates workout directly as `completed`)
+  - `health-hub.update_workout(workout_id: string, status: string, expected_version: VersionObj, request_id: string) -> WorkoutRecord` (Write: transitions status to `completed`, `skipped`, or `cancelled`)
+  - `health-hub.list_goals(status?: string) -> GoalList` (Read-only)
+  - `health-hub.create_goal(goal_data: GoalInput, expected_version: VersionObj, request_id: string) -> GoalRecord` (Write: creates goal in `active` state)
+  - `health-hub.update_goal(goal_id: string, status: string, expected_version: VersionObj, request_id: string) -> GoalRecord` (Write: transitions status to `achieved`, `missed`, or `abandoned`)
+  - `health-hub.list_routine_templates(status?: string) -> RoutineList` (Read-only)
+  - `health-hub.create_routine_template(template_data: RoutineInput, expected_version: VersionObj, request_id: string) -> RoutineRecord` (Write: creates template in `draft` state)
+  - `health-hub.update_routine_template(routine_id: string, blocks?: BlockList, status?: string, expected_version: VersionObj, request_id: string) -> RoutineRecord` (Write: updates blocks or transitions status between `draft`, `active`, and `archived`)
+  - `health-hub.list_notifications() -> NotificationList` (Read-only)
+
+  *Platform Plugin Hooks (Core-Managed Infra):*
+  The Hub does not implement its own storage engine, snapshotting, or reset server. Instead, it exposes the standard App plugin hooks (`validateSeed`, `handleTool`, `applyEvent`, `init`) invoked by Core. Core handles persistence, snapshots, version checks, and the separate Infra operations (`env.load_seed`, `env.reset`, `env.snapshot`, `env.apply_event`).
 
 - **State and lifecycle (required):**
-  - Single-account architecture: Each instance manages exactly one user account identified by `account_id` bound to the run's `person_id`.
+  - Single-account architecture: One user account per instance (`account_id` bound to the run's `person_id`).
   - Fixtures are loaded via `env.load_seed` adhering to `schemas/seed.schema.json`.
-  - State isolation: The Hub stores only biometrics, workouts, goals, and routine templates. Reset (`env.reset`) restores Hub records to the initial seed baseline without touching other apps (`reset_scope: app_instance`).
-  - Writes return Core's committed record version. Retries with identical `request_id` are idempotent.
+  - State isolation: Reset (`env.reset`) restores Hub records to the initial baseline without modifying other apps (`reset_scope: app_instance`).
+  - Writes return Core's updated `{ epoch, revision }` version object. Re-submitting the same `request_id` is idempotent.
 
 - **Events and notifications (required):**
-  Events represent incoming asynchronous wearable sync payloads ingested via Core's `env.apply_event`:
-  
-  *Example Injected Event (`wearable.sync_day`):*
+  Events represent incoming asynchronous wearable data ingested via Core's `env.apply_event`.
+
+  *Example Injected Event (`health-hub.ingest_daily_sync`):*
   ```json
   {
     "event_id": "evt_sync_20261118_01",
     "at": "2026-11-18T06:30:00+01:00",
-    "operation": "health_hub.ingest_daily_sync",
+    "operation": "health-hub.ingest_daily_sync",
     "payload": {
       "date": "2026-11-17",
       "sleep": {
@@ -108,25 +110,21 @@ The Hub does not store or shadow records owned by other apps. The Agent calls se
     }
   }
   ```
-  *Time Rules & Notifications:*
-  - In line with platform constraints, advancing the virtual clock triggers no background callbacks. 
-  - Goal and habit deadlines are evaluated lazily against `ctx.virtual_now` during read operations. A daily goal whose window closed prior to `ctx.virtual_now` without meeting threshold values is dynamically derived as `missed`.
-  - Notifications (e.g., low recovery alerts, missed habit flags) are appended to the internal Hub notification ledger, read by the agent via `health_hub.list_notifications`. No direct messaging channel declaration is required for v1.
+
+  *Time Rules & Notification:*
+  - In Core, read operations are strictly side-effect-free; any read that attempts to mutate data is rejected.
+  - Therefore, notifications (such as "missed habit", "low recovery alert", or "routine conflict") are **persisted to the internal ledger strictly during write operations or event applications** (such as when `health-hub.ingest_daily_sync` arrives or when a workout is updated).
+  - During reads (`health-hub.list_notifications`), the Hub returns existing ledger entries and may dynamically project derived statuses against `ctx.virtual_now` without modifying stored records.
 
 - **Shared data and dependencies (required):**
-  - People are referenced strictly by the run binding's `person_id`.
-  - External entities are referenced solely by foreign ID (e.g., `linked_task_id`, `linked_calendar_event_id`).
-  - Standalone package statement: The package operates with only the shared runtime (Runtime 1.6.0) and its own declared code.
+  - People are referenced strictly by `person_id`. External entities are referenced by ID (e.g., `linked_calendar_event_id`).
+  - Standalone package statement: The package operates with only the shared runtime (Runtime 1.6.0) and its declared dependencies.
 
 - **Health Record Granularity & Gap Representation:**
-  - *Granularity:*
-    - Sleep: 1 aggregated summary record per 24-hour cycle.
-    - Recovery (RHR & HRV): 1 daily baseline reading taken during the primary sleep period.
-    - Strain & Activity: 1 daily aggregate (active calories, steps, strain score 0–21).
-    - Workouts: Discrete event records with start timestamp, duration, activity type, and calorie burn.
-  - *Volume:* A standard 60-day profile contains ~60 sleep records, ~60 recovery summaries, and ~30–50 discrete workout records.
+  - *Granularity:* Daily aggregates for sleep, resting heart rate, HRV, and strain. Discrete records for planned and logged workouts.
+  - *Dating Policy:* All seeded historical data is dated **on or after 2026-01-01**.
   - *Data Gaps (Explicit Missing Days):*
-    If a user does not wear the tracker (e.g., device uncharged), queries covering that date return:
+    Days where the tracker was uncharged or not worn return explicit `no_data` objects:
     ```json
     {
       "date": "2026-10-14",
@@ -135,8 +133,8 @@ The Hub does not store or shadow records owned by other apps. The Agent calls se
       "metrics": null
     }
     ```
-    This allows tasks (such as Task #117) to explicitly test that an agent handles missing data without hallucinating biometric metrics.
-  - *Generation:* Synthetic profiles and time series are deterministically generated via seeded Python/Node scripts enforcing physiological realism (e.g., elevated strain correlates with increased sleep need).
+    This allows tasks like Task #117 to directly verify that agents distinguish between zero values and missing data.
+  - *Generation:* Synthetic profiles are generated deterministically using seeded scripts.
 
 ## 4. Construction plan and effort
 
@@ -144,38 +142,37 @@ The Hub does not store or shadow records owned by other apps. The Agent calls se
 
 | Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
 | :--- | :--- | :--- | :--- |
-| Core Hub & Data Model | Implement Hub storage engine, JSON seed loader, schema validation, and Core Infra handlers (`env.load_seed`, `env.reset`, `env.snapshot`, `env.apply_event`). | Standalone engine passing `npm run app:verify -- --app apps/health-hub`. | 5–7 |
-| Agent MCP Tools | Implement `tools.json` definitions and handlers for health summaries, workouts, goals, routine templates, and notification queries. Enforce optimistic locking (`expected_version`). | Unit tests verifying each tool, optimistic locking conflicts (`stale_version`), and idempotent retries (`request_id`). | 4–6 |
-| Synthetic Data & Generator | Build deterministic generator for 5 fictional user personas with 30–90 days of physiological data, including intentional anomalies and sensor-off gap days. | Seed validation checking physiological bounds, timestamp consistency, and gap schema compliance. | 3–5 |
-| Web Dashboard (GUI) | Responsive GUI in `gui/` hosted on public business Web Host (`runtime/web/`) visualizing sleep, recovery, workout logs, and goals using the same MCP tools. | Verified UI flows rendering stored state accurately without client-side state drift. | 4–6 |
-| Verification & Integration | Comprehensive automated verification suite (`npm run app:verify`), event replay integration, and end-to-end trace validation with Task #117. | Fully green public-runtime verification suite; deterministic reset verified. | 3–4 |
+| Core Hub Plugin Hooks & Schemas | Implement Hub schemas (`seed.schema.json`, `events.schema.json`, `tools.json`) and App plugin hooks (`validateSeed`, `handleTool`, `applyEvent`, `init`). | Standalone package passing `npm run app:verify -- --app apps/health-hub`. | 2–3 |
+| Agent MCP Tools Implementation | Implement all 13 `health-hub.*` tool handlers with optimistic locking on `{ epoch, revision }` and idempotent `request_id` handling. | Automated tool tests verifying CRUD workflows, state transitions, and `stale_version` rejection. | 4–5 |
+| Synthetic Data & Generator | Deterministic generator for 5 fictional user personas dated on or after 2026-01-01, including explicit `no_data` gap days. | Schema-validated fixtures satisfying physiological bounds and gap structures. | 3–4 |
+| Web Dashboard (GUI) | Responsive GUI in `gui/` hosted on public business Web Host (`runtime/web/`) using the same `health-hub.*` MCP tools. | Verified browser rendering of sleep, recovery, workouts, and templates matching state. | 4–5 |
+| Verification & Task Integration | Run public runtime test suite (`npm run app:verify`), verify snapshot/reset determinism, and run end-to-end integration trace with Task #117. | Fully green test suite; verified trace logs with Task #117. | 2–3 |
 
 - **Milestones, owners and dependencies (required):**
-  - **Milestone 1 (Days 1–5):** Data schemas, seed loader, and core storage engine.
-  - **Milestone 2 (Days 6–10):** Agent MCP tools and event handlers; verified with `npm run app:verify`.
-  - **Milestone 3 (Days 11–15):** Deterministic synthetic history generator and gap simulation.
-  - **Milestone 4 (Days 16–20):** GUI dashboard and integration validation with Task #117.
+  - **Milestone 1 (Days 1–5):** App plugin hooks, schema definitions, and seed loader.
+  - **Milestone 2 (Days 6–10) — [FIRST RUNNABLE VERSION]:** Complete implementation of `health-hub.*` MCP tools, event handler (`health-hub.ingest_daily_sync`), and baseline fixtures passing `npm run app:verify`. **This milestone will be submitted within 14 calendar days of plan approval.**
+  - **Milestone 3 (Days 11–14):** Full synthetic dataset generation with 2026-01-01+ timestamps and explicit gap modeling.
+  - **Milestone 4 (Days 15–18):** GUI dashboard in `gui/` and trace validation with Task #117.
   - *Owner:* Nassim (@nassimberrada).
   - *Platform Dependencies:* Pinned to Runtime 1.6.0 and Core API 1.2.0.
   - *Related PR Connections:* 
     - **Task #117:** Hub supplies the daily sleep and strain feed with explicit missing-day gaps.
     - **Task #29:** Uses standalone Calendar and Tasks apps; does not depend on Hub biometrics.
-    - **PR #14 (Northlake), PR #15 (Cadence), PR #123 (Rainshadow):** Specialized clinical, studio booking, and weather workflows are excluded from Hub and left to those apps.
+    - **PR #14, PR #15, PR #123:** External clinical, booking, and weather sources remain out of scope and deferred to those apps.
 - **Resources and total effort (required):**
-  - Estimated effort: **19–28 person-days** (reduced from 22–34 days due to scoping out duplicate mail/calendar/task implementations).
-  - Local execution on Node.js 18+; no hosted servers, API subscriptions, or physical hardware required.
+  - Estimated effort: **15–20 person-days** (further reduced as Core provides storage, reset, and lifecycle management).
+  - Local execution on Node.js 18+; no external services or paid APIs required.
 - **Scope boundary and open questions (required):**
-  - *In scope:* Biometrics (sleep, RHR, HRV, strain), workout tracking, routine templates, wellness goals, and missing-day gap reporting.
-  - *Out of scope:* Medical diagnosis, clinical prescription, real-world wearable hardware syncing, and direct calendar/email shadow stores.
-  - *Open questions resolved:* All write actions require explicit `request_id` and `expected_version`; runtime is pinned to local reference runtime 1.6.0; single-user account per instance.
+  - *In scope:* Wearable biometrics (sleep, recovery, strain), workout logging/planning, wellness goals, routine templates, and explicit gap reporting.
+  - *Out of scope:* Clinical medical diagnosis, live wearable syncing, and duplication of platform Calendar/Tasks/Mail.
 - **License and external dependencies (required):**
-  - MIT / repository standard license. 100% synthetic data generated algorithmically. No proprietary Apple Health or Whoop assets used.
+  - MIT / repository standard license. 100% synthetic data generated deterministically. No external network dependencies.
 
 ### First-Version Workflows, State Transitions & Failure Paths
 
 | Workflow | Entities & States | MCP Tools | Success Example | Error / Rejection Example | Confirm / Cancel Paths |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1. Biometric Read** | Daily recovery summary (`valid` or `no_data`) | `health_hub.get_daily_summary`, `health_hub.list_metrics` | Agent requests summary for `2026-11-17`; receives sleep score (81) and HRV (62). | Query for unseeded future date returns `error_code: "date_out_of_range"`. | Read-only; cancel not applicable. |
-| **2. Workout Logging** | Workout record: `planned` → `completed`, `skipped`, or `cancelled` | `health_hub.log_workout`, `health_hub.update_workout` | Agent logs 45-min run with `request_id: "req_01"`. Record created with `status: "completed"`. | Re-submitting update with stale `expected_version: 1` when record is at version 2 returns `error_code: "stale_version"`. | Agent can update status to `cancelled` if user cancels workout. |
-| **3. Goal Tracking** | Goal record: `active` → `achieved`, `missed`, `abandoned` | `health_hub.create_goal`, `health_hub.update_goal` | Agent creates goal "Sleep $\ge 8$ hrs" with target 480 mins. Returns `status: "active"`. | Agent submits negative duration target; rejected with `error_code: "invalid_target_value"`. | Agent can transition goal to `abandoned` upon user instruction. |
-| **4. Routine Template Update** | Routine template: `draft` → `active` → `archived` | `health_hub.update_routine_template` | Agent updates "Morning Routine" blocks with new version; returns updated record. | Concurrent conflict triggers `stale_version` error; stored routine remains unchanged. | Reverting changes creates a new version with previous blocks. |
+| **1. Biometric Read** | Daily recovery summary (`valid` or `no_data`) | `health-hub.get_daily_summary`, `health-hub.list_metrics` | Agent requests summary for `2026-11-17`; receives sleep score (81) and HRV (62). | Query for unseeded future date returns `error_code: "date_out_of_range"`. | Read-only; cancel not applicable. |
+| **2. Workout Lifecycle** | Workout record: `planned` → `completed`, `skipped`, or `cancelled` | `health-hub.plan_workout`, `health-hub.log_workout`, `health-hub.update_workout` | Agent plans a run via `health-hub.plan_workout` (state: `planned`), or updates a seeded planned workout to `completed`. | Update submitted with stale `expected_version: { epoch: 1, revision: 1 }` when record is at revision 2 returns `error_code: "stale_version"`. | Agent can transition status to `cancelled` upon user request. |
+| **3. Goal Lifecycle** | Goal record: `active` → `achieved`, `missed`, `abandoned` | `health-hub.create_goal`, `health-hub.update_goal`, `health-hub.list_goals` | Agent creates goal "Sleep $\ge 8$ hrs". Stored with `status: "active"` and version `{ epoch: 1, revision: 1 }`. | Agent submits negative duration target; rejected with `error_code: "invalid_target_value"`. | Agent can transition goal to `abandoned`. |
+| **4. Routine Template Lifecycle** | Routine template: `draft` → `active` → `archived` | `health-hub.create_routine_template`, `health-hub.update_routine_template`, `health-hub.list_routine_templates` | Agent creates template (status: `draft`), then calls `health-hub.update_routine_template` with `status: "active"`. | Stale `{ epoch, revision }` supplied on update returns `stale_version`; stored template remains unchanged. | Transitioning status to `archived` deactivates template without deleting history. |
