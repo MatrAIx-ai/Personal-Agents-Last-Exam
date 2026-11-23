@@ -51,9 +51,23 @@ function attemptFields(data, notice, message, run_id, extra) {
   };
 }
 
+function runIdOf(snapshot, explicit) {
+  if (explicit) return explicit;
+  if (snapshot && snapshot.run_id) return snapshot.run_id;
+  if (snapshot && snapshot.snapshot && snapshot.snapshot.run_id) return snapshot.snapshot.run_id;
+  return null;
+}
+
 async function publishPending({snapshot, router, run_id = null}) {
+  const resolvedRun = runIdOf(snapshot, run_id);
+  if (!resolvedRun) {
+    const error = new Error('publishPending needs a run id from the snapshot.');
+    error.code = 'invalid_arguments';
+    throw error;
+  }
   const data = snapshot.data || snapshot.snapshot.data;
   const notices = pendingNotices(snapshot);
+  run_id = resolvedRun;
   const results = [];
   for (const notice of notices) {
     const message = messageFor(data, notice);

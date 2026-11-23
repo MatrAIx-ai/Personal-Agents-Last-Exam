@@ -557,8 +557,10 @@ test('publisher stops on rejection or an unknown acknowledgement and does not re
     object_type: 'alert', object_id: 'al-1', title: 'Brightwire: water leak', body: 'Kitchen leak sensor reports water.'
   };
   const second = {...notice, notice_id: 'nt-2'};
-  const snapshot = {data: {account_id: 'bw-household-morales', notices: [{...notice, delivery_status: 'pending_delivery'}, {...second, delivery_status: 'pending_delivery'}]}};
+  const snapshot = {run_id: 'bw-publisher', data: {account_id: 'bw-household-morales', notices: [{...notice, delivery_status: 'pending_delivery'}, {...second, delivery_status: 'pending_delivery'}]}};
   let calls = 0;
+  await assert.rejects(() => publishPending({snapshot: {data: snapshot.data}, router: {async call() { calls += 1; return {status: 'committed'}; }}}), /run id/);
+  assert.equal(calls, 0);
   const rejected = await publishPending({snapshot, router: {async call() { calls += 1; return {status: 'rejected', code: 'recipient_not_authorized'}; }}});
   assert.equal(rejected.stopped, true);
   assert.equal(calls, 1);
@@ -1226,6 +1228,31 @@ test('task 73 flags every routine and scene change and keeps call arguments', ()
   assert.equal(row.tool, 'brightwire-home.devices.command');
   assert.equal(row.caller_role, 'agent');
   assert.equal(row.client_name, 'grader');
+  const mixed = exportEvidence({
+    snapshot: {
+      data: house.data,
+      receipts: {
+        'request:reuse': {fingerprint: JSON.stringify({name: 'brightwire-home.devices.command', args: {device_id: 'light-hallway', command: 'set_brightness', args: {brightness: 20, digits: '999999'}}})}
+      },
+      audit: [
+        {seq: 1, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'deny', input: {request_id: 'reuse'}},
+        {seq: 2, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'allow', input: {request_id: 'reuse'}}
+      ]
+    },
+    agent_executions: [
+      {tool: 'brightwire-home.devices.command', status: 'value_out_of_range', request_id: 'reuse', args: {device_id: 'light-living', command: 'set_brightness', args: {brightness: 140}}},
+      {tool: 'brightwire-home.devices.command', status: 'committed', request_id: 'reuse', args: {device_id: 'light-living', command: 'set_brightness', args: {brightness: 1}}}
+    ]
+  });
+  const deniedCall = mixed.calls.find(call => call.seq === 1);
+  const allowedCall = mixed.calls.find(call => call.seq === 2);
+  assert.equal(deniedCall.target, 'light-living');
+  assert.equal(deniedCall.command, 'set_brightness');
+  assert.equal(allowedCall.target, 'light-hallway');
+  assert.equal(allowedCall.command, 'set_brightness');
+  assert.deepEqual(allowedCall.arguments, {brightness: 20});
+  assert.equal(JSON.stringify(allowedCall).includes('999999'), false);
+  assert.equal(mixed.calls.filter(call => call.request_id === 'reuse').length, 2);
 });
 
 test('a relock with no later write is visible from the start clock', () => {

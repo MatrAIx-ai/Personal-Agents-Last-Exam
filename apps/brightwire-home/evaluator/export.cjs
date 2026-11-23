@@ -33,6 +33,8 @@ function idsMatch(entry, row) {
 }
 
 function roleMatches(entry, row) {
+  const tool = row.tool || '';
+  if (entry.event_id && tool === 'env.apply_event' && row.actor === 'infra') return true;
   if (!row.actor || !entry.actor_kind) return true;
   if (entry.actor_kind === 'assistant') return row.actor === 'agent';
   if (entry.actor_kind === 'routine') return row.actor === 'agent' || row.actor === 'infra';
@@ -42,6 +44,7 @@ function roleMatches(entry, row) {
 function operationMatches(entry, row) {
   const tool = row.tool || '';
   if (!tool) return true;
+  if (entry.event_id && tool === 'env.apply_event') return true;
   if (tool.startsWith('env.')) return entry.actor_kind !== 'assistant';
   if (tool === 'brightwire-home.devices.command') return Boolean(entry.device_id) || entry.actor_kind === 'assistant' || entry.actor_kind === 'routine';
   if (tool === 'brightwire-home.modes.set') return entry.command === 'set_mode' || entry.cause === 'routine';
@@ -55,6 +58,10 @@ function operationMatches(entry, row) {
 function joinAudit(entry, audit) {
   const rows = audit.filter(row => idsMatch(entry, row) && roleMatches(entry, row) && operationMatches(entry, row));
   if (!rows.length) return null;
+  if (entry.event_id) {
+    const eventRow = [...rows].reverse().find(row => row.tool === 'env.apply_event' && row.decision === 'allow');
+    if (eventRow) return eventRow;
+  }
   const allow = [...rows].reverse().find(row => row.decision === 'allow');
   return allow || rows[rows.length - 1];
 }
@@ -91,6 +98,21 @@ function callCommand(linked, row, execution) {
   if (input.command) return input.command;
   if (linked && linked.command) return linked.command;
   return null;
+}
+
+function receiptCall(state, requestId) {
+  if (!requestId || !state.receipts) return null;
+  const receipt = state.receipts['request:' + requestId];
+  if (!receipt || typeof receipt.fingerprint !== 'string') return null;
+  let parsed;
+  try { parsed = JSON.parse(receipt.fingerprint); } catch { return null; }
+  if (!parsed || !parsed.args || typeof parsed.args !== 'object' || Array.isArray(parsed.args)) return null;
+  return {tool: parsed.name || null, args: parsed.args};
+}
+
+function argTarget(args) {
+  if (!args) return null;
+  return args.device_id || args.routine_id || args.scene_id || null;
 }
 
 function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} = {}) {
@@ -172,17 +194,35 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
     seenCalls.add(key);
     calls.push(call);
   }
+  const deniedQueues = new Map();
+  for (const item of agent_executions) {
+    if (['ok', 'committed', 'ready'].includes(item.status)) continue;
+    const tool = item.tool || item.name || '';
+    const key = tool + '\n' + (item.request_id || '');
+    if (!deniedQueues.has(key)) deniedQueues.set(key, []);
+    deniedQueues.get(key).push(item);
+  }
+  const usedExecutions = new Set();
+  function nextDenied(tool, requestId) {
+    const queue = deniedQueues.get((tool || '') + '\n' + (requestId || ''));
+    if (!queue || !queue.length) return null;
+    const item = queue.shift();
+    usedExecutions.add(item);
+    return item;
+  }
   for (const row of audit) {
     const requestId = row.input ? row.input.request_id || null : null;
-    const execution = agent_executions.find(item => item.request_id && item.request_id === requestId && (item.tool || item.name) === row.tool);
-    const linked = history.find(entry => entry.request_id && entry.request_id === requestId && (!entry.device_id || !execution || !execution.args || execution.args.device_id === entry.device_id));
+    const stored = row.decision === 'allow' ? receiptCall(state, requestId) : null;
+    const execution = stored ? null : (row.decision === 'deny' ? nextDenied(row.tool, requestId) : null);
+    const args = stored ? stored.args : (execution && execution.args);
+    const linked = history.find(entry => entry.request_id && entry.request_id === requestId && (!entry.device_id || !args || !args.device_id || args.device_id === entry.device_id));
     pushCall({
       seq: row.seq,
-      tool: row.tool || null,
-      target: callTarget(linked, row, execution),
-      command: callCommand(linked, row, execution),
-      arguments: allowArguments(execution && execution.args),
-      outcome: row.result && row.result.status || row.reason || row.decision,
+      tool: (stored && stored.tool) || row.tool || null,
+      target: argTarget(args) || callTarget(linked, row, execution),
+      command: (args && args.command) || callCommand(linked, row, execution),
+      arguments: allowArguments(args),
+      outcome: (execution && execution.status) || (row.result && row.result.status) || row.reason || row.decision,
       actor: linked ? linked.actor_kind : row.actor || null,
       caller_role: row.actor || null,
       virtual_time: row.virtual_time || null,
@@ -193,16 +233,10 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
     });
   }
   agent_executions.forEach((item, index) => {
+    if (usedExecutions.has(item)) return;
     const tool = item.tool || item.name || null;
     const decision = ['ok', 'committed', 'ready'].includes(item.status) ? 'allow' : 'deny';
-    const existing = calls.find(call => call.request_id && call.request_id === item.request_id && call.tool === tool && call.decision === decision);
-    if (existing) {
-      if (!existing.target) existing.target = callTarget(null, null, item);
-      if (!existing.command) existing.command = callCommand(null, null, item);
-      existing.arguments = Object.assign(existing.arguments || {}, allowArguments(item.args));
-      if (item.status && (existing.outcome === 'deny' || existing.outcome === 'allow')) existing.outcome = item.status;
-      return;
-    }
+    if (decision === 'allow' && calls.some(call => call.seq != null && call.decision === 'allow' && call.request_id && call.request_id === item.request_id && call.tool === tool)) return;
     pushCall({
       index,
       tool,

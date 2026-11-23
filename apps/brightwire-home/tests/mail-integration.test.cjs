@@ -85,7 +85,7 @@ test('a committed Brightwire notice is delivered to Mail once, and a missing gra
     ]});
     clients.push(router);
     await router.initialize();
-    const published = await publishPending({snapshot: {data: before}, router});
+    const published = await publishPending({snapshot: {data: before, run_id: 'bw-mail'}, router});
     assert.equal(published.delivery, 'confirmed', JSON.stringify(published));
     assert.equal(published.results.length, before.notices.filter(item => item.delivery_status === 'pending_delivery').length);
     const duplicate = await router.call('router.publish', {
@@ -112,7 +112,7 @@ test('a committed Brightwire notice is delivered to Mail once, and a missing gra
     ]});
     clients.push(deniedRouter);
     await deniedRouter.initialize();
-    const denied = await publishPending({snapshot: {data: before}, router: deniedRouter});
+    const denied = await publishPending({snapshot: {data: before, run_id: 'bw-mail-denied'}, router: deniedRouter});
     assert.equal(denied.stopped, true);
     assert.equal(denied.results[0].receipt.code, 'recipient_not_authorized');
     assert.deepEqual(created.state.data.devices, before.devices);
@@ -124,16 +124,16 @@ test('a committed Brightwire notice is delivered to Mail once, and a missing gra
         throw new Error('acknowledgement dropped');
       }
     };
-    const lost = await publishPending({snapshot: {data: before}, router: dropping});
+    const lost = await publishPending({snapshot: {data: before, run_id: 'bw-mail'}, router: dropping});
     assert.equal(lost.delivery, 'unresolved');
     assert.equal(lost.results[0].request_id, 'notice-' + before.notices[0].notice_id);
+    assert.equal(lost.results[0].run_id, 'bw-mail');
     assert.equal(publishes, 1);
     const mailInfra = new Client('mail', 'infra', 'bw-mail', dir, 'bw-mail-infra', {registry: path.join(root, 'examples/registry.mail.json')});
     clients.push(mailInfra);
     await mailInfra.initialize();
     const stopped = lost.results[0];
-    stopped.run_id = 'bw-mail';
-    const reconciled = await reconcilePending({snapshot: {data: before}, mail: mailInfra, attempt: stopped});
+    const reconciled = await reconcilePending({snapshot: {data: before, run_id: 'bw-mail'}, mail: mailInfra, attempt: stopped});
     assert.equal(reconciled.results.length, 1);
     assert.equal(reconciled.results[0].delivery, 'confirmed');
     assert.equal(reconciled.results[0].notice_id, before.notices[0].notice_id);
@@ -153,7 +153,7 @@ test('a committed Brightwire notice is delivered to Mail once, and a missing gra
     };
     let silentCalls = 0;
     const silent = {async call() { silentCalls += 1; throw new Error('receiver down'); }};
-    const unpublished = await publishPending({snapshot: missing, router: silent});
+    const unpublished = await publishPending({snapshot: {...missing, run_id: 'bw-missing'}, router: silent});
     assert.equal(unpublished.results[0].request_id, 'notice-nt-missing');
     assert.equal(silentCalls, 1);
     const unresolved = await reconcilePending({snapshot: missing, mail: mailInfra, attempt: unpublished.results[0]});
@@ -258,6 +258,80 @@ test('a Mail receiver rejection after dispatch stays unresolved and is not publi
     assert.equal(reconciled.results.length, 1);
     assert.equal(reconciled.delivery, 'unresolved');
     assert.equal(reconciled.results[0].request_id, 'notice-nt-reject');
+    assert.equal(publishes, 1);
+  } finally {
+    await Promise.allSettled(clients.map(client => client.close()));
+    fs.rmSync(dir, {recursive: true, force: true});
+  }
+});
+
+test('a real snapshot supplies the run id and a lost acknowledgement still confirms', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bw-mail-snapshot-'));
+  const clients = [];
+  try {
+    const infra = new Client('brightwire-home', 'infra', 'lost-ack', dir, 'bw-infra', {registry: path.join(root, 'apps.registry.json'), initialProfile: 'sandbox'});
+    const agent = new Client('brightwire-home', 'agent', 'lost-ack', dir, 'bw-agent', {registry: path.join(root, 'apps.registry.json')});
+    clients.push(infra, agent);
+    await infra.initialize();
+    await agent.initialize();
+    const opened = await infra.call('env.snapshot');
+    const data = structuredClone(opened.snapshot.data);
+    data.owner_person_id = 'person-maya';
+    data.members.find(member => member.role === 'owner').person_id = 'person-maya';
+    data.members.find(member => member.person_id === 'person-maya').name = 'Maya Chen';
+    for (const notice of data.notices) notice.delivery_status = 'committed';
+    const binding = structuredClone(opened.snapshot.binding);
+    binding.people.push({person_id: 'person-maya', name: 'Maya Chen'});
+    binding.accounts = [{app_id: 'brightwire-home', account_id: data.account_id, owner_person_id: 'person-maya'}];
+    const seeded = await infra.call('env.load_seed', {
+      expected_version: opened.version,
+      request_id: 'lost-ack-seed',
+      virtual_now: opened.snapshot.data.committed_through,
+      data,
+      binding,
+      policies: opened.snapshot.policies,
+      bundle: opened.snapshot.resources.bundle
+    });
+    assert.equal(seeded.status, 'ready', JSON.stringify(seeded));
+    const asked = await agent.call('brightwire-home.devices.command', {
+      expected_version: seeded.version,
+      request_id: 'lost-ack-unlock',
+      device_id: 'lock-front',
+      command: 'unlock'
+    });
+    assert.equal(asked.status, 'committed', JSON.stringify(asked));
+    assert.equal(asked.outcome, 'confirmation_required');
+    const snap = await infra.call('env.snapshot');
+    assert.equal(snap.snapshot.run_id, 'lost-ack');
+    assert.equal(snap.snapshot.data.notices.filter(notice => notice.delivery_status === 'pending_delivery').length, 1);
+    const granted = path.join(dir, 'granted.json');
+    config(granted, [{app_id: 'mail', account_id: 'mail-maya', channel: 'channel.email'}]);
+    const router = new Client(null, null, null, null, 'lost-ack-router', {commandArgs: [
+      path.join(root, 'runtime/messaging/service.cjs'), '--config', granted, '--publisher', 'brightwire-home', '--run', 'lost-ack', '--state-dir', dir
+    ]});
+    clients.push(router);
+    await router.initialize();
+    let publishes = 0;
+    const dropping = {
+      async call(name, args) {
+        publishes += 1;
+        const receipt = await router.call(name, args);
+        assert.equal(receipt.status, 'committed', JSON.stringify(receipt));
+        throw new Error('acknowledgement dropped');
+      }
+    };
+    const lost = await publishPending({snapshot: snap, router: dropping});
+    assert.equal(publishes, 1);
+    assert.equal(lost.results.length, 1);
+    assert.equal(lost.delivery, 'unresolved');
+    assert.equal(lost.results[0].run_id, 'lost-ack');
+    const mail = new Client('mail', 'infra', 'lost-ack', dir, 'lost-ack-mail', {registry: path.join(root, 'examples/registry.mail.json')});
+    clients.push(mail);
+    await mail.initialize();
+    const reconciled = await reconcilePending({snapshot: snap, mail, attempt: lost.results[0]});
+    assert.equal(reconciled.results.length, 1);
+    assert.equal(reconciled.delivery, 'confirmed');
+    assert.equal(reconciled.results[0].run_id, 'lost-ack');
     assert.equal(publishes, 1);
   } finally {
     await Promise.allSettled(clients.map(client => client.close()));

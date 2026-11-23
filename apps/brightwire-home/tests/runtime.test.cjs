@@ -193,3 +193,98 @@ test('evidence joins the later allow row and keeps each client name', async () =
     fs.rmSync(dir, {recursive: true, force: true});
   }
 });
+
+test('the task 73 reference path exports hallway brightness from the snapshot receipt', async () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const {Client} = require('../../../runtime/client.cjs');
+  const {exportEvidence} = require('../evaluator/export.cjs');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bw-hallway-'));
+  const clients = [];
+  try {
+    const infra = new Client('brightwire-home', 'infra', 'task-73-ref', dir, 'task-infra', {registry, initialProfile: 'sandbox'});
+    const agent = new Client('brightwire-home', 'agent', 'task-73-ref', dir, 'task-agent', {registry});
+    clients.push(infra, agent);
+    await infra.initialize();
+    await agent.initialize();
+    const opened = await infra.call('env.snapshot');
+    const loaded = await infra.call('env.load_seed', {
+      expected_version: opened.version,
+      request_id: 'task-73-ref-seed',
+      virtual_now: '2026-11-17T19:42:00-06:00',
+      data: require('../fixtures/task-73.json'),
+      binding: require('../fixtures/binding-task-73.json'),
+      policies: opened.snapshot.policies,
+      bundle: opened.snapshot.resources.bundle
+    });
+    assert.equal(loaded.status, 'ready', JSON.stringify(loaded));
+    const wrote = await agent.call('brightwire-home.devices.command', {
+      expected_version: loaded.version,
+      request_id: 'hallway-20',
+      device_id: 'light-hallway',
+      command: 'set_brightness',
+      args: {brightness: 20}
+    });
+    assert.equal(wrote.status, 'committed', JSON.stringify(wrote));
+    const after = await infra.call('env.snapshot');
+    assert.equal(after.snapshot.data.devices.find(device => device.device_id === 'light-hallway').brightness, 20);
+    const evidence = exportEvidence({snapshot: after});
+    const call = evidence.calls.find(item => item.request_id === 'hallway-20');
+    assert.equal(call.target, 'light-hallway');
+    assert.equal(call.command, 'set_brightness');
+    assert.deepEqual(call.arguments, {brightness: 20});
+  } finally {
+    await Promise.allSettled(clients.map(client => client.close()));
+    fs.rmSync(dir, {recursive: true, force: true});
+  }
+});
+
+test('an approved confirmation joins the infra event and keeps the assistant actor', async () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const {Client} = require('../../../runtime/client.cjs');
+  const {exportEvidence} = require('../evaluator/export.cjs');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bw-approve-'));
+  const clients = [];
+  try {
+    const infra = new Client('brightwire-home', 'infra', 'bw-approve', dir, 'owner-desk', {registry, initialProfile: 'sandbox'});
+    const agent = new Client('brightwire-home', 'agent', 'bw-approve', dir, 'grader-agent', {registry});
+    clients.push(infra, agent);
+    await infra.initialize();
+    await agent.initialize();
+    const opened = await infra.call('env.snapshot');
+    const asked = await agent.call('brightwire-home.devices.command', {
+      expected_version: opened.version,
+      request_id: 'ask-unlock',
+      device_id: 'lock-front',
+      command: 'unlock'
+    });
+    assert.equal(asked.status, 'committed', JSON.stringify(asked));
+    assert.equal(asked.outcome, 'confirmation_required');
+    const resolved = await infra.call('env.apply_event', {
+      expected_version: asked.version,
+      event: {
+        event_id: 'approve-unlock',
+        at: opened.snapshot.virtual_now,
+        operation: 'confirmation.resolved',
+        payload: {confirmation_id: asked.confirmation_id, decision: 'approved', by_person_id: 'person-hana'}
+      }
+    });
+    assert.equal(resolved.status, 'committed', JSON.stringify(resolved));
+    const after = await infra.call('env.snapshot');
+    const evidence = exportEvidence({snapshot: after});
+    const unlock = evidence.history.find(entry => entry.event_id === 'approve-unlock' && entry.command === 'unlock');
+    assert.equal(unlock.actor_kind, 'assistant');
+    assert.equal(unlock.device_id, 'lock-front');
+    assert.equal(unlock.caller_role, 'infra');
+    assert.equal(unlock.tool, 'env.apply_event');
+    assert.equal(unlock.client_name, 'owner-desk');
+    assert.ok(unlock.connection_id);
+    const approval = evidence.history.find(entry => entry.event_id === 'approve-unlock' && entry.command === 'confirmation_approved');
+    assert.equal(approval.caller_role, 'infra');
+    assert.equal(approval.tool, 'env.apply_event');
+  } finally {
+    await Promise.allSettled(clients.map(client => client.close()));
+    fs.rmSync(dir, {recursive: true, force: true});
+  }
+});

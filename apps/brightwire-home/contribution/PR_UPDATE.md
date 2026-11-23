@@ -48,7 +48,7 @@ npm test
 
 Evidence link for this SHA: replace this line with the HTTPS URL of the CI run for the exact commit before `/submit-implementation`.
 
-Candidate suite and base-validator results are separate.
+The candidate suite and the App validator are reported separately.
 
 Observed on 2026-11-23 UTC, runtime 1.6.0, Core API 1.2.0, app 1.0.0, against upstream main `a4bce023953061483c41de5a287ba5e43f4a5648`.
 
@@ -57,13 +57,13 @@ Candidate suite (`npm test`):
 - Node v22.23.4: 24/24 stages passed.
 - Node v18.20.8 (`npx -p node@18`): 24/24 stages passed.
 
-Base validator (`npm run app:verify -- --app apps/brightwire-home`), Node v22.23.4: passed. The report is `.artifacts/brightwire-home.json`.
+App validator (`npm run app:verify -- --app apps/brightwire-home`), Node v22.23.4: passed. The report is `.artifacts/brightwire-home.json`.
 
-App tests on both Node v22.23.4 and Node v18.20.8: 54 passed, 0 failed (`tests/business.test.cjs` 44, `tests/images.test.cjs` 2, `tests/mail-integration.test.cjs` 2, `tests/runtime.test.cjs` 6).
+App tests on both Node v22.23.4 and Node v18.20.8: 57 passed, 0 failed (`tests/business.test.cjs` 44, `tests/images.test.cjs` 2, `tests/mail-integration.test.cjs` 3, `tests/runtime.test.cjs` 8).
 
 - Example: `{"app":"brightwire-home","contact":"open","alerts":0,"committed_through":"2026-11-17T12:05:00-06:00"}`.
-- Runtime tests: 6 passed. Replay, stale version, reset, catch-up rollback, a task 73 load with the package bundle on unchanged Core, and an MCP join of two clients.
-- Mail integration: 2 passed. A confirmation request and a camera share each produce one Mail message. A second publish of the same request id returns `duplicate: true`. A publisher with no grant returns `recipient_not_authorized` with the lock still locked. A dropped acknowledgement is reconciled from the stopped attempt. A receiver rejection after Mail accepts the dispatch stays unresolved, with one publish.
+- Runtime tests: 8 passed. Replay, stale version, reset, catch-up rollback, a task 73 load with the package bundle on unchanged Core, an MCP join of two clients, the task 73 hallway brightness receipt, and an approved confirmation joined to its Infra event.
+- Mail integration: 3 passed. A confirmation request and a camera share each produce one Mail message. A second publish of the same request id returns `duplicate: true`. A publisher with no grant returns `recipient_not_authorized` with the lock still locked. A dropped acknowledgement is reconciled from the stopped attempt. A real `env.snapshot` supplies the run id, and a lost acknowledgement confirms with one publish. A receiver rejection after Mail accepts the dispatch stays unresolved, with one publish.
 
 ## Implementation progress
 
@@ -112,4 +112,4 @@ Every Agent tool is prefixed with `brightwire-home.`. The proposal file was not 
 
 ## Comment draft
 
-@Jasonya Brightwire Home v1 is on `environment-proposal/brightwire-home-devices`. It implements the approved plan: 35 `brightwire-home.*` tools, the 10 events, four household fixtures, the evidence helper, the task 73 grader, and the Mail publisher. The base validator `npm run app:verify -- --app apps/brightwire-home` passed. The candidate suite `npm test` passed 24/24 on Node 22 and on Node 18.20.8, against upstream main `a4bce023953061483c41de5a287ba5e43f4a5648`. The proposal file is unchanged (`cfddc0d8f33af729322817b56620876474509d9d`). Task 73 can load `apps/brightwire-home/fixtures/task-73.json`. The suggested PR text and the limits are in `apps/brightwire-home/contribution/PR_UPDATE.md`. The evidence link for the exact SHA is still a placeholder in that file.
+@Jasonya Brightwire Home v1 is on `environment-proposal/brightwire-home-devices`. It implements the approved plan: 35 `brightwire-home.*` tools, the 10 events, four household fixtures, the evidence helper, the task 73 grader, and the Mail publisher. The App validator `npm run app:verify -- --app apps/brightwire-home` passed. The candidate suite `npm test` passed 24/24 on Node 22 and on Node 18.20.8, against upstream main `a4bce023953061483c41de5a287ba5e43f4a5648`. The proposal file is unchanged (`cfddc0d8f33af729322817b56620876474509d9d`). Task 73 can load `apps/brightwire-home/fixtures/task-73.json`. The suggested PR text and the limits are in `apps/brightwire-home/contribution/PR_UPDATE.md`. The evidence link for the exact SHA is still a placeholder in that file.
