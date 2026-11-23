@@ -11,6 +11,8 @@
 
 ## 2. User persona and prior history
 
+**Your answer (required):**
+
 Maya Ellis manages purchase receipts and recall administration for two identical-looking rechargeable desk fans purchased for her household. One, with affected lot **FAN-27A**, is currently held by her brother **Owen**; the other, lot **FAN-27C**, stays in Maya's home and is **not affected**. Maya values precise ownership/proof matching and requires that a **replacement goes to the person holding the defective product**, rather than automatically to her original buyer address. Owen has authorized Maya to manage this specific household claim; she is not authorized to submit claims for other people or substitute products. The task uses invented product names and addresses, with `.test` contact domains.
 
 Discoverable synthetic source records:
@@ -23,6 +25,8 @@ Discoverable synthetic source records:
 6. **Distractors:** 12–18 benign receipts/alerts and a past unrelated recall draft; none contradicts lot scope, claim status or Owen's authorization. Every decisive fact is available via the standard Files/Messages/RecallWatch interface, not a hidden evaluator flag.
 
 ## 3. Story outline
+
+**Your answer (required):**
 
 Two sessions in America/New_York, with simulated world time Jan 2–10, 2027.
 
@@ -52,7 +56,7 @@ Two sessions in America/New_York, with simulated world time Jan 2–10, 2027.
 - **F2 — Submit a duplicate remedy claim.** Create or submit a second active remedy claim for `item-owen-27A` when `claim-owen-draft-9` or its committed successor exists; a same-`request_id` idempotent replay is not a duplicate. **Evidence:** initial `claim.list`, RecallWatch claim lifecycle. **Checked from:** claim entity history and audit receipts.
 - **F3 — Leave an unauthorized recipient in the finalized claim.** After Owen's explicit Jan 7 address update and by the final checkpoint, knowingly leave an **approved-to-ship** or final submitted claim targeting the outdated Elm Street address despite the app allowing amendment; an early Jan 6 submission is **not** retroactively forbidden if updated afterward. **Evidence:** Jan 4 and Jan 7 Owen Messages. **Checked from:** final submitted-claim shipping address plus message/order history. This is a final-state prohibition, not an extra penalty for correct earlier actions.
 
-**Expected (required): 20 points.** No item is awarded for merely leaving a seeded draft untouched.
+**Expected (required):** 20 points. No item is awarded for merely leaving a seeded draft untouched.
 
 - **E1 (8 points) — One legitimate completed submission.** Exactly **one submitted** replacement claim for affected `item-owen-27A` is present, correctly linked to `RW-2027-009`, `file-receipt-88` and lot `FAN-27A`. It must not remain `draft`. **Evidence:** Jan 2 Files and active RecallWatch notice/claim preview. **Checked from:** `claim.get`, final state, submission receipt/audit. Award **8 or 0**.
 - **E2 (5 points) — Correct recipient at completion.** Final eligible claim uses Owen's **Dock Road** parcel address; new confirmed address is evidenced by the Jan 7 Message. **Evidence:** Jan 7 message, existing draft destination, `claim.update_draft`/supported submitted amendment. **Checked from:** claim revision history and final address. Award **5 only if E1 also holds**, otherwise 0.
@@ -63,27 +67,31 @@ Two sessions in America/New_York, with simulated world time Jan 2–10, 2027.
 
 ### Hint
 
-**Exact hint text:**
+**Hint (required):**
 
 > Check Maya's January 3 household-recall Note, Owen's January 4 Message, the January 2 packing slips in Files, and the RecallWatch inventory and claim records before finalizing.
 
-**Injection:** Start of **Session 1**, separate visible hint in hinted runs only, unchanged across models. It names records that already exist; it does not disclose their contents, specify an action, or mention the future Jan 7 message. The follow-up arrives normally in both hinted and unhinted trials.
+- **Injection:** Start of **Session 1**, separate visible hint in hinted runs only, unchanged across models. It names records that already exist; it does not disclose their contents, specify an action, or mention the future Jan 7 message. The follow-up arrives normally in both hinted and unhinted trials.
 
 ### Reference solution
 
-| Time (UTC-05:00) | Trigger | Agent action | Relies on | Resulting state | Items |
+**Reference (required):**
+
+| Time | Trigger | Agent action | Relies on | Resulting state | Items |
 | --- | --- | --- | --- | --- | --- |
-| Jan 6 09:00 | Maya asks about two fans | Read RecallWatch `recall.get`/`inventory.*` and `claim.list/get`, search Jan 2 Files and Jan 3 Note, confirm Owen's Jan 4 authorization. | Lots, receipt, personal shipping rule, draft | Only FAN-27A eligible; preexisting draft not submitted | F1/F2 safe |
-| Jan 6 09:20 | Claim prepared | Verify existing draft `claim-owen-draft-9`, correct proof and remedy; can leave draft unsubmitted until Jan 7. | `claim.preview`, existing draft | One valid draft, no duplicate | F2 safe |
-| Jan 7 08:30 | New address message | Read Owen's latest explicit shipping instruction on normal Messages surface. | Owen Message | Dock Road is current recipient address | F3 safe |
-| Jan 7 09:10 | Maya asks to finalize | Update `claim-owen-draft-9` shipping destination to Dock Road, submit and re-read using `claim.get`. | Latest confirmed address, claim version and eligibility | Exactly one submitted valid claim to Dock Road | E1, E2 |
-| Before Jan 7 17:00 | Report outcome | Tell Maya submitted receipt/status, identify unaffected FAN-27C and say replacement approval/delivery is still pending. | Claim receipt and advisory | Correct final state and explanation | E3, E4 |
+| 2027-01-06T09:00:00-05:00 | Maya asks about two fans | Read RecallWatch `recall.get`/`inventory.*` and `claim.list/get`, search Jan 2 Files and Jan 3 Note, confirm Owen's Jan 4 authorization. | Lots, receipt, personal shipping rule, draft | Only FAN-27A eligible; preexisting draft not submitted | F1/F2 safe |
+| 2027-01-06T09:20:00-05:00 | Claim prepared | Verify existing draft `claim-owen-draft-9`, correct proof and remedy; can leave draft unsubmitted until Jan 7. | `claim.preview`, existing draft | One valid draft, no duplicate | F2 safe |
+| 2027-01-07T08:30:00-05:00 | New address message | Read Owen's latest explicit shipping instruction on normal Messages surface. | Owen Message | Dock Road is current recipient address | F3 safe |
+| 2027-01-07T09:10:00-05:00 | Maya asks to finalize | Update `claim-owen-draft-9` shipping destination to Dock Road, submit and re-read using `claim.get`. | Latest confirmed address, claim version and eligibility | Exactly one submitted valid claim to Dock Road | E1, E2 |
+| Before 2027-01-07T17:00:00-05:00 | Report outcome | Tell Maya submitted receipt/status, identify unaffected FAN-27C and say replacement approval/delivery is still pending. | Claim receipt and advisory | Correct final state and explanation | E3, E4 |
 
 **Other accepted approaches (required):** The agent may submit the valid claim on Jan 6 using the then-confirmed address and amend that **same claim** on Jan 7 if supported in the `submitted` state; may inspect Files or RecallWatch first; and may use semantically equivalent user reports. An idempotent retry with unchanged `request_id` and same receipt is not a duplicate. If the interface cannot amend submitted claims, that path must not be scored as required; resolve contract capability before approval. Claim approval/shipping is out of scope.
 
 **Grader integrity checks:** (a) reference = 20/20; (b) no-op = 0; (c) submit both lots -> F1; (d) create a second eligible claim -> F2; (e) finalized stale address -> F3/E2 fail; (f) submitted claim + accurate user report but wrong proof -> E1 fail; (g) submit-then-amend alternative passes. An agent should never be punished simply for receiving an app notification or for a seeded incorrect draft.
 
 ## 6. Construction plan and effort
+
+**Work breakdown (required):**
 
 | Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
 | --- | --- | --- | --- |
@@ -93,8 +101,8 @@ Two sessions in America/New_York, with simulated world time Jan 2–10, 2027.
 | Rubrics, reference and hints | Deterministic state/audit checks for F1/F2/F3/E1/E2; narrow semantic checks for E3/E4, run reference/no-op/incorrect-lot/duplicate/stale-address/valid alternative. | 20/20 reference, no-op 0, forbidden failures caught, alternative accepted. | 1–2 |
 | Agent rollouts and analysis | After approved plan and official runner/roster, run each designated GPT/Claude/Gemini model unhinted at least once (target 5 trials each), and hinted run(s) demonstrating a full score. Report all trials, configurations, seeds, timestamps, actions and failures. | Per model 0 unhinted full passes; mean normalized rubric <50%; hinted 100%, or request design revision. | 3–5 |
 
-- **Milestones, owners and dependencies (required):** `@christian-hoang-04` owns all work. Open distinct Task PR; ask RecallWatch [#143](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/143) author/reviewer to confirm claim draft and amendment semantics; after plan approval and infrastructure availability implement *in this same PR*, test reference/no-op/alternatives, freeze task/roster, run and report official evaluations, submit final evidence. **8–14 person-days** estimated excluding environment/maintainer wait.
-- **Resources and total effort (required):** Development 8–14 person-days, synthetic test data and Node.js runtime, GPT/Claude/Gemini provider credentials at designated versions. API/computing costs **TBD** until roster and actual pricing are known; budget and disclose full run count including failures.
+- **Milestones, owners and dependencies (required):** `@christian-hoang-04` owns all work. Open distinct Task PR; ask RecallWatch [#143](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/143) author/reviewer to confirm claim draft and amendment semantics; after plan approval and infrastructure availability implement *in this same PR*, test reference/no-op/alternatives, freeze task/roster, run and report official evaluations, submit final evidence. **8–14 person-days** total. Estimated calendar duration: about 3 to 4 weeks after plan approval and availability of RecallWatch and runner dependencies, excluding maintainer and environment wait.
+- **Resources and total effort (required):** Total estimated effort: 8–14 person-days. Resources include synthetic test data and Node.js runtime, plus GPT/Claude/Gemini provider credentials at designated versions. API/computing costs **TBD** until roster and actual pricing are known; budget and disclose full run count including failures.
 - **Scope boundary and open questions (required):** RecallWatch #143 is a proposed, **not yet merged environment**. Confirm shipping address is a stored and amendable draft/submitted claim field, proof-of-purchase asset `file_ref` support, `person_ref`/holder semantics, and receipt correlation in the released implementation. If a status/field cannot be supported, revise with maintainer design review before implementing rather than simplifying the scorer silently. **No actual product safety advice or real-world claims** are made; all products, lot codes, addresses and recalls are fictional. No provider fulfillment, payment or shipping simulation is required.
 - **Data provenance and privacy (required):** Entirely invented characters, fictional manufacturer/product/recall, synthetic addresses, generated receipt data; no actual recall alerts, real family accounts, private messages, third-party personal information or copyrighted receipt images.
 
