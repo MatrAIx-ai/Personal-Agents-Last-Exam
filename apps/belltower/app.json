@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "app_id": "belltower",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:belltower; author GitHub handle mingyin1"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "belltower.item.published",
+    "belltower.item.updated",
+    "belltower.item.corrected",
+    "belltower.item.retracted"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Synthetic local news only: content is whatever the task supplies. There is no ranking, no recommendation and no fact-checking, and Belltower never judges which source is right.",
+    "One reader account per App instance. The account reads; it does not publish, comment or share. Sources are not accounts: what they publish arrives as events.",
+    "Copies are not grouped into one story and nothing is labelled as outdated: a copy names the revision it copied, and the reader draws the conclusion.",
+    "Twelve fixed topics and three priority levels. Items are text only; search is plain word matching. Areas only: street addresses are text in the body.",
+    "MCP only: no GUI and no reviewer console.",
+    "Time is the environment's: the App has no clock event, timer or scheduler. Time-based states (a public notice's effect, a held or released notification) are derived from the supplied virtual time.",
+    "Notifications reach Mail only through an Infra-run sender and Messaging; the App itself delivers nothing. There is no opt-out for the later revisions of one item.",
+    "No attachments or media: resources are not used."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

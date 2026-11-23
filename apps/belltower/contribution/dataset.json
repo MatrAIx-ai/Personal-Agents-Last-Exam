@@ -1,0 +1,62 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "belltower-minimal",
+  "version": "1.0.0",
+  "description": "Synthetic Belltower fixture: an invented city with nine areas and six invented sources, three weeks of articles and public notices with their updates, corrections and retractions, and one reader account with its follow rules, read marks, clippings and notifications. For package validation and examples; not an evaluation task.",
+  "record_source_ids": [
+    "authored-history"
+  ],
+  "sources": [
+    {
+      "source_id": "authored-history",
+      "kind": "synthetic",
+      "description": "Authored synthetic history. Every source, place, person, headline, text and publisher's note was written for this fixture; nothing was crawled, copied or imported. The items are replayed in time order through the App's own business functions together with the account holder's actions, so revisions, read marks, clippings, notifications and the activity log follow the App rules. The public references named in the README were used only for the shape of the workflows.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "authored content replayed by a deterministic script, no random numbers",
+        "tool": "dev/build-fixture.cjs",
+        "tool_version": "1",
+        "seed": null,
+        "parameters": {
+          "cities": 1,
+          "time_zone": "America/Chicago",
+          "areas": 9,
+          "sources": 6,
+          "items": 48,
+          "revisions": 70,
+          "public_notices": 12,
+          "updates": 11,
+          "corrections": 8,
+          "retractions": 3,
+          "copies": 10,
+          "reports": 6,
+          "follow_rules": 5,
+          "read_marks": 14,
+          "clippings": 4,
+          "notifications": 12,
+          "clock": "2026-11-17T17:00:00-06:00"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "None: records are stored exactly as the script produces them."
+  ],
+  "expected_counts": {
+    "records": 84,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks (seed rules, dev/check-fixture.cjs) do not replace human review of realism: headlines, notice wording and publishers' notes, notification wording, and that every source, place and person is fictional."
+  }
+}
