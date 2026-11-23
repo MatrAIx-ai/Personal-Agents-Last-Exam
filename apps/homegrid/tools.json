@@ -1,0 +1,2577 @@
+[
+  {
+    "name": "homegrid.account.get",
+    "description": "Customer, payment methods (masked), autopay and premises on the account.",
+    "read_only": true,
+    "scope": "homegrid.account.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "account": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "account"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.premises.search",
+    "description": "Find a premise by address text (premises seeded for the task).",
+    "read_only": true,
+    "scope": "homegrid.premises.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "premises": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 1000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "premises"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.services.list",
+    "description": "Services with status, plan, activation and last connection test, as of the run's virtual time.",
+    "read_only": true,
+    "scope": "homegrid.services.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 1000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "services"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.plans.list",
+    "description": "Plans available for a service at a premise.",
+    "read_only": true,
+    "scope": "homegrid.plans.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "service_type": {
+          "enum": [
+            "electricity",
+            "water",
+            "internet"
+          ]
+        }
+      },
+      "required": [
+        "premise_id",
+        "service_type"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "plans": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "plans"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.orders.list",
+    "description": "Orders with status and history.",
+    "read_only": true,
+    "scope": "homegrid.orders.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "status": {
+          "enum": [
+            "scheduled",
+            "effective",
+            "cancelled"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "orders"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.orders.preview",
+    "description": "Earliest dates, deposit, technician need, gap or overlap warnings and price for a start, stop, transfer or temporary-internet order, with a token for orders.create.",
+    "read_only": true,
+    "scope": "homegrid.orders.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": [
+            "start",
+            "stop",
+            "transfer",
+            "temporary_internet"
+          ]
+        },
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "service_type": {
+          "enum": [
+            "electricity",
+            "water",
+            "internet"
+          ]
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "service_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "from_premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "to_premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "electricity",
+              "water",
+              "internet"
+            ]
+          },
+          "maxItems": 3,
+          "uniqueItems": true
+        },
+        "stop_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "start_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "from": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "order_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 10
+        },
+        "warnings": {
+          "type": "object"
+        },
+        "deposit_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        },
+        "price_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "order_token",
+        "expires_at",
+        "parts",
+        "warnings",
+        "deposit_cents",
+        "price_cents"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.appointments.slots",
+    "description": "Installation windows with free capacity at a premise; with order_id, the windows that order can use.",
+    "read_only": true,
+    "scope": "homegrid.appointments.slots",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "from": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "premise_id",
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "slots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "slot": {
+                "enum": [
+                  "08-12",
+                  "12-16",
+                  "16-20"
+                ]
+              },
+              "free": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 50
+              }
+            },
+            "required": [
+              "date",
+              "slot",
+              "free"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        },
+        "earliest": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "earliest_slot": {
+          "anyOf": [
+            {
+              "enum": [
+                "08-12",
+                "12-16",
+                "16-20"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "slots",
+        "earliest",
+        "earliest_slot"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.equipment.list",
+    "description": "Gateways and hotspots with status and return deadlines.",
+    "read_only": true,
+    "scope": "homegrid.equipment.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "equipment": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 1000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "equipment"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.outages.list",
+    "description": "Outages affecting a premise, with estimated restoration history.",
+    "read_only": true,
+    "scope": "homegrid.outages.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "premise_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "outages": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 1000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "outages"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.advisories.list",
+    "description": "Water advisories for a premise with status derived at the virtual time and the version chain.",
+    "read_only": true,
+    "scope": "homegrid.advisories.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "premise_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "advisories": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 1000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "advisories"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.bills.list",
+    "description": "Bills with totals, due dates and status (open, paid, past_due).",
+    "read_only": true,
+    "scope": "homegrid.bills.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "bills": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "bills"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.bills.get",
+    "description": "One bill with its line items and payments applied.",
+    "read_only": true,
+    "scope": "homegrid.bills.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "bill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "bill_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "bill": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "bill"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.payments.list",
+    "description": "Payments, the autopay schedule and payment arrangements with installments.",
+    "read_only": true,
+    "scope": "homegrid.payments.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "payments": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 5000
+        },
+        "autopay": {
+          "type": "object"
+        },
+        "arrangements": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "payments",
+        "autopay",
+        "arrangements"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.preferences.get",
+    "description": "Notification preferences, quiet hours and health-advisory settings.",
+    "read_only": true,
+    "scope": "homegrid.preferences.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "preferences": {
+          "$ref": "schemas/seed.schema.json#/$defs/preferences"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "preferences"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.notifications.list",
+    "description": "Notifications with delivery status as of the virtual time.",
+    "read_only": true,
+    "scope": "homegrid.notifications.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "in_app",
+            "held_quiet_hours",
+            "pending_delivery",
+            "delivered",
+            "delivery_failed",
+            "withdrawn"
+          ]
+        },
+        "type": {
+          "enum": [
+            "order",
+            "appointment",
+            "outage",
+            "advisory",
+            "billing"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "notifications": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/seed.schema.json#/$defs/notification"
+          },
+          "maxItems": 20000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "notifications"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.orders.create",
+    "description": "Create the order(s) described by a preview token.",
+    "read_only": false,
+    "scope": "homegrid.orders.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "order_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "order_token",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "order_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          },
+          "maxItems": 10
+        },
+        "transfer_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "order_ids",
+        "transfer_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.orders.reschedule",
+    "description": "Move a scheduled start or stop to another date (lead times apply).",
+    "read_only": false,
+    "scope": "homegrid.orders.reschedule",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "order_id",
+        "date",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "order_id",
+        "date"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.orders.cancel",
+    "description": "Cancel an order that is not yet effective.",
+    "read_only": false,
+    "scope": "homegrid.orders.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "order_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "order_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.appointments.book",
+    "description": "Book an installation window for an internet start order.",
+    "read_only": false,
+    "scope": "homegrid.appointments.book",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "slot": {
+          "enum": [
+            "08-12",
+            "12-16",
+            "16-20"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "order_id",
+        "date",
+        "slot",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "appointment_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.appointments.reschedule",
+    "description": "Move an appointment; within 24 h of the window a $25.00 fee applies.",
+    "read_only": false,
+    "scope": "homegrid.appointments.reschedule",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "slot": {
+          "enum": [
+            "08-12",
+            "12-16",
+            "16-20"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "appointment_id",
+        "date",
+        "slot",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "fee_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "appointment_id",
+        "fee_cents"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.appointments.cancel",
+    "description": "Cancel an appointment; within 24 h of the window a $25.00 fee applies. The order stays open.",
+    "read_only": false,
+    "scope": "homegrid.appointments.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "appointment_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "fee_cents": {
+          "type": "integer",
+          "minimum": -10000000,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "appointment_id",
+        "fee_cents"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.connection.run_test",
+    "description": "Run and record a connection test for an internet service.",
+    "read_only": false,
+    "scope": "homegrid.connection.run_test",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "service_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "service_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "test": {
+          "$ref": "schemas/seed.schema.json#/$defs/test"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "test"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.equipment.schedule_return",
+    "description": "Arrange the return of a gateway or hotspot.",
+    "read_only": false,
+    "scope": "homegrid.equipment.schedule_return",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "equipment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "method": {
+          "enum": [
+            "dropoff",
+            "prepaid_label"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "equipment_id",
+        "method",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "equipment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "return_due": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "equipment_id",
+        "return_due"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.outages.report",
+    "description": "Report an outage at a premise; linked to a known outage or investigated.",
+    "read_only": false,
+    "scope": "homegrid.outages.report",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "premise_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "service_type": {
+          "enum": [
+            "electricity",
+            "water",
+            "internet"
+          ]
+        },
+        "note": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "premise_id",
+        "service_type",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "report_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "report_status": {
+          "enum": [
+            "linked",
+            "investigating"
+          ]
+        },
+        "outage_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "report_id",
+        "report_status",
+        "outage_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.payments.make",
+    "description": "Make a payment in integer cents; pending until settled.",
+    "read_only": false,
+    "scope": "homegrid.payments.make",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000000
+        },
+        "payment_method_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "amount_cents",
+        "payment_method_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "payment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "payment_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.autopay.set",
+    "description": "Turn autopay on with a payment method, or off with null.",
+    "read_only": false,
+    "scope": "homegrid.autopay.set",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "payment_method_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "payment_method_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "payment_method_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "payment_method_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.arrangements.request",
+    "description": "Request a payment plan for a past-due bill (2-6 installments).",
+    "read_only": false,
+    "scope": "homegrid.arrangements.request",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "bill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "installments": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "bill_id",
+        "installments",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "arrangement_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "installments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "due_date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "amount_cents": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "due_date",
+              "amount_cents"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 6
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "arrangement_id",
+        "installments"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.preferences.update",
+    "description": "Change notification preferences, quiet hours or health-advisory delivery.",
+    "read_only": false,
+    "scope": "homegrid.preferences.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "time_zone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "quiet_hours": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "start": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                "end": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                }
+              },
+              "required": [
+                "start",
+                "end"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "types": {
+          "type": "object",
+          "properties": {
+            "order": {
+              "$ref": "schemas/seed.schema.json#/$defs/type_pref"
+            },
+            "appointment": {
+              "$ref": "schemas/seed.schema.json#/$defs/type_pref"
+            },
+            "outage": {
+              "$ref": "schemas/seed.schema.json#/$defs/type_pref"
+            },
+            "advisory": {
+              "$ref": "schemas/seed.schema.json#/$defs/type_pref"
+            },
+            "billing": {
+              "$ref": "schemas/seed.schema.json#/$defs/type_pref"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "health": {
+          "type": "object",
+          "properties": {
+            "bypass_quiet_hours": {
+              "type": "boolean"
+            },
+            "delivery": {
+              "enum": [
+                "mail",
+                "in_app"
+              ]
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "preferences": {
+          "$ref": "schemas/seed.schema.json#/$defs/preferences"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preferences"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "homegrid.notifications.acknowledge",
+    "description": "Mark a notification as read.",
+    "read_only": false,
+    "scope": "homegrid.notifications.acknowledge",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "notification_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        }
+      },
+      "required": [
+        "notification_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "homegrid"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "notification_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "acknowledged_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "notification_id",
+        "acknowledged_at"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

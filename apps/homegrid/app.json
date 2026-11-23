@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "app_id": "homegrid",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:homegrid (@Oshikaka)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "field.technician_update",
+    "field.activation_result",
+    "logistics.shipment_update",
+    "grid.outage_updated",
+    "water.advisory_published",
+    "billing.cycle_closed",
+    "payment.settled",
+    "notification.delivery_recorded"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Synthetic data only: no real customers, premises, tariffs, outages or bills; tariffs are fictional round numbers.",
+    "No global scheduler: time moves through events and Infra's env.advance_time, which runs no App code; time-based statuses are derived from the virtual time.",
+    "Technicians, shipments, outages, advisories, billing cycles and payment settlement happen only through Infra-applied events.",
+    "The outbound Mail adapter is invoked explicitly by the example and tests; automatic invocation belongs to the planned runner.",
+    "MCP only; no GUI."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

@@ -1,0 +1,46 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "homegrid-minimal",
+  "version": "1.0.0",
+  "description": "Synthetic utility and home-internet account fixture for package validation; not an evaluation task.",
+  "record_source_ids": [
+    "homegrid-generator"
+  ],
+  "sources": [
+    {
+      "source_id": "homegrid-generator",
+      "kind": "synthetic",
+      "description": "Areas, premises, services, bills, payments and notifications written by the seeded generator, which produces account history by running Homegrid's own handlers. All towns, addresses, people, tariffs and fees are fictional; no record describes a real customer, utility or rate.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "seeded procedural generation",
+        "tool": "apps/homegrid/scripts/generate-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20270112,
+        "parameters": {
+          "prng": "mulberry32"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "All times are RFC 3339 with UTC offsets; money is integer US cents; usage is in kWh and gallons."
+  ],
+  "expected_counts": {
+    "records": 19,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automatic checks do not replace human review of realism, wording and provenance."
+  }
+}
