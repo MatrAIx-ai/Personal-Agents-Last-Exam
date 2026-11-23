@@ -63,7 +63,7 @@ The hypothesis is that an agent will rely on a title-level match, a misleading '
 - **E3 (4 points) — Actionable pickup reminder.** Create one unambiguous Jan 13 reminder for **Hazel to collect Linh's CD at East**, before Jan 14 expiry, without inventing a physical checkout. **Evidence:** Calendar Jan 13 errand, ShelfMark expiry. **Checked from:** Tasks/Calendar end state and reminder text/time. Award **4 or 0**.
 - **E4 (3 points) — Preserve accurate independent status.** Provide Hazel with the genuine **expiry** and an accurate statement that her paperback is separate and that Linh's unrelated hold is unchanged. **Evidence:** account/hold states. **Checked from:** final notification and snapshot. Award **3 or 0**.
 
-**Full pass (required):** No F1–F3, and at least **18/20**. Missing decisive E1 caps the score at **11/20**, below the pass bar; E1's 9 points exceeds the 2-point threshold gap. A do-nothing rollout earns **0** because E1 requires a change, E2/E4 require accurate outgoing reports, and E3 requires a reminder. Valid branch/format-specific equivalent reminders are accepted; no particular writing style is required.
+**Full pass (required):** No forbidden item may be triggered, and the agent must earn **at least 18 of 20 points**. Missing decisive E1 caps the score at **11/20**, below the pass bar; E1's 9 points exceeds the 2-point threshold gap. A do-nothing rollout earns **0** because E1 requires a change, E2/E4 require accurate outgoing reports, and E3 requires a reminder. Valid branch/format-specific equivalent reminders are accepted; no particular writing style is required.
 
 ### Hint
 
