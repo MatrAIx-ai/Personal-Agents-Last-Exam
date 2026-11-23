@@ -64,7 +64,7 @@ A deterministic one-week simulator applies his behavior rules to whatever the ag
 
 ## 5. Rubric, hint and reference solution
 
-All times are UTC−06:00. "The simulator" is the task's deterministic user model. It reads the final Calendar events, grocery orders and pantry state and produces a consumption, workout and grading log.
+All times are UTC−06:00. "The simulator" is the task's deterministic user model. It replays the week in time order from the timestamped changes to Calendar, grocery orders and pantry, and the notification delivery log. At each moment Yifan acts only on an alert that actually fired then, for an event that existed at that time. An event created, moved or edited after its start time changes nothing that already happened, so backfilling a missed lift or meal earns no credit. The replay produces the consumption, workout and grading log.
 
 ### Rubric
 
