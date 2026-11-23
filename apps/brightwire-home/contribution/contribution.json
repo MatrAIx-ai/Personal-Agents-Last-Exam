@@ -1,0 +1,368 @@
+{
+  "schema_version": "pale.app-contribution.v1",
+  "contract_revision": "0.4.0",
+  "app_id": "brightwire-home",
+  "app_categories": [
+    "personal"
+  ],
+  "runtime_manifest_ref": "app.json",
+  "interfaces": [
+    {
+      "interface_id": "agent-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "agent"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role agent",
+      "operations": [
+        {
+          "name": "brightwire-home.rooms.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.devices.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.devices.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.devices.history",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.scenes.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.routines.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.routines.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.members.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.modes.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.access_codes.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.permissions.get",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.confirmations.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.activity.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.alerts.list",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.energy.summary",
+          "effect": "read",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.devices.command",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.camera.share.start",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.camera.share.stop",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.scenes.run",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.scenes.create",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.scenes.update",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.scenes.delete",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.routines.create",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.routines.update",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.routines.enable",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.routines.disable",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.routines.delete",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.routines.run_now",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.modes.set",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.access_codes.create",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.access_codes.update",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.access_codes.revoke",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.confirmations.cancel",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.alerts.acknowledge",
+          "effect": "write",
+          "caller": "agent"
+        },
+        {
+          "name": "brightwire-home.alerts.snooze",
+          "effect": "write",
+          "caller": "agent"
+        }
+      ]
+    },
+    {
+      "interface_id": "infra-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "infra"
+      ],
+      "status": "implemented",
+      "entrypoint_ref": "service.cjs --role infra",
+      "operations": [
+        {
+          "name": "env.reset",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.load_seed",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.apply_event",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.snapshot",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.event_status",
+          "effect": "admin",
+          "caller": "infra"
+        },
+        {
+          "name": "env.validate_bundle",
+          "effect": "admin",
+          "caller": "infra"
+        }
+      ]
+    }
+  ],
+  "state": {
+    "owner": "app",
+    "isolation_keys": [
+      "run_id",
+      "app_id"
+    ],
+    "seed_schema_ref": "schemas/seed.schema.json",
+    "snapshot_includes_assets": true,
+    "reset_scope": "app_instance",
+    "version_checks": "implemented",
+    "idempotent_writes": "implemented",
+    "concurrency_control": "Per-App lock and optimistic epoch/revision check",
+    "commit_confirmation": "committed + epoch/revision; failures preserve business state",
+    "outbox_atomic_with_business_state": "unsupported"
+  },
+  "events": {
+    "accepts": [
+      {
+        "type": "sensor.change",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "device.manual_change",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "member.presence",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "mode.changed",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "lock.code_used",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "confirmation.resolved",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "fault.inject",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "fault.clear",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "schedule.process_due",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      },
+      {
+        "type": "notice.delivery_result",
+        "schema_ref": "schemas/events.schema.json",
+        "status": "implemented"
+      }
+    ],
+    "emits": [],
+    "trigger_owner": "task_and_infra"
+  },
+  "shared_data": {
+    "identity_binding_ref": "fixtures/binding.json",
+    "account_model_ref": "schemas/seed.schema.json",
+    "cross_app_references": false,
+    "asset_catalog_refs": [
+      "assets.catalog.json"
+    ]
+  },
+  "gui_ref": "gui.json",
+  "notification_channels": [],
+  "subscriptions": {
+    "business_owner": "source_app",
+    "routing_owner": "infra",
+    "task_binding_required": true,
+    "preferences_seed_ref": null,
+    "status": "unsupported"
+  },
+  "dependencies": {
+    "core_api": "1.2.0",
+    "required_apps": [],
+    "services": []
+  },
+  "extensions": [],
+  "asset_runtime": {
+    "implemented_descriptor_versions": [
+      "pale.asset-descriptor.v1"
+    ],
+    "implemented_mime_types": [
+      "image/png",
+      "image/jpeg",
+      "audio/mpeg",
+      "audio/wav",
+      "video/mp4",
+      "application/json",
+      "application/pdf",
+      "text/plain",
+      "text/calendar"
+    ],
+    "implemented_storage_adapters": [
+      "storage.file",
+      "storage.inline"
+    ],
+    "max_assets": 64,
+    "max_bundle_bytes": 1048576
+  },
+  "messaging": {
+    "publishes": [
+      {
+        "channel": "channel.email",
+        "schema_id": "urn:pale:email-message:2",
+        "schema_ref": "schemas/router-message.schema.json",
+        "status": "implemented",
+        "event_type": "org.pale.mail.notification.v1",
+        "payload_schema_id": "urn:pale:email-payload:1"
+      }
+    ],
+    "receives": [],
+    "envelope": "cloudevents/1.0"
+  }
+}

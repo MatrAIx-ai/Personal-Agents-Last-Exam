@@ -25,6 +25,7 @@ const entries=[
  ['attachment-safety',['runtime/tests/attachments.cjs']],
  ['attachment-workflow',['examples/workflows/attachments/run.cjs']],
  ['personal-apps',['runtime/tests/personal-apps.cjs']],
+ ['brightwire-home',['runtime/cli.cjs','verify','--app','apps/brightwire-home','--output',path.join(reportDir,'brightwire-home.json')]],
  ['business-web-host',['--test','runtime/web/host.test.cjs']]
 ];
 const stages=[];

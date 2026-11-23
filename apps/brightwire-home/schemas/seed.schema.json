@@ -1,0 +1,2384 @@
+{
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "household_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "timezone": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "utc_offset": {
+      "type": "string",
+      "pattern": "^[+-][0-9]{2}:[0-9]{2}$"
+    },
+    "home_mode": {
+      "enum": [
+        "home",
+        "away",
+        "night"
+      ]
+    },
+    "assistant_carried_mode": {
+      "anyOf": [
+        {
+          "enum": [
+            "home",
+            "away",
+            "night"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "committed_through": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "door_open_alert_minutes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 240
+    },
+    "quiet_hours": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "additionalProperties": false
+    },
+    "max_active_codes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50
+    },
+    "max_code_window_hours": {
+      "type": "number",
+      "minimum": 1
+    },
+    "allow_overlapping_codes": {
+      "type": "boolean"
+    },
+    "scopes": {
+      "type": "object",
+      "properties": {
+        "light": {
+          "enum": [
+            "operate",
+            "confirm",
+            "view",
+            "none"
+          ]
+        },
+        "blind": {
+          "enum": [
+            "operate",
+            "confirm",
+            "view",
+            "none"
+          ]
+        },
+        "thermostat": {
+          "enum": [
+            "operate",
+            "confirm",
+            "view",
+            "none"
+          ]
+        },
+        "switch": {
+          "enum": [
+            "operate",
+            "confirm",
+            "view",
+            "none"
+          ]
+        },
+        "lock": {
+          "enum": [
+            "operate",
+            "confirm",
+            "view",
+            "none"
+          ]
+        },
+        "garage": {
+          "enum": [
+            "operate",
+            "confirm",
+            "view",
+            "none"
+          ]
+        },
+        "camera": {
+          "enum": [
+            "operate",
+            "confirm",
+            "view",
+            "none"
+          ]
+        },
+        "speaker": {
+          "enum": [
+            "operate",
+            "confirm",
+            "view",
+            "none"
+          ]
+        },
+        "automations": {
+          "enum": [
+            "operate",
+            "confirm",
+            "view",
+            "none"
+          ]
+        },
+        "modes": {
+          "enum": [
+            "operate",
+            "confirm",
+            "view",
+            "none"
+          ]
+        },
+        "access_codes": {
+          "enum": [
+            "operate",
+            "confirm",
+            "view",
+            "none"
+          ]
+        }
+      },
+      "required": [
+        "light",
+        "blind",
+        "thermostat",
+        "switch",
+        "lock",
+        "garage",
+        "camera",
+        "speaker",
+        "automations",
+        "modes",
+        "access_codes"
+      ],
+      "additionalProperties": false
+    },
+    "mode_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "enum": [
+              "home",
+              "away",
+              "night"
+            ]
+          },
+          "class": {
+            "enum": [
+              "light",
+              "blind",
+              "thermostat",
+              "switch",
+              "lock",
+              "garage",
+              "camera",
+              "speaker",
+              "automations",
+              "modes",
+              "access_codes"
+            ]
+          },
+          "scope": {
+            "enum": [
+              "operate",
+              "confirm",
+              "view",
+              "none"
+            ]
+          }
+        },
+        "required": [
+          "mode",
+          "class",
+          "scope"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "role": {
+            "enum": [
+              "owner",
+              "adult",
+              "child",
+              "guest",
+              "assistant"
+            ]
+          },
+          "presence": {
+            "enum": [
+              "home",
+              "away"
+            ]
+          },
+          "quiet_hours": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "end": {
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  }
+                },
+                "required": [
+                  "start",
+                  "end"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "person_id",
+          "name",
+          "role",
+          "presence",
+          "quiet_hours"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "rooms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "room_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "floor": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "room_id",
+          "name",
+          "floor"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "devices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "room_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "type": {
+            "enum": [
+              "light",
+              "blind",
+              "thermostat",
+              "switch",
+              "lock",
+              "garage",
+              "camera",
+              "speaker",
+              "contact",
+              "motion",
+              "temperature",
+              "leak",
+              "smoke"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "online": {
+            "type": "boolean"
+          },
+          "fault": {
+            "anyOf": [
+              {
+                "enum": [
+                  "jammed",
+                  "obstructed",
+                  "offline"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state_before_fault": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "lock": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "locked",
+                          "unlocked",
+                          "jammed"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "garage": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "closed",
+                          "open",
+                          "obstructed"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "online": {
+                    "type": "boolean"
+                  },
+                  "fault": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "jammed",
+                          "obstructed",
+                          "offline"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "lock",
+                  "garage",
+                  "online",
+                  "fault"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "power": {
+            "anyOf": [
+              {
+                "enum": [
+                  "on",
+                  "off"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "brightness": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "color_temperature": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 2200,
+                "maximum": 6500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "thermo_mode": {
+            "anyOf": [
+              {
+                "enum": [
+                  "heat",
+                  "cool",
+                  "off"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "setpoint": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "current_temperature": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "owner_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "owner_max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rated_watts": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "high_load": {
+            "type": "boolean"
+          },
+          "lock": {
+            "anyOf": [
+              {
+                "enum": [
+                  "locked",
+                  "unlocked",
+                  "jammed"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unlocked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "auto_relock_minutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 240
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "garage": {
+            "anyOf": [
+              {
+                "enum": [
+                  "closed",
+                  "open",
+                  "obstructed"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "privacy": {
+            "anyOf": [
+              {
+                "enum": [
+                  "privacy_on",
+                  "privacy_off"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "volume": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sensor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sensor_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "opened_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hearth_appliance_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "snapshot_asset_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "energy": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "to": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "from",
+                "to"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "energy_kwh_closed": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "device_id",
+          "room_id",
+          "type",
+          "name",
+          "online",
+          "fault",
+          "state_before_fault",
+          "power",
+          "brightness",
+          "color_temperature",
+          "position",
+          "thermo_mode",
+          "setpoint",
+          "current_temperature",
+          "owner_min",
+          "owner_max",
+          "rated_watts",
+          "high_load",
+          "lock",
+          "unlocked_at",
+          "auto_relock_minutes",
+          "garage",
+          "privacy",
+          "volume",
+          "sensor",
+          "sensor_value",
+          "opened_at",
+          "hearth_appliance_id",
+          "snapshot_asset_id",
+          "energy",
+          "energy_kwh_closed"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "scene_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "created_by": {
+            "enum": [
+              "assistant",
+              "member"
+            ]
+          },
+          "last_edited_by": {
+            "enum": [
+              "assistant",
+              "member"
+            ]
+          },
+          "run_as": {
+            "enum": [
+              "assistant",
+              "owner"
+            ]
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "device",
+                    "set_mode"
+                  ]
+                },
+                "device_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "command": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "brightness": {
+                      "type": "integer"
+                    },
+                    "color_temperature": {
+                      "type": "integer"
+                    },
+                    "position": {
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "type": "string"
+                    },
+                    "setpoint": {
+                      "type": "number"
+                    },
+                    "privacy": {
+                      "type": "string"
+                    },
+                    "volume": {
+                      "type": "integer"
+                    },
+                    "text": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                },
+                "mode": {
+                  "enum": [
+                    "home",
+                    "away",
+                    "night"
+                  ]
+                }
+              },
+              "required": [
+                "kind"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "scene_id",
+          "name",
+          "created_by",
+          "last_edited_by",
+          "run_as",
+          "deleted",
+          "actions"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "routines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "routine_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "created_by": {
+            "enum": [
+              "assistant",
+              "member"
+            ]
+          },
+          "last_edited_by": {
+            "enum": [
+              "assistant",
+              "member"
+            ]
+          },
+          "run_as": {
+            "enum": [
+              "assistant",
+              "owner"
+            ]
+          },
+          "trigger": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "enum": [
+                  "clock",
+                  "sunrise",
+                  "sunset",
+                  "sensor",
+                  "device_state",
+                  "member_arrives",
+                  "member_leaves",
+                  "manual"
+                ]
+              },
+              "time": {
+                "type": "string",
+                "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+              },
+              "device_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "state": {
+                "type": "string"
+              },
+              "person_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "equals": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "time_window",
+                    "home_mode",
+                    "device_state"
+                  ]
+                },
+                "start": {
+                  "type": "string",
+                  "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                },
+                "end": {
+                  "type": "string",
+                  "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                },
+                "mode": {
+                  "enum": [
+                    "home",
+                    "away",
+                    "night"
+                  ]
+                },
+                "device_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "equals": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "kind"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "device",
+                    "set_mode"
+                  ]
+                },
+                "device_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "command": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "args": {
+                  "type": "object",
+                  "properties": {
+                    "brightness": {
+                      "type": "integer"
+                    },
+                    "color_temperature": {
+                      "type": "integer"
+                    },
+                    "position": {
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "type": "string"
+                    },
+                    "setpoint": {
+                      "type": "number"
+                    },
+                    "privacy": {
+                      "type": "string"
+                    },
+                    "volume": {
+                      "type": "integer"
+                    },
+                    "text": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                },
+                "mode": {
+                  "enum": [
+                    "home",
+                    "away",
+                    "night"
+                  ]
+                }
+              },
+              "required": [
+                "kind"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "catch_up_minutes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 180
+          }
+        },
+        "required": [
+          "routine_id",
+          "name",
+          "enabled",
+          "deleted",
+          "created_by",
+          "last_edited_by",
+          "run_as",
+          "trigger",
+          "conditions",
+          "actions",
+          "catch_up_minutes"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "access_codes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "holder_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "holder_person_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "digits": {
+            "type": "string",
+            "pattern": "^\\d{6}$"
+          },
+          "schedule": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "always"
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "window"
+                  },
+                  "start": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "end": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "start",
+                  "end"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "recurring"
+                  },
+                  "days": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "SU",
+                        "MO",
+                        "TU",
+                        "WE",
+                        "TH",
+                        "FR",
+                        "SA"
+                      ]
+                    }
+                  },
+                  "start_time": {
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "end_time": {
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "days",
+                  "start_time",
+                  "end_time"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "locks": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "revoked": {
+            "type": "boolean"
+          },
+          "approval": {
+            "enum": [
+              "approved",
+              "pending"
+            ]
+          },
+          "pending_confirmation_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "code_id",
+          "name",
+          "holder_name",
+          "holder_person_id",
+          "digits",
+          "schedule",
+          "locks",
+          "revoked",
+          "approval",
+          "pending_confirmation_id",
+          "created_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "confirmations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "confirmation_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "approved",
+              "denied",
+              "cancelled"
+            ]
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "id"
+            ],
+            "additionalProperties": false
+          },
+          "stored": {
+            "type": "object"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "by_person_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "confirmation_id",
+          "created_at",
+          "status",
+          "target",
+          "stored",
+          "summary",
+          "resolved_at",
+          "decision",
+          "by_person_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "alerts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "alert_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "device_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "acknowledged_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "snooze_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "alert_id",
+          "kind",
+          "device_id",
+          "created_at",
+          "source_key",
+          "acknowledged_at",
+          "snooze_until",
+          "summary"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "notice_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recipient_person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "object_type": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "delivery_status": {
+            "enum": [
+              "pending_delivery",
+              "committed",
+              "rejected",
+              "unknown"
+            ]
+          },
+          "publish_request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "messaging_event_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "notice_id",
+          "kind",
+          "created_at",
+          "recipient_person_id",
+          "object_type",
+          "object_id",
+          "title",
+          "body",
+          "delivery_status",
+          "publish_request_id",
+          "messaging_event_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "device_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "recipient": {
+            "type": "string"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "duration_minutes": {
+            "type": "integer"
+          },
+          "stopped_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "session_id",
+          "device_id",
+          "recipient",
+          "started_at",
+          "duration_minutes",
+          "stopped_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "announcements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "device_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "at",
+          "device_id",
+          "text"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "activity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "activity_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actor_kind": {
+            "enum": [
+              "assistant",
+              "member",
+              "routine",
+              "manual",
+              "guest_code"
+            ]
+          },
+          "actor_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "caller_role": {
+            "anyOf": [
+              {
+                "enum": [
+                  "agent",
+                  "infra"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cause": {
+            "enum": [
+              "direct_command",
+              "routine",
+              "event",
+              "confirmation",
+              "scene",
+              "guest_code",
+              "seed"
+            ]
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "device_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "command": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400
+          },
+          "before": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "power": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "on",
+                              "off"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "brightness": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "color_temperature": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "position": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "thermo_mode": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "heat",
+                              "cool",
+                              "off"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "setpoint": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "lock": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "locked",
+                              "unlocked",
+                              "jammed"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "garage": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "closed",
+                              "open",
+                              "obstructed"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "privacy": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "privacy_on",
+                              "privacy_off"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "volume": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "sensor": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "sensor_value": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fault": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "jammed",
+                              "obstructed",
+                              "offline"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "online": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "power",
+                      "brightness",
+                      "color_temperature",
+                      "position",
+                      "thermo_mode",
+                      "setpoint",
+                      "lock",
+                      "garage",
+                      "privacy",
+                      "volume",
+                      "sensor",
+                      "sensor_value",
+                      "fault",
+                      "online"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "home_mode": {
+                        "enum": [
+                          "home",
+                          "away",
+                          "night"
+                        ]
+                      },
+                      "assistant_carried_mode": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "home",
+                              "away",
+                              "night"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "home_mode",
+                      "assistant_carried_mode"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "after": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "power": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "on",
+                              "off"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "brightness": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "color_temperature": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "position": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "thermo_mode": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "heat",
+                              "cool",
+                              "off"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "setpoint": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "lock": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "locked",
+                              "unlocked",
+                              "jammed"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "garage": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "closed",
+                              "open",
+                              "obstructed"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "privacy": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "privacy_on",
+                              "privacy_off"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "volume": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "sensor": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "sensor_value": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fault": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "jammed",
+                              "obstructed",
+                              "offline"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "online": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "power",
+                      "brightness",
+                      "color_temperature",
+                      "position",
+                      "thermo_mode",
+                      "setpoint",
+                      "lock",
+                      "garage",
+                      "privacy",
+                      "volume",
+                      "sensor",
+                      "sensor_value",
+                      "fault",
+                      "online"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "home_mode": {
+                        "enum": [
+                          "home",
+                          "away",
+                          "night"
+                        ]
+                      },
+                      "assistant_carried_mode": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "home",
+                              "away",
+                              "night"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "home_mode",
+                      "assistant_carried_mode"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "activity_id",
+          "at",
+          "actor_kind",
+          "actor_id",
+          "caller_role",
+          "cause",
+          "request_id",
+          "event_id",
+          "device_id",
+          "command",
+          "summary",
+          "before",
+          "after"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "firings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "firing_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "routine_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "scheduled_for": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fired_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outcome": {
+            "enum": [
+              "fired",
+              "missed",
+              "conditions_unmet"
+            ]
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "firing_id",
+          "routine_id",
+          "scheduled_for",
+          "fired_at",
+          "outcome",
+          "reason",
+          "results"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "code_uses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "use_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lock_device_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "code_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "holder_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outcome": {
+            "enum": [
+              "unlocked",
+              "denied"
+            ]
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "use_id",
+          "at",
+          "lock_device_id",
+          "code_id",
+          "holder_name",
+          "outcome",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "sun_table": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "sunrise": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sunset": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "date",
+          "sunrise",
+          "sunset"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "counters": {
+      "type": "object",
+      "properties": {
+        "activity": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "confirmation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "code": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "session": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "alert": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "notice": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "scene": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "routine": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "firing": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "code_use": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "activity",
+        "confirmation",
+        "code",
+        "session",
+        "alert",
+        "notice",
+        "scene",
+        "routine",
+        "firing",
+        "code_use"
+      ],
+      "additionalProperties": false
+    },
+    "available_snapshots": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+      }
+    }
+  },
+  "required": [
+    "account_id",
+    "household_name",
+    "owner_person_id",
+    "timezone",
+    "utc_offset",
+    "home_mode",
+    "assistant_carried_mode",
+    "committed_through",
+    "door_open_alert_minutes",
+    "quiet_hours",
+    "max_active_codes",
+    "max_code_window_hours",
+    "allow_overlapping_codes",
+    "scopes",
+    "mode_rules",
+    "members",
+    "rooms",
+    "devices",
+    "scenes",
+    "routines",
+    "access_codes",
+    "confirmations",
+    "alerts",
+    "notices",
+    "sessions",
+    "announcements",
+    "activity",
+    "firings",
+    "code_uses",
+    "sun_table",
+    "counters",
+    "available_snapshots"
+  ],
+  "additionalProperties": false
+}
