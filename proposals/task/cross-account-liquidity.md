@@ -1,6 +1,6 @@
 # Task Track proposal
 
-Proposed PR title: `[Task Proposal] [Money & insurance] Proactive Liquidity Protection Across Investment and Banking Accounts`
+Proposed PR title: `[Task Proposal] [Money & insurance] Fund a monthly investment plan without breaking upcoming payments`
 
 ## 1. Task and domains
 
