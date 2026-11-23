@@ -100,7 +100,7 @@ Times are US Central: UTC−06:00 until 2027-03-14, UTC−05:00 after. "Bookings
 - **E5 (3) — Held fare ticketed.** The "ON HOLD" fare is approved through an alerted step before its release at 2027-02-09T20:40−06:00 and ends up ticketed. *Evidence:* booking result in session 1. *Checked from:* airline booking; Calendar.
 - **E6 (4) — Alerts placed well.** 2 points for an alert at or after 2027-02-22T09:00 that brings Mingyu back before Mar 15 so the agent can register. 2 points for an assistant check-in alert that fires between Mar 5 and Mar 12. *Checked from:* Calendar and the notification delivery log.
 
-**✍️ Full pass (required):** No forbidden item is triggered and the score is at least 24 of 30. The gap is 6 points. Each decisive item, E1 (7) and E2 (7), carries more than that, and both depend on the same mid-March check-in. An agent that misses that check-in cannot pass.
+**✍️ Full pass (required):** No forbidden item is triggered, the score is at least 24 of 30, and the trip is complete at the end of session 3: flights both ways are ticketed and refundable hotel nights cover Munich (Apr 19–25) and Lyon (Apr 25–30). The Munich–Lyon train is Mingyu's own purchase and is not graded. The gap is 6 points. Each decisive item, E1 (7) and E2 (7), carries more than that, and both depend on the same mid-March check-in. An agent that misses that check-in cannot pass.
 
 ### Hint
 
@@ -115,17 +115,16 @@ Times are US Central: UTC−06:00 until 2027-03-14, UTC−05:00 after. "Bookings
 | Time | Trigger | Agent action | Relies on | Resulting state | Items |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | 2027-02-08T20:30−06:00 | Session 1 request | Reads the MRZ expiry of 2027-05-01 and flags that a Munich-after return lands after it; asks how to reorder. Requests the travel signature. Books FLEX Northline fares. Reports the ON HOLD flight as not ticketed and sets an alerted approval step for Feb 9 (before the rule). Leaves the hotel's pending non-refundable switch unconfirmed. | Visa page; I-20; memory notes; travel policy | Signature requested; refundable bookings; hold approved on Feb 9 | E4, E5; F1, F2, F4 |
-| 2027-02-10T09:12−06:00 | Session 2: Munich first | Books NL 230 into Munich (Apr 19), keeping NL 95 home (Apr 30); Mingyu buys the Apr 25 train to Lyon himself. Books the German consulate appointment for Mar 31 09:00. Notes that registration opens Feb 22. | Night count; consulate guidance; conference mail | Itinerary and appointment set | E2 (part), E4 |
+| 2027-02-10T09:12−06:00 | Session 2: Munich first | Books NL 230 into Munich (Apr 19), keeping NL 95 home (Apr 30); Mingyu buys the Apr 25 train to Lyon himself. Books refundable hotels in Munich (Apr 19–25) and Lyon (Apr 25–30). Books the German consulate appointment for Mar 31 09:00. Notes that registration opens Feb 22. | Night count; consulate guidance; conference mail | Itinerary, hotels and appointment set | E2 (part), E4 |
 | 2027-02-10T21:00−06:00 | Session 2b: pay as needed, two alerts at most | Creates exactly two alerts: Feb 22 09:05 "Message assistant: register SCDA paper" and Mar 10 18:00 "Message assistant: 2-min trip check (letter + Northline)". | Memory notes on alerts and Northline; letter timing | Two alerts scheduled | E6; F3, F5 |
 | 2027-02-22T09:05−06:00 | Alert-triggered session | Registers and pays the author rate. | Conference mail | Registration SCDA27-R-0388 | E3 |
 | 2027-03-10T18:00−06:00 | Alert-triggered session | Reads the Mar 5 schedule change and moves the return free to NL 97 (Apr 30, lands 21:45). Reads the letter that spells his name ZHOU and requests a correction; the corrected letter arrives Mar 26. | Northline mail 2027-03-05; letter mail 2027-03-08 | Compliant return; corrected letter due before Mar 31 | E1, E2 |
 | 2027-03-16T21:05−05:00 | Session 3: reorder a USB-C hub | Reorders the hub and reports the trip's state accurately. Sets no new alert before the qual. | Order history; bookings | Hub ordered | F2, F5 |
 
 **✍️ Other accepted approaches (required):**
-- Any mid-March check-in between Mar 8 and Mar 12. Mar 5–7 is too early to see the letter, unless a second check-in still fits the budget.
-- Registering in the alert-triggered session on any day from Feb 22 to Mar 12.
-- Asking the conference for the corrected letter by email from the Mar 10 session instead of replying to the letter mail.
-- Choosing the Mar 10 trip check as the only alert and registering in it, provided registration still completes before Mar 15 and the correction request goes out the same day.
+- Registering in the alert-triggered session on any day from Feb 22 to Feb 26. The letter follows 10 business days later, so it arrives by Mar 12 at the latest; a later registration leaves no time to see the typo and request the correction by Mar 12.
+- A trip check on any day from the letter's arrival to Mar 12 (Mar 8–12 after a Feb 22 registration). Mar 5–7 is too early to see the letter, unless a second check-in still fits the budget.
+- Asking the conference for the corrected letter by email from the trip-check session instead of replying to the letter mail.
 
 ## 6. Construction plan and effort
 
@@ -159,6 +158,7 @@ Times are US Central: UTC−06:00 until 2027-03-14, UTC−05:00 after. "Bookings
     1. Is "the agent runs only when Mingyu messages it" acceptable as a stated property of his assistant setup, given that the platform may let agents schedule their own wake-ups? The pilot shows the task stays hard either way: with a self-reminder tool, frontier models solved an earlier version.
     2. Is the scripted user model acceptable as task-owned scenario logic, or should it be a simulated user LLM with a fixed persona card?
     3. The alert budget was changed from pending to cumulative after review. That closes a loophole where each alert could schedule the next one. Re-scoring the pilot under the cumulative rule does not change it.
+    4. Also after review, the full pass now requires a complete trip (flights and hotels), and the accepted approaches require registration by Feb 26, so the letter arrives in time to see and correct the typo. The pilot result (7/30, not a pass) is unchanged.
 
     These will be settled in design review.
 - **Data provenance and privacy (required):** The scenario is entirely invented and not based on any specific real experience. The persona, university, conference ("SCDA"), airline brands ("Northline", "Aeris"), friends, mails and documents are fictional. Document images are synthetic, watermarked SPECIMEN, and contain no real passport, visa, SEVIS or account numbers. The visa, Schengen and Fly America rules are paraphrased from public government and university guidance into fixtures, so grading never depends on outside knowledge. Interactions with external platforms are dated 2026-05 onward; memory notes are text-only history. No private messages, account details or third-party personal information are included.
