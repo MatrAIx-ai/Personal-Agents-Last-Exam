@@ -21,9 +21,11 @@ npm run check
 # From the repository root: real MCP verification with the public runtime
 npm run app:verify -- --app apps/gustline --output .artifacts/gustline.json
 
-# Mail integration through public Messaging (needs the Mail reference App)
-node apps/gustline/examples/mail-integration/run.cjs
+# Runtime and Mail integration through real MCP processes (needs the full checkout)
+cd apps/gustline && npm run integration
 ```
+
+`npm run integration` runs `tests/runtime.integration.cjs` and then `examples/mail-integration/run.cjs`. The first checks a repeated `request_id`, `stale_version` after an event, `env.advance_time` releasing a quiet-hour hold, and two byte-identical resets. The second checks Mail delivery, duplicate republishing, an ungranted recipient, and a quiet-hour release.
 
 ## Package boundary
 
@@ -75,6 +77,17 @@ Each pack in `examples/packs/<name>/` has a `seed.json` and `binding.json` that 
 ## Data
 
 `scripts/generate-fixtures.cjs` writes every fixture and pack deterministically from a fixed seed; `npm run check` fails if a regenerated file differs. All places, stations, issuances, observations, alerts, people and rules are synthetic. The EPA AQI breakpoints and the NOAA solar equations are public-domain U.S. government works, recorded in `contribution/dataset.json`.
+
+## Implementation notes
+
+- **Rules:**
+  - A deleted rule is kept as a tombstone (`status: deleted`) with its revision history. Its ID is never reused, and any of its notifications not yet sent are withdrawn.
+  - A paused rule keeps notifications already created.
+  - Forecast rules read one provider (`provider`, default `gustline`).
+- **Repeat notifications:** within one window occurrence, a "met" notification is sent once. If the person already heard "met", clearing sends "cleared" (when `notify_on_clear` is set). A met notice still held by quiet hours is withdrawn without a "cleared". A condition that returns after a clear notifies again (`|met|2`). A rule without a window notifies for the first date that meets it in each evaluation.
+- **Alert updates and cancels:** they must reference the latest version and keep the same `event`. Version numbers may skip but must increase.
+- **Corrections:** a correction may name the observation's current or any earlier ID.
+- **Places:** all places are fictional. The proposal planned about six real places sourced from USGS GNIS. They were replaced so that no synthetic record implies conditions at a real location.
 
 ## Limitations
 

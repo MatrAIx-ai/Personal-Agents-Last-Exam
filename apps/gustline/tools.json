@@ -812,7 +812,7 @@
   },
   {
     "name": "gustline.air.current",
-    "description": "Current AQI at a place from its monitor: per-pollutant values, averaging basis, category and staleness.",
+    "description": "Current AQI at a place from its monitor: per-pollutant values, averaging basis (hourly PM concentration, not EPA NowCast; 8-hour O3), category and staleness.",
     "read_only": true,
     "scope": "gustline.air.current",
     "resource_target": "current account",
@@ -957,6 +957,11 @@
           "minLength": 1,
           "maxLength": 40
         },
+        "basis": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
         "stale": {
           "type": "boolean"
         }
@@ -976,6 +981,7 @@
         "pollutants",
         "not_provided",
         "aqi_table",
+        "basis",
         "stale"
       ],
       "additionalProperties": false

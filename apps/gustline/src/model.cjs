@@ -2,6 +2,7 @@
 const {fail, references: ownerReferences} = require('./domain-utils.cjs');
 const {validZone} = require('./time.cjs');
 const {METRICS} = require('./catalog.cjs');
+const {notificationId} = require('./common.cjs');
 
 const unique = (list, key, what) => {
   const seen = new Set();
@@ -17,7 +18,7 @@ const notAfter = (value, now, what) => {
 
 // Rule consistency shared by seed validation and the rule write tools.
 function validateRule(data, r) {
-  if (!data.saved_places.some(s => s.saved_place_id === r.saved_place_id)) fail('saved_place_not_found', 'Saved place does not exist.');
+  if (r.status !== 'deleted' && !data.saved_places.some(s => s.saved_place_id === r.saved_place_id)) fail('saved_place_not_found', 'Saved place does not exist.');
   if (r.kind === 'official_alert') {
     if (r.metric !== null || r.threshold !== null || r.comparator !== null) fail('invalid_rule', 'Alert rules take events and a minimum severity, not a metric.');
   } else {
@@ -85,17 +86,23 @@ function validateSeed(ctx, data) {
   unique(data.alerts, 'alert_id', 'alert');
   for (const a of data.alerts) {
     a.versions.forEach((v, i) => {
-      if (v.version !== i + 1) fail('invalid_seed', 'Alert versions must run 1, 2, 3, …');
+      if (i === 0 ? v.version !== 1 : v.version <= a.versions[i - 1].version) fail('invalid_seed', 'Alert versions start at 1 and increase.');
       if ((i === 0) !== (v.msg_type === 'alert')) fail('invalid_seed', 'Only the first version of an alert is msg_type alert.');
       if (i > 0 && a.versions[i - 1].msg_type === 'cancel') fail('invalid_seed', 'A cancelled alert cannot be updated.');
       notAfter(v.issued_at, now, 'Alert version');
     });
   }
   unique(data.rules, 'rule_id', 'rule');
-  for (const r of data.rules) { validateRule(data, r); notAfter(r.created_at, now, 'Rule'); }
+  for (const r of data.rules) {
+    validateRule(data, r); notAfter(r.created_at, now, 'Rule');
+    for (const h of r.history) notAfter(h.at, now, 'Rule history');
+  }
   unique(data.notifications, 'notification_id', 'notification');
   for (const n of data.notifications) {
     notAfter(n.created_at, now, 'Notification');
+    if (n.acknowledged_at) notAfter(n.acknowledged_at, now, 'Acknowledgement');
+    if (n.outcome) notAfter(n.outcome.recorded_at, now, 'Delivery outcome');
+    if (n.notification_id !== notificationId(n.trigger_key)) fail('invalid_seed', 'Notification ID must derive from its trigger key.');
     if (n.recipient_person_id !== data.owner_person_id) fail('invalid_seed', 'Notifications go to the account owner.');
   }
 }

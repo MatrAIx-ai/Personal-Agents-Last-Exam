@@ -1,7 +1,7 @@
 'use strict';
 // Rule evaluation. Runs only inside business event handlers ("now" is the event's `at`), never on reads
 // or clock movement. Each notification is identified by its trigger key.
-const {copy, log, notificationId} = require('./common.cjs');
+const {log, notificationId, effectiveStatus} = require('./common.cjs');
 const {parts, instantOf, render, windowDate, quietRelease, ms, addDays} = require('./time.cjs');
 const {METRICS, SEVERITIES} = require('./catalog.cjs');
 const aqi = require('./aqi.cjs');
@@ -69,18 +69,28 @@ function notify(ctx, data, rule, {key, phase, source, title, body, severe = fals
   return n;
 }
 
-// Threshold rules: notify once per occurrence when met; once when cleared (if notify_on_clear).
+// Threshold rules, per window occurrence. The person hears "met" once; repeated exceedances add nothing.
+// When the condition stops being met: a met notice still held by quiet hours is withdrawn (the person never
+// heard it, so no "cleared" follows); a met notice already released is followed by "cleared" if
+// notify_on_clear. If the condition returns, a held "cleared" is withdrawn, and a new "met" is created only
+// when the person last heard "cleared" or never heard "met". Repeats use keys met|2, cleared|2, ...
 function settle(ctx, data, rule, place, met, evaluated, source, describe) {
-  const prefix = rule.rule_id + '|';
-  const metKeys = new Set(data.notifications.filter(n => n.rule_id === rule.rule_id && n.phase === 'met').map(n => n.trigger_key));
-  for (const [occ, detail] of met) {
-    notify(ctx, data, rule, {key: prefix + occ + '|met', phase: 'met', source, ...describe(detail, true)});
-  }
-  for (const occ of evaluated) {
-    if (met.has(occ) || !metKeys.has(prefix + occ + '|met')) continue;
-    withdrawHeld(data, n => n.trigger_key === prefix + occ + '|met', ctx.virtual_now);
-    const clearedKey = prefix + occ + '|cleared';
-    if (rule.notify_on_clear) notify(ctx, data, rule, {key: clearedKey, phase: 'cleared', source, ...describe({occ}, false)});
+  const now = ctx.virtual_now, prefix = rule.rule_id + '|';
+  const history = occ => data.notifications.filter(n => n.rule_id === rule.rule_id && n.trigger_key.startsWith(prefix + occ + '|'));
+  const key = (occ, phase) => { const n = history(occ).filter(x => x.phase === phase).length + 1; return prefix + occ + '|' + phase + (n > 1 ? '|' + n : ''); };
+  const heard = n => n.status !== 'withdrawn' && effectiveStatus(n, now) !== 'held_quiet_hours';
+  const held = n => n.status === 'held_quiet_hours' && effectiveStatus(n, now) === 'held_quiet_hours';
+  for (const occ of new Set([...met.keys(), ...evaluated])) {
+    const past = history(occ), lastHeard = past.filter(heard).at(-1), pendingMet = past.find(n => n.phase === 'met' && held(n));
+    if (met.has(occ)) {
+      for (const n of past) if (n.phase === 'cleared' && held(n)) n.status = 'withdrawn';
+      if (pendingMet || (lastHeard && lastHeard.phase === 'met')) continue;
+      notify(ctx, data, rule, {key: key(occ, 'met'), phase: 'met', source, ...describe(met.get(occ), true)});
+    } else if (pendingMet) {
+      pendingMet.status = 'withdrawn';
+    } else if (lastHeard && lastHeard.phase === 'met' && rule.notify_on_clear) {
+      notify(ctx, data, rule, {key: key(occ, 'cleared'), phase: 'cleared', source, ...describe({occ}, false)});
+    }
   }
 }
 
@@ -96,8 +106,8 @@ function forecastRules(ctx, data, issuance) {
       if (t < at || t >= end) continue;
       const occ = occurrence(rule, ref.place.time_zone, t);
       if (!occ) continue;
+      if (compare(rule, h[field]) && !met.has(occ) && (rule.window || met.size === 0)) met.set(occ, {occ, value: h[field], at: t});
       evaluated.add(occ);
-      if (compare(rule, h[field]) && !met.has(occ)) met.set(occ, {occ, value: h[field], at: t});
     }
     settle(ctx, data, rule, ref.place, met, evaluated, {kind: 'issuance', id: issuance.issuance_id, version: null}, (d, isMet) => isMet ? {
       title: `${LABELS[rule.metric][0]} ${d.value}${LABELS[rule.metric][1]} forecast at ${ref.saved.label}`,
@@ -124,8 +134,8 @@ function airForecastRules(ctx, data, issuance) {
         : rule.window && rule.window.type === 'absolute' ? Math.max(dayStart, ms(rule.window.from)) : dayStart;
       const occ = probe < dayEnd ? occurrence(rule, zone, probe) : null;
       if (!occ) continue;
+      if (compare(rule, aqi.categoryRank(day.aqi_category)) && !met.has(occ) && (rule.window || met.size === 0)) met.set(occ, {occ, day});
       evaluated.add(occ);
-      if (compare(rule, aqi.categoryRank(day.aqi_category)) && !met.has(occ)) met.set(occ, {occ, day});
     }
     settle(ctx, data, rule, ref.place, met, evaluated, {kind: 'air_issuance', id: issuance.issuance_id, version: null}, (d, isMet) => isMet ? {
       title: `Air quality forecast ${CATEGORY_TEXT[d.day.aqi_category]} at ${ref.saved.label} on ${d.day.date}`,
@@ -160,7 +170,7 @@ function observationRules(ctx, data, kind, record) {
     settle(ctx, data, rule, ref.place, met, new Set([occ]),
       {kind: kind === 'air' ? 'air_observation' : 'observation', id: record.observation_id, version: null}, (d, isMet) => isMet ? {
         title: rule.metric === 'aqi' ? `AQI ${d.value} at ${ref.saved.label}` : `${label} ${d.value}${LABELS[rule.metric][1]} at ${ref.saved.label}`,
-        body: `${label} at ${ref.saved.label} reached ${rule.metric === 'aqi' ? 'AQI ' + d.value + extra : d.value + LABELS[rule.metric][1]} at ${human(t, zone)}. Your rule: ${thresholdText(rule)}${windowText(rule)}.`
+        body: `${label} at ${ref.saved.label} reached ${rule.metric === 'aqi' ? 'AQI ' + d.value + extra + ' (hourly concentration, not NowCast)' : d.value + LABELS[rule.metric][1]} at ${human(t, zone)}. Your rule: ${thresholdText(rule)}${windowText(rule)}.`
       } : {
         title: `${label} back within your limit at ${ref.saved.label}`,
         body: `${label} at ${ref.saved.label} no longer meets your rule (${thresholdText(rule)}) as of ${human(t, zone)}.`
@@ -171,12 +181,12 @@ function observationRules(ctx, data, kind, record) {
 function alertRules(ctx, data, alert) {
   const version = alert.versions[alert.versions.length - 1];
   for (const rule of active(data, 'official_alert')) {
+    // A newer version replaces a held notification for an earlier version, even if it no longer matches.
+    withdrawHeld(data, n => n.rule_id === rule.rule_id && n.source.kind === 'alert' && n.source.id === alert.alert_id, ctx.virtual_now);
     const ref = placeFor(data, rule);
     if (!ref || !affects(version, ref.place)) continue;
     if (rule.alert_events.length && !rule.alert_events.includes(version.event)) continue;
     if (rule.min_severity && SEVERITIES.indexOf(version.severity) < SEVERITIES.indexOf(rule.min_severity)) continue;
-    // A newer version replaces a held notification for an earlier version of the same alert.
-    withdrawHeld(data, n => n.rule_id === rule.rule_id && n.source.kind === 'alert' && n.source.id === alert.alert_id, ctx.virtual_now);
     if (version.msg_type === 'cancel' && !rule.notify_on_clear) continue;
     const zone = ref.place.time_zone;
     notify(ctx, data, rule, {key: `${rule.rule_id}|${alert.alert_id}|${version.version}`, phase: version.msg_type,

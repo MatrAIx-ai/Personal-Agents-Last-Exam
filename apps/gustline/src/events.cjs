@@ -31,7 +31,8 @@ function observationRecorded(ctx, data, p) {
   const values = Object.fromEntries(OBSERVED.filter(k => typeof p[k] === 'number').map(k => [k, p[k]]));
   let record;
   if (p.correction_of) {
-    record = data.observations.find(o => o.observation_id === p.correction_of);
+    // The corrected observation may be named by its current ID or by any earlier ID in its revisions.
+    record = data.observations.find(o => o.observation_id === p.correction_of || o.revisions.some(r => r.observation_id === p.correction_of));
     if (!record) fail('observation_not_found', 'The corrected observation does not exist.');
     if (record.station_id !== p.station_id || ms(record.observed_at) !== ms(p.observed_at)) fail('invalid_event', 'A correction must keep the station and observation time.');
     const previous = Object.fromEntries(OBSERVED.filter(k => typeof record[k] === 'number').map(k => [k, record[k]]));
@@ -84,7 +85,11 @@ function alertPublished(ctx, data, p) {
     if (!alert) fail('alert_reference_unknown', 'The alert being updated or cancelled does not exist.');
     const latest = alert.versions[alert.versions.length - 1];
     if (latest.msg_type === 'cancel') fail('stale_alert_version', 'The alert is already cancelled.');
-    if (version.version !== latest.version + 1) fail('stale_alert_version', 'The version must follow the latest version.');
+    if (version.version <= latest.version) fail('stale_alert_version', 'The version must be greater than the latest version.');
+    if (!(version.references || []).some(r => r.alert_id === alert_id && r.version === latest.version)) {
+      fail('alert_reference_unknown', 'An update or cancel must reference the latest version of this alert.');
+    }
+    if (version.event !== latest.event) fail('invalid_event', 'An update cannot change the alert event; issue a new alert.');
     alert.versions.push(version);
   }
   rules.alertRules(ctx, data, alert);

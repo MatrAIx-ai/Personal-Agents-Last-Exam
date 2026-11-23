@@ -199,8 +199,44 @@ test('W5 a held notification is withdrawn when the condition clears before relea
   f.event(forecastEvent('2027-10-09T05:02:00-07:00', issuance({id: 'fc-0500', issued: '2027-10-09T05:00:00-07:00', gust: () => 30})));
   const n = list(f);
   assert.equal(n.find(x => x.phase === 'met').status, 'withdrawn');
-  const cleared = n.find(x => x.phase === 'cleared');               // rule-2 has notify_on_clear
-  assert.equal(cleared.status, 'held_quiet_hours');
+  assert.equal(n.filter(x => x.phase === 'cleared').length, 0, 'the person never heard "met", so no "cleared" follows');
+});
+
+test('W5 a hazard that returns after a withdrawal is notified again; a held "cleared" is withdrawn', () => {
+  const f = fixture(), at17 = t => t === Date.parse('2027-10-09T17:00:00-07:00');
+  f.event(forecastEvent('2027-10-08T23:10:00-07:00', issuance({id: 'fc-a', issued: '2027-10-08T23:00:00-07:00', gust: t => (at17(t) ? 62 : 20)})));
+  f.event(forecastEvent('2027-10-09T03:02:00-07:00', issuance({id: 'fc-b', issued: '2027-10-09T03:00:00-07:00', gust: () => 30})));
+  f.event(forecastEvent('2027-10-09T05:02:00-07:00', issuance({id: 'fc-c', issued: '2027-10-09T05:00:00-07:00', gust: t => (at17(t) ? 70 : 20)})));
+  f.advance('2027-10-09T07:00:00-07:00');
+  const pending = list(f, 'pending_delivery');
+  assert.equal(pending.length, 1);
+  assert.equal(pending[0].phase, 'met');
+  assert.equal(pending[0].trigger_key, 'rule-2|2027-10-09|met|2');
+  assert.match(pending[0].title, /70/);
+  // After a "met" the person has heard, clearing notifies (notify_on_clear) and a return notifies again.
+  f.event(forecastEvent('2027-10-09T08:02:00-07:00', issuance({id: 'fc-d', issued: '2027-10-09T08:00:00-07:00', gust: () => 30})));
+  f.event(forecastEvent('2027-10-09T09:02:00-07:00', issuance({id: 'fc-e', issued: '2027-10-09T09:00:00-07:00', gust: t => (at17(t) ? 66 : 20)})));
+  assert.deepEqual(list(f).filter(n => n.status !== 'withdrawn').map(n => n.trigger_key),
+    ['rule-2|2027-10-09|met|2', 'rule-2|2027-10-09|cleared', 'rule-2|2027-10-09|met|3']);
+});
+
+test('W5 a rule without a window notifies once per evaluation, for the first date that meets it', () => {
+  const f = fixture();
+  f.event(forecastEvent('2027-10-08T10:02:00-07:00', issuance({id: 'fc-wide', issued: '2027-10-08T10:00:00-07:00', gust: () => 60})));
+  const n = list(f);
+  assert.equal(n.length, 1);
+  assert.equal(n[0].trigger_key, 'rule-2|2027-10-08|met');
+});
+
+test('W5 window occurrences across midnight and across the end of DST', () => {
+  const {occurrence} = require('../src/rules.cjs'), LA = 'America/Los_Angeles';
+  const night = {window: {type: 'recurring', days: [1, 2, 3, 4, 5, 6, 7], start: '22:00', end: '06:00'}};
+  assert.equal(occurrence(night, LA, Date.parse('2027-10-09T01:30:00-07:00')), '2027-10-08T22:00:00-07:00', 'after midnight belongs to the start date');
+  assert.equal(occurrence(night, LA, Date.parse('2027-11-07T01:30:00-08:00')), '2027-11-06T22:00:00-07:00', 'repeated hour after the DST change');
+  assert.equal(occurrence(night, LA, Date.parse('2027-11-07T23:00:00-08:00')), '2027-11-07T22:00:00-08:00');
+  const {render, instantOf} = require('../src/time.cjs');
+  assert.equal(render(instantOf('2027-03-14', '02:30', LA), LA), '2027-03-14T03:00:00-07:00', 'a skipped time moves forward');
+  assert.equal(render(instantOf('2027-11-07', '01:30', LA), LA), '2027-11-07T01:30:00-07:00', 'a repeated time uses its first instance');
 });
 
 test('W5 alert rules: watch and warning on one day are two notifications; update notifies; cancel only with notify_on_clear', () => {
@@ -224,6 +260,87 @@ test('W5 a severe alert bypasses quiet hours only with severe_override; a newer 
   f.event(alertEvent('2027-10-08T23:50:00-07:00', alert({alert_id: 'sv-1', version: 2, msg_type: 'update', event: 'severe_thunderstorm_warning', severity: 'severe', issued_at: '2027-10-08T23:50:00-07:00', headline: 'Warning updated'})));
   const r4 = list(f).filter(n => n.rule_id === 'rule-4');
   assert.deepEqual(r4.map(n => n.status), ['withdrawn', 'held_quiet_hours']);
+});
+
+test('W5 rule limit and missing rules', () => {
+  const g = fixture();
+  unchanged(g, () => g.call('gustline.rules.get', {rule_id: 'rule-99'}), 'rule_not_found');
+  for (let i = 0; i < 23; i++) g.call('gustline.rules.create', {saved_place_id: 'sp-1', kind: 'official_alert'});
+  unchanged(g, () => g.call('gustline.rules.create', {saved_place_id: 'sp-1', kind: 'official_alert'}), 'rule_limit');
+});
+
+test('W1 the saved-place limit is 20', () => {
+  const seed = structuredClone(require('../fixtures/minimal.json'));
+  for (let i = 3; i <= 20; i++) seed.saved_places.push({saved_place_id: 'sp-' + i, place_id: 'pl-dunes', label: 'Spot ' + i, created_at: '2027-09-02T08:00:00-07:00'});
+  const f = fixture({seed});
+  unchanged(f, () => f.call('gustline.saved_places.add', {place_id: 'pl-dunes', label: 'One more'}), 'saved_place_limit');
+});
+
+test('W5 a deleted rule is a tombstone: its ID is never reused and its unsent notices are withdrawn', () => {
+  const f = fixture();
+  f.event(require('../examples/scenario.json'));
+  f.call('gustline.rules.delete', {rule_id: 'rule-1'});
+  assert.equal(list(f)[0].status, 'withdrawn');
+  assert.equal(f.call('gustline.rules.get', {rule_id: 'rule-1'}).rule.status, 'deleted');
+  unchanged(f, () => f.call('gustline.rules.update', {rule_id: 'rule-1', patch: {threshold: 120}}), 'rule_not_found');
+  const {rule_id} = f.call('gustline.rules.create', {saved_place_id: 'sp-1', kind: 'observation_threshold', metric: 'aqi', comparator: 'gte', threshold: 120, delivery: 'mail'});
+  assert.equal(rule_id, 'rule-3');
+  f.event(airEvent('2027-10-08T11:05:00-07:00', '2027-10-08T11:00:00-07:00', 60.0));
+  assert.equal(list(f).filter(n => n.rule_id === 'rule-3').length, 1, 'the new rule notifies');
+});
+
+test('W4 updates must reference the latest version and keep the event; cancel notifies only with notify_on_clear', () => {
+  const f = fixture();
+  f.call('gustline.rules.create', {saved_place_id: 'sp-2', kind: 'official_alert', delivery: 'in_app', notify_on_clear: true});
+  f.event(alertEvent('2027-10-08T10:00:00-07:00', alert({alert_id: 'fw-9', issued_at: '2027-10-08T10:00:00-07:00'})));
+  unchanged(f, () => f.event(alertEvent('2027-10-08T10:10:00-07:00', {...alert({alert_id: 'fw-9', version: 2, msg_type: 'update', issued_at: '2027-10-08T10:10:00-07:00'}), references: [{alert_id: 'zzz-1', version: 9}]})), 'alert_reference_unknown');
+  unchanged(f, () => f.event(alertEvent('2027-10-08T10:10:00-07:00', alert({alert_id: 'fw-9', version: 2, msg_type: 'update', event: 'flood_warning', issued_at: '2027-10-08T10:10:00-07:00'}))), 'invalid_event');
+  f.event(alertEvent('2027-10-08T10:20:00-07:00', {...alert({alert_id: 'fw-9', version: 3, msg_type: 'cancel', issued_at: '2027-10-08T10:20:00-07:00'}), references: [{alert_id: 'fw-9', version: 1}]}));
+  assert.deepEqual(list(f).map(n => n.phase), ['alert', 'cancel'], 'a version gap is allowed; cancel notifies with notify_on_clear');
+});
+
+test('W5 a held alert notice is withdrawn when a newer version no longer matches the rule', () => {
+  const f = fixture();
+  f.call('gustline.rules.create', {saved_place_id: 'sp-2', kind: 'official_alert', min_severity: 'moderate', delivery: 'mail', quiet_hours: {start: '22:00', end: '07:00'}});
+  f.event(alertEvent('2027-10-08T23:00:00-07:00', alert({alert_id: 'wa-1', event: 'wind_advisory', issued_at: '2027-10-08T23:00:00-07:00', headline: 'Wind advisory'})));
+  assert.equal(list(f)[0].status, 'held_quiet_hours');
+  f.event(alertEvent('2027-10-08T23:30:00-07:00', alert({alert_id: 'wa-1', version: 2, msg_type: 'update', event: 'wind_advisory', severity: 'minor', issued_at: '2027-10-08T23:30:00-07:00', headline: 'Wind advisory downgraded'})));
+  assert.deepEqual(list(f).map(n => n.status), ['withdrawn']);
+});
+
+test('W2 a correction can name the original observation ID', () => {
+  const f = fixture();
+  const corr = (id, of, at, temp) => ({event_id: 'ev-' + id, at, operation: 'weather.observation_recorded',
+    payload: {observation_id: id, station_id: 'st-cedar', observed_at: '2027-10-08T08:00:00-07:00', correction_of: of, temp_c: temp}});
+  f.event(corr('ob-c1', 'ob-cedar-0800', '2027-10-08T09:40:00-07:00', 17.9));
+  f.event(corr('ob-c2', 'ob-cedar-0800', '2027-10-08T09:45:00-07:00', 18.1));
+  const row = f.call('gustline.observations.get', {place_id: 'pl-home', from: '2027-10-08T08:00:00-07:00', to: '2027-10-08T08:00:00-07:00'}).observations[0];
+  assert.equal(row.temp_c, 18.1);
+  assert.equal(row.revisions.length, 2);
+});
+
+test('W3 reads state that PM AQI is hourly, not NowCast', () => {
+  const f = fixture();
+  f.event(require('../examples/scenario.json'));
+  assert.match(f.call('gustline.air.current', {place_id: 'pl-school'}).basis, /not EPA NowCast/);
+  assert.match(list(f)[0].body, /not NowCast/);
+  assert.match(require('../tools.json').find(t => t.name === 'gustline.air.current').description, /not EPA NowCast/);
+});
+
+test('W2 forecast history lists three issuances with two superseded (desert pack)', () => {
+  const d = path.resolve(__dirname, '../examples/packs/desert-storm');
+  const {virtual_now, events} = require(path.join(d, 'events.json'));
+  const f = fixture({seed: require(path.join(d, 'seed.json')), now: virtual_now, binding: require(path.join(d, 'binding.json'))});
+  for (const e of events) f.event(e);
+  const h = f.call('gustline.forecast.history', {place_id: 'pl-dunes', kind: 'weather', provider: 'regional_office'}).issuances;
+  assert.deepEqual(h.map(i => i.status), ['current', 'superseded', 'superseded']);
+});
+
+test('fixtures: every seeded record is dated on or after 2026-01-01', () => {
+  const floor = Date.parse('2026-01-01T00:00:00Z');
+  const seeds = [require('../fixtures/minimal.json'), ...['desert-storm', 'smoke-week', 'commuter-week'].map(p => require(`../examples/packs/${p}/seed.json`))];
+  const walk = v => typeof v === 'string' ? (/^\d{4}-\d{2}-\d{2}T/.test(v) ? [v] : []) : v && typeof v === 'object' ? Object.values(v).flatMap(walk) : [];
+  for (const s of seeds) for (const t of walk(s)) assert.ok(Date.parse(t) >= floor, 'too early: ' + t);
 });
 
 test('W5 rule writes: validation, revisions, pause and resume, delete keeps notifications', () => {
@@ -313,12 +430,22 @@ for (const name of ['desert-storm', 'smoke-week', 'commuter-week']) {
         assert.ok(h.gust_kph >= h.wind_kph, 'gust >= wind in ' + i.issuance_id);
         assert.ok(h.dew_point_c <= h.temp_c, 'dew point <= temperature in ' + i.issuance_id);
       }
-      const hourDates = new Set(i.hourly.map(h => h.start.slice(0, 10))), dayDates = new Set(i.daily.map(d => d.date));
-      assert.ok([...dayDates].every(d => hourDates.has(d)), 'daily periods lie inside the hourly window');
+      // Daily periods cover the first days of the hourly window, in order, with consistent highs and lows.
+      const hourDates = [...new Set(i.hourly.map(h => h.start.slice(0, 10)))];
+      assert.deepEqual(i.daily.map(d => d.date), hourDates.slice(0, i.daily.length), 'daily periods cover the hourly window');
+      for (const d of i.daily) {
+        const temps = i.hourly.filter(h => h.start.startsWith(d.date)).map(h => h.temp_c);
+        assert.ok(d.high_c === Math.max(...temps) && d.low_c === Math.min(...temps), 'daily high/low match hourly ' + d.date);
+      }
+      // Every period's local offset matches its zone at that instant (correct across DST).
+      const tz = data.zones.find(z => z.zone_id === i.zone_id).time_zone, {render} = require('../src/time.cjs');
+      for (const h of i.hourly) assert.equal(render(h.start, tz), h.start, 'local time and offset ' + h.start);
     }
     for (const m of data.monitors) {
       const at = Date.parse(f.now), mine = data.air_observations.filter(o => o.monitor_id === m.monitor_id);
-      if (mine.length) assert.ok(Number.isInteger(aqi.compute(mine, at).aqi));
+      if (!mine.length) continue;
+      const r = aqi.compute(mine, at);
+      assert.ok(Number.isInteger(r.aqi) && r.category === aqi.category(r.aqi), 'recomputed AQI and category agree');
     }
     assert.ok(data.notifications.length > 0, 'the pack exercises at least one rule');
   });

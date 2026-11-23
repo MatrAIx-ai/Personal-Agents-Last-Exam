@@ -104,6 +104,7 @@ function airCurrent(ctx, data, args) {
   const result = aqi.compute(data.air_observations.filter(o => o.monitor_id === p.monitor_id), ms(now));
   if (!result) fail('no_observation', 'The monitor has not reported yet.');
   return {place: view(p), monitor_id: p.monitor_id, as_of: render(now, p.time_zone), ...result,
+    basis: 'PM2.5 and PM10 use the hourly concentration, not EPA NowCast; O3 uses the 8-hour rolling mean.',
     observed_at: render(result.observed_at, p.time_zone),
     stale: ms(now) - ms(result.observed_at) > LIMITS.stale_air_hours * 3600e3};
 }

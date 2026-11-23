@@ -20,7 +20,8 @@ const airEvent = (at, observedAt, pm25, extra = {}) => ({event_id: 'ev-' + (++se
 const alertEvent = (at, payload) => ({event_id: 'ev-' + (++seq), at, operation: 'alert.published', payload});
 const alert = (fields) => ({alert_id: 'al-1', version: 1, msg_type: 'alert', issuer: 'Cedar Basin Weather Office',
   event: 'flood_watch', severity: 'moderate', urgency: 'expected', certainty: 'likely', areas: {zone_ids: ['z-cedar']},
-  onset: '2027-10-08T12:00:00-07:00', expires: '2027-10-09T12:00:00-07:00', headline: 'Flood watch for Cedar Basin', ...fields});
+  onset: '2027-10-08T12:00:00-07:00', expires: '2027-10-09T12:00:00-07:00', headline: 'Flood watch for Cedar Basin',
+  ...((fields.version || 1) > 1 ? {references: [{alert_id: fields.alert_id || 'al-1', version: (fields.version || 1) - 1}]} : {}), ...fields});
 const deliveryEvent = (at, notificationId, status, code = null, extra = {}) => ({event_id: 'ev-' + (++seq), at,
   operation: 'notification.delivery_recorded', payload: {notification_id: notificationId, status, code, router_event_id: status === 'committed' ? 'router-abc' : null, ...extra}});
 

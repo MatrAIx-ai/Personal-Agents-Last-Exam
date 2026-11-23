@@ -6,6 +6,12 @@ const {LIMITS, DEFAULT_PROVIDER} = require('./catalog.cjs');
 
 const RULE_FIELDS = ['saved_place_id', 'metric', 'comparator', 'threshold', 'provider', 'look_ahead_hours', 'window',
   'alert_events', 'min_severity', 'notify_on_clear', 'delivery', 'quiet_hours', 'severe_override'];
+// A deleted rule is a tombstone: readable, never changed again.
+function live(data, id) {
+  const rule = getRule(data, id);
+  if (rule.status === 'deleted') fail('rule_not_found', 'The rule was deleted.');
+  return rule;
+}
 const stamp = (ctx, data) => render(ctx.virtual_now, data.settings.time_zone);
 
 function history(ctx, data, rule, action, changes) {
@@ -18,7 +24,7 @@ function write(ctx, data, name, args) {
       getPlace(data, args.place_id);
       if (data.saved_places.length >= LIMITS.saved_places) fail('saved_place_limit', 'At most 20 saved places.');
       if (data.saved_places.some(s => s.place_id === args.place_id || s.label === args.label)) fail('duplicate_saved_place', 'That place or label is already saved.');
-      const saved_place_id = nextId(data.saved_places, 'saved_place_id', 'sp');
+      const saved_place_id = nextId(data.saved_places, 'saved_place_id', 'sp', data.rules.map(r => r.saved_place_id));
       data.saved_places.push({saved_place_id, place_id: args.place_id, label: args.label, created_at: stamp(ctx, data)});
       return {saved_place_id};
     }
@@ -30,7 +36,7 @@ function write(ctx, data, name, args) {
     }
     case 'gustline.saved_places.remove': {
       const s = savedPlace(data, args.saved_place_id);
-      if (data.rules.some(r => r.saved_place_id === s.saved_place_id)) fail('saved_place_in_use', 'A rule refers to this saved place; delete or retarget it first.');
+      if (data.rules.some(r => r.status !== 'deleted' && r.saved_place_id === s.saved_place_id)) fail('saved_place_in_use', 'A rule refers to this saved place; delete or retarget it first.');
       data.saved_places = data.saved_places.filter(x => x !== s);
       if (data.settings.default_saved_place_id === s.saved_place_id) data.settings.default_saved_place_id = null;
       return {saved_place_id: s.saved_place_id};
@@ -44,7 +50,7 @@ function write(ctx, data, name, args) {
       return {settings: copy(data.settings)};
     }
     case 'gustline.rules.create': {
-      if (data.rules.length >= LIMITS.rules) fail('rule_limit', 'At most 25 rules.');
+      if (data.rules.filter(r => r.status !== 'deleted').length >= LIMITS.rules) fail('rule_limit', 'At most 25 rules.');
       const alert = args.kind === 'official_alert';
       const rule = {rule_id: nextId(data.rules, 'rule_id', 'rule'), saved_place_id: args.saved_place_id, kind: args.kind,
         metric: alert ? null : (args.metric ?? null), comparator: alert ? null : (args.comparator ?? null),
@@ -61,7 +67,7 @@ function write(ctx, data, name, args) {
       return {rule_id: rule.rule_id, revision: 1};
     }
     case 'gustline.rules.update': {
-      const rule = getRule(data, args.rule_id);
+      const rule = live(data, args.rule_id);
       if (!Object.keys(args.patch).length) fail('invalid_rule', 'Patch must change a field.');
       Object.assign(rule, copy(args.patch));
       validateRule(data, rule);
@@ -71,7 +77,7 @@ function write(ctx, data, name, args) {
     }
     case 'gustline.rules.pause':
     case 'gustline.rules.resume': {
-      const rule = getRule(data, args.rule_id), pause = name.endsWith('pause');
+      const rule = live(data, args.rule_id), pause = name.endsWith('pause');
       if (pause && rule.status === 'paused') fail('already_paused', 'The rule is already paused.');
       if (!pause && rule.status === 'active') fail('not_paused', 'The rule is not paused.');
       rule.status = pause ? 'paused' : 'active';
@@ -80,8 +86,14 @@ function write(ctx, data, name, args) {
       return {rule_id: rule.rule_id, revision: rule.revision};
     }
     case 'gustline.rules.delete': {
-      const rule = getRule(data, args.rule_id);
-      data.rules = data.rules.filter(r => r !== rule);
+      // A tombstone keeps the rule's ID and revision history; notifications not yet sent are withdrawn.
+      const rule = live(data, args.rule_id);
+      rule.status = 'deleted';
+      rule.revision++;
+      history(ctx, data, rule, 'deleted', {status: 'deleted'});
+      for (const n of data.notifications) {
+        if (n.rule_id === rule.rule_id && ['held_quiet_hours', 'pending_delivery'].includes(n.status)) n.status = 'withdrawn';
+      }
       return {rule_id: rule.rule_id};
     }
     case 'gustline.notifications.acknowledge': {

@@ -13,12 +13,12 @@ const zone = (data, id) => find(data.zones, 'zone_id', id, 'invalid_seed', 'Unkn
 const rule = (data, id) => find(data.rules, 'rule_id', id, 'rule_not_found', 'Rule does not exist in this account.');
 const savedPlace = (data, id) => find(data.saved_places, 'saved_place_id', id, 'saved_place_not_found', 'Saved place does not exist.');
 
-// Next sequential ID with a prefix, deterministic from existing records.
-function nextId(list, key, prefix) {
-  const used = new Set(list.map(x => x[key]));
-  let n = 1;
-  while (used.has(prefix + '-' + n)) n++;
-  return prefix + '-' + n;
+// Next sequential ID with a prefix: one more than the highest number ever used, counting IDs that other
+// records still refer to, so a removed record's ID is never handed out again.
+function nextId(list, key, prefix, referenced = []) {
+  const re = new RegExp('^' + prefix + '-(\\d+)$');
+  const top = [...list.map(x => x[key]), ...referenced].reduce((m, id) => { const r = re.exec(id || ''); return r ? Math.max(m, +r[1]) : m; }, 0);
+  return prefix + '-' + (top + 1);
 }
 
 // Stable ID derived from a trigger key: identical after a reset, so Messaging deduplicates republishing.

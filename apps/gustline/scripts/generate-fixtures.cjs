@@ -121,14 +121,30 @@ function issuanceAt(rand, id, provider, zone, tz, issuedMs, hours, profile, days
     valid_to: render(start + hours * H, tz), hourly: list, daily: daily(list, tz, days, headline), products: profile.products || []};
 }
 
+function stationObs(rand, station, tz, endMs, count, mean) {
+  const out = [];
+  for (let i = count - 1; i >= 0; i--) {
+    const t = endMs - i * H, hour = +render(t, tz).slice(11, 13), temp = round(mean + 7 * Math.sin((hour - 9) / 24 * 2 * Math.PI) + rand() - 0.5);
+    out.push({observation_id: `ob-${station.slice(3)}-${count - 1 - i}`, station_id: station, observed_at: render(t, tz), temp_c: temp,
+      dew_point_c: round(temp - 8 - rand() * 3), wind_kph: round(8 + rand() * 6), gust_kph: round(16 + rand() * 8), precip_mm: 0,
+      humidity_pct: Math.round(40 + rand() * 15), corrected: false, revisions: []});
+  }
+  return out;
+}
+
 // (A) Desert park storm day: two providers, three issuances each, a Flood Watch issued then updated, a park closure.
 function desertPack() {
   eventSeq = 0;
   const rand = prng(SEED + 1), DEN = 'America/Denver', CHI = 'America/Chicago', s = base('gustline-kai', 'person-kai', CHI), events = [];
-  s.zones = [{zone_id: 'z-dunes', name: 'Dune Flats', time_zone: DEN}];
-  s.stations = [{station_id: 'st-dunes', name: 'Dune Flats Visitor Center', zone_id: 'z-dunes'}];
+  s.zones = [{zone_id: 'z-dunes', name: 'Dune Flats', time_zone: DEN}, {zone_id: 'z-rivergate', name: 'Rivergate', time_zone: CHI}];
+  s.stations = [{station_id: 'st-dunes', name: 'Dune Flats Visitor Center', zone_id: 'z-dunes'}, {station_id: 'st-rivergate', name: 'Rivergate Municipal Airport', zone_id: 'z-rivergate'}];
   s.places = [place('pl-dunes', 'Dune Flats Park', 'park', 32.780, -106.172, 1216, DEN, 'z-dunes', {station_id: 'st-dunes'}),
-    place('pl-alamo', 'Alamo Springs', 'city', 32.900, -105.960, 1310, DEN, 'z-dunes', {station_id: 'st-dunes'})];
+    place('pl-alamo', 'Alamo Springs', 'city', 32.900, -105.960, 1310, DEN, 'z-dunes', {station_id: 'st-dunes'}),
+    place('pl-rivergate', 'Rivergate', 'city', 30.270, -97.740, 150, CHI, 'z-rivergate', {station_id: 'st-rivergate'})];
+  for (const iso of ['2026-09-10T17:00:00-05:00', '2026-09-11T05:00:00-05:00', '2026-09-11T11:00:00-05:00']) {
+    s.issuances.push(issuanceAt(rand, 'fc-gl-riv-' + iso.slice(5, 13).replace(/[-T]/g, ''), 'gustline', 'z-rivergate', CHI, Date.parse(iso), 24, {mean: 30, amp: 6, wind: 10}, 1));
+  }
+  s.observations.push(...stationObs(rand, 'st-rivergate', CHI, Date.parse('2026-09-11T15:00:00-05:00'), 48, 30));
   s.saved_places = [{saved_place_id: 'sp-1', place_id: 'pl-dunes', label: 'Dune Flats', created_at: '2026-09-09T19:00:00-05:00'}];
   // Storms build in the afternoon; each later issuance brings the onset earlier.
   const storm = (onset, peak) => h => (h >= onset && h <= 20 ? peak : h >= onset - 2 && h < onset ? 25 : 6);
@@ -163,7 +179,7 @@ function desertPack() {
       quiet_hours: {start: '22:00', end: '06:30'}, created_at: '2026-09-09T19:05:00-05:00'}),
     rule('rule-2', 'sp-1', 'official_alert', {alert_events: ['flood_watch', 'flood_warning', 'area_closure'], created_at: '2026-09-09T19:06:00-05:00'})];
   return {seed: s, now: '2026-09-11T14:00:00-06:00', binding: {people: [{person_id: 'person-kai', name: 'Kai Morgan'}],
-    accounts: [{app_id: 'gustline', account_id: 'gustline-kai', owner_person_id: 'person-kai'}], objects: {gustline: ['pl-dunes', 'pl-alamo']}},
+    accounts: [{app_id: 'gustline', account_id: 'gustline-kai', owner_person_id: 'person-kai'}], objects: {gustline: ['pl-dunes', 'pl-alamo', 'pl-rivergate']}},
     events: sortEvents(events)};
 }
 
@@ -171,16 +187,24 @@ function desertPack() {
 function smokePack() {
   eventSeq = 0;
   const rand = prng(SEED + 2), LA = 'America/Los_Angeles', s = base('gustline-marcus', 'person-marcus', LA), events = [];
-  s.zones = [{zone_id: 'z-cedar', name: 'Cedar Basin', time_zone: LA}];
+  s.zones = [{zone_id: 'z-cedar', name: 'Cedar Basin', time_zone: LA}, {zone_id: 'z-north', name: 'North Shore', time_zone: LA}];
+  s.stations = [{station_id: 'st-cedar-rs', name: 'Cedar Basin Ranger Station', zone_id: 'z-cedar'}];
   s.air_areas = [{air_area_id: 'aa-cedar', name: 'Cedar Basin Air District'}, {air_area_id: 'aa-north', name: 'North Shore Air District'}];
   s.monitors = [{monitor_id: 'mon-cedar', name: 'Cedar Basin - Ranger Station', air_area_id: 'aa-cedar'},
     {monitor_id: 'mon-north', name: 'North Shore - Marina', air_area_id: 'aa-north'}];
   s.places = [place('pl-camp-cedar', 'Cedar Basin Campground', 'campground', 38.910, -120.040, 1900, LA, 'z-cedar', {air_area_id: 'aa-cedar', monitor_id: 'mon-cedar'}),
-    place('pl-camp-north', 'North Shore Campground', 'campground', 39.240, -120.030, 1910, LA, 'z-cedar', {air_area_id: 'aa-north', monitor_id: 'mon-north'}),
-    place('pl-home-oak', 'Oak Hollow', 'city', 38.580, -121.490, 9, LA, 'z-cedar')];
+    place('pl-camp-north', 'North Shore Campground', 'campground', 39.240, -120.030, 1910, LA, 'z-north', {air_area_id: 'aa-north', monitor_id: 'mon-north'}),
+    place('pl-trailhead', 'North Shore Trailhead', 'park', 39.250, -120.050, 1950, LA, 'z-north', {air_area_id: 'aa-north', monitor_id: 'mon-north'}),
+    place('pl-home-oak', 'Oak Hollow', 'city', 38.580, -121.490, 9, LA, 'z-cedar', {station_id: 'st-cedar-rs'})];
   s.saved_places = [{saved_place_id: 'sp-1', place_id: 'pl-camp-cedar', label: 'Campsite', created_at: '2027-09-20T20:00:00-07:00'},
     {saved_place_id: 'sp-2', place_id: 'pl-home-oak', label: 'Home', created_at: '2027-09-20T20:00:00-07:00'}];
   const now = Date.parse('2027-10-04T08:00:00-07:00'), start = Date.parse('2027-10-03T08:00:00-07:00');
+  s.places[0].station_id = 'st-cedar-rs';
+  s.observations.push(...stationObs(rand, 'st-cedar-rs', LA, now, 48, 16));
+  for (const iso of ['2027-10-04T05:00:00-07:00', '2027-10-05T05:00:00-07:00', '2027-10-06T05:00:00-07:00']) {
+    const iss = issuanceAt(rand, 'fc-gl-cedar-' + iso.slice(5, 10).replace('-', ''), 'gustline', 'z-cedar', LA, Date.parse(iso), 48, {mean: 17, amp: 8, wind: 9}, 2);
+    if (Date.parse(iso) <= now) s.issuances.push(iss); else events.push(ev(render(Date.parse(iso) + 2 * 60e3, LA), 'weather.forecast_issued', iss));
+  }
   for (const mon of ['mon-cedar', 'mon-north']) {
     for (let i = 0; i < 120; i++) {
       const t = start + i * H, day = i / 24;
@@ -215,7 +239,7 @@ function smokePack() {
     rule('rule-2', 'sp-1', 'forecast_threshold', {metric: 'aqi_forecast_category', comparator: 'gte', threshold: 3, look_ahead_hours: 72,
       quiet_hours: {start: '21:00', end: '07:00'}, created_at: '2027-09-20T20:06:00-07:00'})];
   return {seed: s, now: render(now, LA), binding: {people: [{person_id: 'person-marcus', name: 'Marcus Webb'}],
-    accounts: [{app_id: 'gustline', account_id: 'gustline-marcus', owner_person_id: 'person-marcus'}], objects: {gustline: ['pl-camp-cedar', 'pl-camp-north', 'pl-home-oak']}},
+    accounts: [{app_id: 'gustline', account_id: 'gustline-marcus', owner_person_id: 'person-marcus'}], objects: {gustline: ['pl-camp-cedar', 'pl-camp-north', 'pl-trailhead', 'pl-home-oak']}},
     events: sortEvents(events)};
 }
 
@@ -224,15 +248,29 @@ function commuterPack() {
   eventSeq = 0;
   const rand = prng(SEED + 3), CHI = 'America/Chicago', s = base('gustline-priya', 'person-priya', CHI), events = [];
   s.settings.units = 'metric';
-  s.zones = [{zone_id: 'z-metro', name: 'Lakeport Metro', time_zone: CHI}];
+  s.zones = [{zone_id: 'z-metro', name: 'Lakeport Metro', time_zone: CHI}, {zone_id: 'z-maple', name: 'Maple Grove', time_zone: CHI}];
+  s.air_areas = [{air_area_id: 'aa-metro', name: 'Lakeport Air Quality District'}];
+  s.monitors = [{monitor_id: 'mon-metro', name: 'Lakeport - Elm Street', air_area_id: 'aa-metro'}];
   s.stations = [{station_id: 'st-metro', name: 'Lakeport Airport', zone_id: 'z-metro'}];
   s.places = [place('pl-home-ash', 'Ashby (home)', 'address', 41.880, -87.680, 180, CHI, 'z-metro', {station_id: 'st-metro'}),
     place('pl-work-loop', 'Harbor Office Park', 'address', 41.882, -87.630, 182, CHI, 'z-metro', {station_id: 'st-metro'}),
-    place('pl-school-elm', 'Elm Street School', 'venue', 41.900, -87.660, 181, CHI, 'z-metro', {station_id: 'st-metro'})];
+    place('pl-school-elm', 'Elm Street School', 'venue', 41.900, -87.660, 181, CHI, 'z-metro', {station_id: 'st-metro', air_area_id: 'aa-metro', monitor_id: 'mon-metro'}),
+    place('pl-gym', 'Lakeside Fitness', 'venue', 41.890, -87.620, 179, CHI, 'z-metro', {station_id: 'st-metro', air_area_id: 'aa-metro', monitor_id: 'mon-metro'}),
+    place('pl-maple-gran', 'Maple Grove (grandparents)', 'address', 41.790, -88.010, 215, CHI, 'z-maple')];
   s.saved_places = [{saved_place_id: 'sp-1', place_id: 'pl-home-ash', label: 'Home', created_at: '2027-06-01T08:00:00-05:00'},
     {saved_place_id: 'sp-2', place_id: 'pl-work-loop', label: 'Work', created_at: '2027-06-01T08:00:00-05:00'},
     {saved_place_id: 'sp-3', place_id: 'pl-school-elm', label: 'School', created_at: '2027-06-01T08:00:00-05:00'}];
   const now = Date.parse('2027-07-12T06:00:00-05:00');
+  for (let i = 71; i >= 0; i--) {
+    const t = now - i * H, hour = +render(t, CHI).slice(11, 13);
+    s.air_observations.push({observation_id: 'ao-metro-' + (71 - i), monitor_id: 'mon-metro', observed_at: render(t, CHI),
+      pm25_ugm3: round(8 + rand() * 6), o3_ppb: round(30 + 20 * Math.sin((hour - 9) / 24 * 2 * Math.PI) + rand() * 4)});
+  }
+  for (let k = 0; k < 7; k++) {
+    const issued = Date.parse('2027-07-11T17:00:00-05:00') + k * 24 * H;
+    const iss = issuanceAt(rand, 'fc-gl-maple-' + render(issued, CHI).slice(5, 10).replace('-', ''), 'gustline', 'z-maple', CHI, issued, 24, {mean: 28, amp: 7, wind: 9}, 1);
+    if (issued <= now) s.issuances.push(iss); else events.push(ev(render(issued + 3 * 60e3, CHI), 'weather.forecast_issued', iss));
+  }
   for (let k = 0; k < 14; k++) {
     const issued = Date.parse('2027-07-11T17:00:00-05:00') + k * 12 * H, dayIndex = Math.floor(k / 2);
     const heat = dayIndex >= 1 && dayIndex <= 3 ? 6 : 0, windy = dayIndex === 4 ? 18 : 0;
@@ -272,7 +310,7 @@ function commuterPack() {
       acknowledged_at: i % 2 ? render(Date.parse(created) + 2 * H, CHI) : null};
   });
   return {seed: s, now: render(now, CHI), binding: {people: [{person_id: 'person-priya', name: 'Priya Nair'}],
-    accounts: [{app_id: 'gustline', account_id: 'gustline-priya', owner_person_id: 'person-priya'}], objects: {gustline: ['pl-home-ash', 'pl-work-loop', 'pl-school-elm']}},
+    accounts: [{app_id: 'gustline', account_id: 'gustline-priya', owner_person_id: 'person-priya'}], objects: {gustline: ['pl-home-ash', 'pl-work-loop', 'pl-school-elm', 'pl-gym', 'pl-maple-gran']}},
     events: sortEvents(events)};
 }
 
