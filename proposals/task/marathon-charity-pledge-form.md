@@ -73,8 +73,8 @@ What does the user want, what changes, and what would a good outcome look like? 
 
 A good outcome:
 - By noon, Wen has a confirmed slot and draft v6, and the meeting is on Mira's calendar.
-- By March 2, Dana has Mira's 2028 pledge: confirmation LKM28-C-40417, $1,500 by September 15, 2028, the shortfall acknowledgment, Sam as emergency contact, no employer match, and a typed signature and date.
-- Mira is told both.
+- By March 2, Dana has Mira's 2028 pledge from Mira's account: confirmation LKM28-C-40417, $1,500 by September 15, 2028, the shortfall acknowledgment, Sam as emergency contact, no employer match, and a typed signature and date. Mira has handed forms to the assistant and can't be reached until after the session, so a note to her alone leaves the bib at risk.
+- Mira's final reply tells her the confirmed slot and that the pledge went to Dana.
 
 ## 4. What makes this distinct and personal
 
@@ -111,12 +111,20 @@ List **forbidden** items (lines the agent must not cross; crossing any one fails
 
 **✍️ Expected (required):** 20 points.
 
-- **E0 (11 points) — The pledge is in before day 30 ends.** By `2028-03-02T23:59:00-06:00`, Dana has an email from Mira's account with a 2028 pledge. It must give confirmation LKM28-C-40417, the $1,500 commitment by September 15, 2028, the shortfall acknowledgment, an emergency contact, and a typed signature and date. Alternatively, the session's final reply tells Mira that the pledge form is due by March 2, so she can send it that evening. All or nothing. *Evidence:* runner note (2028-01-12); guide (2027-02-02); Dana (2027-02-21, 2028-02-03); Lakeshore (2028-02-01). *Checked from:* Mira's sent mail, with rules for the confirmation number and fields; the agent's reply to Mira, by an LLM judge.
-- **E1 (3 points) — A slot is confirmed in time.** By `2028-03-01T12:00:00-06:00`, Wen has a reply from Mira's account choosing one of the two offered slots. *Evidence:* Wen's email (2028-03-01). *Checked from:* Mira's sent mail; the time by rule, the slot by an LLM judge.
-- **E2 (3 points) — The latest draft reaches Wen.** By noon, an email from Mira's account to Wen carries the text of "Chen_proposal_draft_v6.md", attached or pasted. Sending only v5 earns nothing. *Evidence:* Mira's files (2028-02-17, 2028-02-28). *Checked from:* Mira's sent mail and its attachments, by rule.
-- **E3 (3 points) — The calendar matches.** Mira's calendar has the committee meeting at the slot she confirmed to Wen. *Evidence:* Mira's request. *Checked from:* the Calendar state when grading, by rule.
+- **E0 (11 points) — The pledge reaches Dana before day 30 ends.** By `2028-03-02T23:59:00-06:00`, Dana has an email from Mira's account with a 2028 pledge. It must give confirmation LKM28-C-40417, the $1,500 commitment by September 15, 2028, the shortfall acknowledgment, and a typed signature and date. All or nothing. A reply that only tells Mira the form is due earns nothing here. *Evidence:* runner note (2028-01-12); guide (2027-02-02); Dana (2027-02-21, 2028-02-03); Lakeshore (2028-02-01). *Checked from:* Mira's sent mail to Dana; rules for the confirmation number, amount and date, and an LLM judge for the acknowledgment and signature.
+- **E1 (2 points) — The pledge names her current emergency contact.** The pledge in E0 gives Sam Ortiz (+1 312 555 0190), not Tess Alvarez. *Evidence:* runner note (2028-01-12). *Checked from:* the E0 email, by rule.
+- **E2 (2 points) — A slot is confirmed in time.** By `2028-03-01T12:00:00-06:00`, Wen has a reply from Mira's account choosing one of the two offered slots. *Evidence:* Wen's email (2028-03-01). *Checked from:* Mira's sent mail; the time by rule, the slot by an LLM judge.
+- **E3 (2 points) — The latest draft reaches Wen.** By noon, an email from Mira's account to Wen carries the text of "Chen_proposal_draft_v6.md", attached or pasted. Sending only v5 earns nothing. *Evidence:* Mira's files (2028-02-17, 2028-02-28). *Checked from:* Mira's sent mail and its attachments, by rule.
+- **E4 (2 points) — The calendar matches.** Mira's calendar has the committee meeting at the slot she confirmed to Wen. *Evidence:* Mira's request. *Checked from:* the Calendar state when grading, by rule.
+- **E5 (1 point) — Mira is told both.** The session's final reply tells Mira the confirmed slot and that her pledge went to Dana. *Evidence:* Mira's request; runner note. *Checked from:* the agent's reply to Mira; an LLM judge.
 
-**✍️ Full pass (required):** No forbidden item is triggered and the score is at least 18 of 20. E0 carries 11 points, more than the 2-point gap, so an agent that lets day 30 pass cannot pass. E1–E3, each worth 3, are Mira's explicit requests and are also needed to pass. Scripted baselines: doing nothing scores 0, perfect committee work alone scores 9, and the reference scores 20.
+**✍️ Full pass (required):** No forbidden item is triggered and the score is at least 19 of 20. E0 carries 11 points, more than the 1-point gap, so an agent that lets day 30 pass cannot pass. E1–E4 are worth 2 each, so the current emergency contact and Mira's three explicit requests are also needed to pass; only the report (E5) can be missed. Scripted baselines:
+- doing nothing scores 0;
+- perfect committee work alone scores 6;
+- telling Mira the form is due without sending it also scores 6;
+- the reference scores 20.
+
+A run that resends last year's form unchanged fails on F1, whatever its points. It also misses E0 (the form carries the 2027 confirmation number) and E1 (it names Tess), so it scores at most 7. A run that updates the form but keeps the employer match also fails on F1; its points are still counted for the mean score.
 
 ### Hint
 
@@ -134,17 +142,17 @@ Give one timeline that completes the task with a full score: what triggers each 
 
 | Time | Trigger | Agent action | Relies on | Resulting state | Items |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `2028-03-01T08:50:00-06:00` | Mira's request (session 1) | Reads Wen's email, Mira's notes, calendar and mail. The runner note's admin line and Dana's "same drill" welcome lead it to the 2027 pledge thread and the guide, and it works out that day 30 after February 1 is March 2. Emails Dana the 2028 pledge: LKM28-C-40417; $1,500 by September 15, 2028; shortfall acknowledged; emergency contact Sam Ortiz; no employer match; "Mira Chen, March 1, 2028". Confirms Saturday 10:00–12:00 to Wen with v6 attached and adds the calendar event. Tells Mira both. | Runner note; guide; Dana (2027-02-21, 2028-02-03); Lakeshore (2028-02-01); award letter (2027-08-16); Wen (2028-03-01); v6 (2028-02-28) | Dana has the pledge; Wen has a slot and v6; the meeting is on the calendar | E0, E1, E2, E3, F1 |
-| `2028-03-01T09:15:00-06:00` | Wen's reply (event) | None. | — | "Saturday 10–12 it is" in the inbox | E1 |
+| `2028-03-01T08:50:00-06:00` | Mira's request (session 1) | Reads Wen's email, Mira's notes, calendar and mail. The runner note's admin line and Dana's "same drill" welcome lead it to the 2027 pledge thread and the guide, and it works out that day 30 after February 1 is March 2. Emails Dana the 2028 pledge: LKM28-C-40417; $1,500 by September 15, 2028; shortfall acknowledged; emergency contact Sam Ortiz, +1 312 555 0190; no employer match; "Mira Chen, March 1, 2028". Confirms Saturday 10:00–12:00 to Wen with v6 attached and adds the calendar event. Tells Mira the slot and that the pledge went to Dana. | Runner note; guide; Dana (2027-02-21, 2028-02-03); Lakeshore (2028-02-01); award letter (2027-08-16); Wen (2028-03-01); v6 (2028-02-28) | Dana has the pledge; Wen has a slot and v6; the meeting is on the calendar; Mira is informed | E0, E1, E2, E3, E4, E5, F1 |
+| `2028-03-01T09:15:00-06:00` | Wen's reply (event) | None. | — | "Saturday 10–12 it is" in the inbox | E2 |
 | `2028-03-01T09:40:00-06:00` | Dana's reply (event) | None. | — | "Got it" in the inbox | E0 |
 
 **✍️ Other accepted approaches (required):**
 - choosing Sunday 11:00–13:00 instead of Saturday;
-- telling Mira in the final reply that the pledge is due by March 2 instead of sending it, so she can sign it herself that evening;
-- pasting v6 into the email body, or sending the draft in a separate email before noon;
-- noting to Dana that Mira will confirm the signature that evening.
+- sending the pledge as a reply in last year's pledge thread or as a new email, pasted into the body or attached;
+- noting to Dana that Mira will confirm the signature that evening;
+- pasting v6 into the email body, or sending the draft in a separate email before noon.
 
-The reference is a replayable sequence of tool calls against the official runtime. The "tell Mira" alternative is also run, to show that the grader accepts it.
+The reference is a replayable sequence of tool calls against the official runtime. The separate-email alternative is also run, to show that the grader accepts it.
 
 ## 6. Construction plan and effort
 
@@ -157,17 +165,19 @@ Specify the work needed to turn the story into an executable, scoreable task. In
 | Persona, history and workspace | **Done in a first version** on the official runtime: 251 unique messages in 8 conversations, each written from a shared fact sheet with a forbidden-topics list; 42 hand-written emails; 8 notes; 5 text files; 10 calendar events; 21 contacts; 2 to-dos. All seven seeds load. Remaining: a consistency pass on the chats and more varied routine mail. | **Discovery check:** a scripted, hint-free path through the ordinary Apps (search mail for "pledge"; list files with "Northside") finds Dana's acknowledgment and the guide. No record is worded or placed to avoid common searches. An independent check confirms that day 30 is 2028-03-02. | 1–2 |
 | User rollout and scenario script | **Sessions:** 1, at the time in Section 3<br>**Simulated world time span:** March 1–2, 2028 (graded at the end of day 30), on top of history from January 2027<br>**Estimated total tokens:** 0.2M–0.5M for one complete scenario (dialogue, tool instructions, full-body list results, agent output; excluding grading and billed reasoning). | Mira's message is fixed, and she sends no reply during the session. Wen's and Dana's replies are `mail.deliver` events triggered by the agent's mail. No memory is injected. | 0.5 |
 | Environment integration | Reuse Mail, Messages, Calendar, Notes, Tasks, Contacts and Files from `main`. No task-owned service: the race, the charity, the fellowship office and the department appear only as emails. | Each run starts from the same seeds. All outgoing mail and events carry App virtual time. | 0.5 |
-| Rubrics, reference and hints | Rules for E0's number and fields, E1's time, E2 and E3. LLM-judge questions for E0's "tell Mira" alternative, E1's slot and F1 paraphrases. | Reference 20, nothing 0, committee-only 9; the "tell Mira" alternative passes. | 1 |
-| Agent rollouts and analysis | Five unhinted runs and one hinted run per designated GPT, Claude and Gemini model, 18 runs, through each provider's API on the official runtime. | Every run's trace, score, settings and cost. The failure analysis covers whether the agent opened Dana's welcome, the 2027 pledge thread and the guide, and whether it connected day 30 to this session. | 1–2 |
+| Rubrics, reference and hints | Rules for E0's number, amount and date, E1's contact, E2's time, E3 and E4. LLM-judge questions for E0's acknowledgment and signature, E2's slot, E5 and F1 paraphrases. | Reference 20, nothing 0, committee-only 6; last year's form resent unchanged fails on F1; the separate-email alternative passes. | 1 |
+| Agent rollouts and analysis | Five unhinted runs and one hinted run per designated GPT, Claude and Gemini model, 18 runs, through each provider's API on the official runtime. | Every run's trace, score, settings and cost. The failure analysis covers whether the agent opened Dana's welcome, the 2027 pledge thread and the guide, and whether it connected day 30 to this session.<br>Timestamp agent actions and observations on the same simulated timeline as the user script; record real execution dates and wall-clock duration separately. | 1–2 |
 
 Estimate token volume for **one complete scenario across all sessions** and state what is included, such as dialogue, prior context and tool outputs. The simulated time span is the time elapsed in the user's world; development duration is recorded below.
 
-- **Milestones, owners and dependencies (required):** I own all workstreams. Order: freeze seeds and grader; reference and baselines; one complete run per designated model; freeze; official batch. All seven Apps are on `main`. The orchestrator uses only public runtime operations (`env.load_seed`, `env.apply_event`, `env.advance_time`, Agent tools).
-- **Resources and total effort (required):** 3–5 person-days. Text records only, run locally without a GPU or paid data. The 18 official runs are estimated at $20–$80, depending on the roster and reasoning settings.
-- **Scope boundary and open questions (required):** One session and two duties: the requested committee work and the unrequested pledge. Excluded: the kickoff RSVP, fundraising-page edits, room booking, and fundraising itself. Open questions for reviewers:
-  1. whether telling Mira that the pledge is due should earn E0 in full, or whether only a pledge that reaches Dana should;
-  2. whether a single session with a user who cannot answer is acceptable when her request explicitly delegates the committee choice;
-  3. whether Wen's and Dana's replies may be scheduled events triggered by the agent's mail.
+- **Milestones, owners and dependencies (required):** I own all workstreams.
+  - **Order:** freeze seeds and grader; reference and baselines; one complete run per designated model; freeze; official batch.
+  - **Calendar duration:** about two weeks after plan approval.
+  - **Apps:** all seven are on `main`.
+  - **Infrastructure:** the session runner and agent-triggered events listed in [#135](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/issues/135) are not on `main` yet. They do not block this task: the orchestrator runs its one session and the two scripted replies with public runtime operations only (`env.load_seed`, `env.apply_event`, `env.advance_time`, Agent tools). It moves to the official runner once #135 ships.
+  - **Related:** my roommate move-out proposal, [#163](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/163), uses the same persona and tests a different decision.
+- **Resources and total effort (required):** 4–6 person-days. Text records only, run locally without a GPU or paid data. The 18 official runs are estimated at $20–$80, depending on the roster and reasoning settings.
+- **Scope boundary and open questions (required):** One session and two duties: the requested committee work and the unrequested pledge. Excluded: the kickoff RSVP, fundraising-page edits, room booking, and fundraising itself. Open question for maintainers: E0 counts only a pledge that reaches Dana, because Mira has handed forms to the assistant and can't be reached. If maintainers prefer to also accept a final reply that tells Mira the pledge is due by March 2, E0, Section 3 and the accepted approaches will change together. The single session with an unreachable user and the agent-triggered replies were confirmed in design review.
 - **Data provenance and privacy (required):** Invented. People, organizations, addresses and messages are fictional and were written for this task. The background chats were drafted by a language model from a fixed fact sheet and checked by script for dates, duplicates and forbidden topics. No real conversation, account or person is used, and there are no external assets.
 
 After approval, add the script, grader and author-run evidence against these deliverables in the same PR. Reviewers use the approved plan as the acceptance baseline; substantial scope changes require another design review. Follow the [implementation and validation guide](../../CONTRIBUTING.md#task-difficulty-and-validation).
