@@ -13,7 +13,7 @@ Proposed PR title: `[Task Proposal] [Money & insurance] Maintain and deliver a v
 
 **✍️ Your answer (required):** Rowan (fictional) changed jobs during 2025, from Atlas Labs to Brook Systems. Rowan has two brokerage accounts (Northfield Brokerage and Ridgeway Invest) and a checking account at Cedar Bank, and closed a savings account at Bayview Bank in 2025. Rowan has completed a personal-tax intake with their accountant, Morgan Lee. They agreed that Rowan would deliver supporting records by `2026-03-10`; this is a date the two set between them, not a legal deadline. Morgan decides filing status, residency, deductions and tax owed.
 
-Before the task starts, the tax workspace holds the 2024 Northfield statement and the 2024 organizer, which are kept for reference. Rowan's mailbox holds tax-form emails from issuers and a CPA instruction sheet listing the fields Morgan wants:
+Before the task starts, the tax workspace holds the 2024 Northfield statement (issued `2025-02-14`) and the 2024 organizer (sent by Morgan on `2025-03-03`), which are kept for reference. Rowan's mailbox holds tax-form emails from issuers and a CPA instruction sheet listing the fields Morgan wants:
 
 - W-2 boxes 1 and 2.
 - 1099-INT box 1.
