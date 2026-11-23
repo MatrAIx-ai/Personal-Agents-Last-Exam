@@ -28,61 +28,73 @@ The environment evaluates personal agents on retrieval precision, multi-document
 ## 3. Potential app connections
 
 ### Connected workflows using public contracts
+All source app connections pin Mail/Calendar v1.3.0 and Files/Contacts v1.0.0 at `main 61b637164e4abddf81536bb48935cdb688a69ff1`. Infrastructure provides authorized caller bindings; entity extraction and matching remain internal to Personal Records.
+
 - **Internal personal apps (required):**
-  - **Mail (`examples/apps/mail/tools.json:1954`):** Read-only integration. Personal Records calls `mail.get_message` and `mail.get_attachment` using message `id` and `asset_id` to fetch original attachment bytes, MIME types, and SHA-256 hashes. Reading Mail leaves Mail's business state unchanged.
-  - **Files (`apps/files/tools.json:914`):** Read-only integration. Personal Records provides an import adapter calling `files.read_file_bytes(file_id, version_id)` to ingest documents deposited by users or agents into the `Files` app.
-  - **Calendar (`examples/apps/calendar/tools.json:3,237`):** Read-only integration. Personal Records calls `calendar.list_events` with range filters to correlate contract renewals and tax deadlines. No Messaging receiver is required for Calendar reads.
-  - **Contacts (`apps/contacts/tools.json:184`):** Read-only integration. Personal Records calls `contacts.list_contacts` to map extracted organization names and employer/issuer strings to stable `person_id` or contact entities.
-  - *Outbound notifications via Mail (`examples/apps/mail/schemas/router-message.schema.json`):* Retained outbound alerts optionally send a notification to the user inbox using `mail.receive_notification` with payload `urn:pale:email-payload:1`.
+  - **Mail (Optional package dependency):** Records imports attachments via `mail.get({ id })` and `mail.attachment.get({ id, asset_id })`. Records stores original bytes, MIME type, and SHA-256 hash. Missing or denied messages return `SOURCE_UNAVAILABLE`; Mail's business state remains unchanged.
+  - **Files (Optional package dependency):** Records ingests files via `files.read({ id, number? })` (where `number` is the optional file revision number). Records captures bytes, assigned `version_id`, and hash. Absent files return `SOURCE_NOT_FOUND`; Files state remains untouched.
+  - **Calendar (Optional package dependency):** Records reads contract milestones and tax dates via `calendar.list({ start?, end?, include_cancelled? })` to correlate expiry alerts. Read failures degrade gracefully without blocking ingestion.
+  - **Contacts (Optional package dependency):** Records correlates issuer names to stable entities via `contacts.list({ query?, include_inactive? })`. If contacts are absent or match is ambiguous, extracted counterparty strings are retained as raw text.
+  - **Outbound Mail Alerts (Receiver integration):** Outbound alerts are routed via Messaging's trusted `env.apply_event` targeting Mail using `urn:pale:email-message:2` with payload `urn:pale:email-payload:1`. Not an Agent-callable tool.
 
 - **Other apps and websites (required):**
-  - **Cloud storage, investment platforms, & e-sign platforms:** To guarantee 100% local reproducibility without live internet dependencies, external services are simulated via static, deterministic synthetic intake fixtures and controlled local folder adapters in v1. Live third-party API access is out of scope.
+  - **Cloud storage, investment platforms, & e-sign platforms:** Simulated locally via static, deterministic synthetic intake fixtures and controlled local folder adapters. No live third-party network access.
 
 ### Integration details
 
 #### Operations and access (required)
 
-The environment strictly separates Agent/User business tools from Platform administrative operations:
+The environment enforces caller authorization at the handler level:
 
-| Operation | Mode | Caller | Access | Description |
+| Operation | Mode | Caller | Access | Description / Outcome |
 | :--- | :--- | :--- | :--- | :--- |
-| `records.upload_document` | MCP / Web UI | Agent / User | Write | Uploads original bytes and creates an intake record. |
-| `records.import_from_source` | MCP / Web UI | Agent / User | Write | Ingests from `mail` or `files` via their public read contracts. |
+| `records.upload_document` | MCP / Web UI | Agent / User | Write | Ingests bytes, creates intake record. Returns `{ document_id, version: 1, hash }`. Duplicate hash returns existing ID (`DUPLICATE_DOCUMENT`). |
+| `records.import_from_source` | MCP / Web UI | Agent / User | Write | Calls `mail.attachment.get` or `files.read`. Ingests bytes without mutating source. Missing source returns `SOURCE_UNAVAILABLE`. |
+| `records.create_version` | MCP / Web UI | Agent / User | Write | Replaces or appends a document version. Success yields `version_number + 1`; invalid parent returns `NOT_FOUND`. |
 | `records.get_document` | MCP / Web UI | Agent / User | Read | Retrieves document metadata, versions, and extracted text/passages. Non-mutating. |
-| `records.search` | MCP / Web UI | Agent / User | Read | Full-text (FTS5) and structured field search. Non-mutating. |
-| `records.link_documents` | MCP / Web UI | Agent / User | Write | Creates a directed link (`source_id`, `target_id`, `relationship_type`, `metadata`). `relationship_type` is an open/arbitrary string. |
-| `records.create_evidence_claim` | MCP / Web UI | Agent / User | Write | Links a factual claim to specific passage citations. |
-| `records.propose_update` | MCP | Agent | Write | Submits a proposed metadata or relationship change pending confirmation. |
-| `records.confirm_update` | Web UI | User only | Write | Approves or rejects a pending agent update. |
-| `platform.seed_fixtures` | Platform API | Platform | Write | Loads initial scenario documents and ground truth. Blocked from Agent. |
-| `platform.reset` | Platform API | Platform | Write | Resets database, blobs, and indexes to baseline. Blocked from Agent. |
-| `platform.inject_event` | Platform API | Platform | Write | Injects a timestamped document or expiry event. Blocked from Agent. |
+| `records.search` | MCP / Web UI | Agent / User | Read | SQLite FTS5 full-text and metadata search. Non-mutating. |
+| `records.link_documents` | MCP / Web UI | Agent / User | Write | Creates directed link (`source_id`, `target_id`, `relationship_type`). Nonexistent target yields `LINK_TARGET_NOT_FOUND` (no state change). |
+| `records.create_evidence_claim` | MCP / Web UI | Agent / User | Write | Links a factual assertion to stable passage spans. Invalid span yields `INVALID_PASSAGE_REFERENCE`. |
+| `records.propose_update` | MCP | Agent | Write | Submits pending mutation. Returns `{ proposal_id, status: "PENDING" }`. Leaves base document unmutated. |
+| `records.confirm_update` | Trusted Session | User only | Write | Approves/rejects `proposal_id`. Caller must be authenticated user session token; Agent calls return `PERMISSION_DENIED`. |
+| `platform.seed_fixtures` | Platform API | Platform | Write | Loads initial scenario documents, extraction revisions, and ground truth. Blocked from Agent. |
+| `platform.reset` | Platform API | Platform | Write | Resets database, blobs, and FTS indexes to baseline. Blocked from Agent. |
+| `platform.inject_event` | Platform API | Platform | Write | Injects a timestamped document intake or expiry check. Blocked from Agent. |
 
-- **Browser audience and Web UI:** The browser interface runs on PALE's standard **Business Web Host** (`runtime/web/README.md`) over the same authenticated MCP state. It serves human users inspecting records, approving proposals, or verifying claims, and supports CUA-based evaluation agents.
+- **Trusted Confirmation Path:** To prevent agents from approving their own proposals via the Web UI/MCP, `records.confirm_update` requires a trusted user session token issued by the test harness. Agent MCP processes are restricted to `records.propose_update`. Rejected or cancelled proposals mark the proposal record as `REJECTED`/`CANCELLED` and leave all underlying documents and claims completely unchanged. Stale confirmations (where the document version incremented while the proposal was pending) fail with `STALE_PROPOSAL_VERSION`.
 
 #### State and lifecycle (required)
 - **Account and run isolation:** User libraries, document files, and metadata are partitioned strictly by `account_id` and benchmark run.
 - **Document state machine:**
   - Processing lifecycle: `PENDING_INGEST` $\rightarrow$ `PARSING` $\rightarrow$ `READY` (or `EXTRACTION_FAILED`).
   - Verification lifecycle: `INFERRED` (machine-extracted) $\rightarrow$ `USER_CONFIRMED` (verified by human/user) $\rightarrow$ `SUPERSEDED` (replaced by newer document version).
-- **Transitions and error outcomes:**
-  - `DUPLICATE_DOCUMENT`: Ingest rejected when SHA-256 hash matches an existing document in the same account (returns existing `document_id`).
-  - `UNSUPPORTED_FORMAT`: Returns explicit error receipt if uploaded MIME type is outside v1 scope.
-  - `STALE_VERSION`: Writes specifying an `expected_version` fail if the record was mutated concurrently.
-  - `CONFIRMATION_REQUIRED`: Agent attempts to alter `USER_CONFIRMED` data or delete records produce a pending change receipt rather than mutating state.
-  - `EVIDENCE_INVALIDATION`: Superseding a document version marks existing claims referencing it as `REVIEW_REQUIRED` without destroying historical claim records.
-- **Fixture ground truth:** Synthetic datasets provide paired `truth.json` manifests specifying ground-truth fields, passage coordinates, and expected relationship graphs for deterministic grading.
-- **Core write/replay and reset contract:**
-  - Follows `runtime/core/runtime.cjs:119–126`. Read operations produce zero business mutations. Write operations accept idempotency keys.
-  - Reset (`platform.reset`) clears all App-local tables (documents, extractions, links, claims, in-app notifications) and resets SQLite FTS5 indexes and temporary blob storage back to the scenario's initial baseline.
-  - App-owned business history (visible to users and agents) is kept distinct from PALE Core execution audit logs.
-
-#### Events and notifications (required)
-- **Virtual time and scheduling:** All temporal calculations (e.g., document expiry, policy renewal notices) evaluate against `ctx.virtual_now`. Advancing time via `env.advance_time` executes no ambient polling or timers. Event handlers evaluate conditions when invoked at `event.at`.
-- **Structured event injection:** Scenarios inject events via standard envelopes:
+- **Seeded History & Evidence References:**
+  Every citation is immutably anchored to a triple: `(document_id, version_number, extraction_revision)`. When a document is re-extracted or a new version is uploaded, historical citations continue to point to the historical extraction revision.
   ```json
   {
-    "event_id": "evt_payslip_2026_11",
+    "claim_id": "clm_tax_2026_income",
+    "document_id": "doc_payslip_dec2026",
+    "version_number": 1,
+    "extraction_revision": "ext_rev_01",
+    "span": { "start_offset": 450, "end_offset": 512 },
+    "cited_text": "Net Taxable Pay: $4,250.00",
+    "verification_state": "USER_CONFIRMED"
+  }
+  ```
+  App state joins to the benchmark trace via `(run_id, account_id, request_id)`. Before any `platform.reset`, the harness preserves a full snapshot of the committed state for evaluation.
+- **Core write/replay and reset contract:**
+  - Follows `runtime/core/runtime.cjs:119–126`. Read operations produce zero business mutations. Write operations accept idempotency keys.
+  - Reset (`platform.reset`) clears all App-local tables and temporary blobs, restoring the SQLite database and FTS5 indexes to the baseline scenario seed.
+
+#### Events and notifications (required)
+- **Virtual time, expiry, and discrepancies:**
+  - Evaluated strictly against `ctx.virtual_now`. Advancing time executes no ambient polling.
+  - **Expiry Rule:** When an expiry evaluation event is triggered at `event.at`, Records queries documents where `valid_until <= ctx.virtual_now + alert_threshold_days` (default 30 days). Duplicate alerts are suppressed if an alert was dispatched within 7 virtual days.
+  - **Discrepancy Rule:** When successive documents of the same class (e.g., successive payslips from the same employer) are linked via `supersedes` or chronologically ordered, a discrepancy is flagged if numerical fields (e.g., net pay, tax withholdings) change by $>0\%$ without an associated user confirmation.
+- **Structured event injection:**
+  ```json
+  {
+    "event_id": "evt_intake_2026_11_20",
     "at": "2026-11-20T09:00:00Z",
     "operation": "records.inject_document",
     "payload": {
@@ -93,17 +105,40 @@ The environment strictly separates Agent/User business tools from Platform admin
     }
   }
   ```
-- **Notification semantics:**
-  - In-app alerts are written directly to the internal `records_notifications` table.
-  - External notifications: Retained email notifications use `mail.receive_notification` adhering to `urn:pale:email-payload:1`. Mobile push notifications are deferred.
+- **Outbound Notification Wire Format:**
+  Outbound alerts dispatched to Mail adhere to CloudEvent `urn:pale:email-message:2` with payload schema `urn:pale:email-payload:1`:
+  ```json
+  {
+    "specversion": "1.0",
+    "type": "urn:pale:email-message:2",
+    "source": "/app/personal-records",
+    "id": "evt_alert_expiry_20261120",
+    "time": "2026-11-20T09:00:00Z",
+    "datacontenttype": "application/json",
+    "data": {
+      "recipient": "user@example.com",
+      "subject": "Document Expiry Notice: Auto Insurance Policy",
+      "body_text": "Your policy (doc_ins_04) expires in 14 days. A renewal document is required.",
+      "asset_ids": []
+    }
+  }
+  ```
+  Delivery denials or network retries log an integration receipt without rolling back committed Records business state.
 
 #### Shared data and dependencies (required)
-- **Format scope (v1):** Supported formats are strictly **PDF, PNG, JPEG, and TXT**. Complex office formats (DOCX, XLSX) and raw email containers (EML) are excluded from v1 parsing and handled only as raw unparsed attachments.
-- **Resource and storage budgets:**
-  - Per-file maximum size: 10 MB.
-  - Total synthetic fixture bundle: 150–250 documents $\le$ 250 MB total storage.
-  - Compute & OCR: Built with SQLite (with FTS5) and lightweight local text extraction (`pypdf` / `pdf-parse`). Synthetic document fixtures bundle pre-extracted text fallback fields in `truth.json` to guarantee fast (<2s), 100% deterministic CI runs without GPU or external OCR engine requirements.
-- **Stable identifiers:** Documents are referenced by immutable `document_id`. Citations reference `passage_id` or line/character offset spans `{start_offset, end_offset}` to ensure precise source attribution.
+- **Format & Storage Scope Matrix:**
+
+| Channel / Format | Ingestion Path | Byte Preservation | Text Extraction | Missing / Unsupported Outcome |
+| :--- | :--- | :--- | :--- | :--- |
+| **PDF (Digital)** | Direct / Mail / Files | Stored in local blob store | Extracted via `pypdf` | If unreadable, fallback to `truth.json` pre-extracted text. |
+| **PDF (Scanned) / Images (PNG/JPEG)** | Direct / Mail / Files | Stored in local blob store | Deterministic fallback from `truth.json` | Missing fallback yields `EXTRACTION_FAILED`; bytes preserved. |
+| **TXT** | Direct / Mail / Files | Stored in local blob store | Direct UTF-8 decode | Encoding error yields `EXTRACTION_FAILED`. |
+| **Office (DOCX/XLSX) / EML** | Direct upload only | Stored as raw unparsed blob | None (Deferred) | Status set to `RAW_ATTACHMENT`; full-text search disabled. |
+
+- **Resource Limits & Corpus Partitioning:**
+  - **Full Corpus Repository:** 150–250 synthetic documents (~150 MB total fixture storage).
+  - **Per-Scenario Run Budget:** Capped at 15–25 active documents per run, strictly respecting the reference host limit of $\le 64$ assets and $\le 1\text{ MiB}$ decoded payload per App bundle.
+  - **Ground Truth vs. Runtime Text:** Synthetic fixtures cleanly separate runtime parser fallback text (`fallback_content`) from grading-only evaluation criteria in `truth.json` (such as expected key-value extraction assertions and link graphs).
 
 ## 4. Construction plan and effort
 
@@ -111,16 +146,16 @@ The environment strictly separates Agent/User business tools from Platform admin
 
 | Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
 | :--- | :--- | :--- | ---: |
-| Storage & Core MCP Backend | Implement SQLite schema, FTS5 search index, file blob store, and agent MCP endpoints (`upload`, `get`, `search`, `link`, `create_evidence_claim`). | Working MCP server passing local CRUD, FTS5 search, idempotency, and version conflict tests. | 5–7 |
-| Web UI (Web Host) | Implement 6–8 responsive business views (document library, file preview, passage viewer, link inspector, review/confirmation modal) on `runtime/web`. | Verified UI rendering, passage highlighting, and confirmation flows across major browsers via Playwright. | 4–6 |
-| App Integrations (Mail, Files, Contacts, Calendar) | Implement read-only adapters for Mail attachments, Files original bytes, Contacts entity matching, and Calendar date linking. | Integration tests verifying source byte/hash preservation and ensuring zero mutations on source apps. | 3–4 |
-| Synthetic Dataset & Ground Truth | Synthesize 150–250 realistic documents across 8 categories (tax, employment, insurance, property, utilities, healthcare, banking, legal) with ground-truth `truth.json` manifests. | Coherent persona histories. Check duplicate detection, extraction consistency, and passage ground-truth alignment. | 4–6 |
-| Platform Lifecycle & Reset Harness | Implement `platform.seed`, `platform.reset`, event injection handlers, and Core replay compliance. | Reproducible reset tests verifying clean table/FTS restoration, baseline re-seeding, and deterministic state. | 3–5 |
+| Storage & Core MCP Backend | SQLite schema, FTS5 index, blob store, and MCP endpoints mapped to pinned tools; trusted user session gating. | MCP server passing local CRUD, FTS5 search, idempotency, and version conflict tests. | 5–7 |
+| Web UI (Web Host) | 6–8 responsive business views on `runtime/web`; distinct user confirmation modal. | Verified UI rendering, passage highlighting, and confirmation flows across major browsers via Playwright. | 4–6 |
+| App Integrations (Mail, Files, Contacts, Calendar) | Read adapters mapped to `mail.get`, `files.read`, `contacts.list`, `calendar.list`; CloudEvent outbound notification dispatch. | Integration tests verifying source byte/hash preservation and zero mutation on source apps. | 3–4 |
+| Synthetic Dataset & Ground Truth | Synthesize 150–250 realistic documents partitioned into $\le 1\text{ MiB}$ scenario slices with dual fallback/grading `truth.json`. | Coherent persona histories. Check duplicate detection, extraction consistency, and passage alignment. | 4–6 |
+| Platform Lifecycle & Reset Harness | `platform.seed`, `platform.reset`, event injection handlers, and Core replay compliance. | Reproducible reset tests verifying clean table/FTS restoration, baseline re-seeding, and deterministic state. | 3–5 |
 
 ### Milestones, owners, and dependencies (required)
 
 - **14-day First Runnable Slice (Approval Milestone):**
-  - Deliver runnable core SQLite engine, blob storage, core MCP operations (`records.upload`, `records.get`, `records.search`, `records.link`), baseline fixture seeder, and `platform.reset`.
+  - Deliver runnable core SQLite engine, blob storage, core MCP operations (`records.upload_document`, `records.get_document`, `records.search`, `records.link_documents`), baseline fixture seeder, and `platform.reset`.
   - Pass reproducible unit and integration tests under `npm test` / `pytest`.
 - **Subsequent Milestones:**
   - Milestone 2: Mail and Files import adapters; Contacts/Calendar read linking.
@@ -132,7 +167,7 @@ Owners: Nassim (@nassimberrada). Calendar duration: 3–4 weeks.
 
 ### Resources and total effort (required)
 - **Estimated total effort:** 19–28 person-days.
-- **Compute & storage:** Modest local development environment (SQLite, Python / Node runtime, $\le$ 250 MB disk). No external paid APIs or cloud dependencies.
+- **Compute & storage:** Modest local development environment (SQLite, Python / Node runtime, $\le 250\text{ MB}$ disk). No external paid APIs or cloud dependencies.
 
 ### Scope boundary and open questions (required)
 - **Included in v1:** Digital PDF/image/text parsing, SQLite FTS5 full-text search, arbitrary directed document relationships, immutable version history, passage-level evidence linking, and user confirmation boundaries.
