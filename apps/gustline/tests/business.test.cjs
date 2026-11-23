@@ -298,3 +298,28 @@ test('optional diagnostics cannot change business results', () => {
   assert.deepEqual(on.data, off.data);
   assert.ok(on.logs.some(l => l.step === 'gustline.notification_created'));
 });
+
+// ---- Scenario packs: each loads as a seed and replays its events in order ----
+for (const name of ['desert-storm', 'smoke-week', 'commuter-week']) {
+  test(`pack ${name}: loads, replays every event, and stays physically consistent`, () => {
+    const dirPack = path.resolve(__dirname, '../examples/packs', name);
+    const seed = require(path.join(dirPack, 'seed.json')), {virtual_now, events} = require(path.join(dirPack, 'events.json'));
+    for (const file of ['seed.json', 'events.json']) assert.ok(fs.statSync(path.join(dirPack, file)).size < 400 * 1024, file + ' under 400 KB');
+    const f = fixture({seed, now: virtual_now, binding: require(path.join(dirPack, 'binding.json'))});
+    for (const e of events) f.event(e);
+    const data = f.data;
+    for (const i of data.issuances) {
+      for (const h of i.hourly) {
+        assert.ok(h.gust_kph >= h.wind_kph, 'gust >= wind in ' + i.issuance_id);
+        assert.ok(h.dew_point_c <= h.temp_c, 'dew point <= temperature in ' + i.issuance_id);
+      }
+      const hourDates = new Set(i.hourly.map(h => h.start.slice(0, 10))), dayDates = new Set(i.daily.map(d => d.date));
+      assert.ok([...dayDates].every(d => hourDates.has(d)), 'daily periods lie inside the hourly window');
+    }
+    for (const m of data.monitors) {
+      const at = Date.parse(f.now), mine = data.air_observations.filter(o => o.monitor_id === m.monitor_id);
+      if (mine.length) assert.ok(Number.isInteger(aqi.compute(mine, at).aqi));
+    }
+    assert.ok(data.notifications.length > 0, 'the pack exercises at least one rule');
+  });
+}

@@ -62,9 +62,19 @@ Gustline has no timers and no clock event. Infra moves time with an event's `at`
 
 `src/publisher.cjs` reads notifications that are `pending_delivery` at the current virtual time from an Infra snapshot. It builds Mail's `channel.email` message (`urn:pale:email-message:2`, payload `urn:pale:email-payload:1`) with title, body and `time` frozen on the notification, so a retry sends identical bytes. It publishes with `request_id` equal to the notification ID. Infra then records the outcome with `notification.delivery_recorded`.
 
+## Scenario packs
+
+Each pack in `examples/packs/<name>/` has a `seed.json` and `binding.json` that a task can load with `env.load_seed`. Its `events.json` holds the seed's `virtual_now` and the events in time order. The tests load every pack and replay all its events.
+
+| Pack | Contents |
+| :--- | :--- |
+| `desert-storm` | A park in `America/Denver` for a person in `America/Chicago`: two providers with three issuances each, storms arriving earlier in later issuances, a Flood Watch that is issued and then updated, an informational park closure, 48 observations, a trip-window thunder rule and an alert rule |
+| `smoke-week` | Two air areas and monitors with five days of hourly PM2.5 and O3 (240 rows), ten daily air-quality forecasts, a smoke advisory that is issued, extended and cancelled, an observed-AQI trip rule and an AQI-category forecast rule |
+| `commuter-week` | Home, work and school with two issuances a day for seven days, heat and wind advisories, a severe thunderstorm warning at night, four rules (commute gusts, pickup heat, heat alerts, severe alerts with the quiet-hour override) and six notifications from the previous week |
+
 ## Data
 
-`scripts/generate-fixtures.cjs` writes every fixture deterministically from a fixed seed; `npm run check` fails if a regenerated file differs. All places, stations, issuances, observations, alerts, people and rules are synthetic. The EPA AQI breakpoints and the NOAA solar equations are public-domain U.S. government works, recorded in `contribution/dataset.json`.
+`scripts/generate-fixtures.cjs` writes every fixture and pack deterministically from a fixed seed; `npm run check` fails if a regenerated file differs. All places, stations, issuances, observations, alerts, people and rules are synthetic. The EPA AQI breakpoints and the NOAA solar equations are public-domain U.S. government works, recorded in `contribution/dataset.json`.
 
 ## Limitations
 
