@@ -1,0 +1,1563 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:gustline:seed:1",
+  "title": "Gustline account and world data",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "settings": {
+      "$ref": "seed.schema.json#/$defs/settings"
+    },
+    "zones": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/zone"
+      },
+      "maxItems": 200
+    },
+    "air_areas": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/air_area"
+      },
+      "maxItems": 200
+    },
+    "stations": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/station"
+      },
+      "maxItems": 200
+    },
+    "monitors": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/monitor"
+      },
+      "maxItems": 200
+    },
+    "places": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/place"
+      },
+      "maxItems": 500
+    },
+    "saved_places": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/saved_place"
+      },
+      "maxItems": 20
+    },
+    "issuances": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/issuance"
+      },
+      "maxItems": 2000
+    },
+    "air_issuances": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/air_issuance"
+      },
+      "maxItems": 2000
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/observation"
+      },
+      "maxItems": 20000
+    },
+    "air_observations": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/air_observation"
+      },
+      "maxItems": 20000
+    },
+    "alerts": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/alert"
+      },
+      "maxItems": 1000
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/rule"
+      },
+      "maxItems": 25
+    },
+    "notifications": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/notification"
+      },
+      "maxItems": 20000
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "settings",
+    "zones",
+    "air_areas",
+    "stations",
+    "monitors",
+    "places",
+    "saved_places",
+    "issuances",
+    "air_issuances",
+    "observations",
+    "air_observations",
+    "alerts",
+    "rules",
+    "notifications"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "external_ref": {
+      "type": "object",
+      "properties": {
+        "app_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "object_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "app_id",
+        "account_id",
+        "object_id"
+      ],
+      "additionalProperties": false
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "units": {
+          "enum": [
+            "metric",
+            "us"
+          ]
+        },
+        "time_zone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "default_saved_place_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "units",
+        "time_zone",
+        "default_saved_place_id"
+      ],
+      "additionalProperties": false
+    },
+    "zone": {
+      "type": "object",
+      "properties": {
+        "zone_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "time_zone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "zone_id",
+        "name",
+        "time_zone"
+      ],
+      "additionalProperties": false
+    },
+    "air_area": {
+      "type": "object",
+      "properties": {
+        "air_area_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "air_area_id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "station": {
+      "type": "object",
+      "properties": {
+        "station_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "zone_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "station_id",
+        "name",
+        "zone_id"
+      ],
+      "additionalProperties": false
+    },
+    "monitor": {
+      "type": "object",
+      "properties": {
+        "monitor_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "air_area_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "monitor_id",
+        "name",
+        "air_area_id"
+      ],
+      "additionalProperties": false
+    },
+    "place": {
+      "type": "object",
+      "properties": {
+        "place_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "kind": {
+          "enum": [
+            "city",
+            "park",
+            "campground",
+            "venue",
+            "airport",
+            "address"
+          ]
+        },
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "elevation_m": {
+          "type": "number",
+          "minimum": -500,
+          "maximum": 9000
+        },
+        "time_zone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "zone_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "air_area_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "station_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "monitor_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "external_ref": {
+          "anyOf": [
+            {
+              "$ref": "seed.schema.json#/$defs/external_ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "place_id",
+        "name",
+        "kind",
+        "latitude",
+        "longitude",
+        "elevation_m",
+        "time_zone",
+        "zone_id",
+        "air_area_id",
+        "station_id",
+        "monitor_id"
+      ],
+      "additionalProperties": false
+    },
+    "saved_place": {
+      "type": "object",
+      "properties": {
+        "saved_place_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "place_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "saved_place_id",
+        "place_id",
+        "label",
+        "created_at"
+      ],
+      "additionalProperties": false
+    },
+    "hourly": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "temp_c": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 70
+        },
+        "feels_like_c": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 80
+        },
+        "dew_point_c": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 50
+        },
+        "precip_prob_pct": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "precip_mm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "thunder_prob_pct": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "wind_kph": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 500
+        },
+        "gust_kph": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 500
+        },
+        "wind_dir_deg": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 360
+        },
+        "cloud_pct": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "visibility_km": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 200
+        },
+        "uv_index": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "humidity_pct": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "start"
+      ],
+      "additionalProperties": false
+    },
+    "daily": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "high_c": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 70
+        },
+        "low_c": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 70
+        },
+        "precip_prob_pct": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "headline": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "day_text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "night_text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "date"
+      ],
+      "additionalProperties": false
+    },
+    "product": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "outlook",
+            "discussion"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 5000
+        }
+      },
+      "required": [
+        "kind",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "issuance": {
+      "type": "object",
+      "properties": {
+        "issuance_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "provider": {
+          "enum": [
+            "gustline",
+            "regional_office"
+          ]
+        },
+        "zone_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "hourly": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/hourly"
+          },
+          "maxItems": 168
+        },
+        "daily": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/daily"
+          },
+          "maxItems": 7
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/product"
+          },
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "issuance_id",
+        "provider",
+        "zone_id",
+        "issued_at",
+        "valid_from",
+        "valid_to",
+        "hourly",
+        "daily"
+      ],
+      "additionalProperties": false
+    },
+    "air_day": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "aqi_category": {
+          "enum": [
+            "good",
+            "moderate",
+            "unhealthy_for_sensitive_groups",
+            "unhealthy",
+            "very_unhealthy",
+            "hazardous"
+          ]
+        },
+        "aqi": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 500
+        },
+        "dominant_pollutant": {
+          "enum": [
+            "pm25",
+            "pm10",
+            "o3"
+          ]
+        }
+      },
+      "required": [
+        "date",
+        "aqi_category"
+      ],
+      "additionalProperties": false
+    },
+    "air_issuance": {
+      "type": "object",
+      "properties": {
+        "issuance_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "air_area_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "days": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/air_day"
+          },
+          "maxItems": 7,
+          "minItems": 1
+        },
+        "narrative": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "issuance_id",
+        "air_area_id",
+        "issued_at",
+        "days"
+      ],
+      "additionalProperties": false
+    },
+    "observation_revision": {
+      "type": "object",
+      "properties": {
+        "observation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "values": {
+          "type": "object",
+          "properties": {
+            "temp_c": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 70
+            },
+            "feels_like_c": {
+              "type": "number",
+              "minimum": -100,
+              "maximum": 80
+            },
+            "dew_point_c": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 50
+            },
+            "precip_mm": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "wind_kph": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 500
+            },
+            "gust_kph": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 500
+            },
+            "wind_dir_deg": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 360
+            },
+            "visibility_km": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 200
+            },
+            "humidity_pct": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "observation_id",
+        "values"
+      ],
+      "additionalProperties": false
+    },
+    "observation": {
+      "type": "object",
+      "properties": {
+        "observation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "station_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "temp_c": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 70
+        },
+        "feels_like_c": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 80
+        },
+        "dew_point_c": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 50
+        },
+        "precip_mm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "wind_kph": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 500
+        },
+        "gust_kph": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 500
+        },
+        "wind_dir_deg": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 360
+        },
+        "visibility_km": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 200
+        },
+        "humidity_pct": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "corrected": {
+          "type": "boolean"
+        },
+        "revisions": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/observation_revision"
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "observation_id",
+        "station_id",
+        "observed_at",
+        "corrected",
+        "revisions"
+      ],
+      "additionalProperties": false
+    },
+    "air_observation": {
+      "type": "object",
+      "properties": {
+        "observation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "monitor_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "pm25_ugm3": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2000
+        },
+        "pm10_ugm3": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5000
+        },
+        "o3_ppb": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "observation_id",
+        "monitor_id",
+        "observed_at"
+      ],
+      "additionalProperties": false
+    },
+    "alert_version": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "msg_type": {
+          "enum": [
+            "alert",
+            "update",
+            "cancel"
+          ]
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "event": {
+          "enum": [
+            "flood_watch",
+            "flood_warning",
+            "severe_thunderstorm_watch",
+            "severe_thunderstorm_warning",
+            "heat_advisory",
+            "excessive_heat_warning",
+            "wind_advisory",
+            "winter_storm_warning",
+            "red_flag_warning",
+            "air_quality_alert",
+            "smoke_advisory",
+            "area_closure"
+          ]
+        },
+        "severity": {
+          "enum": [
+            "minor",
+            "moderate",
+            "severe",
+            "extreme"
+          ]
+        },
+        "urgency": {
+          "enum": [
+            "immediate",
+            "expected",
+            "future",
+            "past",
+            "unknown"
+          ]
+        },
+        "certainty": {
+          "enum": [
+            "observed",
+            "likely",
+            "possible",
+            "unlikely",
+            "unknown"
+          ]
+        },
+        "areas": {
+          "type": "object",
+          "properties": {
+            "zone_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 50
+            },
+            "air_area_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 50
+            },
+            "place_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 50
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "onset": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "headline": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 5000
+        },
+        "instruction": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "alert_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              }
+            },
+            "required": [
+              "alert_id",
+              "version"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "version",
+        "msg_type",
+        "issued_at",
+        "issuer",
+        "event",
+        "severity",
+        "urgency",
+        "certainty",
+        "areas",
+        "onset",
+        "expires",
+        "headline"
+      ],
+      "additionalProperties": false
+    },
+    "alert": {
+      "type": "object",
+      "properties": {
+        "alert_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/alert_version"
+          },
+          "maxItems": 1000,
+          "minItems": 1
+        }
+      },
+      "required": [
+        "alert_id",
+        "versions"
+      ],
+      "additionalProperties": false
+    },
+    "rule_window": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "recurring"
+            },
+            "days": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 7
+              },
+              "maxItems": 7,
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "start": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            },
+            "end": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            }
+          },
+          "required": [
+            "type",
+            "days",
+            "start",
+            "end"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "absolute"
+            },
+            "from": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "to": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "type",
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rule": {
+      "type": "object",
+      "properties": {
+        "rule_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "saved_place_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "kind": {
+          "enum": [
+            "forecast_threshold",
+            "observation_threshold",
+            "official_alert"
+          ]
+        },
+        "metric": {
+          "anyOf": [
+            {
+              "enum": [
+                "temp_max_c",
+                "temp_min_c",
+                "temp_c",
+                "feels_like_c",
+                "precip_prob_pct",
+                "precip_mm",
+                "thunder_prob_pct",
+                "gust_kph",
+                "uv_index",
+                "aqi",
+                "aqi_forecast_category"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comparator": {
+          "anyOf": [
+            {
+              "enum": [
+                "gte",
+                "lte"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "threshold": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": -1000,
+              "maximum": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provider": {
+          "enum": [
+            "gustline",
+            "regional_office"
+          ]
+        },
+        "look_ahead_hours": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 72
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "window": {
+          "$ref": "seed.schema.json#/$defs/rule_window"
+        },
+        "alert_events": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "flood_watch",
+              "flood_warning",
+              "severe_thunderstorm_watch",
+              "severe_thunderstorm_warning",
+              "heat_advisory",
+              "excessive_heat_warning",
+              "wind_advisory",
+              "winter_storm_warning",
+              "red_flag_warning",
+              "air_quality_alert",
+              "smoke_advisory",
+              "area_closure"
+            ]
+          },
+          "maxItems": 12,
+          "uniqueItems": true
+        },
+        "min_severity": {
+          "anyOf": [
+            {
+              "enum": [
+                "minor",
+                "moderate",
+                "severe",
+                "extreme"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notify_on_clear": {
+          "type": "boolean"
+        },
+        "delivery": {
+          "enum": [
+            "mail",
+            "in_app"
+          ]
+        },
+        "quiet_hours": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "start": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                "end": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                }
+              },
+              "required": [
+                "start",
+                "end"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "severe_override": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "paused"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "revision": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "action": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "changes": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "revision",
+              "at",
+              "action",
+              "changes"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 1000
+        }
+      },
+      "required": [
+        "rule_id",
+        "saved_place_id",
+        "kind",
+        "metric",
+        "comparator",
+        "threshold",
+        "provider",
+        "look_ahead_hours",
+        "window",
+        "alert_events",
+        "min_severity",
+        "notify_on_clear",
+        "delivery",
+        "quiet_hours",
+        "severe_override",
+        "status",
+        "created_at",
+        "revision",
+        "history"
+      ],
+      "additionalProperties": false
+    },
+    "notification": {
+      "type": "object",
+      "properties": {
+        "notification_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "rule_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "trigger_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "phase": {
+          "enum": [
+            "met",
+            "cleared",
+            "alert",
+            "update",
+            "cancel"
+          ]
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "issuance",
+                "observation",
+                "air_observation",
+                "air_issuance",
+                "alert"
+              ]
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "version": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "id",
+            "version"
+          ],
+          "additionalProperties": false
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "release_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "delivery": {
+          "enum": [
+            "mail",
+            "in_app"
+          ]
+        },
+        "status": {
+          "enum": [
+            "in_app",
+            "held_quiet_hours",
+            "pending_delivery",
+            "delivered",
+            "delivery_failed",
+            "withdrawn"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recipient_person_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "committed",
+                    "rejected",
+                    "unknown",
+                    "halted"
+                  ]
+                },
+                "code": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "stop_run": {
+                  "type": "boolean"
+                },
+                "router_event_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "recorded_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "status",
+                "code",
+                "stop_run",
+                "router_event_id",
+                "recorded_at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "acknowledged_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "notification_id",
+        "rule_id",
+        "trigger_key",
+        "phase",
+        "source",
+        "created_at",
+        "release_at",
+        "delivery",
+        "status",
+        "title",
+        "body",
+        "time",
+        "recipient_person_id",
+        "outcome",
+        "acknowledged_at"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

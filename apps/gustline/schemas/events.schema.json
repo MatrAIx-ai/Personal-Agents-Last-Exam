@@ -1,0 +1,442 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:gustline:events:1",
+  "title": "Infra-applied Gustline events (tasks choose content and timing)",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "weather.forecast_issued"
+        },
+        "payload": {
+          "$ref": "seed.schema.json#/$defs/issuance"
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "weather.observation_recorded"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "observation_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "station_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "observed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "correction_of": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "temp_c": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 70
+            },
+            "feels_like_c": {
+              "type": "number",
+              "minimum": -100,
+              "maximum": 80
+            },
+            "dew_point_c": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 50
+            },
+            "precip_mm": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "wind_kph": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 500
+            },
+            "gust_kph": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 500
+            },
+            "wind_dir_deg": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 360
+            },
+            "visibility_km": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 200
+            },
+            "humidity_pct": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "observation_id",
+            "station_id",
+            "observed_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "air.observation_recorded"
+        },
+        "payload": {
+          "$ref": "seed.schema.json#/$defs/air_observation"
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "air.forecast_issued"
+        },
+        "payload": {
+          "$ref": "seed.schema.json#/$defs/air_issuance"
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "alert.published"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "alert_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "msg_type": {
+              "enum": [
+                "alert",
+                "update",
+                "cancel"
+              ]
+            },
+            "issued_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "issuer": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "event": {
+              "enum": [
+                "flood_watch",
+                "flood_warning",
+                "severe_thunderstorm_watch",
+                "severe_thunderstorm_warning",
+                "heat_advisory",
+                "excessive_heat_warning",
+                "wind_advisory",
+                "winter_storm_warning",
+                "red_flag_warning",
+                "air_quality_alert",
+                "smoke_advisory",
+                "area_closure"
+              ]
+            },
+            "severity": {
+              "enum": [
+                "minor",
+                "moderate",
+                "severe",
+                "extreme"
+              ]
+            },
+            "urgency": {
+              "enum": [
+                "immediate",
+                "expected",
+                "future",
+                "past",
+                "unknown"
+              ]
+            },
+            "certainty": {
+              "enum": [
+                "observed",
+                "likely",
+                "possible",
+                "unlikely",
+                "unknown"
+              ]
+            },
+            "areas": {
+              "type": "object",
+              "properties": {
+                "zone_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 50
+                },
+                "air_area_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 50
+                },
+                "place_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 50
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "onset": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "expires": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "headline": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 5000
+            },
+            "instruction": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "references": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "alert_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  }
+                },
+                "required": [
+                  "alert_id",
+                  "version"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 50
+            }
+          },
+          "required": [
+            "alert_id",
+            "version",
+            "msg_type",
+            "issued_at",
+            "issuer",
+            "event",
+            "severity",
+            "urgency",
+            "certainty",
+            "areas",
+            "onset",
+            "expires",
+            "headline"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "notification.delivery_recorded"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "notification_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "committed",
+                "rejected",
+                "unknown",
+                "halted"
+              ]
+            },
+            "code": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "stop_run": {
+              "type": "boolean"
+            },
+            "router_event_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "notification_id",
+            "status",
+            "code",
+            "router_event_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

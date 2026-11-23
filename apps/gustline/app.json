@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "app_id": "gustline",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:gustline (@Oshikaka)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "weather.forecast_issued",
+    "weather.observation_recorded",
+    "air.observation_recorded",
+    "air.forecast_issued",
+    "alert.published",
+    "notification.delivery_recorded"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Synthetic data only: no live weather, air-quality or alert feeds.",
+    "PM2.5 and PM10 AQI use hourly concentrations, not EPA NowCast; O3 uses the 8-hour rolling mean.",
+    "No global scheduler: time moves through events and Infra's env.advance_time, which runs no App code.",
+    "The outbound Mail adapter is invoked explicitly by the example and tests; automatic invocation belongs to the planned runner.",
+    "MCP only; no GUI."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}
