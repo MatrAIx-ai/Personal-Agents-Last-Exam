@@ -19,7 +19,7 @@ With only this folder, run `node --test tests/business.test.cjs` and `node examp
 
 | Workflow | How it works |
 | --- | --- |
-| Timed reminders | `notify.reminder.create` takes either `fire_at` or a Calendar anchor (`calendar_account_id`, `calendar_event_id`, `event_start` as read with `calendar.get`, `minutes_before`). The time must be in the future. A reminder moves `scheduled → delivered \| silenced \| cancelled`. Update and cancel work only while it is `scheduled`. |
+| Timed reminders | `notify.reminder.create` takes either `fire_at` or a Calendar anchor (`calendar_account_id`, `calendar_event_id`, `event_start` as read with `calendar.get`, `minutes_before`); the fire time keeps the event start's UTC offset and fractional seconds. The time must be in the future. A reminder moves `scheduled → delivered \| silenced \| cancelled`. Update and cancel work only while it is `scheduled`. |
 | Delivery | Infra applies `notify.reminder.fire` at the reminder's time. Firing early returns `not_due`; firing a reminder that already fired returns `already_fired`; firing a cancelled one is a recorded no-op; retrying the same event ID returns Core's original receipt. The reminder and its feed item are written in the same commit. |
 | Notification feed | Other Apps publish to `channel.push` with the receiver-owned contract `urn:pale:push-payload:1` (wire schema `urn:pale:push-message:1`, type `org.pale.notify.push.v1`). Messaging applies it as `notify.receive`. The sender must be an App account bound to the device owner. The feed item keeps the source object, CloudEvent ID, producer time (not invented when missing) and arrival time. |
 | Quiet hours | The device has an IANA time zone, focus windows in local wall-clock time (a window whose end is not after its start runs past midnight) and an optional `silence_until`. Anything that arrives while the phone is quiet is stored as `silenced` instead of `delivered`. `notify.focus.get` tells the Agent whether the phone is quiet now and why. |
@@ -35,7 +35,7 @@ Core 1.2 gives a package's tools only to the Agent role, and the Web Host connec
 
 ## Finding due reminders
 
-The App never schedules itself, and Core 1.2 exposes only its fixed Infra lifecycle operations. A runner reads `data.reminders` from `env.snapshot`, selects the due ones with `src/due.cjs` (`due(data, from, to)` returns scheduled reminders with `from ≤ fire_at < to` in time order), and applies `fireEvent(reminder)` for each at its own time. The event ID is `fire-<reminder_id>`, so a retry is deduplicated. Whether a delivered `actionable` reminder starts a user session is the runner's decision; the feed item and the reminder's `fired_at` are the evidence.
+The App never schedules itself, and Core 1.2 exposes only its fixed Infra lifecycle operations. A runner reads `data.reminders` from `env.snapshot`, selects the due ones with `src/due.cjs` (`due(data, from, to)` returns scheduled reminders with `from ≤ fire_at < to` in time order), and applies `fireEvent(reminder)` for each at its own time. The event ID is `fire-<reminder_id>` (for a reminder ID too long to fit the 100-character event ID, a prefix plus a hash of the full ID), so a retry is deduplicated. Whether a delivered `actionable` reminder starts a user session is the runner's decision; the feed item and the reminder's `fired_at` are the evidence.
 
 ## State and time
 

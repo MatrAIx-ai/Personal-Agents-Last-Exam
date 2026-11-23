@@ -63,6 +63,14 @@ test('a Calendar anchor computes the fire time from the event start and keeps it
   assert.throws(() => plugin.validateSeed(f.ctx, bad), /minutes_before/);
 });
 
+test('a Calendar anchor keeps the fractional seconds of the event start', () => {
+  const f = fixture();
+  const anchor = {calendar_account_id:'calendar-maya', calendar_event_id:'evt-lunch', event_start:'2026-11-18T13:00:00.500-08:00', minutes_before:15};
+  const out = f.call('notify.reminder.create', {title:'Lunch', ...anchor});
+  assert.equal(out.fire_at, '2026-11-18T12:45:00.500-08:00');
+  assert.equal(f.call('notify.reminder.update', {id:out.id, patch:{...anchor, minutes_before:20}}).fire_at, '2026-11-18T12:40:00.500-08:00');
+});
+
 test('update and cancel work only before the reminder fires; absolute time detaches an anchor', () => {
   const f = fixture();
   const id = f.call('notify.reminder.create', {title:'Lunch', ...{calendar_account_id:'calendar-maya', calendar_event_id:'evt-lunch', event_start:'2026-11-18T13:00:00-08:00', minutes_before:10}}).id;
@@ -182,6 +190,22 @@ test('the runner helper lists due reminders in order and builds stable fire even
   assert.deepEqual(fireEvent(list[1]), require('../examples/scenario.json'));
   f.event(fireEvent(list[0]));
   assert.deepEqual(due(f.data, '2026-11-18T09:00:00-08:00', '2026-11-19T00:00:00-08:00').map(r => r.reminder_id), ['reminder-pantry', 'reminder-plants']);
+});
+
+test('fire events stay within the event ID limit for the longest reminder IDs', () => {
+  const f = fixture();
+  const data = f.data, long = 'r' + 'x'.repeat(99), sibling = 'r' + 'x'.repeat(98) + 'y';
+  const pantry = data.reminders.find(r => r.id === 'reminder-pantry');
+  data.reminders.push({...structuredClone(pantry), id:long}, {...structuredClone(pantry), id:sibling, fire_at:'2026-11-18T17:31:00-08:00'});
+  f.load(data);
+  const events = due(f.data, '2026-11-18T17:00:00-08:00', '2026-11-18T18:00:00-08:00').map(fireEvent);
+  assert.deepEqual(events.map(e => e.payload.reminder_id), ['reminder-pantry', long, sibling]);
+  assert.equal(new Set(events.map(e => e.event_id)).size, 3);
+  for (const e of events) assert.ok(e.event_id.length <= 100);
+  assert.equal(events[0].event_id, 'fire-reminder-pantry');
+  assert.deepEqual(fireEvent({reminder_id:long, fire_at:pantry.fire_at}), events[1]);
+  for (const e of events) f.event(e); // the harness checks each event against events.schema.json
+  assert.equal(reminder(f, long).status, 'delivered');
 });
 
 test('seed validation rejects unbound accounts, bad zones, broken links and reversed history', () => {

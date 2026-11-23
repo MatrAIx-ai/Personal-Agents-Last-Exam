@@ -47,6 +47,8 @@ function fixture({logging=true}={}) {
   }
   let seq=0;
   return {ctx, get data(){return structuredClone(data);}, get logs(){return structuredClone(logs);},
+    // Like env.load_seed: the replacement seed must pass the schema and validateSeed.
+    load(seed) {validate(seed);data=structuredClone(seed);},
     call(name,args={}) {
       return transaction(() => {
         const tool=tools.find(t=>t.name===name);

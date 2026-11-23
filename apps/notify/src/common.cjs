@@ -28,12 +28,15 @@ function stamp(ctx, record, action, details = {}) {
   log(ctx, 'notify.' + action, {record_id:record.id || 'device', ...details});
 }
 
-// Shift an RFC 3339 time by deltaMs and keep its original UTC offset spelling.
+// Shift an RFC 3339 time by a whole number of seconds and keep its original
+// fractional seconds and UTC offset spelling (Calendar keeps both).
 function shift(iso, deltaMs) {
-  const offset = iso.match(/(Z|[+-]\d{2}:\d{2})$/)[1];
-  const minutes = offset === 'Z' ? 0 : (offset[0] === '-' ? -1 : 1) * (Number(offset.slice(1, 3)) * 60 + Number(offset.slice(4)));
-  const local = new Date(ms(iso) + deltaMs + minutes * 60000).toISOString().slice(0, 19);
-  return local + offset;
+  if (!Number.isInteger(deltaMs / 1000)) throw new Error('shift takes whole seconds');
+  const [, fraction = '', offset] = iso.match(/(\.\d+)?(Z|[+-]\d{2}:\d{2})$/i);
+  const minutes = /^z$/i.test(offset) ? 0 : (offset[0] === '-' ? -1 : 1) * (Number(offset.slice(1, 3)) * 60 + Number(offset.slice(4)));
+  const whole = ms(iso.slice(0, iso.length - fraction.length - offset.length) + offset);
+  const local = new Date(whole + deltaMs + minutes * 60000).toISOString().slice(0, 19);
+  return local + fraction + offset;
 }
 
 module.exports = {fail, copy, log, ms, find, nextId, stamp, shift};
