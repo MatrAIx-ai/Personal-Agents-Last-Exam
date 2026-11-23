@@ -1,0 +1,110 @@
+{
+  "schema": "rainshadow.v1-evidence-index",
+  "recorded_at": "2026-11-23T00:36:31Z",
+  "app_id": "rainshadow",
+  "app_version": "1.0.0",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "mail_version": "1.3.0",
+  "proposal_commit": "d08ce78fd3b8939c554dcf4e6f8dff683d906943",
+  "proposal_status": "plan approved for implementation (/approve-plan on PR #123, recorded 2026-11-22T22:24:35Z); the proposal file is unchanged since that commit",
+  "public_runtime_base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
+  "app_package_sha256": "3ea5d7bef4548ecd0f314f647b9d0dc39d3b8ecaffcde026aa06ed77f200ced4",
+  "app_package_git_tree": "4168a871ae81656d1ef1918e907020aa6c5b3311",
+  "package_hash_agrees_in": [
+    "public-runtime.node22.json",
+    "public-runtime.node18.json",
+    "base-runtime.json"
+  ],
+  "tested_node": {
+    "22": "v22.23.4",
+    "18": "v18.20.8"
+  },
+  "tested_os": "Linux 6.18.44-fc-v726 x86_64",
+  "interface": {
+    "operations": 21,
+    "read": 13,
+    "write": 8,
+    "events": 5
+  },
+  "checks": {
+    "standalone_business": {
+      "node22": {
+        "tests": 23,
+        "pass": 21,
+        "fail": 0,
+        "skipped": 2
+      },
+      "node18": {
+        "tests": 23,
+        "pass": 21,
+        "fail": 0,
+        "skipped": 2
+      }
+    },
+    "business_with_runtime": {
+      "node22": {
+        "tests": 23,
+        "pass": 23,
+        "fail": 0,
+        "skipped": 0
+      },
+      "node18": {
+        "tests": 23,
+        "pass": 23,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    "standalone_event_example": "passed on both Node versions",
+    "fixture_and_generated_contract_checks": "passed on both Node versions",
+    "public_app_verifier": {
+      "node22": 52,
+      "node18": 52
+    },
+    "mcp_integration": {
+      "node22": 90,
+      "node18": 90
+    },
+    "mail_integration": {
+      "node22": 25,
+      "node18": 25
+    },
+    "base_runtime_verifier": {
+      "checks": 52,
+      "selection": {
+        "full": false,
+        "ids": [
+          "rainshadow"
+        ]
+      }
+    },
+    "reference_suite_stages": {
+      "node22": "22/22",
+      "node18": "22/22"
+    },
+    "shared_contract_copies": "runtime/sdk/sync.cjs --check and runtime/build-contracts.cjs --check passed on both Node versions"
+  },
+  "reports": [
+    "base-runtime.json",
+    "mail-integration.node18.json",
+    "mail-integration.node22.json",
+    "mcp-integration.node18.json",
+    "mcp-integration.node22.json",
+    "public-runtime.node18.json",
+    "public-runtime.node22.json",
+    "reference-suite.node18.json",
+    "reference-suite.node22.json"
+  ],
+  "not_claimed": [
+    "No agent trials or model runs.",
+    "No GUI or Web/CUA evidence: the first version is MCP only.",
+    "No acceptance, merge or authorship credit.",
+    "The two skipped standalone tests are the real-MCP scripts, which need the runtime; they pass in business_with_runtime."
+  ],
+  "remaining": [
+    "Independent maintainer reproduction and acceptance.",
+    "Official PR CI (public-runtime 18 and 22, base-runtime-compatibility) on the implementation commit.",
+    "Human review of realism and of the invented names."
+  ]
+}
