@@ -1,0 +1,10 @@
+'use strict';
+const assert = require('node:assert/strict');
+const { fixture } = require('../tests/harness.cjs');
+const f = fixture();
+const account = f.call('plateway.account.get', {});
+assert.equal(account.status, 'ok');
+const paused = f.event(require('./scenario.json'));
+assert.equal(paused.status, 'committed');
+assert.equal(f.data().restaurants[0].paused, true);
+console.log(JSON.stringify({ account: account.holder.person_id, event: paused.status }));

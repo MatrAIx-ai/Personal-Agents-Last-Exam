@@ -1,0 +1,4844 @@
+[
+  {
+    "name": "plateway.account.get",
+    "description": "Read the account holder, saved addresses with their delivery zones, saved cards (masked) and the App's current time and time zone. No side effects.",
+    "scope": "plateway.read",
+    "resource_target": "account",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "holder": {
+          "type": "object",
+          "properties": {
+            "person_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "person_id",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "addresses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "label": {
+                "type": "string"
+              },
+              "line1": {
+                "type": "string"
+              },
+              "zone_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "line1",
+              "zone_id"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "brand": {
+                "type": "string"
+              },
+              "masked_number": {
+                "type": "string",
+                "pattern": "^•••• [0-9]{4}$"
+              },
+              "exp_month": {
+                "type": "integer"
+              },
+              "exp_year": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id",
+              "brand",
+              "masked_number",
+              "exp_month",
+              "exp_year"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time_zone": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "holder",
+        "addresses",
+        "cards",
+        "now",
+        "time_zone"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.restaurants.search",
+    "description": "Find restaurants that deliver to one of the account's addresses, optionally by text (restaurant or dish name, cuisine) and cuisine. Returns only restaurants serving that address's zone, each with its status at the App's current time (open, closed or paused), the delivery estimate in minutes (preparation plus travel to that zone), the delivery fee and the aggregate rating. No side effects.",
+    "scope": "plateway.read",
+    "resource_target": "restaurant",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "address_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "cuisine": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        }
+      },
+      "required": [
+        "address_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "restaurants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string"
+              },
+              "cuisines": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "closed",
+                  "paused"
+                ]
+              },
+              "pause_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "delivery_fee_cents": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "estimate_minutes": {
+                "type": "integer"
+              },
+              "rating": {
+                "type": "object",
+                "properties": {
+                  "average": {
+                    "type": "number"
+                  },
+                  "count": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "average",
+                  "count"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "cuisines",
+              "status",
+              "pause_reason",
+              "delivery_fee_cents",
+              "estimate_minutes",
+              "rating"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "restaurants"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.restaurants.get",
+    "description": "Read one restaurant: weekly hours, status, pause reason, delivery fee, preparation time, served zones with travel times, aggregate rating and its menu with prices, availability and the restaurant's declared allergens per dish. Declarations are shown as declared and not verified; empty lists mean none declared, not allergen-free. No side effects.",
+    "scope": "plateway.read",
+    "resource_target": "restaurant",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "restaurant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "restaurant_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "restaurant": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string"
+            },
+            "cuisines": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "hours": {
+              "type": "object",
+              "properties": {
+                "mon": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "tue": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "wed": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "thu": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "fri": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "sat": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "sun": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                }
+              },
+              "required": [
+                "mon",
+                "tue",
+                "wed",
+                "thu",
+                "fri",
+                "sat",
+                "sun"
+              ],
+              "additionalProperties": false
+            },
+            "status": {
+              "enum": [
+                "open",
+                "closed",
+                "paused"
+              ]
+            },
+            "pause_reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "delivery_fee_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "prep_minutes": {
+              "type": "integer"
+            },
+            "zones": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "zone_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "travel_minutes": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "zone_id",
+                  "travel_minutes"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "rating": {
+              "type": "object",
+              "properties": {
+                "average": {
+                  "type": "number"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "average",
+                "count"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "cuisines",
+            "hours",
+            "status",
+            "pause_reason",
+            "delivery_fee_cents",
+            "prep_minutes",
+            "zones",
+            "rating"
+          ],
+          "additionalProperties": false
+        },
+        "menu": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "price_cents": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "available": {
+                "type": "boolean"
+              },
+              "allergens": {
+                "type": "object",
+                "properties": {
+                  "contains": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "milk",
+                        "egg",
+                        "fish",
+                        "crustacean shellfish",
+                        "tree nuts",
+                        "peanuts",
+                        "wheat",
+                        "soybeans",
+                        "sesame"
+                      ]
+                    }
+                  },
+                  "may_contain": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "milk",
+                        "egg",
+                        "fish",
+                        "crustacean shellfish",
+                        "tree nuts",
+                        "peanuts",
+                        "wheat",
+                        "soybeans",
+                        "sesame"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "contains",
+                  "may_contain"
+                ],
+                "additionalProperties": false
+              },
+              "has_options": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "description",
+              "price_cents",
+              "available",
+              "allergens",
+              "has_options"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "restaurant",
+        "menu"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.menu_items.get",
+    "description": "Read one dish: description of its main ingredients, price, availability, declared allergens and its option groups (required or optional, minimum and maximum selections) with each option's price change and declared allergens. No side effects.",
+    "scope": "plateway.read",
+    "resource_target": "menu_item",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "item_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "restaurant_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "price_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "available": {
+              "type": "boolean"
+            },
+            "allergens": {
+              "type": "object",
+              "properties": {
+                "contains": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "milk",
+                      "egg",
+                      "fish",
+                      "crustacean shellfish",
+                      "tree nuts",
+                      "peanuts",
+                      "wheat",
+                      "soybeans",
+                      "sesame"
+                    ]
+                  }
+                },
+                "may_contain": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "milk",
+                      "egg",
+                      "fish",
+                      "crustacean shellfish",
+                      "tree nuts",
+                      "peanuts",
+                      "wheat",
+                      "soybeans",
+                      "sesame"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "contains",
+                "may_contain"
+              ],
+              "additionalProperties": false
+            },
+            "option_groups": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "required": {
+                    "type": "boolean"
+                  },
+                  "min": {
+                    "type": "integer"
+                  },
+                  "max": {
+                    "type": "integer"
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "price_delta_cents": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "allergens": {
+                          "type": "object",
+                          "properties": {
+                            "contains": {
+                              "type": "array",
+                              "items": {
+                                "enum": [
+                                  "milk",
+                                  "egg",
+                                  "fish",
+                                  "crustacean shellfish",
+                                  "tree nuts",
+                                  "peanuts",
+                                  "wheat",
+                                  "soybeans",
+                                  "sesame"
+                                ]
+                              }
+                            },
+                            "may_contain": {
+                              "type": "array",
+                              "items": {
+                                "enum": [
+                                  "milk",
+                                  "egg",
+                                  "fish",
+                                  "crustacean shellfish",
+                                  "tree nuts",
+                                  "peanuts",
+                                  "wheat",
+                                  "soybeans",
+                                  "sesame"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "contains",
+                            "may_contain"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "price_delta_cents",
+                        "allergens"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "required",
+                  "min",
+                  "max",
+                  "options"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "id",
+            "restaurant_id",
+            "name",
+            "description",
+            "price_cents",
+            "available",
+            "allergens",
+            "option_groups"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "item"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.cart.get",
+    "description": "Read the cart: its restaurant and lines with options, quantity, label and prices read from the current menu, plus each line's availability and the subtotal. No side effects.",
+    "scope": "plateway.read",
+    "resource_target": "cart",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "restaurant_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "item_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "price_delta_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "price_delta_cents"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unit_price_cents": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "subtotal_cents": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "available": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "item_id",
+              "name",
+              "options",
+              "quantity",
+              "label",
+              "unit_price_cents",
+              "subtotal_cents",
+              "available"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "subtotal_cents": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "restaurant_id",
+        "lines",
+        "subtotal_cents"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.cart.add_item",
+    "description": "Add a dish to the cart with its option IDs, a quantity of 1 to 10 and an optional label of up to 40 characters (Unicode code points) shown on the receipt (never sent to the restaurant; it changes no dish). The cart holds one restaurant's dishes.",
+    "scope": "plateway.write",
+    "resource_target": "cart",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "option_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "uniqueItems": true,
+          "maxItems": 100
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "request_id",
+        "expected_version",
+        "item_id",
+        "option_ids",
+        "quantity"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "line_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "cart": {
+          "type": "object",
+          "properties": {
+            "restaurant_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "item_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "price_delta_cents": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "price_delta_cents"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "label": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "unit_price_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "subtotal_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "available": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "item_id",
+                  "name",
+                  "options",
+                  "quantity",
+                  "label",
+                  "unit_price_cents",
+                  "subtotal_cents",
+                  "available"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "subtotal_cents": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "restaurant_id",
+            "lines",
+            "subtotal_cents"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "line_id",
+        "cart"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.cart.update_item",
+    "description": "Change a cart line's quantity, options or label.",
+    "scope": "plateway.write",
+    "resource_target": "cart",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "line_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "option_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "uniqueItems": true,
+          "maxItems": 100
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "request_id",
+        "expected_version",
+        "line_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "cart": {
+          "type": "object",
+          "properties": {
+            "restaurant_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "item_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "price_delta_cents": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "price_delta_cents"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "label": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "unit_price_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "subtotal_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "available": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "item_id",
+                  "name",
+                  "options",
+                  "quantity",
+                  "label",
+                  "unit_price_cents",
+                  "subtotal_cents",
+                  "available"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "subtotal_cents": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "restaurant_id",
+            "lines",
+            "subtotal_cents"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "cart"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.cart.remove_item",
+    "description": "Remove a line from the cart.",
+    "scope": "plateway.write",
+    "resource_target": "cart",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "line_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "request_id",
+        "expected_version",
+        "line_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "cart": {
+          "type": "object",
+          "properties": {
+            "restaurant_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "item_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "price_delta_cents": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "price_delta_cents"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "label": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "unit_price_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "subtotal_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "available": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "item_id",
+                  "name",
+                  "options",
+                  "quantity",
+                  "label",
+                  "unit_price_cents",
+                  "subtotal_cents",
+                  "available"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "subtotal_cents": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "restaurant_id",
+            "lines",
+            "subtotal_cents"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "cart"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.checkout.preview",
+    "description": "Preview the all-in total of the cart for an address, a card, as soon as possible or a scheduled delivery time, and a tip in cents: lines, delivery fee, 12% service fee, $2.49 small-order fee below a $12.00 subtotal, 8% tax per line, tip, total, the estimate or scheduled time and the release time. A scheduled time must be on a 15-minute boundary, 45 minutes through 7 days ahead, with its release time (delivery time minus the estimate) after now and inside the restaurant's weekly hours; a pause does not block scheduling. Runs the same checks as orders.place (except the card decline, which only an attempted charge reveals) and returns a token for orders.place. Stores nothing.",
+    "scope": "plateway.read",
+    "resource_target": "checkout",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "address_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "when": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "mode": {
+                  "const": "asap"
+                }
+              },
+              "required": [
+                "mode"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "mode": {
+                  "const": "scheduled"
+                },
+                "delivery_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "mode",
+                "delivery_at"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "tip_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "address_id",
+        "card_id",
+        "when",
+        "tip_cents"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "restaurant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "item_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "price_delta_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "price_delta_cents"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unit_price_cents": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "subtotal_cents": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "tax_cents": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "id",
+              "item_id",
+              "name",
+              "options",
+              "quantity",
+              "label",
+              "unit_price_cents",
+              "subtotal_cents",
+              "tax_cents"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "fees": {
+          "type": "object",
+          "properties": {
+            "delivery_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "service_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "small_order_cents": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "delivery_cents",
+            "service_cents",
+            "small_order_cents"
+          ],
+          "additionalProperties": false
+        },
+        "subtotal_cents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tax_cents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tip_cents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_cents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mode": {
+          "enum": [
+            "asap",
+            "scheduled"
+          ]
+        },
+        "estimate_minutes": {
+          "type": "integer"
+        },
+        "estimated_delivery_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "delivery_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "release_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "token": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "restaurant_id",
+        "lines",
+        "fees",
+        "subtotal_cents",
+        "tax_cents",
+        "tip_cents",
+        "total_cents",
+        "mode",
+        "estimate_minutes",
+        "estimated_delivery_at",
+        "delivery_at",
+        "release_at",
+        "token"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.orders.list",
+    "description": "List the account's orders, newest first, optionally by status, restaurant and a placed-at date range (inclusive). Statuses reflect the App's current time. No side effects.",
+    "scope": "plateway.read",
+    "resource_target": "order",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "scheduled",
+            "submitted",
+            "preparing",
+            "picked_up",
+            "delivered",
+            "cancelled"
+          ]
+        },
+        "restaurant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "restaurant_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "restaurant_name": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "scheduled",
+                  "submitted",
+                  "preparing",
+                  "picked_up",
+                  "delivered",
+                  "cancelled"
+                ]
+              },
+              "placed_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "delivery_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "estimated_delivery_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "delivered_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "total_cents": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "refunded_cents": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "line_count": {
+                "type": "integer"
+              },
+              "rated": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "restaurant_id",
+              "restaurant_name",
+              "status",
+              "placed_at",
+              "delivery_at",
+              "estimated_delivery_at",
+              "delivered_at",
+              "total_cents",
+              "refunded_cents",
+              "line_count",
+              "rated"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "orders"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.orders.get",
+    "description": "Read one order: lines with options and labels (removed lines are marked, not deleted), timeline, estimate, the itemized receipt as booked (fees, tax, tip, total and the charge), refunds, cancellation and rating, as of the App's current time. No side effects.",
+    "scope": "plateway.read",
+    "resource_target": "order",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "order_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "order": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "restaurant_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "restaurant_name": {
+              "type": "string"
+            },
+            "address_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "card_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "scheduled",
+                "submitted",
+                "preparing",
+                "picked_up",
+                "delivered",
+                "cancelled"
+              ]
+            },
+            "mode": {
+              "enum": [
+                "asap",
+                "scheduled"
+              ]
+            },
+            "placed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "delivery_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "release_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "submitted_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "accept_by": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "estimated_delivery_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "delivered_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "item_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "price_delta_cents": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "price_delta_cents"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "label": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "unit_price_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "subtotal_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "tax_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "removed": {
+                    "type": "boolean"
+                  },
+                  "removed_reason": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "removed_at": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "report": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "missing",
+                              "wrong"
+                            ]
+                          },
+                          "at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "at"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "item_id",
+                  "name",
+                  "options",
+                  "quantity",
+                  "label",
+                  "unit_price_cents",
+                  "subtotal_cents",
+                  "tax_cents",
+                  "removed",
+                  "removed_reason",
+                  "removed_at",
+                  "report"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "fees": {
+              "type": "object",
+              "properties": {
+                "delivery_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "service_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "small_order_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "delivery_cents",
+                "service_cents",
+                "small_order_cents"
+              ],
+              "additionalProperties": false
+            },
+            "subtotal_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tax_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tip_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "total_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "charge": {
+              "type": "object",
+              "properties": {
+                "card_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "amount_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "card_id",
+                "amount_cents",
+                "at"
+              ],
+              "additionalProperties": false
+            },
+            "refunds": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "amount_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "line_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "id",
+                  "amount_cents",
+                  "reason",
+                  "line_id",
+                  "at"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "refunded_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "timeline": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "at",
+                  "status",
+                  "note"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "cancellation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "stage": {
+                      "enum": [
+                        "scheduled",
+                        "submitted",
+                        "preparing"
+                      ]
+                    },
+                    "refunded_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "kept_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "reason",
+                    "refunded_cents",
+                    "kept_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rating": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "stars": {
+                      "type": "integer"
+                    },
+                    "text": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "stars",
+                    "text",
+                    "at"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "restaurant_id",
+            "restaurant_name",
+            "address_id",
+            "card_id",
+            "status",
+            "mode",
+            "placed_at",
+            "delivery_at",
+            "release_at",
+            "submitted_at",
+            "accept_by",
+            "estimated_delivery_at",
+            "delivered_at",
+            "lines",
+            "fees",
+            "subtotal_cents",
+            "tax_cents",
+            "tip_cents",
+            "total_cents",
+            "charge",
+            "refunds",
+            "refunded_cents",
+            "timeline",
+            "cancellation",
+            "rating"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "order"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.orders.place",
+    "description": "Place the cart as an order with the token from checkout.preview, restating its address, card, delivery time and tip. Charges the card once for the previewed total; a declining or expired card fails with payment_failed and creates no order. A token whose business changes no longer match current state returns stale_preview.",
+    "scope": "plateway.write",
+    "resource_target": "order",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "address_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "when": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "mode": {
+                  "const": "asap"
+                }
+              },
+              "required": [
+                "mode"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "mode": {
+                  "const": "scheduled"
+                },
+                "delivery_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "mode",
+                "delivery_at"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "tip_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "token": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "request_id",
+        "expected_version",
+        "address_id",
+        "card_id",
+        "when",
+        "tip_cents",
+        "token"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "order": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "restaurant_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "restaurant_name": {
+              "type": "string"
+            },
+            "address_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "card_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "scheduled",
+                "submitted",
+                "preparing",
+                "picked_up",
+                "delivered",
+                "cancelled"
+              ]
+            },
+            "mode": {
+              "enum": [
+                "asap",
+                "scheduled"
+              ]
+            },
+            "placed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "delivery_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "release_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "submitted_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "accept_by": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "estimated_delivery_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "delivered_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "item_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "price_delta_cents": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "price_delta_cents"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "label": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "unit_price_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "subtotal_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "tax_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "removed": {
+                    "type": "boolean"
+                  },
+                  "removed_reason": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "removed_at": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "report": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "missing",
+                              "wrong"
+                            ]
+                          },
+                          "at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "at"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "item_id",
+                  "name",
+                  "options",
+                  "quantity",
+                  "label",
+                  "unit_price_cents",
+                  "subtotal_cents",
+                  "tax_cents",
+                  "removed",
+                  "removed_reason",
+                  "removed_at",
+                  "report"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "fees": {
+              "type": "object",
+              "properties": {
+                "delivery_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "service_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "small_order_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "delivery_cents",
+                "service_cents",
+                "small_order_cents"
+              ],
+              "additionalProperties": false
+            },
+            "subtotal_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tax_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tip_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "total_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "charge": {
+              "type": "object",
+              "properties": {
+                "card_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "amount_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "card_id",
+                "amount_cents",
+                "at"
+              ],
+              "additionalProperties": false
+            },
+            "refunds": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "amount_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "line_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "id",
+                  "amount_cents",
+                  "reason",
+                  "line_id",
+                  "at"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "refunded_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "timeline": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "at",
+                  "status",
+                  "note"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "cancellation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "stage": {
+                      "enum": [
+                        "scheduled",
+                        "submitted",
+                        "preparing"
+                      ]
+                    },
+                    "refunded_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "kept_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "reason",
+                    "refunded_cents",
+                    "kept_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rating": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "stars": {
+                      "type": "integer"
+                    },
+                    "text": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "stars",
+                    "text",
+                    "at"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "restaurant_id",
+            "restaurant_name",
+            "address_id",
+            "card_id",
+            "status",
+            "mode",
+            "placed_at",
+            "delivery_at",
+            "release_at",
+            "submitted_at",
+            "accept_by",
+            "estimated_delivery_at",
+            "delivered_at",
+            "lines",
+            "fees",
+            "subtotal_cents",
+            "tax_cents",
+            "tip_cents",
+            "total_cents",
+            "charge",
+            "refunds",
+            "refunded_cents",
+            "timeline",
+            "cancellation",
+            "rating"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "order_id",
+        "order"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.orders.cancel.preview",
+    "description": "Preview cancelling an order at its current stage: free while scheduled or submitted (full refund); while preparing only the delivery fee and tip are refunded and the rest is kept; picked_up, delivered and cancelled orders cannot be cancelled (invalid_state). Returns the charge, prior refunds, the refund, the amount kept, the refund card and a token for orders.cancel.confirm. Stores nothing.",
+    "scope": "plateway.read",
+    "resource_target": "order",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "order_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "stage": {
+          "enum": [
+            "scheduled",
+            "submitted",
+            "preparing",
+            "picked_up",
+            "delivered",
+            "cancelled"
+          ]
+        },
+        "charge_cents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "prior_refunds_cents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "refund_cents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kept_cents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "refund_card_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "token": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "order_id",
+        "stage",
+        "charge_cents",
+        "prior_refunds_cents",
+        "refund_cents",
+        "kept_cents",
+        "refund_card_id",
+        "token"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.orders.cancel.confirm",
+    "description": "Cancel an order with the token from orders.cancel.preview. The status change, the refund to the original card and the notice commit together; a token whose stage or amounts no longer match returns stale_preview.",
+    "scope": "plateway.write",
+    "resource_target": "order",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "token": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "request_id",
+        "expected_version",
+        "order_id",
+        "token"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "order": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "restaurant_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "restaurant_name": {
+              "type": "string"
+            },
+            "address_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "card_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "scheduled",
+                "submitted",
+                "preparing",
+                "picked_up",
+                "delivered",
+                "cancelled"
+              ]
+            },
+            "mode": {
+              "enum": [
+                "asap",
+                "scheduled"
+              ]
+            },
+            "placed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "delivery_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "release_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "submitted_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "accept_by": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "estimated_delivery_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "delivered_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "item_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "price_delta_cents": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "price_delta_cents"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "label": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "unit_price_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "subtotal_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "tax_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "removed": {
+                    "type": "boolean"
+                  },
+                  "removed_reason": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "removed_at": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "report": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "missing",
+                              "wrong"
+                            ]
+                          },
+                          "at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "at"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "item_id",
+                  "name",
+                  "options",
+                  "quantity",
+                  "label",
+                  "unit_price_cents",
+                  "subtotal_cents",
+                  "tax_cents",
+                  "removed",
+                  "removed_reason",
+                  "removed_at",
+                  "report"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "fees": {
+              "type": "object",
+              "properties": {
+                "delivery_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "service_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "small_order_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "delivery_cents",
+                "service_cents",
+                "small_order_cents"
+              ],
+              "additionalProperties": false
+            },
+            "subtotal_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tax_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tip_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "total_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "charge": {
+              "type": "object",
+              "properties": {
+                "card_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "amount_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "card_id",
+                "amount_cents",
+                "at"
+              ],
+              "additionalProperties": false
+            },
+            "refunds": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "amount_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "line_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "id",
+                  "amount_cents",
+                  "reason",
+                  "line_id",
+                  "at"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "refunded_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "timeline": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "at",
+                  "status",
+                  "note"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "cancellation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "stage": {
+                      "enum": [
+                        "scheduled",
+                        "submitted",
+                        "preparing"
+                      ]
+                    },
+                    "refunded_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "kept_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "reason",
+                    "refunded_cents",
+                    "kept_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rating": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "stars": {
+                      "type": "integer"
+                    },
+                    "text": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "stars",
+                    "text",
+                    "at"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "restaurant_id",
+            "restaurant_name",
+            "address_id",
+            "card_id",
+            "status",
+            "mode",
+            "placed_at",
+            "delivery_at",
+            "release_at",
+            "submitted_at",
+            "accept_by",
+            "estimated_delivery_at",
+            "delivered_at",
+            "lines",
+            "fees",
+            "subtotal_cents",
+            "tax_cents",
+            "tip_cents",
+            "total_cents",
+            "charge",
+            "refunds",
+            "refunded_cents",
+            "timeline",
+            "cancellation",
+            "rating"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "order_id",
+        "order"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.orders.report_issue",
+    "description": "Report delivered lines as missing or wrong within 48 hours of delivery, once per line. Every named line is checked before any refund; each reported line is refunded its subtotal plus tax to the original card, automatically and in full.",
+    "scope": "plateway.write",
+    "resource_target": "order",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "lines": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "properties": {
+              "line_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "missing",
+                  "wrong"
+                ]
+              }
+            },
+            "required": [
+              "line_id",
+              "kind"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "request_id",
+        "expected_version",
+        "order_id",
+        "lines"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "refunded_cents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "order": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "restaurant_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "restaurant_name": {
+              "type": "string"
+            },
+            "address_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "card_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "scheduled",
+                "submitted",
+                "preparing",
+                "picked_up",
+                "delivered",
+                "cancelled"
+              ]
+            },
+            "mode": {
+              "enum": [
+                "asap",
+                "scheduled"
+              ]
+            },
+            "placed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "delivery_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "release_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "submitted_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "accept_by": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "estimated_delivery_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "delivered_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "item_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "price_delta_cents": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "price_delta_cents"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "label": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "unit_price_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "subtotal_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "tax_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "removed": {
+                    "type": "boolean"
+                  },
+                  "removed_reason": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "removed_at": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "report": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "missing",
+                              "wrong"
+                            ]
+                          },
+                          "at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "at"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "item_id",
+                  "name",
+                  "options",
+                  "quantity",
+                  "label",
+                  "unit_price_cents",
+                  "subtotal_cents",
+                  "tax_cents",
+                  "removed",
+                  "removed_reason",
+                  "removed_at",
+                  "report"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "fees": {
+              "type": "object",
+              "properties": {
+                "delivery_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "service_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "small_order_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "delivery_cents",
+                "service_cents",
+                "small_order_cents"
+              ],
+              "additionalProperties": false
+            },
+            "subtotal_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tax_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tip_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "total_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "charge": {
+              "type": "object",
+              "properties": {
+                "card_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "amount_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "card_id",
+                "amount_cents",
+                "at"
+              ],
+              "additionalProperties": false
+            },
+            "refunds": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "amount_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "line_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "id",
+                  "amount_cents",
+                  "reason",
+                  "line_id",
+                  "at"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "refunded_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "timeline": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "at",
+                  "status",
+                  "note"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "cancellation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "stage": {
+                      "enum": [
+                        "scheduled",
+                        "submitted",
+                        "preparing"
+                      ]
+                    },
+                    "refunded_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "kept_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "reason",
+                    "refunded_cents",
+                    "kept_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rating": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "stars": {
+                      "type": "integer"
+                    },
+                    "text": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "stars",
+                    "text",
+                    "at"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "restaurant_id",
+            "restaurant_name",
+            "address_id",
+            "card_id",
+            "status",
+            "mode",
+            "placed_at",
+            "delivery_at",
+            "release_at",
+            "submitted_at",
+            "accept_by",
+            "estimated_delivery_at",
+            "delivered_at",
+            "lines",
+            "fees",
+            "subtotal_cents",
+            "tax_cents",
+            "tip_cents",
+            "total_cents",
+            "charge",
+            "refunds",
+            "refunded_cents",
+            "timeline",
+            "cancellation",
+            "rating"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "order_id",
+        "refunded_cents",
+        "order"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plateway.orders.rate",
+    "description": "Rate a delivered order once within 30 days of delivery: 1 to 5 stars with optional text of up to 500 characters (Unicode code points). The restaurant's aggregate rating is not recomputed.",
+    "scope": "plateway.write",
+    "resource_target": "order",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "stars": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "request_id",
+        "expected_version",
+        "order_id",
+        "stars"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "object"
+        },
+        "order_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "order": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "restaurant_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "restaurant_name": {
+              "type": "string"
+            },
+            "address_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "card_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "scheduled",
+                "submitted",
+                "preparing",
+                "picked_up",
+                "delivered",
+                "cancelled"
+              ]
+            },
+            "mode": {
+              "enum": [
+                "asap",
+                "scheduled"
+              ]
+            },
+            "placed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "delivery_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "release_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "submitted_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "accept_by": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "estimated_delivery_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "delivered_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "item_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "price_delta_cents": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "price_delta_cents"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "label": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "unit_price_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "subtotal_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "tax_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "removed": {
+                    "type": "boolean"
+                  },
+                  "removed_reason": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "removed_at": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "report": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "missing",
+                              "wrong"
+                            ]
+                          },
+                          "at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "at"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "item_id",
+                  "name",
+                  "options",
+                  "quantity",
+                  "label",
+                  "unit_price_cents",
+                  "subtotal_cents",
+                  "tax_cents",
+                  "removed",
+                  "removed_reason",
+                  "removed_at",
+                  "report"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "fees": {
+              "type": "object",
+              "properties": {
+                "delivery_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "service_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "small_order_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "delivery_cents",
+                "service_cents",
+                "small_order_cents"
+              ],
+              "additionalProperties": false
+            },
+            "subtotal_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tax_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tip_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "total_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "charge": {
+              "type": "object",
+              "properties": {
+                "card_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "amount_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "card_id",
+                "amount_cents",
+                "at"
+              ],
+              "additionalProperties": false
+            },
+            "refunds": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "amount_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "line_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "id",
+                  "amount_cents",
+                  "reason",
+                  "line_id",
+                  "at"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "refunded_cents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "timeline": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "at",
+                  "status",
+                  "note"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "cancellation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "stage": {
+                      "enum": [
+                        "scheduled",
+                        "submitted",
+                        "preparing"
+                      ]
+                    },
+                    "refunded_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "kept_cents": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "reason",
+                    "refunded_cents",
+                    "kept_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rating": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "stars": {
+                      "type": "integer"
+                    },
+                    "text": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "stars",
+                    "text",
+                    "at"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "restaurant_id",
+            "restaurant_name",
+            "address_id",
+            "card_id",
+            "status",
+            "mode",
+            "placed_at",
+            "delivery_at",
+            "release_at",
+            "submitted_at",
+            "accept_by",
+            "estimated_delivery_at",
+            "delivered_at",
+            "lines",
+            "fees",
+            "subtotal_cents",
+            "tax_cents",
+            "tip_cents",
+            "total_cents",
+            "charge",
+            "refunds",
+            "refunded_cents",
+            "timeline",
+            "cancellation",
+            "rating"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "order_id",
+        "order"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

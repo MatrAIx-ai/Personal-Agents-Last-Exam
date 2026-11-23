@@ -1,0 +1,264 @@
+{
+  "schema": "plateway.validation.v1",
+  "checked_on": "2026-11-23",
+  "app": {
+    "app_id": "plateway",
+    "version": "1.0.0",
+    "package_sha256": "0ab2550c46b8f95d358cb45c24b3f2154cc44f5db1c3e2460256fcfb77ff4c3d"
+  },
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "receiver": "mail 1.3.0",
+  "base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
+  "standalone_copy": "passed (apps/plateway, runtime/, examples/apps/mail, package.json)",
+  "runs": [
+    {
+      "node": "v18.20.8",
+      "business_tests": {
+        "total": 109,
+        "passed": 109
+      },
+      "example": "passed",
+      "fixture_check": "passed",
+      "public_verifier": {
+        "passed": true,
+        "checks": 50,
+        "stages": [
+          {
+            "name": "business",
+            "status": "passed"
+          },
+          {
+            "name": "event-example",
+            "status": "passed"
+          }
+        ]
+      },
+      "mcp_integration": {
+        "passed": true,
+        "checks": 53
+      },
+      "mail_integration": {
+        "passed": true,
+        "checks": 38
+      },
+      "full_suite": "22/22 stages passed"
+    },
+    {
+      "node": "v22.14.0",
+      "business_tests": {
+        "total": 109,
+        "passed": 109
+      },
+      "example": "passed",
+      "fixture_check": "passed",
+      "public_verifier": {
+        "passed": true,
+        "checks": 50,
+        "stages": [
+          {
+            "name": "business",
+            "status": "passed"
+          },
+          {
+            "name": "event-example",
+            "status": "passed"
+          }
+        ]
+      },
+      "mcp_integration": {
+        "passed": true,
+        "checks": 53
+      },
+      "mail_integration": {
+        "passed": true,
+        "checks": 38
+      },
+      "full_suite": "22/22 stages passed"
+    },
+    {
+      "node": "v25.8.1",
+      "business_tests": {
+        "total": 109,
+        "passed": 109
+      },
+      "example": "passed",
+      "fixture_check": "passed",
+      "public_verifier": {
+        "passed": true,
+        "checks": 50,
+        "stages": [
+          {
+            "name": "business",
+            "status": "passed"
+          },
+          {
+            "name": "event-example",
+            "status": "passed"
+          }
+        ]
+      },
+      "mcp_integration": {
+        "passed": true,
+        "checks": 53
+      },
+      "mail_integration": {
+        "passed": true,
+        "checks": 38
+      },
+      "full_suite": "22/22 stages passed"
+    }
+  ],
+  "public_verifier_checks": [
+    "Manifest, schemas, seed, references, media and declarations load",
+    "business standalone command succeeds",
+    "event-example standalone command succeeds",
+    "Agent discovery excludes administrative tools",
+    "Published input/output for plateway.account.get",
+    "Published input/output for plateway.restaurants.search",
+    "Published input/output for plateway.restaurants.get",
+    "Published input/output for plateway.menu_items.get",
+    "Published input/output for plateway.cart.get",
+    "Published input/output for plateway.cart.add_item",
+    "Published input/output for plateway.cart.update_item",
+    "Published input/output for plateway.cart.remove_item",
+    "Published input/output for plateway.checkout.preview",
+    "Published input/output for plateway.orders.list",
+    "Published input/output for plateway.orders.get",
+    "Published input/output for plateway.orders.place",
+    "Published input/output for plateway.orders.cancel.preview",
+    "Published input/output for plateway.orders.cancel.confirm",
+    "Published input/output for plateway.orders.report_issue",
+    "Published input/output for plateway.orders.rate",
+    "Infra exposes the lifecycle interface and host clock operation",
+    "Agent cannot call env.advance_time",
+    "Agent cannot call env.apply_event",
+    "Agent cannot call env.event_status",
+    "Agent cannot call env.load_seed",
+    "Agent cannot call env.reset",
+    "Agent cannot call env.snapshot",
+    "Agent cannot call env.validate_bundle",
+    "Real MCP business read succeeds",
+    "MCP content and structured result agree",
+    "MCP envelope remains unchanged",
+    "Read does not change business data",
+    "Caller cannot override run or role",
+    "Infra loads history, relationships and assets",
+    "Loaded historical records match input",
+    "Invalid history is rejected",
+    "Rejected history leaves business state unchanged",
+    "Declared incoming event commits",
+    "Event changes business data",
+    "Committed event is queryable",
+    "Identical event retry is deduplicated",
+    "Duplicate has no additional state change",
+    "Same event ID with changed content is rejected",
+    "Old version cannot reset a changed App",
+    "A separate run retains its own initial data",
+    "Reset returns ready",
+    "Reset restores the loaded business baseline",
+    "Reset advances epoch",
+    "New MCP process reads persisted App state",
+    "Submitted package remains unchanged"
+  ],
+  "mcp_integration_checks": [
+    "The package wire schema is byte-identical to the runtime contract",
+    "T04 placement commits",
+    "T04 the same request ID returns the stored receipt",
+    "T04 one order and one charge",
+    "T07 a cancel token for the scheduled order",
+    "T07 one minute after release orders.get shows submitted",
+    "T07 one minute after release orders.list shows submitted",
+    "T07 a new cancel preview yields a new token",
+    "T07 the original token with a fresh request and the current version is stale",
+    "T07 the stored order, refunds and notices are unchanged after release",
+    "T07 21 minutes after release orders.get shows cancelled, not accepted, with the full refund",
+    "T07 21 minutes after release orders.list shows cancelled",
+    "T07 the cancel preview is invalid_state",
+    "T07 a confirm of the new token is invalid_state",
+    "T07 the stored order, refunds and notices are still unchanged",
+    "T07 a fresh cart write commits",
+    "T07 both transitions persist with one full refund",
+    "T07 one cancellation notice dated release + 20 minutes",
+    "T07 the release is dated at its time",
+    "T06 the acceptance limit is 20 minutes after submission",
+    "T06 an acceptance at exactly the limit commits",
+    "T06 the timer applies first: cancelled, not accepted, one full refund",
+    "T09 a late acceptance commits at its at",
+    "T09 the cancelled order stays cancelled",
+    "T09 unknown-target and back-dated events are invalid_event",
+    "T09 data, notices, version and clock are preserved",
+    "T09 one denial audit row each",
+    "T11 cancellation commits",
+    "T11 an identical retry returns the stored receipt",
+    "T11 the replayed receipt equals the original",
+    "T11 one refund",
+    "T15 an unknown order is not_found",
+    "T15 a repeated request ID returns the stored receipt",
+    "T15 the same request ID with different arguments conflicts",
+    "T15 a failing write is rejected",
+    "T15 a failed call preserves data and version",
+    "T15 the Agent cannot apply events or reset",
+    "T16 the event commits",
+    "T16 an identical event and bundle under the same event ID are deduplicated",
+    "T16 the replayed event receipt equals the original",
+    "T16 changed content under the same event ID conflicts",
+    "T16 reset is ready",
+    "T16 reset restores the seed, the cart and virtual time",
+    "T16 a write with a pre-reset version is stale",
+    "T16 a seed with another seed ID loads",
+    "T16 a checkout token previewed under a different seed is stale",
+    "T16 the fixture loads five minutes after the scheduled release",
+    "T16 reads show the release",
+    "T16 the stored order is still scheduled",
+    "T16 at the same virtual time the next cart write persists the release once",
+    "T16 the clock did not move",
+    "T16 reset is ready after the clock moved",
+    "T16 reset restores the loaded seed and the virtual time given at load"
+  ],
+  "mail_integration_checks": [
+    "Mail 1.3.0 is the receiver",
+    "The package wire schema is byte-identical to the runtime contract",
+    "The package wire schema is byte-identical to Mail's receive schema",
+    "Only the run notices are pending, not seeded history",
+    "Payload for notice.order_placed matches the Mail payload schema",
+    "Payload for notice.order_accepted matches the Mail payload schema",
+    "Payload for notice.order_delivered matches the Mail payload schema",
+    "Every notice is published with a committed receipt",
+    "Message and request IDs come from the epoch and the notice",
+    "One inbox record per notice, received at the synchronized time",
+    "The delivered notice reads back in Mail",
+    "The receipt keeps the notice time as the CloudEvents time",
+    "Publishing leaves Plateway unchanged",
+    "An identical retry in the same Router session returns the first receipts marked duplicate",
+    "A retry creates no second record",
+    "A Plateway reset leaves Mail records unchanged",
+    "Both clocks agree before the next delivery",
+    "A notice written after a reset is a new message",
+    "Without an Infra grant the sender publishes nothing",
+    "An ungranted publish is refused by the Router before dispatch, without halting",
+    "A refused publish creates no Mail record",
+    "The Router stays available after a pre-dispatch refusal",
+    "An incompatible contract is rejected before dispatch",
+    "An incompatible contract creates no Mail record",
+    "A receiver rejection halts the Router",
+    "A receiver rejection creates no Mail record",
+    "A receiver rejection leaves Plateway committed state",
+    "Later deliveries wait for reconciliation",
+    "A receiver reset after Router setup invalidates the route",
+    "No Mail record is created after the receiver reset",
+    "A lost acknowledgement is unknown and halts the Router",
+    "Reconciliation in the same Mail epoch finds the committed event and exactly one record",
+    "Plateway stays committed after an unknown acknowledgement",
+    "The halted Router accepts no further delivery",
+    "After a receiver reset the unknown outcome is recorded as indeterminate",
+    "Without a bound Mail account nothing is published",
+    "No Mail record is created",
+    "The notice stays in the Plateway log"
+  ],
+  "not_run": [
+    "Independent base validator selected by maintainers (PR check base-runtime-compatibility)",
+    "Maintainers' human review of realism and provenance",
+    "Trial runs with an Agent"
+  ]
+}

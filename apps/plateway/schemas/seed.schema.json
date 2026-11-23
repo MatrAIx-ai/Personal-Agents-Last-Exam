@@ -1,0 +1,1250 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Plateway seed",
+  "type": "object",
+  "properties": {
+    "seed_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "time_zone": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "holder": {
+      "type": "object",
+      "properties": {
+        "person_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      },
+      "required": [
+        "person_id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "addresses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "line1": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "zone_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "line1",
+          "zone_id"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "cards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "brand": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "last4": {
+            "type": "string",
+            "pattern": "^[0-9]{4}$"
+          },
+          "exp_month": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "exp_year": {
+            "type": "integer",
+            "minimum": 2020,
+            "maximum": 2100
+          },
+          "behavior": {
+            "enum": [
+              "approve",
+              "decline"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "brand",
+          "last4",
+          "exp_month",
+          "exp_year",
+          "behavior"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "restaurants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "cuisines": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "minItems": 1
+          },
+          "delivery_fee_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000
+          },
+          "prep_minutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 180
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "zone_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "travel_minutes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 180
+                }
+              },
+              "required": [
+                "zone_id",
+                "travel_minutes"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1
+          },
+          "hours": {
+            "type": "object",
+            "properties": {
+              "mon": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "maxItems": 4
+              },
+              "tue": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "maxItems": 4
+              },
+              "wed": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "maxItems": 4
+              },
+              "thu": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "maxItems": 4
+              },
+              "fri": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "maxItems": 4
+              },
+              "sat": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "maxItems": 4
+              },
+              "sun": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "maxItems": 4
+              }
+            },
+            "required": [
+              "mon",
+              "tue",
+              "wed",
+              "thu",
+              "fri",
+              "sat",
+              "sun"
+            ],
+            "additionalProperties": false
+          },
+          "paused": {
+            "type": "boolean"
+          },
+          "pause_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rating": {
+            "type": "object",
+            "properties": {
+              "average": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "average",
+              "count"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "cuisines",
+          "delivery_fee_cents",
+          "prep_minutes",
+          "zones",
+          "hours",
+          "paused",
+          "pause_reason",
+          "rating"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "dishes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "restaurant_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "price_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "allergens": {
+            "type": "object",
+            "properties": {
+              "contains": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "milk",
+                    "egg",
+                    "fish",
+                    "crustacean shellfish",
+                    "tree nuts",
+                    "peanuts",
+                    "wheat",
+                    "soybeans",
+                    "sesame"
+                  ]
+                },
+                "uniqueItems": true
+              },
+              "may_contain": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "milk",
+                    "egg",
+                    "fish",
+                    "crustacean shellfish",
+                    "tree nuts",
+                    "peanuts",
+                    "wheat",
+                    "soybeans",
+                    "sesame"
+                  ]
+                },
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "contains",
+              "may_contain"
+            ],
+            "additionalProperties": false
+          },
+          "option_groups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "required": {
+                  "type": "boolean"
+                },
+                "min": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "max": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "price_delta_cents": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100000
+                      },
+                      "allergens": {
+                        "type": "object",
+                        "properties": {
+                          "contains": {
+                            "type": "array",
+                            "items": {
+                              "enum": [
+                                "milk",
+                                "egg",
+                                "fish",
+                                "crustacean shellfish",
+                                "tree nuts",
+                                "peanuts",
+                                "wheat",
+                                "soybeans",
+                                "sesame"
+                              ]
+                            },
+                            "uniqueItems": true
+                          },
+                          "may_contain": {
+                            "type": "array",
+                            "items": {
+                              "enum": [
+                                "milk",
+                                "egg",
+                                "fish",
+                                "crustacean shellfish",
+                                "tree nuts",
+                                "peanuts",
+                                "wheat",
+                                "soybeans",
+                                "sesame"
+                              ]
+                            },
+                            "uniqueItems": true
+                          }
+                        },
+                        "required": [
+                          "contains",
+                          "may_contain"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "price_delta_cents",
+                      "allergens"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1,
+                  "maxItems": 20
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "required",
+                "min",
+                "max",
+                "options"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 10
+          }
+        },
+        "required": [
+          "id",
+          "restaurant_id",
+          "name",
+          "description",
+          "price_cents",
+          "available",
+          "allergens",
+          "option_groups"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "cart": {
+      "type": "object",
+      "properties": {
+        "restaurant_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "item_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "option_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "uniqueItems": true
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "item_id",
+              "option_ids",
+              "quantity",
+              "label"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "restaurant_id",
+        "lines"
+      ],
+      "additionalProperties": false
+    },
+    "orders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "restaurant_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "address_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "card_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "status": {
+            "enum": [
+              "scheduled",
+              "submitted",
+              "preparing",
+              "picked_up",
+              "delivered",
+              "cancelled"
+            ]
+          },
+          "mode": {
+            "enum": [
+              "asap",
+              "scheduled"
+            ]
+          },
+          "placed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "delivery_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "release_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "submitted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "accept_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "estimated_delivery_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "delivered_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "item_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "price_delta_cents": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "price_delta_cents"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10
+                },
+                "label": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "unit_price_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "subtotal_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "tax_cents": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "removed": {
+                  "type": "boolean"
+                },
+                "removed_reason": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "unavailable",
+                        "release"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "removed_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "report": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "enum": [
+                            "missing",
+                            "wrong"
+                          ]
+                        },
+                        "at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "at"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "item_id",
+                "name",
+                "options",
+                "quantity",
+                "label",
+                "unit_price_cents",
+                "subtotal_cents",
+                "tax_cents",
+                "removed",
+                "removed_reason",
+                "removed_at",
+                "report"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 50
+          },
+          "fees": {
+            "type": "object",
+            "properties": {
+              "delivery_cents": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "service_cents": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "small_order_cents": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "delivery_cents",
+              "service_cents",
+              "small_order_cents"
+            ],
+            "additionalProperties": false
+          },
+          "subtotal_cents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "tax_cents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "tip_cents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "total_cents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "charge": {
+            "type": "object",
+            "properties": {
+              "card_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "amount_cents": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "card_id",
+              "amount_cents",
+              "at"
+            ],
+            "additionalProperties": false
+          },
+          "refunds": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "amount_cents": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "reason": {
+                  "enum": [
+                    "cancelled",
+                    "line_unavailable",
+                    "line_removed_at_release",
+                    "line_reported"
+                  ]
+                },
+                "line_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "amount_cents",
+                "reason",
+                "line_id",
+                "at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "note": {
+                  "type": "string",
+                  "maxLength": 300
+                }
+              },
+              "required": [
+                "at",
+                "status",
+                "note"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "cancellation": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "reason": {
+                    "enum": [
+                      "account_holder",
+                      "rejected",
+                      "not_accepted",
+                      "unavailable_at_release",
+                      "closed_at_release",
+                      "last_line_unavailable"
+                    ]
+                  },
+                  "stage": {
+                    "enum": [
+                      "scheduled",
+                      "submitted",
+                      "preparing"
+                    ],
+                    "description": "The order status just before the cancellation. The App records it; a seed may omit it, in which case it is read from the timeline."
+                  },
+                  "refunded_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "kept_cents": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "at",
+                  "reason",
+                  "refunded_cents",
+                  "kept_cents"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "stars": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "text": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "stars",
+                  "text",
+                  "at"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "restaurant_id",
+          "address_id",
+          "card_id",
+          "status",
+          "mode",
+          "placed_at",
+          "delivery_at",
+          "release_at",
+          "submitted_at",
+          "accept_by",
+          "estimated_delivery_at",
+          "delivered_at",
+          "lines",
+          "fees",
+          "subtotal_cents",
+          "tax_cents",
+          "tip_cents",
+          "total_cents",
+          "charge",
+          "refunds",
+          "timeline",
+          "cancellation",
+          "rating"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Timers are stored on orders: accept_by for a submitted order and release_at for a scheduled order. A seed may hold a timer that is already due at the loaded clock; it is valid, reads and previews project its effect, and the first write or event commits it as of its due time, before anything else."
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+          },
+          "kind": {
+            "enum": [
+              "notice.order_placed",
+              "notice.order_accepted",
+              "notice.order_delayed",
+              "notice.order_delivered",
+              "notice.item_refunded",
+              "notice.order_cancelled"
+            ]
+          },
+          "order_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "line_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 800
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80000
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "order_id",
+          "line_id",
+          "at",
+          "title",
+          "body"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "issued": {
+      "type": "object",
+      "properties": {
+        "o": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 999999999
+        },
+        "ol": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 999999999
+        },
+        "rf": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 999999999
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 999999999
+        }
+      },
+      "additionalProperties": false,
+      "description": "Optional. The highest numeric suffix issued so far for each ID prefix (o, ol, rf, n), so that IDs are never reused after a removal. The App maintains it; a seed may omit it."
+    }
+  },
+  "required": [
+    "seed_id",
+    "account_id",
+    "owner_person_id",
+    "time_zone",
+    "holder",
+    "zones",
+    "addresses",
+    "cards",
+    "restaurants",
+    "dishes",
+    "cart",
+    "orders",
+    "notices"
+  ],
+  "additionalProperties": false
+}
