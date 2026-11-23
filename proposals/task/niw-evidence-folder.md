@@ -35,7 +35,7 @@ Earlier conversations and authorized workspaces hold facts that the live request
 
 ### Sources
 
-All sources share one simulated clock and return raw results, pages and files, never gold answers. Every record carries timestamps, stable IDs and realistic metadata.
+All sources share one simulated clock and return raw results, pages and files, never gold answers. Every record carries timestamps, stable IDs and realistic metadata. Every mail, profile, preprint, publisher, review and portal record is dated on or after `2025-01-01`; P1 and P2 were published in 2025.
 
 - **Mail:** the attorney checklist and a later clarification, plus publisher and conference messages, including similar-looking acceptance notices. It also holds review invitations and organizer confirmations, and distractors. Evidence emails must be exported as `.eml` or readable PDF with the sender, date, message ID and decision text intact.
 - **Scholar-like profile** (workflow reference: Google Scholar): ten entries for eight works, including one genuine duplicate and one article by a namesake. Citation lists are visible but are not proof of identity or use. Edits require authorization.
