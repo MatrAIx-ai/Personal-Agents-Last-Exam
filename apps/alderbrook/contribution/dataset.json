@@ -1,0 +1,44 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "alderbrook-minimal",
+  "version": "1.0.0",
+  "description": "Authored synthetic history of one policyholder at a fictional insurer, for reproducible acceptance: 2 policies and 9 claims. A development script replays the authored history once through the App. The fixture keeps the 22 newest notifications and every activity row. It is not a benchmark task.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Authored synthetic records; no external collection. The insurer, people, shops, lender and policies are fictional. Two public pages were read only for the shape of the workflows, and no text, data, form or brand was copied: the auto claims process of Progressive (https://www.progressive.com/claims/auto-process/) and the Fair Claims Settlement Practices Regulations of California, for response time limits (https://www.insurance.ca.gov/01-consumers/130-laws-regs-hearings/05-CCR/fair-claims-regs.cfm).",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/alderbrook/dev/build-fixture.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized timestamps and account IDs. Records are policies and claims; a claim holds its evidence, requests, estimates, decisions, disputes, offers, rental periods and payments."
+  ],
+  "expected_counts": {
+    "records": 11,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}

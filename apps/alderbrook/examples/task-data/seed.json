@@ -1,0 +1,325 @@
+{
+  "account_id": "alderbrook-jordan",
+  "owner_person_id": "person-jordan",
+  "insurer": {
+    "name": "Alderbrook Mutual",
+    "timezone": "America/New_York",
+    "rules": {
+      "notice_days": 30,
+      "request_response_days": 10,
+      "dispute_window_days": 30,
+      "offer_response_days": 7,
+      "rental_grace_days": 5
+    }
+  },
+  "preferences": {
+    "timezone": "America/New_York",
+    "email_notices": true
+  },
+  "policies": [
+    {
+      "id": "pol-auto-01",
+      "kind": "auto",
+      "number": "AB-AUTO-204418",
+      "term": {
+        "start": "2026-07-01T00:00:00-04:00",
+        "end": "2027-07-01T00:00:00-04:00"
+      },
+      "named_insured": {
+        "person_id": "person-jordan",
+        "name": "Jordan Ellis"
+      },
+      "listed_people": [
+        {
+          "person_id": "person-jordan",
+          "name": "Jordan Ellis",
+          "role": "named_insured"
+        },
+        {
+          "person_id": "person-priya",
+          "name": "Priya Ellis",
+          "role": "driver"
+        },
+        {
+          "person_id": "person-sam",
+          "name": "Sam Ellis",
+          "role": "driver"
+        }
+      ],
+      "vehicles": [
+        {
+          "id": "veh-01",
+          "year": 2021,
+          "make": "Honda",
+          "model": "CR-V",
+          "lienholder": null
+        },
+        {
+          "id": "veh-02",
+          "year": 2023,
+          "make": "Toyota",
+          "model": "Camry",
+          "lienholder": {
+            "name": "Harbor Credit Union"
+          }
+        }
+      ],
+      "insured_address": null,
+      "coverages": [
+        {
+          "type": "collision",
+          "deductible": 500,
+          "limit": null
+        },
+        {
+          "type": "comprehensive",
+          "deductible": 250,
+          "limit": null
+        }
+      ],
+      "rental_benefit": {
+        "daily_cap": 40,
+        "max_days": 30
+      }
+    },
+    {
+      "id": "pol-rent-01",
+      "kind": "renters",
+      "number": "AB-RENT-118072",
+      "term": {
+        "start": "2026-03-01T00:00:00-05:00",
+        "end": "2027-03-01T00:00:00-05:00"
+      },
+      "named_insured": {
+        "person_id": "person-jordan",
+        "name": "Jordan Ellis"
+      },
+      "listed_people": [
+        {
+          "person_id": "person-jordan",
+          "name": "Jordan Ellis",
+          "role": "named_insured"
+        },
+        {
+          "person_id": "person-noor",
+          "name": "Noor Haddad",
+          "role": "household_member"
+        }
+      ],
+      "vehicles": [],
+      "insured_address": {
+        "id": "addr-01",
+        "line": "48 Larch Street, Apt 3B, Rochester, NY 14607"
+      },
+      "coverages": [
+        {
+          "type": "personal_property",
+          "deductible": 250,
+          "limit": 15000
+        }
+      ],
+      "rental_benefit": null
+    }
+  ],
+  "claims": [
+    {
+      "police_report_number": "RPD-26-118842",
+      "driver": {
+        "kind": "listed",
+        "person_id": "person-jordan"
+      },
+      "state": "open",
+      "path": "repair",
+      "outcome": null,
+      "closed_at": null,
+      "withdrawn_at": null,
+      "repair_completed_at": null,
+      "repair_reported_by": null,
+      "final_invoice_total": null,
+      "payee": null,
+      "evidence": [],
+      "requests": [],
+      "estimates": [],
+      "determinations": [],
+      "disputes": [],
+      "offers": [],
+      "rentals": [],
+      "payments": [],
+      "history": [
+        {
+          "at": "2026-11-30T09:15:00-05:00",
+          "action": "claims.file",
+          "actor": "agent",
+          "ref": "seed-clm-0007"
+        }
+      ],
+      "id": "clm-0007",
+      "policy_id": "pol-auto-01",
+      "coverage": "collision",
+      "subject_id": "veh-01",
+      "loss_at": "2026-11-28T16:40:00-05:00",
+      "filed_at": "2026-11-30T09:15:00-05:00",
+      "description": "Rear-ended at a stop light on Monroe Avenue. Damage to the rear bumper and the left tail lamp."
+    },
+    {
+      "police_report_number": "RPD-26-112207",
+      "driver": null,
+      "state": "open",
+      "path": "repair",
+      "outcome": null,
+      "closed_at": null,
+      "withdrawn_at": null,
+      "repair_completed_at": null,
+      "repair_reported_by": null,
+      "final_invoice_total": null,
+      "payee": null,
+      "evidence": [
+        {
+          "id": "evd-0003",
+          "kind": "report",
+          "dated": "2026-11-11T10:00:00-05:00",
+          "description": "Police report for the basement break-in.",
+          "reference": null,
+          "added_at": "2026-11-12T08:05:00-05:00"
+        },
+        {
+          "id": "evd-0004",
+          "kind": "receipt",
+          "dated": "2025-04-18T12:00:00-04:00",
+          "description": "Store receipt for the bicycle, 420.00.",
+          "reference": null,
+          "added_at": "2026-11-27T18:20:00-05:00"
+        }
+      ],
+      "requests": [],
+      "estimates": [
+        {
+          "id": "est-0029",
+          "kind": "initial",
+          "source": "adjuster",
+          "shop_name": null,
+          "submitted_at": "2026-11-14T12:00:00-05:00",
+          "lines": [
+            {
+              "id": "ln-01",
+              "text": "Laptop, 14 inch, bought 2025",
+              "amount": 1150,
+              "decisions": [
+                {
+                  "status": "approved",
+                  "amount": 1150,
+                  "reason": null,
+                  "decided_at": "2026-11-25T14:00:00-05:00",
+                  "source": "determination",
+                  "source_id": "det-0041"
+                }
+              ]
+            },
+            {
+              "id": "ln-02",
+              "text": "Commuter bicycle",
+              "amount": 420,
+              "decisions": [
+                {
+                  "status": "denied",
+                  "amount": null,
+                  "reason": "No proof of ownership.",
+                  "decided_at": "2026-11-25T14:00:00-05:00",
+                  "source": "determination",
+                  "source_id": "det-0041"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "determinations": [
+        {
+          "id": "det-0041",
+          "issued_at": "2026-11-25T14:00:00-05:00",
+          "issued_by": "Adjuster R. Imani",
+          "note": "The bicycle needs proof of ownership.",
+          "line_ids": [
+            "ln-01",
+            "ln-02"
+          ]
+        }
+      ],
+      "disputes": [
+        {
+          "id": "dsp-0003",
+          "line_id": "ln-02",
+          "decision_index": 0,
+          "reason": "The receipt for the bicycle is attached.",
+          "evidence_ids": [
+            "evd-0004"
+          ],
+          "opened_at": "2026-11-27T18:25:00-05:00",
+          "state": "open",
+          "decided_at": null,
+          "decided_by": null,
+          "note": null
+        }
+      ],
+      "offers": [],
+      "rentals": [],
+      "payments": [],
+      "history": [
+        {
+          "at": "2026-11-12T08:05:00-05:00",
+          "action": "claims.file",
+          "actor": "agent",
+          "ref": "seed-clm-0008"
+        }
+      ],
+      "id": "clm-0008",
+      "policy_id": "pol-rent-01",
+      "coverage": "personal_property",
+      "subject_id": "addr-01",
+      "loss_at": "2026-11-10T19:30:00-05:00",
+      "filed_at": "2026-11-12T08:05:00-05:00",
+      "description": "Storage unit in the building basement was broken into. A laptop and a bicycle were taken."
+    },
+    {
+      "police_report_number": null,
+      "driver": {
+        "kind": "listed",
+        "person_id": "person-priya"
+      },
+      "state": "open",
+      "path": "repair",
+      "outcome": null,
+      "closed_at": null,
+      "withdrawn_at": null,
+      "repair_completed_at": null,
+      "repair_reported_by": null,
+      "final_invoice_total": null,
+      "payee": null,
+      "evidence": [],
+      "requests": [],
+      "estimates": [],
+      "determinations": [],
+      "disputes": [],
+      "offers": [],
+      "rentals": [],
+      "payments": [],
+      "history": [
+        {
+          "at": "2026-12-01T10:30:00-05:00",
+          "action": "claims.file",
+          "actor": "agent",
+          "ref": "seed-clm-0009"
+        }
+      ],
+      "id": "clm-0009",
+      "policy_id": "pol-auto-01",
+      "coverage": "collision",
+      "subject_id": "veh-02",
+      "loss_at": "2026-11-29T07:50:00-05:00",
+      "filed_at": "2026-12-01T10:30:00-05:00",
+      "description": "Slid on ice into a guard rail on Route 490. Heavy damage to the front and the left side."
+    }
+  ],
+  "notifications": [],
+  "activity": []
+}

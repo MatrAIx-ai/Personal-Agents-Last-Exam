@@ -1,0 +1,199 @@
+{
+  "schema": "alderbrook.mail-integration.v1",
+  "runtime_version": "1.6.0",
+  "app_version": "1.0.0",
+  "mail_version": "1.3.0",
+  "node": "v18.20.8",
+  "checks": [
+    {
+      "name": "schemas/router-message.schema.json is a byte copy of the wire schema of Mail 1.3.0",
+      "status": "passed"
+    },
+    {
+      "name": "dispatchId keeps the notification ID in the first lifecycle and adds the epoch in a later one",
+      "status": "passed"
+    },
+    {
+      "name": "The real router process reads the publish declaration of the package, and its connection has no env.* operation",
+      "status": "passed"
+    },
+    {
+      "name": "An event on a claim writes one notification with its full wire message",
+      "status": "passed"
+    },
+    {
+      "name": "sender.publishPending publishes it once under the notification ID, and the receipt is committed",
+      "status": "passed"
+    },
+    {
+      "name": "The sender wrote nothing to Alderbrook: its state, version and audit are byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "The Mail Agent reads the record with mail.get and the event_id of the receipt: in the inbox, unread, with the title and the text of the notification",
+      "status": "passed"
+    },
+    {
+      "name": "The receipt ties the Mail record to the notification ID",
+      "status": "passed"
+    },
+    {
+      "name": "The times are kept apart: the wire time is the time of the event, and received_at is the virtual time of Mail",
+      "status": "passed"
+    },
+    {
+      "name": "Seed history is not sent: the notification of the loaded seed has a wire message, and Mail holds only the new one",
+      "status": "passed"
+    },
+    {
+      "name": "With email_notices off the next event writes a notification with no wire message, and nothing is published",
+      "status": "passed"
+    },
+    {
+      "name": "With email_notices on again the next notification is sent, and the one written while it was off is never sent",
+      "status": "passed"
+    },
+    {
+      "name": "An identical retry returns the first receipt with duplicate true and the same event_id, and Mail still has one record of it",
+      "status": "passed"
+    },
+    {
+      "name": "The same request_id with changed text is rejected with idempotency_conflict, and Mail is unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "A message that names another source account is rejected with source_identity_mismatch, and Mail is unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "A second publishPending publishes nothing, because a delivery is final",
+      "status": "passed"
+    },
+    {
+      "name": "env.reset on Alderbrook only: its epoch advances and its notifications are the seed again, and Mail keeps its epoch and its messages",
+      "status": "passed"
+    },
+    {
+      "name": "After the reset a new notification gets the ID of a notification that was already delivered, with other content",
+      "status": "passed"
+    },
+    {
+      "name": "Control: under the plain notification ID the router refuses the new notice, because the router already knows that identity",
+      "status": "passed"
+    },
+    {
+      "name": "publishPending delivers the new notice as <id>.e<epoch>: committed, not a duplicate and not a conflict",
+      "status": "passed"
+    },
+    {
+      "name": "Mail keeps the old messages and has exactly one new one, with the new title and text",
+      "status": "passed"
+    },
+    {
+      "name": "The seeded history is still not sent",
+      "status": "passed"
+    },
+    {
+      "name": "A second publishPending and a direct identical router.publish add no record",
+      "status": "passed"
+    },
+    {
+      "name": "Control: a second sender object with no firstEpoch reuses the plain notification ID. The router refuses it with idempotency_conflict, the sender stops, and Mail gets nothing",
+      "status": "passed"
+    },
+    {
+      "name": "Control: the refused publish changed nothing in Alderbrook",
+      "status": "passed"
+    },
+    {
+      "name": "A second sender object created with firstEpoch publishes as <id>.e<epoch>: the notice that the first sender delivered is a duplicate, and the new notice is delivered",
+      "status": "passed"
+    },
+    {
+      "name": "Mail keeps its messages and has exactly one new one, with the title and the text of the new notice",
+      "status": "passed"
+    },
+    {
+      "name": "Control: under the plain notification ID the router answers with the old receipt, marked duplicate, and the new notice does not reach Mail",
+      "status": "passed"
+    },
+    {
+      "name": "A new seed in the same run is a later lifecycle too: publishPending delivers the notice as <id>.e<epoch>, and Mail has one more message",
+      "status": "passed"
+    },
+    {
+      "name": "The seed history is read from each snapshot: the notification that only the second seed holds has a wire message, and it is not sent under its ID or as <id>.e<epoch>",
+      "status": "passed"
+    },
+    {
+      "name": "No grant: the router rejects each delivery before dispatch with recipient_not_authorized, and the sender goes on to the next notification",
+      "status": "passed"
+    },
+    {
+      "name": "No grant: Mail has no record, the run is not halted, and both notifications are still in Alderbrook, which the sender did not change",
+      "status": "passed"
+    },
+    {
+      "name": "No mailbox for the owner: the router rejects each delivery before dispatch with recipient_unavailable, and the sender goes on to the next notification",
+      "status": "passed"
+    },
+    {
+      "name": "No mailbox for the owner: Mail has no record, the run is not halted, and both notifications are still in Alderbrook, which the sender did not change",
+      "status": "passed"
+    },
+    {
+      "name": "Receiver refusal: Mail refuses the delivery into a full mailbox. The result is rejected with receiver_rejected and stop_run true, and the sender stops",
+      "status": "passed"
+    },
+    {
+      "name": "Receiver refusal: mail.get with the attempted event_id finds nothing",
+      "status": "passed"
+    },
+    {
+      "name": "Receiver refusal: Alderbrook keeps its commit. The notification is still in env.snapshot and the state is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Receiver refusal: what Mail holds at that moment, read by the Mail Agent: its 1000 old messages, and no record of the notification. Its version is the same",
+      "status": "passed"
+    },
+    {
+      "name": "Receiver refusal: the next publish in that run returns halted with run_halted, and the sender publishes nothing more",
+      "status": "passed"
+    },
+    {
+      "name": "Receiver reset: after env.reset on Mail the router refuses the next delivery. The result is rejected with receiver_lifecycle_changed and stop_run true, and the sender stops",
+      "status": "passed"
+    },
+    {
+      "name": "Receiver reset: Alderbrook keeps its commit. The notification is still in env.snapshot and the state is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Receiver reset: what Mail holds at that moment, read by the Mail Agent: the empty mailbox of its seed, and no record of the notification. Its version is the same",
+      "status": "passed"
+    },
+    {
+      "name": "Receiver reset: the next publish in that run returns halted with run_halted, and the sender publishes nothing more",
+      "status": "passed"
+    },
+    {
+      "name": "Unknown answer: Mail does not answer the router while its state lock is held. The result is unknown with receiver_unconfirmed and stop_run true, and the sender stops",
+      "status": "passed",
+      "note": "This shows a receiver that does not answer: the router got no answer to its first call, so no delivery event was sent and the result has no event_id. It does not reproduce a commit in Mail whose acknowledgement is lost."
+    },
+    {
+      "name": "Unknown answer: Alderbrook keeps its commit. The notification is still in env.snapshot and the state is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Unknown answer: what Mail holds at that moment, read by the Mail Agent: an empty mailbox (read after the lock is removed, when Mail answers again), and no record of the notification. Its version is the same",
+      "status": "passed"
+    },
+    {
+      "name": "Unknown answer: the next publish in that run returns halted with run_halted, and the sender publishes nothing more",
+      "status": "passed"
+    }
+  ],
+  "passed": true
+}
