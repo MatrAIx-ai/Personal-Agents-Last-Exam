@@ -210,20 +210,25 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
     usedExecutions.add(item);
     return item;
   }
+  const pairedReads = new Set();
   for (const row of audit) {
     const requestId = row.input ? row.input.request_id || null : null;
-    const stored = row.decision === 'allow' ? receiptCall(state, requestId) : null;
+    const candidate = row.decision === 'allow' && row.actor === 'agent' ? receiptCall(state, requestId) : null;
+    const stored = candidate && candidate.tool === row.tool ? candidate : null;
     const execution = stored ? null : (row.decision === 'deny' ? nextDenied(row.tool, requestId) : null);
     const args = stored ? stored.args : (execution && execution.args);
-    const linked = history.find(entry => entry.request_id && entry.request_id === requestId && (!entry.device_id || !args || !args.device_id || args.device_id === entry.device_id));
+    const bareDeny = row.decision === 'deny' && !execution;
+    const linked = row.actor === 'agent' && !bareDeny
+      ? history.find(entry => entry.request_id && entry.request_id === requestId && (!entry.device_id || !args || !args.device_id || args.device_id === entry.device_id))
+      : null;
     pushCall({
       seq: row.seq,
-      tool: (stored && stored.tool) || row.tool || null,
-      target: argTarget(args) || callTarget(linked, row, execution),
-      command: (args && args.command) || callCommand(linked, row, execution),
-      arguments: allowArguments(args),
+      tool: row.tool || null,
+      target: bareDeny ? null : (argTarget(args) || callTarget(linked, row, execution)),
+      command: bareDeny ? null : ((args && args.command) || callCommand(linked, row, execution)),
+      arguments: bareDeny ? {} : allowArguments(args),
       outcome: (execution && execution.status) || (row.result && row.result.status) || row.reason || row.decision,
-      actor: linked ? linked.actor_kind : row.actor || null,
+      actor: row.actor || null,
       caller_role: row.actor || null,
       virtual_time: row.virtual_time || null,
       request_id: requestId,
@@ -236,7 +241,14 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
     if (usedExecutions.has(item)) return;
     const tool = item.tool || item.name || null;
     const decision = ['ok', 'committed', 'ready'].includes(item.status) ? 'allow' : 'deny';
-    if (decision === 'allow' && calls.some(call => call.seq != null && call.decision === 'allow' && call.request_id && call.request_id === item.request_id && call.tool === tool)) return;
+    if (decision === 'allow' && item.request_id && calls.some(call => call.seq != null && call.decision === 'allow' && call.request_id && call.request_id === item.request_id && call.tool === tool)) return;
+    if (decision === 'allow' && !item.request_id) {
+      const open = calls.find(call => call.seq != null && call.decision === 'allow' && call.tool === tool && !call.request_id && !pairedReads.has(call.seq));
+      if (open) {
+        pairedReads.add(open.seq);
+        return;
+      }
+    }
     pushCall({
       index,
       tool,

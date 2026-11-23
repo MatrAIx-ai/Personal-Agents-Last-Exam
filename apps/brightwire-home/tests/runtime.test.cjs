@@ -239,6 +239,77 @@ test('the task 73 reference path exports hallway brightness from the snapshot re
   }
 });
 
+test('a clock advance that reuses a request id stays a clock advance', async () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const {Client} = require('../../../runtime/client.cjs');
+  const {exportEvidence} = require('../evaluator/export.cjs');
+  const {task73} = require('../examples/task-73-grade.cjs');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bw-shared-id-'));
+  const clients = [];
+  try {
+    const infra = new Client('brightwire-home', 'infra', 'task-73-shared', dir, 'task-infra', {registry, initialProfile: 'sandbox'});
+    const agent = new Client('brightwire-home', 'agent', 'task-73-shared', dir, 'task-agent', {registry});
+    clients.push(infra, agent);
+    await infra.initialize();
+    await agent.initialize();
+    const opened = await infra.call('env.snapshot');
+    const loaded = await infra.call('env.load_seed', {
+      expected_version: opened.version,
+      request_id: 'task-73-shared-seed',
+      virtual_now: '2026-11-17T19:42:00-06:00',
+      data: require('../fixtures/task-73.json'),
+      binding: require('../fixtures/binding-task-73.json'),
+      policies: opened.snapshot.policies,
+      bundle: opened.snapshot.resources.bundle
+    });
+    assert.equal(loaded.status, 'ready', JSON.stringify(loaded));
+    const off = await agent.call('brightwire-home.devices.command', {
+      expected_version: loaded.version,
+      request_id: 'living-off',
+      device_id: 'light-living',
+      command: 'turn_off'
+    });
+    assert.equal(off.status, 'committed', JSON.stringify(off));
+    const moved = await infra.call('env.advance_time', {
+      expected_version: off.version,
+      request_id: 'living-off',
+      virtual_now: '2026-11-17T19:43:00-06:00'
+    });
+    assert.equal(moved.status, 'committed', JSON.stringify(moved));
+    const later = await infra.call('env.advance_time', {
+      expected_version: moved.version,
+      request_id: 'clock-1944',
+      virtual_now: '2026-11-17T19:44:00-06:00'
+    });
+    assert.equal(later.status, 'committed', JSON.stringify(later));
+    const wrote = await agent.call('brightwire-home.devices.command', {
+      expected_version: later.version,
+      request_id: 'hallway-20',
+      device_id: 'light-hallway',
+      command: 'set_brightness',
+      args: {brightness: 20}
+    });
+    assert.equal(wrote.status, 'committed', JSON.stringify(wrote));
+    const after = await infra.call('env.snapshot');
+    const evidence = exportEvidence({snapshot: after});
+    const advance = evidence.calls.find(call => call.seq === 3);
+    assert.equal(advance.tool, 'env.advance_time');
+    assert.equal(advance.actor, 'infra');
+    assert.equal(advance.request_id, 'living-off');
+    const commands = evidence.calls.filter(call => call.tool === 'brightwire-home.devices.command');
+    assert.equal(commands.length, 2);
+    assert.deepEqual(commands.map(call => ({target: call.target, command: call.command, arguments: call.arguments})), [
+      {target: 'light-living', command: 'turn_off', arguments: {}},
+      {target: 'light-hallway', command: 'set_brightness', arguments: {brightness: 20}}
+    ]);
+    assert.equal(task73(evidence).fresh_device_commands.length, 2);
+  } finally {
+    await Promise.allSettled(clients.map(client => client.close()));
+    fs.rmSync(dir, {recursive: true, force: true});
+  }
+});
+
 test('an approved confirmation joins the infra event and keeps the assistant actor', async () => {
   const fs = require('node:fs');
   const os = require('node:os');

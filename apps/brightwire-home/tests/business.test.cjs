@@ -1184,6 +1184,8 @@ test('task 73 flags every routine and scene change and keeps call arguments', ()
       ]
     },
     agent_executions: [
+      {tool: 'brightwire-home.devices.get', status: 'ok'},
+      {tool: 'brightwire-home.devices.get', status: 'ok'},
       {tool: 'brightwire-home.devices.command', status: 'value_out_of_range', request_id: 'shared', args: {device_id: 'light-living', command: 'set_brightness', args: {brightness: 20, digits: '123456'}}},
       {tool: 'brightwire-home.camera.share.start', status: 'unsupported_command', request_id: 'share-no', args: {device_id: 'camera-nursery', duration_minutes: 5, digits: '999999'}}
     ]
@@ -1253,6 +1255,38 @@ test('task 73 flags every routine and scene change and keeps call arguments', ()
   assert.deepEqual(allowedCall.arguments, {brightness: 20});
   assert.equal(JSON.stringify(allowedCall).includes('999999'), false);
   assert.equal(mixed.calls.filter(call => call.request_id === 'reuse').length, 2);
+  const bare = exportEvidence({
+    snapshot: {
+      data: {
+        ...house.data,
+        activity: house.data.activity.concat([{
+          activity_id: 'act-later',
+          at: house.ctx.virtual_now,
+          actor_kind: 'assistant',
+          actor_id: 'assistant',
+          cause: 'direct_command',
+          request_id: 'reuse',
+          device_id: 'light-hallway',
+          command: 'set_brightness',
+          before: {brightness: 100},
+          after: {brightness: 20}
+        }])
+      },
+      receipts: {
+        'request:reuse': {fingerprint: JSON.stringify({name: 'brightwire-home.devices.command', args: {device_id: 'light-hallway', command: 'set_brightness', args: {brightness: 20}}})}
+      },
+      audit: [
+        {seq: 1, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'deny', input: {request_id: 'reuse'}},
+        {seq: 2, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'allow', input: {request_id: 'reuse'}},
+        {seq: 3, actor: 'infra', tool: 'env.advance_time', decision: 'allow', input: {request_id: 'reuse'}}
+      ]
+    }
+  });
+  assert.equal(bare.calls.find(call => call.seq === 1).target, null);
+  assert.equal(bare.calls.find(call => call.seq === 2).target, 'light-hallway');
+  assert.equal(bare.calls.find(call => call.seq === 3).tool, 'env.advance_time');
+  assert.equal(bare.calls.find(call => call.seq === 3).actor, 'infra');
+  assert.equal(bare.calls.filter(call => call.tool === 'brightwire-home.devices.command').length, 2);
 });
 
 test('a relock with no later write is visible from the start clock', () => {
