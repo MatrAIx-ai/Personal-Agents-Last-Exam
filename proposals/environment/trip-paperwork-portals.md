@@ -69,7 +69,7 @@ Proposed PR title: `[Environment Proposal] [Public service & law + Learning & re
   - The VisaSlot appointment check is an Infra event, `appointment.held`, that records `complete` or `refused` with the missing items.
 - **Events and notifications (required):**
   - **Accepts:** the Infra events listed above.
-  - **Sends:** Mail notices through `channel.email`, for example a ConfDesk invitation letter: `{"subject":"Your SCDA invitation letter","body":"...Mr. ZHOU Mingyu...","from":"registration@confdesk.example"}`.
+  - **Sends:** Mail notices through `channel.email`, as CloudEvents whose `data` follows Mail's [`urn:pale:email-payload:1`](../../examples/apps/mail/schemas/email-payload.schema.json) unchanged. For example, the `data` of a ConfDesk invitation letter: `{"channel":"channel.email","recipient":{"kind":"app_account_ref","app_id":"mail","id":"mail-mingyu"},"source_object":{"app_id":"confdesk","account_id":"confdesk-mingyu","object_type":"invitation_letter","object_id":"letter-0388"},"content":{"title":"Your SCDA invitation letter","body":{"format":"text/plain","text":"Dear Mr. ZHOU Mingyu, ..."},"asset_ids":[]},"extensions":[]}`. The sender identity comes from the CloudEvent `source` and `source_object`, not a free-form address.
   - VisaSlot sends no mail in v1; appointments are read in the portal.
 - **Shared data and dependencies (required):**
   - People are bound person references; the passport name is seed data, used for the name-match check.
