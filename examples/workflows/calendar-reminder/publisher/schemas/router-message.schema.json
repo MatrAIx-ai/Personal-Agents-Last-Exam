@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:push-message:1",
+  "title": "CloudEvents with Notify push payload v1",
+  "description": "CloudEvents JSON envelope; PALE requires JSON object data, dataschema and an absolute source URI. No binary/batch or custom context extensions in this profile. MCP wrapping is a PALE convention, not a standard CloudEvents MCP binding.",
+  "type": "object",
+  "properties": {
+    "specversion": {
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 150
+    },
+    "source": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$",
+      "maxLength": 512
+    },
+    "type": {
+      "const": "org.pale.notify.push.v1"
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "datacontenttype": {
+      "const": "application/json"
+    },
+    "dataschema": {
+      "const": "urn:pale:push-payload:1"
+    },
+    "data": {
+      "$id": "urn:pale:push-payload:1",
+      "title": "Notify-owned phone push payload",
+      "type": "object",
+      "properties": {
+        "channel": {
+          "const": "channel.push"
+        },
+        "recipient": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "app_account_ref"
+            },
+            "app_id": {
+              "const": "notify"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "kind",
+            "app_id",
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "source_object": {
+          "type": "object",
+          "properties": {
+            "app_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "object_type": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "object_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            }
+          },
+          "required": [
+            "app_id",
+            "object_type",
+            "object_id",
+            "account_id"
+          ],
+          "additionalProperties": false
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "body": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 2000
+            },
+            "actionable": {
+              "type": "boolean"
+            },
+            "deep_link": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512,
+                  "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "title",
+            "body",
+            "actionable",
+            "deep_link"
+          ],
+          "additionalProperties": false
+        },
+        "extensions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "namespace": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$"
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "required": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "namespace",
+              "version",
+              "required",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 0
+        }
+      },
+      "required": [
+        "channel",
+        "recipient",
+        "source_object",
+        "content",
+        "extensions"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "specversion",
+    "id",
+    "source",
+    "type",
+    "datacontenttype",
+    "dataschema",
+    "data"
+  ],
+  "additionalProperties": false
+}
