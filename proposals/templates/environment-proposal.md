@@ -8,6 +8,8 @@ Copy this template to `proposals/environment/<slug>.md`. Keep the overview conci
 
 ✍️ Replace each `[Fill in: …]` with your answer. Optional fields can be `None`. For unresolved details, use `TBD` and explain how they will be resolved.
 
+After design approval, use the [App contribution guide](../../docs/app-contribution.md) and [public Core / Messaging runtime](../../runtime/README.md) to reproduce local integration checks. For connections to existing Apps, consult their [business and receive contracts](../../docs/app-integrations.md) before implementing the sender.
+
 ## 1. App and domains
 
 - **Authors / GitHub handles (required):** `[Fill in: names and @handles]`
@@ -37,6 +39,8 @@ Briefly describe the main workflows and why this environment would be useful for
 
 Name possible connections and briefly explain their purpose. Internal personal apps include Mail, Calendar, Contacts and similar tools. Use `None` if no connection applies, or `TBD` if undecided.
 
+For internal personal Apps, state which workflow needs each App and whether the connection is required or optional. Link the existing public interface/version, or identify the missing capability, owner and fallback.
+
 - **Internal personal apps (required):** `[Fill in: personal apps and what could be read or updated, or None / TBD]`
 - **Other apps and websites (required):** `[Fill in: services and potential shared workflows, or None / TBD]`
 
@@ -45,7 +49,7 @@ Name possible connections and briefly explain their purpose. Internal personal a
 - **Operations and access (required):** `[Fill in: MCP, API or GUI entry points; agent-facing actions; setup, reset and event-injection operations used by the platform]`
 - **State and lifecycle (required):** `[Fill in: how app, account and run state is separated; initial data, reset and snapshot behavior; write confirmation, retries and concurrent updates]`
 - **Events and notifications (required):** `[Fill in: external events the app accepts and notifications it sends; channels and example input/output data, or None. Task scenarios define when events occur.]`
-- **Shared data and dependencies (required):** `[Fill in: people, accounts and object references; media and attachment formats; shared components or services needed to run the app]`
+- **Shared data and dependencies (required):** `[Fill in: people, accounts and object references; media and attachment formats; shared components or services needed to run the app; confirm the App package runs on its own with only the shared runtime and these declared dependencies]`
 
 ## 4. Construction plan and effort
 
@@ -58,8 +62,8 @@ Specify how the environment will be built, what will be collected or synthesized
 | Web / app construction | `[Fill in: pages, workflows and state to build; components to reuse]` | `[Fill in: working flows and expected outcomes to verify]` | `[Fill in: estimate]` |
 | Data and image collection | `[Fill in: sources, crawling or reuse method, expected records/images and cleaning work]` | `[Fill in: collected assets, source/reuse records and checks for completeness and broken media]` | `[Fill in: estimate, or N/A with reason]` |
 | Synthetic data and assets | `[Fill in: records/images to generate, quantities, generation method and realistic variation]` | `[Fill in: generated fixtures and checks for consistency, duplication and realism]` | `[Fill in: estimate, or N/A with reason]` |
-| App integrations | `[Fill in: internal personal apps and other services in initial scope; reads/writes and dependencies]` | `[Fill in: connected workflows and state-consistency checks]` | `[Fill in: estimate, or N/A with reason]` |
-| Validation and reset | `[Fill in: local business tests, workflow/error cases and reset checks; fixtures and expected outcomes for platform integration validation]` | `[Fill in: reproducible local test results and platform validation evidence covering permissions, state consistency and reset]` | `[Fill in: estimate]` |
+| App integrations | `[Fill in: internal personal apps and other services in initial scope; reads/writes, existing tool/receive contracts to reuse, data or file formats and dependencies]` | `[Fill in: connected workflows, observable receiver records/files and state-consistency checks]` | `[Fill in: estimate, or N/A with reason]` |
+| Validation and reset | `[Fill in: local business tests plus public-runtime MCP, workflow/error, history-loading and reset checks; declared cross-App flows and expected receiver state/receipts where applicable]` | `[Fill in: after implementation: exact App/runtime versions, commands and reproducible reports covering permissions, state consistency, reset and declared integrations; note remaining manual or deployment checks]` | `[Fill in: estimate]` |
 
 - **Milestones, owners and dependencies (required):** `[Fill in: work order, responsible contributors, expected calendar duration and dependencies; link related PRs]`
 - **Resources and total effort (required):** `[Fill in: total person-days, expected collection/generation costs and storage/compute needs; estimates or explained TBDs]`
