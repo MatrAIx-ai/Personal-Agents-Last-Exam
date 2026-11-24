@@ -1,0 +1,103 @@
+{
+  "schema_version": "pale.app-contribution.v1",
+  "contract_revision": "0.4.0",
+  "app_id": "delivery",
+  "app_categories": [
+    "external"
+  ],
+  "runtime_manifest_ref": null,
+  "interfaces": [
+    {
+      "interface_id": "business-mcp",
+      "transport": "mcp.stdio",
+      "audience": [
+        "agent"
+      ],
+      "status": "declared",
+      "operations": [
+        {
+          "name": "delivery.place_order",
+          "effect": "write",
+          "caller": "agent"
+        }
+      ]
+    }
+  ],
+  "state": {
+    "owner": "app",
+    "isolation_keys": [
+      "run_id",
+      "app_id"
+    ],
+    "seed_schema_ref": "schemas/seed.schema.json",
+    "snapshot_includes_assets": true,
+    "reset_scope": "app_instance",
+    "version_checks": "declared",
+    "idempotent_writes": "declared",
+    "concurrency_control": "per-App file lock in current Core 1.1; source outbox is a proposed extension",
+    "commit_confirmation": "committed + epoch/revision; failures preserve business state",
+    "outbox_atomic_with_business_state": "declared"
+  },
+  "events": {
+    "accepts": [
+      {
+        "type": "delivery.order_status",
+        "schema_ref": "schemas/order-event.schema.json",
+        "status": "declared"
+      }
+    ],
+    "emits": [
+      {
+        "type": "notification.requested",
+        "schema_ref": "schemas/notification.schema.json",
+        "status": "declared"
+      }
+    ],
+    "trigger_owner": "task_and_infra"
+  },
+  "shared_data": {
+    "identity_binding_ref": "fixtures/binding.json",
+    "account_model_ref": "schemas/seed.schema.json",
+    "cross_app_references": true,
+    "asset_catalog_refs": [
+      "assets.catalog.json"
+    ]
+  },
+  "gui_ref": "gui.json",
+  "notification_channels": [
+    "channel.email",
+    "channel.message",
+    "channel.push"
+  ],
+  "subscriptions": {
+    "business_owner": "source_app",
+    "routing_owner": "infra",
+    "task_binding_required": true,
+    "preferences_seed_ref": "fixtures/notification-preferences.json",
+    "status": "declared"
+  },
+  "dependencies": {
+    "core_api": "1.1.0",
+    "required_apps": [],
+    "services": [
+      {
+        "name": "pale.message_router",
+        "status": "declared",
+        "owner": "infra"
+      }
+    ]
+  },
+  "extensions": [],
+  "asset_runtime": {
+    "implemented_descriptor_versions": [],
+    "implemented_mime_types": [],
+    "implemented_storage_adapters": [],
+    "max_assets": 0,
+    "max_bundle_bytes": 0
+  },
+  "messaging": {
+    "publishes": [],
+    "receives": [],
+    "envelope": "cloudevents/1.0"
+  }
+}
