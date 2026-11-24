@@ -1,0 +1,44 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "fernshelf-reference",
+  "version": "1.0.0",
+  "description": "Synthetic records of one fictional person's photo library (Maya Fenwick) with fictional relatives and friends, for reproducible acceptance; not a benchmark task. Workflow shapes were informed by Google Photos Help (https://support.google.com/photos/) for shared albums, link sharing, storage and trash, and by the Immich documentation (https://docs.immich.app/) for albums, stacks, shared links and trash; no data, text, photos, branding or icons were taken from them.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-authored synthetic records; no external collection. People, places and captions are fictional.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "Fernshelf fixture authoring",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Timestamps carry explicit UTC offsets; local days are resolved in America/Los_Angeles."
+  ],
+  "expected_counts": {
+    "records": 26,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism (library size and metadata, notification wording), of whether the script-drawn stand-in images are adequate, and of the fictional status of every person and place."
+  }
+}
