@@ -1,0 +1,232 @@
+{
+  "about": "Recorded outcomes of check (b). Each anchor reference run from check (a) is mutated one step at a time: a write dropped, an audience widened, a count changed, or the clock moved to a deadline just before a step. tests/mutation.test.cjs recomputes every row and fails if any differs, or if a mutation does not fail its targets. Every row whose run returned an error or failed more than its targets has an explanation.",
+  "mutations": [
+    {
+      "anchor": "send_off",
+      "mutation": "drop step 2 (publish)",
+      "kind": "write dropped",
+      "targets": [
+        "planners_told"
+      ],
+      "failed": [
+        "planners_told"
+      ],
+      "errors": [],
+      "extra_flips": []
+    },
+    {
+      "anchor": "send_off",
+      "mutation": "widen step 2 (publish)",
+      "kind": "audience widened",
+      "targets": [
+        "wren_not_told"
+      ],
+      "failed": [
+        "wren_not_told"
+      ],
+      "errors": [],
+      "extra_flips": []
+    },
+    {
+      "anchor": "school_party",
+      "mutation": "drop step 1 (rsvp)",
+      "kind": "write dropped",
+      "targets": [
+        "party_count"
+      ],
+      "failed": [
+        "party_count"
+      ],
+      "errors": [],
+      "extra_flips": []
+    },
+    {
+      "anchor": "school_party",
+      "mutation": "count step 1 (rsvp)",
+      "kind": "count changed",
+      "targets": [
+        "party_count"
+      ],
+      "failed": [
+        "party_count"
+      ],
+      "errors": [],
+      "extra_flips": []
+    },
+    {
+      "anchor": "school_party",
+      "mutation": "deadline step 1 (rsvp): RSVP close",
+      "kind": "deadline passed",
+      "targets": [
+        "party_count"
+      ],
+      "failed": [
+        "party_count"
+      ],
+      "errors": [
+        "step 2: rsvp_closed"
+      ],
+      "extra_flips": [],
+      "explanation": "The clock reaches the RSVP close (2027-03-19 12:00); rsvps.preview returns rsvp_closed, so no RSVP is recorded and party_count fails. Step 2 is the RSVP, after the inserted clock step."
+    },
+    {
+      "anchor": "waitlist_claim",
+      "mutation": "drop step 1 (rsvp)",
+      "kind": "write dropped",
+      "targets": [
+        "claimed",
+        "claim_count"
+      ],
+      "failed": [
+        "claimed",
+        "claim_count"
+      ],
+      "errors": [],
+      "extra_flips": []
+    },
+    {
+      "anchor": "waitlist_claim",
+      "mutation": "count step 1 (rsvp)",
+      "kind": "count changed",
+      "targets": [
+        "claim_count"
+      ],
+      "failed": [
+        "claim_count"
+      ],
+      "errors": [],
+      "extra_flips": []
+    },
+    {
+      "anchor": "waitlist_claim",
+      "mutation": "deadline step 1 (rsvp): offer expiry",
+      "kind": "deadline passed",
+      "targets": [
+        "claimed",
+        "claim_count"
+      ],
+      "failed": [
+        "claimed",
+        "claim_count"
+      ],
+      "errors": [
+        "step 2: claim_expired"
+      ],
+      "extra_flips": [],
+      "explanation": "The clock reaches the offer expiry (2027-03-06 18:20); the offer passes to the next member and rsvps.preview returns claim_expired. Nothing is claimed, so both claim checks fail."
+    },
+    {
+      "anchor": "venue_move",
+      "mutation": "drop step 1 (change)",
+      "kind": "write dropped",
+      "targets": [
+        "venue_moved",
+        "guests_only_told"
+      ],
+      "failed": [
+        "venue_moved",
+        "guests_only_told"
+      ],
+      "errors": [],
+      "extra_flips": []
+    },
+    {
+      "anchor": "venue_move",
+      "mutation": "widen step 1 (change)",
+      "kind": "audience widened",
+      "targets": [
+        "guests_only_told"
+      ],
+      "failed": [
+        "guests_only_told"
+      ],
+      "errors": [],
+      "extra_flips": []
+    },
+    {
+      "anchor": "venue_move",
+      "mutation": "deadline step 1 (change): event end",
+      "kind": "deadline passed",
+      "targets": [
+        "venue_moved"
+      ],
+      "failed": [
+        "venue_moved",
+        "guests_only_told",
+        "slot_done"
+      ],
+      "errors": [
+        "step 2: invalid_state",
+        "step 3: sheet_locked",
+        "step 4: invalid_state"
+      ],
+      "extra_flips": [
+        "guests_only_told",
+        "slot_done"
+      ],
+      "explanation": "The clock reaches the end of the cleanup (2027-03-20 12:00). The edit preview returns invalid_state because the event is past; the sheet locked on 2027-03-18 20:00 (sheet_locked on the release) and the swap expired on 2027-03-02 17:30 (invalid_state on the answer). guests_only_told fails because nobody was told, and slot_done because neither sheet step could run: every later step depends on the clock."
+    },
+    {
+      "anchor": "venue_move",
+      "mutation": "drop step 2 (signups.release)",
+      "kind": "write dropped",
+      "targets": [
+        "slot_done"
+      ],
+      "failed": [
+        "slot_done"
+      ],
+      "errors": [],
+      "extra_flips": []
+    },
+    {
+      "anchor": "venue_move",
+      "mutation": "deadline step 2 (signups.release): sheet lock",
+      "kind": "deadline passed",
+      "targets": [
+        "slot_done"
+      ],
+      "failed": [
+        "guests_only_told",
+        "slot_done"
+      ],
+      "errors": [
+        "step 3: sheet_locked",
+        "step 4: invalid_state"
+      ],
+      "extra_flips": [
+        "guests_only_told"
+      ],
+      "explanation": "The clock reaches the sheet lock (2027-03-18 20:00) after the venue move. The release returns sheet_locked and the swap answer invalid_state (the swap expired on 2027-03-02), so slot_done fails. guests_only_told also flips: the 48-hour reconfirmation window passed on the same clock move, the guests who did not reconfirm became no, and the check compares the notified members with the RSVPs still open at the end."
+    },
+    {
+      "anchor": "venue_move",
+      "mutation": "drop step 3 (signups.swap_answer)",
+      "kind": "write dropped",
+      "targets": [
+        "slot_done"
+      ],
+      "failed": [
+        "slot_done"
+      ],
+      "errors": [],
+      "extra_flips": []
+    },
+    {
+      "anchor": "venue_move",
+      "mutation": "deadline step 3 (signups.swap_answer): swap expiry",
+      "kind": "deadline passed",
+      "targets": [
+        "slot_done"
+      ],
+      "failed": [
+        "slot_done"
+      ],
+      "errors": [
+        "step 4: invalid_state"
+      ],
+      "extra_flips": [],
+      "explanation": "The clock reaches the swap expiry (2027-03-02 17:30); the swap is expired at the next write and the answer returns invalid_state, so the snacks claim never moves and slot_done fails."
+    }
+  ]
+}

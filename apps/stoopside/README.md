@@ -2,23 +2,29 @@
 
 Stoopside is a resettable community-groups App with synthetic data, built for the approved proposal in [#26](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/26) ([`proposals/environment/stoopside.md`](../../proposals/environment/stoopside.md)). Groups have roles, capped events with RSVPs that carry guest and child counts, posts with an audience, and sign-up sheets. Stoopside records who was shown or sent what, so a task about who learns what can be checked from state without a judge. Group, role, event, RSVP and waitlist structure follow Meetup's public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside's own rules.
 
-This is the **first version (M1)**: workflows 1-5 through 25 MCP tools (M1 requires 1-3; 4 and 5 are included early), the visibility function with its hand-written table, one fixture, reset, business tests, checks (a), (c) and (d), and a host-side publisher that delivers notices to Mail. Pages, two more fixtures, the companion Mail seed and the remaining checks follow in M2 and M3 (see [Remaining work](#remaining-work)).
+This is the **second version (M2)**. M1 delivered workflows 1-5 through 25 MCP tools, the visibility function with its hand-written table, one fixture, reset, business tests, checks (a), (c) and (d), and a host-side publisher that delivers notices to Mail. M2 adds the eight business pages on the shared Web Host, two more fixtures, a companion Mail seed and an example scenario for every fixture, the fixture checker, and checks (b), (e), (f) on every fixture and (g). Check (h), an independent reproduction, is M3 (see [Remaining work](#remaining-work)).
 
 ## Run it
 
 Node.js 18+. No packages to install.
 
 ```sh
-# From this directory: business tests and the example event
+# From this directory: business tests (with the fixture checker, (b), (f) and (g)), the example event, the fixture checker
 npm test
 npm run example
+npm run check:fixtures
 
 # From the repository root: real Core with separate Agent and Infra MCP connections
 npm run app:verify -- --app apps/stoopside --output .artifacts/stoopside.json
 node apps/stoopside/tests/platform-checks.cjs
+node apps/stoopside/tests/replay-checks.cjs
 node apps/stoopside/examples/publish-to-mail.cjs
 
-# Regenerate the fixture, binding, dataset hashes, schemas and tools.json after editing their sources
+# Pages in a browser (see Pages below); the browser checks need `npm ci` and `npx playwright install chromium` at the root
+node runtime/web/server.cjs --app stoopside --registry apps/stoopside/web.registry.json --run web-demo --profile sandbox
+node apps/stoopside/tests/web-checks.cjs
+
+# Regenerate fixtures, bindings, Mail seeds, dataset hashes, schemas and tools.json after editing their sources
 npm run generate
 ```
 
@@ -43,6 +49,27 @@ Stoopside follows the environment clock (`ctx.virtual_now`). **Agent reads and w
 Deadlines are computed from stored due times. Reads compute their effect on a copy and store nothing. The next write or event commits every item that fell due, one at a time in due-time order, each stamped with its own due time. When an offer expires, the place passes on at the expiry instant, so the next member's claim deadline is 24 hours from the previous expiry, not from the commit that catches up. One clock jump across several deadlines therefore commits the same chain as several small steps: `tests/business.test.cjs` compares a single jump with small steps (reads in between: byte-identical data; a commit at each step: identical RSVP chain, deliveries and notices), and `tests/platform-checks.cjs` does the same through real Core with `env.advance_time`.
 
 All times use the group's fixed UTC offset; the fixture groups use UTC-05:00 (EST) with no daylight-saving change. A call at a deadline fails.
+
+## Pages
+
+Eight business pages in [`gui/src/app.js`](gui/src/app.js), with [`gui/index.html`](gui/index.html) as the entry page, declared with the optional `pale.web` extension in [`contribution/gui.json`](contribution/gui.json) (`gui_ref` in `contribution.json`). The shared business Web Host (`runtime/web/server.cjs`) serves only these two files and its shared client and stylesheet, and forwards only the Agent tools the run's profile allows. The pages are views inside `app.js`, selected by the URL hash:
+
+| Page | Route | Tools | View-as |
+| :--- | :--- | :--- | :--- |
+| Group home with discovery | `#/groups`, `#/group/<id>` | `groups.list`, `groups.get`, `groups.join`, `groups.leave`, `posts.list`, `posts.delete` | yes |
+| Member directory | `#/members/<group>` | `members.search`, `members.export` | |
+| Event | `#/event/<id>` | `events.get`, `posts.list`, `rsvps.preview`, `rsvps.confirm` | yes |
+| Change preview | `#/change/<new\|edit\|cancel>/<id>` | `events.get`, `events.preview_change`, `events.confirm_change` | |
+| Post composer | `#/compose/<group>[/<post\|comment\|edit\|event>/<id>]` | `groups.get`, `events.list`, `posts.preview`, `posts.publish` | |
+| Sheet | `#/sheet/<id>` | `signups.get`, `signups.claim`, `signups.release`, `signups.swap_propose`, `signups.swap_answer` | yes |
+| Profile | `#/profile` | `profile.get`, `profile.update` | |
+| Help | `#/help` | `help.get` | |
+
+Every value on a page is a tool result: previews show the tool's recipient list, counts and notes (including where pre-filled RSVP counts came from), and errors are the tool's codes. The page keeps no business state and applies no rule; Refresh re-reads. A write sends the version the page last read (`stale_version` asks for a refresh) and reuses its request ID if the same write is retried. View-as lists members already visible on the page and shows `visibility.view_as`'s answer. There are no images or icons; the brand mark is a text letter styled by the shared stylesheet.
+
+**Clock.** Core starts a new instance at the registry's `initial_time`; the Web Host uses whatever registry it is given. The Maple St fixture's clock is 2027-03-01 09:00 EST, later than the shared `apps.registry.json` time (2026-11-18 09:00 PST). Under the shared registry, Maple St's upcoming events read as not open yet (`rsvp_not_open`) and January 2027 events as upcoming, which is not a sensible demo. So the package ships [`web.registry.json`](web.registry.json), a one-App registry with `initial_time` set to the fixture clock; start the Host with `--registry apps/stoopside/web.registry.json` (or `npm run web` from this directory). With any other registry, Infra can move the clock forward with `env.advance_time` to 2027-03-01T09:00:00-05:00, or load another fixture with `env.load_seed` and its own `virtual_now`. The Hillcrest fixture's clock equals the shared `initial_time`.
+
+[`tests/web-checks.cjs`](tests/web-checks.cjs) opens all eight pages in Chromium, compares what they show with the tool results over MCP, drives every write through the pages (RSVP preview with pre-filled counts and a confirm with explicit counts, a venue move notified to guests, a post to an event's guests, a slot release and a swap accept, a profile edit), uses view-as on the three pages that have it, checks the committed state with an Infra snapshot, applies an Infra event and sees it after a refresh, and checks that a management call from the page is refused, that a 390-pixel viewport has no horizontal overflow and that there are no JavaScript errors.
 
 ## The visibility record
 
@@ -89,7 +116,25 @@ There is no host-side publisher on main, so the package ships one: [`examples/pu
 
 ## Data
 
-[`fixtures/minimal.json`](fixtures/minimal.json) is one account (Dana Okafor, member `m-001`) on a fictional Maple St: four groups, 64 members (about a quarter with a display name unlike their everyday name, such as Wren Adeyemi, whom Dana calls Birdie), 37 events (30 past, 7 upcoming), 317 RSVPs, 123 posts and comments, 6 sign-up sheets and two swaps. History runs from 2025-01-06 to the clock, 2027-03-01 09:00 EST. A business test fails if any fixture or example date is before 2025-01-01 or the clock is before 2026-01-01. Dana's latest RSVP in the school parents' group is a year old (guests 1, children 2), which `rsvps.preview` pre-fills. Deliveries are recorded for posts from 2027-01-01 on; older notification history was not imported.
+Three fixtures, listed in [`fixtures/index.json`](fixtures/index.json). Each has a seed, a binding, a companion Mail seed (`fixtures/mail/<key>.json`, the user's Mail 1.3.0 mailbox) and an example scenario (`examples/scenarios/<key>.json`). Only `fixtures/minimal.json` is the manifest seed; load the others with Infra's `env.load_seed`, passing `data`, the fixture's `binding`, `virtual_now` (its clock) and a bundle whose dataset names the fixture as its record source (as `tests/replay-checks.cjs` does).
+
+| Fixture | Seed | Groups | Members (aliased) | Events | Sheets | RSVPs | Posts | Mail threads | Scenario events | Clock | Offset |
+| :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | :--- | :--- |
+| Maple St | `minimal.json` | 4 | 64 (17) | 37 | 6 | 317 | 123 | 17 | 16 | 2027-03-01 09:00 | UTC-05:00 |
+| Riverside | `riverside.json` | 3 | 70 (19) | 32 | 7 | 255 | 67 | 18 | 16 | 2026-04-20 09:00 | UTC-06:00 |
+| Hillcrest | `hillcrest.json` | 4 | 82 (21) | 39 | 7 | 318 | 125 | 19 | 17 | 2026-11-18 09:00 | UTC-08:00 |
+
+History starts in January 2025 in every fixture and runs to its clock, so it covers early 2026 (reviewer suggestion). Every fixture has a group where the user's latest RSVP, the one `rsvps.preview` pre-fills, is over 11 months old with guests and children: Maple St's school parents (2026-03-07, guests 1, children 2), Riverside's soccer families (2025-05-08, guests 1, children 2) and Hillcrest's library friends (2025-11-28, guests 1, children 2). Each also has a full event with a waitlist, a pending swap to the user, `hosts_only` and `event_guests` posts, an announcement, removed and departed members, and a member the user knows by another name who is not on a planning event (Birdie/Wren, Gwen/Wendy, Delia, whose retirement send-off is planned without her).
+
+A member is **aliased** when the first word of their display name and their everyday first name are not prefixes of each other ("Wren" for Birdie, "Hal" for Harold; "Tom" for Tomasz is not aliased). Every aliased member has an agent-visible name link: their email in the user's member export (groups where the user is co-organizer or organizer), a post the user can see that uses both names, or a Mail message in the companion seed that uses both names.
+
+The Riverside and Hillcrest fixtures come from [`scripts/fixture-builder.cjs`](scripts/fixture-builder.cjs) with the hand-written specs in [`scripts/fixtures/`](scripts/fixtures/) (people, groups, events, sheets, swaps, key posts and Mail threads); past RSVPs, background members' join dates and monthly background posts come from a fixed-seed generator. The Maple St Mail threads are in `scripts/fixtures/maple-street-mail.cjs`. The scenarios are hand-written. [`contribution/dataset.json`](contribution/dataset.json) records each fixture as a source, with the SHA-256 of its seed, binding, Mail seed and scenario and its counts.
+
+**Fixture checker.** [`scripts/check-fixtures.cjs`](scripts/check-fixtures.cjs) (`npm run check:fixtures`, also a business test) runs nine checks per fixture: shape (3-4 groups, 60-90 members with 20-35% aliased, 25-40 events, 6-10 sheets, 15-25 Mail threads, 12-20 scenario events); seed schema and `validateSeed`; unique IDs (per collection, across object types, slots, emails, person IDs, Mail messages, scenario events, commit sequence numbers); ordered dates (history from 2025-01-01 to the clock, clock and scenario events from 2026-01-01, revisions, threads, commit order and scenario events in time order, consistent event times); capacity arithmetic (places taken within capacity, guests within the limit, no waitlisted RSVP that would fit, sheet claims within quantity); emails matching the Mail seed (the mailbox address is the user's member email, every `@example.net` address is a member's email, every message is to or from the user); a name link for every aliased member; a stale default RSVP over 11 months old; and the scenario applying in order. A test breaks a copy of a fixture for each check and confirms the checker catches it.
+
+### Maple St
+
+[`fixtures/minimal.json`](fixtures/minimal.json) is one account (Dana Okafor, member `m-001`) on a fictional Maple St: four groups, 64 members (about a quarter with a display name unlike their everyday name, such as Wren Adeyemi, whom Dana calls Birdie), 37 events (30 past, 7 upcoming), 317 RSVPs, 123 posts and comments, 6 sign-up sheets and two swaps. History runs from 2025-01-06 to the clock, 2027-03-01 09:00 EST. A business test fails if any date in any fixture, binding, Mail seed or scenario is before 2025-01-01, or a clock or scenario event is before 2026-01-01. Dana's latest RSVP in the school parents' group is a year old (guests 1, children 2), which `rsvps.preview` pre-fills. Deliveries are recorded for posts from 2027-01-01 on; older notification history was not imported.
 
 The fixture, [`fixtures/binding.json`](fixtures/binding.json) and the hashes in [`contribution/dataset.json`](contribution/dataset.json) come from [`scripts/generate-fixture.cjs`](scripts/generate-fixture.cjs): people, groups, upcoming events, sheets and the posts the checks rely on are written out by hand there; past RSVPs and monthly background posts come from a fixed-seed generator. [`scripts/build-schemas.cjs`](scripts/build-schemas.cjs) generates the seed and event schemas and `tools.json`. A business test fails if any generated file is out of date. No real group, person or post is used.
 
@@ -99,14 +144,20 @@ The fixture, [`fixtures/binding.json`](fixtures/binding.json) and the hashes in 
 | :--- | :--- | :--- |
 | Business rules and every named error, workflows 1-5 | `tests/business.test.cjs` | M1 |
 | (a) Anchor runs: each reference passes every check; do-nothing fails exactly the checks that need a write; each wrong run fails its named check or returns its named error (group post after an empty everyday-name search, the same post deleted, pre-filled counts confirmed, late claim, host edit notified to `group`, unanswered swap, `view_as` trusted after a delivery) | `tests/business.test.cjs` with `tests/checks.cjs` | M1 |
+| (b) Mutation: each anchor reference run with one step changed (15 mutations: 6 writes dropped, 2 audiences widened, 2 counts changed, 5 deadlines passed) fails at least its targeted check; every outcome, error and extra flip is recorded with an explanation in `tests/mutations.json` and recomputed by the test | `tests/mutation.test.cjs` | M2 |
 | (c) Contracts: role-by-operation matrix | `tests/business.test.cjs` | M1 |
 | (c) Contracts: retried and conflicting `request_id`, `stale_version`, consumed previews; the `browse` profile refusing the four gated tools with the state hash unchanged | `tests/platform-checks.cjs` | M1 |
 | (d) Reset: 20 cycles after a write that leaves a notice restore the loaded state hash and visibility-record hash, with no outgoing notice left; Mail untouched | `tests/platform-checks.cjs` | M1 |
-| Single clock jump and small steps give the same chain (reviewer check) | `tests/business.test.cjs`, `tests/platform-checks.cjs` | M1 |
-| (f) Visibility table, and invariants on the fixture (`hosts_only` never visible to a non-host other than the author; nothing visible after removal) | `tests/business.test.cjs` | M1 (planned for M2) |
-| Mail delivery: committed, rejected without a grant, retried | `examples/publish-to-mail.cjs` | M1 (planned for M2) |
-| Public verifier (MCP discovery, schemas, history load, event, reset, isolation, restart) | `npm run app:verify` | M1 |
-| (b) Mutation, (e) replay over a full event list, (g) hidden values, the rest of (f) on all fixtures, (h) independent reproduction | | M2-M3 |
+| (e) Replay through real Core over each fixture's full scenario: one clock jump, 5-hour `env.advance_time` steps with a read after each, and the same steps with a write after each, give byte-identical business data, deliveries, notices and visibility record | `tests/replay-checks.cjs` (and the M1 single-event comparison in `tests/business.test.cjs` and `tests/platform-checks.cjs`) | M2 |
+| (f) Visibility table, hand-written before the function | `tests/business.test.cjs` | M1 |
+| (f) Invariants on every fixture after its scenario: each `hosts_only` interval starts while the member holds a host role (or wrote the post); no interval opens or stays open for a removed member after the removal; the record's open intervals equal `canSee` now for every member and object | `tests/fixtures.test.cjs` | M2 |
+| (g) Hidden values on every fixture, before, halfway through and after its scenario: every read tool over every reachable object, `view_as` for a spread of members, and the three previews; no output contains a pending event's text, names or IDs, a `person_id`, the everyday name of a member whose display name differs, or an email outside `members.export`. `src/` uses no random or wall-clock value, and IDs encode no role | `tests/fixtures.test.cjs` | M2 |
+| Fixture checker on every fixture, and a broken copy for each check | `scripts/check-fixtures.cjs`, `tests/fixtures.test.cjs` | M2 |
+| Companion Mail seeds load into Mail 1.3.0 and read back with `mail.get` | `tests/replay-checks.cjs` | M2 |
+| Mail delivery: committed, rejected without a grant, retried | `examples/publish-to-mail.cjs` | M1 |
+| Pages: all eight in Chromium against the tool results | `tests/web-checks.cjs` | M2 |
+| Public verifier (MCP discovery, schemas, history load, event, reset, isolation, restart) | `npm run app:verify` | M1, rerun in M2 |
+| (h) Independent reproduction by a second person | | M3 |
 
 ## Deviations and clarifications
 
@@ -120,13 +171,16 @@ These follow from the runtime or fill in details the proposal left open; none ch
 - Posts and comments notify their audience in the app (`in_app` deliveries, no Mail notice); announcements, event changes, offers, swaps and the digest go by email. The digest is created only for weeks that have posts.
 - `guest_limit` caps guests; children are not capped but take places.
 - The acceptance command for Mail is `examples/publish-to-mail.cjs` (see above), not `app:verify --with`.
-- The example list has 9 events (one per operation except `swap.answered`); the 12-20 event scenario per fixture is M2 work, with the other fixtures.
+- `examples/timeline.json` (9 events, one per operation except `swap.answered`) stays as the M1 example; each fixture's 12-20 event scenario is in `examples/scenarios/`. `swap.answered` is not in them because it needs a swap the user proposed during the run; a business test covers it.
+- The companion Mail seed exists for every fixture, not only one.
+- **Registry entry in its own commit.** The repository's `apps.registry.json` gets a Stoopside entry in a separate final commit that changes nothing else. With it, the repository suite's `clock-contract` stage fails: `runtime/tests/clock.test.cjs` asserts that the registry has exactly seven Apps, and a submission may not change runtime tests. Without that commit every stage passes. Either way the Web Host demo uses `web.registry.json` (see Pages), because the shared `initial_time` is earlier than the Maple St clock.
+- (e) also runs a third mode, small steps with a write after each step, so due items are committed at each step rather than at the next event; it gives the same hashes.
 
 ## Remaining work
 
-- Pages (`pale.web`, 8 pages with view-as selectors): M2.
-- Two more fixtures, the companion Mail seed (15-25 threads) and a 12-20 event scenario per fixture: M2.
-- Checks (b), (e) over full event lists, (g), and the fixture checker (capacity arithmetic, emails matching the Mail seed, name links for aliased members): M2. Check (h), an independent reproduction: M3.
+- Check (h): a clean-checkout reproduction by a second person who did not implement the flows, named before M3.
+- The repository registry entry passes the full suite only once the runtime's clock test no longer pins seven Apps (see Deviations).
+- A human read of every member and event row in the two new fixtures (`dataset.json` review status is `pending`).
 
 ## Dependencies
 

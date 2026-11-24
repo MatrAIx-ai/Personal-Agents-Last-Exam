@@ -21,7 +21,7 @@ function rng(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-const rand = rng(20270301);
+let rand = rng(20270301);   // reset at the start of each build()
 const pick = list => list[Math.floor(rand() * list.length)];
 // Fisher-Yates with the fixed-seed PRNG (Array.sort with a random comparator
 // is not stable across Node versions).
@@ -173,6 +173,7 @@ const TEXT = {
 };
 
 function build() {
+  rand = rng(20270301);
   const data = {account_id: 'st-dana', owner_person_id: 'person-dana-okafor', user_member_id: 'm-001', next_seq: 1,
     groups: [], members: [], memberships: [], events: [], rsvps: [], posts: [], digests: [], sheets: [], swaps: [],
     deliveries: [], previews: [], notices: []};
@@ -408,52 +409,98 @@ function build() {
   return {data, binding};
 }
 
-function dataset(data, fixtureSha, bindingSha) {
+// ---- All fixtures ---------------------------------------------------------------
+// Maple St is built above (unchanged since M1). Riverside and Hillcrest come
+// from scripts/fixture-builder.cjs with the hand-written specs in
+// scripts/fixtures/. Each fixture has a binding, a companion Mail seed and a
+// hand-written example scenario (examples/scenarios/<key>.json).
+const FIXTURES = [
+  {key: 'maple-street', seed: 'fixtures/minimal.json', binding: 'fixtures/binding.json', mail: 'fixtures/mail/maple-street.json',
+    scenario: 'examples/scenarios/maple-street.json', clock: '2027-03-01T09:00:00-05:00', history_from: '2025-01-06', rng_seed: 20270301,
+    tool: 'apps/stoopside/scripts/generate-fixture.cjs',
+    description: 'Maple St: a school parents group, a community garden, a block association and a run club. Eastern time (UTC-05:00). The user is Dana Okafor (m-001).'},
+  {key: 'riverside', seed: 'fixtures/riverside.json', binding: 'fixtures/riverside.binding.json', mail: 'fixtures/mail/riverside.json',
+    scenario: 'examples/scenarios/riverside.json', spec: './fixtures/riverside.cjs', tool: 'apps/stoopside/scripts/fixture-builder.cjs',
+    description: 'Riverside: a housing co-op, a kids\' soccer team and a book circle. Central time (UTC-06:00). The user is Nadia Haddad (m-001).'},
+  {key: 'hillcrest', seed: 'fixtures/hillcrest.json', binding: 'fixtures/hillcrest.binding.json', mail: 'fixtures/mail/hillcrest.json',
+    scenario: 'examples/scenarios/hillcrest.json', spec: './fixtures/hillcrest.cjs', tool: 'apps/stoopside/scripts/fixture-builder.cjs',
+    description: 'Hillcrest: a community choir, a dog park group, a cycling club and the library friends. Pacific time (UTC-08:00). The user is Jonah Feld (m-001).'},
+];
+
+function buildAll() {
+  const B = require('./fixture-builder.cjs');
+  return FIXTURES.map(f => {
+    if (!f.spec) {
+      const {data, binding} = build();
+      return {...f, data, bindingData: binding, mailSeed: B.mailSeed({mail: require('./fixtures/maple-street-mail.cjs')}, data)};
+    }
+    const spec = require(f.spec);
+    const out = B.build(spec);
+    return {...f, data: out.data, bindingData: out.binding, mailSeed: out.mail, clock: spec.clock, history_from: spec.historyFrom.slice(0, 10), rng_seed: spec.rngSeed};
+  });
+}
+
+function dataset(all, sha, scenarioSha) {
+  const counts = f => ({groups: f.data.groups.length, members: f.data.members.length, events: f.data.events.length, rsvps: f.data.rsvps.length,
+    posts: f.data.posts.length, sheets: f.data.sheets.length, mail_threads: new Set(f.mailSeed.messages.map(m => m.thread_id)).size,
+    mail_messages: f.mailSeed.messages.length});
   return {
     schema_version: 'pale.dataset.v1',
-    dataset_id: 'stoopside-maple-street',
-    version: '0.1.0',
-    description: 'Synthetic community groups on a fictional Maple St: four groups, 64 members, 37 events and two years of RSVP and post history. For reproducible checks; not a benchmark task. No real group, person or post.',
-    record_source_ids: ['generated'],
-    sources: [{
-      source_id: 'generated',
+    dataset_id: 'stoopside-community-groups',
+    version: '0.2.0',
+    description: 'Three synthetic community-group fixtures (Maple St, Riverside, Hillcrest), each with 3-4 groups, 60-90 members, 25-40 events, 6-10 sign-up sheets, RSVP and post history from January 2025, a companion Mail seed and an example scenario. The manifest seed is Maple St. For reproducible checks; not a benchmark task. No real group, person or post.',
+    record_source_ids: ['maple-street'],
+    sources: all.map(f => ({
+      source_id: f.key,
       kind: 'synthetic',
-      description: 'Hand-written people, groups, upcoming events, sheets and key posts, plus fixed-seed generated past RSVPs and monthly background posts (scripts/generate-fixture.cjs). Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup\'s public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside\'s own rules.',
+      description: f.description + ' People, groups, upcoming events, sheets, key posts and Mail threads are written by hand; past RSVPs and monthly background posts come from a fixed-seed generator. Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup\'s public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside\'s own rules.',
       uri: null,
       license: 'CC0-1.0',
       usage: 'permitted',
       collection: null,
-      generation: {method: 'scripted', tool: 'apps/stoopside/scripts/generate-fixture.cjs', tool_version: '0.1.0', seed: 20270301,
-        parameters: {fixture_sha256: fixtureSha, binding_sha256: bindingSha, history_from: '2025-01-06', clock: '2027-03-01T09:00:00-05:00'}},
-    }],
+      generation: {method: 'scripted', tool: f.tool, tool_version: '0.2.0', seed: f.rng_seed,
+        parameters: {fixture: f.seed, fixture_sha256: sha(f.data), binding: f.binding, binding_sha256: sha(f.bindingData), mail_seed: f.mail,
+          mail_seed_sha256: sha(f.mailSeed), scenario: f.scenario, scenario_sha256: scenarioSha(f.scenario), history_from: f.history_from, clock: f.clock,
+          counts: counts(f)}},
+    })),
     transformations: [
-      'Fixed UTC-05:00 group times; IDs stable across resets.',
-      'Deliveries are recorded for posts from 2027-01-01 on; older notification history was not imported.',
+      'Each fixture uses one fixed UTC offset (no daylight-saving change); IDs are stable across resets.',
+      'Deliveries are recorded only for recent posts (Maple St from 2027-01-01, Riverside from 2026-03-01, Hillcrest from 2026-10-01); older notification history was not imported.',
+      'Only fixtures/minimal.json is the manifest seed; the other fixtures load with env.load_seed and their own binding (see README).',
     ],
-    expected_counts: {records: data.events.length, assets: 0},
+    expected_counts: {records: all[0].data.events.length, assets: 0},
     quality_policy: {duplicate_records: 'reject', duplicate_assets: 'reject', missing_assets: 'allow_declared'},
-    review: {status: 'pending', reviewer: null, notes: 'Automated checks do not replace a human read of every member and event row.'},
+    review: {status: 'pending', reviewer: null, notes: 'Automated checks (scripts/check-fixtures.cjs) do not replace a human read of every member and event row.'},
   };
 }
 
 const root = path.resolve(__dirname, '..');
 function write({check = false} = {}) {
-  const {data, binding} = build();
+  const all = buildAll();
   const json = value => JSON.stringify(value, null, 2) + '\n';
   const sha = value => require('node:crypto').createHash('sha256').update(json(value)).digest('hex');
-  const files = {'fixtures/minimal.json': data, 'fixtures/binding.json': binding, 'fixtures/clock.json': {initial_time: '2027-03-01T09:00:00-05:00'},
-    'contribution/dataset.json': dataset(data, sha(data), sha(binding))};
+  const scenarioSha = file => require('node:crypto').createHash('sha256').update(fs.readFileSync(path.join(root, file))).digest('hex');
+  const files = {'fixtures/clock.json': {initial_time: '2027-03-01T09:00:00-05:00'}, 'contribution/dataset.json': dataset(all, sha, scenarioSha),
+    'fixtures/index.json': {about: 'Generated by scripts/generate-fixture.cjs. One entry per fixture; fixtures/minimal.json is the manifest seed.',
+      fixtures: all.map(f => ({key: f.key, seed: f.seed, binding: f.binding, mail_seed: f.mail, scenario: f.scenario, clock: f.clock}))}};
+  for (const f of all) Object.assign(files, {[f.seed]: f.data, [f.binding]: f.bindingData, [f.mail]: f.mailSeed});
   for (const [file, value] of Object.entries(files)) {
     const text = json(value), target = path.join(root, file);
     if (check) {
-      if (fs.readFileSync(target, 'utf8') !== text) throw new Error('Fixture is out of date: ' + file);
-    } else fs.writeFileSync(target, text);
+      if (!fs.existsSync(target) || fs.readFileSync(target, 'utf8') !== text) throw new Error('Fixture is out of date: ' + file);
+    } else {
+      fs.mkdirSync(path.dirname(target), {recursive: true});
+      fs.writeFileSync(target, text);
+    }
   }
-  return {data, binding};
+  return {data: all[0].data, binding: all[0].bindingData, all};
 }
-module.exports = {build, write};
+module.exports = {build, buildAll, write, FIXTURES};
 if (require.main === module) {
-  const {data} = write({check: process.argv.includes('--check')});
-  console.log(JSON.stringify({members: data.members.length, memberships: data.memberships.length, events: data.events.length, rsvps: data.rsvps.length,
-    posts: data.posts.length, sheets: data.sheets.length, deliveries: data.deliveries.length, next_seq: data.next_seq}));
+  const {all} = write({check: process.argv.includes('--check')});
+  for (const f of all) {
+    const d = f.data;
+    console.log(JSON.stringify({fixture: f.key, members: d.members.length, memberships: d.memberships.length, events: d.events.length, rsvps: d.rsvps.length,
+      posts: d.posts.length, sheets: d.sheets.length, deliveries: d.deliveries.length, next_seq: d.next_seq, mail_messages: f.mailSeed.messages.length}));
+  }
 }

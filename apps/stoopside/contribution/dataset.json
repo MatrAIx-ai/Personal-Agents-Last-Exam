@@ -1,16 +1,16 @@
 {
   "schema_version": "pale.dataset.v1",
-  "dataset_id": "stoopside-maple-street",
-  "version": "0.1.0",
-  "description": "Synthetic community groups on a fictional Maple St: four groups, 64 members, 37 events and two years of RSVP and post history. For reproducible checks; not a benchmark task. No real group, person or post.",
+  "dataset_id": "stoopside-community-groups",
+  "version": "0.2.0",
+  "description": "Three synthetic community-group fixtures (Maple St, Riverside, Hillcrest), each with 3-4 groups, 60-90 members, 25-40 events, 6-10 sign-up sheets, RSVP and post history from January 2025, a companion Mail seed and an example scenario. The manifest seed is Maple St. For reproducible checks; not a benchmark task. No real group, person or post.",
   "record_source_ids": [
-    "generated"
+    "maple-street"
   ],
   "sources": [
     {
-      "source_id": "generated",
+      "source_id": "maple-street",
       "kind": "synthetic",
-      "description": "Hand-written people, groups, upcoming events, sheets and key posts, plus fixed-seed generated past RSVPs and monthly background posts (scripts/generate-fixture.cjs). Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup's public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside's own rules.",
+      "description": "Maple St: a school parents group, a community garden, a block association and a run club. Eastern time (UTC-05:00). The user is Dana Okafor (m-001). People, groups, upcoming events, sheets, key posts and Mail threads are written by hand; past RSVPs and monthly background posts come from a fixed-seed generator. Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup's public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside's own rules.",
       "uri": null,
       "license": "CC0-1.0",
       "usage": "permitted",
@@ -18,20 +18,111 @@
       "generation": {
         "method": "scripted",
         "tool": "apps/stoopside/scripts/generate-fixture.cjs",
-        "tool_version": "0.1.0",
+        "tool_version": "0.2.0",
         "seed": 20270301,
         "parameters": {
+          "fixture": "fixtures/minimal.json",
           "fixture_sha256": "86fe8a45b202397096e78b329ab02abde3412f4a8590795fa67525fa4a0500ce",
+          "binding": "fixtures/binding.json",
           "binding_sha256": "d142277ba9064803d9079347152c3d4828b99bb22adb72e4a3c57b53e7469cb8",
+          "mail_seed": "fixtures/mail/maple-street.json",
+          "mail_seed_sha256": "d570352d371e770003ce909dd90f73d8d55ff80011458b576b2703a1915e79f4",
+          "scenario": "examples/scenarios/maple-street.json",
+          "scenario_sha256": "f849998a0f84160e30a5642fe53ab3ff4f9be89167a49b7e001dd1e0c3c1f45f",
           "history_from": "2025-01-06",
-          "clock": "2027-03-01T09:00:00-05:00"
+          "clock": "2027-03-01T09:00:00-05:00",
+          "counts": {
+            "groups": 4,
+            "members": 64,
+            "events": 37,
+            "rsvps": 317,
+            "posts": 123,
+            "sheets": 6,
+            "mail_threads": 17,
+            "mail_messages": 20
+          }
+        }
+      }
+    },
+    {
+      "source_id": "riverside",
+      "kind": "synthetic",
+      "description": "Riverside: a housing co-op, a kids' soccer team and a book circle. Central time (UTC-06:00). The user is Nadia Haddad (m-001). People, groups, upcoming events, sheets, key posts and Mail threads are written by hand; past RSVPs and monthly background posts come from a fixed-seed generator. Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup's public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside's own rules.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/stoopside/scripts/fixture-builder.cjs",
+        "tool_version": "0.2.0",
+        "seed": 20260420,
+        "parameters": {
+          "fixture": "fixtures/riverside.json",
+          "fixture_sha256": "ac512d9ecbb6916f4dcb41f0c3aaff673303f5200bc1c383fe9603d825bbebf3",
+          "binding": "fixtures/riverside.binding.json",
+          "binding_sha256": "f1c499e31450bda4c44a1c7a2ba53825a256337ecc20b9a10c171ea84c657a35",
+          "mail_seed": "fixtures/mail/riverside.json",
+          "mail_seed_sha256": "7200b636917f5dead78d1dfae16baa6e7018e4a27481d0489fced184ef6d0a29",
+          "scenario": "examples/scenarios/riverside.json",
+          "scenario_sha256": "a999dcadcb739791ae5818e8c91b25e15fcca7612436154a71d5761295906ca9",
+          "history_from": "2025-01-08",
+          "clock": "2026-04-20T09:00:00-06:00",
+          "counts": {
+            "groups": 3,
+            "members": 70,
+            "events": 32,
+            "rsvps": 255,
+            "posts": 67,
+            "sheets": 7,
+            "mail_threads": 18,
+            "mail_messages": 23
+          }
+        }
+      }
+    },
+    {
+      "source_id": "hillcrest",
+      "kind": "synthetic",
+      "description": "Hillcrest: a community choir, a dog park group, a cycling club and the library friends. Pacific time (UTC-08:00). The user is Jonah Feld (m-001). People, groups, upcoming events, sheets, key posts and Mail threads are written by hand; past RSVPs and monthly background posts come from a fixed-seed generator. Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup's public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside's own rules.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/stoopside/scripts/fixture-builder.cjs",
+        "tool_version": "0.2.0",
+        "seed": 20261118,
+        "parameters": {
+          "fixture": "fixtures/hillcrest.json",
+          "fixture_sha256": "e50e4bf93c71f5746893f655656481845f3e381b902bb7abceffc10e79462d21",
+          "binding": "fixtures/hillcrest.binding.json",
+          "binding_sha256": "f9a2acc7e4e5816e631c9ae7d08698b2957f9e467dc16601bbb242ba9312b491",
+          "mail_seed": "fixtures/mail/hillcrest.json",
+          "mail_seed_sha256": "32ba3336b591c2027ed301723ed75ddd32b15cf6cc7001806781220f5b53a25f",
+          "scenario": "examples/scenarios/hillcrest.json",
+          "scenario_sha256": "a148a87f2b926e601d40ae15f069723c6e36f7d4ec862613556ca00013b6c38a",
+          "history_from": "2025-01-09",
+          "clock": "2026-11-18T09:00:00-08:00",
+          "counts": {
+            "groups": 4,
+            "members": 82,
+            "events": 39,
+            "rsvps": 318,
+            "posts": 125,
+            "sheets": 7,
+            "mail_threads": 19,
+            "mail_messages": 21
+          }
         }
       }
     }
   ],
   "transformations": [
-    "Fixed UTC-05:00 group times; IDs stable across resets.",
-    "Deliveries are recorded for posts from 2027-01-01 on; older notification history was not imported."
+    "Each fixture uses one fixed UTC offset (no daylight-saving change); IDs are stable across resets.",
+    "Deliveries are recorded only for recent posts (Maple St from 2027-01-01, Riverside from 2026-03-01, Hillcrest from 2026-10-01); older notification history was not imported.",
+    "Only fixtures/minimal.json is the manifest seed; the other fixtures load with env.load_seed and their own binding (see README)."
   ],
   "expected_counts": {
     "records": 37,
@@ -45,6 +136,6 @@
   "review": {
     "status": "pending",
     "reviewer": null,
-    "notes": "Automated checks do not replace a human read of every member and event row."
+    "notes": "Automated checks (scripts/check-fixtures.cjs) do not replace a human read of every member and event row."
   }
 }
