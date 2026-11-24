@@ -1,0 +1,1159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:parcel-delivery-manager:seed:1",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "carrier": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "service_area": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "name",
+        "service_area"
+      ],
+      "additionalProperties": false
+    },
+    "addresses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "recipient_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "line1": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "line2": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "city": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "region": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "postal_code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          },
+          "country": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "delivery_restricted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "person_id",
+          "label",
+          "recipient_name",
+          "line1",
+          "line2",
+          "city",
+          "region",
+          "postal_code",
+          "country",
+          "verified",
+          "delivery_restricted"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "pickup_points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "kind": {
+            "enum": [
+              "counter",
+              "locker"
+            ]
+          },
+          "address_text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "time_zone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "hours": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "weekday": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 6
+                },
+                "opens": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                "closes": {
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                }
+              },
+              "required": [
+                "weekday",
+                "opens",
+                "closes"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 21
+          },
+          "status": {
+            "enum": [
+              "open",
+              "closed"
+            ]
+          },
+          "accessible": {
+            "type": "boolean"
+          },
+          "accepts_redirects": {
+            "type": "boolean"
+          },
+          "status_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "address_text",
+          "time_zone",
+          "hours",
+          "status",
+          "accessible",
+          "accepts_redirects",
+          "status_note",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "allow_reschedule": {
+            "type": "boolean"
+          },
+          "max_reschedule_days": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          },
+          "allow_address_change": {
+            "type": "boolean"
+          },
+          "allow_hold": {
+            "type": "boolean"
+          },
+          "max_hold_days": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          },
+          "allow_pickup_redirect": {
+            "type": "boolean"
+          },
+          "allow_delegation": {
+            "type": "boolean"
+          },
+          "change_cutoff_hours": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 168
+          },
+          "pickup_window_hours": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 720
+          },
+          "failure_action_hours": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 720
+          },
+          "max_grant_hours": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 720
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "allow_reschedule",
+          "max_reschedule_days",
+          "allow_address_change",
+          "allow_hold",
+          "max_hold_days",
+          "allow_pickup_redirect",
+          "allow_delegation",
+          "change_cutoff_hours",
+          "pickup_window_hours",
+          "failure_action_hours",
+          "max_grant_hours"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 50
+    },
+    "collectors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "recipient_person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "relationship": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "recipient_person_id",
+          "person_id",
+          "relationship"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "shipments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "tracking_number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "recipient_person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "sender_label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "contents_label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "policy_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "estimated_delivery": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "in_transit",
+              "out_for_delivery",
+              "attempt_failed",
+              "at_pickup",
+              "delivered",
+              "collected",
+              "returning",
+              "returned"
+            ]
+          },
+          "plan": {
+            "type": "object",
+            "properties": {
+              "revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "mode": {
+                "enum": [
+                  "home",
+                  "pickup",
+                  "hold"
+                ]
+              },
+              "address_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "point_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "delivery_date": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "hold_until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "revision",
+              "mode",
+              "address_id",
+              "point_id",
+              "delivery_date",
+              "hold_until"
+            ],
+            "additionalProperties": false
+          },
+          "pending_change_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pickup_epoch": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "pickup": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "point_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "epoch": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "ready_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "deadline": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "point_id",
+                  "epoch",
+                  "ready_at",
+                  "deadline"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "attempt": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "action_deadline": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "at",
+                  "reason",
+                  "action_deadline"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "return_info": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "started_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "completed_at": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "started_at",
+                  "reason",
+                  "completed_at"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "kind": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                }
+              },
+              "required": [
+                "at",
+                "kind",
+                "summary"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 1000
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "tracking_number",
+          "recipient_person_id",
+          "sender_label",
+          "contents_label",
+          "policy_id",
+          "created_at",
+          "updated_at",
+          "estimated_delivery",
+          "status",
+          "plan",
+          "pending_change_id",
+          "pickup_epoch",
+          "pickup",
+          "attempt",
+          "return_info",
+          "completed_at",
+          "timeline",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "shipment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "reschedule",
+              "address",
+              "hold",
+              "redirect",
+              "home_delivery"
+            ]
+          },
+          "requested_by_person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "base_plan_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "enum": [
+                  "home",
+                  "pickup",
+                  "hold"
+                ]
+              },
+              "address_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "point_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "delivery_date": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "hold_until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "mode",
+              "address_id",
+              "point_id",
+              "delivery_date",
+              "hold_until"
+            ],
+            "additionalProperties": false
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "applied",
+              "rejected",
+              "cancelled"
+            ]
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "shipment_id",
+          "kind",
+          "requested_by_person_id",
+          "created_at",
+          "updated_at",
+          "base_plan_revision",
+          "target",
+          "status",
+          "decided_at",
+          "reason",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "grants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "shipment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "collector_person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "point_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "pickup_epoch": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "revoked",
+              "replaced",
+              "expired",
+              "invalidated",
+              "consumed"
+            ]
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "end_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "replaces_grant_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "shipment_id",
+          "collector_person_id",
+          "point_id",
+          "pickup_epoch",
+          "created_at",
+          "expires_at",
+          "status",
+          "ended_at",
+          "end_reason",
+          "replaces_grant_id",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "passes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "shipment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "holder_person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "grant_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "point_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "pickup_epoch": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z0-9]{4}-[A-Z0-9]{4}$"
+          },
+          "issued_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "consumed",
+              "invalidated"
+            ]
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "end_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "shipment_id",
+          "holder_person_id",
+          "grant_id",
+          "point_id",
+          "pickup_epoch",
+          "code",
+          "issued_at",
+          "expires_at",
+          "status",
+          "ended_at",
+          "end_reason"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 4000
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "shipment_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "audience": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "shipment_id",
+          "at",
+          "type",
+          "audience",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "carrier",
+    "addresses",
+    "pickup_points",
+    "policies",
+    "collectors",
+    "shipments",
+    "changes",
+    "grants",
+    "passes",
+    "notices"
+  ],
+  "additionalProperties": false
+}
