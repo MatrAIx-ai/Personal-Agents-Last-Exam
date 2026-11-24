@@ -1,0 +1,125 @@
+# Environment Track proposal
+
+Proposed PR title: `[Environment Proposal] [Work & business + Money & insurance + Public service & law] Casefold professional client portal: evolving document requests and item-level review`
+
+## 1. App and domains
+
+- **Authors / GitHub handles (required):** Minghao Guo (@MinghoKwok)
+- **Reference app or website / URL (required):** Client portals of accounting, legal and lending firms: TaxDome client portal (https://taxdome.com/client-portal), Clio for Clients (https://www.clio.com/features/client-portal/) and SmartVault (https://www.smartvault.com/). Used only for the shape of the workflows.
+- **Primary domain (required):** Work & business
+- **Secondary domains (optional):** Money & insurance, Public service & law
+
+## 2. What you plan to build
+
+**✍️ Your answer (required):** Casefold is a resettable, persistent workspace between one professional firm (an accountant, an attorney or a lender) and one client, seen from the client's side. The firm keeps asking for documents and keeps changing what it asks for; its reviewer accepts, waives or asks to replace each item; the client, or an agent acting for them, answers item by item over weeks. Every request revision, every submission and every review decision is kept as its own record, so anyone can tell what was asked at a given moment, what was sent in answer, and which decision applied to which file.
+
+What the client has and what the firm holds are different things. A corrected statement in the client's own files does not replace the copy the firm already has. A file the portal received can still be sent back by the reviewer. A request can change after it was answered, and the change may or may not undo the earlier acceptance. A task can check whether the agent kept the firm's record in step with the client's current evidence, and whether it reported only what the portal shows.
+
+The portal has four workflows:
+
+1. **W1 Cases and evolving requests.**
+   - The agent lists the client's cases and reads a case: status, review cutoff, the firm's late-submission policy, the agent's access, and the request items.
+   - A request item has a stable ID and a chain of immutable **revisions** (title, instructions, accepted file types, due time, required or optional). The firm adds items and revises them through events. A revision states whether it invalidates earlier reviews (a new requirement) or not (for example, a later due time).
+   - Each item's status is derived, never stored by hand: `open` (no submission for the current revision), `received`, `accepted`, `needs_replacement` or `waived`, from the latest submission and review decision that apply to the current revision. An item past its due time and not accepted or waived reads `overdue`.
+2. **W2 Submissions and receipts.**
+   - The agent submits one or more files. A **submission** is immutable: its files, the request items and revisions it answers (one file can answer several items), the virtual time, the submitting actor, and its cutoff standing. Casefold computes the SHA-256 and size of the bytes it actually stored; a hash supplied by the caller is only checked against them.
+   - A new submission for an item supersedes the earlier one for that item only. Superseded submissions stay readable.
+   - The agent can withdraw a submission that no review decision references yet, while the case accepts submissions.
+   - The agent reads back stored bytes, submissions and receipts.
+3. **W3 Review decisions, waivers and notes.**
+   - A **review decision** is immutable and names the item, the revision and the submission it decides, with `accepted` or `needs_replacement` and a note; or names the item and revision with `waived`. Decisions come only from the firm, through Infra events; no Agent operation creates or edits one.
+   - The agent can ask for an item to be waived, with a reason; the firm answers by event.
+   - The agent and the firm exchange notes on the case. A note never changes an item's status.
+4. **W4 Access, cutoff and closure.**
+   - The client's access on a case is `upload`, `view` or `none`, the portal's own business record. The client can lower an assistant's access and the firm can close or reopen a case, through events.
+   - After the review cutoff, the firm's `late_submission_policy` decides: `reject` (no bytes stored, error `after_cutoff`), `archive_only` (stored and receipted, marked not eligible for review, item status unchanged) or `accept_for_review` (handled like an on-time submission and marked late). The firm can extend the cutoff by event. A case can override its firm's policy in the seed.
+
+**What the firm's reviewer is.** Casefold never reads document content or judges whether a file is right. Review decisions arrive as Infra events, and the App validates each one before it applies:
+
+- the case, item, revision and submission exist; the revision is the item's current one; the submission answers that revision, is not withdrawn or superseded, and was stored before the event time;
+- a decision is never edited; a later decision is a new record, and a request revision that invalidates reviews makes earlier decisions inapplicable without changing them.
+
+A task's success criteria, its hidden facts and the client's private instructions stay in the task.
+
+**Reusable workflows.** The same package supports, by seed alone:
+
+- **Tax intake:** an accountant requests W-2s and 1099s; the reviewer marks an issuer statement `needs_replacement` after the issuer corrects it; the agent must submit the corrected file.
+- **Immigration evidence:** an attorney lists exhibits by group; a partial delivery is acceptable while open items are tracked; the reviewer notes that a manuscript lacks the client's name; the attorney's cutoff uses `archive_only`.
+- **Mortgage pre-approval:** a lender requests pay stubs and bank statements, then revises the bank-statement item to cover three months instead of two, which invalidates the earlier acceptance; the client later lowers the assistant's access to `view`.
+- **Baseline:** a landlord requests an ID and proof of income; both are submitted and accepted with no revision, replacement or cutoff. This is the first end-to-end test.
+
+**Boundaries and overlap.** I checked the proposal list and the related PR pages on 2026-11-24.
+
+- **#218 Vouchfile** is applicant-centric: the applicant assembles a dossier, collects confidential letters with waiver rules and reminder limits, and delivers packets to programs against fixed requirements. Casefold is provider-driven: one firm's requirements evolve, its reviewer decides each item, and the client answers in replacement cycles. Casefold has no letters, writers, waivers of access rights or multi-recipient deliveries. Both keep earlier versions readable; I have asked the #218 author about aligning names.
+- **#33 Personal Document Records and the merged Files App (`apps/files`)** hold the client's own library. Casefold holds only what the firm received, as the firm's record, and makes no call into another App's storage.
+- **#148 SubmissionDesk** releases scholarly bundles; **#188 Inkwell** signs documents; **#192** checks a consulate checklist at an appointment; **#39**, **#14** and **#181** are domain portals with attachments. None models a firm's evolving requests and item-level review.
+- **#219 Counterline** (same author) covers negotiation and provider commitments; Casefold covers evidence and review. They share no records.
+
+Tasks that meet this problem: #102 (a verified tax packet for an accountant's portal) and #106 (an NIW evidence folder for an attorney's portal). Both currently plan a task-owned portal.
+
+**First-version scope.** Two fixture families, tax intake and immigration evidence, plus the baseline. Mortgage pre-approval is a later reuse demonstration.
+
+## 3. Potential app connections
+
+- **Internal personal apps (required):**
+  - **Files (`apps/files`), optional, used by the Agent.** The Agent reads a file with `files.read` and passes its bytes to `casefold.submissions.add`. Casefold makes no call to Files. #33 can play the same role once implemented.
+  - **Mail 1.3.0, optional, send-only.** When `email_notices` is on, a new or revised request, a review decision or a firm note also carries a plain-text notice for Mail's existing receive declaration (`channel.email`, `urn:pale:email-message:2`, `mail.receive_notification`), reviewed at `main` commit `a4bce02`. Casefold builds no inbox. No attachment channel is needed.
+  - Calendar has no messaging receiver and is not used. Contacts, Messages, Notes and Tasks are not used.
+- **Other apps and websites (required):** None at run time.
+
+### Integration details
+
+- **Operations and access (required):** 13 Agent-facing MCP operations over stdio, registered in `tools.json` as `casefold.<name>`. Names are provisional until scope review.
+  - Read (8): `cases.list`, `cases.get` (status, cutoff, policy, access, items with current revision and derived status), `requests.get` (with all revisions), `submissions.list` (with superseded, withdrawn and archived ones), `submissions.get`, `submissions.read` (stored bytes), `reviews.list`, `notes.list`.
+  - Write (5): `submissions.add` (case; the items it answers; up to 8 files as filename, MIME type, base64 and an optional SHA-256 to check), `submissions.withdraw`, `requests.ask_waiver`, `notes.send`, `notices.update` (`email_notices`).
+  - No Agent operation creates, edits or removes a request revision or a review decision.
+  - The Agent acts as the bound client or assistant set by Infra, never through an argument; its access on each case comes from the case's access record. `policies.json` can further restrict tools.
+  - Infra-only: `env.load_seed`, `env.apply_event`, `env.reset`, `env.snapshot`, `env.event_status`, `env.validate_bundle` and `env.advance_time`, not listed on the Agent connection.
+  - Errors: `not_found`; `access_denied`; `invalid_state` (a closed case, an item that is accepted or waived for its current revision, a withdrawal after a decision); `after_cutoff` (late submission under `reject`); `hash_mismatch`; `unsupported_type`; `too_large`.
+- **State and lifecycle (required):**
+  - One instance holds one firm and one client, with any number of cases. Firm records (time zone, staff names, accepted types, size limits, cutoff and late-submission policy) are seed history.
+  - Immutable, append-only records: request revisions, submissions, review decisions, waiver requests and notes. Mutable state: case status and cutoff, access records, and which submission is current for each item. Item status is computed from the records.
+  - Bytes are stored through Core's `ctx.assets`, which verifies encoding and hash, and read back through `submissions.read`. Fixtures stay within the reference runtime's budget of 64 assets and 1 MiB decoded per App.
+  - Core gives version checks and request IDs. Retrying `submissions.add` with the same request ID returns the original receipt. A failed submission stores no bytes and changes nothing. Reset restores the seed and the loaded virtual time.
+- **Events and notifications (required):** Tasks choose timing; Casefold defines and validates effects.
+
+  | Event | Example payload | Effect and validation |
+  | :--- | :--- | :--- |
+  | `casefold.request.added` | `{"case_id":"CP-2025-ROWAN","request_id":"rq-07","title":"1099-INT, Bayview","types":["application/pdf"],"due":"2026-03-10T12:00:00-08:00","required":true}` | Adds an item with revision 1. Rejected for a closed case or a duplicate ID. |
+  | `casefold.request.revised` | `{"request_id":"rq-04","changes":{"instructions":"Three most recent monthly statements"},"invalidates_reviews":true}` | Adds the next revision. With `invalidates_reviews`, earlier decisions stay recorded but no longer apply, so the item reads `open`. |
+  | `casefold.review.decided` | `{"request_id":"rq-03","revision":1,"submission_id":"sb-0005","decision":"needs_replacement","note":"Issuer corrected this statement on 2026-03-02."}` | Appends a decision after the checks in section 2. `waived` omits `submission_id`. |
+  | `casefold.note.posted` | `{"case_id":"NIW-LIN-01","from":"Ana Ruiz","text":"The P3 file does not show your name."}` | Appends a firm note. |
+  | `casefold.case.cutoff_set` | `{"case_id":"NIW-LIN-01","cutoff":"2026-02-20T14:00:00-08:00"}` | Sets or extends the review cutoff. Never earlier than the current virtual time. |
+  | `casefold.access.changed` | `{"case_id":"ML-2026-11","actor":"assistant","access":"view"}` | Changes the bound actor's access on the case. |
+  | `casefold.case.closed` / `casefold.case.reopened` | `{"case_id":"CP-2025-ROWAN"}` | Closes the case to all writes, or reopens it. |
+
+  Business time: `overdue` and cutoff standing are computed from the virtual time on read and on write. Outgoing notifications: the optional Mail notices above.
+- **Shared data and dependencies (required):**
+  - Every object has a stable ID. A receipt lists the case, the items and revisions answered, the submission ID, filenames, sizes, the SHA-256 Casefold computed, the cutoff standing and the virtual time, so a task can join what the firm holds to the client's own files by hash, without a shared store.
+  - File types in v1: PDF, UTF-8 text, PNG and JPEG, the formats Core's asset layer validates.
+  - The package runs on its own with runtime 1.6.0 (Core API 1.2.0). `dependencies.required_apps` is empty. Files and Mail are optional and pinned only in the integration examples.
+
+## 4. Construction plan and effort
+
+**✍️ Work breakdown (required):**
+
+| Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
+| :--- | :--- | :--- | :--- |
+| Web / app construction | App package under `apps/casefold/` (`app.json`, `tools.json`, `plugin.cjs`, `service.cjs`, schemas, `src/` modules for cases, request revisions, submissions and supersession, review decisions and their validation, derived status, cutoff policy, access and notes). MCP only; no GUI. | The four workflows run end to end through the public host, with bytes stored and read back through `ctx.assets`. | 3.5 to 4.5 |
+| Data and image collection | N/A: no real firm data, forms or images. | N/A | 0 |
+| Synthetic data and assets | Authored JSON and small synthetic text-layer PDFs, each marked as synthetic. Tax intake: 7 items, one revised, 9 submissions including an original and a corrected statement, one `needs_replacement`, policy `reject`. Immigration evidence: 12 items in 6 groups, a partial delivery, a reviewer note, policy `archive_only`. Baseline seed with policy `accept_for_review`. About 30 files under 600 KB. | Seeds pass validation. A consistency script checks that every receipt hash equals the stored bytes, every decision names an existing revision and an answering submission, and every derived status follows from the records. No real people, firms or identity numbers. | 1.5 to 2 |
+| App integrations | Files read by the Agent and submitted to Casefold; optional send-only Mail notices. | One Files to Casefold flow: a file read from Files is submitted and the receipt hash equals the Files bytes. One Casefold to Mail flow: the inbox shows the notice; a rejected delivery leaves the case unchanged. | 1 |
+| Validation and reset | Business tests T00 to T18 (below); `npm run app:verify -- --app apps/casefold`; a real-MCP script for a task seed with `virtual_now`, `env.advance_time` across a due time and a cutoff under each policy, a failed submission that stores nothing, a retry, rejected review events, and reset; repository `npm test` stays green. | After implementation: exact App, runtime, Files and Mail versions, commands, reproducible reports and a workflow-to-test map. Manual review remains for the realism of request wording and firm policies. | 2 to 2.5 |
+
+| Workflow | Success example | Error or control example | Tests |
+| :--- | :--- | :--- | :--- |
+| Baseline | A landlord case requests an ID and proof of income. Two submissions return receipts; both items read `received`; two `accepted` decisions make them `accepted`. | A submission to an unknown case → `not_found`. | T00 |
+| W1 Requests and revisions | `cases.get` on `CP-2025-ROWAN` lists items with current revisions and derived status. `request.added` adds `rq-07` as `open`. A revision that only moves the due time keeps an `accepted` item `accepted`. A revision with `invalidates_reviews` makes it `open`, and `reviews.list` still shows the earlier decision on revision 1. | Business data is byte-identical after every read. A past-due item reads `overdue` only while not accepted or waived. | T01 to T04 |
+| W2 Submissions and receipts | Submitting the original Northfield statement for `rq-03` returns a receipt whose SHA-256 Casefold computed. Submitting the corrected statement supersedes it for `rq-03` only; one file answering `rq-02` and `rq-05` creates one submission that counts for both. `submissions.read` returns bytes equal to the corrected file. | A supplied hash that differs from the bytes → `hash_mismatch`, nothing stored. A `.docx` for a PDF-only item → `unsupported_type`. A withdrawal of a decided submission → `invalid_state`. A retry with the same request ID returns the original receipt. | T05 to T09 |
+| W3 Reviews, waivers, notes | `review.decided` `needs_replacement` on `sb-0005` makes `rq-03` `needs_replacement`; a new submission makes it `received`. `requests.ask_waiver` records the reason; a `waived` decision closes the item with no file. Notes append on both sides. | A decision naming a superseded or withdrawn submission, a non-current revision, a submission stored after the event time, or a submission that does not answer the item is rejected and changes nothing. Submitting to an `accepted` item → `invalid_state`. A note never changes status. | T10 to T14 |
+| W4 Access, cutoff, closure | Under `archive_only`, a late submission is stored, receipted and marked not eligible; the item status does not change. Under `accept_for_review`, it counts and is marked late. `case.cutoff_set` later than the cutoff makes the next submission on time. | Under `reject`, a late submission → `after_cutoff`, nothing stored. After `access.changed` to `view`, `submissions.add` → `access_denied`. After `case.closed`, every write → `invalid_state`. Reset restores the seed and clock. | T15 to T18 |
+
+- **Milestones, owners and dependencies (required):** Minghao Guo implements and maintains the App. **Activation order:** I also own #219 (Counterline). I ask maintainers to confirm activating this plan after #219's first version is submitted, so the two 14-day windows do not overlap; if that is not possible, I will follow the standard clock. Work order after activation: schemas, asset handling and the baseline (days 1 to 3); request revisions, submissions and receipts (days 3 to 6); review validation, derived status, cutoff policies, access and time (days 6 to 9); fixtures and tests (days 9 to 11); Files and Mail examples and verifier reports (days 11 to 12). Dependencies: runtime 1.6.0 only. Related: #218, #33, #148, #188, #219, #102, #106.
+- **Resources and total effort (required):** 8 to 10 person-days. Node.js 18+ only. No GPU, paid data, model cost or external service. Fixtures under 1 MB, within the runtime's per-App asset budget.
+- **Scope boundary and open questions (required):** Not in the first version: reading or judging document content; OCR; e-signature of engagement letters (#188); payments or invoices; questionnaires and forms; several firms or clients per instance; the firm's side as an Agent; a GUI or CUA interface; a mortgage fixture. Open questions for review: (1) whether the 64-asset and 1 MiB per-App budget is expected to grow, since a real immigration packet can exceed it; v1 stays within it; (2) whether one submission answering several items, as proposed, should instead be one submission per item; (3) the activation order requested above.
+- **License and external dependencies (required):** Code under the repository's MIT License. Fixtures and PDFs are synthetic and offered under the same terms. Nothing is hosted. No external service at run time. Reference pages are used only for the shape of the workflows; no text, forms, logos or brand names are copied.
