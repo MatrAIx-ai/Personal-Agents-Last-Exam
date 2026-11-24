@@ -137,7 +137,8 @@ async function run() {
     equal('No second credit at Skyline', (await skyline.call('skyline.balance', {})).balance, skylineBalance.balance);
 
     // 3–5. Ticket the award, sell out the rest, take the free alternative after a schedule change.
-    const skylineSteps = await require('./skyline-steps.cjs').run({skyline, skylineInfra, mail, router, write, event, version, equal, ok});
+    const skylineSteps = await require('./skyline-steps.cjs').run({skyline, skylineInfra, mail, router, write, event, version, equal, ok,
+      sync:iso => clock(all, iso)});
 
     // 6. Transfer to Harbor (released a day later), then book with the certificate and with points.
     const toHarbor = await write(waypoint, waypointInfra, 'waypoint.transfer', {partner_id:'harbor', points:T.harbor_points});

@@ -122,7 +122,7 @@ All writes use the run's virtual time, `expected_version` and `request_id`. Book
 
 ## GUI
 
-`gui/src/app.js` is a business page for the public Web Host: trips, schedule changes and cancelled bookings with seats and free seats, the points ledger and notices, and Search awards, Book award, Save seats, Accept alternative and Cancel trip. Inventory and schedule events are shown but not caused by the page because the Host connects as the Agent. `gui/src/view.js` is the escaped reviewer renderer. See `gui/README.md`.
+`gui/src/app.js` is a business page for the public Web Host: trips, schedule changes and cancelled bookings with seats and free seats, the points ledger and notices, and Search awards, Book award, Save seats, Accept alternative and Cancel trip. Inventory and schedule events are shown but not caused by the page because the Host connects as the Agent. `gui/src/view.js` is the escaped reviewer renderer. See `gui/README.md`. Flight times show each airport's own clock with its UTC offset, not the viewer's time zone.
 
 ## Limitations
 

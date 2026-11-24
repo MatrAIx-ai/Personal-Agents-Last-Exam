@@ -6,11 +6,16 @@ const money=c=>(c<0?'−$':'$')+(Math.abs(c)/100).toFixed(2);
 const route=t=>t.flights[0].origin+' → '+t.flights.at(-1).dest;
 const openChange=t=>t.status==='ticketed'&&t.change?.status==='open';
 const statusLabel=t=>t.status==='cancelled'?'Cancelled':openChange(t)?'Schedule change':'Ticketed';
-const leg=f=>f.flight_number+' '+f.origin+' '+time(f.departs_at)+' → '+f.dest+' '+time(f.arrives_at);
+// Flight times are shown as the airport's own wall clock with its UTC offset, never converted to the
+// viewer's time zone, so "HND 17:30" means 17:30 in Tokyo wherever the page is opened.
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const localTime=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:\d{2})$/.exec(String(iso||''));
+ return m?MONTHS[+m[2]-1]+' '+(+m[3])+', '+m[4]+':'+m[5]+' (UTC'+(m[6]==='Z'?'+00:00':m[6])+')':time(iso);};
+const leg=f=>f.flight_number+' '+f.origin+' '+localTime(f.departs_at)+' → '+f.dest+' '+localTime(f.arrives_at);
 export const config={
  id:'skyline',title:'Skyline Miles',description:'Award flights, trips and points for this member.',
  list:'skyline.trips',collection:'trips',listArgs:{},get:'skyline.trips',item:'trip',
- heading:t=>route(t)+' · '+t.locator,subtitle:t=>statusLabel(t)+' · '+time(t.flights[0].departs_at),
+ heading:t=>route(t)+' · '+t.locator,subtitle:t=>statusLabel(t)+' · '+localTime(t.flights[0].departs_at),
  labels:{option_id:'Option ID (from Search awards)',passenger_ids:'Passengers',payment_label:'Pay taxes and fees with',dest:'Destination',pax:'Passengers'},
  actions:[
   {label:'Search awards',tool:'skyline.search',success:'Search finished.'},
@@ -36,7 +41,7 @@ function seatPicker(t,f,ui){
 function changeBox(t,ui){
  const ch=t.change;if(!ch)return null;
  const box=el('section',{class:'query-result'},el('h3',{},'Schedule change ('+ch.reason.replace('_',' ')+') · '+ch.status),
-  metadata('Choose by',time(ch.deadline)));
+  metadata('Choose by',localTime(ch.deadline)));
  for(const a of ch.alternatives){
   const accept=el('button',{type:'button',disabled:!openChange(t)||!ui.has('skyline.manage')},'Accept '+a.id);
   accept.addEventListener('click',()=>manage(ui,{booking_id:t.id,action:'accept_alternative',alternative_id:a.id}));
