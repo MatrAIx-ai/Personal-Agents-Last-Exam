@@ -1,0 +1,44 @@
+[
+  {
+    "event_id": "rent-attempt-1",
+    "at": "2026-12-01T09:00:00-08:00",
+    "operation": "finance.debit_due",
+    "payload": {
+      "account_id": "checking",
+      "obligation_id": "rent",
+      "occurrence_id": "rent-december",
+      "amount_cents": 250000
+    }
+  },
+  {
+    "event_id": "delayed-payroll",
+    "at": "2026-12-02T09:00:00-08:00",
+    "operation": "finance.credit_posted",
+    "payload": {
+      "account_id": "checking",
+      "amount_cents": 200000,
+      "source_ref": "payroll-posting"
+    }
+  },
+  {
+    "event_id": "rent-attempt-2",
+    "at": "2026-12-02T09:01:00-08:00",
+    "operation": "finance.debit_due",
+    "payload": {
+      "account_id": "checking",
+      "obligation_id": "rent",
+      "occurrence_id": "rent-december",
+      "amount_cents": 250000
+    }
+  },
+  {
+    "event_id": "minimum-balance",
+    "at": "2026-12-02T23:59:00-08:00",
+    "operation": "finance.balance_check",
+    "payload": {
+      "account_id": "checking",
+      "rule_id": "daily-floor",
+      "business_date": "2026-12-02"
+    }
+  }
+]

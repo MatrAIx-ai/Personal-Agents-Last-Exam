@@ -1,0 +1,1300 @@
+{
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "owner_person_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "instruction": {
+      "$ref": "seed.schema.json#/$defs/instruction"
+    },
+    "next_id": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9000000000000
+    },
+    "accounts": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/account"
+      }
+    },
+    "holdings": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/holding"
+      }
+    },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/proposal"
+      }
+    },
+    "receipts": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/receipt"
+      }
+    },
+    "transactions": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/transaction"
+      }
+    },
+    "instruments": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/instrument"
+      }
+    },
+    "quotes": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/quote"
+      }
+    },
+    "market_history": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/bar"
+      }
+    },
+    "announcements": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/announcement"
+      }
+    },
+    "obligations": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/obligation"
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/rule"
+      }
+    },
+    "assessments": {
+      "type": "array",
+      "items": {
+        "$ref": "seed.schema.json#/$defs/assessment"
+      }
+    },
+    "market_source": {
+      "$ref": "seed.schema.json#/$defs/market_source"
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "instruction",
+    "next_id",
+    "accounts",
+    "holdings",
+    "proposals",
+    "receipts",
+    "transactions",
+    "instruments",
+    "quotes",
+    "market_history",
+    "announcements",
+    "obligations",
+    "rules",
+    "assessments"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "account": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "kind": {
+          "enum": [
+            "bank",
+            "brokerage"
+          ]
+        },
+        "owner_person_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "currency": {
+          "const": "USD"
+        },
+        "balance_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "owner_person_id",
+        "currency",
+        "balance_cents",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "instruction": {
+      "type": "object",
+      "properties": {
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9000000000000
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      },
+      "required": [
+        "revision",
+        "text",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    },
+    "transfer": {
+      "type": "object",
+      "properties": {
+        "from_account": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "to_account": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "from_account",
+        "to_account",
+        "amount_cents"
+      ],
+      "additionalProperties": false
+    },
+    "order_input": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      },
+      "required": [
+        "account_id",
+        "instrument_id",
+        "quantity"
+      ],
+      "additionalProperties": false
+    },
+    "holding": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "cost_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "account_id",
+        "instrument_id",
+        "quantity",
+        "cost_cents"
+      ],
+      "additionalProperties": false
+    },
+    "instrument": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "ticker": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "quote": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "price_cents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9000000000000
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "provider": {
+          "enum": [
+            "yahoo_chart",
+            "alphavantage_demo"
+          ]
+        },
+        "source_url": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "collected_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "raw_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "raw_price": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "delay_seconds": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9000000000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "interval": {
+          "enum": [
+            "1d",
+            "15m",
+            "quote"
+          ]
+        },
+        "price_kind": {
+          "enum": [
+            "last_trade",
+            "daily_reference",
+            "intraday_reference"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "instrument_id",
+        "price_cents",
+        "as_of",
+        "available_at",
+        "valid_until"
+      ],
+      "additionalProperties": false
+    },
+    "bar": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "price_cents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9000000000000
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "provider": {
+          "enum": [
+            "yahoo_chart",
+            "alphavantage_demo"
+          ]
+        },
+        "source_url": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "collected_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "raw_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "raw_price": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "delay_seconds": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9000000000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "interval": {
+          "enum": [
+            "1d",
+            "15m",
+            "quote"
+          ]
+        },
+        "price_kind": {
+          "enum": [
+            "last_trade",
+            "daily_reference",
+            "intraday_reference"
+          ]
+        },
+        "bar_start_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "bar_complete": {
+          "type": "boolean"
+        },
+        "open_price": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "high_price": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "low_price": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "close_price": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "volume": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9000000000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "instrument_id",
+        "price_cents",
+        "as_of",
+        "available_at"
+      ],
+      "additionalProperties": false
+    },
+    "announcement": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "published_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "instrument_id",
+        "text",
+        "published_at",
+        "available_at"
+      ],
+      "additionalProperties": false
+    },
+    "effect": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": -9000000000000,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "account_id",
+        "amount_cents"
+      ],
+      "additionalProperties": false
+    },
+    "position_effect": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "quantity_delta": {
+          "type": "integer",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "cost_delta_cents": {
+          "type": "integer",
+          "minimum": -9000000000000,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "account_id",
+        "instrument_id",
+        "quantity_delta",
+        "cost_delta_cents"
+      ],
+      "additionalProperties": false
+    },
+    "obligation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "kind": {
+          "enum": [
+            "credit",
+            "debit"
+          ]
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9000000000000
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "due_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recurrence": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      },
+      "required": [
+        "id",
+        "account_id",
+        "kind",
+        "amount_cents",
+        "description",
+        "due_at",
+        "recurrence",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    },
+    "rule": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "minimum_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "fee_cents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9000000000000
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "assessment_time": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      },
+      "required": [
+        "id",
+        "account_id",
+        "minimum_cents",
+        "fee_cents",
+        "timezone",
+        "assessment_time",
+        "description",
+        "source_ref"
+      ],
+      "additionalProperties": false
+    },
+    "assessment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "rule_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "business_date": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "balance_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "assessed_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "paid_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "outstanding_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "id",
+        "account_id",
+        "rule_id",
+        "business_date",
+        "at",
+        "balance_cents",
+        "assessed_cents",
+        "paid_cents",
+        "outstanding_cents"
+      ],
+      "additionalProperties": false
+    },
+    "feed_error": {
+      "type": "object",
+      "properties": {
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "interval": {
+          "enum": [
+            "1d",
+            "15m"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "instrument_id",
+        "interval",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "market_source": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "synthetic",
+            "live",
+            "replay"
+          ]
+        },
+        "provider": {
+          "enum": [
+            "authored",
+            "yahoo_chart",
+            "alphavantage_demo"
+          ]
+        },
+        "status": {
+          "enum": [
+            "ready",
+            "degraded",
+            "unavailable"
+          ]
+        },
+        "checked_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_success_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/feed_error"
+          }
+        }
+      },
+      "required": [
+        "mode",
+        "provider",
+        "status",
+        "checked_at",
+        "last_success_at",
+        "snapshot_id",
+        "errors"
+      ],
+      "additionalProperties": false
+    },
+    "market_snapshot": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "provider": {
+          "enum": [
+            "yahoo_chart",
+            "alphavantage_demo"
+          ]
+        },
+        "checked_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "ready",
+            "degraded",
+            "unavailable"
+          ]
+        },
+        "instruments": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "$ref": "seed.schema.json#/$defs/instrument"
+          }
+        },
+        "quotes": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "$ref": "seed.schema.json#/$defs/quote"
+          }
+        },
+        "history": {
+          "type": "array",
+          "maxItems": 1440,
+          "items": {
+            "$ref": "seed.schema.json#/$defs/bar"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/feed_error"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "provider",
+        "checked_at",
+        "status",
+        "instruments",
+        "quotes",
+        "history",
+        "errors"
+      ],
+      "additionalProperties": false
+    },
+    "order": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "quote_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "price_cents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9000000000000
+        },
+        "total_cents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "account_id",
+        "instrument_id",
+        "quantity",
+        "quote_id",
+        "price_cents",
+        "total_cents"
+      ],
+      "additionalProperties": false
+    },
+    "approval": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "decision": {
+          "enum": [
+            "approve",
+            "reject"
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "proposal_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revoked": {
+          "type": "boolean"
+        },
+        "consumed": {
+          "type": "boolean"
+        },
+        "revocation_source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      },
+      "required": [
+        "id",
+        "decision",
+        "source_ref",
+        "proposal_hash",
+        "expires_at",
+        "recorded_at",
+        "revoked",
+        "consumed"
+      ],
+      "additionalProperties": false
+    },
+    "proposal": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "kind": {
+          "enum": [
+            "transfer",
+            "buy",
+            "sell"
+          ]
+        },
+        "parameters": {
+          "anyOf": [
+            {
+              "$ref": "seed.schema.json#/$defs/transfer"
+            },
+            {
+              "$ref": "seed.schema.json#/$defs/order"
+            }
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9000000000000
+        },
+        "instruction_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9000000000000
+        },
+        "account_revisions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9000000000000
+          }
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "approved",
+            "rejected",
+            "cancelled",
+            "executed"
+          ]
+        },
+        "approval": {
+          "anyOf": [
+            {
+              "$ref": "seed.schema.json#/$defs/approval"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "proposal_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "parameters",
+        "reason",
+        "revision",
+        "instruction_revision",
+        "account_revisions",
+        "created_at",
+        "expires_at",
+        "status",
+        "approval",
+        "proposal_hash"
+      ],
+      "additionalProperties": false
+    },
+    "receipt": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "proposal_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "proposal_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "approval_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "approval_source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "executed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/effect"
+          }
+        },
+        "position_effects": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/position_effect"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "proposal_id",
+        "proposal_hash",
+        "approval_id",
+        "approval_source_ref",
+        "executed_at",
+        "effects",
+        "position_effects"
+      ],
+      "additionalProperties": false
+    },
+    "transaction": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "kind": {
+          "enum": [
+            "history",
+            "credit",
+            "debit",
+            "fee",
+            "transfer",
+            "buy",
+            "sell"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "$ref": "seed.schema.json#/$defs/effect"
+          }
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "status": {
+          "enum": [
+            "posted",
+            "paid",
+            "failed"
+          ]
+        },
+        "opening_history": {
+          "type": "boolean"
+        },
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "source_event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "occurrence_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "obligation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "requested_cents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9000000000000
+        },
+        "assessed_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "paid_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        },
+        "outstanding_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9000000000000
+        }
+      },
+      "required": [
+        "id",
+        "at",
+        "kind",
+        "description",
+        "effects",
+        "source_ref",
+        "status"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

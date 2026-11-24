@@ -1,6 +1,9 @@
 # Public business Web Host
 
-Seven Apps provide their own business pages/controllers in `gui/`: Mail, Calendar, Files, Messages, Notes, Tasks and Contacts. This shared Host serves those files and connects the page to a fixed **Agent** MCP process for one App/run. It contains no App-specific operation logic and exposes no management connection to the browser.
+Apps provide their own business pages/controllers in `gui/`. This shared Host serves those files and connects the page to a fixed **Agent** MCP process for one App/run. It contains no App-specific operation logic and exposes no management connection to the browser.
+
+The `pale.web` extension may also declare a package-relative `stylesheet`.
+The Host serves that validated local path at `/app.css` under the same CSP.
 
 ## Start an App
 
@@ -9,10 +12,11 @@ Node 18+ is sufficient to run the Host; no npm install is needed:
 ```sh
 node runtime/web/server.cjs --app mail --run web-demo --profile sandbox
 node runtime/web/server.cjs --app calendar --run web-demo --profile sandbox
-# Other --app values: files, messages, notes, tasks, contacts
+node runtime/web/server.cjs --app finance --registry apps/finance/registry.json --run finance-demo --profile sandbox
+# Other --app values: files, messages, notes, tasks, contacts, finance
 ```
 
-Open the access link printed by each process. A port is selected automatically; `--port 8780` is optional. `--state-dir` and `--registry` select the same state and package assembly as ordinary MCP clients. The provided `apps.registry.json` includes all seven Apps. Each App still has separate state and can run independently.
+Open the access link printed by each process. A port is selected automatically; `--port 8780` is optional. `--state-dir` and `--registry` select the same state and package assembly as ordinary MCP clients. The provided `apps.registry.json` lists the available packages. Each App still has separate state and can run independently. Finance's implementation is pending acceptance; its App README describes the separate trusted confirmation terminal.
 
 Only a **new** instance is initialized with the CLI-selected synthetic profile. `sandbox` enables declared business writes; use a fresh run with `--profile scenario` for restricted Task-like permissions. Starting a Host for existing state never resets that state or changes its policy. To load a real Task or inject a scenario, use the separate Infra MCP interface. There is no browser API for those operations.
 

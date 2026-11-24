@@ -1,0 +1,202 @@
+TAP version 13
+# Subtest: transfer conserves cash, consumes exact approval and replays one financial receipt
+ok 1 - transfer conserves cash, consumes exact approval and replays one financial receipt
+  ---
+  duration_ms: 262.924917
+  type: 'test'
+  ...
+# Subtest: read operations preserve business state
+ok 2 - read operations preserve business state
+  ---
+  duration_ms: 133.398542
+  type: 'test'
+  ...
+# Subtest: rejects invalid endpoints, insufficient cash and fractional cents without changing input
+ok 3 - rejects invalid endpoints, insufficient cash and fractional cents without changing input
+  ---
+  duration_ms: 170.01525
+  type: 'test'
+  ...
+# Subtest: rejection and cancellation prevent execution
+ok 4 - rejection and cancellation prevent execution
+  ---
+  duration_ms: 297.006625
+  type: 'test'
+  ...
+# Subtest: instruction revision invalidates an approved preview
+ok 5 - instruction revision invalidates an approved preview
+  ---
+  duration_ms: 169.675708
+  type: 'test'
+  ...
+# Subtest: only changes to a relevant account invalidate its preview
+ok 6 - only changes to a relevant account invalidate its preview
+  ---
+  duration_ms: 332.749667
+  type: 'test'
+  ...
+# Subtest: approval expiry and revocation prevent money movement
+ok 7 - approval expiry and revocation prevent money movement
+  ---
+  duration_ms: 297.563459
+  type: 'test'
+  ...
+# Subtest: tampered previews, wrong decision revision and foreign identity are rejected
+ok 8 - tampered previews, wrong decision revision and foreign identity are rejected
+  ---
+  duration_ms: 206.913833
+  type: 'test'
+  ...
+# Subtest: only Infra can record a decision, and one approval cannot cover two proposals
+ok 9 - only Infra can record a decision, and one approval cannot cover two proposals
+  ---
+  duration_ms: 209.752
+  type: 'test'
+  ...
+# Subtest: whole-share buys and sells update cash, quantity and cost once
+ok 10 - whole-share buys and sells update cash, quantity and cost once
+  ---
+  duration_ms: 299.757666
+  type: 'test'
+  ...
+# Subtest: trade previews reject short sales, fractional shares and bank-account orders
+ok 11 - trade previews reject short sales, fractional shares and bank-account orders
+  ---
+  duration_ms: 124.715292
+  type: 'test'
+  ...
+# Subtest: a new quote invalidates an approved trade, even when the price stays equal
+ok 12 - a new quote invalidates an approved trade, even when the price stays equal
+  ---
+  duration_ms: 219.244
+  type: 'test'
+  ...
+# Subtest: market reads hide future observations and label expired quotes without mutating data
+ok 13 - market reads hide future observations and label expired quotes without mutating data
+  ---
+  duration_ms: 141.280125
+  type: 'test'
+  ...
+# Subtest: failed debit preserves cash; a funded retry pays one occurrence only once
+ok 14 - failed debit preserves cash; a funded retry pays one occurrence only once
+  ---
+  duration_ms: 215.897084
+  type: 'test'
+  ...
+# Subtest: daily fees honor the local cutoff and record assessed, paid and outstanding amounts once
+ok 15 - daily fees honor the local cutoff and record assessed, paid and outstanding amounts once
+  ---
+  duration_ms: 127.100375
+  type: 'test'
+  ...
+# Subtest: a no-fee daily assessment cannot later be assessed again after cash changes
+ok 16 - a no-fee daily assessment cannot later be assessed again after cash changes
+  ---
+  duration_ms: 85.952583
+  type: 'test'
+  ...
+# Subtest: fixture and schema generators reproduce the package in a disposable copy
+ok 17 - fixture and schema generators reproduce the package in a disposable copy
+  ---
+  duration_ms: 98.684042
+  type: 'test'
+  ...
+# Subtest: a timed-out pure computation retries identical input once; persistent timeout stays an error
+ok 18 - a timed-out pure computation retries identical input once; persistent timeout stays an error
+  ---
+  duration_ms: 0.349667
+  type: 'test'
+  ...
+# Subtest: real-data normalizers pass their offline source-contract checks without ARE
+ok 19 - real-data normalizers pass their offline source-contract checks without ARE
+  ---
+  duration_ms: 307.483
+  type: 'test'
+  ...
+# Subtest: trusted market snapshot reads retry transient locks within a fixed budget
+ok 20 - trusted market snapshot reads retry transient locks within a fixed budget
+  ---
+  duration_ms: 7.0145
+  type: 'test'
+  ...
+# Subtest: Core discovers writes correctly and deduplicates complete original requests
+ok 21 - Core discovers writes correctly and deduplicates complete original requests
+  ---
+  duration_ms: 319.054917
+  type: 'test'
+  ...
+# Subtest: Core separates Infra decisions from Agent calls and commits one transfer effect
+ok 22 - Core separates Infra decisions from Agent calls and commits one transfer effect
+  ---
+  duration_ms: 768.87475
+  type: 'test'
+  ...
+# Subtest: instruction changes and virtual-time expiry deny execution without changing cash
+ok 23 - instruction changes and virtual-time expiry deny execution without changing cash
+  ---
+  duration_ms: 962.648084
+  type: 'test'
+  ...
+# Subtest: Core deduplicates credit events, rejects invalid seeds and resets to its loaded baseline
+ok 24 - Core deduplicates credit events, rejects invalid seeds and resets to its loaded baseline
+  ---
+  duration_ms: 400.270167
+  type: 'test'
+  ...
+# Subtest: actual MCP transport persists the approved transfer and original financial receipt
+ok 25 - actual MCP transport persists the approved transfer and original financial receipt
+  ---
+  duration_ms: 2645.413416
+  type: 'test'
+  ...
+# Subtest: public tool schemas and Core commit whole-share fills and debit attempts
+ok 26 - public tool schemas and Core commit whole-share fills and debit attempts
+  ---
+  duration_ms: 1113.527417
+  type: 'test'
+  ...
+# Subtest: Mail and Calendar walkthrough verifies actual receiver state and failure boundaries
+ok 27 - Mail and Calendar walkthrough verifies actual receiver state and failure boundaries
+  ---
+  duration_ms: 4123.05525
+  type: 'test'
+  ...
+# Subtest: three generated scenes load and replay their scheduled events through Core
+ok 28 - three generated scenes load and replay their scheduled events through Core
+  ---
+  duration_ms: 2206.23175
+  type: 'test'
+  ...
+# Subtest: loading executed history preserves original receipts without reapplying financial effects
+ok 29 - loading executed history preserves original receipts without reapplying financial effects
+  ---
+  duration_ms: 820.287291
+  type: 'test'
+  ...
+# Subtest: distinct same-time attempts retain source event IDs without duplicating a paid occurrence
+ok 30 - distinct same-time attempts retain source event IDs without duplicating a paid occurrence
+  ---
+  duration_ms: 977.764292
+  type: 'test'
+  ...
+# Subtest: captured real prices enter through Infra and replay the same observations offline
+ok 31 - captured real prices enter through Infra and replay the same observations offline
+  ---
+  duration_ms: 3107.892541
+  type: 'test'
+  ...
+# Subtest: capture tampering, mixed providers and future collection barriers are rejected
+ok 32 - capture tampering, mixed providers and future collection barriers are rejected
+  ---
+  duration_ms: 231.19675
+  type: 'test'
+  ...
+1..32
+# tests 32
+# suites 0
+# pass 32
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 17784.0865

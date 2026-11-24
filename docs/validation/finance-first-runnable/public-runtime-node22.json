@@ -1,0 +1,210 @@
+{
+  "schema": "pale.app-verification.v1",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "app_id": "finance",
+  "app_version": "0.1.0",
+  "package_sha256": "a74876d3895e6b0466dc890c5ab4058267c5cd80786b6d07ff052ff8730198e8",
+  "node": "v22.22.0",
+  "verified_at": "2026-11-24T09:51:51.433Z",
+  "checks": [
+    {
+      "name": "Manifest, schemas, seed, references, media and declarations load",
+      "status": "passed"
+    },
+    {
+      "name": "business standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "event-example standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "Agent discovery excludes administrative tools",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for finance.accounts.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for finance.holdings.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for finance.transactions.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for finance.obligations.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for finance.market.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for finance.actions.preview",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for finance.actions.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for finance.actions.cancel",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for finance.actions.execute",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for finance.receipts.get",
+      "status": "passed"
+    },
+    {
+      "name": "Infra exposes the lifecycle interface and host clock operation",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.advance_time",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.apply_event",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.event_status",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.load_seed",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.reset",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.snapshot",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.validate_bundle",
+      "status": "passed"
+    },
+    {
+      "name": "Real MCP business read succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "MCP content and structured result agree",
+      "status": "passed"
+    },
+    {
+      "name": "MCP envelope remains unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Read does not change business data",
+      "status": "passed"
+    },
+    {
+      "name": "Caller cannot override run or role",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads history, relationships and assets",
+      "status": "passed"
+    },
+    {
+      "name": "Loaded historical records match input",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid history is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Rejected history leaves business state unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Declared incoming event commits",
+      "status": "passed"
+    },
+    {
+      "name": "Event changes business data",
+      "status": "passed"
+    },
+    {
+      "name": "Committed event is queryable",
+      "status": "passed"
+    },
+    {
+      "name": "Identical event retry is deduplicated",
+      "status": "passed"
+    },
+    {
+      "name": "Duplicate has no additional state change",
+      "status": "passed"
+    },
+    {
+      "name": "Same event ID with changed content is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Old version cannot reset a changed App",
+      "status": "passed"
+    },
+    {
+      "name": "A separate run retains its own initial data",
+      "status": "passed"
+    },
+    {
+      "name": "Reset returns ready",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded business baseline",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances epoch",
+      "status": "passed"
+    },
+    {
+      "name": "New MCP process reads persisted App state",
+      "status": "passed"
+    },
+    {
+      "name": "Submitted package remains unchanged",
+      "status": "passed"
+    }
+  ],
+  "stages": [
+    {
+      "name": "business",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "TAP version 13\n# Subtest: transfer conserves cash, consumes exact approval and replays one financial receipt\nok 1 - transfer conserves cash, consumes exact approval and replays one financial receipt\n  ---\n  duration_ms: 260.432959\n  type: 'test'\n  ...\n# Subtest: read operations preserve business state\nok 2 - read operations preserve business state\n  ---\n  duration_ms: 131.433042\n  type: 'test'\n  ...\n# Subtest: rejects invalid endpoints, insufficient cash and fractional cents without changing input\nok 3 - rejects invalid endpoints, insufficient cash and fractional cents without changing input\n  ---\n  duration_ms: 173.938208\n  type: 'test'\n  ...\n# Subtest: rejection and cancellation prevent execution\nok 4 - rejection and cancellation prevent execution\n  ---\n  duration_ms: 302.125\n  type: 'test'\n  ...\n# Subtest: instruction revision invalidates an approved preview\nok 5 - instruction revision invalidates an approved preview\n  ---\n  duration_ms: 173.031625\n  type: 'test'\n  ...\n# Subtest: only changes to a relevant account invalidate its preview\nok 6 - only changes to a relevant account invalidate its preview\n  ---\n  duration_ms: 351.369334\n  type: 'test'\n  ...\n# Subtest: approval expiry and revocation prevent money movement\nok 7 - approval expiry and revocation prevent money movement\n  ---\n  duration_ms: 297.817917\n  type: 'test'\n  ...\n# Subtest: tampered previews, wrong decision revision and foreign identity are rejected\nok 8 - tampered previews, wrong decision revision and foreign identity are rejected\n  ---\n  duration_ms: 216.721875\n  type: 'test'\n  ...\n# Subtest: only Infra can record a decision, and one approval cannot cover two proposals\nok 9 - only Infra can record a decision, and one approval cannot cover two proposals\n  ---\n  duration_ms: 215.956333\n  type: 'test'\n  ...\n# Subtest: whole-share buys and sells update cash, quantity and cost once\nok 10 - whole-share buys and sells update cash, quantity and cost once\n  ---\n  duration_ms: 303.560167\n  type: 'test'\n  ...\n# Subtest: trade previews reject short sales, fractional shares and bank-account orders\nok 11 - trade previews reject short sales, fractional shares and bank-account orders\n  ---\n  duration_ms: 127.720708\n  type: 'test'\n  ...\n# Subtest: a new quote invalidates an approved trade, even when the price stays equal\nok 12 - a new quote invalidates an approved trade, even when the price stays equal\n  ---\n  duration_ms: 214.960625\n  type: 'test'\n  ...\n# Subtest: market reads hide future observations and label expired quotes without mutating data\nok 13 - market reads hide future observations and label expired quotes without mutating data\n  ---\n  duration_ms: 137.591791\n  type: 'test'\n  ...\n# Subtest: failed debit preserves cash; a funded retry pays one occurrence only once\nok 14 - failed debit preserves cash; a funded retry pays one occurrence only once\n  ---\n  duration_ms: 210.047083\n  type: 'test'\n  ...\n# Subtest: daily fees honor the local cutoff and record assessed, paid and outstanding amounts once\nok 15 - daily fees honor the local cutoff and record assessed, paid and outstanding amounts once\n  ---\n  duration_ms: 126.971625\n  type: 'test'\n  ...\n# Subtest: a no-fee daily assessment cannot later be assessed again after cash changes\nok 16 - a no-fee daily assessment cannot later be assessed again after cash changes\n  ---\n  duration_ms: 84.666625\n  type: 'test'\n  ...\n# Subtest: fixture and schema generators reproduce the package in a disposable copy\nok 17 - fixture and schema generators reproduce the package in a disposable copy\n  ---\n  duration_ms: 101.619041\n  type: 'test'\n  ...\n# Subtest: a timed-out pure computation retries identical input once; persistent timeout stays an error\nok 18 - a timed-out pure computation retries identical input once; persistent timeout stays an error\n  ---\n  duration_ms: 0.349125\n  type: 'test'\n  ...\n# Subtest: real-data normalizers pass their offline source-contract checks without ARE\nok 19 - real-data normalizers pass their offline source-contract checks without ARE\n  ---\n  duration_ms: 329.159375\n  type: 'test'\n  ...\n1..19\n# tests 19\n# suites 0\n# pass 19\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 3851.474959\n",
+      "errors": ""
+    },
+    {
+      "name": "event-example",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "{\n  \"example\": \"App-only transfer; trusted decision supplied by the test harness\",\n  \"receipt\": {\n    \"id\": \"receipt-2\",\n    \"proposal_id\": \"proposal-1\",\n    \"proposal_hash\": \"0a59d623263083281acf92b395f116d8e9823133451d696494e690f07b8d2811\",\n    \"approval_id\": \"approval-proposal-1\",\n    \"approval_source_ref\": \"trusted-user-turn-2\",\n    \"executed_at\": \"2026-12-01T09:00:00-08:00\",\n    \"effects\": [\n      {\n        \"account_id\": \"checking\",\n        \"amount_cents\": -10000\n      },\n      {\n        \"account_id\": \"investing\",\n        \"amount_cents\": 10000\n      }\n    ],\n    \"position_effects\": []\n  },\n  \"balances\": [\n    {\n      \"id\": \"checking\",\n      \"balance_cents\": 410000\n    },\n    {\n      \"id\": \"savings\",\n      \"balance_cents\": 800000\n    },\n    {\n      \"id\": \"investing\",\n      \"balance_cents\": 310000\n    }\n  ]\n}\n",
+      "errors": ""
+    }
+  ],
+  "passed": true,
+  "remaining": [
+    "App-specific approved workflow coverage",
+    "Human data/media/provenance review",
+    "Production remote authentication and deployment checks when applicable"
+  ]
+}
