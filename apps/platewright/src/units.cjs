@@ -37,8 +37,9 @@ function tryConvert(quantity, from, to, ing) {
 function convert(quantity, from, to, ing) {
   const value = tryConvert(quantity, from, to, ing);
   if (value === null) {
-    const how = [UNITS[from].dim, UNITS[to].dim].includes('count') ? 'weight per piece' : 'density';
-    fail('no_conversion', `${ing.name} has no ${how} in the ingredient table, so ${from} cannot be converted to ${to}.`);
+    const missing = [UNITS[from].dim, UNITS[to].dim].filter(d => gramsPerBase(ing, d) === null)
+      .map(d => (d === 'volume' ? 'density' : 'weight per piece'));
+    fail('no_conversion', `${ing.name} has no ${[...new Set(missing)].join(' or ')} in the ingredient table, so ${from} cannot be converted to ${to}.`);
   }
   return value;
 }
@@ -82,4 +83,4 @@ function shown(value, unit, ing) {
   return {quantity: round(value, unit, ing), unit, exact: exact(value)};
 }
 
-module.exports = {UNITS, UNIT_NAMES, UNIT_SYSTEMS, BASE, dimension, measurable, tryConvert, convert, toGrams, displayUnit, round, roundUp, shown};
+module.exports = {UNIT_NAMES, UNIT_SYSTEMS, BASE, dimension, measurable, tryConvert, convert, toGrams, displayUnit, roundUp, shown};

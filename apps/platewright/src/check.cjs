@@ -85,4 +85,4 @@ function check(content, people, date, {ingredients, zone}) {
   });
 }
 
-module.exports = {SEVERITY, worst, nutrition, shownNutrition, constraintState, check};
+module.exports = {worst, nutrition, shownNutrition, constraintState, check};

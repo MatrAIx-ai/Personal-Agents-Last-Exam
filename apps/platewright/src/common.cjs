@@ -58,7 +58,6 @@ function localDate(instant, zone) {
 }
 // "Today" is virtual_now in the household's time zone.
 const today = (ctx, data) => localDate(ctx.virtual_now, data.household.time_zone);
-const hasOffset = ts => typeof ts === 'string' && /(Z|[+-]\d{2}:\d{2})$/.test(ts) && Number.isFinite(Date.parse(ts));
 
 // ---- Small numeric helpers ----------------------------------------------------------------------
 // Trims floating-point noise from exact values (1049.9999999 -> 1050) without rounding real fractions.
@@ -95,6 +94,6 @@ function slug(text) {
 
 module.exports = {
   ALLERGENS, FLAGS, DIETS, NUTRIENTS, KINDS, METHODS, MEALS, WEEKDAYS, EVENT_KINDS, ID_PATTERN,
-  fail, copy, isDate, addDays, daysBetween, weekday, validTimeZone, localDate, today, hasOffset, exact, ceilHalf,
+  fail, copy, isDate, addDays, daysBetween, weekday, validTimeZone, localDate, today, exact, ceilHalf,
   byId, ingredient, recipe, member, nextId, slug
 };

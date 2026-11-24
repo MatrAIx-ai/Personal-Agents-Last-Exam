@@ -316,5 +316,5 @@ function createVariant(ctx, data, args) {
   return {id: r.id, state: 'active', revision: 1, base_recipe_id: variant.base_recipe_id, base_revision: variant.base_revision, unverified: variant.unverified};
 }
 
-module.exports = {CONTENT_KEYS, contentOf, contentAt, ingredientsMap, state, checkServings, checkLine, normalizeContent, insertRecipe, people,
+module.exports = {contentOf, contentAt, ingredientsMap, checkServings, normalizeContent, insertRecipe, people,
   search, ingredientSearch, get, checkRecipe, create, update, substitutions, preview, createVariant};

@@ -101,7 +101,8 @@ function validateSeed(ctx, data) {
       if (d.servings !== undefined && d.servings !== null && (d.servings < 1 || d.servings > 200)) bad(`${where}: servings out of range.`);
       if (d.leftovers_of !== undefined) {
         const src = slots.get(d.leftovers_of);
-        if (!src || pos(src) >= pos(s) || !src.dishes.some(x => x.leftovers_of === undefined && x.recipe_id === d.recipe_id)) bad(`${where}: leftovers of ${d.leftovers_of} are not available.`);
+        // The source may since have been changed, skipped or cleared; that reads as leftover_short, not as a bad seed.
+        if (!src || pos(src) >= pos(s)) bad(`${where}: leftovers of ${d.leftovers_of} must come from an earlier slot.`);
       }
     }
     if ((s.state === 'cooked') !== (s.cooked !== null)) bad(`${where}: cooked details must match its state.`);

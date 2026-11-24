@@ -261,4 +261,4 @@ function flagsFromSnapshot(data) {
   return Object.fromEntries(data.plan.map(s => [s.id, flags(data, s)]).filter(([, f]) => f.length));
 }
 
-module.exports = {parseSlotId, order, slotOf, isLeftover, defaultPortions, dishServings, dishContent, flags, window, get, setSlot, setTool, markTool, flagsFromSnapshot};
+module.exports = {order, slotOf, isLeftover, dishServings, dishContent, window, get, setSlot, setTool, markTool, flagsFromSnapshot};

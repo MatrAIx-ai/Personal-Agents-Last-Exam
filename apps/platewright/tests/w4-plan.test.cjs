@@ -146,6 +146,12 @@ test('T12 cooked and skipped; leftovers available, short, expired and unavailabl
   // Clock passes the end of Saturday: the cooked slot reads past.
   f.advance('2026-11-15T00:00:00-05:00');
   assert.equal(slotOf(f, SAT).phase, 'past');
+  // Clearing or replacing a leftover source is allowed; the later slot then reads leftover_short with nothing available.
+  f.call(P + 'plan.slot.set', {id: '2026-11-15:dinner', dishes: [{recipe_id: 'rec-red-lentil-soup', servings: 6}], attendees: ['person-nora']});
+  f.call(P + 'plan.slot.set', {id: '2026-11-16:dinner', dishes: [{leftovers_of: '2026-11-15:dinner', portions: 2}], attendees: ['person-nora']});
+  assert.equal(slotOf(f, '2026-11-16:dinner').flags.filter(x => x.type === 'leftover_short').length, 0);
+  f.call(P + 'plan.slot.set', {id: '2026-11-15:dinner', dishes: []});
+  assert.deepEqual(slotOf(f, '2026-11-16:dinner').flags.filter(x => x.type === 'leftover_short').map(x => [x.planned, x.available]), [[2, 0]]);
   // Flags recomputed from a snapshot match what plan.get shows.
   const fromSnapshot = require('../plugin.cjs').flagsFromSnapshot(f.data);
   assert.deepEqual(fromSnapshot['2026-11-16:lunch'], slotOf(f, '2026-11-16:lunch').flags);

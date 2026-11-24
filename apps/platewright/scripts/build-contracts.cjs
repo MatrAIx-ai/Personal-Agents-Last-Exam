@@ -154,34 +154,26 @@ const SHOWN_LINE = obj({line: INT(0), ingredient_id: ID, name: str(120), optiona
 const LINE_REF = obj({line: INT(0), ingredient_id: ID, unit: UNIT}, ['unit']);
 const NUTRITION_VIEW = {nutrition: nul(ref('nutrition')), nutrition_exact: nul(ref('nutrition')), missing_for: arr(LINE_REF), optional_excluded: arr(LINE_REF)};
 const VERDICT = en(['unsafe', 'may_contain', 'unsuitable', 'over_limit', 'disliked', 'ok_if_omitted', 'ok']);
-const FINDING = obj({verdict: VERDICT, reason: str(60), constraint_id: nul(ID), kind: en(C.KINDS), lines: arr(obj({line: INT(0), ingredient_id: ID, optional: BOOL})),
-  allergen: en(C.ALLERGENS), strict: BOOL, ingredient_id: ID, flag: en(C.FLAGS), diet: str(60), flags: arr(en(C.FLAGS)), tag: str(40),
-  nutrient: en(C.NUTRIENTS), max: NUM, value: NUM, portion_factor: NUM},
-['allergen', 'strict', 'ingredient_id', 'flag', 'diet', 'flags', 'tag', 'nutrient', 'max', 'value', 'portion_factor']);
-const PERSON_VERDICT = obj({kind: en(['member', 'guest']), id: ID, name: str(120), verdict: VERDICT, findings: arr(FINDING),
-  omit_lines: arr(obj({line: INT(0), ingredient_id: ID, optional: BOOL})), unchecked: arr(obj({constraint_id: nul(ID), nutrient: en(C.NUTRIENTS), reason: {const: 'nutrition_unknown'}}))});
+// Nested detail (findings, history rows, cooked details) is published as objects with their key fields
+// typed, so the tool list stays compact; the full record shapes are in schemas/seed.schema.json.
+const some = properties => ({type: 'object', properties, required: Object.keys(properties), additionalProperties: true});
+const FINDING = some({verdict: VERDICT, reason: str(60), lines: arr(OPEN)});
+const PERSON_VERDICT = obj({kind: en(['member', 'guest']), id: ID, name: str(120), verdict: VERDICT, findings: arr(FINDING), omit_lines: arr(OPEN), unchecked: arr(OPEN)});
 const MEMBER_VIEW = obj({person_id: ID, display_name: str(120), portion_factor: NUM, account_holder: BOOL,
-  constraints: arr({...inline(ref('constraint')), properties: {...inline(ref('constraint')).properties, state: en(['scheduled', 'active', 'expired', 'ended'])},
-    required: [...inline(ref('constraint')).required, 'state']})});
+  constraints: arr(some({id: ID, kind: en(C.KINDS), state: en(['scheduled', 'active', 'expired', 'ended']), effective_from: nul(DATE), expires_on: nul(DATE)}))});
 const RULE_VIEW = obj({...inline(ref('rule')).properties, to_name: str(120), to_allergens: arr(en(C.ALLERGENS)), to_may_contain: arr(en(C.ALLERGENS)),
   to_flags: arr(en(C.FLAGS)), applicable: BOOL, reason: nul(str(300))});
-const FLAG = obj({type: en(['person', 'archived_recipe', 'stale_base', 'leftover_short', 'leftover_expired']), dish: INT(0), recipe_id: ID,
-  kind: en(['member', 'guest']), id: ID, name: str(120), verdict: VERDICT,
-  dishes: arr(obj({dish: INT(0), recipe_id: ID, verdict: VERDICT, findings: arr(FINDING), omit_lines: arr(OPEN)})),
-  base_recipe_id: ID, base_revision: INT(1), base_current_revision: INT(1), leftovers_of: SLOT, planned: NUM, available: NUM, age_days: INT(0), leftover_max_days: INT(0)},
-['dish', 'recipe_id', 'kind', 'id', 'name', 'verdict', 'dishes', 'base_recipe_id', 'base_revision', 'base_current_revision', 'leftovers_of', 'planned', 'available', 'age_days', 'leftover_max_days']);
+const FLAG = some({type: en(['person', 'archived_recipe', 'stale_base', 'leftover_short', 'leftover_expired'])});
 const SLOT_VIEW = obj({id: SLOT, date: DATE, meal: en(C.MEALS), state: en(['planned', 'cleared', 'cooked', 'skipped']), phase: en(['upcoming', 'past']),
-  attendees: arr(ID), guests: arr(ref('guest')), note: nul(str(500)), default_servings: NUM,
-  dishes: arr(obj({dish: INT(0), kind: en(['recipe', 'leftovers']), recipe_id: ID, title: str(200), servings: NUM, servings_source: en(['default', 'explicit']),
-    leftovers_of: SLOT, portions: NUM}, ['servings', 'servings_source', 'leftovers_of', 'portions'])),
-  leftovers: arr(obj({recipe_id: ID, portions_left: NUM, taken_by: arr(obj({slot_id: SLOT, portions: NUM})), unclaimed: NUM, usable_until: DATE})),
-  cooked: inline(ref('slot')).properties.cooked, flags: arr(FLAG), history: inline(ref('slot')).properties.history, updated_at: TS});
-const LINE_VIEW = {...inline(ref('shopping_line')), properties: {...inline(ref('shopping_line')).properties, name: nul(str(200))},
-  required: [...inline(ref('shopping_line')).required, 'name']};
-const SHOPPING_VIEW = nul({...inline(ref('shopping')), properties: {...inline(ref('shopping')).properties, stale: BOOL, lines: arr(LINE_VIEW)},
-  required: [...inline(ref('shopping')).required, 'stale']});
+  attendees: arr(ID), guests: arr(OPEN), note: nul(str(500)), default_servings: NUM,
+  dishes: arr(some({dish: INT(0), kind: en(['recipe', 'leftovers']), recipe_id: ID})), leftovers: arr(OPEN),
+  cooked: nul(OPEN), flags: arr(FLAG), history: arr(OPEN), updated_at: TS});
+const LINE_VIEW = some({id: ID, kind: en(['derived', 'manual']), ingredient_id: nul(ID), name: nul(str(200)), quantity: nul(POS), unit: nul(UNIT),
+  state: en(['needed', 'ticked', 'excluded']), surplus: BOOL, slots: arr(SLOT)});
+const SHOPPING_VIEW = nul(some({id: ID, start: DATE, end: DATE, generated_at: TS, stale: BOOL, lines: arr(LINE_VIEW),
+  optional_lines: arr(OPEN), expiring_before_use: arr(OPEN), stock_not_counted: arr(OPEN)}));
 const PANTRY_VIEW = obj({ingredient_id: ID, name: str(120), quantity: POS, unit: UNIT, use_by: nul(DATE), state: en(['in_stock', 'out']),
-  freshness: en(['fresh', 'use_soon', 'expired', 'no_date']), days_left: nul({type: 'integer'}), updated_at: TS, history: inline(ref('pantry_item')).properties.history});
+  freshness: en(['fresh', 'use_soon', 'expired', 'no_date']), days_left: nul({type: 'integer'}), updated_at: TS, history: arr(OPEN)});
 
 const T = [];
 function tool(name, description, input, output, {read = false, optional = [], target = 'current household'} = {}) {
@@ -208,8 +200,8 @@ tool('recipes.get', 'Read a recipe (or an earlier revision) at any number of ser
     unit_system: en(UNIT_SYSTEMS), lines: arr(SHOWN_LINE), method_tags: arr(en(C.METHODS)), steps: arr(str(1000)), tags: arr(str(40)),
     active_minutes: nul(INT(0)), total_minutes: nul(INT(0)), contains: arr(en(C.ALLERGENS)), may_contain: arr(en(C.ALLERGENS)), flags: arr(en(C.FLAGS)),
     allergens_only_in_optional_lines: arr(en(C.ALLERGENS)), ...NUTRITION_VIEW,
-    revisions: arr(obj({revision: INT(1), at: TS, actor: ACTOR, by: nul(ID)})), history: inline(ref('recipe')).properties.history,
-    variant: nul(obj({...inline(ref('variant')).properties, base_title: str(200), base_current_revision: INT(1), stale_base: BOOL})), origin: ref('origin')})},
+    revisions: arr(obj({revision: INT(1), at: TS, actor: ACTOR, by: nul(ID)})), history: arr(OPEN),
+    variant: nul(some({base_recipe_id: ID, base_revision: INT(1), base_current_revision: INT(1), stale_base: BOOL, swaps: arr(OPEN), unverified: BOOL})), origin: OPEN})},
   {read: true, optional: ['servings', 'unit_system', 'units', 'revision']});
 tool('recipes.check', 'Check a recipe for members (default: all) and guests on the date of the meal (default today): one verdict per person (unsafe, may_contain, unsuitable, over_limit, disliked, ok_if_omitted or ok) with the lines behind it. Constraints apply as they stand on that date. Not medical advice.',
   {id: ID, date: DATE, members: arr(ID, {uniqueItems: true, maxItems: 20}), guests: arr(GUEST_INPUT, {maxItems: 20}), revision: INT(1)},
@@ -251,7 +243,7 @@ tool('plan.slot.set', 'Set a slot (id = date:meal) with dishes (a recipe at serv
 tool('plan.slot.mark', 'Mark a planned slot cooked (not before its date; records portions made and eaten per recipe, default its servings and its attendees\' portions; deduct_pantry takes the exact quantities from the pantry, never below zero, and returns what was short) or skipped.',
   {id: SLOT, status: en(['cooked', 'skipped']), portions: arr(obj({recipe_id: ID, made: NUM, eaten: NUM}, ['made', 'eaten']), {maxItems: 10}), deduct_pantry: BOOL},
   {id: SLOT, state: en(['cooked', 'skipped']), portions: arr(obj({recipe_id: ID, revision: INT(1), made: NUM, eaten: NUM})), deducted: BOOL,
-    short: inline(ref('slot')).properties.cooked.anyOf[0].properties.short}, {optional: ['portions', 'deduct_pantry'], target: 'current household plan'});
+    short: arr(some({ingredient_id: ID, quantity: NUM, unit: UNIT, reason: en(['not_in_pantry', 'no_conversion', 'not_enough'])}))}, {optional: ['portions', 'deduct_pantry'], target: 'current household plan'});
 tool('pantry.set', 'Set the pantry quantity of an ingredient (id = ingredient_id) in a unit it is measured in, and optionally its use-by date (null: none). Quantity 0 marks it used up.',
   {id: ID, quantity: NUM, unit: UNIT, use_by: nul(DATE)},
   {id: ID, state: en(['in_stock', 'out']), quantity: POS, unit: UNIT, use_by: nul(DATE), freshness: en(['fresh', 'use_soon', 'expired', 'no_date']), days_left: nul({type: 'integer'})},

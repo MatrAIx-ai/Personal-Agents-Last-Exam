@@ -74,7 +74,8 @@ test('seed validation rejects what the plan lists (invalid_seed)', () => {
   rejects('account the binding does not declare', d => { d.account_id = 'platewright-other'; }, /binding/);
   rejects('constraint naming an allergen outside the nine', d => { d.members[2].constraints[0].allergen = 'tree_nut'; d.members[2].constraints[0].kind = 'medical'; }, /does not take/);
   rejects('invalid time zone', d => { d.household.time_zone = 'Mars/Olympus'; }, /IANA/);
-  rejects('leftovers from a later slot', d => { d.plan[3].dishes.push({leftovers_of: '2026-11-10:dinner', recipe_id: 'rec-red-lentil-soup', portions: 1}); }, /leftovers/);
+  rejects('leftovers from a later slot', d => { d.plan[3].dishes.push({leftovers_of: '2026-11-10:dinner', recipe_id: 'rec-red-lentil-soup', portions: 1}); }, /earlier slot/);
+  rejects('leftovers from a slot that does not exist', d => { d.plan[3].dishes.push({leftovers_of: '2026-11-02:dinner', recipe_id: 'rec-red-lentil-soup', portions: 1}); }, /earlier slot/);
   rejects('expires_on before effective_from', d => { d.members[0].constraints[0].expires_on = '2026-01-01'; }, /before effective_from/);
   rejects('revision content out of step', d => { d.recipes[0].title = 'Changed without a revision'; }, /differs from its last revision/);
 });

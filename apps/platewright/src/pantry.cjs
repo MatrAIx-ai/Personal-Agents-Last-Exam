@@ -48,4 +48,4 @@ function setTool(ctx, data, args) {
     ...freshness(data, item, c.today(ctx, data))};
 }
 
-module.exports = {freshness, list, check, apply, setTool};
+module.exports = {list, check, apply, setTool};

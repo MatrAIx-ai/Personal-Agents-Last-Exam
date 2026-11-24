@@ -205,4 +205,4 @@ function itemRemove(ctx, data, args) {
   return {id: line.id, state: 'removed', kind: 'manual'};
 }
 
-module.exports = {LIST_ID, fingerprint, derive, generate, view, needList, addManual, tick, itemSet, itemRemove};
+module.exports = {fingerprint, generate, view, needList, addManual, tick, itemSet, itemRemove};

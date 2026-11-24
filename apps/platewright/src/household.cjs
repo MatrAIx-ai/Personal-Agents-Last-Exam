@@ -144,4 +144,4 @@ function removeTool(ctx, data, args) {
   return {id: con.id, member_id: args.id, state: 'ended', ended_at: con.ended_at};
 }
 
-module.exports = {TARGETS, target, normalizeGuests, get, setConstraint, removeConstraint, bodyOf, setTool, removeTool, memberView};
+module.exports = {target, normalizeGuests, get, setConstraint, removeConstraint, setTool, removeTool};
