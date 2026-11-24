@@ -153,6 +153,12 @@ function get(ctx, data, args) {
   }};
 }
 
+function mealDate(ctx, data, date) {
+  const d = date || c.today(ctx, data);
+  if (!c.isDate(d)) fail('invalid_arguments', `${d} is not a calendar date.`);
+  return d;
+}
+
 // The people a check is run for: listed members (default: every member) and the given guests.
 function people(data, memberIds, guests) {
   const ids = memberIds || data.members.map(m => m.person_id);
@@ -166,7 +172,7 @@ function people(data, memberIds, guests) {
 function checkRecipe(ctx, data, args) {
   const r = c.recipe(data, args.id);
   const content = contentAt(r, args.revision);
-  const date = args.date || c.today(ctx, data);
+  const date = mealDate(ctx, data, args.date);
   const guests = require('./household.cjs').normalizeGuests(data, args.guests || []);
   const verdicts = check(content, people(data, args.members, guests), date, {ingredients: ingredientsMap(data), zone: data.household.time_zone});
   return {recipe_id: r.id, revision: args.revision || r.revision, date, ...nutritionView(data, content), verdicts};
@@ -262,7 +268,7 @@ function buildVariant(data, args) {
   const content = contentOf(base), used = new Set(), swaps = [];
   for (const s of args.swaps) {
     const from = c.ingredient(data, s.ingredient_id);
-    const indexes = content.lines.map((l, i) => [l, i]).filter(([l, i]) => l.ingredient_id === from.id && (s.line === undefined || s.line === i)).map(([, i]) => i);
+    const indexes = base.lines.map((l, i) => [l, i]).filter(([l, i]) => l.ingredient_id === from.id && (s.line === undefined || s.line === i)).map(([, i]) => i);
     if (!indexes.length) fail('not_in_recipe', `${from.name} is not ${s.line === undefined ? 'in this recipe' : 'on line ' + s.line + ' of this recipe'}.`);
     let to, ratio, rule = null;
     if (s.rule_id) {
@@ -294,7 +300,7 @@ function buildVariant(data, args) {
 
 function preview(ctx, data, args) {
   const {base, content, variant} = buildVariant(data, args);
-  const date = args.date || c.today(ctx, data);
+  const date = mealDate(ctx, data, args.date);
   const guests = require('./household.cjs').normalizeGuests(data, args.guests || []);
   const who = people(data, args.members, guests), opts = {ingredients: ingredientsMap(data), zone: data.household.time_zone};
   const before = check(contentOf(base), who, date, opts), after = check(content, who, date, opts);

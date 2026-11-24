@@ -139,7 +139,7 @@ function validateSeed(ctx, data) {
       if (l.kind === 'manual' && (l.state === 'excluded' || l.slots.length)) bad(`Manual line ${l.id} cannot be excluded or name slots.`);
       if (l.ingredient_id === null && l.text === null) bad(`Line ${l.id} needs an ingredient or a text.`);
       if ((l.state === 'excluded') !== (l.excluded_reason !== null)) bad(`Line ${l.id}: an excluded line carries its reason.`);
-      if (l.surplus && l.state !== 'ticked') bad(`Line ${l.id}: only a ticked line can be surplus.`);
+      if (l.surplus && l.kind !== 'derived') bad(`Line ${l.id}: only a derived line can be surplus.`);
       for (const id of l.slots) if (!slots.has(id)) bad(`Line ${l.id}: unknown slot ${id}.`);
     }
   }

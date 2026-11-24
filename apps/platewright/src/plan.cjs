@@ -223,7 +223,7 @@ function markTool(ctx, data, args) {
     slot.state = 'skipped';
     slot.updated_at = who.at;
     slot.history.push(historyRow(who, 'skipped', slot));
-    return {id: slot.id, state: 'skipped', deducted: false, short: []};
+    return {id: slot.id, state: 'skipped', portions: [], deducted: false, short: []};
   }
   if (slot.date > t) fail('not_yet', `${slot.id} is in the future; it cannot be marked cooked before its date.`);
   const recipeDishes = slot.dishes.filter(d => !isLeftover(d));

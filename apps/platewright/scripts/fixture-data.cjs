@@ -56,6 +56,7 @@ const MINIMAL_INGREDIENTS = [
   ['ing-salt', 'Salt', 'herbs and spices', 'mv', 1.2, null, 'g', false, [0, 0, 0, 0, 38758], {}],
   ['ing-black-pepper', 'Ground black pepper', 'herbs and spices', 'mv', 0.5, null, 'g', false, [251, 10, 64, 3, 20], {tags: ['spice']}],
   ['ing-green-curry-paste', 'Green curry paste', 'sauces', 'mv', 1.1, null, 'g', false, [120, 2, 10, 8, 2400], {may: ['tree_nut'], tags: ['spicy']}],
+  ['ing-green-curry-paste-nf', 'Green curry paste, nut-free kitchen', 'sauces', 'mv', 1.1, null, 'g', false, [118, 2, 10, 8, 2350], {tags: ['spicy']}],
   ['ing-fish-sauce', 'Fish sauce', 'sauces', 'mv', 1.2, null, 'ml', false, [35, 5, 3.6, 0, 7850], {al: ['fish'], fl: ['fish_or_seafood', 'animal_product']}],
   ['ing-tamari', 'Tamari', 'sauces', 'mv', 1.15, null, 'ml', false, [60, 10.5, 5.6, 0.1, 5600], {al: ['soy'], aliases: ['wheat-free soy sauce']}],
   ['ing-white-wine', 'Dry white wine', 'drinks', 'mv', 0.99, null, 'ml', false, [82, 0.1, 2.6, 0, 5], {fl: ['alcohol']}],
@@ -67,6 +68,7 @@ const MINIMAL_INGREDIENTS = [
 // Substitution rule rows: [id, from, to, ratio, methods, note].
 const MINIMAL_RULES = [
   ['rule-fish-sauce-tamari', 'ing-fish-sauce', 'ing-tamari', 1, ['simmer', 'sauce', 'fry', 'raw'], 'Salty and savoury; no fish. Tamari contains soy.'],
+  ['rule-paste-nut-free', 'ing-green-curry-paste', 'ing-green-curry-paste-nf', 1, ['simmer', 'fry', 'sauce'], 'Same heat; made where no tree nuts are handled.'],
   ['rule-butter-applesauce', 'ing-butter', 'ing-applesauce', 1, ['bake'], 'Moist quick breads and muffins only; the crumb is denser.'],
   ['rule-butter-coconut-oil', 'ing-butter', 'ing-coconut-oil', 0.8, ['bake', 'fry', 'simmer'], 'Use a little less; adds a faint coconut taste.'],
   ['rule-cashews-sunflower', 'ing-cashews', 'ing-sunflower-seeds', 1, ['raw', 'simmer', 'bake', 'sauce', 'fry'], 'Nut-free crunch; toast them first.'],
