@@ -1,3 +1,71 @@
 # Bellnote
 
-School–family portal App (README completed in milestone M4).
+Bellnote is a resettable school–family portal, seen from one guardian's account. The school accepts whatever a permitted guardian submits before its cut-off, so an action the portal accepts can still be wrong for the family; Bellnote records enough to check that: which children, rights, lists, forms, menus and balances were read; what was reported, signed, declined, withdrawn, paid or changed, for which child and how long before each cut-off; what the office, the cafeteria and the other guardian did; and what the account was told.
+
+- App ID `bellnote`, version 1.0.0, Core API 1.2.0, public runtime 1.6.0. Node.js 18+ built-ins only; nothing to install.
+- Approved scope: [`proposals/environment/bellnote.md`](../../proposals/environment/bellnote.md). Validation, workflow-to-test mapping and the acceptance self-review: [VALIDATION.md](VALIDATION.md).
+- MCP-only first version: no GUI, reviewer console or staff console. Staff, the cafeteria and the other guardian act only through events.
+- Everything is fictional: the Merrow Vale Unified School District, Alder Elementary, Kestrel Ridge Middle School, the families and staff. Phone numbers use the 555-01xx range. Workflow shapes were informed by public product pages of ParentSquare and the PowerSchool parent portal; no data, text, branding or icons were taken from them.
+
+## Workflows
+
+| Workflow | Agent operations | Events that change it |
+| --- | --- | --- |
+| W1 Attendance and absence reports | `attendance.list`, `absences.list`, `absences.report`, `absences.cancel` | `attendance.marked`, `absence.reviewed` |
+| W2 Forms and permission slips | `forms.list`, `forms.get`, `forms.respond`, `forms.withdraw`, `payments.list` | `form.published`, `form.changed`, `form.answered` |
+| W3 Pickup authorization and dismissal changes | `pickup.get`, `pickup.person_add`, `pickup.person_remove`, `dismissal.set`, `dismissal.cancel` | `pickup.person_reviewed`, `dismissal.recorded` |
+| W4 Lunch account | `lunch.account_get`, `menu.list`, `lunch.topup`, `lunch.settings_update` | `lunch.charged` |
+| Account | `children.list`, `schools.get`, `notifications.list`, `preferences.get`, `preferences.update` | `school.day_changed` |
+
+All 23 tools are `bellnote.<name>` (12 reads, 11 writes). Every write takes Core's `request_id` and `expected_version` (`{epoch, revision}`) and returns the object's `id` with the committed version. The object state in a write result is `state` (Core owns `status: committed`). The target is always the argument `id` (for a new report, change or answer: the child or form it is about, with `child_id` beside it for forms); a window is always `start` / `end` as `YYYY-MM-DD` dates. Errors: `not_found`, `not_permitted`, `not_yours`, `too_late`, `not_school_day`, `conflict`, `invalid_window`, `invalid_time`, `invalid_state`, `closed`, `already_answered`, `missing_answer`, `stale_form`, `payment_declined`, `amount_out_of_range`, `not_authorized_person`, `restricted_person`, `pending_review`, `in_use`, `invalid_arguments`; Core adds `permission_denied`, `stale_version` and `idempotency_conflict`. Any refused event is `invalid_event` with data and clock unchanged.
+
+### Rules worth knowing
+
+- **Rights are per guardian and per child** (`custodial`, `can_sign`, `can_pay`, `can_pickup`) and come from the seed. `custodial` is needed to report absences and to see or change who collects the child; `can_sign` to answer forms; `can_pay` to pay a fee, top up or change lunch settings.
+- **Cut-offs are explicit rules resolved to dated instants.** A district policy (with per-school overrides) holds `absence_cutoff_local` and `dismissal_change_cutoff_local`, each either `{"anchor":"fixed","local_time":"08:30"}` or `{"anchor":"dismissal","minutes_before":90}`. `schools.get` shows the resolved instant for every day in the district's IANA time zone, so a daylight-saving change and an early dismissal (which moves a dismissal-relative cut-off) are both handled; the cut-off instant itself is already too late. Late-arrival and early-leave reports use that day's absence cut-off.
+- **A restriction is matched by `person_id`, never by name.** `pickup.person_add` maps a person to one canonical ID: a supplied `person_id` is used as is; otherwise a phone number the school already holds (digits only, a leading country code 1 ignored) resolves to that person; otherwise a new school-held person record is created. The display name never decides identity, so a restricted person under another name is still refused, and a namesake with a different number is not.
+- **Time is the environment's.** Bellnote has no timers or clock event. A form's `closed`, a dismissal change's `past`, a passed cut-off, an expired card (after the last day of its expiry month), `moot` on a closed day, `restricted_item`, `over_daily_limit` and `excluded_for` are derived at read time from stored records and `ctx.virtual_now`, never stored.
+- **Notifications are for what other people did**, never for the guardian's own writes and never for the passing of time. When `email_notices` is on at that moment, the notification also stores the full Mail wire message.
+- **The activity log** has one row per committed Agent write, one per applied event and one per effect of that event (`effect.form_response.needs_review`, `effect.dismissal_change.void`, `effect.notification.written`), each with sequence, virtual time, actor, action, child, object ID and the `request_id` or `event_id` behind it. A replay, a refusal or a clock move writes none.
+
+## Data
+
+`fixtures/reference.json` is the package seed: one account (`bellnote-maya`, owner `person-maya`) with three children across two schools, two other guardians, six pickup people in every state and one restriction, 120 attendance records with six reports, ten forms and fourteen responses (every kind and state, four with fees), three lunch accounts with 84 transactions, four weeks of menus with allergen tags, two payment methods (one expiring in November 2026), eight payments and twenty notifications (170 KB, no media). `fixtures/minimal.json` is the smaller account the business tests start from; tests build their variations from it in code. Both pass `scripts/check-fixtures.cjs`. `scripts/build-reference-fixture.cjs` is the authoring-time builder of the reference fixture (`--check` compares it with the committed JSON). A task supplies its own seed with `env.load_seed`; `validateSeed` rejects duplicate IDs, dangling references, a child without a guardian link for the account holder, a person both listed and restricted for the same child, two active dismissal changes for one child and day, a response whose version the form never had, a balance that does not equal the sum of its transactions, timestamps without a UTC offset and an account the binding does not declare.
+
+`tools.json`, `schemas/seed.schema.json`, `schemas/events.schema.json` and `schemas/state.schema.json` are generated from `scripts/build-contracts.cjs` (`npm run contracts:check` in this folder detects drift). The other schema files are copies of the public shared contracts kept in sync by the repository's `npm run contracts:check`; `schemas/router-message.schema.json` is a byte-identical copy of Mail 1.3.0's generated wire schema.
+
+## Optional Mail notices
+
+Bellnote declares one `messaging.publishes` entry (`channel.email`, `urn:pale:email-message:2`, `org.pale.mail.notification.v1`, payload `urn:pale:email-payload:1`) for the existing receive declaration of Mail 1.3.0 in `examples/apps/mail` and receives nothing. The recipient is `{"kind":"person_ref","id":<owner_person_id>}`. `src/publisher.cjs` is an Infra-run sender: Infra gives it Bellnote's Infra connection (to read notifications through `env.snapshot`) and a Messaging publisher connection fixed to this account; it calls `router.publish` and never writes back into Bellnote. A rejected delivery creates no Mail record and leaves Bellnote unchanged; a receipt means Mail stored the message, not that anyone acted on it. Bellnote runs fully without Mail; `dependencies.required_apps` is empty.
+
+## Commands
+
+From this folder (the package alone, no runtime needed):
+
+```sh
+npm test                      # 28 business tests: T01–T19 (App-side), fixtures, contracts, diagnostics
+npm run example               # walkthrough: report, two marks, one notification
+npm run contracts:check       # generated tools/schemas match their source
+npm run fixtures:check        # consistency of both fixtures
+```
+
+With the pinned public runtime (found automatically in a full checkout, or `--runtime DIR` / `PALE_RUNTIME_ROOT`):
+
+```sh
+node scripts/real-mcp.cjs  [--runtime DIR] [--output FILE]               # 44 real MCP checks
+node scripts/mail-flow.cjs [--runtime DIR] [--mail DIR] [--output FILE]  # 17 Bellnote → Mail checks with Mail 1.3.0
+```
+
+From the repository root:
+
+```sh
+npm run app:verify -- --app apps/bellnote --output .artifacts/bellnote.json
+npm run contracts:check
+npm test
+```
+
+Run an MCP server pair by hand: `node apps/bellnote/service.cjs --role infra --run demo --state-dir .state` and, in another process, the same with `--role agent`. The default `scenario` profile allows only reads; Infra selects `sandbox` with `env.reset` to allow writes.
+
+## Limitations
+
+Out of scope in this version, as approved: school posts and announcements, replies to teachers, sign-up sheets, grades, assignments, timetables, enrolment, bus tracking, after-care billing, meal pre-ordering and free/reduced-price applications, real payments and saved-card management, form attachments, parent group chat, the staff side, the other guardian as a second account, several districts per account, push/SMS and any GUI. Guardian links and restrictions are set only by the seed. There is no outbox or cross-App transaction for Mail notices. Policy values, the school calendar and notification wording are illustrative and await human review.
