@@ -22,6 +22,7 @@ test('T14 the platform clock: after advance_time and no App event, trash reads p
   const strip = r => JSON.parse(JSON.stringify(r, (k, v) => (k === 'version' ? undefined : v)));
   const before = reads(), data = JSON.stringify(f.data), rows = f.data.activity.length;
   assert.deepEqual([before.item.item.state, before.item.item.file, before.reunion.links[0].state], ['trashed', {asset_id: 'asset-m09'}, 'active']);
+  assert.equal(f.try('fernshelf.items.read', {id: 'it-m09'}).status, 'in_trash');
   f.advance('2027-01-01T00:00:00-08:00');
   assert.equal(JSON.stringify(f.data), data, 'business data unchanged by the clock');
   const after = reads();
@@ -33,7 +34,8 @@ test('T14 the platform clock: after advance_time and no App event, trash reads p
   assert.deepEqual(after.search.rows.map(r => r.id), ['it-m09', 'it-m10']);
   assert.equal(f.try('fernshelf.items.read', {id: 'it-m09'}).status, 'gone');
   assert.equal(f.data.activity.length, rows, 'no activity row for a time-driven change');
-  assert.deepEqual(plugin.assetReferences(f.data).map(r => r.object_id), ['it-m09'], 'the stored reference stays until the next commit');
+  assert.equal(f.data.items.find(i => i.id === 'it-m09').file, 'asset-m09', 'the stored reference stays until the next commit');
+  assert.deepEqual(plugin.assetReferences(f.data), [], 'a trashed item\'s file is never offered to Core\'s resource reader');
   // The next committed write drops the stored file reference and the album record; reads are unchanged.
   f.call('fernshelf.albums.create', {title: 'Unrelated'});
   const m09 = f.data.items.find(i => i.id === 'it-m09');

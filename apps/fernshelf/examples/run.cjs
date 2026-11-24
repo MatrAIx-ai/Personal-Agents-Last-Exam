@@ -1,33 +1,39 @@
 'use strict';
-// Walkthrough on fresh synthetic data: Maya makes an album, adds two reunion photos, invites Kofi
-// and shares a link. Kofi joins through an event that names the new album by what it holds
-// (album_match), views the link and saves one photo. Then Kofi asks that one photo be taken down
-// (examples/scenario.json); honouring it clears the album and its link at once, and the result
-// lists the save that cannot be undone.
+// Walkthrough on fresh synthetic data (the reference library): Maya makes an album for Iris with
+// two reunion photos, invites her and shares a link. Iris joins through an event that names the
+// new album by what it holds (album_match), views the link and saves one photo. Then Dana asks
+// that three reunion photos be taken down from Reunion 2026 (examples/scenario.json). Honouring it
+// clears that album and its link at once, leaves Omar's contribution alone (not_removable), keeps
+// the new album as it is (the request named Reunion 2026 only), and lists what was already seen
+// and saved. Adding one of the photos to a shared album afterwards returns a removal_honored warning.
 const assert = require('node:assert/strict');
 const {fixture} = require('../tests/harness.cjs');
-const f = fixture({now: '2026-11-20T09:00:00-08:00'});
-const album = f.call('fernshelf.albums.create', {title: 'Reunion picks'});
-f.call('fernshelf.albums.update', {id: album.id, add_ids: ['it-m03', 'it-m13']});
-const kofi = f.call('fernshelf.albums.members.invite', {id: album.id, person_id: 'person-kofi', role: 'viewer'});
+const f = fixture({seed: 'reference'});
+const album = f.call('fernshelf.albums.create', {title: 'For Iris'});
+f.call('fernshelf.albums.update', {id: album.id, add_ids: ['it-2611-0934', 'it-2611-0942']});
+f.call('fernshelf.albums.members.invite', {id: album.id, person_id: 'person-iris', role: 'viewer'});
 const link = f.call('fernshelf.links.create', {id: album.id, expires_at: '2026-11-27T09:00:00-08:00'});
-f.event({event_id: 'ev-fs-410', at: '2026-11-20T10:00:00-08:00', operation: 'fernshelf.member.changed',
-  payload: {album_match: {contains_item_ids: ['it-m03', 'it-m13']}, person_id: 'person-kofi', change: 'join'}});
-f.event({event_id: 'ev-fs-430', at: '2026-11-20T12:00:00-08:00', operation: 'fernshelf.share.viewed',
-  payload: {view_id: 'vw-0430', surface: {type: 'link', album_match: {person_id: 'person-kofi'}}, viewer: {person_id: 'person-kofi'},
-    viewed_item_ids: 'all', saved_item_ids: ['it-m03']}});
-const before = f.call('fernshelf.exposure.get', {id: 'it-m03'});
+f.event({event_id: 'ev-fs-412', at: '2026-11-20T10:00:00-08:00', operation: 'fernshelf.member.changed',
+  payload: {album_match: {contains_item_ids: ['it-2611-0934']}, person_id: 'person-iris', change: 'join'}});
+f.event({event_id: 'ev-fs-431', at: '2026-11-20T12:00:00-08:00', operation: 'fernshelf.share.viewed',
+  payload: {view_id: 'vw-0431', surface: {type: 'link', album_match: {person_id: 'person-iris'}}, viewer: {person_id: 'person-iris'},
+    viewed_item_ids: 'all', saved_item_ids: ['it-2611-0934']}});
+const before = f.call('fernshelf.exposure.get', {id: 'it-2611-0934'});
 f.event(require('./scenario.json'));
-const pending = f.call('fernshelf.removals.list', {state: 'pending'}).removals.find(r => r.id === 'rr-0440');
-const answer = f.call('fernshelf.removals.respond', {id: 'rr-0440', decision: 'honor', note: 'Taken down from the reunion album.'});
-const after = f.call('fernshelf.exposure.get', {id: 'it-m03'});
-assert.deepEqual(before.albums.map(a => a.album_id).sort(), ['al-reunion', album.id].sort());
-assert.deepEqual(answer.cleared, [{item_id: 'it-m03', album_ids: ['al-reunion'], link_ids: ['ln-m1']}]);
-assert.deepEqual(after.albums.map(a => a.album_id), [album.id], 'the request named al-reunion only');
-assert.deepEqual([answer.already_seen[0].views.length, answer.already_seen[0].saves.length], [2, 1], 'Kofi saw it twice and saved it once through the new link: that cannot be undone');
-console.log(JSON.stringify({app: 'fernshelf', album, invite: kofi, link,
-  joined_album: f.data.activity.find(a => a.event_id === 'ev-fs-410').details.album_id,
+const answer = f.call('fernshelf.removals.respond', {id: 'rr-0007', decision: 'honor', note: 'Taken down from Reunion 2026.'});
+const after = f.call('fernshelf.exposure.get', {id: 'it-2611-0934'});
+const again = f.call('fernshelf.albums.update', {id: 'al-family-2026', add_ids: ['it-2611-0931']});
+assert.equal(f.data.activity.find(a => a.event_id === 'ev-fs-412').details.album_id, album.id);
+assert.deepEqual(answer.cleared.map(c => [c.item_id, c.album_ids, c.link_ids]), [['it-2611-0931', ['al-reunion-2026'], ['ln-0012']], ['it-2611-0934', ['al-reunion-2026'], ['ln-0012']]]);
+assert.deepEqual(answer.not_removable, ['ct-omar-0007']);
+assert.deepEqual(after.albums.map(a => a.album_id), ['al-family-2026', album.id]);
+assert.deepEqual(again.warnings.map(w => [w.item_id, w.person_id]), [['it-2611-0931', 'person-dana']]);
+console.log(JSON.stringify({app: 'fernshelf', album, link: {id: link.id, expires_at: link.expires_at},
+  joined_album: f.data.activity.find(a => a.event_id === 'ev-fs-412').details.album_id,
   exposure_before: before.albums.map(a => ({album_id: a.album_id, visible_to: a.visible_to, links: a.links.map(l => l.link_id)})),
-  request: {id: pending.id, state: pending.state, not_removable: pending.not_removable}, answer,
+  answer: {state: answer.state, cleared: answer.cleared, not_removable: answer.not_removable,
+    already_seen: answer.already_seen.map(x => ({item_id: x.item_id, views: x.views.map(v => (v.viewer.display_name || 'anonymous') + ' at ' + v.at),
+      saves: x.saves.map(v => (v.viewer.display_name || 'anonymous') + ' at ' + v.at)}))},
   exposure_after: after.albums.map(a => ({album_id: a.album_id, visible_to: a.visible_to})),
-  notifications: f.data.notifications.map(n => ({kind: n.kind, title: n.title})), activity_rows: f.data.activity.length}, null, 2));
+  later_write_warnings: again.warnings, notifications: f.data.notifications.slice(-2).map(n => ({kind: n.kind, title: n.title})),
+  activity_rows: f.data.activity.length}, null, 2));

@@ -120,6 +120,9 @@ const records = data => [...data.items, ...data.stacks, ...data.labels, ...data.
 const objects = data => [data.account_id, ...data.items.map(i => i.id), ...data.albums.flatMap(a => [a.id, ...a.contributions.map(k => k.id)]),
   ...data.stacks.map(s => s.id), ...data.labels.map(l => l.id), ...data.links.map(l => l.id), ...data.views.map(v => v.id), ...data.removals.map(r => r.id),
   ...data.notifications.map(n => n.id)];
-// An item's image file is parented by the item. A purged item keeps no file reference.
-const assetReferences = data => data.items.filter(i => i.file !== null).map(i => ({asset_id: i.file, object_id: i.id, object_type: 'item'}));
+// An item's image file is parented by the item, and only while the item is active. Core asks for
+// these references without a clock, so a trashed item (whose purge_at may already have passed) is
+// left out: its bytes are unreachable through items.read and through Core's resources/read until it
+// is restored. A purged item keeps no file reference at all.
+const assetReferences = data => data.items.filter(i => i.file !== null && i.state === 'active').map(i => ({asset_id: i.file, object_id: i.id, object_type: 'item'}));
 module.exports = {validateSeed, records, objects, references: () => [], assetReferences};

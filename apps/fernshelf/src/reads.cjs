@@ -89,6 +89,7 @@ function itemGet(ctx, data, args) {
 function itemRead(ctx, data, args) {
   const t = d.now(ctx), item = mine(data, args.id);
   if (d.itemState(item, t) === 'purged') c.fail('gone', 'Item ' + item.id + ' has been purged; its file no longer exists.');
+  if (d.itemState(item, t) === 'trashed') c.fail('in_trash', 'Item ' + item.id + ' is in the trash; restore it to open its file.');
   if (item.file === null) c.fail('no_file', 'Item ' + item.id + (item.backed_up ? ' has no image file (videos and some items are metadata only).' : ' is not backed up; its original is still on the device.'));
   if (args.asset_id !== undefined && args.asset_id !== item.file) c.fail('not_found', 'Asset ' + args.asset_id + ' is not the file of item ' + item.id + '.');
   if (!ctx.assets?.read) c.fail('unsupported_capability', 'Reading image bytes needs the host asset reader.');
