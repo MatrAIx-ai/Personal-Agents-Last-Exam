@@ -3,7 +3,8 @@
   "owner_person_id": "person-maya",
   "carrier": {
     "name": "Northline Parcel (synthetic)",
-    "service_area": "Fictional domestic service area; addresses are not deliverable."
+    "service_area": "Fictional domestic service area; addresses are not deliverable.",
+    "time_zone": "America/Toronto"
   },
   "addresses": [
     {
@@ -30,6 +31,48 @@
       "city": "Harlow Bay",
       "region": "QC",
       "postal_code": "H0H 0B2",
+      "country": "CA",
+      "verified": true,
+      "delivery_restricted": false
+    },
+    {
+      "id": "addr-maya-pobox",
+      "person_id": "person-maya",
+      "label": "Mail box",
+      "recipient_name": "Maya Chen",
+      "line1": "Box 219, 12 Quay Street",
+      "line2": null,
+      "city": "Harlow Bay",
+      "region": "QC",
+      "postal_code": "H0H 0C3",
+      "country": "CA",
+      "verified": true,
+      "delivery_restricted": true
+    },
+    {
+      "id": "addr-maya-cottage",
+      "person_id": "person-maya",
+      "label": "Cottage",
+      "recipient_name": "Maya Chen",
+      "line1": "3 Tamarack Trail",
+      "line2": null,
+      "city": "Lac Brume",
+      "region": "QC",
+      "postal_code": "J0J 0D4",
+      "country": "CA",
+      "verified": false,
+      "delivery_restricted": false
+    },
+    {
+      "id": "addr-alex-home",
+      "person_id": "person-alex",
+      "label": "Home",
+      "recipient_name": "Alex Rivera",
+      "line1": "420 Larchmere Row",
+      "line2": null,
+      "city": "Harlow Bay",
+      "region": "QC",
+      "postal_code": "H0H 0A1",
       "country": "CA",
       "verified": true,
       "delivery_restricted": false
@@ -133,6 +176,50 @@
       "accepts_redirects": true,
       "status_note": "Upper lockers only; no step-free access.",
       "updated_at": "2026-01-05T14:00:00Z"
+    },
+    {
+      "id": "P03",
+      "name": "Quay Street depot counter",
+      "kind": "counter",
+      "address_text": "30 Quay Street, Harlow Bay",
+      "time_zone": "America/Toronto",
+      "hours": [
+        {
+          "weekday": 1,
+          "opens": "08:00",
+          "closes": "18:00"
+        },
+        {
+          "weekday": 2,
+          "opens": "08:00",
+          "closes": "18:00"
+        },
+        {
+          "weekday": 3,
+          "opens": "08:00",
+          "closes": "18:00"
+        },
+        {
+          "weekday": 4,
+          "opens": "08:00",
+          "closes": "18:00"
+        },
+        {
+          "weekday": 5,
+          "opens": "08:00",
+          "closes": "18:00"
+        },
+        {
+          "weekday": 6,
+          "opens": "08:00",
+          "closes": "18:00"
+        }
+      ],
+      "status": "open",
+      "accessible": true,
+      "accepts_redirects": true,
+      "status_note": null,
+      "updated_at": "2026-01-05T14:00:00Z"
     }
   ],
   "policies": [
@@ -149,7 +236,29 @@
       "change_cutoff_hours": 12,
       "pickup_window_hours": 72,
       "failure_action_hours": 48,
-      "max_grant_hours": 72
+      "max_grant_hours": 72,
+      "allowed_point_kinds": [
+        "counter",
+        "locker"
+      ]
+    },
+    {
+      "id": "pol-signature",
+      "name": "Signature required",
+      "allow_reschedule": true,
+      "max_reschedule_days": 3,
+      "allow_address_change": false,
+      "allow_hold": false,
+      "max_hold_days": 0,
+      "allow_pickup_redirect": true,
+      "allow_delegation": false,
+      "change_cutoff_hours": 24,
+      "pickup_window_hours": 48,
+      "failure_action_hours": 24,
+      "max_grant_hours": 24,
+      "allowed_point_kinds": [
+        "counter"
+      ]
     }
   ],
   "collectors": [
@@ -269,6 +378,55 @@
         {
           "at": "2026-03-01T15:00:00Z",
           "action": "pickup_ready"
+        }
+      ]
+    },
+    {
+      "id": "S003",
+      "account_id": "pdm-maya",
+      "tracking_number": "NL4471200035",
+      "recipient_person_id": "person-maya",
+      "sender_label": "Halden Optics",
+      "contents_label": "Prescription glasses",
+      "policy_id": "pol-signature",
+      "created_at": "2026-02-28T17:00:00Z",
+      "updated_at": "2026-03-01T18:00:00Z",
+      "estimated_delivery": "2026-03-06",
+      "status": "in_transit",
+      "plan": {
+        "revision": 1,
+        "mode": "home",
+        "address_id": "addr-maya-home",
+        "point_id": null,
+        "delivery_date": "2026-03-06",
+        "hold_until": null
+      },
+      "pending_change_id": null,
+      "pickup_epoch": 0,
+      "pickup": null,
+      "attempt": null,
+      "return_info": null,
+      "completed_at": null,
+      "timeline": [
+        {
+          "at": "2026-02-28T17:00:00Z",
+          "kind": "label_created",
+          "summary": "Shipping label created by the sender."
+        },
+        {
+          "at": "2026-03-01T18:00:00Z",
+          "kind": "in_transit",
+          "summary": "Arrived at regional sort facility."
+        }
+      ],
+      "history": [
+        {
+          "at": "2026-02-28T17:00:00Z",
+          "action": "seeded"
+        },
+        {
+          "at": "2026-03-01T18:00:00Z",
+          "action": "transit_update"
         }
       ]
     }

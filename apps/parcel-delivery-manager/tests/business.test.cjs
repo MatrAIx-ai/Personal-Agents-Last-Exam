@@ -23,12 +23,12 @@ test('generated contracts match their source definitions', () => {
 test('fixture loads and reads are side-effect free', () => {
   const f = fixture(), before = f.data;
   const list = f.call('shipments.list').items;
-  assert.deepEqual(list.map(x => x.id).sort(), ['S001', 'S002']);
+  assert.deepEqual(list.map(x => x.id).sort(), ['S001', 'S002', 'S003']);
   assert.equal(f.call('shipments.get', {id: 'S002'}).shipment.pickup.point_id, 'P01');
-  assert.equal(f.call('points.list', {accessible_only: true}).items.length, 1);
+  assert.equal(f.call('points.list', {accessible_only: true}).items.length, 2);
   assert.equal(f.call('changes.list', {shipment_id: 'S002'}).items[0].status, 'applied');
   assert.equal(f.call('collectors.list').items[0].name, 'Alex Rivera');
-  assert.equal(f.call('pass.get', {shipment_id: 'S002'}).pass.code, 'K7QM-4R2X');
+  assert.equal(f.call('pass.get', {id: 'S002'}).pass.code, 'K7QM-4R2X');
   assert.equal(f.call('notices.list').items.length, 1);
   assert.deepEqual(f.data, before);
 });
@@ -38,20 +38,25 @@ test('unknown and foreign parcels are indistinguishable', () => {
   const f = fixture({seed, binding: b});
   assert.equal(f.call('shipments.list').items.length, 0);
   for (const id of ['S001', 'missing']) rejects(f, () => f.call('shipments.get', {id}), 'not_found');
-  rejects(f, () => f.call('pass.get', {shipment_id: 'S002'}), 'not_found');
+  rejects(f, () => f.call('pass.get', {id: 'S002'}), 'not_found');
+  rejects(f, () => f.call('options.get', {id: 'S001'}), 'not_found');
+  rejects(f, () => f.call('change.preview', {id: 'S001', kind: 'reschedule', delivery_date: '2026-03-06'}), 'not_found');
+  rejects(f, () => f.call('change.submit', {id: 'S001', kind: 'reschedule', delivery_date: '2026-03-06', confirmation: 'cf-guess'}), 'not_found');
+  rejects(f, () => f.call('change.cancel', {id: 'C001'}), 'not_found');
   assert.equal(f.call('notices.list').items.length, 0);
   assert.equal(f.call('changes.list').items.length, 0);
 });
 
 test('pickup deadline is evaluated at the committed clock without writing state', () => {
   const f = fixture();
-  assert.equal(f.call('pass.get', {shipment_id: 'S002'}).pass.valid_now, true);
+  assert.equal(f.call('pass.get', {id: 'S002'}).pass.valid_now, true);
   f.advance('2026-03-04T15:00:00Z');
   const before = f.data;
   const view = f.call('shipments.get', {id: 'S002'}).shipment;
   assert.equal(view.status, 'at_pickup');
   assert.deepEqual(view.deadlines, [{kind: 'pickup', at: '2026-03-04T15:00:00Z', passed: true}]);
-  assert.equal(f.call('pass.get', {shipment_id: 'S002'}).pass.valid_now, false, 'Validity uses now < expires_at');
+  assert.equal(f.call('pass.get', {id: 'S002'}).pass.valid_now, false, 'Validity uses now < expires_at');
+  assert.equal(f.call('change.preview', {id: 'S002', kind: 'redirect', point_id: 'P03'}).preview.reason, 'deadline_passed');
   assert.deepEqual(f.data, before);
 });
 
@@ -72,7 +77,10 @@ test('seed validation rejects inconsistent history', () => {
     [d => { d.shipments[0].plan.address_id = 'addr-missing'; }, /missing record/],
     [d => { d.shipments[0].pending_change_id = 'C001'; }, /pending change/],
     [d => { d.changes.push({...structuredClone(d.changes[0]), id: 'C001'}); }, /Duplicate/],
-    [d => { d.notices[0].audience = ['person-unknown']; }, /binding/]
+    [d => { d.notices[0].audience = ['person-unknown']; }, /binding/],
+    [d => { d.carrier.time_zone = 'Mars/Olympus'; }, /time zone/],
+    [d => { d.shipments[0].plan.delivery_date = '2026-02-30'; }, /calendar date/],
+    [d => { d.shipments[0].status = 'out_for_delivery'; d.shipments[0].plan = {...d.shipments[1].plan}; }, /home delivery plan/]
   ];
   for (const [mutate, pattern] of cases) {
     const bad = structuredClone(good); mutate(bad);
@@ -88,7 +96,12 @@ test('transit update follows the current plan and rejects superseded or terminal
   rejects(f, () => f.event({...event, event_id: 'old-plan', payload: {...event.payload, plan_revision: 2}}), 'invalid_event');
   rejects(f, () => f.event({...event, event_id: 'pickup-not-moving', payload: {...event.payload, shipment_id: 'S002', plan_revision: 2}}), 'invalid_event');
   rejects(f, () => f.event({...event, event_id: 'bad', payload: {...event.payload, status: 'delivered'}}), /Event schema/);
+  rejects(f, () => f.event({...event, event_id: 'unknown', payload: {...event.payload, shipment_id: 'S999'}}), 'invalid_event');
 });
+
+// Workflow suites; the public verifier runs this file, which registers them too.
+require('./w1-home-delivery.test.cjs');
+require('./w2-pickup.test.cjs');
 
 test('optional diagnostics cannot change business results', () => {
   const scenario = require('../examples/scenario.json');

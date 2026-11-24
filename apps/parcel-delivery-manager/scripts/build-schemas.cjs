@@ -64,7 +64,8 @@ const policy = obj({
   allow_address_change: bool, allow_hold: bool, max_hold_days: int(0, 30),
   allow_pickup_redirect: bool, allow_delegation: bool,
   change_cutoff_hours: int(0, 168), pickup_window_hours: int(1, 720),
-  failure_action_hours: int(1, 720), max_grant_hours: int(1, 720)
+  failure_action_hours: int(1, 720), max_grant_hours: int(1, 720),
+  allowed_point_kinds: list(oneOf(['counter', 'locker']), 2, {uniqueItems: true})
 });
 const collector = obj({recipient_person_id: id, person_id: id, relationship: text(80)});
 const shipment = obj({
@@ -99,7 +100,7 @@ const seed = {
   $id: 'urn:pale:parcel-delivery-manager:seed:1',
   ...obj({
     account_id: id, owner_person_id: id,
-    carrier: obj({name: text(120), service_area: text(200)}),
+    carrier: obj({name: text(120), service_area: text(200), time_zone: text(64)}),
     addresses: list(address, 200), pickup_points: list(point, 100), policies: list(policy, 50),
     collectors: list(collector, 200), shipments: list(shipment, 500), changes: list(change, 2000),
     grants: list(grant, 2000), passes: list(pass, 4000), notices: list(notice, 5000)
@@ -135,7 +136,8 @@ const optionsView = obj({
   home_delivery: obj({...eligibility.properties, address_ids: list(id, 200)}),
   delegation: eligibility
 });
-const changeInput = obj({kind: oneOf(CHANGE_KINDS), delivery_date: day, address_id: id, point_id: id, hold_until: day}, ['kind']);
+// Flat change request. `id` is always the tool's primary object so Core object-level policy constraints apply to it.
+const changeFields = {id, kind: oneOf(CHANGE_KINDS), delivery_date: day, address_id: id, point_id: id, hold_until: day};
 const preview = obj({allowed: bool, reason: nullable(text(80)), summary: text(500), confirmation: nullable(text(64)), current_plan: nullable(plan), proposed_plan: nullable(target)});
 const passView = obj({
   id, shipment_id: id, holder_person_id: id, role: oneOf(['recipient', 'delegate']), point_id: id, point_name: text(120),
@@ -156,34 +158,34 @@ const tool = (name, description, readOnly, inputSchema, outputProperties) => ({
 const tools = [
   tool('shipments.list', 'List parcels this person may see: their own parcels and parcels they are currently authorized to collect. Closed parcels (delivered, collected, returned) require include_closed. Read-only.', true,
     obj({query: text(200, 0), include_closed: bool}, []), {items: list(shipmentSummary, 500)}),
-  tool('shipments.get', 'Read one parcel: physical status, current delivery plan, pending change, pickup readiness, deadlines and timeline. A delegate sees only the collection details of a parcel they are authorized for. Read-only.', true,
+  tool('shipments.get', 'Read one parcel by its ID: physical status, current delivery plan, pending change, pickup readiness, deadlines and timeline. A delegate sees only the collection details of a parcel they are authorized for. Read-only.', true,
     obj({id}), {shipment: shipmentView}),
-  tool('options.get', 'List the delivery changes the parcel policy currently allows (reschedule, address, hold, pickup redirect, back to home delivery, delegation) with eligible addresses/points and reasons when not allowed. Recipient only. Read-only.', true,
-    obj({shipment_id: id}), {options: optionsView}),
+  tool('options.get', 'For the parcel with this ID, list the delivery changes its policy currently allows (reschedule, address, hold, pickup redirect, back to home delivery, delegation) with eligible dates, addresses and points, and a reason when a change is not allowed. Recipient only. Read-only.', true,
+    obj({id}), {options: optionsView}),
   tool('points.list', 'Search the pickup-point directory with hours, accessibility and current status. Read-only.', true,
     obj({query: text(200, 0), accessible_only: bool, open_only: bool}, []), {items: list(pointView, 100)}),
-  tool('change.preview', 'Check a proposed delivery change against the current plan and policy without changing anything. Returns the effect and a confirmation value that change.submit requires; the confirmation becomes stale when the parcel changes. Read-only.', true,
-    obj({shipment_id: id, change: changeInput}), {preview}),
-  tool('change.submit', 'Submit a previewed delivery change to the carrier. The request becomes pending; the delivery plan changes only when the carrier applies it. Requires the confirmation returned by change.preview.', false,
-    write({shipment_id: id, change: changeInput, confirmation: text(64)}), {change_id: id, change_status: {const: 'pending'}}),
-  tool('change.cancel', 'Withdraw a pending delivery change. Fails with too_late once the carrier has decided it.', false,
-    write({change_id: id}), {change_id: id, change_status: {const: 'cancelled'}}),
+  tool('change.preview', 'Check a proposed delivery change for the parcel with this ID against its current plan and policy, without changing anything. kind selects the change: reschedule (delivery_date), address (address_id, optional delivery_date), hold (hold_until), redirect (point_id) or home_delivery (address_id, optional delivery_date). Returns the effect and a confirmation value that change.submit requires; the confirmation becomes stale when the parcel changes. Read-only.', true,
+    obj(changeFields, ['id', 'kind']), {preview}),
+  tool('change.submit', 'Submit a previewed delivery change for the parcel with this ID to the carrier, repeating the previewed fields and its confirmation. The request becomes pending; the delivery plan changes only when the carrier applies it.', false,
+    write({...changeFields, confirmation: text(64)}, ['id', 'kind', 'confirmation']), {change_id: id, change_status: {const: 'pending'}}),
+  tool('change.cancel', 'Withdraw the pending delivery change with this change ID. Fails with too_late once the carrier has decided it.', false,
+    write({id}), {change_id: id, change_status: {const: 'cancelled'}}),
   tool('changes.list', 'List delivery change requests and their decisions, optionally for one parcel. Recipient only. Read-only.', true,
     obj({shipment_id: id}, []), {items: list(change, 2000)}),
   tool('collectors.list', 'List the people this recipient has saved as trusted collectors. Read-only.', true,
     obj({}, []), {items: list(obj({person_id: id, name: nullable(text(120)), relationship: text(80)}), 200)}),
   tool('grants.list', 'List collection authorizations for the recipient\'s parcels, or the authorizations granted to this person when they are a delegate. Read-only.', true,
     obj({shipment_id: id}, []), {items: list(grant, 2000)}),
-  tool('grant.preview', 'Check whether a trusted collector can be authorized to collect a ready parcel until the given time, optionally replacing an existing authorization. Returns the limited access granted and a confirmation value. Read-only.', true,
-    obj({shipment_id: id, collector_person_id: id, expires_at: time, replaces_grant_id: id}, ['shipment_id', 'collector_person_id', 'expires_at']),
+  tool('grant.preview', 'Check whether a trusted collector can be authorized to collect the ready parcel with this ID until the given time, optionally replacing an existing authorization. Returns the limited access granted and a confirmation value. Read-only.', true,
+    obj({id, collector_person_id: id, expires_at: time, replaces_grant_id: id}, ['id', 'collector_person_id', 'expires_at']),
     {preview: obj({allowed: bool, reason: nullable(text(80)), summary: text(500), confirmation: nullable(text(64)), point_id: nullable(id), effective_expires_at: nullable(time)})}),
-  tool('grant.create', 'Authorize a trusted collector for one ready parcel at its current pickup point, or replace an existing authorization. Issues the collector a pass. Requires the confirmation returned by grant.preview.', false,
-    write({shipment_id: id, collector_person_id: id, expires_at: time, replaces_grant_id: id, confirmation: text(64)}, ['shipment_id', 'collector_person_id', 'expires_at', 'confirmation']),
+  tool('grant.create', 'Authorize a trusted collector for the ready parcel with this ID at its current pickup point, or replace an existing authorization. Issues the collector a pass. Requires the confirmation returned by grant.preview.', false,
+    write({id, collector_person_id: id, expires_at: time, replaces_grant_id: id, confirmation: text(64)}, ['id', 'collector_person_id', 'expires_at', 'confirmation']),
     {grant_id: id, pass_id: id}),
-  tool('grant.revoke', 'Revoke an active collection authorization and invalidate its pass.', false,
-    write({grant_id: id}), {grant_id: id, grant_status: {const: 'revoked'}}),
-  tool('pass.get', 'Show this person\'s current collection pass for a ready parcel (the recipient\'s own pass or a delegate\'s authorized pass). Read-only.', true,
-    obj({shipment_id: id}), {pass: passView}),
+  tool('grant.revoke', 'Revoke the active collection authorization with this grant ID and invalidate its pass.', false,
+    write({id}), {grant_id: id, grant_status: {const: 'revoked'}}),
+  tool('pass.get', 'Show this person\'s current collection pass for the ready parcel with this ID (the recipient\'s own pass or a delegate\'s authorized pass). Read-only.', true,
+    obj({id}), {pass: passView}),
   tool('notices.list', 'List in-app delivery notices visible to this person, optionally for one parcel. Read-only.', true,
     obj({shipment_id: id}, []), {items: list(notice, 5000)})
 ];

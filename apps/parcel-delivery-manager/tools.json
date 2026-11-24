@@ -168,7 +168,7 @@
   },
   {
     "name": "parcel-delivery-manager.shipments.get",
-    "description": "Read one parcel: physical status, current delivery plan, pending change, pickup readiness, deadlines and timeline. A delegate sees only the collection details of a parcel they are authorized for. Read-only.",
+    "description": "Read one parcel by its ID: physical status, current delivery plan, pending change, pickup readiness, deadlines and timeline. A delegate sees only the collection details of a parcel they are authorized for. Read-only.",
     "read_only": true,
     "scope": "parcel-delivery-manager.shipments.get",
     "resource_target": "current account",
@@ -775,20 +775,20 @@
   },
   {
     "name": "parcel-delivery-manager.options.get",
-    "description": "List the delivery changes the parcel policy currently allows (reschedule, address, hold, pickup redirect, back to home delivery, delegation) with eligible addresses/points and reasons when not allowed. Recipient only. Read-only.",
+    "description": "For the parcel with this ID, list the delivery changes its policy currently allows (reschedule, address, hold, pickup redirect, back to home delivery, delegation) with eligible dates, addresses and points, and a reason when a change is not allowed. Recipient only. Read-only.",
     "read_only": true,
     "scope": "parcel-delivery-manager.options.get",
     "resource_target": "current account",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "shipment_id": {
+        "id": {
           "type": "string",
           "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
         }
       },
       "required": [
-        "shipment_id"
+        "id"
       ],
       "additionalProperties": false
     },
@@ -1244,55 +1244,46 @@
   },
   {
     "name": "parcel-delivery-manager.change.preview",
-    "description": "Check a proposed delivery change against the current plan and policy without changing anything. Returns the effect and a confirmation value that change.submit requires; the confirmation becomes stale when the parcel changes. Read-only.",
+    "description": "Check a proposed delivery change for the parcel with this ID against its current plan and policy, without changing anything. kind selects the change: reschedule (delivery_date), address (address_id, optional delivery_date), hold (hold_until), redirect (point_id) or home_delivery (address_id, optional delivery_date). Returns the effect and a confirmation value that change.submit requires; the confirmation becomes stale when the parcel changes. Read-only.",
     "read_only": true,
     "scope": "parcel-delivery-manager.change.preview",
     "resource_target": "current account",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "shipment_id": {
+        "id": {
           "type": "string",
           "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
         },
-        "change": {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "enum": [
-                "reschedule",
-                "address",
-                "hold",
-                "redirect",
-                "home_delivery"
-              ]
-            },
-            "delivery_date": {
-              "type": "string",
-              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-            },
-            "address_id": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
-            },
-            "point_id": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
-            },
-            "hold_until": {
-              "type": "string",
-              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-            }
-          },
-          "required": [
-            "kind"
-          ],
-          "additionalProperties": false
+        "kind": {
+          "enum": [
+            "reschedule",
+            "address",
+            "hold",
+            "redirect",
+            "home_delivery"
+          ]
+        },
+        "delivery_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "address_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "point_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "hold_until": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         }
       },
       "required": [
-        "shipment_id",
-        "change"
+        "id",
+        "kind"
       ],
       "additionalProperties": false
     },
@@ -1528,50 +1519,41 @@
   },
   {
     "name": "parcel-delivery-manager.change.submit",
-    "description": "Submit a previewed delivery change to the carrier. The request becomes pending; the delivery plan changes only when the carrier applies it. Requires the confirmation returned by change.preview.",
+    "description": "Submit a previewed delivery change for the parcel with this ID to the carrier, repeating the previewed fields and its confirmation. The request becomes pending; the delivery plan changes only when the carrier applies it.",
     "read_only": false,
     "scope": "parcel-delivery-manager.change.submit",
     "resource_target": "current account",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "shipment_id": {
+        "id": {
           "type": "string",
           "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
         },
-        "change": {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "enum": [
-                "reschedule",
-                "address",
-                "hold",
-                "redirect",
-                "home_delivery"
-              ]
-            },
-            "delivery_date": {
-              "type": "string",
-              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-            },
-            "address_id": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
-            },
-            "point_id": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
-            },
-            "hold_until": {
-              "type": "string",
-              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-            }
-          },
-          "required": [
-            "kind"
-          ],
-          "additionalProperties": false
+        "kind": {
+          "enum": [
+            "reschedule",
+            "address",
+            "hold",
+            "redirect",
+            "home_delivery"
+          ]
+        },
+        "delivery_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "address_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "point_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "hold_until": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "confirmation": {
           "type": "string",
@@ -1602,8 +1584,8 @@
         }
       },
       "required": [
-        "shipment_id",
-        "change",
+        "id",
+        "kind",
         "confirmation",
         "expected_version",
         "request_id"
@@ -1657,14 +1639,14 @@
   },
   {
     "name": "parcel-delivery-manager.change.cancel",
-    "description": "Withdraw a pending delivery change. Fails with too_late once the carrier has decided it.",
+    "description": "Withdraw the pending delivery change with this change ID. Fails with too_late once the carrier has decided it.",
     "read_only": false,
     "scope": "parcel-delivery-manager.change.cancel",
     "resource_target": "current account",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "change_id": {
+        "id": {
           "type": "string",
           "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
         },
@@ -1692,7 +1674,7 @@
         }
       },
       "required": [
-        "change_id",
+        "id",
         "expected_version",
         "request_id"
       ],
@@ -2242,14 +2224,14 @@
   },
   {
     "name": "parcel-delivery-manager.grant.preview",
-    "description": "Check whether a trusted collector can be authorized to collect a ready parcel until the given time, optionally replacing an existing authorization. Returns the limited access granted and a confirmation value. Read-only.",
+    "description": "Check whether a trusted collector can be authorized to collect the ready parcel with this ID until the given time, optionally replacing an existing authorization. Returns the limited access granted and a confirmation value. Read-only.",
     "read_only": true,
     "scope": "parcel-delivery-manager.grant.preview",
     "resource_target": "current account",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "shipment_id": {
+        "id": {
           "type": "string",
           "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
         },
@@ -2267,7 +2249,7 @@
         }
       },
       "required": [
-        "shipment_id",
+        "id",
         "collector_person_id",
         "expires_at"
       ],
@@ -2380,14 +2362,14 @@
   },
   {
     "name": "parcel-delivery-manager.grant.create",
-    "description": "Authorize a trusted collector for one ready parcel at its current pickup point, or replace an existing authorization. Issues the collector a pass. Requires the confirmation returned by grant.preview.",
+    "description": "Authorize a trusted collector for the ready parcel with this ID at its current pickup point, or replace an existing authorization. Issues the collector a pass. Requires the confirmation returned by grant.preview.",
     "read_only": false,
     "scope": "parcel-delivery-manager.grant.create",
     "resource_target": "current account",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "shipment_id": {
+        "id": {
           "type": "string",
           "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
         },
@@ -2432,7 +2414,7 @@
         }
       },
       "required": [
-        "shipment_id",
+        "id",
         "collector_person_id",
         "expires_at",
         "confirmation",
@@ -2489,14 +2471,14 @@
   },
   {
     "name": "parcel-delivery-manager.grant.revoke",
-    "description": "Revoke an active collection authorization and invalidate its pass.",
+    "description": "Revoke the active collection authorization with this grant ID and invalidate its pass.",
     "read_only": false,
     "scope": "parcel-delivery-manager.grant.revoke",
     "resource_target": "current account",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "grant_id": {
+        "id": {
           "type": "string",
           "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
         },
@@ -2524,7 +2506,7 @@
         }
       },
       "required": [
-        "grant_id",
+        "id",
         "expected_version",
         "request_id"
       ],
@@ -2577,20 +2559,20 @@
   },
   {
     "name": "parcel-delivery-manager.pass.get",
-    "description": "Show this person's current collection pass for a ready parcel (the recipient's own pass or a delegate's authorized pass). Read-only.",
+    "description": "Show this person's current collection pass for the ready parcel with this ID (the recipient's own pass or a delegate's authorized pass). Read-only.",
     "read_only": true,
     "scope": "parcel-delivery-manager.pass.get",
     "resource_target": "current account",
     "inputSchema": {
       "type": "object",
       "properties": {
-        "shipment_id": {
+        "id": {
           "type": "string",
           "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
         }
       },
       "required": [
-        "shipment_id"
+        "id"
       ],
       "additionalProperties": false
     },

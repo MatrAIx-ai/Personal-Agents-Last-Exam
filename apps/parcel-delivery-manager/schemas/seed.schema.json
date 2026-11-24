@@ -23,11 +23,17 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 200
+        },
+        "time_zone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
         }
       },
       "required": [
         "name",
-        "service_area"
+        "service_area",
+        "time_zone"
       ],
       "additionalProperties": false
     },
@@ -278,6 +284,17 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 720
+          },
+          "allowed_point_kinds": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "counter",
+                "locker"
+              ]
+            },
+            "maxItems": 2,
+            "uniqueItems": true
           }
         },
         "required": [
@@ -293,7 +310,8 @@
           "change_cutoff_hours",
           "pickup_window_hours",
           "failure_action_hours",
-          "max_grant_hours"
+          "max_grant_hours",
+          "allowed_point_kinds"
         ],
         "additionalProperties": false
       },

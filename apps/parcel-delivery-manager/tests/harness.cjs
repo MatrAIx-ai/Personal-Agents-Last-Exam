@@ -60,10 +60,29 @@ function fixture({seed = require('../fixtures/minimal.json'), binding = require(
 }
 
 // Assert that a failing call or event leaves business data untouched.
-function rejects(f, fn, code) {
+// `code` is a business error code (or a pattern for harness schema failures); `message`
+// optionally pins the specific rule so a rejection for another reason does not pass.
+function rejects(f, fn, code, message) {
   const before = f.data;
-  assert.throws(fn, error => error.code === code || (code instanceof RegExp && code.test(error.message)), 'Expected ' + code);
+  assert.throws(fn, error => {
+    const matched = code instanceof RegExp ? code.test(error.message) : error.code === code;
+    assert.ok(matched, 'Expected ' + code + ', got ' + (error.code || '') + ': ' + error.message);
+    if (message) assert.match(error.message, message);
+    return true;
+  });
   assert.deepEqual(f.data, before, 'Rejected operation changed data');
 }
 
-module.exports = {fixture, rejects, T, app};
+// Build a trusted event with a unique ID.
+let eventSeq = 0;
+const ev = (operation, at, payload) => ({event_id: 'evt-' + (++eventSeq), at, operation: 'parcel.' + operation, payload});
+// Preview then submit, as an Agent must. Returns the new change ID.
+function submit(f, id, change) {
+  const preview = f.call('change.preview', {id, ...change}).preview;
+  assert.equal(preview.allowed, true, 'Preview should allow: ' + preview.reason);
+  return f.call('change.submit', {id, ...change, confirmation: preview.confirmation}).change_id;
+}
+const decide = (f, at, shipment_id, change_id, base_plan_revision, decision = 'applied', reason = null) =>
+  f.event(ev('change_resolved', at, {shipment_id, change_id, base_plan_revision, decision, reason}));
+
+module.exports = {fixture, rejects, ev, submit, decide, T, app};

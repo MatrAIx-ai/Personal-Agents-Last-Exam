@@ -2,6 +2,7 @@
 // Record consistency. Core runs validateSeed on loaded history and after every committed
 // tool call or event, so these invariants hold for every persisted state.
 const {fail, references, ms} = require('./common.cjs');
+const t = require('./time.cjs');
 
 const COLLECTIONS = ['addresses', 'pickup_points', 'policies', 'shipments', 'changes', 'grants', 'passes', 'notices'];
 
@@ -33,8 +34,11 @@ function validateSeed(ctx, data) {
   const person = (id, label) => { if (!people.has(id)) fail('invalid_seed', label + ' is not a person in the task binding.'); };
   const find = (key, id, label) => data[key].find(x => x.id === id) || fail('invalid_seed', label + ' references a missing record: ' + id);
 
+  if (!t.validZone(data.carrier.time_zone)) fail('invalid_seed', 'Carrier time zone is not a known zone.');
+  const day = (value, label) => { if (value !== null && !t.validDay(value)) fail('invalid_seed', label + ' is not a calendar date.'); };
   for (const a of data.addresses) person(a.person_id, 'Address owner');
   for (const p of data.pickup_points) {
+    if (!t.validZone(p.time_zone)) fail('invalid_seed', 'Pickup point time zone is not a known zone: ' + p.id);
     for (const h of p.hours) if (h.opens >= h.closes) fail('invalid_seed', 'Pickup point hours must open before they close: ' + p.id);
   }
   const trusted = new Set();
@@ -54,6 +58,9 @@ function validateSeed(ctx, data) {
     ordered(s, label);
     for (let i = 1; i < s.timeline.length; i++) if (ms(s.timeline[i].at) < ms(s.timeline[i - 1].at)) fail('invalid_seed', label + ' timeline is out of order.');
     const plan = s.plan;
+    day(plan.delivery_date, label + ' delivery date'); day(plan.hold_until, label + ' hold end'); day(s.estimated_delivery, label + ' estimated delivery');
+    if (['out_for_delivery', 'attempt_failed', 'delivered'].includes(s.status) && plan.mode !== 'home') fail('invalid_seed', label + ' status requires a home delivery plan.');
+    if (s.status === 'collected' && plan.mode !== 'pickup') fail('invalid_seed', label + ' can only be collected under a pickup plan.');
     if (plan.mode === 'pickup') {
       if (!plan.point_id || plan.address_id || plan.delivery_date || plan.hold_until) fail('invalid_seed', label + ' pickup plan must name only a point.');
       find('pickup_points', plan.point_id, label);
@@ -121,7 +128,9 @@ function validateSeed(ctx, data) {
 
 module.exports = {
   validateSeed,
-  records: data => [...data.shipments, ...data.changes, ...data.grants, ...data.passes, ...data.notices],
+  // Parcels are the primary records. Core counts records against objects when a Task loads
+  // history without a resource bundle, so both hooks describe the same set.
+  records: data => data.shipments,
   objects: data => data.shipments.map(s => s.id),
   references: () => []
 };

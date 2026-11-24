@@ -3,6 +3,7 @@
 // records. Physical progress, carrier decisions and handoffs arrive as trusted events.
 const c = require('./common.cjs');
 const v = require('./views.cjs');
+const ch = require('./changes.cjs');
 const {fail, copy, now, ms} = c;
 
 const READS = {
@@ -19,6 +20,15 @@ const READS = {
   'shipments.get'(ctx, data, args) {
     const {shipment, access} = c.visibleShipment(ctx, data, args.id);
     return {shipment: v.shipmentView(ctx, data, shipment, access)};
+  },
+  'options.get'(ctx, data, args) {
+    const {shipment} = c.visibleShipment(ctx, data, args.id, {recipientOnly: true});
+    return {options: ch.options(ctx, data, shipment)};
+  },
+  'change.preview'(ctx, data, args) {
+    const {shipment} = c.visibleShipment(ctx, data, args.id, {recipientOnly: true});
+    const {id, ...input} = args, e = ch.evaluate(ctx, data, shipment, input);
+    return {preview: {allowed: e.allowed, reason: e.reason, summary: e.summary, confirmation: e.confirmation, current_plan: copy(shipment.plan), proposed_plan: e.target}};
   },
   'points.list'(ctx, data, args) {
     const query = (args.query || '').toLocaleLowerCase();
@@ -48,7 +58,7 @@ const READS = {
     return {items: copy(items)};
   },
   'pass.get'(ctx, data, args) {
-    const {shipment, access} = c.visibleShipment(ctx, data, args.shipment_id);
+    const {shipment, access} = c.visibleShipment(ctx, data, args.id);
     const me = data.owner_person_id;
     const pass = data.passes.find(p => p.shipment_id === shipment.id && p.holder_person_id === me && p.status === 'active');
     if (!pass || shipment.status !== 'at_pickup') fail('not_available', 'There is no current collection pass for this parcel.');
@@ -63,12 +73,47 @@ const READS = {
   }
 };
 
-// Planned in the next implementation step: eligibility/preview, submissions, cancellation and grants.
-const PLANNED = ['options.get', 'change.preview', 'change.submit', 'change.cancel', 'grant.preview', 'grant.create', 'grant.revoke'];
+const WRITES = {
+  // A submission only records a pending request. The plan changes when the carrier applies it.
+  'change.submit'(ctx, data, args) {
+    const {shipment: s} = c.visibleShipment(ctx, data, args.id, {recipientOnly: true});
+    const {id, confirmation, expected_version, request_id, ...input} = args;
+    const e = ch.evaluate(ctx, data, s, input);
+    if (!e.allowed) fail(e.reason, e.summary);
+    if (confirmation !== e.confirmation) fail('stale_confirmation', ch.MESSAGES.stale_confirmation);
+    const at = ctx.virtual_now;
+    const change = {id: c.nextId(data.changes, 'C'), account_id: data.account_id, shipment_id: s.id, kind: input.kind,
+      requested_by_person_id: data.owner_person_id, created_at: at, updated_at: at, base_plan_revision: s.plan.revision,
+      target: e.target, status: 'pending', decided_at: null, reason: null, history: [{at, action: 'submitted'}]};
+    data.changes.push(change);
+    s.pending_change_id = change.id;
+    c.timeline(s, at, 'change_requested', 'Change requested: ' + ch.describe(data, e.target) + '. Waiting for the carrier.');
+    c.log(ctx, c.APP + '.change_submitted', {shipment_id: s.id, change_id: change.id, kind: input.kind});
+    return {change_id: change.id, change_status: 'pending'};
+  },
+  'change.cancel'(ctx, data, args) {
+    const change = data.changes.find(x => x.id === args.id);
+    const s = change && data.shipments.find(x => x.id === change.shipment_id);
+    if (!s || s.recipient_person_id !== data.owner_person_id) fail('not_found', 'Change request does not exist in this account.');
+    if (change.status !== 'pending') fail('too_late', ch.MESSAGES.too_late);
+    const at = ctx.virtual_now;
+    change.status = 'cancelled';
+    change.decided_at = at;
+    c.touch(change, at, 'cancelled');
+    s.pending_change_id = null;
+    c.timeline(s, at, 'change_cancelled', 'Change request withdrawn; the delivery plan is unchanged.');
+    c.log(ctx, c.APP + '.change_cancelled', {shipment_id: s.id, change_id: change.id});
+    return {change_id: change.id, change_status: 'cancelled'};
+  }
+};
+
+// Planned in the next implementation step (W3): collection authorizations.
+const PLANNED = ['grant.preview', 'grant.create', 'grant.revoke'];
 
 function handleTool(ctx, data, tool, args) {
   const op = c.name(tool);
   if (READS[op]) return {data, result: READS[op](ctx, data, args)};
+  if (WRITES[op]) return {data, result: WRITES[op](ctx, data, args)};
   if (PLANNED.includes(op)) fail('not_implemented', 'This operation is not implemented yet.');
   fail('unknown_tool', 'Unknown business operation.');
 }
