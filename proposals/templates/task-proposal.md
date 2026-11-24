@@ -6,6 +6,8 @@ Example: `[Task Proposal] [Travel & commuting] Adapt an airport pickup after a f
 
 Copy this template to `proposals/task/<slug>.md`. Keep the persona, story and personalization insight concise. Section 5 defines how the task is scored. The construction plan defines the scope, deliverables, quality checks and effort that reviewers will follow through implementation and merge in this same PR.
 
+Completed implementations use the [LifePack v1.0 task delivery format](../../docs/lifepack-task-format.md). This proposal defines the plan; the package and run evidence follow approval.
+
 ✍️ Replace each `[Fill in: …]` with your answer. Optional fields can be `None`. For unresolved details, use `TBD` and explain how they will be resolved. See the [worked example](../task/lena-spring-gathering.md).
 
 ## 1. Task and domains
@@ -105,6 +107,8 @@ Specify the work needed to turn the story into an executable, scoreable task. In
 | Agent rollouts and analysis | `[Fill in: planned runs per designated GPT, Claude and Gemini model, hinted runs and analysis work]` | `[Fill in: traces, scores and failure analysis meeting the linked validation protocol]`<br>Timestamp agent actions and observations on the same simulated timeline as the user script; record real execution dates and wall-clock duration separately. | `[Fill in: estimate]` |
 
 Estimate token volume for **one complete scenario across all sessions** and state what is included, such as dialogue, prior context and tool outputs. The simulated time span is the time elapsed in the user's world; development duration is recorded below.
+
+On the simulated timeline, tasks involving interaction with external platforms must start their first session **on or after 2026-01-01**, records of the user's interactions with external platforms must be dated **on or after 2025-01-01**, and text-only user history, such as personal background, past experiences, preferences and user–agent conversations, has **no earliest-date restriction**.
 
 - **Milestones, owners and dependencies (required):** `[Fill in: work order, responsible contributors, expected calendar duration and environment/infra dependencies; link related PRs]`
 - **Resources and total effort (required):** `[Fill in: total person-days, estimated model/API and generation costs, and compute needs; estimates or explained TBDs]`

@@ -342,6 +342,8 @@ class LifecycleTests(unittest.TestCase):
         maintenance = pr(number=124, title="Fix documentation")
         api.pages.return_value = [maintenance, pr()]
         def request(path, method="GET", data=None):
+            if path.endswith("/pulls/123"):return pr()
+            if path.endswith("/pulls/124"):return maintenance
             if path.endswith("/status"):return {"statuses": []}
             if "/check-runs?" in path:return {"check_runs": []}
             return {}
@@ -363,6 +365,7 @@ class LifecycleTests(unittest.TestCase):
         draft = pr(title="Fix documentation", draft=True)
         api.pages.return_value = [draft]
         def request(path, method="GET", data=None):
+            if path.endswith("/pulls/123"):return draft
             if path.endswith("/status"):return {"statuses": []}
             if "/check-runs?" in path:
                 return {"check_runs": [{"id": 999, "external_id": "pale-contribution-ready:" + HEAD,

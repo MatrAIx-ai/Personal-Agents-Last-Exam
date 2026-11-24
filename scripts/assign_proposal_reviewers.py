@@ -13,10 +13,10 @@ import sys
 
 try:
     from .review_identity import can_self_review
-    from .sync_proposals import APIError, GitHub, PROPOSAL_PATH, TITLE, decode_file, domains_from_readme, field, labels, track
+    from .sync_proposals import APIError, GitHub, RateLimited, rate_limit_notice, PROPOSAL_PATH, TITLE, decode_file, domains_from_readme, field, labels, track
 except ImportError:
     from review_identity import can_self_review
-    from sync_proposals import APIError, GitHub, PROPOSAL_PATH, TITLE, decode_file, domains_from_readme, field, labels, track
+    from sync_proposals import APIError, GitHub, RateLimited, rate_limit_notice, PROPOSAL_PATH, TITLE, decode_file, domains_from_readme, field, labels, track
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -164,12 +164,14 @@ class Router:
             raise ValueError("No non-author reviewer is available in this Track")
         return min(eligible, key=lambda u: (loads[u], pool.index(u))), "Author conflict: least-loaded non-author reviewer in the same Track"
 
-    def run(self, apply=False):
+    def run(self, apply=False, numbers=None):
         all_prs = list(self.api.pages(f"{self.base}/pulls", state="all", base=self.branch, sort="created", direction="asc"))
         opened = sorted([p for p in all_prs if p["state"] == "open" and track(p)], key=lambda p: p["number"])
         loads = Counter(u for p in opened if not p.get("draft") for u in requested(p))
         rows = []
         for pr in opened:
+            if numbers is not None and pr["number"] not in numbers:
+                continue
             row = {"number": pr["number"], "track": track(pr), "author": pr["user"]["login"],
                    "draft": bool(pr.get("draft")), "requested_reviewers": requested(pr),
                    "status": "preserved", "reason": "Existing review assignment"}
@@ -182,14 +184,16 @@ class Router:
                 row.update(status="self-managed", reason="Owner reviews and accepts their own changes; no automatic reviewer request")
                 continue
             try:
-                meta = self.metadata(pr)
-                row.update(domain=meta["domain"])
+                if not named_track(pr):
+                    raise ValueError("Use a valid proposal title with a consistent Track")
                 if pr.get("draft"):
                     row.update(status="draft", reason="Wait for Ready for review"); continue
-                if self.rules["routing"]["manual_label"] in labels(pr):
-                    row.update(status="manual", reason="Manual routing label"); continue
                 if self.established(pr):
                     row.update(reason="Prior review or explicit reviewer change; preserve human routing"); continue
+                meta = self.metadata(pr)
+                row.update(domain=meta["domain"])
+                if self.rules["routing"]["manual_label"] in labels(pr):
+                    row.update(status="manual", reason="Manual routing label"); continue
                 reviewer, reason = self.choose(pr, meta, all_prs, loads)
                 row.update(reviewer=reviewer, reason=reason)
                 if apply:
@@ -250,7 +254,9 @@ def main():
     validate_policy(rules, domains_from_readme((ROOT / "README.md").read_text()))
     api = GitHub(args.repository, os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN"))
     branch = api.request(f"/repos/{api.repository}")["default_branch"]
-    rows = Router(api, rules, branch).run(args.apply)
+    event = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text()) if os.environ.get("GITHUB_EVENT_PATH") else {}
+    numbers = {event["pull_request"]["number"]} if os.environ.get("GITHUB_EVENT_NAME") == "pull_request_target" else None
+    rows = Router(api, rules, branch).run(args.apply, numbers)
     result = {"as_of": datetime.now(timezone.utc).isoformat(), "applied": args.apply, "rows": rows}
     args.output.write_text(json.dumps(result, indent=2) + "\n")
     report = summary(rows, rules)
@@ -265,6 +271,9 @@ def main():
 if __name__ == "__main__":
     try:
         main()
+    except RateLimited as error:
+        rate_limit_notice("Reviewer routing", error)
+        sys.exit(1)
     except (APIError, ValueError, RuntimeError) as error:
         print(f"Reviewer routing failed: {error}", file=sys.stderr)
         sys.exit(1)

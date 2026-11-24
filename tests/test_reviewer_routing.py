@@ -72,6 +72,20 @@ def event(user, action="review_requested", number=1):
 
 
 class RoutingTests(unittest.TestCase):
+    def test_event_processes_only_selected_pr_and_preserves_author_continuity(self):
+        api = FakeAPI([pr(1), pr(2), pr(3, author="someone-else")])
+        api.events[1] = [event("TianyuCodings")]
+        rows = routing.Router(api, RULES).run(True, {2})
+        self.assertEqual([r["number"] for r in rows], [2])
+        self.assertEqual(api.posts, [(2, {"reviewers": ["TianyuCodings"]})])
+        self.assertFalse(any("/3/" in str(c) for c in api.calls))
+
+    def test_existing_review_history_skips_proposal_download(self):
+        api = FakeAPI([pr(1)])
+        api.events[1] = [event("haolun-wu")]
+        routing.Router(api, RULES).run(True)
+        self.assertFalse(any("/files" in str(c) or "proposals/" in str(c) for c in api.calls))
+
     def run_router(self, api, apply=False, rules=None):
         return routing.Router(api, rules or RULES).run(apply)
 
