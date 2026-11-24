@@ -100,8 +100,250 @@ function minimal() {
   };
 }
 
+
+// ---- Reference household ----------------------------------------------------------------------------
+// The reference fixture starts from seeded records (tables, recipes, profiles, pantry) and then
+// replays five weeks of household life through the App's own hooks: the account's plan writes and
+// marks, and fourteen events from the other members. Replaying keeps every history row, slot state,
+// notification and activity row consistent with the rules. Rows written by the account during the
+// replay are then marked `seed` (they happened before any run), and only the event rows stay in the
+// activity log, one per notification.
+const plugin = require('../plugin.cjs');
+const BINDING = require('../fixtures/binding.json');
+const EDT = '-04:00', EST = '-05:00';
+const ts = (date, time) => `${date}T${time}:00${date < '2026-11-01' ? EDT : EST}`;
+const NORA = 'person-nora', EVAN = 'person-evan', ELI = 'person-eli', ADA = 'person-ada';
+const FAMILY = [NORA, EVAN, ELI, ADA];
+const EVENT_RECIPES = ['rec-soba-salad', 'rec-gochujang-chicken'];
+const REPLAY_START = '2026-10-10T16:00:00-04:00';
+
+function referenceBase() {
+  const allIngredients = [...D.MINIMAL_INGREDIENTS, ...D.MORE_INGREDIENTS].map(ingredient);
+  const originals = [...D.MINIMAL_RECIPES, ...D.MORE_RECIPES];
+  const seeded = originals.filter(x => !EVENT_RECIPES.includes(x.id));
+  const revised = {
+    'rec-shakshuka': [['2026-05-03T10:00:00-04:00', {servings: 2, lines: content(D.MINIMAL_RECIPES.find(x => x.id === 'rec-shakshuka')).lines.map(l => l.ingredient_id === 'ing-egg' ? {...l, quantity: 4} : l)}]],
+    'rec-chili-con-carne': [['2026-03-08T17:00:00-05:00', {title: 'Chili'}], ['2026-06-14T17:00:00-04:00', {total_minutes: 90}]],
+    'rec-pesto-pasta': [['2026-07-21T19:00:00-04:00', {tags: ['dinner', 'quick']}]]
+  };
+  const archived = {'rec-focaccia': '2026-09-02T20:00:00-04:00'};
+  const recipes = seeded.map((x, i) => {
+    const at = `2026-${String(1 + (i % 9)).padStart(2, '0')}-${String(3 + (i % 25)).padStart(2, '0')}T20:00:00Z`;
+    const hist = (revised[x.id] || []).map(([when, change]) => [when, change]);
+    // The given row is the latest content; the change object is what the earlier revision had.
+    return recipe(x, at, i % 3 ? NORA : EVAN, {revisions: hist, archived: archived[x.id]});
+  });
+  const c = (id, body, at, by, opts) => constraint(id, body, at, by, opts);
+  return {
+    account_id: 'platewright-nora', owner_person_id: NORA,
+    household: {name: 'Arden-Okafor household', time_zone: 'America/New_York', week_start: 'monday', unit_system: 'recipe', leftover_max_days: 3, use_soon_days: 2},
+    members: [
+      {person_id: NORA, display_name: 'Nora', portion_factor: 1, constraints: [
+        c('con-nora-01', {kind: 'diet', diet: 'lactose_free', effective_from: '2026-03-02', expires_on: '2026-09-30', note: 'Six-month trial from the March check-up'}, '2026-03-02T08:00:00-05:00', NORA),
+        c('con-nora-06', {kind: 'diet', diet: 'no_pork', effective_from: '2026-10-01', expires_on: null, note: null}, '2026-09-30T20:00:00-04:00', NORA),
+        c('con-nora-02', {kind: 'limit', nutrient: 'sodium_mg', max: 800, effective_from: '2026-11-20', expires_on: null, note: 'Trying a lower-salt month'}, '2026-10-05T21:00:00-04:00', NORA),
+        c('con-nora-03', {kind: 'dislike', tag: 'shellfish', effective_from: '2026-01-05', expires_on: null, note: null}, '2026-01-05T19:00:00-05:00', NORA),
+        c('con-nora-04', {kind: 'medical', ingredient_id: 'ing-grapefruit', effective_from: '2026-09-15', expires_on: null, note: 'Pharmacist: no grapefruit with the new prescription'}, '2026-09-15T18:00:00-04:00', NORA)]},
+      {person_id: EVAN, display_name: 'Evan', portion_factor: 1.5, constraints: [
+        c('con-evan-01', {kind: 'limit', nutrient: 'kcal', max: 700, effective_from: '2026-11-09', expires_on: null, note: "Dietitian's cap per sitting, from the 9th"}, '2026-10-08T18:30:00-04:00', EVAN),
+        c('con-evan-02', {kind: 'dislike', ingredient_id: 'ing-beetroot', effective_from: '2026-01-01', expires_on: null, note: null}, '2026-01-02T12:00:00-05:00', EVAN),
+        c('con-evan-03', {kind: 'diet', diet: 'no_alcohol', effective_from: '2026-10-01', expires_on: '2026-10-31', note: 'Sober October'}, '2026-09-30T21:00:00-04:00', EVAN),
+        c('con-evan-04', {kind: 'dislike', tag: 'mushroom', effective_from: '2026-04-10', expires_on: null, note: null}, '2026-04-10T19:00:00-04:00', EVAN)]},
+      {person_id: ELI, display_name: 'Eli', portion_factor: 1, constraints: [
+        c('con-eli-01', {kind: 'allergy', allergen: 'soy', strict: false, effective_from: '2026-01-10', expires_on: null, note: 'Mild; confirmed by the clinic'}, '2026-01-10T12:00:00-05:00', NORA),
+        c('con-eli-02', {kind: 'dislike', tag: 'mushroom', effective_from: '2026-02-01', expires_on: null, note: null}, '2026-02-01T18:00:00-05:00', ELI, {ended: '2026-09-01T18:00:00-04:00'})]},
+      {person_id: ADA, display_name: 'Ada', portion_factor: 0.5, constraints: [
+        c('con-ada-01', {kind: 'dislike', tag: 'spicy', effective_from: '2026-04-01', expires_on: '2026-12-31', note: 'Going through a no-spice phase'}, '2026-04-01T09:00:00-04:00', NORA),
+        c('con-ada-02', {kind: 'dislike', ingredient_id: 'ing-green-beans', effective_from: '2026-05-01', expires_on: '2026-06-30', note: null}, '2026-05-01T09:00:00-04:00', NORA),
+        c('con-ada-03', {kind: 'allergy', allergen: 'sesame', strict: false, effective_from: '2026-01-01', expires_on: null, note: 'Mild reaction to tahini last winter'}, '2026-01-03T10:00:00-05:00', NORA),
+        c('con-ada-04', {kind: 'allergy', allergen: 'peanut', strict: true, effective_from: '2026-01-01', expires_on: null, note: 'Carries an auto-injector'}, '2026-01-03T10:00:00-05:00', NORA),
+        c('con-ada-05', {kind: 'dislike', ingredient_id: 'ing-mushroom', effective_from: '2026-09-01', expires_on: null, note: null}, '2026-08-30T19:00:00-04:00', ADA)]}
+    ],
+    ingredients: allIngredients, substitution_rules: [...D.MINIMAL_RULES, ...D.MORE_RULES].map(rule), recipes, plan: [],
+    pantry: PANTRY.filter(([, , , , at]) => Date.parse(at) <= Date.parse(REPLAY_START)).map(([id, q, unit, useBy, at]) => pantry(id, q, unit, useBy, at, NORA)),
+    shopping: null, notifications: [], activity: []
+  };
+}
+
+// [ingredient, quantity, unit, use_by, last set]
+const PANTRY = [
+  ['ing-coconut-milk', 800, 'ml', '2027-06-30', '2026-10-03T11:00:00-04:00'], ['ing-yogurt-lf', 500, 'g', '2026-11-12', '2026-11-06T17:00:00-05:00'],
+  ['ing-egg', 6, 'each', '2026-11-20', '2026-09-12T10:00:00-04:00'], ['ing-flour-ap', 1000, 'g', null, '2026-09-12T10:00:00-04:00'],
+  ['ing-butter', 0, 'g', null, '2026-11-04T19:00:00-05:00'], ['ing-black-beans-canned', 800, 'g', '2027-03-01', '2026-09-12T10:00:00-04:00'],
+  ['ing-cumin', 40, 'g', null, '2026-09-20T10:00:00-04:00'], ['ing-lime', 2, 'each', '2026-11-09', '2026-11-06T17:00:00-05:00'],
+  ['ing-onion', 4, 'each', '2026-11-30', '2026-11-01T11:00:00-05:00'], ['ing-garlic', 12, 'each', '2026-11-25', '2026-11-01T11:00:00-05:00'],
+  ['ing-olive-oil', 750, 'ml', null, '2026-08-20T10:00:00-04:00'], ['ing-vegetable-oil', 500, 'ml', null, '2026-08-20T10:00:00-04:00'],
+  ['ing-salt', 500, 'g', null, '2026-06-01T10:00:00-04:00'], ['ing-black-pepper', 50, 'g', null, '2026-06-01T10:00:00-04:00'],
+  ['ing-sugar', 900, 'g', null, '2026-09-12T10:00:00-04:00'], ['ing-brown-sugar', 300, 'g', null, '2026-09-12T10:00:00-04:00'],
+  ['ing-baking-powder', 100, 'g', '2027-04-30', '2026-09-12T10:00:00-04:00'], ['ing-baking-soda', 200, 'g', null, '2026-09-12T10:00:00-04:00'],
+  ['ing-oats', 400, 'g', '2027-02-28', '2026-09-12T10:00:00-04:00'], ['ing-jasmine-rice', 1500, 'g', null, '2026-09-12T10:00:00-04:00'],
+  ['ing-basmati-rice', 500, 'g', null, '2026-09-12T10:00:00-04:00'], ['ing-spaghetti', 500, 'g', '2027-08-31', '2026-09-12T10:00:00-04:00'],
+  ['ing-penne', 0, 'g', '2027-08-31', '2026-10-30T19:00:00-04:00'], ['ing-lentils-red', 500, 'g', '2027-05-31', '2026-09-12T10:00:00-04:00'],
+  ['ing-tomato-canned', 1200, 'g', '2027-09-30', '2026-09-12T10:00:00-04:00'], ['ing-passata', 0, 'g', '2027-01-31', '2026-11-02T19:00:00-05:00'],
+  ['ing-chickpeas-canned', 400, 'g', '2027-04-30', '2026-09-12T10:00:00-04:00'], ['ing-veg-stock', 500, 'ml', '2026-11-11', '2026-11-03T19:00:00-05:00'],
+  ['ing-soy-sauce', 250, 'ml', '2027-03-31', '2026-08-20T10:00:00-04:00'], ['ing-tamari', 150, 'ml', '2027-05-31', '2026-10-15T18:00:00-04:00'],
+  ['ing-fish-sauce', 200, 'ml', '2027-10-31', '2026-08-20T10:00:00-04:00'], ['ing-green-curry-paste', 60, 'g', '2026-12-15', '2026-10-03T11:00:00-04:00'],
+  ['ing-milk', 1000, 'ml', '2026-11-10', '2026-11-06T17:00:00-05:00'], ['ing-cheddar', 200, 'g', '2026-11-21', '2026-11-01T11:00:00-05:00'],
+  ['ing-parmesan', 120, 'g', '2026-12-20', '2026-09-12T10:00:00-04:00'], ['ing-spinach', 150, 'g', '2026-11-08', '2026-11-05T18:00:00-05:00'],
+  ['ing-carrot', 600, 'g', '2026-11-18', '2026-11-01T11:00:00-05:00'], ['ing-potato', 1500, 'g', '2026-11-28', '2026-11-01T11:00:00-05:00'],
+  ['ing-tofu-firm', 400, 'g', '2026-11-07', '2026-09-12T10:00:00-04:00'], ['ing-peanut-butter', 340, 'g', '2027-02-28', '2026-07-10T10:00:00-04:00']
+];
+
+// One week's menu: [date, meal, recipe or {leftovers}, options]. outcome: cooked (default for past
+// dates), skipped, cleared (cleared the day before) or planned.
+const W = (date, meal, dish, o = {}) => ({date, meal, dish, ...o});
+const LEFT = (of, portions) => ({leftovers_of: of, portions});
+const MENU = [
+  // Week of 2026-10-12
+  W('2026-10-12', 'dinner', 'rec-spaghetti-bolognese'), W('2026-10-13', 'dinner', 'rec-dal'), W('2026-10-14', 'dinner', 'rec-salmon-traybake'),
+  W('2026-10-15', 'dinner', 'rec-black-bean-tacos'), W('2026-10-16', 'dinner', 'rec-bacon-leek-pasta', {attendees: [EVAN, ELI, ADA]}),
+  W('2026-10-17', 'breakfast', 'rec-banana-pancakes'), W('2026-10-17', 'lunch', 'rec-greek-salad', {outcome: 'skipped'}),
+  W('2026-10-17', 'dinner', 'rec-margherita-pizza', {servings: 4}), W('2026-10-18', 'breakfast', 'rec-scrambled-eggs-toast', {servings: 3, attendees: [NORA, EVAN]}),
+  W('2026-10-18', 'lunch', 'rec-minestrone', {servings: 6, made: 6, eaten: 3.5}), W('2026-10-18', 'dinner', 'rec-chicken-traybake'),
+  W('2026-10-14', 'lunch', 'rec-hummus-wraps', {attendees: [NORA, EVAN]}),
+  W('2026-10-19', 'lunch', LEFT('2026-10-18:lunch', 2), {attendees: [NORA, EVAN]}),
+  // Week of 2026-10-19
+  W('2026-10-19', 'dinner', 'rec-chana-masala'), W('2026-10-20', 'dinner', 'rec-turkey-meatballs'), W('2026-10-21', 'dinner', 'rec-mushroom-risotto', {outcome: 'cleared'}),
+  W('2026-10-21', 'breakfast', 'rec-overnight-oats', {attendees: [NORA, EVAN]}), W('2026-10-22', 'dinner', 'rec-tofu-fried-rice', {servings: 4}),
+  W('2026-10-23', 'dinner', 'rec-fish-tacos'), W('2026-10-24', 'breakfast', 'rec-yogurt-parfait'), W('2026-10-24', 'lunch', 'rec-quinoa-salad'),
+  W('2026-10-24', 'dinner', 'rec-veg-lasagne', {made: 6, eaten: 5}),
+  W('2026-10-25', 'breakfast', 'rec-baked-oatmeal', {servings: 6, made: 6, eaten: 3}), W('2026-10-25', 'lunch', LEFT('2026-10-24:dinner', 1), {attendees: [EVAN]}),
+  W('2026-10-25', 'dinner', 'rec-beef-stew', {servings: 6, made: 6, eaten: 4}), W('2026-10-23', 'lunch', 'rec-lentil-salad', {attendees: [NORA, ELI]}),
+  // Week of 2026-10-26
+  W('2026-10-26', 'dinner', 'rec-red-lentil-soup'), W('2026-10-26', 'lunch', LEFT('2026-10-25:dinner', 2), {attendees: [NORA, EVAN]}),
+  W('2026-10-27', 'dinner', 'rec-stuffed-peppers'), W('2026-10-28', 'dinner', 'rec-herb-cod'), W('2026-10-29', 'dinner', 'rec-peanut-noodles', {attendees: [NORA, EVAN]}),
+  W('2026-10-30', 'lunch', 'rec-tabbouleh', {attendees: [NORA, EVAN], outcome: 'event-cleared'}), W('2026-10-30', 'dinner', 'rec-chicken-curry'),
+  W('2026-10-31', 'breakfast', 'rec-green-smoothie'), W('2026-10-31', 'lunch', 'rec-tomato-soup-grilled-cheese'),
+  W('2026-10-31', 'dinner', 'rec-chili-con-carne', {servings: 6, made: 6, eaten: 4, guests: [{guest_id: 'guest-sam', name: 'Sam', constraints: []}]}),
+  W('2026-11-01', 'breakfast', 'rec-frittata'), W('2026-11-01', 'lunch', LEFT('2026-10-31:dinner', 2), {attendees: [EVAN, ELI]}),
+  W('2026-11-01', 'dinner', 'rec-mushroom-risotto', {outcome: 'skipped'}), W('2026-10-28', 'lunch', 'rec-couscous-salad', {attendees: [NORA]}),
+  // Week of 2026-11-02 (the loaded time is Sunday 2026-11-08, 08:00)
+  W('2026-11-02', 'dinner', 'rec-miso-salmon', {attendees: [NORA, EVAN]}), W('2026-11-03', 'dinner', 'rec-ratatouille'),
+  W('2026-11-04', 'dinner', 'rec-shepherds-pie', {servings: 6, made: 6, eaten: 4, deduct: true}), W('2026-11-05', 'lunch', LEFT('2026-11-04:dinner', 2), {attendees: [NORA, EVAN]}),
+  W('2026-11-05', 'dinner', 'rec-halloumi-skewers'), W('2026-11-06', 'dinner', 'rec-pesto-pasta'),
+  W('2026-11-07', 'breakfast', 'rec-overnight-oats'), W('2026-11-07', 'lunch', 'rec-hummus-wraps'), W('2026-11-07', 'dinner', 'rec-shakshuka', {servings: 6, made: 6, eaten: 4}),
+  W('2026-11-08', 'breakfast', 'rec-banana-pancakes'), W('2026-11-08', 'lunch', LEFT('2026-11-07:dinner', 2), {attendees: [NORA, ELI]}),
+  W('2026-11-08', 'dinner', 'rec-chicken-noodle-soup'),
+  // Week of 2026-11-09 (upcoming)
+  W('2026-11-09', 'dinner', 'rec-black-bean-tacos'), W('2026-11-10', 'dinner', 'rec-red-lentil-soup'), W('2026-11-11', 'dinner', 'rec-salmon-traybake'),
+  W('2026-11-12', 'dinner', 'rec-spaghetti-bolognese'), W('2026-11-13', 'dinner', 'rec-frittata'), W('2026-11-14', 'breakfast', 'rec-yogurt-parfait', {attendees: [NORA, ADA]}),
+  W('2026-11-14', 'dinner', 'rec-green-curry', {attendees: [NORA, ELI], guests: [{guest_id: 'guest-ines', name: 'Ines', constraints: [{kind: 'diet', diet: 'vegetarian'}]},
+    {guest_id: 'guest-kofi', name: 'Kofi', constraints: []}, {guest_id: 'guest-lea', name: 'Lea', constraints: []}]}),
+  W('2026-11-15', 'lunch', LEFT('2026-11-14:dinner', 2), {attendees: [NORA, EVAN]}), W('2026-11-15', 'dinner', 'rec-dal'),
+  // Packed lunches and snacks across the five weeks
+  W('2026-10-13', 'lunch', 'rec-quinoa-salad', {attendees: [NORA, EVAN]}), W('2026-10-15', 'snack', 'rec-carrot-muffins', {servings: 12, made: 12, eaten: 3}),
+  W('2026-10-20', 'lunch', 'rec-soba-salad', {attendees: [NORA, EVAN]}), W('2026-10-22', 'lunch', 'rec-greek-salad', {attendees: [NORA, EVAN]}),
+  W('2026-10-27', 'lunch', 'rec-lentil-salad', {attendees: [NORA, EVAN]}), W('2026-10-29', 'snack', 'rec-guacamole', {attendees: [ELI, ADA]}),
+  W('2026-11-03', 'lunch', 'rec-tabbouleh', {attendees: [NORA, EVAN]}), W('2026-11-04', 'lunch', 'rec-minestrone', {servings: 6, made: 6, eaten: 2}),
+  W('2026-11-10', 'lunch', 'rec-couscous-salad', {attendees: [NORA, EVAN]}), W('2026-11-12', 'snack', 'rec-brownies', {servings: 16, attendees: [EVAN, ADA]})
+];
+
+const MEAL_TIME = {breakfast: '09:30', lunch: '13:00', snack: '16:00', dinner: '20:30'};
+const LOADED = '2026-11-08T08:00:00-05:00';
+const addDays = (date, n) => { const d = new Date(date + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const monday = date => { const d = new Date(date + 'T12:00:00Z'); return addDays(date, -((d.getUTCDay() + 6) % 7)); };
+const MAYA = {guest_id: 'guest-maya', name: 'Maya', constraints: [{kind: 'allergy', allergen: 'tree_nut', strict: true}]};
+const recipeEvent = (id, by) => {
+  const x = D.MORE_RECIPES.find(y => y.id === id), c = content(x);
+  return {recipe: {id, title: c.title, servings: c.servings, lines: c.lines.map(({ingredient_id, quantity, unit, optional}) => ({ingredient_id, quantity, unit, optional})),
+    method_tags: c.method_tags, steps: c.steps, tags: c.tags, active_minutes: c.active_minutes, total_minutes: c.total_minutes}, by};
+};
+const EVENTS = [
+  ['ev-pw-001', '2026-10-13T19:00:00-04:00', 'member.updated', {member_id: ELI, action: 'set', constraint: {id: 'con-eli-03', kind: 'dislike', ingredient_id: 'ing-olives', note: 'Says they taste like soap'}, by: ELI}],
+  ['ev-pw-002', '2026-10-16T12:00:00-04:00', 'recipe.added', recipeEvent('rec-soba-salad', ELI)],
+  ['ev-pw-003', '2026-10-17T09:00:00-04:00', 'pantry.changed', {items: [{ingredient_id: 'ing-spaghetti', quantity: 500, unit: 'g', use_by: '2027-08-31'},
+    {ingredient_id: 'ing-tomato-canned', quantity: 1200, unit: 'g', use_by: '2027-09-30'}, {ingredient_id: 'ing-chickpeas-canned', quantity: 400, unit: 'g', use_by: '2027-04-30'},
+    {ingredient_id: 'ing-parmesan', quantity: 120, unit: 'g', use_by: '2026-12-20'}], by: EVAN, note: 'Saturday shop'}],
+  ['ev-pw-004', '2026-10-20T18:00:00-04:00', 'plan.changed', {id: '2026-10-22:dinner', action: 'set', dishes: [{recipe_id: 'rec-chicken-curry', servings: 4}], attendees: FAMILY, by: EVAN}],
+  ['ev-pw-005', '2026-10-23T17:00:00-04:00', 'guest.changed', {id: '2026-10-24:dinner', action: 'set', guest: {guest_id: 'guest-ines', name: 'Ines', constraints: [{kind: 'diet', diet: 'vegetarian'}]}}],
+  ['ev-pw-006', '2026-10-24T10:00:00-04:00', 'pantry.changed', {items: [{ingredient_id: 'ing-oats', quantity: 400, unit: 'g', use_by: '2027-02-28'},
+    {ingredient_id: 'ing-egg', quantity: 12, unit: 'each', use_by: '2026-11-10'}], by: ELI, note: 'Farmers market'}],
+  ['ev-pw-007', '2026-10-27T08:00:00-04:00', 'member.updated', {member_id: ADA, action: 'remove', constraint_id: 'con-ada-03', note: 'Allergist: outgrown', by: NORA}],
+  ['ev-pw-008', '2026-10-29T18:00:00-04:00', 'plan.changed', {id: '2026-10-30:lunch', action: 'clear', by: EVAN}],
+  ['ev-pw-009', '2026-10-31T12:00:00-04:00', 'pantry.changed', {items: [{ingredient_id: 'ing-tofu-firm', quantity: 400, unit: 'g', use_by: '2026-11-07'}], by: EVAN}],
+  ['ev-pw-010', '2026-11-03T07:30:00-05:00', 'member.updated', {member_id: ELI, action: 'set', constraint: {id: 'con-eli-04', kind: 'diet', diet: 'vegetarian', effective_from: '2026-11-16', note: 'Going vegetarian from the 16th'}, by: ELI}],
+  ['ev-pw-011', '2026-11-05T19:00:00-05:00', 'recipe.added', recipeEvent('rec-gochujang-chicken', EVAN)],
+  ['ev-pw-012', '2026-11-07T21:00:00-05:00', 'shopping.changed', {action: 'tick', line_id: 'TICKED_BY_ELI', by: ELI}],
+  ['ev-pw-013', '2026-11-07T21:30:00-05:00', 'plan.changed', {id: '2026-11-13:dinner', action: 'set', dishes: [{recipe_id: 'rec-gochujang-chicken'}], attendees: FAMILY, by: EVAN}],
+  ['ev-pw-014', '2026-11-07T22:00:00-05:00', 'guest.changed', {id: '2026-11-14:dinner', action: 'set', guest: MAYA}]
+];
+const CURRY_LINES = content(D.MINIMAL_RECIPES.find(x => x.id === 'rec-green-curry')).lines;
+const ACTIONS = [
+  ['2026-10-12T09:00:00-04:00', 'members.constraint.remove', {id: EVAN, constraint_id: 'con-evan-04', note: 'Likes them now'}],
+  ['2026-10-15T18:00:00-04:00', 'recipes.variant.create', {id: 'rec-green-curry', swaps: [{ingredient_id: 'ing-fish-sauce', rule_id: 'rule-fish-sauce-tamari'}], title: 'Green curry with tamari'}],
+  ['2026-10-20T19:00:00-04:00', 'recipes.update', {id: 'rec-green-curry', patch: {lines: CURRY_LINES.map(l => l.ingredient_id === 'ing-sweet-potato' ? {...l, quantity: 300} : l)}}],
+  ['2026-10-21T20:00:00-04:00', 'recipes.update', {id: 'rec-bacon-leek-pasta', patch: {archived: true}}],
+  ['2026-10-22T20:00:00-04:00', 'recipes.variant.create', {id: 'rec-banana-bread', swaps: [{ingredient_id: 'ing-flour-ap', rule_id: 'rule-flour-gf'}], title: 'Gluten-free banana bread'}],
+  ['2026-10-28T19:30:00-04:00', 'recipes.variant.create', {id: 'rec-green-curry', title: 'Nut-free green curry',
+    swaps: [{ingredient_id: 'ing-green-curry-paste', rule_id: 'rule-paste-nut-free'}, {ingredient_id: 'ing-cashews', rule_id: 'rule-cashews-sunflower'}]}],
+  ['2026-10-29T20:00:00-04:00', 'recipes.variant.create', {id: 'rec-mac-cheese', title: 'Mac and cheese with oat drink',
+    swaps: [{ingredient_id: 'ing-milk', rule_id: 'rule-milk-oat'}, {ingredient_id: 'ing-butter', rule_id: 'rule-butter-plant'}]}],
+  ['2026-11-02T19:00:00-05:00', 'recipes.variant.create', {id: 'rec-spaghetti-bolognese', title: 'Turkey bolognese', swaps: [{ingredient_id: 'ing-beef-mince', rule_id: 'rule-beef-turkey'}]}],
+  ['2026-11-03T20:00:00-05:00', 'recipes.variant.create', {id: 'rec-chili-con-carne', title: 'Lentil chili',
+    swaps: [{ingredient_id: 'ing-beef-mince', rule_id: 'rule-beef-lentils'}, {ingredient_id: 'ing-sour-cream', to_ingredient_id: 'ing-greek-yogurt', ratio: 1}]}],
+  ['2026-11-07T18:00:00-05:00', 'shopping.generate', {start: '2026-11-09', end: '2026-11-15'}],
+  ['2026-11-07T18:05:00-05:00', 'shopping.item.set', {text: 'Birthday candles', quantity: 1, unit: 'each'}],
+  ['2026-11-07T18:06:00-05:00', 'shopping.item.set', {ingredient_id: 'ing-lemon', quantity: 2, unit: 'each'}],
+  ['2026-11-07T18:07:00-05:00', 'shopping.item.set', {line: 'ing-cilantro', excluded: true, reason: 'Using parsley from the garden instead'}],
+  ['2026-11-07T18:08:00-05:00', 'shopping.item.set', {line: 'ing-salmon', ticked: true}]
+];
+
+function reference() {
+  let data = referenceBase(), seq = 0;
+  const steps = [];
+  for (const m of MENU) {
+    const id = m.date + ':' + m.meal, dish = typeof m.dish === 'string' ? {recipe_id: m.dish, ...(m.servings ? {servings: m.servings} : {})} : m.dish;
+    const args = {id, dishes: [dish], attendees: m.attendees || FAMILY, ...(m.guests ? {guests: m.guests} : {})};
+    steps.push({at: ts(addDays(monday(m.date), -2), '17:00'), order: id, tool: 'plan.slot.set', args});
+    const when = ts(m.date, MEAL_TIME[m.meal]);
+    if (m.outcome === 'cleared') steps.push({at: ts(addDays(m.date, -1), '19:00'), order: id, tool: 'plan.slot.set', args: {id, dishes: []}});
+    else if (m.outcome === 'skipped') steps.push({at: when, order: id, tool: 'plan.slot.mark', args: {id, status: 'skipped'}});
+    else if (!m.outcome && Date.parse(when) < Date.parse(LOADED)) {
+      const portions = m.made !== undefined ? [{recipe_id: dish.recipe_id, made: m.made, eaten: m.eaten}] : undefined;
+      if (!dish.leftovers_of) steps.push({at: when, order: id, tool: 'plan.slot.mark', args: {id, status: 'cooked', ...(portions ? {portions} : {}), ...(m.deduct ? {deduct_pantry: true} : {})}});
+      else steps.push({at: when, order: id, tool: 'plan.slot.mark', args: {id, status: 'cooked'}});
+    }
+  }
+  for (const [at, tool, args] of ACTIONS) steps.push({at, order: '', tool, args});
+  // Pantry records last set after the replay starts are set by the account at that time.
+  for (const [id, quantity, unit, use_by, at] of PANTRY) {
+    if (Date.parse(at) > Date.parse(REPLAY_START)) steps.push({at, order: '', tool: 'pantry.set', args: {id, quantity, unit, use_by}});
+  }
+  for (const [event_id, at, op, payload] of EVENTS) steps.push({at, order: '', event: {event_id, at, operation: 'platewright.' + op, payload}});
+  steps.sort((a, b) => Date.parse(a.at) - Date.parse(b.at) || a.order.localeCompare(b.order));
+  const ctx = (now, role = 'agent') => ({app_id: 'platewright', run_id: 'build', role, binding: BINDING, virtual_now: now});
+  const lineOf = ingredientId => { const l = data.shopping.lines.find(x => x.ingredient_id === ingredientId && x.kind === 'derived'); if (!l) throw Error('No derived line for ' + ingredientId + ': ' + data.shopping.lines.map(x => x.ingredient_id).join(' ')); return l.id; };
+  for (const step of steps) {
+    if (Date.parse(step.at) >= Date.parse(LOADED)) throw Error('Replay step after the loaded time: ' + step.at);
+    const work = structuredClone(data);
+    try {
+      if (step.event) {
+        const e = structuredClone(step.event);
+        if (e.payload.line_id === 'TICKED_BY_ELI') e.payload.line_id = lineOf('ing-beef-mince');
+        data = plugin.applyEvent(ctx(e.at, 'infra'), work, e);
+      } else {
+        const args = {...structuredClone(step.args), request_id: 'hist-' + String(++seq).padStart(3, '0'), expected_version: {epoch: 1, revision: seq}};
+        if (args.line) { args.id = lineOf(args.line); delete args.line; }
+        data = plugin.handleTool(ctx(step.at), work, 'platewright.' + step.tool, args).data;
+      }
+      plugin.validateSeed(ctx(step.at), data);
+    } catch (e) { e.message += ' (replay step ' + JSON.stringify(step).slice(0, 300) + ')'; throw e; }
+  }
+  // What the account did before the run is part of the seed: keep only the events' activity rows and
+  // mark the account's history rows `seed`.
+  data.activity = data.activity.filter(a => a.actor === 'event').map((a, i) => ({...a, seq: i + 1}));
+  (function mark(x) {
+    if (Array.isArray(x)) return x.forEach(mark);
+    if (!x || typeof x !== 'object') return;
+    if (x.actor === 'agent') { x.actor = 'seed'; x.request_id = null; }
+    Object.values(x).forEach(mark);
+  })(data);
+  plugin.validateSeed(ctx(LOADED), data);
+  return data;
+}
+
 function outputs() {
-  return {'fixtures/minimal.json': minimal()};
+  return {'fixtures/minimal.json': minimal(), 'fixtures/reference.json': reference()};
 }
 function build({check = false} = {}) {
   const drift = [];

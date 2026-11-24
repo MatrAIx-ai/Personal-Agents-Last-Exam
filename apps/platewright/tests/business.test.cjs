@@ -7,3 +7,4 @@ require('./w3-substitutions.test.cjs');
 require('./w4-plan.test.cjs');
 require('./w5-pantry-shopping.test.cjs');
 require('./events.test.cjs');
+require('./fixtures.test.cjs');

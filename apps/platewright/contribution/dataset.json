@@ -1,8 +1,8 @@
 {
   "schema_version": "pale.dataset.v1",
-  "dataset_id": "platewright-minimal",
+  "dataset_id": "platewright-reference",
   "version": "1.0.0",
-  "description": "placeholder",
+  "description": "Hand-authored synthetic records of one fictional household (the Arden-Okafor household: Nora, Evan, Eli and Ada) for reproducible acceptance; not a benchmark task. fixtures/reference.json is the package seed: 213 ingredients, 48 substitution rules, 60 recipes written for this package plus 6 variants, 4 members with 18 dated constraints, 71 plan slots over five weeks, 40 pantry items, a shopping list and 14 notifications. fixtures/minimal.json is the smaller household the business tests start from. Both are produced by scripts/build-fixtures.cjs and checked by scripts/check-fixtures.cjs. Workflow shapes (scaling and converting, a meal planner, a pantry, a list built from planned meals) were informed by public help pages of Paprika (https://www.paprikaapp.com/help/v4/ios/), Plan to Eat (https://learn.plantoeat.com/en) and Mealime (https://www.mealime.com/); the nine allergen names follow the FDA's list of major food allergens (https://www.fda.gov/food/nutrition-food-labeling-and-critical-foods/food-allergies). No data, recipe text, photos, branding or icons were taken from them.",
   "record_source_ids": [
     "authored"
   ],
@@ -10,7 +10,7 @@
     {
       "source_id": "authored",
       "kind": "synthetic",
-      "description": "Hand-authored synthetic records; no external collection.",
+      "description": "Hand-authored synthetic records; no external collection. Recipes, steps and the ingredient table were written for this package. Nutrition values per 100 g are rounded, illustrative figures, not measurements.",
       "uri": null,
       "license": "MIT",
       "usage": "permitted",
@@ -24,9 +24,12 @@
       }
     }
   ],
-  "transformations": [],
+  "transformations": [
+    "Timestamps carry explicit UTC offsets; household dates are resolved in America/New_York.",
+    "The five weeks of plan history, the variants, the shopping list and the fourteen events were produced by replaying them through the App's own hooks at authoring time; rows the account wrote then are marked seed."
+  ],
   "expected_counts": {
-    "records": 90,
+    "records": 492,
     "assets": 0
   },
   "quality_policy": {
@@ -37,6 +40,6 @@
   "review": {
     "status": "pending",
     "reviewer": null,
-    "notes": "Automated checks do not replace human review."
+    "notes": "Automated checks do not replace human review of the realism of recipes, substitution rules and nutrition values, and of the fictional status of the household. The suitability check and nutrition values are simplified and are not medical, allergy or dietary advice."
   }
 }
