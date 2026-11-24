@@ -4,7 +4,7 @@ Platewright is a resettable recipe box and household meal planner, seen from one
 
 - App ID `platewright`, version 1.0.0, Core API 1.2.0, public runtime 1.6.0. Node.js 18+ built-ins only; nothing to install.
 - Approved scope: [`proposals/environment/platewright.md`](../../proposals/environment/platewright.md). Validation, the workflow-to-test mapping and the acceptance self-review: [VALIDATION.md](VALIDATION.md).
-- MCP-only first version: no GUI and no reviewer console. The other household members act only through events.
+- MCP tools for the Agent, and an App-owned web interface served by the repository's shared Web Host ([Web interface](#web-interface)). The other household members act only through events.
 - Everything is fictional: the Arden-Okafor household (Nora, Evan, Eli and Ada), their guests, the 60 recipes, the substitution rules and the ingredient table were written for this package. Workflow shapes were informed by public help pages of Paprika, Plan to Eat and Mealime; the nine allergen names follow the FDA's list of major food allergens. No data, recipe text, photos, branding or icons were taken from them.
 - **Not advice.** The nutrition values are rounded, illustrative figures and the suitability check is simplified. Nothing here is medical, allergy or dietary advice.
 
@@ -69,6 +69,8 @@ With the pinned public runtime (found automatically in a full checkout, or `--ru
 ```sh
 node scripts/real-mcp.cjs [--runtime DIR] [--output FILE]                                       # 63 real MCP checks (Core side of T17)
 node scripts/notes-calendar-walkthrough.cjs [--runtime DIR] [--notes DIR] [--calendar DIR]      # Notes 1.0.0 -> Platewright -> Calendar 1.3.0
+npm run test:web          # tests/web-smoke.cjs: the shared Web Host serving this App (no npm dependency)
+npm run test:web:browser  # tests/web-browser.cjs: Chromium click-through (needs the repository's Playwright)
 ```
 
 From the repository root:
@@ -81,6 +83,16 @@ npm test
 
 Run an MCP server pair by hand: `node apps/platewright/service.cjs --role infra --run demo --state-dir .state` and, in another process, the same with `--role agent`. The default `scenario` profile allows only reads; Infra selects `sandbox` with `env.reset` to allow writes.
 
+## Web interface
+
+The App owns its pages (`gui/index.html`, `gui/src/app.js`) and declares them in `contribution/gui.json` (the reviewer-renderer profile with `gui/src/view.js`, plus the `pale.web` extension, `status: implemented`). The repository's shared Web Host serves them; from the repository root:
+
+```sh
+node runtime/web/server.cjs --app platewright --registry apps/platewright/web.registry.json --run web-demo --profile sandbox
+```
+
+`web.registry.json` is a one-App registry for this package, so the Host needs no change to `apps.registry.json` or `runtime/`. Views: Meal plan (week by week, with the check's findings per meal), Recipes and Archived recipes (scaling, units, nutrition, check for the table, edit, archive, swap ingredients into a variant), Shopping list, Pantry, Household (members' dated needs) and Activity. Every Agent write of the five workflows has a control; see [gui/README.md](gui/README.md) for the views, the behaviour (versioned writes, retries, refusals with the App's code, restricted profiles, text-only rendering) and what is left to MCP. The interface was added after the plan was approved, at the maintainers' request; the approved plan described an MCP-only first version.
+
 ## Limitations
 
-Out of scope in this version, as approved: prices, budgets, stores, products, carts and orders; recipe import from a web page or a photo; photos and other media; ratings and comments; automatic menu or recipe suggestion; daily or weekly nutrition totals (a `limit` is per meal); micronutrients beyond sodium; cooking timers; locking a day of the plan; several households or accounts per instance; email, push and chat notices; any GUI. There is no messaging in either direction. Nutrition values, substitution rules and recipes are illustrative and await human review.
+Out of scope in this version, as approved: prices, budgets, stores, products, carts and orders; recipe import from a web page or a photo; photos and other media; ratings and comments; automatic menu or recipe suggestion; daily or weekly nutrition totals (a `limit` is per meal); micronutrients beyond sodium; cooking timers; locking a day of the plan; several households or accounts per instance; email, push and chat notices. The web interface is a local, loopback-only business page through the shared Host; there is no reviewer console. There is no messaging in either direction. Nutrition values, substitution rules and recipes are illustrative and await human review.

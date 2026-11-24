@@ -1,26 +1,31 @@
 # Platewright 1.0.0: validation
 
-Approved scope: [`proposals/environment/platewright.md`](../../proposals/environment/platewright.md) (MCP-only; five workflows; six events; no messaging; no GUI). Runtime: public Core/Messaging runtime 1.6.0, Core API 1.2.0, contribution revision 0.4.0, at repository commit `a4bce02`. Node.js 22.23.1, 20.19.6 and 18.20.8. No dependency is installed; `dependencies.required_apps` is empty.
+Approved scope: [`proposals/environment/platewright.md`](../../proposals/environment/platewright.md) (five workflows; six events; no messaging). The approved plan described an MCP-only first version; the web interface was added after plan approval at the maintainers' request ("Environments now need a GUI/Website"), following the `apps/notes` convention. Runtime: public Core/Messaging runtime 1.6.0, Core API 1.2.0, contribution revision 0.4.0, at repository commit `a4bce02`. Node.js 22.23.1 and 18.20.8 (20.19.6 in the earlier round). The package installs nothing; the optional browser test uses the repository's pinned Playwright; `dependencies.required_apps` is empty.
 
 ## Commands and results
 
-| Command (repository root unless noted) | Node | Result |
+Run for this version (seeded history and web interface) on Node.js 22.23.1 and 18.20.8; the earlier MCP-only round also ran on 20.19.6, which was not repeated for this version. Captured outputs are kept with the submission evidence, one folder per Node version.
+
+| Command (repository root unless noted) | Node 22 | Node 18 |
 | --- | --- | --- |
-| `npm test` in `apps/platewright` | 22, 20, 18 | 32 of 32 tests pass |
-| `npm run example` in `apps/platewright` | 22, 20, 18 | passes; prints the walkthrough state |
-| `npm run contracts:check` in `apps/platewright` | 22, 20, 18 | generated contracts match |
-| `npm run fixtures:check` in `apps/platewright` | 22, 20, 18 | both fixtures pass; reference: 1361 records, 2.2 MB (1.2 MB compact), history from 2025-01-01 |
-| `node apps/platewright/scripts/real-mcp.cjs` | 22, 20, 18 | 63 of 63 checks pass |
-| `node apps/platewright/scripts/notes-calendar-walkthrough.cjs` | 22, 20, 18 | 16 of 16 checks pass (Notes 1.0.0, Calendar 1.3.0) |
-| `npm run app:verify -- --app apps/platewright` | 22, 20, 18 | passed, 45 checks; stages `business` and `event-example` passed |
-| `node runtime/ci/select-apps.cjs . a4bce02` | 22, 20, 18 | `{"full":false,"ids":["platewright"]}` |
-| `node runtime/ci/verify-submissions.cjs . <out> a4bce02` | 22, 20, 18 | `platewright: PASS` |
-| `npm run contracts:check` | 22, 20, 18 | shared schemas and derived contribution fields match |
-| `npm test` | 22, 20, 18 | 22 of 22 stages pass |
+| `npm test` in `apps/platewright` | 32 of 32 tests pass | 32 of 32 |
+| `npm run example` in `apps/platewright` | passes; prints the walkthrough state | passes |
+| `npm run contracts:check` in `apps/platewright` | generated contracts match | match |
+| `npm run fixtures:check` in `apps/platewright` | both fixtures pass; reference: 1361 records, 2.2 MB (1.2 MB compact), history from 2025-01-01 | both pass, 1361 records |
+| `node apps/platewright/scripts/real-mcp.cjs` | 63 of 63 checks pass | 63 of 63 |
+| `node apps/platewright/scripts/notes-calendar-walkthrough.cjs` | 16 of 16 checks pass (Notes 1.0.0, Calendar 1.3.0) | 16 of 16 |
+| `npm run test:web` in `apps/platewright` (`tests/web-smoke.cjs`, shared Web Host) | passes | passes |
+| `npm run test:web:browser` in `apps/platewright` (`tests/web-browser.cjs`, Chromium 141.0.7390.37 headless) | 33 of 33 checks pass | 33 of 33 |
+| `npm run app:verify -- --app apps/platewright` | passed, 45 checks (declarations, including `contribution/gui.json`, load) | passed, 45 checks |
+| `node runtime/ci/select-apps.cjs . a4bce02` | `{"full":false,"ids":["platewright"]}` | same |
+| `node runtime/ci/verify-submissions.cjs . <out> a4bce02` | `platewright: PASS` | `platewright: PASS` |
+| `npm run contracts:check` | shared schemas and derived contribution fields match | match |
+| `npm test` | 22 of 22 stages pass | 22 of 22 |
+| `npm run test:web` (repository Host tests) | 4 of 4 pass | 22 of 22W |
 
-The captured outputs (reports, logs and the package hash from the verifier) are attached to the submission as review evidence; generated state is not committed.
+The browser run used the repository's pinned Playwright 1.56.1 (`npm ci`, `node_modules` not committed) with its cached Chromium build; on this machine Chromium needed `libasound.so.2`, supplied through `LD_LIBRARY_PATH` from a locally extracted package. Screenshots at 1280 px and 390 px were inspected by eye.
 
-Not run: the verifier against a newer `main` than `a4bce02` (no network was used; maintainers should re-run `npm run app:verify` on the current base before merging); GUI checks (no GUI is in scope); messaging checks (no messaging is in scope).
+Not run: the verifier against a newer `main` than `a4bce02` (no network was used for the repository; maintainers should re-run `npm run app:verify` on the current base before merging); the Host's own browser suite `npm run test:web:browser` at the repository root (it covers the seven reference Apps, not this one); messaging checks (no messaging is in scope); a model-agent or user-simulator session against the web interface.
 
 ## Workflow-to-test mapping
 
@@ -80,6 +85,30 @@ The reviewer replaced the earlier note "date all seeded history from 2026-01-01 
 - **Count updates in existing checks.** `fixtures.test.cjs` expected 14 notifications from `notifications.list` with no window; it now expects 74 (60 generated, 14 hand-written with their IDs) and checks the 14 from 2026-10-12. `real-mcp.cjs` checked the separate run's 71 slots; it now checks 880. No other expectation changed.
 - **Size and reads.** 2.2 MB on disk and 1.2 MB as compact JSON, within the new budget in `check-fixtures.cjs` (2.5 MiB on disk; 1.5 MiB compact, under Core's 2 MiB limit on one MCP request line, which `env.load_seed` must fit in). Window reads stay bounded: `plan.get` defaults to the current week and allows at most 42 days, `recipes.search` returns pages of 20, `shopping.get` covers one list. Two reads return everything by design of the approved plan: `notifications.list` without a window returns all 74 notifications (18 KB), and `pantry.list` includes each item's full history (256 rows, 54 KB). These sizes are recorded by `check-fixtures.cjs` (`default_read_bytes`).
 
+## Web interface (added after plan approval)
+
+The maintainers changed the scope for all Environments after this plan was approved ("Environments now need a GUI/Website. The App owns the pages and they are served through the shared Web Host"); the approved plan said MCP-only. The interface follows `apps/notes`: `contribution/gui.json` (reviewer-renderer profile with `gui/src/view.js`, plus `pale.web` version 1, `status: implemented`), `gui/index.html`, `gui/src/app.js`, `gui/README.md`; `contribution.json` sets `gui_ref` and `app.json` `capabilities.ui`. No business schema, tool, event or seed format changed, and nothing in `src/` changed for it.
+
+| Workflow | Browser (`web-browser.cjs`, real clicks, result read back over MCP) | Smoke (`web-smoke.cjs`, Host API, read back over MCP) |
+| --- | --- | --- |
+| W1 Recipe box | search, select, scale to 6 servings (1050 ml coconut milk), edit title → revision 3 | `recipes.get` at 6 servings; `recipes.create` |
+| W2 Profiles and the check | add a need with end before start → `invalid_window: …` shown; corrected → scheduled constraint | `members.constraint.set` → scheduled |
+| W3 Substitutions | swap fish sauce for tamari, preview before/after per person, save variant | `recipes.variant.create` |
+| W4 Weekly plan | next week, Saturday's flags (Maya unsafe, Ines unsuitable); plan Tuesday breakfast with a guest; mark Monday dinner skipped; reload keeps both | `plan.slot.set` with a guest; `past_slot` refusal leaves the slot unchanged |
+| W5 Pantry and list | stale banner; tick with the checkbox; add an item through a dropped response and a retry (one line); stale pantry form → `stale_version`; Refresh shows an independent MCP write; update stock | `pantry.set`, `shopping.item.set` tick, stale version, retried request ID commits once |
+| Events | an Infra `pantry.changed` event appears in Activity | — |
+| Boundary | restricted (`scenario`) run shows no write controls and the Host refuses a forged write; no JavaScript errors; no horizontal overflow at 390 and 1280 px; hostile guest name shown as text | hidden paths, fixture/state/source downloads, Infra routes, `env.*` calls, foreign origin, missing CSRF and session refused; discovery lists exactly the 22 Agent tools; `scenario` lists the 11 reads and refuses writes |
+
+Choices where the request was silent:
+
+- **Starting the App on the shared Host without changing `runtime/`.** `apps/platewright/web.registry.json` is a one-App registry (path `.`) passed with the Host's existing `--registry` option; the repository's `apps.registry.json` is unchanged.
+- **One controller, several product views.** The shared `mount()` handles one list and one detail read; the controller switches the list read per view (plan, recipes, household, pantry, notifications) and renders its own week, list and pantry layouts, so the session, discovery, versioned writes, retries and text rendering stay the shared client's.
+- **Forms.** Writes whose inputs are lists of objects (dishes, guests, recipe lines, swaps) need product forms, so every write uses an App-owned modal form that submits through the shared `perform()`; option lists come from the live tool schemas where they are enumerated. A refusal shows `code: message`.
+- **Reads per view.** A Core call takes about 0.9 s on the reference household with two years of history (about 0.3 s with the earlier five weeks; measured on this machine), so each view reads its list plus at most two more; the Recipes view opens in about 4.5 s and the others in about 2 s.
+- **Styles.** The Host serves one shared stylesheet and its CSP has no inline styles, so App-specific layout is a constructed stylesheet built from constant text in the controller.
+- **Times** are shown as recorded (the timestamp's own wall clock and offset), not in the browser's zone.
+- **Left to MCP:** leftovers from a meal outside the week shown, editing a recipe line's note, `medical` needs and ingredient dislikes for guests (listed in `gui/README.md`).
+
 ## Tool schemas
 
 `tools.json` is 247 KB on disk (about 92 KB as compact JSON, as sent by `tools/list`). Every result object, including nested ones (slot guests, leftovers, cooked details, history rows, flags, findings, shopping lines, pantry history), is typed with `additionalProperties: false`, as in the reference Apps; real results validate on Core in `real-mcp.cjs` and the walkthrough.
@@ -107,11 +136,11 @@ Verdicts: passed / failed / not run / not applicable.
 
 | Item | Verdict | Evidence / note |
 | --- | --- | --- |
-| 1.1 Promised workflows and modes from the proposal and review | passed | W1–W5 MCP-only; no GUI or messaging promised (review answer 3: no Mail) |
+| 1.1 Promised workflows and modes from the proposal and review | passed | W1–W5 over MCP and in the web interface requested after approval; no messaging promised (review answer 3: no Mail) |
 | 1.2 Versions, paths, schemas, tools, hooks, events, dependencies match files | passed | registry load in the verifier; `contracts:check`; `package.test.cjs` checks tools against handlers |
 | 1.3 Startup/tests from a clean checkout with public Host only | passed | verifier copies the package alone and runs its tests and example; `service.cjs` uses the public launcher |
 | 1.4 Required receiving Apps at compatible versions | not applicable | none required; the walkthrough uses Notes 1.0.0 and Calendar 1.3.0 through their own tools only |
-| 2.1 App-only tests with real functions, invalid transitions, missing objects, read-only behaviour | passed | 31 tests; refusals asserted decided-before-change |
+| 2.1 App-only tests with real functions, invalid transitions, missing objects, read-only behaviour | passed | 32 tests; refusals asserted decided-before-change |
 | 2.2 Create/read/update/cancel produce state and history; invalid operations preserve data | passed | T04, T07, T11–T15; real MCP atomicity checks |
 | 2.3 Data references and provenance valid | passed (automated) | `check-fixtures.cjs`; `dataset.json`; human review of realism still pending |
 | 2.4 Optional diagnostics do not change results | passed | `package.test.cjs` diagnostics test |
@@ -120,7 +149,13 @@ Verdicts: passed / failed / not run / not applicable.
 | 3.3 Seed/reset, runs, versions, retries, events, supplied time | passed | `real-mcp.cjs` |
 | 3.4 Declared messaging | not applicable | publishes and receives none |
 | 3.5 Candidate and base validators | passed (candidate at `a4bce02`); base re-run on current `main` not run | `verify-submissions.cjs` at `a4bce02` |
-| GUI items | not applicable | MCP-only approved scope |
+| GUI: runnable delivery | passed | `gui/index.html`, `gui/src/app.js`, `contribution/gui.json`; the shared Host starts it with `--registry apps/platewright/web.registry.json` (no `runtime/` change); `tests/web-smoke.cjs` |
+| GUI: actual controls | passed | `tests/web-browser.cjs` in Chromium clicks navigation, search, selection, forms, create/edit/clear/mark/tick/exclude flows (see below) |
+| GUI: shared state | passed | every browser and smoke write is read back through an independent Agent MCP connection to the same run; reload; an Infra event and an MCP write are seen after Refresh |
+| GUI: failure behaviour | passed | refusal shown with the App code (`invalid_window`); stale form shows `stale_version` and writes nothing; a dropped response retried with the same request ID commits once |
+| GUI: business-only access | passed | no management controls; direct `env.*` calls, hidden paths, fixture/state downloads, foreign origins and missing CSRF refused (smoke); restricted profile shows no write controls and the Host refuses a forged write (browser) |
+| GUI: files and content | passed (text) / not applicable (files) | hostile guest name rendered as text, no element created; the App has no attachments (`capabilities.resources: false`) |
+| GUI: evidence | passed | commands, versions, browser version and screenshots below; browser automation is not a model-agent evaluation |
 | 4.1 Essential workflows have evidence; human review of realism | automated evidence passed; human review not run | remaining manual review below |
 | 4.2 Modes reported separately | passed | this file |
 | 4.3 Remaining gaps listed | passed | below |
