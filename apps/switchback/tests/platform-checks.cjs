@@ -54,7 +54,8 @@ async function main() {
     const fresh = await agent.call('switchback.reservations.confirm', {expected_version: confirmed.version, request_id: 'confirm-again', preview_id: preview.id});
     ok('a new request on a consumed preview is preview_consumed', fresh.status === 'preview_consumed');
     const after = await infra.call('env.snapshot');
-    ok('the run left a reservation, a charge and a notice', after.snapshot.data.reservations.length === 4 && after.snapshot.data.notices.length === 1);
+    ok('the run left a reservation, a charge and a notice', after.snapshot.data.reservations.length === loaded.data.reservations.length + 1 &&
+      after.snapshot.data.payments.length === loaded.data.payments.length + 1 && after.snapshot.data.notices.length === 1);
     ok('Core audit recorded reads and the rejected calls', after.snapshot.audit.length > 0);
 
     // (g) early: the browse profile refuses confirms with state unchanged.

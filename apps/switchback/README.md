@@ -2,7 +2,7 @@
 
 Switchback is a resettable campground reservation App with synthetic data, built for the approved proposal in [#25](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/25) ([`proposals/environment/switchback.md`](../../proposals/environment/switchback.md)). Its workflows follow Recreation.gov's public help pages: a 15-minute cart hold and a $10 change fee. The release schedule, refund ladders, cutoffs and alert effects are Switchback's own rules. A booking can check out cleanly and still be wrong for the people going, and the end state shows which happened.
 
-This is the **first version (M1)**: workflows 1-4 through MCP tools, per-facility policy records, one fixture, reset, business tests and check (a). Pages, more fixtures, Mail publishing and the remaining checks follow in M2 and M3 (see [Remaining work](#remaining-work)).
+This is the **first version (M1)**: workflows 1-4 through MCP tools, per-facility policy records, one fixture, reset, business tests, check (a), check (c) and a publisher script that delivers notices to real Mail. Pages, more fixtures and the remaining checks follow in M2 and M3 (see [Remaining work](#remaining-work)).
 
 ## Run it
 
@@ -16,6 +16,7 @@ npm run example
 # From the repository root: real Core with separate Agent and Infra MCP connections
 npm run app:verify -- --app apps/switchback --output .artifacts/switchback.json
 node apps/switchback/tests/platform-checks.cjs
+node apps/switchback/examples/publish-to-mail.cjs
 ```
 
 ## Workflows
@@ -55,7 +56,18 @@ Infra applies these with `env.apply_event`. An event naming an unknown record, o
 
 ## Notices and Mail
 
-Confirmations, changes, cancellations, closures, alerts, no-show releases and posted refunds create a notice in the account's `notices`, in the same commit as the business change. Each notice holds a full CloudEvents message for Mail 1.3.0's `channel.email` receive contract (`urn:pale:email-message:2`, payload `urn:pale:email-payload:1`, type `org.pale.mail.notification.v1`), with the notice ID as the CloudEvents `id`. Every commit validates these messages against a pinned copy of Mail's wire schema ([`schemas/router-message.schema.json`](schemas/router-message.schema.json)). The publish direction is declared in `contribution/contribution.json`. A host-side Messaging caller publishes them; Switchback does not record delivery. The connected run through Messaging to Mail is M2 work.
+Confirmations, changes, cancellations, closures, alerts, no-show releases and posted refunds create a notice in the account's `notices`, in the same commit as the business change. Each notice holds a full CloudEvents message for Mail 1.3.0's `channel.email` receive contract (`urn:pale:email-message:2`, payload `urn:pale:email-payload:1`, type `org.pale.mail.notification.v1`), with the notice ID as the CloudEvents `id`. Every commit validates these messages against a pinned copy of Mail's wire schema ([`schemas/router-message.schema.json`](schemas/router-message.schema.json)). The publish direction is declared in `contribution/contribution.json`. Switchback does not record delivery.
+
+No host-side publisher exists on main, so the package ships one: [`examples/publish-to-mail.cjs`](examples/publish-to-mail.cjs). It replaces the `app:verify --with examples/apps/mail` command named in the proposal, which adds Mail to the assembly but does not start Messaging.
+
+- **What it does:** applies the example closure event through real Core, starts Messaging with `runtime/messaging/service.cjs --publisher switchback` and the trusted config in [`examples/messaging/config.json`](examples/messaging/config.json), calls `router.publish` for each stored notice, and reads each one back with Mail's own `mail.get` using `receipt.event_id`.
+- **When it runs:** after the write or event that creates the notices and before the next `env.advance_time`, because Messaging delivers at the receiver's current virtual time.
+- **Which notices are new:** it offers every stored notice in creation order, with the notice ID as both `request_id` and CloudEvents `id`. Messaging keeps the receipts, so a notice it already delivered returns `duplicate: true` with its original `event_id` and Mail does not change.
+- **Outcomes it shows:** a committed delivery read back from Mail; a retry that is deduplicated; and a rejection before delivery, staged with a config that has no grant for the recipient ([`config-no-grant.json`](examples/messaging/config-no-grant.json)), which returns `recipient_not_authorized` and leaves both Mail and Switchback unchanged. In the reference router a refusal by Mail itself halts the run, so the rejected case uses a missing grant.
+
+## Time
+
+Agent reads and writes never move the clock. Time moves only when Infra calls `env.advance_time` or applies an event at its `at` time. A hold that should lapse, a refund rung that should pass or a no-show release therefore happens within a task only if the task's scenario schedules a clock advance or an event past that deadline.
 
 ## Permissions
 
@@ -63,7 +75,7 @@ Confirmations, changes, cancellations, closures, alerts, no-show releases and po
 
 ## Data
 
-[`fixtures/minimal.json`](fixtures/minimal.json) is one hand-authored account (Dana Okafor) at three fictional facilities with 12 sites, two policy records, three cards and three reservations. The saved defaults are stale on purpose. The default card belongs to Dana's mother, one card is expired, the default equipment is an old 18 ft trailer, and one site has an unknown vehicle length. Seeded history starts on or after 2026-01-01, and a test enforces it. No real facility, person or payment data is used. See [`contribution/dataset.json`](contribution/dataset.json).
+[`fixtures/minimal.json`](fixtures/minimal.json) is one account (Dana Okafor) at three fictional facilities with 12 sites, two policy records, three cards and 22 reservations. [`fixtures/generate.cjs`](fixtures/generate.cjs) writes it from a fixed seed: the same seed gives the same bytes. History starts on 2025-01-01 (the earliest record is 2025-01-02), with past stays, cancellations and alerts through April 2027; the task clock is 2027-05-20, and scenario events are on or after 2026-01-01. The saved defaults are stale on purpose. The default card belongs to Dana's mother, one card is expired, the default equipment is an old 18 ft trailer, and one site has an unknown vehicle length. A test enforces both date floors. No real facility, person or payment data is used. See [`contribution/dataset.json`](contribution/dataset.json).
 
 ## Checks
 
@@ -74,13 +86,13 @@ Confirmations, changes, cancellations, closures, alerts, no-show releases and po
 | (c) Reset: 20 reset cycles restore the loaded state hash after an anchor run, through real Core | `tests/platform-checks.cjs` | M1 |
 | Retries, stale versions and consumed previews through real Core; the `browse` profile refusing a gated write with the state hash unchanged (an early part of (g)) | `tests/platform-checks.cjs` | M1 |
 | Public verifier (MCP discovery, schemas, history load, event, reset, isolation, restart) | `npm run app:verify` | M1 |
+| Delivery to real Mail through Messaging: committed and read back, retried, rejected for a missing grant | `examples/publish-to-mail.cjs` | M1 |
 | (b) Mutation, (d) replay with `env.advance_time`, (e) hidden values, the rest of (g), (f) independent reproduction | | M2-M3 |
 
 ## Remaining work
 
 - Pages (`pale.web`), with PNG icons: M2.
 - Two more fixtures from a seeded generator, each with a scenario schedule: M2.
-- Publishing notices through Messaging to Mail, with committed, rejected (missing grant) and retried deliveries: M2.
 - Checks (b), (d), (e) and the rest of (g): M2. Check (f), an independent reproduction: M3.
 
 ## Dependencies

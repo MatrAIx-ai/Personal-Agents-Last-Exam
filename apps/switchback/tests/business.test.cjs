@@ -314,12 +314,13 @@ for (const [name, s] of Object.entries(SCENARIOS)) {
   });
 }
 
-test('fixture history starts on or after 2026-01-01', () => {
-  const floor = Date.parse('2026-01-01T00:00:00Z');
+test('fixture history starts on or after 2025-01-01, and the task clock on or after 2026-01-01', () => {
+  const floor = Date.parse('2025-01-01T00:00:00Z');
+  assert.ok(Date.parse(require('../fixtures/clock.json').initial_time) >= Date.parse('2026-01-01T00:00:00Z'));
   const text = JSON.stringify(require('../fixtures/minimal.json'));
   for (const [stamp] of text.matchAll(/\d{4}-\d{2}-\d{2}(T[0-9:.]+(Z|[+-]\d{2}:\d{2}))?/g)) {
     const t = Date.parse(stamp.length === 10 ? stamp + 'T00:00:00Z' : stamp);
-    assert.ok(t >= floor, 'Fixture timestamp before 2026-01-01: ' + stamp);
+    assert.ok(t >= floor, 'Fixture timestamp before 2025-01-01: ' + stamp);
   }
-  for (const [stamp] of JSON.stringify(require('../examples/scenario.json')).matchAll(/\d{4}-\d{2}-\d{2}/g)) assert.ok(stamp >= '2026-01-01', stamp);
+  for (const [stamp] of JSON.stringify(require('../examples/scenario.json')).matchAll(/\d{4}-\d{2}-\d{2}/g)) assert.ok(stamp >= '2026-01-01', stamp);  // scenario events are on the task timeline
 });
