@@ -34,9 +34,13 @@ function session2b(flags = {}) {
 }
 
 const ms = iso => Date.parse(iso);
-const asksForSession = title => /\b(message|text|ping|open|check in with|talk to)\b[^.]*\bassistant\b/i.test(title);
-const asksForBankApproval = title => /\b(approve|verify|confirm)\b[^.]*\b(payment|charge|bank|card|northline)\b/i.test(title)
-  || /\bbank app\b/i.test(title);
+// An alert brings Mingyu back to the assistant when its title asks him to contact it, however worded
+// ("Message assistant", "Chat with assistant", "Check-in with assistant", "Assistant check-in").
+const asksForSession = title => /\b(message|text|ping|open|chat with|talk to|reply to|contact|ask|check[ -]?in with)\b[^.:]*\bassistant\b/i.test(title)
+  || /\bassistant\b[^.:]*\b(check[ -]?in|session|chat)\b/i.test(title);
+// Only an explicit request to approve or verify the payment approves the held fare; a title that merely
+// mentions the airline or the bank app does not.
+const asksForBankApproval = title => /\b(approve|authori[sz]e|verify)\b[^.]*\b(payment|charge|purchase|transaction|fare|ticket)\b/i.test(title);
 
 // Mingyu acts only on alerted calendar items with an actionable title. From the rule at session 2b until
 // the qual, at most two agent-created alerts may fire in total; later ones in that window are muted and

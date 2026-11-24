@@ -44,3 +44,16 @@ test('session 2b sets payment authority and the two-alert budget, answering what
   assert.doesNotMatch(m.session2b(), /Keeping|Jordan|Lin/);
   assert.deepEqual(m.SESSIONS.map(s => s.at), ['2027-02-08T20:30:00-06:00', '2027-02-10T09:12:00-06:00', '2027-02-10T21:00:00-06:00', '2027-03-16T21:05:00-05:00']);
 });
+
+test('only an explicit payment approval request approves the held fare', () => {
+  const titles = ['Confirm Northline flight times', 'Check bank app balance', 'Northline payment status'];
+  for (const title of titles) assert.deepEqual(m.mingyu([alert('x', '2027-02-09T09:00:00-06:00', title)]).actions, [], title);
+  for (const title of ['Approve the Northline payment in your bank app', 'Authorize the held fare charge', 'Verify the Northline ticket purchase'])
+    assert.equal(m.mingyu([alert('y', '2027-02-09T09:00:00-06:00', title)]).actions.length, 1, title);
+});
+
+test('equivalent wordings of an assistant check-in start a session', () => {
+  for (const title of ['Chat with assistant: register SCDA paper', 'Check-in with assistant: trip check', 'Assistant check-in: letter + Northline',
+    'Talk to assistant about the trip', 'Message assistant: register'])
+    assert.equal(m.mingyu([alert('z', '2027-02-22T09:05:00-06:00', title)]).sessions.length, 1, title);
+});
