@@ -372,7 +372,7 @@ test('seed validation rejects broken ledgers, prices, links, bindings and timeli
   rejects(d => { d.balance = 41000; }, /Balance/);
   rejects(d => { d.ledger[1].balance_after = 39000; }, /running balance/);
   rejects(d => { d.ledger[0].points = 5000; d.ledger[0].balance_after = 5000; }, /running balance/);
-  rejects(d => { d.ledger[3].ref = {reservation_id:'res-1'}; }, /Refund/);
+  rejects(d => { d.ledger[4].ref = {reservation_id:'res-1'}; }, /Refund/);
   rejects(d => { d.ledger.push({id:'t', at:'2026-03-01T00:00:00Z', kind:'transfer_in', points:1, balance_after:40001,
     ref:{app_id:'waypoint', account_id:'waypoint-mei', object_type:'transfer', object_id:'x', message_id:'m', sent_at:null}}); d.balance = 40001; d.last_activity_at = '2026-03-01T00:00:00Z'; }, /same member/);
   rejects(d => { d.last_activity_at = '2026-01-30T00:00:00-06:00'; }, /last_activity_at/);
@@ -387,6 +387,21 @@ test('seed validation rejects broken ledgers, prices, links, bindings and timeli
   rejects(d => { d.notices[0].ref.object_id = 'res-9'; }, /unknown object/);
   rejects(d => { d.reservations[1].history[0].at = '2099-01-01T00:00:00Z'; }, /history/);
   rejects(d => { d.notices.push({...d.notices[0], id:'res-1'}); }, /Duplicate/);
+});
+
+test('the seed holds the credit for every completed Waypoint transfer in the Waypoint fixture', () => {
+  const sender = path.resolve(__dirname, '../../waypoint/fixtures/minimal.json');
+  if (!fs.existsSync(sender)) return;
+  const a = fixture().data;
+  const sent = require(sender).transfers.filter(x => x.status === 'completed' && x.recipient.account_id === a.account_id);
+  assert.ok(sent.length > 0);
+  for (const x of sent) {
+    const entry = a.ledger.find(e => e.id === x.receipt.event_id);
+    assert.ok(entry, 'missing credit for ' + x.id);
+    assert.deepEqual([entry.kind, entry.points, entry.ref.object_id, entry.ref.sent_at], ['transfer_in', x.points, x.id, x.created_at]);
+    assert.ok(Date.parse(entry.at) >= Date.parse(x.available_at) && Date.parse(entry.at) <= Date.parse(x.settled_at));
+    assert.ok(Date.parse(a.last_activity_at) >= Date.parse(entry.at));
+  }
 });
 
 test('each README event example is valid and applies to the fixture', () => {

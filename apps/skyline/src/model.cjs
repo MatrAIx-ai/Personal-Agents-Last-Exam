@@ -97,6 +97,9 @@ function validateSeed(ctx, data) {
     if (legs.some(f => !f.cabins[b.cabin])) bad('Booking ' + b.id + ' cabin is missing on a flight.');
     if (legs.slice(1).some((f, i) => legs[i].dest !== f.origin)) bad('Booking ' + b.id + ' segments do not connect.');
     if (!b.saver_flight_ids.every(id => b.segments.includes(id)) || (b.status === 'cancelled' && b.saver_flight_ids.length)) bad('Booking ' + b.id + ' saver inventory is inconsistent.');
+    if (b.saver_reductions.some(r => !b.segments.includes(r.flight_id) || b.saver_flight_ids.includes(r.flight_id))
+      || new Set(b.saver_reductions.map(r => r.flight_id)).size !== b.saver_reductions.length
+      || (b.status === 'cancelled' && b.saver_reductions.length)) bad('Booking ' + b.id + ' saver reductions are inconsistent.');
     if (!data.payment_labels.includes(b.payment_label)) bad('Booking ' + b.id + ' uses an unknown payment label.');
     // Exactly one seat per passenger per segment, in that order.
     const expected = b.segments.flatMap(f => b.passenger_ids.map(p => f + '|' + p));

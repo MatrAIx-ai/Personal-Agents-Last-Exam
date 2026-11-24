@@ -60,7 +60,7 @@ function book(ctx, data, args) {
 
   const id = c.nextId(data, 'booking');
   const b = {id, locator:locator(data, id), status:'ticketed', cabin, passenger_ids:[...args.passenger_ids], segments:path.map(f => f.id),
-    saver_flight_ids:path.map(f => f.id), seats:[], points:option.total.points, partner_fee_cents:option.total.partner_fee_cents,
+    saver_flight_ids:path.map(f => f.id), saver_reductions:[], seats:[], points:option.total.points, partner_fee_cents:option.total.partner_fee_cents,
     taxes_cents:option.total.taxes_cents, payment_label:args.payment_label, charge_ids:[], change:null,
     created_at:ctx.virtual_now, updated_at:ctx.virtual_now, history:[]};
   b.seats = ordered(b, seats);
@@ -120,11 +120,7 @@ function acceptAlternative(ctx, data, b, args) {
   // Two passengers sat together if they had an adjacent pair on every replaced segment.
   const together = pax === 2 && ch.replaces.every(id => { const [a, z] = seatsOn(id); return inv.isPair(inv.flight(data, id).cabins[b.cabin], a.seat, z.seat); });
   const seats = b.seats.filter(s => !ch.replaces.includes(s.flight_id) || alt.flight_ids.includes(s.flight_id));
-  for (const id of ch.replaces.filter(id => !alt.flight_ids.includes(id))) {
-    const map = inv.flight(data, id).cabins[b.cabin];
-    for (const s of seatsOn(id)) inv.release(map, s.seat);
-    if (b.saver_flight_ids.includes(id)) { map.saver_seats += pax; b.saver_flight_ids = b.saver_flight_ids.filter(x => x !== id); }
-  }
+  for (const id of ch.replaces.filter(id => !alt.flight_ids.includes(id))) releaseSegment(data, b, id);
   const changed = [], reassigned = [];
   for (const f of fresh.filter(f => !b.segments.includes(f.id))) {
     const map = f.cabins[b.cabin];
@@ -136,7 +132,9 @@ function acceptAlternative(ctx, data, b, args) {
     }
     const assigned = b.passenger_ids.map((p, i) => ({flight_id:f.id, passenger_id:p, seat:chosen[i]}));
     for (const s of assigned) { inv.take(map, s.seat); changed.push({...s, from:null}); seats.push(s); }
+    const before = map.saver_seats;
     inv.clampSaver(map);
+    if (map.saver_seats < before) b.saver_reductions.push({flight_id:f.id, seats:before - map.saver_seats});
     if (together && !inv.isPair(map, chosen[0], chosen[1])) reassigned.push({flight_id:f.id, reason:'adjacent_pair_unavailable', seats:c.copy(assigned)});
   }
   b.segments = segments;
@@ -148,6 +146,17 @@ function acceptAlternative(ctx, data, b, args) {
   return outcome(b, 'accept_alternative', {changed:changed.map(({flight_id, passenger_id, from, seat}) => ({flight_id, passenger_id, from, seat})), reassigned});
 }
 
+// Frees this booking's seats on one segment and gives back the saver inventory it held there:
+// its own saver seats, and any saver seats its non-saver seats had pushed out.
+function releaseSegment(data, b, id) {
+  const map = inv.flight(data, id).cabins[b.cabin];
+  for (const s of b.seats.filter(s => s.flight_id === id)) inv.release(map, s.seat);
+  if (b.saver_flight_ids.includes(id)) map.saver_seats += b.passenger_ids.length;
+  for (const r of b.saver_reductions.filter(r => r.flight_id === id)) map.saver_seats += r.seats;
+  b.saver_flight_ids = b.saver_flight_ids.filter(x => x !== id);
+  b.saver_reductions = b.saver_reductions.filter(r => r.flight_id !== id);
+}
+
 function cancel(ctx, data, b) {
   ticketed(b);
   if (c.ms(inv.flight(data, b.segments[0]).departs_at) <= c.ms(ctx.virtual_now)) c.fail('invalid_state', 'The trip has already started.');
@@ -157,12 +166,7 @@ function cancel(ctx, data, b) {
   const fee = waived ? b.partner_fee_cents : 0, amount = b.taxes_cents + fee;
   const chargeId = amount > 0 ? ledger.charge(ctx, data, b.payment_label, -amount, 'Award refund, booking ' + b.locator, {booking_id:b.id}) : null;
   if (chargeId) b.charge_ids.push(chargeId);
-  for (const id of b.segments) {
-    const map = inv.flight(data, id).cabins[b.cabin];
-    for (const s of b.seats.filter(s => s.flight_id === id)) inv.release(map, s.seat);
-    if (b.saver_flight_ids.includes(id)) map.saver_seats += b.passenger_ids.length;
-  }
-  b.saver_flight_ids = [];
+  for (const id of b.segments) releaseSegment(data, b, id);
   b.status = 'cancelled';
   data.inventory_revision++;
   c.stamp(ctx, b, 'cancelled', {fee_waived:waived});

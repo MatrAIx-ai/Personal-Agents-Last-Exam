@@ -872,6 +872,30 @@
                 "uniqueItems": true,
                 "description": "Segments on which this booking holds saver inventory."
               },
+              "saver_reductions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "flight_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "seats": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9
+                    }
+                  },
+                  "required": [
+                    "flight_id",
+                    "seats"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 4,
+                "description": "Saver seats that this booking's non-saver seats (a free schedule-change alternative) pushed out of a flight's saver inventory; given back when those seats are released."
+              },
               "seats": {
                 "type": "array",
                 "items": {
@@ -1153,6 +1177,7 @@
               "passenger_ids",
               "segments",
               "saver_flight_ids",
+              "saver_reductions",
               "seats",
               "points",
               "partner_fee_cents",
@@ -1221,6 +1246,30 @@
               "maxItems": 4,
               "uniqueItems": true,
               "description": "Segments on which this booking holds saver inventory."
+            },
+            "saver_reductions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "flight_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "seats": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9
+                  }
+                },
+                "required": [
+                  "flight_id",
+                  "seats"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 4,
+              "description": "Saver seats that this booking's non-saver seats (a free schedule-change alternative) pushed out of a flight's saver inventory; given back when those seats are released."
             },
             "seats": {
               "type": "array",
@@ -1503,6 +1552,7 @@
             "passenger_ids",
             "segments",
             "saver_flight_ids",
+            "saver_reductions",
             "seats",
             "points",
             "partner_fee_cents",

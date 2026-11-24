@@ -316,6 +316,30 @@ test('when no adjacent pair is free the alternative lists the reassignment', () 
   assert.deepEqual([next.seats.map(s => s.seat), next.reassigned], [['1A', '1D', '1A', '1B'], []]);
 });
 
+test('saver seats an alternative pushes out come back when its seats are released', () => {
+  const NEXT = ALT_NEXT.flight_ids;
+  const run = release => {
+    const f = fixture();
+    const b = changed(f);
+    // Fill each alternative cabin's saver inventory up to its free seats, so seating the pair must push two out.
+    const data = f.data;
+    for (const id of NEXT) { const m = data.flights.find(x => x.id === id).cabins.business; m.saver_seats = m.seats.length - m.taken.length; }
+    f.load(data);
+    const start = NEXT.map(id => [cabin(f, id).saver_seats, free(f, id).length]);
+    f.call('skyline.manage', {booking_id:b.id, action:'accept_alternative', alternative_id:'alt-next-day'});
+    assert.deepEqual(NEXT.map(id => [cabin(f, id).saver_seats, free(f, id).length]), start.map(([s, n]) => [s - 2, n - 2]));
+    assert.deepEqual(booking(f, b.id).saver_reductions, NEXT.map(flight_id => ({flight_id, seats:2})));
+    release(f, b);
+    assert.deepEqual(NEXT.map(id => [cabin(f, id).saver_seats, free(f, id).length]), start);
+    assert.deepEqual(booking(f, b.id).saver_reductions, []);
+  };
+  run((f, b) => f.call('skyline.manage', {booking_id:b.id, action:'cancel'}));
+  // A second schedule change that moves the pair off the alternative releases it the same way.
+  run((f, b) => f.event({event_id:'schedule-2', at:'2027-08-27T07:00:00-05:00', operation:'skyline.schedule.changed',
+    payload:{change_id:'chg-2', flight_id:'PC12-2027-10-22', departs_at:'2027-10-22T20:30:00+09:00', arrives_at:'2027-10-22T14:20:00-07:00',
+      alternatives:[ALT_SAME], deadline:DEADLINE}}) && f.call('skyline.manage', {booking_id:b.id, action:'accept_alternative', alternative_id:'alt-same-day'}));
+});
+
 test('the free alternative cannot be taken at or after its deadline', () => {
   const f = fixture();
   const b = changed(f);
