@@ -1,0 +1,14 @@
+# Original synthetic fixtures
+
+All records are fictional, authored with Codex assistance and licensed MIT. No real merchant, customer, skin diary, medical record or external price feed is included. Human provenance/plausibility review remains pending; business tests do not establish maintainer acceptance.
+
+- `minimal.json`: account A; 8 exact product/variant/pack combinations across filters, care products and food; 3 sellers; 4 trusted eligibility sources; 12 immutable quote episodes and their lifecycle rows. Watches, candidates, transitions and event receipts start empty. There are 39 business records.
+- `account-b.json` and `binding-account-b.json`: an independent replacement seed/binding for account B. Account B is not present in account A's business data; the App does not expose a client account selector.
+- `clock.json`: the public verifier/App launcher baseline is `2026-12-02T08:00:00-08:00`. Every seeded publication/history timestamp is at or before that instant. Future event inputs in this directory are not preloaded into agent-visible state.
+- `watch-examples.json`: four complete neutral business rules. The caller must add its observed Core `expected_version` and a retry-stable `request_id` when calling the real MCP write; these examples are not executable Core receipts.
+- `event-cases.json`: independent valid/invalid/replay control inputs with expected outcome descriptions. Some cases share an event/episode intentionally; do not treat the entire file as one ordered success-only scenario. The public executable example selects and applies its own documented sequence.
+- `history.json`: a coherent replacement seed with four watches, twelve quote episodes, four candidates, fourteen transitions and fourteen retained business event receipts, beginning `2026-01-01T08:00:00-08:00`. It has 75 business records. History includes a ceiling revision, pause, variant revision while paused, resume, and expiry; a later active variant match and food match remain visible at the baseline time.
+- `history-timeline.json`: authored business-handler inputs used to generate `history.json`. This is a deterministic App-level replay description, not an invented Core/MCP execution trace. The real runtime example/tests provide separate transport/commit evidence.
+- `history-bundle.json`: empty assets plus MIT provenance/counts for the historical replacement seed. Supply this bundle together with `history.json` to `env.load_seed`; it preserves explicit provenance and matches the 75-record count. Core administrative load/reset is never an agent operation.
+
+`watch_key` is an explicit account-local intent key. The same key retains a server watch ID while its criteria change; a distinct key is an independent intent even if the criteria are identical. No target is chosen from personal history or a suitability flag by these fixtures.

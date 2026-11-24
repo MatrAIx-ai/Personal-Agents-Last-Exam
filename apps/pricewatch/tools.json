@@ -1,0 +1,362 @@
+[
+  {
+    "name": "pricewatch.offers.list",
+    "description": "Read released current account-scoped checkout quotes and effective validity; no business state changes.",
+    "read_only": true,
+    "scope": "pricewatch.offers.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "product_family_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "include_inactive": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "pricewatch"
+        },
+        "version": {
+          "$ref": "schemas/business.schema.json#/$defs/core_version"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/business.schema.json#/$defs/offer_view"
+          }
+        },
+        "next_offset": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "items",
+        "next_offset"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "pricewatch.watch.upsert",
+    "description": "Create or revise one stable account-local intent key using complete neutral criteria and active/paused state; evaluate current quotes atomically.",
+    "read_only": false,
+    "scope": "pricewatch.watch.upsert",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "watch_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "criteria": {
+          "$ref": "schemas/business.schema.json#/$defs/input_criteria"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "active",
+            "paused"
+          ]
+        },
+        "expected_version": {
+          "$ref": "schemas/business.schema.json#/$defs/core_version"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "watch_key",
+        "criteria",
+        "state",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "pricewatch"
+        },
+        "version": {
+          "$ref": "schemas/business.schema.json#/$defs/core_version"
+        },
+        "watch_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "watch_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "activation_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "active",
+            "paused"
+          ]
+        },
+        "changed": {
+          "type": "boolean"
+        },
+        "created": {
+          "type": "boolean"
+        },
+        "candidate_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          }
+        },
+        "duplicate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "watch_id",
+        "watch_revision",
+        "activation_id",
+        "state",
+        "changed",
+        "created",
+        "candidate_ids"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "pricewatch.watch.list",
+    "description": "Read account-local watches and current effective available-candidate counts; no business state changes.",
+    "read_only": true,
+    "scope": "pricewatch.watch.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "pricewatch"
+        },
+        "version": {
+          "$ref": "schemas/business.schema.json#/$defs/core_version"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/business.schema.json#/$defs/watch_view"
+          }
+        },
+        "next_offset": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "items",
+        "next_offset"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "pricewatch.watch.get",
+    "description": "Read one server watch ID, paginated candidate projections and append-only transition history; no read receipt or business mutation.",
+    "read_only": true,
+    "scope": "pricewatch.watch.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "watch_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "candidate_offset": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "history_offset": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "watch_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "pricewatch"
+        },
+        "version": {
+          "$ref": "schemas/business.schema.json#/$defs/core_version"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "watch": {
+          "$ref": "schemas/business.schema.json#/$defs/watch_view"
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/business.schema.json#/$defs/candidate_view"
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "$ref": "schemas/business.schema.json#/$defs/transition"
+          }
+        },
+        "next_candidate_offset": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "next_history_offset": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "watch",
+        "candidates",
+        "transitions",
+        "next_candidate_offset",
+        "next_history_offset"
+      ],
+      "additionalProperties": false
+    }
+  }
+]
