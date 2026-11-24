@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "app_id": "curbline",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:curbline (@Oshikaka)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "dispatch.driver_assigned",
+    "dispatch.eta_updated",
+    "dispatch.driver_arrived",
+    "dispatch.driver_cancelled",
+    "trip.started",
+    "trip.completed",
+    "trip.rider_no_show",
+    "flight.status_changed",
+    "market.updated",
+    "support.resolved",
+    "payment.refund_settled",
+    "notification.delivery_recorded"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Synthetic data only: no real rides, drivers, vehicles, fares, places or flights.",
+    "No vehicle simulation: drivers, trips, flights and prices change only through Infra events.",
+    "No global scheduler: time moves through events and Infra's env.advance_time, which runs no App code. Lapses and expired shares are derived on reads and committed by the next write or event.",
+    "The outbound Mail adapter is invoked explicitly by the example and tests; automatic invocation belongs to the planned runner.",
+    "MCP only; no GUI."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

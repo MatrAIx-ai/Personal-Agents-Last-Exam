@@ -1,0 +1,46 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "curbline-minimal",
+  "version": "1.0.0",
+  "description": "Synthetic ride, airport-pickup and ledger fixture for package validation; not an evaluation task.",
+  "record_source_ids": [
+    "curbline-generator"
+  ],
+  "sources": [
+    {
+      "source_id": "curbline-generator",
+      "kind": "synthetic",
+      "description": "Metro Ashford places, zones, travel times, supply, flights, drivers, vehicles, payment methods and ride histories written by the seeded generator. All people, places, drivers, plates, flights and prices are fictional; no real ride, fare or location data is collected.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "seeded procedural generation",
+        "tool": "apps/curbline/scripts/generate-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20261203,
+        "parameters": {
+          "prng": "mulberry32"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "All times are RFC 3339 with UTC offsets in the place's IANA time zone; money is integer cents in USD."
+  ],
+  "expected_counts": {
+    "records": 57,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automatic checks do not replace human review of realism, wording and provenance."
+  }
+}

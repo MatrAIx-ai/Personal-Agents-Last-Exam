@@ -1,0 +1,1196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:curbline:events:1",
+  "title": "Infra-applied Curbline events (tasks choose content and timing)",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "dispatch.driver_assigned"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "booking_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "driver": {
+                  "$ref": "seed.schema.json#/$defs/driver"
+                },
+                "vehicle": {
+                  "$ref": "seed.schema.json#/$defs/vehicle"
+                },
+                "eta": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "booking_id",
+                "driver",
+                "vehicle",
+                "eta"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "selector": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "flight": {
+                          "$ref": "seed.schema.json#/$defs/flight_key"
+                        }
+                      },
+                      "required": [
+                        "flight"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "rider_person_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "pickup_from": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "pickup_to": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "rider_person_id",
+                        "pickup_from",
+                        "pickup_to"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "on_multiple": {
+                  "enum": [
+                    "first",
+                    "reject"
+                  ]
+                },
+                "driver": {
+                  "$ref": "seed.schema.json#/$defs/driver"
+                },
+                "vehicle": {
+                  "$ref": "seed.schema.json#/$defs/vehicle"
+                },
+                "eta": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "selector",
+                "driver",
+                "vehicle",
+                "eta"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "dispatch.eta_updated"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "booking_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "eta": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "booking_id",
+                "eta"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "selector": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "flight": {
+                          "$ref": "seed.schema.json#/$defs/flight_key"
+                        }
+                      },
+                      "required": [
+                        "flight"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "rider_person_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "pickup_from": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "pickup_to": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "rider_person_id",
+                        "pickup_from",
+                        "pickup_to"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "on_multiple": {
+                  "enum": [
+                    "first",
+                    "reject"
+                  ]
+                },
+                "eta": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "selector",
+                "eta"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "dispatch.driver_arrived"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "booking_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "arrived_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "pickup_point": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "booking_id",
+                "arrived_at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "selector": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "flight": {
+                          "$ref": "seed.schema.json#/$defs/flight_key"
+                        }
+                      },
+                      "required": [
+                        "flight"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "rider_person_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "pickup_from": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "pickup_to": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "rider_person_id",
+                        "pickup_from",
+                        "pickup_to"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "on_multiple": {
+                  "enum": [
+                    "first",
+                    "reject"
+                  ]
+                },
+                "arrived_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "pickup_point": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "selector",
+                "arrived_at"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "dispatch.driver_cancelled"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "booking_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "reassign": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "booking_id",
+                "reason",
+                "reassign"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "selector": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "flight": {
+                          "$ref": "seed.schema.json#/$defs/flight_key"
+                        }
+                      },
+                      "required": [
+                        "flight"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "rider_person_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "pickup_from": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "pickup_to": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "rider_person_id",
+                        "pickup_from",
+                        "pickup_to"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "on_multiple": {
+                  "enum": [
+                    "first",
+                    "reject"
+                  ]
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "reassign": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "selector",
+                "reason",
+                "reassign"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "trip.started"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "booking_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "started_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "booking_id",
+                "started_at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "selector": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "flight": {
+                          "$ref": "seed.schema.json#/$defs/flight_key"
+                        }
+                      },
+                      "required": [
+                        "flight"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "rider_person_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "pickup_from": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "pickup_to": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "rider_person_id",
+                        "pickup_from",
+                        "pickup_to"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "on_multiple": {
+                  "enum": [
+                    "first",
+                    "reject"
+                  ]
+                },
+                "started_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "selector",
+                "started_at"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "trip.completed"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "booking_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "started_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "completed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "distance_km": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1000
+                },
+                "duration_min": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1440
+                },
+                "tolls_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10000000
+                }
+              },
+              "required": [
+                "booking_id",
+                "completed_at",
+                "distance_km",
+                "duration_min",
+                "tolls_cents"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "selector": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "flight": {
+                          "$ref": "seed.schema.json#/$defs/flight_key"
+                        }
+                      },
+                      "required": [
+                        "flight"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "rider_person_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "pickup_from": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "pickup_to": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "rider_person_id",
+                        "pickup_from",
+                        "pickup_to"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "on_multiple": {
+                  "enum": [
+                    "first",
+                    "reject"
+                  ]
+                },
+                "started_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "completed_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "distance_km": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1000
+                },
+                "duration_min": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1440
+                },
+                "tolls_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10000000
+                }
+              },
+              "required": [
+                "selector",
+                "completed_at",
+                "distance_km",
+                "duration_min",
+                "tolls_cents"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "trip.rider_no_show"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "booking_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "booking_id",
+                "at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "selector": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "flight": {
+                          "$ref": "seed.schema.json#/$defs/flight_key"
+                        }
+                      },
+                      "required": [
+                        "flight"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "rider_person_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "pickup_from": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "pickup_to": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "rider_person_id",
+                        "pickup_from",
+                        "pickup_to"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "on_multiple": {
+                  "enum": [
+                    "first",
+                    "reject"
+                  ]
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "selector",
+                "at"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "flight.status_changed"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "flight": {
+              "$ref": "seed.schema.json#/$defs/flight_key"
+            },
+            "status": {
+              "enum": [
+                "scheduled",
+                "on_time",
+                "delayed",
+                "early",
+                "cancelled",
+                "diverted",
+                "landed"
+              ]
+            },
+            "scheduled_arrival": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "estimated_arrival": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "arrival_place_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "landed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "source_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "flight",
+            "status",
+            "scheduled_arrival",
+            "arrival_place_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "market.updated"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "zone_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "multiplier": {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 5
+            },
+            "supply": {
+              "type": "object",
+              "properties": {
+                "standard": {
+                  "type": "object",
+                  "properties": {
+                    "night": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    },
+                    "offpeak": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    },
+                    "peak": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                },
+                "xl": {
+                  "type": "object",
+                  "properties": {
+                    "night": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    },
+                    "offpeak": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    },
+                    "peak": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                },
+                "comfort": {
+                  "type": "object",
+                  "properties": {
+                    "night": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    },
+                    "offpeak": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    },
+                    "peak": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                },
+                "wheelchair_accessible": {
+                  "type": "object",
+                  "properties": {
+                    "night": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    },
+                    "offpeak": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    },
+                    "peak": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "zone_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "support.resolved"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "case_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "outcome": {
+              "enum": [
+                "resolved_adjusted",
+                "resolved_no_change"
+              ]
+            },
+            "adjustment_cents": {
+              "type": "integer",
+              "minimum": -10000000,
+              "maximum": 0
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "case_id",
+            "outcome"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "payment.refund_settled"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "ledger_entry_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "settled_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "ledger_entry_id",
+            "settled_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "notification.delivery_recorded"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "notification_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "committed",
+                "rejected",
+                "unknown",
+                "halted"
+              ]
+            },
+            "code": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "stop_run": {
+              "type": "boolean"
+            },
+            "router_event_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "notification_id",
+            "status",
+            "code",
+            "router_event_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}
