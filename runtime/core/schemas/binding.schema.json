@@ -1,0 +1,61 @@
+{
+  "type": "object",
+  "properties": {
+    "people": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "person_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "person_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "accounts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "app_id": {
+            "type": "string"
+          },
+          "account_id": {
+            "type": "string"
+          },
+          "owner_person_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "app_id",
+          "account_id",
+          "owner_person_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "objects": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "people",
+    "accounts",
+    "objects"
+  ],
+  "additionalProperties": false
+}
