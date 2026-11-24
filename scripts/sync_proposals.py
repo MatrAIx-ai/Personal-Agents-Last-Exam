@@ -5,14 +5,16 @@ from __future__ import annotations
 import argparse
 import base64
 from datetime import datetime, timezone
+import hashlib
 import html
+from http.client import RemoteDisconnected
 import json
 import os
 from pathlib import Path
 import re
 import sys
 import time
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
@@ -23,15 +25,36 @@ except ImportError:
 
 INDEX_PATH = "proposals/proposal-list.md"
 INDEX_BRANCH = "proposal-index"
+# Per-PR results reused between runs. Stored next to the index on the bot-only branch.
+CACHE_PATH = "proposals/proposal-cache.json"
+# Open PRs are re-read at least this often even when GitHub reports no update.
+OPEN_REFRESH_SECONDS = 6 * 3600
 MAX_PROPOSAL_BYTES = 200_000
 TITLE = re.compile(r"^\[(Environment|Task) Proposal\]\s*(?:\[([^\]]+)\])?\s*(.*)$", re.I)
 PROPOSAL_PATH = re.compile(r"^proposals/(environment|task)/[A-Za-z0-9][A-Za-z0-9_.-]*\.md$")
+URL = re.compile(r"(https?://\S+)")
 
 
 class APIError(RuntimeError):
     def __init__(self, status, message):
         super().__init__(message)
         self.status = status
+
+
+class RateLimited(APIError):
+    """GitHub refused the request because the token's API quota is exhausted."""
+
+    def __init__(self, status, message, reset=None):
+        super().__init__(status, message)
+        self.reset = reset
+
+
+def rate_limit_notice(job, error):
+    when = ""
+    if error.reset:
+        when = " The quota resets at " + datetime.fromtimestamp(error.reset, timezone.utc).strftime("%H:%M UTC") + "."
+    print(f"::error title=GitHub API rate limit::{job} is incomplete.{when} "
+          f"Pending commands remain in PR comments for scheduled recovery. {error}")
 
 
 class GitHub:
@@ -57,14 +80,45 @@ class GitHub:
             # especially when backfilling merge checks for many existing PRs.
             time.sleep(max(0.0, 1.1 - (time.monotonic() - self._last_write)))
             self._last_write = time.monotonic()
-        try:
-            with urlopen(request, timeout=30) as response:
-                if response.status == 204:
-                    return None
-                return json.load(response)
-        except HTTPError as error:
-            # Do not print response bodies or authentication headers.
-            raise APIError(error.code, f"GitHub API {error.code} for {method} {path}") from None
+        for attempt in range(3):
+            try:
+                with urlopen(request, timeout=30) as response:
+                    if response.status == 204:
+                        return None
+                    return json.load(response)
+            except HTTPError as error:
+                h = error.headers or {}
+                retry_after, reset = h.get("retry-after"), h.get("x-ratelimit-reset")
+                reset = int(reset) if reset and reset.isdigit() else None
+                # Inspect only for classification; never log bodies or credentials.
+                try:
+                    message = json.loads(error.read(8192)).get("message", "").lower()
+                except (ValueError, AttributeError):
+                    message = ""
+                limited = error.code in {403, 429} and (error.code == 429 or
+                    h.get("x-ratelimit-remaining") == "0" or retry_after or "rate limit" in message)
+                diagnostic = (f"GitHub API {error.code} for {method} {path}; "
+                    f"remaining={h.get('x-ratelimit-remaining', 'unknown')}, "
+                    f"reset={reset}, retry_after={retry_after}, request_id={h.get('x-github-request-id', 'unknown')}")
+                if limited:
+                    delay = int(retry_after) if retry_after and retry_after.isdigit() else (
+                        max(1, reset - int(time.time()) + 1) if reset and h.get("x-ratelimit-remaining") == "0" else 60)
+                    if attempt < 2 and delay <= 60:
+                        print(f"::warning::{diagnostic}; retrying in {delay}s", file=sys.stderr)
+                        time.sleep(delay)
+                        continue
+                    raise RateLimited(error.code, diagnostic, reset) from None
+                if error.code in {500, 502, 503, 504} and method in {"GET", "HEAD"} and attempt < 2:
+                    time.sleep(2 ** attempt)
+                    continue
+                raise APIError(error.code, diagnostic) from None
+            except (URLError, RemoteDisconnected, TimeoutError, ConnectionError) as error:
+                # A POST may have committed before losing its response. Recover
+                # from live state next run instead of blindly creating it twice.
+                if method in {"GET", "HEAD"} and attempt < 2:
+                    time.sleep(2 ** attempt)
+                    continue
+                raise APIError(0, f"GitHub transport error for {method} {path}: {type(error).__name__}") from None
 
     def pages(self, path, **params):
         for page in range(1, 1001):
@@ -110,7 +164,8 @@ def clean(value):
 
 
 def field(text, name):
-    pattern = r"^\s*(?:[-*]\s+)?\*\*" + re.escape(name) + r"(?:\s*\([^)]*\))?:\*\*\s*(.*)$"
+    # The value is the rest of the label's own line; an empty value must not capture the next line.
+    pattern = r"^[ \t]*(?:[-*][ \t]+)?\*\*" + re.escape(name) + r"(?:\s*\([^)]*\))?:\*\*[ \t]*(.*)$"
     match = re.search(pattern, text, re.M | re.I)
     return clean(match[1]) if match else ""
 
@@ -197,17 +252,22 @@ def progress(pr, changes_requested):
 def proposal_text(api, pr, kind):
     files = list(api.pages(f"/repos/{api.repository}/pulls/{pr['number']}/files"))
     if len(files) >= 3000:
-        raise RuntimeError("PR file list reached GitHub's cap; cannot identify the proposal reliably")
+        # GitHub lists at most 3000 files. Flag this row rather than abort the whole index.
+        return "", "", "PR changes too many files to identify the proposal file"
     paths = [x["filename"] for x in files if x.get("status") != "removed" and PROPOSAL_PATH.fullmatch(x["filename"])]
     paths = [path for path in paths if path.split("/")[1] == kind]
     if len(paths) != 1:
         return "", "", "Add exactly one proposal file for this track"
     path = paths[0]
     # The base repository's pull ref also works for public fork PRs. Never check out the head.
-    ref = f"refs/pull/{pr['number']}/head"
-    result = api.contents(path, ref)
-    if result is None and pr.get("merged_at") and pr.get("merge_commit_sha"):
-        result = api.contents(path, pr["merge_commit_sha"])
+    ref = (pr.get("head") or {}).get("sha") or f"refs/pull/{pr['number']}/head"
+    try:
+        result = api.contents(path, ref)
+        if result is None and pr.get("merged_at") and pr.get("merge_commit_sha"):
+            result = api.contents(path, pr["merge_commit_sha"])
+    except ValueError:
+        # A symlink, submodule or directory at the proposal path. API errors still abort the run.
+        return "", path, "Proposal path must be a regular Markdown file"
     if result is None:
         return "", path, "Proposal file is unavailable"
     try:
@@ -216,8 +276,17 @@ def proposal_text(api, pr, kind):
         return "", path, "Proposal must be a UTF-8 text file of at most 200 KB"
 
 
-def collect(api, domain_names, branch):
+def cache_key(pr):
+    # updated_at moves with commits, comments, reviews, labels and edits; the
+    # head SHA pins the proposal file. Without both, never reuse a result.
+    head, updated = (pr.get("head") or {}).get("sha"), pr.get("updated_at")
+    return [updated, head] if head and updated else None
+
+
+def collect(api, domain_names, branch, cache=None, now=None):
+    """Build index records. When a cache dict is given, reuse unchanged PRs and update it in place."""
     records = []
+    now = time.time() if now is None else now
     rules = json.loads(Path(__file__).resolve().parents[1].joinpath(".github/review-policy.json").read_text())
     for summary in api.pages(f"/repos/{api.repository}/pulls", state="all", base=branch, sort="created", direction="desc"):
         kind = track(summary)
@@ -226,6 +295,12 @@ def collect(api, domain_names, branch):
         # The list response already contains these PR fields. Avoid one extra
         # API request per proposal on every index refresh.
         pr = summary
+        key = cache_key(pr)
+        entry = (cache or {}).get(str(pr["number"]))
+        if (key and isinstance(entry, dict) and entry.get("key") == key and isinstance(entry.get("record"), dict)
+                and (pr.get("state") == "closed" or now - entry.get("fetched", 0) < OPEN_REFRESH_SECONDS)):
+            records.append(entry["record"])
+            continue
         text, path, issue = proposal_text(api, pr, kind)
         named = TITLE.match(pr.get("title", ""))
         title_domains = [x.strip() for x in (named[2] or "").split("+")] if named else []
@@ -261,17 +336,27 @@ def collect(api, domain_names, branch):
             "lifecycle": lifecycle,
             "reviewers": [u["login"] for u in pr.get("requested_reviewers", [])],
         })
+        if cache is not None and key:
+            cache[str(pr["number"])] = {"key": key, "fetched": now, "record": records[-1]}
     return sorted(records, key=lambda x: (x["created_at"], x["number"]), reverse=True)
 
 
 def escape_cell(value, limit=240):
     value = " ".join(str(value).split())
     if len(value) > limit:
-        value = value[:limit - 1] + "…"
+        cut = value[:limit - 1]
+        if not value[limit - 1].isspace() and " " in cut:
+            # End on a whole word so that no word or link is left half-printed.
+            cut = cut.rsplit(" ", 1)[0]
+        value = cut.rstrip(" ,;:([") + "…"
     value = html.escape(value, quote=False)
-    for char in ("\\", "|", "[", "]", "*", "_", "`", "!"):
-        value = value.replace(char, "\\" + char)
-    return value
+    parts = URL.split(value)
+    for index, part in enumerate(parts):
+        # Odd items are bare URLs: an escaped underscore would become part of the link target.
+        for char in ("\\", "|", "[", "]", "*", "`", "!") + (() if index % 2 else ("_",)):
+            part = part.replace(char, "\\" + char)
+        parts[index] = part
+    return "".join(parts)
 
 
 def utc(value):
@@ -337,18 +422,44 @@ def render(records, repository):
     return "\n".join(lines)
 
 
-def publish(api, branch, content):
+def cache_fingerprint():
+    # Any change to this script, the review policy or the domain list invalidates cached records.
+    root = Path(__file__).resolve().parents[1]
+    digest = hashlib.sha256()
+    for path in (Path(__file__).resolve(), root / ".github/review-policy.json", root / "README.md"):
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
+def load_cache(api, fingerprint):
+    existing = api.contents(CACHE_PATH, INDEX_BRANCH)
+    if not existing:
+        return {}
+    try:
+        data = json.loads(decode_file(existing, 5_000_000))
+    except (ValueError, UnicodeError):
+        return {}
+    if not isinstance(data, dict) or data.get("fingerprint") != fingerprint or not isinstance(data.get("records"), dict):
+        return {}
+    return data["records"]
+
+
+def cache_content(cache, fingerprint):
+    return json.dumps({"fingerprint": fingerprint, "records": cache}, sort_keys=True, separators=(",", ":")) + "\n"
+
+
+def publish(api, branch, content, path=INDEX_PATH, message="Update proposal list"):
     if branch != INDEX_BRANCH:
         raise ValueError("Generated indexes may only be published to proposal-index, never main")
     for attempt in range(3):
-        existing = api.contents(INDEX_PATH, branch)
+        existing = api.contents(path, branch)
         if existing and decode_file(existing) == content:
             return False
-        data = {"message": "Update proposal list", "content": base64.b64encode(content.encode()).decode(), "branch": branch}
+        data = {"message": message, "content": base64.b64encode(content.encode()).decode(), "branch": branch}
         if existing:
             data["sha"] = existing["sha"]
         try:
-            api.request(f"/repos/{api.repository}/contents/{INDEX_PATH}", "PUT", data)
+            api.request(f"/repos/{api.repository}/contents/{path}", "PUT", data)
             return True
         except APIError as error:
             if error.status != 409 or attempt == 2:
@@ -380,13 +491,19 @@ def main():
     api = GitHub(args.repository, os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN"))
     branch = api.request(f"/repos/{api.repository}")["default_branch"]
     domains = domains_from_readme(Path(__file__).resolve().parents[1].joinpath("README.md").read_text())
-    records = collect(api, domains, branch)
-    content = render(records, args.repository)
     if args.publish:
         ensure_index_branch(api, branch)
+        fingerprint = cache_fingerprint()
+        cache = load_cache(api, fingerprint)
+        reused = len(cache)
+        records = collect(api, domains, branch, cache)
+        content = render(records, args.repository)
         changed = publish(api, INDEX_BRANCH, content)
-        print(f"Proposal index: {len(records)} records; {'updated' if changed else 'unchanged'}.")
+        publish(api, INDEX_BRANCH, cache_content(cache, fingerprint), CACHE_PATH, "Update proposal cache")
+        print(f"Proposal index: {len(records)} records ({reused} cached before this run); {'updated' if changed else 'unchanged'}.")
     else:
+        records = collect(api, domains, branch)
+        content = render(records, args.repository)
         args.output.write_text(content)
         print(f"Preview written to {args.output}: {len(records)} proposals. GitHub was not modified.")
 
@@ -394,6 +511,9 @@ def main():
 if __name__ == "__main__":
     try:
         main()
+    except RateLimited as error:
+        rate_limit_notice("Proposal sync", error)
+        sys.exit(1)
     except (APIError, ValueError, RuntimeError) as error:
         print(f"Proposal sync failed: {error}", file=sys.stderr)
         sys.exit(1)
