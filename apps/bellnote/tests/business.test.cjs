@@ -7,3 +7,4 @@ require('./w3-pickup.test.cjs');
 require('./w4-lunch.test.cjs');
 require('./cross.test.cjs');
 require('./fixtures.test.cjs');
+require('./rules.test.cjs');

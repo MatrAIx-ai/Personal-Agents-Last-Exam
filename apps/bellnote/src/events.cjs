@@ -30,4 +30,4 @@ function applyEvent(ctx, data, event) {
     c.fail('invalid_event', e.message);
   }
 }
-module.exports = {applyEvent, EVENT_TYPES: Object.keys(HANDLERS)};
+module.exports = {applyEvent};

@@ -1,9 +1,18 @@
 'use strict';
 // App-only test context: real Bellnote hooks, the package's own schemas and the vendored public
-// schema validator. It applies inputs the way the host does (schema check, ctx.virtual_now, a
-// working copy, validateSeed after every change) but it is not a second Core: idempotency,
-// stale versions, policies, persistence and the Agent/Infra split are tested against the real
-// runtime in scripts/real-mcp.cjs.
+// schema validator. It is not a second Core: idempotency, stale versions, policies, persistence
+// and the Agent/Infra split are tested against the real runtime in scripts/real-mcp.cjs.
+//
+// Commit/discard semantics mirror runtime/core/runtime.cjs execute(): the hook receives a working
+// copy of the data; on success the result is validated (seed schema, validateSeed, output schema)
+// and becomes the data; on any throw the working copy is discarded, the data stays as it was and
+// a denial row is appended to the audit (here: `audit`), and for an event the clock rolls back.
+// Because of that discard, "a refusal leaves data unchanged" is true by construction for the
+// stored data; the harness therefore also checks a stronger App property for Agent writes:
+// every refusal is decided before the hook changes anything in its working copy
+// (`refusal.working_copy_changed`), so no write depends on the discard to stay atomic. Event
+// handlers append their activity row before they can refuse and do rely on the discard; their
+// atomicity is checked against real Core in scripts/real-mcp.cjs.
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const {compile} = require('./schema-validator.cjs');
@@ -39,8 +48,12 @@ function fixture({seed = require('../fixtures/minimal.json'), now = require('../
     if (!tool) fail('permission_denied', 'Unknown tool');
     const full = tool.read_only ? args : {expected_version: {epoch: 1, revision}, request_id: 'local-' + (++seq), ...args};
     if (!input.get(name)(full)) fail('invalid_arguments', 'Input schema: ' + name);
-    const before = JSON.stringify(data);
-    const out = plugin.handleTool(ctx('agent'), structuredClone(data), name, structuredClone(full));
+    const before = JSON.stringify(data), work = structuredClone(data);
+    let out;
+    try { out = plugin.handleTool(ctx('agent'), work, name, structuredClone(full)); } catch (e) {
+      e.working_copy_changed = JSON.stringify(work) !== before;
+      throw e;
+    }
     if (tool.read_only) assert.equal(JSON.stringify(out.data), before, 'A read must not change business data: ' + name);
     validate(out.data);
     if (!tool.read_only) revision++;
@@ -66,7 +79,8 @@ function fixture({seed = require('../fixtures/minimal.json'), now = require('../
   function attempt(fn) {
     const before = JSON.stringify(data);
     try { const r = fn(); audit.push({decision: 'allow'}); return r; } catch (e) {
-      assert.equal(JSON.stringify(data), before, 'A refused call must leave business data unchanged');
+      assert.equal(JSON.stringify(data), before, 'Core semantics: the working copy of a refused call is discarded');
+      assert.notEqual(e.working_copy_changed, true, 'An Agent write refusal must be decided before any change: ' + e.message);
       audit.push({decision: 'deny', reason: e.code || 'internal_error'});
       return {status: e.code || 'internal_error', message: e.message};
     }

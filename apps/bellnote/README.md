@@ -21,9 +21,13 @@ All 23 tools are `bellnote.<name>` (12 reads, 11 writes). Every write takes Core
 
 ### Rules worth knowing
 
-- **Rights are per guardian and per child** (`custodial`, `can_sign`, `can_pay`, `can_pickup`) and come from the seed. `custodial` is needed to report absences and to see or change who collects the child; `can_sign` to answer forms; `can_pay` to pay a fee, top up or change lunch settings.
-- **Cut-offs are explicit rules resolved to dated instants.** A district policy (with per-school overrides) holds `absence_cutoff_local` and `dismissal_change_cutoff_local`, each either `{"anchor":"fixed","local_time":"08:30"}` or `{"anchor":"dismissal","minutes_before":90}`. `schools.get` shows the resolved instant for every day in the district's IANA time zone, so a daylight-saving change and an early dismissal (which moves a dismissal-relative cut-off) are both handled; the cut-off instant itself is already too late. Late-arrival and early-leave reports use that day's absence cut-off.
-- **A restriction is matched by `person_id`, never by name.** `pickup.person_add` maps a person to one canonical ID: a supplied `person_id` is used as is; otherwise a phone number the school already holds (digits only, a leading country code 1 ignored) resolves to that person; otherwise a new school-held person record is created. The display name never decides identity, so a restricted person under another name is still refused, and a namesake with a different number is not.
+- **Rights are per guardian and per child** (`custodial`, `can_sign`, `can_pay`, `can_pickup`) and come from the seed. `custodial` is needed to report absences and to see or change who collects the child; `can_sign` to answer forms; `can_pay` to pay a fee, top up or change lunch settings. The other guardian's `form.answered` signing a form with a fee also needs their `can_pay` for that child.
+- **A guardian who is not custodial for a child learns nothing of that child's pickup list.** `pickup.get` is refused, `children.list` omits the child's `default_dismissal` (the key is absent, not null), and no pickup or dismissal notification is written for that child (`dismissal.recorded`, `pickup.person_reviewed`, `dismissal.void`); a `school.day_changed` notice for that child's school carries no pickup detail. The events are still applied and logged in the activity rows.
+- **Cut-offs are explicit rules resolved to dated instants.** A district policy (with per-school overrides) holds `absence_cutoff_local` and `dismissal_change_cutoff_local`, each either `{"anchor":"fixed","local_time":"08:30"}` or `{"anchor":"dismissal","minutes_before":90}`. `schools.get` shows the resolved instant for every day in the district's IANA time zone, so a daylight-saving change and an early dismissal (which moves a dismissal-relative cut-off) are both handled; the cut-off instant itself is already too late. A full-day absence uses that day's absence cut-off; a late arrival can be reported until the stated arrival time and an early leave until the stated leaving time (the time must be inside that day's school hours).
+- **A restriction is matched by `person_id`, never by name.** `pickup.person_add` maps a person to one canonical ID: a supplied `person_id` is used as is; otherwise a phone number the school already holds (digits only, a leading country code 1 ignored) resolves to that person; otherwise a new school-held person record is created. A supplied `person_id` cannot take a phone number the school holds for someone else (`conflict`, or `restricted_person` when that number belongs to a person restricted for the child), so no other person's details are attached to the entry. The display name never decides identity, so a restricted person under another name is still refused, and a namesake with a different number is not.
+- **Moot days.** Each day of a report reads `moot` when it became a closed day, or, for a late arrival or early leave, when an early dismissal moved the end of the day to or before the reported time; the whole report reads `moot` only when every day is moot, and otherwise lists its `moot_dates`. A dismissal change on a closed day reads `moot`.
+- **Forms list phase** is `closed` once the due time passes; otherwise `answered` when every child in scope (one child with `child_id`, else every addressed child) has a signed or declined answer (a `needs_review` answer does not count), else `open`. `accepting_answers` tells whether answers are still taken.
+- **Daily spending** for `over_daily_limit` is the day's purchases net of same-day meal refunds credited to the balance.
 - **Time is the environment's.** Bellnote has no timers or clock event. A form's `closed`, a dismissal change's `past`, a passed cut-off, an expired card (after the last day of its expiry month), `moot` on a closed day, `restricted_item`, `over_daily_limit` and `excluded_for` are derived at read time from stored records and `ctx.virtual_now`, never stored.
 - **Notifications are for what other people did**, never for the guardian's own writes and never for the passing of time. When `email_notices` is on at that moment, the notification also stores the full Mail wire message.
 - **The activity log** has one row per committed Agent write, one per applied event and one per effect of that event (`effect.form_response.needs_review`, `effect.dismissal_change.void`, `effect.notification.written`), each with sequence, virtual time, actor, action, child, object ID and the `request_id` or `event_id` behind it. A replay, a refusal or a clock move writes none.
@@ -43,7 +47,7 @@ Bellnote declares one `messaging.publishes` entry (`channel.email`, `urn:pale:em
 From this folder (the package alone, no runtime needed):
 
 ```sh
-npm test                      # 28 business tests: T01–T19 (App-side), fixtures, contracts, diagnostics
+npm test                      # 41 business tests: T01–T19 (App-side), rules, fixtures, contracts, diagnostics
 npm run example               # walkthrough: report, two marks, one notification
 npm run contracts:check       # generated tools/schemas match their source
 npm run fixtures:check        # consistency of both fixtures
@@ -52,7 +56,7 @@ npm run fixtures:check        # consistency of both fixtures
 With the pinned public runtime (found automatically in a full checkout, or `--runtime DIR` / `PALE_RUNTIME_ROOT`):
 
 ```sh
-node scripts/real-mcp.cjs  [--runtime DIR] [--output FILE]               # 44 real MCP checks
+node scripts/real-mcp.cjs  [--runtime DIR] [--output FILE]               # 51 real MCP checks
 node scripts/mail-flow.cjs [--runtime DIR] [--mail DIR] [--output FILE]  # 17 Bellnote → Mail checks with Mail 1.3.0
 ```
 

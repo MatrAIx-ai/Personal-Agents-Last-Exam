@@ -6,7 +6,6 @@ const {log} = require('./diagnostics.cjs');
 const fail = (code, message) => { const e = new Error(message); e.code = code; throw e; };
 const copy = value => structuredClone(value);
 const ALLERGENS = Object.freeze(['peanut', 'tree_nut', 'milk', 'egg', 'wheat', 'soy', 'fish', 'shellfish', 'sesame']);
-const RIGHTS = Object.freeze(['can_pickup', 'can_sign', 'can_pay', 'custodial']);
 const RESTRICTION_NOTE = 'on file with the school office';
 
 // ---- identifiers -----------------------------------------------------------------------------
@@ -88,7 +87,6 @@ function schoolDay(data, s, date) {
   if (!info.school_day) fail('not_school_day', date + ' is not a school day at ' + s.name + ' (' + info.kind + ').');
   return info;
 }
-const isClosed = (data, s, date) => s.calendar.some(c => c.date === date && c.kind === 'closed');
 
 // ---- windows ---------------------------------------------------------------------------------
 const MAX_WINDOW_DAYS = 120;
@@ -129,6 +127,6 @@ function activity(ctx, data, row) {
   return entry;
 }
 
-module.exports = {fail, copy, ALLERGENS, RIGHTS, RESTRICTION_NOTE, nextId, allIds, idTaken, find, child, school, schoolOf,
+module.exports = {fail, copy, ALLERGENS, RESTRICTION_NOTE, nextId, allIds, idTaken, find, child, school, schoolOf,
   person, displayName, myLink, requireRight, guardianLink, restricted, tz, policy, resolveCutoff, dayInfo, passed,
-  schoolDay, isClosed, windowOf, methodState, chargeableMethod, activity, time, log};
+  schoolDay, windowOf, methodState, chargeableMethod, activity, time, log};

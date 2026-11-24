@@ -5,15 +5,33 @@ const {notify, longDate} = require('./notify.cjs');
 const MAX_REPORT_SCHOOL_DAYS = 10, MAX_REPORT_SPAN_DAYS = 31;
 
 const isOpen = r => r.state !== 'cancelled';
+// Cut-off of one reported day. A full-day absence uses the school's absence cut-off for that day.
+// A late arrival can be reported until the stated arrival time and an early leave until the
+// stated leaving time (both inside that day's school hours).
+function dayCutoff(data, info, kind, timeLocal) {
+  if (!info.school_day) return null;
+  return kind === 'absent' ? info.absence_cutoff_at : c.time.zonedIso(info.date, timeLocal, c.tz(data));
+}
+const insideDay = (info, timeLocal) => {
+  const t = c.time.minutesOf(timeLocal);
+  return t > c.time.minutesOf(info.start_local) && t < c.time.minutesOf(info.dismissal_local);
+};
+// Per day: `moot` when that day became a closed day, or (late arrival / early leave) when an
+// early dismissal moved the end of the day to or before the reported time; otherwise `reported`.
+// The whole report reads `moot` only when every one of its days is moot; otherwise it keeps its
+// stored state and lists its moot_dates. Nothing here is stored.
 function reportView(ctx, data, r) {
   const s = c.schoolOf(data, r.child_id);
   const days = r.dates.map(date => {
     const info = c.dayInfo(data, s, date);
-    return {date, closed: info.kind === 'closed', cutoff_at: info.absence_cutoff_at || null,
-      cutoff_passed: info.absence_cutoff_at ? c.passed(ctx, info.absence_cutoff_at) : true};
+    const reason = info.kind === 'closed' ? 'closed' : !info.school_day ? info.kind
+      : r.kind !== 'absent' && !insideDay(info, r.time_local) ? 'time_outside_day' : null;
+    const cutoff = reason ? null : dayCutoff(data, info, r.kind, r.time_local);
+    return {date, state: reason ? 'moot' : 'reported', moot_reason: reason, closed: info.kind === 'closed', cutoff_at: cutoff,
+      cutoff_passed: cutoff ? c.passed(ctx, cutoff) : true};
   });
-  const moot = r.dates.length > 0 && days.every(d => d.closed) && r.state !== 'cancelled';
-  return {...c.copy(r), state: moot ? 'moot' : r.state, stored_state: r.state, days};
+  const moot = r.state !== 'cancelled' && r.dates.length > 0 && days.every(d => d.state === 'moot');
+  return {...c.copy(r), state: moot ? 'moot' : r.state, stored_state: r.state, moot_dates: days.filter(d => d.state === 'moot').map(d => d.date), days};
 }
 const reportCovering = (data, childId, date) => data.absence_reports.find(r => r.child_id === childId && isOpen(r) && r.dates.includes(date));
 
@@ -38,7 +56,7 @@ function report(ctx, data, args) {
   const s = c.schoolOf(data, childId), start = args.start, end = args.end || args.start;
   if (!c.time.validDate(start) || !c.time.validDate(end) || end < start) c.fail('invalid_window', 'The report must start on or before the day it ends.');
   if (args.kind !== 'absent' && start !== end) c.fail('invalid_window', 'A late arrival or early leave covers exactly one day.');
-  if (c.time.daysBetween(start, end) > MAX_REPORT_SPAN_DAYS) c.fail('invalid_window', 'A report may cover at most ' + MAX_REPORT_SCHOOL_DAYS + ' school days.');
+  if (c.time.daysBetween(start, end) > MAX_REPORT_SPAN_DAYS) c.fail('invalid_window', 'A report may span at most ' + (MAX_REPORT_SPAN_DAYS + 1) + ' calendar days.');
   c.schoolDay(data, s, start); c.schoolDay(data, s, end);
   const covered = c.time.eachDate(start, end).map(d => c.dayInfo(data, s, d)).filter(d => d.school_day);
   if (covered.length > MAX_REPORT_SCHOOL_DAYS) c.fail('invalid_window', 'A report may cover at most ' + MAX_REPORT_SCHOOL_DAYS + ' school days.');
@@ -46,12 +64,12 @@ function report(ctx, data, args) {
   if (args.kind !== 'absent') {
     const day = covered[0];
     if (!args.time_local || !c.time.parseLocal(args.time_local)) c.fail('invalid_time', 'A late arrival or early leave needs a time (HH:MM).');
-    const t = c.time.minutesOf(args.time_local);
-    if (t <= c.time.minutesOf(day.start_local) || t >= c.time.minutesOf(day.dismissal_local)) {
+    if (!insideDay(day, args.time_local)) {
       c.fail('invalid_time', 'The time must fall inside that school day (' + day.start_local + '–' + day.dismissal_local + ').');
     }
   }
-  if (c.passed(ctx, covered[0].absence_cutoff_at)) c.fail('too_late', 'The cut-off for ' + covered[0].date + ' passed at ' + covered[0].absence_cutoff_at + '.');
+  const cutoff = dayCutoff(data, covered[0], args.kind, args.time_local);
+  if (c.passed(ctx, cutoff)) c.fail('too_late', 'The cut-off for ' + covered[0].date + ' passed at ' + cutoff + '.');
   const dates = covered.map(d => d.date);
   const clash = data.absence_reports.find(r => r.child_id === childId && isOpen(r) && r.dates.some(d => dates.includes(d)));
   if (clash) c.fail('conflict', 'Report ' + clash.id + ' already covers ' + clash.dates.filter(d => dates.includes(d)).join(', ') + '.');
@@ -67,7 +85,7 @@ function report(ctx, data, args) {
     }
   }
   c.activity(ctx, data, {actor: 'agent', action: 'absences.report', child_id: childId, object_id: r.id, request_id: args.request_id});
-  return {id: r.id, child_id: childId, state: r.state, dates, cutoff_at: covered[0].absence_cutoff_at};
+  return {id: r.id, child_id: childId, state: r.state, dates, cutoff_at: cutoff};
 }
 
 function cancel(ctx, data, args) {
@@ -75,7 +93,7 @@ function cancel(ctx, data, args) {
   c.requireRight(data, r.child_id, 'custodial');
   const view = reportView(ctx, data, r);
   if (view.state !== 'submitted') c.fail('invalid_state', 'Only a submitted report can be cancelled; this one is ' + view.state + '.');
-  const ahead = view.days.filter(d => !d.cutoff_passed && !d.closed).map(d => d.date);
+  const ahead = view.days.filter(d => d.state === 'reported' && !d.cutoff_passed).map(d => d.date);
   if (!ahead.length) c.fail('too_late', 'Every day of this report has passed its cut-off.');
   r.cancelled_dates.push(...ahead);
   r.dates = r.dates.filter(d => !ahead.includes(d));

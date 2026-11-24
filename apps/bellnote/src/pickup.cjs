@@ -48,12 +48,19 @@ function get(ctx, data, args) {
 // used as is; otherwise a phone number the school already holds resolves to that person's ID;
 // otherwise a new school-held person record is created. The display name never decides identity.
 function resolvePerson(ctx, data, args) {
-  if (args.person_id) {
-    if (!c.person(data, args.person_id)) c.fail('not_found', 'Person ' + args.person_id + ' is not known to the school.');
-    return {person_id: args.person_id, created: false};
-  }
   const phone = digits(args.phone);
   const match = data.people.find(p => p.phone && digits(p.phone) === phone);
+  if (args.person_id) {
+    if (!c.person(data, args.person_id)) c.fail('not_found', 'Person ' + args.person_id + ' is not known to the school.');
+    // A phone number the school holds for someone else cannot be attached to this person: that
+    // would put another person's contact details on this entry. The restriction check runs on
+    // the person the number belongs to, so a restricted person cannot be added under another ID.
+    if (match && match.person_id !== args.person_id && !c.restricted(data, args.id, args.person_id)) {
+      if (c.restricted(data, args.id, match.person_id)) c.fail('restricted_person', 'The school office holds a restriction for the person with this phone number.');
+      c.fail('conflict', 'This phone number belongs to another person on file (' + match.person_id + ').');
+    }
+    return {person_id: args.person_id, created: false};
+  }
   if (match) return {person_id: match.person_id, created: false};
   return {person_id: c.nextId(data.people, 'person-bn', 'person_id'), created: true};
 }
@@ -160,6 +167,8 @@ function reviewed(ctx, data, event, row) {
     }
   }
   const verb = {approve: 'approved', deny: 'did not approve', revoke: 'removed'}[p.decision];
+  // Nothing of the pickup list reaches a guardian who is not custodial for the child.
+  if (!c.myLink(data, pp.child_id)?.custodial) return;
   notify(ctx, data, {kind: 'pickup.person_reviewed', child_id: pp.child_id, object_type: 'pickup_person', object_id: pp.id, event_id: event.event_id,
     cause_seq: row.seq, title: s.name + ': ' + pp.display_name + ' ' + verb + ' for ' + kid.display_name,
     body: 'The office ' + verb + ' ' + pp.display_name + ' as a person who may collect ' + kid.display_name + '.' +
@@ -181,7 +190,9 @@ function recorded(ctx, data, event, row) {
   const byStaff = data.staff.some(x => x.id === p.recorded_by && x.school_id === s.id);
   if (!byGuardian && !byStaff) c.fail('invalid_event', 'A dismissal change is recorded by another guardian of this child or by the school office.');
   if (byGuardian && !byGuardian.custodial) c.fail('invalid_event', 'That guardian cannot change who collects this child.');
-  if (!c.dayInfo(data, s, p.date).school_day) c.fail('invalid_event', p.date + ' is not a school day.');
+  const info = c.dayInfo(data, s, p.date);
+  if (!info.school_day) c.fail('invalid_event', p.date + ' is not a school day.');
+  if (c.passed(ctx, info.dismissal_at)) c.fail('invalid_event', 'That day\'s dismissal has already passed.');
   if ((p.mode === 'pickup') !== Boolean(p.person_id)) c.fail('invalid_event', 'A pickup change names exactly one person.');
   if (p.mode === 'pickup') checkCollector(data, kid.id, p.person_id, 'invalid_event');
   const prior = replaceActive(ctx, data, kid.id, p.date, p.change_id, {event_id: event.event_id});
@@ -191,6 +202,7 @@ function recorded(ctx, data, event, row) {
     history: [{at: ctx.virtual_now, action: 'recorded', by: p.recorded_by, event_id: event.event_id}]};
   data.dismissal_changes.push(d);
   row.child_id = kid.id; row.object_id = d.id;
+  if (!c.myLink(data, kid.id)?.custodial) return;
   const who = c.displayName(data, p.recorded_by);
   notify(ctx, data, {kind: 'dismissal.recorded', child_id: kid.id, object_type: 'dismissal_change', object_id: d.id, event_id: event.event_id,
     cause_seq: row.seq, title: who + ' changed ' + kid.display_name + "'s way home on " + longDate(p.date),

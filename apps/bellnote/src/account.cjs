@@ -4,9 +4,12 @@
 const c = require('./common.cjs');
 const {notify, longDate} = require('./notify.cjs');
 const pickup = require('./pickup.cjs');
+const attendance = require('./attendance.cjs');
 
 function children(ctx, data) {
-  return {children: data.children.map(k => ({...c.copy(k), school_name: c.school(data, k.school_id).name,
+  // A child's default way home is part of the pickup list: omitted unless the account holder is custodial.
+  const visible = k => { const {default_dismissal, ...rest} = c.copy(k); return c.myLink(data, k.id)?.custodial ? {...rest, default_dismissal} : rest; };
+  return {children: data.children.map(k => ({...visible(k), school_name: c.school(data, k.school_id).name,
     guardians: data.guardian_links.filter(l => l.child_id === k.id).map(l => ({person_id: l.person_id, display_name: c.displayName(data, l.person_id),
       relationship: l.relationship, is_me: l.person_id === data.owner_person_id, can_pickup: l.can_pickup, can_sign: l.can_sign, can_pay: l.can_pay, custodial: l.custodial}))}))};
 }
@@ -61,20 +64,24 @@ function dayChanged(ctx, data, event, row) {
   row.object_id = dayId;
   const after = c.dayInfo(data, s, p.date), zone = c.tz(data);
   const kids = data.children.filter(k => k.school_id === s.id);
-  const lines = kids.map(k => {
-    const d = pickup.activeChange(data, k.id, p.date);
-    if (p.kind === 'closed') {
-      const reps = data.absence_reports.filter(r => r.child_id === k.id && r.state !== 'cancelled' && r.dates.includes(p.date));
-      return k.display_name + ': ' + (d ? 'your dismissal change (' + pickup.describe(data, d) + ', ' + d.id + ') no longer applies' : 'no dismissal change for that day') +
-        (reps.length ? '; report ' + reps.map(r => r.id).join(', ') + ' no longer applies to that day' : '') + '.';
+  // Pickup details are given only for children the account holder is custodial for.
+  const lines = kids.flatMap(k => {
+    const out = [], custodial = !!c.myLink(data, k.id)?.custodial, d = pickup.activeChange(data, k.id, p.date);
+    if (custodial && p.kind === 'closed') {
+      const whose = d && (d.recorded_by === data.owner_person_id ? 'your dismissal change' : 'the dismissal change recorded by ' + c.displayName(data, d.recorded_by));
+      out.push(k.display_name + ': ' + (d ? whose + ' (' + pickup.describe(data, d) + ', ' + d.id + ') no longer applies.' : 'no dismissal change for that day.'));
+    } else if (custodial) {
+      out.push(k.display_name + "'s dismissal plan for that day is still: " + (d ? pickup.describe(data, d) + ' (' + d.id + ')' : 'the default, ' + k.default_dismissal.replace('_', ' ')) + '.');
     }
-    const custodial = c.myLink(data, k.id)?.custodial;
-    if (!custodial) return k.display_name + ': see the school for the dismissal plan.';
-    return k.display_name + "'s dismissal plan for that day is still: " + (d ? pickup.describe(data, d) + ' (' + d.id + ')' : 'the default, ' + k.default_dismissal.replace('_', ' ')) + '.';
+    const moot = data.absence_reports.filter(r => r.child_id === k.id && r.state !== 'cancelled' && r.dates.includes(p.date) &&
+      attendance.reportView(ctx, data, r).days.find(x => x.date === p.date).state === 'moot');
+    if (moot.length) out.push(k.display_name + ': report ' + moot.map(r => r.id).join(', ') + ' no longer applies to that day.');
+    return out;
   });
   const when = p.kind === 'closed' ? s.name + ' will be closed on ' + longDate(p.date) + '.'
     : s.name + ' will dismiss at ' + p.dismissal_local + ' on ' + longDate(p.date) + ' (usually ' + s.bell.dismissal_local + ').';
-  const cutoff = p.kind === 'early_dismissal' ? ' Changes for that day can be made until ' + c.time.localTime(after.dismissal_change_cutoff_at, zone) + ' that day.' : '';
+  const anyCustodial = kids.some(k => c.myLink(data, k.id)?.custodial);
+  const cutoff = p.kind === 'early_dismissal' && anyCustodial ? ' Changes for that day can be made until ' + c.time.localTime(after.dismissal_change_cutoff_at, zone) + ' that day.' : '';
   notify(ctx, data, {kind: 'school.day_changed', child_id: kids.length === 1 ? kids[0].id : null, object_type: 'school_day', object_id: dayId,
     event_id: event.event_id, cause_seq: row.seq,
     title: s.name + ': ' + (p.kind === 'closed' ? 'closed' : 'early dismissal at ' + p.dismissal_local) + ' on ' + longDate(p.date),

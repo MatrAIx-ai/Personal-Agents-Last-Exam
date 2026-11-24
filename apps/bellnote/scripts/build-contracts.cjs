@@ -121,6 +121,7 @@ function inline(schema) {
 }
 // A read view is a stored record plus derived fields: keep the record's typing, allow additions.
 const view = (def, extra = {}) => { const s = inline(defs[def]); return {...s, properties: {...s.properties, ...extra}, additionalProperties: true}; };
+const optional = (schema, keys) => ({...schema, required: schema.required.filter(k => !keys.includes(k))});
 const any = (required = []) => ({type: 'object', required, additionalProperties: true});
 const base = readOnly => ({status: {const: readOnly ? 'ok' : 'committed'}, app_id: {const: 'bellnote'}, version: VERSION});
 const WINDOW = {start: DATE, end: DATE};
@@ -131,16 +132,16 @@ function tool(name, readOnly, description, input, output, optional = [], target 
   tools.push({name: 'bellnote.' + name, description, read_only: readOnly, scope: 'bellnote.' + name, resource_target: target,
     inputSchema: inline(inputSchema), outputSchema: inline(outputSchema)});
 }
-tool('children.list', true, 'List the children on this account with school, grade, homeroom, meal restrictions, default way home and every guardian\'s rights for each child.',
-  {}, {children: arr(view('child', {school_name: str(), guardians: arr(any(['person_id', 'is_me', 'can_pickup', 'can_sign', 'can_pay', 'custodial']))}))});
+tool('children.list', true, 'List the children on this account with school, grade, homeroom, meal restrictions, default way home (only for a child you are custodial for) and every guardian\'s rights for each child.',
+  {}, {children: arr(optional(view('child', {school_name: str(), guardians: arr(any(['person_id', 'is_me', 'can_pickup', 'can_sign', 'can_pay', 'custodial']))}), ['default_dismissal']))});
 tool('schools.get', true, 'Read one school: bell times, term, the effective policy (cut-off rules, pickup review, top-up range, meal debt limit) and, for start..end (dates, default today..+14), each calendar day with its kind, dismissal time and resolved cut-off instants.',
   {id: ID, ...WINDOW}, {school: any(['id', 'name', 'time_zone', 'bell', 'term', 'policy']), start: DATE, end: DATE, days: arr(any(['date', 'kind', 'school_day']))}, ['start', 'end'], 'school');
 tool('attendance.list', true, 'Attendance records by day (status, explained/unexplained, the office\'s excused/unexcused) for one child (id) or all children, in start..end (default the last 14 days). A day with no mark has no record.',
   {id: ID, ...WINDOW}, {start: DATE, end: DATE, records: arr(view('attendance'))}, ['id', 'start', 'end'], 'child');
 tool('absences.list', true, 'Absence, late-arrival and early-leave reports with their state (submitted, excused, unexcused, cancelled, or moot when every day became a closed day) and per-day cut-offs. Filter by report id, child_id or state.',
   {id: ID, child_id: ID, state: en('submitted', 'excused', 'unexcused', 'cancelled', 'moot')}, {reports: arr(view('absence_report', {state: str(20), days: arr(any(['date', 'closed', 'cutoff_passed']))}))}, ['id', 'child_id', 'state'], 'absence_report');
-tool('forms.list', true, 'Forms addressed to the account\'s children with phase (open/closed by the clock), fee, due time, version and each child\'s answer (unanswered, signed, declined, withdrawn, needs_review).',
-  {child_id: ID, phase: en('open', 'closed')}, {forms: arr(any(['id', 'title', 'phase', 'version', 'fee_cents', 'due_at', 'responses']))}, ['child_id', 'phase'], 'form');
+tool('forms.list', true, 'Forms addressed to the account\'s children with phase (closed once the due time passes; otherwise answered when every child in scope has a signed or declined answer, else open), fee, due time, version and each child\'s answer (unanswered, signed, declined, withdrawn, needs_review).',
+  {child_id: ID, phase: en('open', 'answered', 'closed')}, {forms: arr(any(['id', 'title', 'phase', 'version', 'fee_cents', 'due_at', 'responses']))}, ['child_id', 'phase'], 'form');
 tool('forms.get', true, 'Read one form: exact text, questions, fee, event date, due time, current version and version history, each addressed child\'s answer and your rights to sign and pay.',
   {id: ID}, {form: any(['id', 'title', 'text', 'questions', 'fee_cents', 'due_at', 'version', 'phase', 'versions', 'responses', 'my_rights'])}, [], 'form');
 tool('pickup.get', true, 'Who may collect one child (id): guardians with can_pickup, standing pickup people by state, restrictions on file with the school office, the default way home, dismissal changes in start..end and the resulting plan per day. Requires your custodial right for the child.',

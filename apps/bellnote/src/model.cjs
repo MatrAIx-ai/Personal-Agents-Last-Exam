@@ -7,7 +7,7 @@ const COLLECTIONS = Object.freeze(['schools', 'staff', 'children', 'guardian_lin
   'payment_methods', 'payments', 'notifications']);
 const bad = message => c.fail('invalid_seed', message);
 const TIME_KEYS = new Set(['at', 'created_at', 'paid_at', 'refunded_at', 'marked_at', 'submitted_at', 'reviewed_at', 'answered_at',
-  'due_at', 'published_at', 'changed_at', 'time']);
+  'due_at', 'published_at', 'changed_at', 'recorded_at', 'time']);
 
 function walkTimes(value, path) {
   if (Array.isArray(value)) { value.forEach((v, i) => walkTimes(v, path + '[' + i + ']')); return; }

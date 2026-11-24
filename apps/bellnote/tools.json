@@ -1,7 +1,7 @@
 [
   {
     "name": "bellnote.children.list",
-    "description": "List the children on this account with school, grade, homeroom, meal restrictions, default way home and every guardian's rights for each child.",
+    "description": "List the children on this account with school, grade, homeroom, meal restrictions, default way home (only for a child you are custodial for) and every guardian's rights for each child.",
     "read_only": true,
     "scope": "bellnote.children.list",
     "resource_target": "current account",
@@ -118,8 +118,7 @@
               "school_id",
               "grade",
               "homeroom",
-              "meal_restrictions",
-              "default_dismissal"
+              "meal_restrictions"
             ],
             "additionalProperties": true
           }
@@ -660,7 +659,7 @@
   },
   {
     "name": "bellnote.forms.list",
-    "description": "Forms addressed to the account's children with phase (open/closed by the clock), fee, due time, version and each child's answer (unanswered, signed, declined, withdrawn, needs_review).",
+    "description": "Forms addressed to the account's children with phase (closed once the due time passes; otherwise answered when every child in scope has a signed or declined answer, else open), fee, due time, version and each child's answer (unanswered, signed, declined, withdrawn, needs_review).",
     "read_only": true,
     "scope": "bellnote.forms.list",
     "resource_target": "form",
@@ -674,6 +673,7 @@
         "phase": {
           "enum": [
             "open",
+            "answered",
             "closed"
           ]
         }

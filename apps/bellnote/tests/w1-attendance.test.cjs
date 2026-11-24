@@ -36,10 +36,10 @@ test('T01 attendance lists by child and window; explained and unexplained; a mar
   assert.equal(f.try('bellnote.attendance.list', {id: 'child-zed'}).status, 'not_found');
   // A mark that arrives before the report: a school whose cut-off is 10:00 lets the guardian explain it afterwards.
   const g = fixture({now: '2026-11-17T09:00:00-08:00', mutate: d => { d.district.policy.absence_cutoff_local = {anchor: 'fixed', local_time: '10:00'}; }});
-  g.event(mark('child-theo', '2026-11-17', 'late', '2026-11-17T09:20:00-08:00', {time_local: '09:15'}));
+  g.event(mark('child-theo', '2026-11-17', 'absent', '2026-11-17T09:20:00-08:00'));
   assert.equal(g.data.attendance.find(a => a.date === '2026-11-17').explanation, 'unexplained');
   const n0 = g.data.notifications.length;
-  g.call('bellnote.absences.report', {id: 'child-theo', kind: 'late', start: '2026-11-17', time_local: '09:15', reason: 'Dentist'});
+  g.call('bellnote.absences.report', {id: 'child-theo', kind: 'absent', start: '2026-11-17', reason: 'Dentist'});
   const after = g.data.attendance.find(a => a.date === '2026-11-17');
   assert.equal(after.explanation, 'explained');
   assert.equal(g.data.notifications.length, n0, 'My own report writes no notification');

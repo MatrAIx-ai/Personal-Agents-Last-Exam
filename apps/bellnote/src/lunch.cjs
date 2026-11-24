@@ -10,11 +10,15 @@ function transactionViews(data, acct) {
   return data.lunch_transactions.filter(t => t.lunch_account_id === acct.id).slice().sort((a, b) => Date.parse(a.at) - Date.parse(b.at))
     .map(t => {
       const day = c.time.localDate(t.at, zone);
+      // The day's spending is its purchases net of same-day meal refunds (a refund credited to the
+      // balance, not a top-up returned to its card); it never goes below zero.
       let over = false;
       if (t.kind === 'purchase') {
         const total = (spent.get(day) || 0) - t.amount_cents;
         spent.set(day, total);
         over = acct.daily_limit_cents !== null && total > acct.daily_limit_cents;
+      } else if (t.kind === 'refund' && !t.payment_id && t.amount_cents > 0) {
+        spent.set(day, Math.max(0, (spent.get(day) || 0) - t.amount_cents));
       }
       return {...c.copy(t), local_date: day, restricted_item: t.allergens.some(a => kid.meal_restrictions.includes(a)), over_daily_limit: over};
     });

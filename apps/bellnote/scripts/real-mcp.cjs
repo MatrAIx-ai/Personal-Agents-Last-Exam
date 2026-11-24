@@ -69,6 +69,49 @@ async function run() {
     check('Repeated top-up request returns the stored receipt', t2.duplicate === true && t2.payment.id === t1.payment.id);
     check('Only one payment and one transaction were written', s.snapshot.data.payments.filter(p => p.request_id === 'topup-1').length === 1 &&
       s.snapshot.data.lunch_transactions.filter(t => t.request_id === 'topup-1').length === 1);
+    // Refusal atomicity on real Core for business refusals that come after reads of several records.
+    const same = (a, b) => JSON.stringify(a.snapshot.data) === JSON.stringify(b.snapshot.data) && JSON.stringify(a.version) === JSON.stringify(b.version) &&
+      a.snapshot.virtual_now === b.snapshot.virtual_now;
+    const Q = [{id: 'q-lunch', type: 'choice', label: 'Lunch', options: ['school_sack_lunch', 'bring_own'], required: true}];
+    s = await snap();
+    const pub = await infra.call('env.apply_event', {expected_version: s.version, event: {event_id: 'ev-pub-aq', at: '2026-11-17T07:30:00-08:00', operation: 'bellnote.form.published',
+      payload: {form_id: 'form-aq', school_id: 'school-alder', child_ids: ['child-theo', 'child-ines'], kind: 'permission_slip', title: 'Aquarium', text: 'Trip on 4 December.',
+        questions: Q, fee_cents: 1800, event_date: '2026-12-04', due_at: '2026-11-25T16:00:00-08:00'}}});
+    check('Form published by event', pub.status === 'committed', pub);
+    s = await snap();
+    const signed = await agent.call('bellnote.forms.respond', {id: 'form-aq', child_id: 'child-theo', action: 'sign', form_version: 1, answers: {'q-lunch': 'bring_own'}, request_id: 'sign-1', expected_version: s.version});
+    check('Signing charges the fee once', signed.status === 'committed' && signed.charged_cents === 1800, signed);
+    s = await snap();
+    await infra.call('env.apply_event', {expected_version: s.version, event: {event_id: 'ev-chg-aq', at: '2026-11-17T07:40:00-08:00', operation: 'bellnote.form.changed',
+      payload: {form_id: 'form-aq', change: {event_date: '2026-12-11'}, reason: 'Moved'}}});
+    s = await snap();
+    const stale = await agent.call('bellnote.forms.respond', {id: 'form-aq', child_id: 'child-theo', action: 'sign', form_version: 1, answers: {'q-lunch': 'bring_own'}, request_id: 'sign-2', expected_version: s.version});
+    after = await snap();
+    check('Signing the old version is stale_form with data, version and payments unchanged and a denial row', stale.status === 'stale_form' && same(after, s) &&
+      after.snapshot.audit.at(-1).decision === 'deny' && after.snapshot.audit.at(-1).reason === 'stale_form');
+    const noPay = await infra.call('env.apply_event', {expected_version: s.version, event: {event_id: 'ev-dana-ines', at: '2026-11-17T07:45:00-08:00', operation: 'bellnote.form.answered',
+      payload: {form_id: 'form-aq', child_id: 'child-ines', by_guardian_id: 'person-dana', action: 'sign', form_version: 2, answers: {'q-lunch': 'bring_own'}}}});
+    after = await snap();
+    check('Other guardian signing a fee form without can_pay is invalid_event; data, version and clock unchanged', noPay.status === 'invalid_event' && same(after, s), noPay);
+    const closed = await infra.call('env.apply_event', {expected_version: s.version, event: {event_id: 'ev-past-dc', at: '2026-11-17T07:45:00-08:00', operation: 'bellnote.dismissal.recorded',
+      payload: {change_id: 'dc-past', child_id: 'child-theo', date: '2026-11-16', mode: 'bus', recorded_by: 'person-dana'}}});
+    check('A dismissal change for a past day is invalid_event with nothing written', closed.status === 'invalid_event' && same(await snap(), s));
+    // All or nothing across several records: a range report is refused whole on a conflict in its last day.
+    const one = await agent.call('bellnote.absences.report', {id: 'child-theo', kind: 'absent', start: '2026-11-20', reason: 'Trip', request_id: 'rep-fri', expected_version: s.version});
+    s = await snap();
+    const range = await agent.call('bellnote.absences.report', {id: 'child-theo', kind: 'absent', start: '2026-11-18', end: '2026-11-20', reason: 'x', request_id: 'rep-range', expected_version: s.version});
+    after = await snap();
+    check('A range report overlapping on its last day is conflict; no report, attendance or activity row is written', one.status === 'committed' && range.status === 'conflict' && same(after, s));
+    // ...and a committed multi-record write lands in one revision: the report and the attendance record it explains.
+    const markEv = await infra.call('env.apply_event', {expected_version: s.version, event: {event_id: 'ev-mark-ines', at: '2026-11-17T07:50:00-08:00', operation: 'bellnote.attendance.marked',
+      payload: {child_id: 'child-ines', date: '2026-11-17', status: 'absent', marked_by: 'staff-office-alder'}}});
+    s = await snap();
+    const multi = await agent.call('bellnote.absences.report', {id: 'child-ines', kind: 'absent', start: '2026-11-17', end: '2026-11-19', reason: 'Fever', request_id: 'rep-ines', expected_version: s.version});
+    after = await snap();
+    const att = after.snapshot.data.attendance.find(a => a.id === 'att-child-ines-2026-11-17');
+    check('A committed range report and the attendance record it explains share one revision', markEv.status === 'committed' && multi.status === 'committed' &&
+      after.version.revision === s.version.revision + 1 && att.explanation === 'explained' && att.report_id === multi.id, multi);
+    s = await snap();
     // Events: at their own time, deduplicated, conflicting reuse rejected, backwards time rejected.
     const event = {event_id: 'ev-bn-130', at: '2026-11-18T12:10:00-08:00', operation: 'bellnote.lunch.charged',
       payload: {transaction_id: 'tx-0412', child_id: 'child-ines', kind: 'purchase', amount_cents: -425, item: 'Peanut noodle bowl', allergens: ['peanut', 'wheat', 'soy']}};
@@ -116,6 +159,19 @@ async function run() {
     const other = await open('infra', 'bellnote-other');
     check('A separate run keeps the package seed', (await other.call('env.snapshot')).snapshot.data.account_id === 'bellnote-maya' &&
       (await other.call('env.snapshot')).snapshot.data.absence_reports.length === 6);
+    // A task policy narrows an operation to named objects; Core enforces it before any App code.
+    const pinfra = await open('infra', 'bellnote-policy'), pagent = await open('agent', 'bellnote-policy');
+    const policies = JSON.parse(fs.readFileSync(path.join(locate.packageDir, 'fixtures/policies.json'), 'utf8'));
+    policies.scenario.constraints = {}; policies.sandbox.constraints = {'bellnote.lunch.topup': {ids: ['lunch-theo']}};
+    let ps = await pinfra.call('env.snapshot');
+    await pinfra.call('env.reset', {expected_version: ps.version, profile: 'sandbox'});
+    ps = await pinfra.call('env.snapshot');
+    check('Infra loads a task policy with an object constraint', (await pinfra.call('env.load_seed', {expected_version: ps.version, request_id: 'seed-policy', data: seed, policies, binding: ps.snapshot.binding})).status === 'ready');
+    ps = await pinfra.call('env.snapshot');
+    const outside = await pagent.call('bellnote.lunch.topup', {id: 'lunch-ines', amount_cents: 1000, request_id: 'pol-1', expected_version: ps.version});
+    const pAfter = await pinfra.call('env.snapshot');
+    check('A top-up outside the policy\'s objects is permission_denied with nothing written', outside.status === 'permission_denied' && JSON.stringify(pAfter.snapshot.data) === JSON.stringify(ps.snapshot.data));
+    check('A top-up on the allowed object commits', (await pagent.call('bellnote.lunch.topup', {id: 'lunch-theo', amount_cents: 1000, request_id: 'pol-2', expected_version: ps.version})).status === 'committed');
     return {schema: 'bellnote.real-mcp.v1', passed: true, runtime_version: JSON.parse(fs.readFileSync(path.join(runtime, 'package.json'), 'utf8')).version,
       core_api_version: prepared.model.registry.api, node: process.version, checks};
   } finally {

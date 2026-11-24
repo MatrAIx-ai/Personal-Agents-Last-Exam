@@ -5,6 +5,7 @@ const {notify, money} = require('./notify.cjs');
 const MATERIAL = Object.freeze(['title', 'text', 'questions', 'fee_cents', 'event_date']);
 const ACTIVE = Object.freeze(['signed', 'declined', 'needs_review']);
 
+// Whether the form still accepts answers: decided by the clock alone.
 const phase = (ctx, f) => c.passed(ctx, f.due_at) ? 'closed' : 'open';
 const responseOf = (data, formId, childId) => data.form_responses.find(r => r.form_id === formId && r.child_id === childId) || null;
 function responseView(ctx, data, f, r) {
@@ -13,15 +14,23 @@ function responseView(ctx, data, f, r) {
   return {...c.copy(r), mine: r.by_person_id === data.owner_person_id, by_display_name: c.displayName(data, r.by_person_id),
     effective_state: effective, counts_as_signed: r.state === 'signed' && r.form_version === f.version};
 }
-function summary(ctx, data, f) {
+// Listing phase (plan W2: open, answered, closed), for the children in scope (one child when
+// forms.list is filtered by child_id, otherwise every addressed child): `closed` once the due time
+// has passed; else `answered` when every child in scope has a signed or declined answer at the
+// current version (a needs_review answer does not count); else `open`.
+function listPhase(ctx, data, f, childIds = f.child_ids) {
+  if (phase(ctx, f) === 'closed') return 'closed';
+  return childIds.every(id => { const r = responseOf(data, f.id, id); return r && ['signed', 'declined'].includes(r.state); }) ? 'answered' : 'open';
+}
+function summary(ctx, data, f, scope) {
   return {id: f.id, school_id: f.school_id, kind: f.kind, title: f.title, child_ids: c.copy(f.child_ids), fee_cents: f.fee_cents,
-    event_date: f.event_date, due_at: f.due_at, version: f.version, phase: phase(ctx, f),
+    event_date: f.event_date, due_at: f.due_at, version: f.version, phase: listPhase(ctx, data, f, scope), accepting_answers: phase(ctx, f) === 'open',
     responses: f.child_ids.map(id => { const r = responseOf(data, f.id, id); return r ? responseView(ctx, data, f, r) : {child_id: id, state: 'unanswered'}; })};
 }
 function list(ctx, data, args) {
   if (args.child_id) c.child(data, args.child_id);
-  const forms = data.forms.filter(f => (!args.child_id || f.child_ids.includes(args.child_id)) && (!args.phase || phase(ctx, f) === args.phase))
-    .map(f => summary(ctx, data, f));
+  const forms = data.forms.filter(f => !args.child_id || f.child_ids.includes(args.child_id))
+    .map(f => summary(ctx, data, f, args.child_id ? [args.child_id] : f.child_ids)).filter(f => !args.phase || f.phase === args.phase);
   return {forms};
 }
 function get(ctx, data, args) {
@@ -81,7 +90,6 @@ function respond(ctx, data, args) {
       form_version: f.version, answers: {}, paid_cents: 0, payment_ids: [], answered_at: ctx.virtual_now, history: []};
     data.form_responses.push(r);
   }
-  if (r.state === 'withdrawn') { r.by_person_id = me; r.payment_ids = r.payment_ids.filter(id => data.payments.find(p => p.id === id)); }
   if (args.action === 'decline' && r.paid_cents > 0) refundAll(ctx, data, r, 'declined');
   if (payment) { payment.object_id = r.id; data.payments.push(payment); r.payment_ids.push(payment.id); r.paid_cents += charged; }
   const action = r.state === 'needs_review' ? (args.action === 'sign' ? 're_signed' : 'declined_after_change') : args.action === 'sign' ? 'signed' : 'declined';
@@ -144,6 +152,7 @@ function published(ctx, data, event, row) {
 function changed(ctx, data, event, row) {
   const p = event.payload, f = data.forms.find(x => x.id === p.form_id);
   if (!f) c.fail('invalid_event', 'Unknown form.');
+  if (phase(ctx, f) === 'closed') c.fail('invalid_event', 'A closed form cannot change.');
   const ch = p.change, fields = Object.keys(ch).filter(k => JSON.stringify(ch[k]) !== JSON.stringify(k === 'due_at' ? f.due_at : f[k]));
   if (!fields.length) c.fail('invalid_event', 'The change does not change the form.');
   if (ch.questions) validateQuestions(ch.questions);
@@ -189,6 +198,7 @@ function answered(ctx, data, event, row) {
     if (r && ACTIVE.includes(r.state) && !(r.by_person_id === p.by_guardian_id && r.state === 'needs_review')) c.fail('invalid_event', 'This child already has an answer.');
     if (p.form_version !== f.version) c.fail('invalid_event', 'The answer names a version that is not current.');
     checkAnswers(f, p.answers, p.action === 'sign', 'invalid_event');
+    if (p.action === 'sign' && f.fee_cents > 0 && !link.can_pay) c.fail('invalid_event', 'The answering guardian cannot pay the fee for this child.');
     if (!r) {
       r = {id: c.nextId(data.form_responses, 'fr'), form_id: f.id, child_id: p.child_id, by_person_id: p.by_guardian_id, state: null,
         form_version: f.version, answers: {}, paid_cents: 0, payment_ids: [], answered_at: ctx.virtual_now, history: []};

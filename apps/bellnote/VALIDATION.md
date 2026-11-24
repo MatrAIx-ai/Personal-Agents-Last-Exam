@@ -8,17 +8,17 @@ Checked 23 November 2026 (America/Los_Angeles) on Node.js v22.23.1 (Linux), publ
 
 | Evidence | Command | Result |
 | --- | --- | --- |
-| App-only business tests | `cd apps/bellnote && npm test` | 28 tests, 28 passed, 0 failed |
+| App-only business tests | `cd apps/bellnote && npm test` | 41 tests, 41 passed, 0 failed |
 | Walkthrough | `cd apps/bellnote && npm run example` | Report before the cut-off, two office marks: one explained and quiet, one unexplained with one notification |
 | Generated contracts | `cd apps/bellnote && npm run contracts:check` | `tools.json` and the seed/events/state schemas match `scripts/build-contracts.cjs`; `fixtures/reference.json` matches its builder |
 | Fixture consistency | `cd apps/bellnote && npm run fixtures:check` | `minimal.json` and `reference.json`: no problems |
-| Package real MCP | `node apps/bellnote/scripts/real-mcp.cjs` | 44 checks passed |
+| Package real MCP | `node apps/bellnote/scripts/real-mcp.cjs` | 54 checks passed |
 | Bellnote → Mail | `node apps/bellnote/scripts/mail-flow.cjs` | 17 checks passed (Mail 1.3.0, real router and receiver) |
 | Public verifier | `npm run app:verify -- --app apps/bellnote --output .artifacts/bellnote.json` | passed: 46 checks; `business` and `event-example` stages passed from an isolated package copy |
 | CI submission validator | `node runtime/ci/verify-submissions.cjs . .artifacts/submissions a4bce02` | selection `["bellnote"]` (App-only change), `bellnote: PASS` |
 | Shared contracts | `npm run contracts:check` | passed |
 | Repository suite | `npm test` | 22/22 stages passed |
-| Isolated package | copy of `apps/bellnote` alone: `npm test`, `npm run example`; `scripts/real-mcp.cjs --runtime DIR`, `scripts/mail-flow.cjs --runtime DIR --mail DIR` | 28/28; example passed; 44/44; 17/17. Without `--runtime` the scripts stop with a clear message |
+| Isolated package | copy of `apps/bellnote` alone: `npm test`, `npm run example`; `scripts/real-mcp.cjs --runtime DIR`, `scripts/mail-flow.cjs --runtime DIR --mail DIR` | 41/41; example passed; 54/54; 17/17. Without `--runtime` the scripts stop with a clear message |
 
 The runtime directory is unchanged from `a4bce02`, so the CI validator above is the base validator run from the same checkout, not from a separately selected base checkout.
 
@@ -45,9 +45,11 @@ Test files are in `tests/`; `business.test.cjs` loads them all. "MCP" refers to 
 | T04–T08 | `tests/w2-forms.test.cjs` | |
 | T09–T13 | `tests/w3-pickup.test.cjs` | `in_use` on removal is asserted in T10 |
 | T14–T16 | `tests/w4-lunch.test.cjs` | |
-| T17 | `tests/cross.test.cjs` | 21 invalid events, each leaving data, clock and revision unchanged |
+| T17 | `tests/cross.test.cjs` | 21 invalid events, each refused as `invalid_event` (the harness discards data and clock as Core does; real-Core atomicity for events is in `scripts/real-mcp.cjs`) |
 | T18 | `tests/cross.test.cjs` (two tests); MCP | notifications for others only, wire only with email notices on and valid against Mail's schema; time-only changes with the harness clock and with real `env.advance_time` |
 | T19 | `tests/cross.test.cjs` (seed validation, activity rows); MCP | replay → stored receipt and one charge, changed input → `idempotency_conflict`, stale → `stale_version`, Agent calling `env.apply_event` / `env.reset` / `env.advance_time` → `permission_denied`, reset restores the loaded seed and time: real Core, in `scripts/real-mcp.cjs` |
+| Rules after review | `tests/rules.test.cjs` | non-custodial guardian (T09/T18), other guardian's fee answer (T05/T06), `answered` phase (T04), moot days (T03), late events refused, early dismissal before a reported time, late/early-leave cut-offs (T02), net daily spend (T16), person_id mapping (T12), denied/removed people (T09), fee decrease (T07), one notification per kind (T18) |
+
 
 Other package tests: generated contracts and tool shape (`package.test.cjs`), every read byte-identical, optional diagnostics, fixture consistency and builder match, the proposal's example events on the reference fixture (`fixtures.test.cjs`).
 
@@ -69,12 +71,12 @@ Against [docs/review/app-implementation-checklist.md](../../docs/review/app-impl
 | 1.2 Versions, paths, schemas, tools, hooks, events, dependencies against files | met | loader + verifier; `contracts:check`; contribution declarations derived and checked |
 | 1.3 Reproduce documented startup/tests from a clean public checkout | partly met | reproduced in the working checkout and from an isolated package copy; a fresh clone by a reviewer is not run |
 | 1.4 Required receiving Apps at pinned versions; contracts reused | met | Mail is optional; its 1.3.0 receive contract and wire schema are reused byte-identically; no Mail state or code copied |
-| 2.1 App-only tests on real functions, invalid transitions, missing objects, read-only | met | 28 tests |
-| 2.2 Create/read/update/cancel flows and history; failures preserve data | met | every refusal in the tests asserts unchanged data and revision |
+| 2.1 App-only tests on real functions, invalid transitions, missing objects, read-only | met | 41 tests |
+| 2.2 Create/read/update/cancel flows and history; failures preserve data | met | In the App-only harness, which discards a refused call's working copy exactly as Core does, "data unchanged" holds by construction; what those tests do check is that every Agent-write refusal is decided before the handler changes anything in its working copy. Atomicity itself is checked on real Core (`scripts/real-mcp.cjs`): stale form, declined top-up, debt-limit event, other guardian's fee answer without `can_pay`, dismissal change for a past day, a range report refused on its last day, and a committed multi-record write in one revision |
 | 2.3 Data/media references and provenance | met (automated); human review pending | no media; `contribution/dataset.json` records the synthetic source and the two workflow references |
 | 2.4 Optional diagnostics do not change results | met | `package.test.cjs` |
-| 3.1 Real MCP discovery and calls match contracts and state | met | verifier (46), real MCP (44) |
-| 3.2 Business callers cannot seed, reset, inject or snapshot; object/field authorization on the backend | met for operations; object/field constraints not exercised | Agent `permission_denied` for every `env.*`; Bellnote's sample policies have no object/field constraints, which Core enforces generically |
+| 3.1 Real MCP discovery and calls match contracts and state | met | verifier (46), real MCP (54) |
+| 3.2 Business callers cannot seed, reset, inject or snapshot; object/field authorization on the backend | met (object constraint); field constraint not applicable | Agent `permission_denied` for every `env.*`; real MCP loads a task policy limiting `lunch.topup` to `lunch-theo`: `lunch-ines` is `permission_denied` with nothing written. No Bellnote write takes a `patch`, so Core's field constraint does not apply |
 | 3.3 Seed/reset, separate runs, versions, retries, events, supplied time | met | verifier and real MCP |
 | 3.4 Declared messaging: receiver records, receipts, refusals, duplicates | met | Mail flow: committed receipt, inbox record, identical retry, ungranted refusal with no record, Bellnote unchanged |
 | 3.5 Candidate and independently selected base validators | partly met | base runtime `a4bce02` equals the candidate runtime and its CI validator passed from this checkout; a separate base checkout was not used |
@@ -86,14 +88,20 @@ Against [docs/review/app-implementation-checklist.md](../../docs/review/app-impl
 ## Implementation choices where the plan was silent
 
 - **Partial cancel.** `absences.cancel` cancels the days still ahead of their cut-off; days already past stay reported and the report stays `submitted` (fully ahead → `cancelled`).
-- **Late arrival / early leave cut-off.** These one-day reports use that day's absence cut-off; their time must fall strictly inside that day's school hours (an early-dismissal day uses its new dismissal time).
+- **Late arrival / early leave cut-off.** The plan defines only the absence cut-off. A late arrival can be reported until the stated arrival time and an early leave until the stated leaving time; the time must fall strictly inside that day's school hours (an early-dismissal day uses its new dismissal time). A full-day absence uses the absence cut-off.
+- **Moot per day.** Each reported day reads `moot` when it becomes closed, or (late arrival / early leave) when an early dismissal moves the end of the day to or before the reported time; the report reads `moot` only when all its days do, otherwise it keeps its state and lists `moot_dates`; moot days cannot be cancelled. The `school.day_changed` notice names reports that a change makes moot.
+- **`answered` listing phase.** `closed` once the due time passes; else `answered` when every child in scope (one child with `child_id`, else every addressed child) has a signed or declined answer (`needs_review` does not count); else `open`.
+- **Non-custodial guardian.** For a child the account holder is not custodial for, `children.list` omits `default_dismissal` (key absent), and no `dismissal.recorded`, `pickup.person_reviewed` or `dismissal.void` notification is written; `school.day_changed` notices carry no pickup detail for that child. The events still apply and write activity rows. Closed-day notices say "your dismissal change" only for changes the account holder made, otherwise "the dismissal change recorded by" its author.
+- **Other guardian's fee.** Their `form.answered` signing a form with a fee needs their `can_pay` for that child, else `invalid_event`.
+- **Daily spending** counts purchases net of same-day meal refunds credited to the balance (never below zero).
+- **person_id with another person's phone.** A supplied `person_id` with a phone number the school holds for a different person is refused (`restricted_person` if that person is restricted for the child, else `conflict`); no person record is changed.
 - **Fee decrease on a changed form.** Re-signing after a fee decrease does not refund the difference; the full amount is refunded on withdrawal or on declining after the change. Partial refunds are not modelled.
 - **Lunch refunds.** `lunch.charged` with `kind: refund` and a `payment_id` returns that top-up to its payment method (amount equal to minus the top-up; the payment becomes `refunded`); without a `payment_id` it is a positive meal credit.
 - **Low-balance notice after a settings change.** Setting the threshold re-arms the once-per-crossing rule against the current balance without notifying (the guardian's own write).
 - **Form title.** A title change is versioned like a text change.
 - **The other guardian's fee** is recorded on their response (`paid_cents`); their payment method is not in this account, so no payment record is written here.
 - **Attendance corrections.** A second `attendance.marked` for the same child and day corrects the record and keeps its history.
-- **Extra event refusals** beyond the plan's list: a mark for a future day or a non-school day, a calendar change for a past day, an early dismissal outside the usual day, a staff ID unknown to the school.
+- **Extra event refusals** beyond the plan's list: a mark for a future day or a non-school day, a calendar change for a past day, an early dismissal outside the usual day, a staff ID unknown to the school, a `form.changed` on a closed form, a `dismissal.recorded` for a day whose dismissal has passed.
 - **Write results** use `state` for the object's state, because Core owns `status` (`committed`).
 
 ## Remaining gaps and dependencies
