@@ -13,6 +13,7 @@ const entries=[
  ['mail-public-verification',['runtime/cli.cjs','verify','--app','examples/apps/mail','--output',path.join(reportDir,'mail.json')]],
  ['calendar-public-verification',['runtime/cli.cjs','verify','--app','examples/apps/calendar','--output',path.join(reportDir,'calendar.json')]],
  ['core-business-and-mcp',['runtime/tests/core-behavior.cjs']],
+ ['lost-ack-retry',['runtime/tests/lost-ack-retry.cjs']],
  ['assets',['runtime/tests/assets.cjs']],
  ['platform-access',['runtime/tests/platform-access.cjs']],
  ['app-diagnostics',['runtime/tests/app-logging.cjs']],
