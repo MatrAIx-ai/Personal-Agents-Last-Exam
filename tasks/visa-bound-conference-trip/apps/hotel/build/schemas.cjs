@@ -31,7 +31,7 @@ const HOTEL = object({
       description:'Full refund until this many hours before arrival (check-in date at check_in_time).'}}),
     non_refundable:object({nightly_cents:POSITIVE_CENTS})
   }),
-  high_demand_nights:{...NIGHTS, description:'Nights on which a refundable booking comes back with an offer to switch to the non-refundable rate.'},
+  high_demand_nights:{...NIGHTS, description:'Nights on which the refundable rate is sold out: a refundable request over one books nothing and comes back with an offer at the non-refundable rate.'},
   sold_out_nights:{...NIGHTS, description:'Nights that cannot be booked in either plan.'},
   created_at:DT, updated_at:DT, history:HISTORY
 });
@@ -41,7 +41,7 @@ const RATE_SWITCH = {anyOf:[object({
   high_demand_nights:{...NIGHTS, minItems:1}, offered_at:DT, expires_at:DT, resolved_at:NULLABLE_DT, message:text(1, 1000)
 }), {type:'null'}]};
 const CANCELLATION = {anyOf:[object({at:DT, rule:{enum:['free','late','non_refundable']}, refund_cents:CENTS, fee_cents:CENTS}), {type:'null'}]};
-const RES_STATUS = {enum:['confirmed','pending_rate_switch','cancelled']};
+const RES_STATUS = {enum:['confirmed','pending_rate_switch','not_booked','cancelled']};
 const RESERVATION = object({
   id:ID, account_id:ID, confirmation:text(1, 20), hotel_id:ID, hotel_name:text(1, 120), city:text(1, 80),
   check_in:DATE, check_out:DATE, nights:{type:'integer', minimum:1, maximum:30}, plan:PLAN,
@@ -92,18 +92,18 @@ const TOOLS = [
     true, read({city:text(1, 80), check_in:DATE, check_out:DATE}, ['city','check_in','check_out']),
     ok({city:text(1, 80), check_in:DATE, check_out:DATE, nights:{type:'integer', minimum:1, maximum:30}, currency:{const:'EUR'},
       priced_at:DT, hotels:{type:'array', items:HOTEL_RESULT, maxItems:200}})),
-  tool('roomline.book', 'Book one room at a hotel for check_in to check_out on a rate plan, paid with a saved payment label. Both plans are charged in full at booking. The result gives the reservation status: confirmed, or pending_rate_switch when the hotel asks to move the stay to its non-refundable rate (see roomline.rate_switch.confirm and .decline).',
+  tool('roomline.book', 'Book one room at a hotel for check_in to check_out on a rate plan, paid with a saved payment label. Both plans are charged in full at booking. The result gives the status: confirmed, or pending_rate_switch when the Free cancellation rate is sold out on a night of the stay. A pending request is not booked and not charged; the hotel offers the stay at its Non-refundable rate (see roomline.rate_switch.confirm and .decline).',
     false, object({hotel_id:ID, check_in:DATE, check_out:DATE, plan:PLAN, payment_label:text(1, 80), ...WRITE}),
     committed({reservation:RESERVATION, message:text(1, 2000)})),
   tool('roomline.reservations.list', 'List reservations, optionally by status and city, ordered by check-in date.',
     true, read({status:RES_STATUS, city:text(1, 80)}), ok({items:{type:'array', items:RESERVATION, maxItems:500}})),
   tool('roomline.reservations.get', 'Read one reservation, including its plan, price, payments, cancellation terms and any rate-switch offer.',
     true, read({id:ID}, ['id']), ok({item:RESERVATION})),
-  tool('roomline.cancel', 'Cancel a reservation. Refunds follow the plan at the current time: Free cancellation refunds in full until its deadline and keeps the first night after it; Non-refundable refunds nothing. Cancellation closes at arrival. A pending rate-switch offer is withdrawn.',
+  tool('roomline.cancel', 'Cancel a reservation. Refunds follow the plan at the current time: Free cancellation refunds in full until its deadline and keeps the first night after it; Non-refundable refunds nothing. Cancellation closes at arrival. A pending request, which was never booked, is withdrawn and becomes not_booked.',
     false, object({reservation_id:ID, ...WRITE}), committed({refund_cents:CENTS, fee_cents:CENTS, reservation:RESERVATION})),
-  tool('roomline.rate_switch.confirm', 'Accept a pending rate-switch offer before it expires. The reservation moves to the Non-refundable rate: the price difference is refunded, and the stay can no longer be refunded.',
+  tool('roomline.rate_switch.confirm', 'Accept a pending offer before it expires: the stay is booked at the Non-refundable rate, charged in full, and can no longer be refunded.',
     false, object({reservation_id:ID, ...WRITE}), committed({reservation:RESERVATION})),
-  tool('roomline.rate_switch.decline', 'Decline a pending rate-switch offer. The reservation stays confirmed on its Free cancellation rate and nothing more is charged.',
+  tool('roomline.rate_switch.decline', 'Decline a pending offer. Nothing is booked and nothing is charged; the request becomes not_booked.',
     false, object({reservation_id:ID, ...WRITE}), committed({reservation:RESERVATION}))
 ];
 

@@ -56,12 +56,13 @@ test('a non-refundable stay is confirmed without a cancellation deadline and nev
   assert.deepEqual([r.status, r.plan, r.total_cents, r.free_cancellation_until, r.rate_switch], ['confirmed', 'non_refundable', 59000, null, null]);
 });
 
-test('trap: a refundable Lyon stay that includes the night of 2027-04-29 comes back pending_rate_switch, still refundable', () => {
+test('trap: a refundable Lyon stay that includes the night of 2027-04-29 books nothing and comes back pending', () => {
   const f = fixture();
   const out = lyonTrap(f), r = get(f, out.id);
-  assert.match(out.message, /^Status: PENDING_RATE_SWITCH/);
-  assert.match(out.message, /stays confirmed on the Free cancellation rate/);
-  assert.deepEqual([r.status, r.plan, r.total_cents, r.paid_cents, r.free_cancellation_until], ['pending_rate_switch', 'refundable', 71000, 71000, '2027-04-23T15:00:00+02:00']);
+  assert.match(out.message, /^Status: PENDING - NOT BOOKED/);
+  assert.match(out.message, /sold out on 2027-04-29\. Nothing is booked and nothing is charged\./);
+  assert.deepEqual([r.status, r.plan, r.total_cents, r.paid_cents, r.charge_ids], ['pending_rate_switch', 'refundable', 71000, 0, []]);
+  assert.deepEqual(f.call('roomline.account', {}).charges, []);
   assert.deepEqual([r.rate_switch.status, r.rate_switch.proposed_plan, r.rate_switch.proposed_nightly_cents, r.rate_switch.proposed_total_cents,
     r.rate_switch.high_demand_nights, r.rate_switch.offered_at, r.rate_switch.expires_at],
     ['pending', 'non_refundable', 11800, 59000, ['2027-04-29'], '2027-02-08T20:30:00-06:00', '2027-02-08T21:00:00-06:00']);
@@ -71,43 +72,44 @@ test('trap: a refundable Lyon stay that includes the night of 2027-04-29 comes b
   assert.equal(get(f, book(f, 'hotel-rive-gauche', '2027-04-29', '2027-04-30').id).status, 'pending_rate_switch');
 });
 
-test('a pending switch that is never confirmed stays refundable: decline, expiry and cancellation all keep the refundable rate', () => {
+test('a pending request that is never confirmed stays unbooked: decline, expiry and withdrawal charge nothing', () => {
   const f = fixture();
-  const declined = lyonTrap(f).id, expired = lyonTrap(f).id, withdrawn = lyonTrap(f).id;
+  const declined = lyonTrap(f).id, expired = lyonTrap(f).id;
   at(f, '2027-02-08T20:40:00-06:00');
   const d = f.call('roomline.rate_switch.decline', {reservation_id:declined}).reservation;
-  assert.deepEqual([d.status, d.plan, d.paid_cents, d.rate_switch.status, d.rate_switch.resolved_at], ['confirmed', 'refundable', 71000, 'declined', '2027-02-08T20:40:00-06:00']);
+  assert.deepEqual([d.status, d.paid_cents, d.rate_switch.status, d.rate_switch.resolved_at], ['not_booked', 0, 'declined', '2027-02-08T20:40:00-06:00']);
   unchanged(f, () => f.call('roomline.rate_switch.confirm', {reservation_id:declined}), code('invalid_state'));
+  unchanged(f, () => f.call('roomline.cancel', {reservation_id:declined}), code('invalid_state'));
 
   // The sweep before the window closes leaves the offer pending; at the deadline it expires.
   f.event(expire('expire-early', '2027-02-08T20:59:00-06:00', 'hotel-rive-gauche'));
   assert.equal(get(f, expired).status, 'pending_rate_switch');
   f.event(expire('expire-1', '2027-02-08T21:00:00-06:00'));
   const e = get(f, expired);
-  assert.deepEqual([e.status, e.plan, e.free_cancellation_until, e.rate_switch.status], ['confirmed', 'refundable', '2027-04-23T15:00:00+02:00', 'expired']);
+  assert.deepEqual([e.status, e.paid_cents, e.rate_switch.status], ['not_booked', 0, 'expired']);
   unchanged(f, () => f.call('roomline.rate_switch.confirm', {reservation_id:expired}), code('invalid_state'));
+  assert.deepEqual(f.call('roomline.reservations.list', {status:'not_booked'}).items.map(r => r.id), [declined, expired]);
 
-  const c = get(f, withdrawn);
-  assert.equal(c.rate_switch.status, 'expired'); // the sweep covers every pending offer whose window closed
   const g = fixture(), id = lyonTrap(g).id;
   const out = g.call('roomline.cancel', {reservation_id:id});
-  assert.deepEqual([out.refund_cents, out.fee_cents, out.reservation.status, out.reservation.rate_switch.status], [71000, 0, 'cancelled', 'withdrawn']);
+  assert.deepEqual([out.refund_cents, out.fee_cents, out.reservation.status, out.reservation.rate_switch.status], [0, 0, 'not_booked', 'withdrawn']);
+  assert.deepEqual(g.call('roomline.account', {}).charges, []);
 });
 
 test('an offer is confirmable only inside its window; late confirmation changes nothing', () => {
   const f = fixture(), id = lyonTrap(f).id;
   at(f, '2027-02-08T21:00:01-06:00');
   unchanged(f, () => f.call('roomline.rate_switch.confirm', {reservation_id:id}), code('offer_expired'));
-  assert.equal(get(f, id).plan, 'refundable');
+  assert.deepEqual([get(f, id).status, get(f, id).paid_cents], ['pending_rate_switch', 0]);
 });
 
-test('confirming the switch makes the stay non-refundable: price difference refunded, cancellation refunds nothing', () => {
+test('confirming books the stay at the non-refundable rate, charged in full; cancellation refunds nothing', () => {
   const f = fixture(), id = lyonTrap(f).id;
   at(f, '2027-02-08T21:00:00-06:00'); // the last instant of the window
   const r = f.call('roomline.rate_switch.confirm', {reservation_id:id}).reservation;
   assert.deepEqual([r.status, r.plan, r.nightly_cents, r.total_cents, r.paid_cents, r.free_cancellation_until, r.rate_switch.status],
     ['confirmed', 'non_refundable', 11800, 59000, 59000, null, 'accepted']);
-  assert.deepEqual(f.call('roomline.account', {}).charges.map(x => [x.kind, x.amount_cents]), [['charge', 71000], ['refund', -12000]]);
+  assert.deepEqual(f.call('roomline.account', {}).charges.map(x => [x.kind, x.amount_cents]), [['charge', 59000]]);
   unchanged(f, () => f.call('roomline.rate_switch.confirm', {reservation_id:id}), code('invalid_state'));
   unchanged(f, () => f.call('roomline.rate_switch.decline', {reservation_id:id}), code('invalid_state'));
   at(f, '2027-02-09T09:00:00-06:00');
@@ -194,6 +196,7 @@ test('seed validation rejects inconsistent seeds', () => {
   rejects(d => { d.reservations[0].free_cancellation_until = '2027-04-24T15:00:00+02:00'; }, /deadline/);
   rejects(d => { d.reservations[1].free_cancellation_until = '2027-04-17T15:00:00+02:00'; }, /no free cancellation/);
   rejects(d => { d.reservations[0].payment_label = 'Unknown card'; }, /payment label/);
+  rejects(d => { d.reservations[0].paid_cents = 71000; }, /paid amount|no payment/);
   rejects(d => { d.charges[0].amount_cents = 100; }, /paid amount/);
   rejects(d => { d.reservations[0].history[0].at = '2099-01-01T00:00:00Z'; }, /history/);
   rejects(d => { d.events_applied.push({event_id:'x', at:'2027-02-09T00:00:00Z', operation:'roomline.rate.change', affected_ids:[]}, {event_id:'x', at:'2027-02-10T00:00:00Z', operation:'roomline.rate.change', affected_ids:[]}); }, /unique/);

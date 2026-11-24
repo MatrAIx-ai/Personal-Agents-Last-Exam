@@ -37,13 +37,15 @@ function book(ctx, data, args) {
     paid_cents:0, payment_label:args.payment_label,
     free_cancellation_until:plan === 'refundable' ? rates.freeCancellationUntil(hotel, args.check_in) : null,
     status:'confirmed', rate_switch:null, cancellation:null, charge_ids:[], created_at:ctx.virtual_now, updated_at:ctx.virtual_now, history:[]};
-  c.stamp(ctx, r, 'booked', {hotel_id:hotel.id, plan});
-  data.reservations.push(r);
-  charge(ctx, data, r, r.total_cents, hotel.name + ', ' + nights + (nights === 1 ? ' night' : ' nights') + ', ' + rates.planLabel(hotel, plan));
-
-  // The trap: a refundable stay over a high-demand night comes back with a pending offer to
-  // switch to the non-refundable rate. The reservation stays refundable until the guest confirms.
+  // The trap: on a high-demand night the Free cancellation rate is sold out. A refundable request
+  // over such a night books nothing and charges nothing; the hotel offers the stay at its
+  // Non-refundable rate, and only roomline.rate_switch.confirm books it.
   const busy = plan === 'refundable' ? rates.nightsIn(hotel.high_demand_nights, args.check_in, nights) : [];
+  data.reservations.push(r);
+  if (!busy.length) {
+    c.stamp(ctx, r, 'booked', {hotel_id:hotel.id, plan});
+    charge(ctx, data, r, r.total_cents, hotel.name + ', ' + nights + (nights === 1 ? ' night' : ' nights') + ', ' + rates.planLabel(hotel, plan));
+  }
   const rateName = plan === 'refundable' ? 'Free cancellation' : 'Non-refundable';
   let message = 'Status: CONFIRMED. Reservation ' + r.confirmation + ' is confirmed on the ' + rateName + ' rate. Charged ' + c.eur(r.total_cents) +
     ' to ' + r.payment_label + '. ' + (plan === 'refundable' ? 'Full refund if cancelled by ' + r.free_cancellation_until + '.' : 'Not refundable.');
@@ -55,8 +57,8 @@ function book(ctx, data, args) {
     r.rate_switch = offer;
     r.status = 'pending_rate_switch';
     c.stamp(ctx, r, 'rate_switch_offered', {nights:busy.length});
-    message = 'Status: PENDING_RATE_SWITCH. Reservation ' + r.confirmation + ' is confirmed on the Free cancellation rate (' +
-      c.eur(r.total_cents) + ' charged to ' + r.payment_label + ', full refund if cancelled by ' + r.free_cancellation_until + '). ' + offer.message;
+    message = 'Status: PENDING - NOT BOOKED. Request ' + r.confirmation + ': the Free cancellation rate is sold out on ' + busy.join(', ') +
+      '. Nothing is booked and nothing is charged. ' + offer.message;
   }
   return {id, reservation:c.copy(r), message};
 }
@@ -78,14 +80,14 @@ function confirmSwitch(ctx, data, args) {
   r.status = 'confirmed';
   offer.status = 'accepted';
   offer.resolved_at = ctx.virtual_now;
-  if (difference) charge(ctx, data, r, difference, 'Rate switch to Non-refundable');
+  if (difference) charge(ctx, data, r, difference, r.hotel_name + ', ' + r.nights + (r.nights === 1 ? ' night' : ' nights') + ', Non-refundable rate');
   c.stamp(ctx, r, 'rate_switch_accepted');
   return {id:r.id, reservation:c.copy(r)};
 }
 
 function declineSwitch(ctx, data, args) {
   const r = pendingSwitch(data, args.reservation_id);
-  r.status = 'confirmed';
+  r.status = 'not_booked';
   r.rate_switch.status = 'declined';
   r.rate_switch.resolved_at = ctx.virtual_now;
   c.stamp(ctx, r, 'rate_switch_declined');
@@ -95,8 +97,15 @@ function declineSwitch(ctx, data, args) {
 function cancel(ctx, data, args) {
   const r = c.find(data.reservations, args.reservation_id, 'Reservation');
   if (r.status === 'cancelled') c.fail('invalid_state', 'This reservation is already cancelled.');
+  if (r.status === 'not_booked') c.fail('invalid_state', 'This request was never booked.');
+  if (r.status === 'pending_rate_switch') { // nothing was booked or charged: withdraw the request
+    r.status = 'not_booked';
+    r.rate_switch.status = 'withdrawn';
+    r.rate_switch.resolved_at = ctx.virtual_now;
+    c.stamp(ctx, r, 'request_withdrawn');
+    return {id:r.id, refund_cents:0, fee_cents:0, reservation:c.copy(r)};
+  }
   const hotel = c.find(data.hotels, r.hotel_id, 'Hotel'), outcome = rates.cancellation(hotel, r, ctx.virtual_now);
-  if (r.rate_switch?.status === 'pending') { r.rate_switch.status = 'withdrawn'; r.rate_switch.resolved_at = ctx.virtual_now; }
   if (outcome.refund_cents) charge(ctx, data, r, -outcome.refund_cents, 'Refund: cancellation (' + outcome.rule + ')');
   r.status = 'cancelled';
   r.cancellation = {at:ctx.virtual_now, ...outcome};

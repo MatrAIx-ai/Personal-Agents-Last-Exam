@@ -6,7 +6,7 @@ const c = require('./common.cjs');
 const d = require('./dates.cjs');
 
 // Expire every pending rate-switch offer (at one hotel, or at all hotels when hotel_id is null)
-// whose window has closed. The reservation stays on its refundable rate.
+// whose window has closed. The request stays unbooked.
 function expireOffers(ctx, data, payload) {
   if (payload.hotel_id !== null) c.find(data.hotels, payload.hotel_id, 'Hotel');
   const affected = [];
@@ -16,7 +16,7 @@ function expireOffers(ctx, data, payload) {
     if (c.ms(offer.expires_at) > c.ms(ctx.virtual_now)) continue;
     offer.status = 'expired';
     offer.resolved_at = ctx.virtual_now;
-    r.status = 'confirmed';
+    r.status = 'not_booked';
     c.stamp(ctx, r, 'rate_switch_expired');
     affected.push(r.id);
   }

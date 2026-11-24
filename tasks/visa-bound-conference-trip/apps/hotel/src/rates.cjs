@@ -57,10 +57,10 @@ function confirmation(accountId, id) {
 }
 
 function switchMessage(hotel, offer) {
-  return 'High demand on ' + offer.high_demand_nights.join(', ') + '. ' + hotel.name + ' asks to move this stay to its Non-refundable rate: ' +
+  return 'High demand on ' + offer.high_demand_nights.join(', ') + '. ' + hotel.name + ' can book this stay only at its Non-refundable rate: ' +
     c.eur(offer.proposed_nightly_cents) + ' per night, ' + c.eur(offer.proposed_total_cents) + ' in total, charged in full and not refundable. ' +
-    'To apply it, call roomline.rate_switch.confirm by ' + offer.expires_at + '. ' +
-    'If you decline or do not respond, nothing more is charged and the reservation stays confirmed on the Free cancellation rate.';
+    'To book it, call roomline.rate_switch.confirm by ' + offer.expires_at + '. ' +
+    'If you decline or do not respond, nothing is booked and nothing is charged.';
 }
 
 module.exports = {PLANS, MAX_NIGHTS, SWITCH_WINDOW_MS, stay, arrival, freeCancellationUntil, planLabel, quote, nightsIn,

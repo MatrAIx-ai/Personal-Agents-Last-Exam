@@ -36,6 +36,7 @@ function offer(r) {
   const o = r.rate_switch;
   if (!o) { if (r.status === 'pending_rate_switch') bad(r.id + ' is pending a rate switch but has no offer.'); return; }
   if ((o.status === 'pending') !== (r.status === 'pending_rate_switch')) bad(r.id + ': status and rate-switch offer disagree.');
+  if ((r.status === 'not_booked') !== ['declined', 'expired', 'withdrawn'].includes(o.status)) bad(r.id + ': only a declined, expired or withdrawn offer leaves a request unbooked.');
   if ((o.resolved_at === null) !== (o.status === 'pending')) bad(r.id + ': only a pending offer is unresolved.');
   if (ms(o.expires_at) <= ms(o.offered_at) || ms(o.offered_at) < ms(r.created_at) || ms(o.offered_at) > ms(r.updated_at)) bad(r.id + ': offer times are inconsistent.');
   if (o.resolved_at !== null && (ms(o.resolved_at) < ms(o.offered_at) || ms(o.resolved_at) > ms(r.updated_at))) bad(r.id + ': offer resolution is outside the record timeline.');
@@ -65,6 +66,11 @@ function reservation(r, data, hotels, charges) {
   const own = data.charges.filter(x => x.reservation_id === r.id);
   if (JSON.stringify(own.map(x => x.id)) !== JSON.stringify(r.charge_ids) || !r.charge_ids.every(id => charges.has(id))) bad(r.id + ': charge list mismatch.');
   if (sum(own.map(x => x.amount_cents)) !== r.paid_cents) bad(r.id + ': paid amount must equal its charges.');
+  if (['pending_rate_switch', 'not_booked'].includes(r.status)) { // a held request is never charged
+    if (own.length || r.paid_cents !== 0 || r.cancellation !== null || r.plan !== 'refundable') bad(r.id + ': a pending or unbooked request has no payment.');
+    timeline(r, r.id);
+    return;
+  }
   if (!own.length || own[0].kind !== 'charge' || own[0].amount_cents <= 0) bad(r.id + ': a reservation starts with its booking charge.');
   const cancelled = r.status === 'cancelled';
   if (cancelled !== (r.cancellation !== null)) bad(r.id + ': cancellation record mismatch.');

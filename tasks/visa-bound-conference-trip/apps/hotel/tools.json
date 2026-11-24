@@ -391,7 +391,7 @@
   },
   {
     "name": "roomline.book",
-    "description": "Book one room at a hotel for check_in to check_out on a rate plan, paid with a saved payment label. Both plans are charged in full at booking. The result gives the reservation status: confirmed, or pending_rate_switch when the hotel asks to move the stay to its non-refundable rate (see roomline.rate_switch.confirm and .decline).",
+    "description": "Book one room at a hotel for check_in to check_out on a rate plan, paid with a saved payment label. Both plans are charged in full at booking. The result gives the status: confirmed, or pending_rate_switch when the Free cancellation rate is sold out on a night of the stay. A pending request is not booked and not charged; the hotel offers the stay at its Non-refundable rate (see roomline.rate_switch.confirm and .decline).",
     "read_only": false,
     "scope": "roomline.book",
     "resource_target": "current account",
@@ -578,6 +578,7 @@
               "enum": [
                 "confirmed",
                 "pending_rate_switch",
+                "not_booked",
                 "cancelled"
               ]
             },
@@ -802,6 +803,7 @@
           "enum": [
             "confirmed",
             "pending_rate_switch",
+            "not_booked",
             "cancelled"
           ]
         },
@@ -933,6 +935,7 @@
                 "enum": [
                   "confirmed",
                   "pending_rate_switch",
+                  "not_booked",
                   "cancelled"
                 ]
               },
@@ -1275,6 +1278,7 @@
               "enum": [
                 "confirmed",
                 "pending_rate_switch",
+                "not_booked",
                 "cancelled"
               ]
             },
@@ -1481,7 +1485,7 @@
   },
   {
     "name": "roomline.cancel",
-    "description": "Cancel a reservation. Refunds follow the plan at the current time: Free cancellation refunds in full until its deadline and keeps the first night after it; Non-refundable refunds nothing. Cancellation closes at arrival. A pending rate-switch offer is withdrawn.",
+    "description": "Cancel a reservation. Refunds follow the plan at the current time: Free cancellation refunds in full until its deadline and keeps the first night after it; Non-refundable refunds nothing. Cancellation closes at arrival. A pending request, which was never booked, is withdrawn and becomes not_booked.",
     "read_only": false,
     "scope": "roomline.cancel",
     "resource_target": "current account",
@@ -1655,6 +1659,7 @@
               "enum": [
                 "confirmed",
                 "pending_rate_switch",
+                "not_booked",
                 "cancelled"
               ]
             },
@@ -1864,7 +1869,7 @@
   },
   {
     "name": "roomline.rate_switch.confirm",
-    "description": "Accept a pending rate-switch offer before it expires. The reservation moves to the Non-refundable rate: the price difference is refunded, and the stay can no longer be refunded.",
+    "description": "Accept a pending offer before it expires: the stay is booked at the Non-refundable rate, charged in full, and can no longer be refunded.",
     "read_only": false,
     "scope": "roomline.rate_switch.confirm",
     "resource_target": "current account",
@@ -2026,6 +2031,7 @@
               "enum": [
                 "confirmed",
                 "pending_rate_switch",
+                "not_booked",
                 "cancelled"
               ]
             },
@@ -2233,7 +2239,7 @@
   },
   {
     "name": "roomline.rate_switch.decline",
-    "description": "Decline a pending rate-switch offer. The reservation stays confirmed on its Free cancellation rate and nothing more is charged.",
+    "description": "Decline a pending offer. Nothing is booked and nothing is charged; the request becomes not_booked.",
     "read_only": false,
     "scope": "roomline.rate_switch.decline",
     "resource_target": "current account",
@@ -2395,6 +2401,7 @@
               "enum": [
                 "confirmed",
                 "pending_rate_switch",
+                "not_booked",
                 "cancelled"
               ]
             },
