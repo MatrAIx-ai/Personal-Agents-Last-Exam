@@ -2,7 +2,7 @@
 
 **Proposed PR title:** `[Task Proposal] [Shopping & groceries] Finish a phone replacement without losing independent work and banking access`
 
-Proposal stage, prepared 2026-11-21; revised 2026-11-23 (America/Chicago). Author-side prototypes exist, but official PALE integration and designated-model qualification are not claimed. Implementation and required model evaluations follow plan approval in this PR.
+Proposal stage, prepared 2026-11-21; revised 2026-11-24 (America/Chicago). Author-side prototypes exist, but official PALE integration and designated-model qualification are not claimed. Implementation and required model evaluations follow plan approval in this PR.
 
 ## 1. Task and domains
 
@@ -13,7 +13,7 @@ Proposal stage, prepared 2026-11-21; revised 2026-11-23 (America/Chicago). Autho
 
 ## 2. User persona and prior history
 
-**Your answer (required):** Eli relies on one handset for work and banking. In his personal note `old-phone-retention`, dated `2027-01-18T19:00:00-06:00`, he recorded a past migration that passed a test but failed at the next real shift, and instructed the assistant to retain the old phone through his first successful live-shift login on any replacement, then complete the return in the first available authorized pickup window. This is his chosen retention boundary, separate from the device's technical enrollment state. He authorizes an advance replacement with a refundable hold up to $300. Both independent access checks remain necessary; passwords, one-time codes and recovery secrets stay with Eli.
+**Your answer (required):** Eli relies on one handset for work and banking. In his personal note `old-phone-retention`, dated `2027-01-18T19:00:00-06:00`, he recorded a past migration that passed a test but failed at the next real shift, and instructed the assistant to retain the old phone through his first successful live-shift login on any replacement, then complete the return in the first available authorized pickup window. This is his chosen retention boundary, separate from the device's technical enrollment state. He authorizes an advance replacement with a refundable hold up to $300. In this frozen scenario, the provider offers only one advance-replacement remedy, with a fixed refundable hold of exactly $300 (30000 cents). The Agent cannot choose, edit or top up that amount; preview and acceptance expose and bind the same provider-fixed amount, and no additional authorization or capture is offered. The initial remedy-policy discloses this constraint. Therefore the $300 cap is guaranteed by the available provider action space, rather than an additional scored choice. Both independent access checks remain necessary; passwords, one-time codes and recovery secrets stay with Eli.
 
 | Record | Availability | Source and purpose |
 | :--- | :--- | :--- |
@@ -69,7 +69,7 @@ Proposal stage, prepared 2026-11-21; revised 2026-11-23 (America/Chicago). Autho
 
 | Time | Trigger | Agent action | Relies on | Resulting state | Items |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 2027-02-22T09:00:00-06:00 | Initial replacement request | Inspect devices, hold authorization, access dependencies, the dated retention instruction and both pickup slots; accept authorized replacement. | profile; delegation; remedy-policy; work-deadline; old-phone-retention; pickup-options | Both technical readiness and personal retention boundary known; authorized hold created | F1, F2, F3, E1 |
+| 2027-02-22T09:00:00-06:00 | Initial replacement request | Inspect devices, hold authorization, access dependencies, the dated retention instruction and both pickup slots; accept authorized replacement. | profile; delegation; remedy-policy; work-deadline; old-phone-retention; pickup-options | Both technical readiness and personal retention boundary known; provider-fixed $300 authorized hold created | F1, F2, F3, E1 |
 | 2027-02-23T18:00:00-06:00 | New phone and migration message | Request separate independent bank/work checks on the new serial; inspect results; request IT enrollment if work still needs the old phone. | delivery; transfer-policy; specific check replies | Need for IT determined by observed result | F1, E1 |
 | 2027-02-24T15:00:00-06:00 | IT update | Inspect enrollment completion and obtain successful independent work login; banking has also passed. Retain OLD-17 under the prior instruction. | IT reply; fresh checks; old-phone-retention | Independent access proven before shift; old phone retained pending real use | F1, F3, E1 |
 | 2027-02-25T08:00:00-06:00 | Before first shift | Verify readiness and arrange the February 26 15:30 exact-serial pickup; retain the old phone and keep erasure pending. Scheduling alone is not handoff. | work-deadline; case serial; old-phone-retention; check records | Ready before 09:00; personal boundary preserved | F1, F2, F3, E1, E2 |
