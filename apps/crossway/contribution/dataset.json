@@ -1,0 +1,51 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "crossway-minimal",
+  "version": "0.1.0",
+  "description": "Synthetic toll account history for Dani Reyes (Crossway Toll Authority, a fictional state authority), generated for reproducible checks; not a benchmark task. Plazas, rates, plates, people, cards and notices are fictional. No real E-ZPass or Tolls by Mail data, rates or assets are used.",
+  "record_source_ids": [
+    "generated"
+  ],
+  "sources": [
+    {
+      "source_id": "generated",
+      "kind": "synthetic",
+      "description": "scripts/generate-seed.cjs opens the account on 2025-01-06 and replays about 22 months of tolls, top-ups, auto-replenishments, notices, payments, disputes and statements through Crossway's own handlers, ending at the fixture clock (2026-11-02). Random transponder tolls and plate reads come from a fixed-seed PRNG; the current notices and vehicles are scripted. Workflow rules follow the public E-ZPass NY and Tolls by Mail sites; amounts and deadlines are Crossway's own.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/crossway/scripts/generate-seed.cjs",
+        "tool_version": "0.1.0",
+        "seed": 20250106,
+        "parameters": {
+          "opened_on": "2025-01-06",
+          "clock": "2026-11-02T09:00:00-05:00",
+          "commute_probability": 0.3,
+          "weekend_trip_probability": 0.25,
+          "borrowed_car_plate_read_probability": 0.012
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Authority time is US Eastern (America/New_York rules computed in src/clock.cjs); amounts in cents; IDs stable across resets.",
+    "Outgoing Mail notices and spent previews from the generated history are cleared: history counts as delivered."
+  ],
+  "expected_counts": {
+    "records": 192,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks (validateSeed, ledger reconciliation, generator reproduction, date floor) do not replace human review of realism and variation."
+  }
+}

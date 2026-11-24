@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "app_id": "crossway",
+  "version": "0.1.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Rohan Pandey (@Rohan-Pandey1729), PR #27"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "crossway.toll.posted",
+    "crossway.card.status_changed",
+    "crossway.dispute.decided"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "none (pages arrive in M2)",
+    "real_delivery": false
+  },
+  "limitations": [
+    "First version: MCP tools only; pages arrive in M2.",
+    "One fixture; two more arrive in M2.",
+    "Notices are stored as Mail channel.email messages; examples/publish-to-mail.cjs publishes them through Messaging to Mail."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}
