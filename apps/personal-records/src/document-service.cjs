@@ -34,51 +34,64 @@ class DocumentService {
     const versionId = `${docId}_v1`;
     const extractionId = `ext_${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`;
 
-    const ext = this.extractionService.extract(buffer, mimeType, sha256);
+    const doInsert = (ext) => {
+      this.db.exec('BEGIN TRANSACTION;');
+      try {
+        this.db.prepare('INSERT OR IGNORE INTO accounts (account_id) VALUES (?)').run(accountId);
 
-    this.db.exec('BEGIN TRANSACTION;');
-    try {
-      this.db.prepare('INSERT OR IGNORE INTO accounts (account_id) VALUES (?)').run(accountId);
+        this.db.prepare(`
+          INSERT INTO documents (
+            document_id, account_id, title, category, tags,
+            current_version_number, verification_state, valid_until
+          ) VALUES (?, ?, ?, ?, ?, ?, 'INFERRED', ?)
+        `).run(docId, accountId, title, category || null, JSON.stringify(tags), versionNumber, validUntil || null);
 
-      this.db.prepare(`
-        INSERT INTO documents (
-          document_id, account_id, title, category, tags,
-          current_version_number, verification_state, valid_until
-        ) VALUES (?, ?, ?, ?, ?, ?, 'INFERRED', ?)
-      `).run(docId, accountId, title, category || null, JSON.stringify(tags), versionNumber, validUntil || null);
+        this.db.prepare(`
+          INSERT INTO document_versions (
+            version_id, document_id, version_number, sha256,
+            mime_type, byte_size, blob_path, source_type
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, 'UPLOAD')
+        `).run(versionId, docId, versionNumber, sha256, mimeType, byteSize, relPath);
 
-      this.db.prepare(`
-        INSERT INTO document_versions (
-          version_id, document_id, version_number, sha256,
-          mime_type, byte_size, blob_path, source_type
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'UPLOAD')
-      `).run(versionId, docId, versionNumber, sha256, mimeType, byteSize, relPath);
+        this.db.prepare(`
+          INSERT INTO extractions (
+            extraction_id, document_id, version_number, extraction_revision,
+            raw_text, extracted_fields, extraction_source
+          ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).run(extractionId, docId, versionNumber, ext.extractionRevision, ext.rawText, JSON.stringify(ext.extractedFields), ext.extractionSource);
 
-      this.db.prepare(`
-        INSERT INTO extractions (
-          extraction_id, document_id, version_number, extraction_revision,
-          raw_text, extracted_fields, extraction_source
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
-      `).run(extractionId, docId, versionNumber, ext.extractionRevision, ext.rawText, JSON.stringify(ext.extractedFields), ext.extractionSource);
+        this.db.prepare(`
+          INSERT INTO fts_documents (document_id, account_id, title, category, tags, raw_text)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `).run(docId, accountId, title, category || '', JSON.stringify(tags), ext.rawText);
 
-      this.db.prepare(`
-        INSERT INTO fts_documents (document_id, account_id, title, category, tags, raw_text)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(docId, accountId, title, category || '', JSON.stringify(tags), ext.rawText);
+        this.db.exec('COMMIT;');
+      } catch (err) {
+        this.db.exec('ROLLBACK;');
+        this.blobStore.deleteBlob(relPath);
+        throw err;
+      }
 
-      this.db.exec('COMMIT;');
-    } catch (err) {
-      this.db.exec('ROLLBACK;');
-      this.blobStore.deleteBlob(relPath);
-      throw err;
+      return {
+        document_id: docId,
+        version_number: versionNumber,
+        sha256,
+        status: ext.extractionSource !== 'DEFERRED_RAW' ? 'READY' : 'PARSING'
+      };
+    };
+
+    const extResult = this.extractionService.extract(buffer, mimeType, sha256);
+
+    // If extract returned a Promise (async PDF parsing)
+    if (extResult && typeof extResult.then === 'function') {
+      return extResult.then(doInsert).catch((err) => {
+        this.blobStore.deleteBlob(relPath);
+        throw err;
+      });
     }
 
-    return {
-      document_id: docId,
-      version_number: versionNumber,
-      sha256,
-      status: ext.extractionSource !== 'DEFERRED_RAW' ? 'READY' : 'PARSING'
-    };
+    // Synchronous execution path (text/plain & fixtures)
+    return doInsert(extResult);
   }
 
   createVersion({ accountId, documentId, contentBytes, mimeType, changeSummary, expectedParentVersion }) {
@@ -109,57 +122,68 @@ class DocumentService {
       `${doc.title.slice(0, 15)}_v${newVersionNumber}`
     );
 
-    const ext = this.extractionService.extract(buffer, mimeType, sha256);
     const extractionId = `ext_${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`;
 
-    this.db.exec('BEGIN TRANSACTION;');
-    try {
-      this.db.prepare(`
-        UPDATE documents 
-        SET current_version_number = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-        WHERE document_id = ?
-      `).run(newVersionNumber, documentId);
+    const doInsertVersion = (ext) => {
+      this.db.exec('BEGIN TRANSACTION;');
+      try {
+        this.db.prepare(`
+          UPDATE documents 
+          SET current_version_number = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+          WHERE document_id = ?
+        `).run(newVersionNumber, documentId);
 
-      this.db.prepare(`
-        INSERT INTO document_versions (
-          version_id, document_id, version_number, sha256,
-          mime_type, byte_size, blob_path, change_summary, source_type
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'UPLOAD')
-      `).run(versionId, documentId, newVersionNumber, sha256, mimeType, byteSize, relPath, changeSummary || null);
+        this.db.prepare(`
+          INSERT INTO document_versions (
+            version_id, document_id, version_number, sha256,
+            mime_type, byte_size, blob_path, change_summary, source_type
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'UPLOAD')
+        `).run(versionId, documentId, newVersionNumber, sha256, mimeType, byteSize, relPath, changeSummary || null);
 
-      this.db.prepare(`
-        INSERT INTO extractions (
-          extraction_id, document_id, version_number, extraction_revision,
-          raw_text, extracted_fields, extraction_source
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
-      `).run(extractionId, documentId, newVersionNumber, ext.extractionRevision, ext.rawText, JSON.stringify(ext.extractedFields), ext.extractionSource);
+        this.db.prepare(`
+          INSERT INTO extractions (
+            extraction_id, document_id, version_number, extraction_revision,
+            raw_text, extracted_fields, extraction_source
+          ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).run(extractionId, documentId, newVersionNumber, ext.extractionRevision, ext.rawText, JSON.stringify(ext.extractedFields), ext.extractionSource);
 
-      this.db.prepare(`DELETE FROM fts_documents WHERE document_id = ?`).run(documentId);
-      this.db.prepare(`
-        INSERT INTO fts_documents (document_id, account_id, title, category, tags, raw_text)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(documentId, accountId, doc.title, doc.category || '', doc.tags, ext.rawText);
+        this.db.prepare(`DELETE FROM fts_documents WHERE document_id = ?`).run(documentId);
+        this.db.prepare(`
+          INSERT INTO fts_documents (document_id, account_id, title, category, tags, raw_text)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `).run(documentId, accountId, doc.title, doc.category || '', doc.tags, ext.rawText);
 
-      // Invalidate existing claims referencing older versions
-      this.db.prepare(`
-        UPDATE evidence_claims
-        SET verification_state = 'REVIEW_REQUIRED'
-        WHERE document_id = ? AND version_number < ?
-      `).run(documentId, newVersionNumber);
+        this.db.prepare(`
+          UPDATE evidence_claims
+          SET verification_state = 'REVIEW_REQUIRED'
+          WHERE document_id = ? AND version_number < ?
+        `).run(documentId, newVersionNumber);
 
-      this.db.exec('COMMIT;');
-    } catch (err) {
-      this.db.exec('ROLLBACK;');
-      this.blobStore.deleteBlob(relPath);
-      throw err;
+        this.db.exec('COMMIT;');
+      } catch (err) {
+        this.db.exec('ROLLBACK;');
+        this.blobStore.deleteBlob(relPath);
+        throw err;
+      }
+
+      return {
+        document_id: documentId,
+        version_number: newVersionNumber,
+        sha256,
+        status: 'READY'
+      };
+    };
+
+    const extResult = this.extractionService.extract(buffer, mimeType, sha256);
+
+    if (extResult && typeof extResult.then === 'function') {
+      return extResult.then(doInsertVersion).catch((err) => {
+        this.blobStore.deleteBlob(relPath);
+        throw err;
+      });
     }
 
-    return {
-      document_id: documentId,
-      version_number: newVersionNumber,
-      sha256,
-      status: 'READY'
-    };
+    return doInsertVersion(extResult);
   }
 
   getDocument({ accountId, documentId, versionNumber, includeExtractedText = true, includeClaims = false }) {
@@ -179,7 +203,7 @@ class DocumentService {
     const targetVersion = versionNumber !== undefined ? versionNumber : doc.current_version_number;
 
     const ver = this.db.prepare(`
-      SELECT version_number, sha256, mime_type, byte_size, change_summary, source_type, created_at
+      SELECT version_number, sha256, mime_type, byte_size, blob_path, change_summary, source_type, created_at
       FROM document_versions
       WHERE document_id = ? AND version_number = ?
     `).get(documentId, targetVersion);
@@ -242,7 +266,11 @@ class DocumentService {
     if (query && query.trim()) {
       joinFts = 'JOIN fts_documents ON d.document_id = fts_documents.document_id';
       where.push('fts_documents MATCH ?');
-      params.push(query.trim().replace(/'/g, "''"));
+      const tokens = query.trim().match(/"[^"]*"|\S+/g) || [];
+      const sanitized = tokens
+        .map((t) => (t.startsWith('"') && t.endsWith('"') ? t : `"${t.replace(/"/g, '""')}"`))
+        .join(' ');
+      params.push(sanitized);
     }
 
     if (category) {
