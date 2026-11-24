@@ -1,7 +1,7 @@
 [
   {
     "name": "bellnote.children.list",
-    "description": "List the children on this account with school, grade, homeroom, meal restrictions, default way home (only for a child you are custodial for) and every guardian's rights for each child.",
+    "description": "List the children on this account with school, grade, homeroom, meal restrictions, default way home (only for a child you are custodial for) and every guardian's rights for each child, and the ID of each child's lunch account (null when the child has none).",
     "read_only": true,
     "scope": "bellnote.children.list",
     "resource_target": "current account",
@@ -95,6 +95,17 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 200
+              },
+              "lunch_account_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "guardians": {
                 "type": "array",

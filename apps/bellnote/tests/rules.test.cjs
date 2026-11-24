@@ -230,3 +230,18 @@ test('T18 each event writes exactly one notification of its kind per occurrence'
     assert.equal(new Set(written.map(n => n.kind)).size, written.length, kind + ': no kind written twice for one occurrence');
   }
 });
+
+test('W4 children.list names each child\'s lunch account, so every balance can be read without guessing an ID', () => {
+  const f = fixture();
+  const kids = f.call('bellnote.children.list').children;
+  for (const k of kids) {
+    assert.equal(k.lunch_account_id, f.data.lunch_accounts.find(a => a.child_id === k.id).id, k.id);
+    assert.equal(f.call('bellnote.lunch.account_get', {id: k.lunch_account_id}).account.child_id, k.id);
+  }
+  const g = fixture({mutate: d => {
+    d.lunch_transactions = d.lunch_transactions.filter(t => t.child_id !== 'child-nico');
+    d.payments = d.payments.filter(p => p.child_id !== 'child-nico');
+    d.lunch_accounts = d.lunch_accounts.filter(a => a.child_id !== 'child-nico');
+  }});
+  assert.equal(g.call('bellnote.children.list').children.find(k => k.id === 'child-nico').lunch_account_id, null);
+});

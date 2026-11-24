@@ -9,7 +9,9 @@ const attendance = require('./attendance.cjs');
 function children(ctx, data) {
   // A child's default way home is part of the pickup list: omitted unless the account holder is custodial.
   const visible = k => { const {default_dismissal, ...rest} = c.copy(k); return c.myLink(data, k.id)?.custodial ? {...rest, default_dismissal} : rest; };
+  // The lunch account ID is how lunch.account_get, lunch.topup and lunch.settings_update name the child's account.
   return {children: data.children.map(k => ({...visible(k), school_name: c.school(data, k.school_id).name,
+    lunch_account_id: data.lunch_accounts.find(a => a.child_id === k.id)?.id ?? null,
     guardians: data.guardian_links.filter(l => l.child_id === k.id).map(l => ({person_id: l.person_id, display_name: c.displayName(data, l.person_id),
       relationship: l.relationship, is_me: l.person_id === data.owner_person_id, can_pickup: l.can_pickup, can_sign: l.can_sign, can_pay: l.can_pay, custodial: l.custodial}))}))};
 }

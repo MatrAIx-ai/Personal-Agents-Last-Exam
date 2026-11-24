@@ -132,8 +132,8 @@ function tool(name, readOnly, description, input, output, optional = [], target 
   tools.push({name: 'bellnote.' + name, description, read_only: readOnly, scope: 'bellnote.' + name, resource_target: target,
     inputSchema: inline(inputSchema), outputSchema: inline(outputSchema)});
 }
-tool('children.list', true, 'List the children on this account with school, grade, homeroom, meal restrictions, default way home (only for a child you are custodial for) and every guardian\'s rights for each child.',
-  {}, {children: arr(optional(view('child', {school_name: str(), guardians: arr(any(['person_id', 'is_me', 'can_pickup', 'can_sign', 'can_pay', 'custodial']))}), ['default_dismissal']))});
+tool('children.list', true, 'List the children on this account with school, grade, homeroom, meal restrictions, default way home (only for a child you are custodial for) and every guardian\'s rights for each child, and the ID of each child\'s lunch account (null when the child has none).',
+  {}, {children: arr(optional(view('child', {school_name: str(), lunch_account_id: nul(ID), guardians: arr(any(['person_id', 'is_me', 'can_pickup', 'can_sign', 'can_pay', 'custodial']))}), ['default_dismissal']))});
 tool('schools.get', true, 'Read one school: bell times, term, the effective policy (cut-off rules, pickup review, top-up range, meal debt limit) and, for start..end (dates, default today..+14), each calendar day with its kind, dismissal time and resolved cut-off instants.',
   {id: ID, ...WINDOW}, {school: any(['id', 'name', 'time_zone', 'bell', 'term', 'policy']), start: DATE, end: DATE, days: arr(any(['date', 'kind', 'school_day']))}, ['start', 'end'], 'school');
 tool('attendance.list', true, 'Attendance records by day (status, explained/unexplained, the office\'s excused/unexcused) for one child (id) or all children, in start..end (default the last 14 days). A day with no mark has no record.',
