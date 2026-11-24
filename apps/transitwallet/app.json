@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "app_id": "transitwallet",
+  "version": "0.1.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Hanson Tang (@hansontang), PR #149"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "record.add",
+    "route.update",
+    "verification.reply",
+    "assistance.reply",
+    "journey.perform"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none; approved MCP-only scope",
+    "real_delivery": false
+  },
+  "limitations": [
+    "One bound account per instance; a separate reservation wallet, not another App fare card.",
+    "No live payments, outbound messaging, GUI, groups, atomic ticket exchange or automatic post-travel compensation."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

@@ -1,0 +1,935 @@
+{
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "source_actor_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 16000
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "source_actor_id",
+          "body",
+          "created_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 256,
+      "minItems": 0
+    },
+    "equipment": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "owner_person_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 16000
+          },
+          "width_mm": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "owner_person_id",
+          "label",
+          "width_mm",
+          "revision",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 32,
+      "minItems": 1
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 16000
+          },
+          "provider_actor_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "reserve_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reserve_before": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "confirm_before": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancel_before": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hold_expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "depart_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scheduled_arrival_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "width_mm": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "capacity": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "fare_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "cancel_fee_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "currency": {
+            "enum": [
+              "USD"
+            ]
+          },
+          "status": {
+            "enum": [
+              "available",
+              "unavailable",
+              "lift_unavailable"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "status": {
+                  "enum": [
+                    "available",
+                    "unavailable",
+                    "lift_unavailable"
+                  ]
+                },
+                "width_mm": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "source_event_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                }
+              },
+              "required": [
+                "at",
+                "status",
+                "width_mm",
+                "source_event_id"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 256,
+            "minItems": 0
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "provider_actor_id",
+          "reserve_from",
+          "reserve_before",
+          "confirm_before",
+          "cancel_before",
+          "hold_expires_at",
+          "depart_at",
+          "scheduled_arrival_at",
+          "width_mm",
+          "capacity",
+          "fare_cents",
+          "cancel_fee_cents",
+          "currency",
+          "status",
+          "created_at",
+          "changes"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 64,
+      "minItems": 1
+    },
+    "bookings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "service_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "booking_attempt": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "equipment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "status": {
+            "enum": [
+              "held",
+              "confirmed",
+              "cancelled",
+              "consumed"
+            ]
+          },
+          "fare_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "cancel_fee_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "currency": {
+            "enum": [
+              "USD"
+            ]
+          },
+          "hold_expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "confirm_before": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancel_before": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "depart_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "confirmed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cancelled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "consumed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "service_id",
+          "booking_attempt",
+          "equipment_id",
+          "status",
+          "fare_cents",
+          "cancel_fee_cents",
+          "currency",
+          "hold_expires_at",
+          "confirm_before",
+          "cancel_before",
+          "depart_at",
+          "created_at",
+          "confirmed_at",
+          "cancelled_at",
+          "consumed_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 256,
+      "minItems": 0
+    },
+    "requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "kind": {
+            "enum": [
+              "measurement",
+              "assistance"
+            ]
+          },
+          "selector": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "equipment_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                  },
+                  "kind": {
+                    "enum": [
+                      "measurement"
+                    ]
+                  },
+                  "request_attempt": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000000
+                  }
+                },
+                "required": [
+                  "equipment_id",
+                  "kind",
+                  "request_attempt"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "service_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                  },
+                  "booking_attempt": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000000
+                  },
+                  "request_attempt": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000000
+                  }
+                },
+                "required": [
+                  "service_id",
+                  "booking_attempt",
+                  "request_attempt"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "source_actor_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "equipment_snapshot": {
+            "type": "object",
+            "properties": {
+              "equipment_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              "width_mm": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "equipment_revision": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              }
+            },
+            "required": [
+              "equipment_id",
+              "width_mm",
+              "equipment_revision"
+            ],
+            "additionalProperties": false
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "performed",
+              "refused",
+              "confirmed",
+              "cancelled"
+            ]
+          },
+          "reply": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "source_event_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                  },
+                  "source_actor_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                  },
+                  "status": {
+                    "enum": [
+                      "performed",
+                      "refused",
+                      "confirmed"
+                    ]
+                  },
+                  "observation": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "width_mm": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 1000000
+                          },
+                          "equipment_revision": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 1000000
+                          }
+                        },
+                        "required": [
+                          "width_mm",
+                          "equipment_revision"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "source_event_id",
+                  "source_actor_id",
+                  "status",
+                  "observation"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "selector",
+          "source_actor_id",
+          "equipment_snapshot",
+          "status",
+          "reply",
+          "created_at",
+          "cancelled_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 256,
+      "minItems": 0
+    },
+    "journeys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "selector": {
+            "type": "object",
+            "properties": {
+              "service_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              "booking_attempt": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "journey_attempt": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              }
+            },
+            "required": [
+              "service_id",
+              "booking_attempt",
+              "journey_attempt"
+            ],
+            "additionalProperties": false
+          },
+          "booking_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "cancelled",
+              "in_transit",
+              "failed",
+              "completed"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "departed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "arrived_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "departure_event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "arrival_event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "actual_equipment": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "width_mm": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000000
+                  },
+                  "equipment_revision": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000000
+                  }
+                },
+                "required": [
+                  "width_mm",
+                  "equipment_revision"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "departure_snapshot": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "service_status": {
+                    "enum": [
+                      "available",
+                      "unavailable",
+                      "lift_unavailable"
+                    ]
+                  },
+                  "service_width_mm": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000000
+                  },
+                  "user_ready": {
+                    "type": "boolean"
+                  },
+                  "assistance_request_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "service_status",
+                  "service_width_mm",
+                  "user_ready",
+                  "assistance_request_id"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "failure_reasons": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+            },
+            "maxItems": 16,
+            "minItems": 0
+          }
+        },
+        "required": [
+          "id",
+          "selector",
+          "booking_id",
+          "status",
+          "created_at",
+          "departed_at",
+          "arrived_at",
+          "departure_event_id",
+          "arrival_event_id",
+          "actual_equipment",
+          "departure_snapshot",
+          "failure_reasons"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 256,
+      "minItems": 0
+    },
+    "ledger": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "kind": {
+            "enum": [
+              "opening_credit",
+              "debit",
+              "refund"
+            ]
+          },
+          "booking_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "amount_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "currency": {
+            "enum": [
+              "USD"
+            ]
+          },
+          "source_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "booking_id",
+          "amount_cents",
+          "currency",
+          "source_id",
+          "created_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 256,
+      "minItems": 0
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "operation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "object_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "source_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          }
+        },
+        "required": [
+          "sequence",
+          "at",
+          "operation",
+          "object_id",
+          "source_id"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1024,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "records",
+    "equipment",
+    "services",
+    "bookings",
+    "requests",
+    "journeys",
+    "ledger",
+    "history"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

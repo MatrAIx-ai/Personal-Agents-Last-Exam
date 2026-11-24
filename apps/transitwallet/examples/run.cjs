@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {fixture,hold,confirm,cancel,assistance,approve,depart}=require('../tests/harness.cjs');
+const h=fixture(),out=confirm(h,hold(h)),early=confirm(h,hold(h,'wide-early-20270209'));
+for(const b of [out,early])approve(h,assistance(h,b));
+const outward=h.call('journey.plan',{booking_id:out.id}).item;h.call('journey.plan',{booking_id:early.id});
+h.event('route.update',{service_id:'rail-out-20270209',source_actor_id:'person-provider',status:'lift_unavailable'},'2027-02-09T06:10:00-06:00');
+depart(h,outward,'2027-02-09T07:30:00-06:00');assert.equal(h.data.journeys[0].status,'in_transit');
+h.event('journey.perform',{selector:outward.selector,phase:'arrival',source_actor_id:'person-provider'},'2027-02-09T08:30:00-06:00');
+h.advance('2027-02-09T10:40:00-06:00');cancel(h,early);
+const later=confirm(h,hold(h,'wide-late-20270209'));approve(h,assistance(h,later));const back=h.call('journey.plan',{booking_id:later.id}).item;
+depart(h,back,'2027-02-09T12:30:00-06:00');h.event('journey.perform',{selector:back.selector,phase:'arrival',source_actor_id:'person-provider'},'2027-02-09T13:30:00-06:00');
+assert.equal(h.data.journeys.filter(j=>j.status==='completed').length,2);assert.equal(h.call('wallet.get').balance_cents,6400);assert.equal(h.data.bookings.find(b=>b.id===early.id).status,'cancelled');
+console.log(JSON.stringify({app:'transitwallet',example:'two paid reservations -> actual outward travel -> cancel/refund early return -> new assistance and actual late return',completed:2,net_cost_cents:3600,ledger_entries:h.data.ledger.length,shared_core_claim:false}));

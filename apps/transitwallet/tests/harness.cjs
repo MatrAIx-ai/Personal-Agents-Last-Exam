@@ -1,0 +1,11 @@
+'use strict';
+// App-only fixture for business tests. No transport, persistence or replacement Core.
+const plugin=require('../plugin.cjs');
+function fixture(seed){let data=structuredClone(seed||require('../fixtures/minimal.json')),seq=0;const ctx={app_id:'transitwallet',virtual_now:require('../fixtures/clock.json').initial_time,binding:structuredClone(require('../fixtures/binding.json'))};plugin.validateSeed(ctx,data);return {ctx,get data(){return structuredClone(data);},call(name,args={}){const out=plugin.handleTool(ctx,structuredClone(data),'transitwallet.'+name,{request_id:'business-'+(++seq),...args});plugin.validateSeed(ctx,out.data);data=out.data;return structuredClone(out.result.value);},event(operation,payload,at=ctx.virtual_now){const next={...ctx,virtual_now:at},result=plugin.applyEvent(next,structuredClone(data),{event_id:'business-event-'+(++seq),at,operation,payload});plugin.validateSeed(next,result);data=result;ctx.virtual_now=at;return structuredClone(data);},advance(at){if(Date.parse(at)<Date.parse(ctx.virtual_now))throw Error('Test timeline cannot go backward');ctx.virtual_now=at;plugin.validateSeed(ctx,data);}};}
+const hold=(h,service='wide-out-20270209')=>h.call('booking.hold',{service_id:service,equipment_id:'chair-1'}).item;
+function confirm(h,b){const quote=h.call('booking.preview',{id:b.id,action:'confirm'}).quote;return h.call('booking.confirm',{id:b.id,quote_digest:quote.digest}).item;}
+function cancel(h,b){const quote=h.call('booking.preview',{id:b.id,action:'cancel'}).quote;return h.call('booking.cancel',{id:b.id,quote_digest:quote.digest});}
+function assistance(h,b,width=740,revision=2){return h.call('assistance.request',{booking_id:b.id,declared_width_mm:width,equipment_revision:revision}).item;}
+function approve(h,q){h.event('assistance.reply',{selector:q.selector,source_actor_id:'person-provider',status:'confirmed',equipment_revision:q.equipment_snapshot.equipment_revision});}
+function depart(h,j,at,width=740,revision=2,ready=true){return h.event('journey.perform',{selector:j.selector,phase:'departure',source_actor_id:'person-provider',actual_equipment:{width_mm:width,equipment_revision:revision},user_ready:ready},at);}
+module.exports={fixture,hold,confirm,cancel,assistance,approve,depart};
