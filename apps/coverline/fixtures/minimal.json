@@ -1,0 +1,1091 @@
+{
+  "account_id": "coverline-maya",
+  "owner_person_id": "person-maya",
+  "jurisdiction": "CL-DEMO",
+  "next_id": 115,
+  "sources": [
+    {
+      "id": "user-intake",
+      "at": "2026-11-23T08:00:00-08:00",
+      "title": "Trusted synthetic owner intake and declarations",
+      "facts": {
+        "drivers": [
+          {
+            "person_id": "person-maya",
+            "name": "Maya Chen",
+            "years_licensed": 14,
+            "accidents": 0,
+            "violations": 0,
+            "excluded": false
+          }
+        ],
+        "vehicle": {
+          "year": 2021,
+          "make": "Honda",
+          "model": "Civic",
+          "vin": "SYNTHETIC00000001"
+        },
+        "annual_mileage": 12000,
+        "garaging": {
+          "city": "Los Angeles",
+          "state": "CA-DEMO",
+          "zip": "90026"
+        },
+        "vehicle_use": "commute",
+        "ownership": "owned",
+        "current_policy": {
+          "ends_on": "2026-12-01",
+          "continuous_months": 36,
+          "lapse_days": 0,
+          "lender_requirements": []
+        },
+        "monitoring_consent": false
+      }
+    },
+    {
+      "id": "odometer-note",
+      "at": "2026-11-24T08:00:00-08:00",
+      "title": "Owner-provided corrected mileage estimate",
+      "facts": {
+        "annual_mileage": 15000
+      }
+    },
+    {
+      "id": "coverage-brief",
+      "at": "2026-11-23T08:00:00-08:00",
+      "title": "User requested coverage",
+      "facts": {}
+    }
+  ],
+  "profiles": [
+    {
+      "id": "profile-v1",
+      "revision": 1,
+      "at": "2026-11-23T08:00:00-08:00",
+      "source_ref": "user-intake",
+      "fields": {
+        "drivers": {
+          "value": [
+            {
+              "person_id": "person-maya",
+              "name": "Maya Chen",
+              "years_licensed": 14,
+              "accidents": 0,
+              "violations": 0,
+              "excluded": false
+            }
+          ],
+          "status": "confirmed",
+          "source_ref": "user-intake",
+          "observed_at": "2026-11-23T08:00:00-08:00"
+        },
+        "vehicle": {
+          "value": {
+            "year": 2021,
+            "make": "Honda",
+            "model": "Civic",
+            "vin": "SYNTHETIC00000001"
+          },
+          "status": "confirmed",
+          "source_ref": "user-intake",
+          "observed_at": "2026-11-23T08:00:00-08:00"
+        },
+        "annual_mileage": {
+          "value": 12000,
+          "status": "confirmed",
+          "source_ref": "user-intake",
+          "observed_at": "2026-11-23T08:00:00-08:00"
+        },
+        "garaging": {
+          "value": {
+            "city": "Los Angeles",
+            "state": "CA-DEMO",
+            "zip": "90026"
+          },
+          "status": "confirmed",
+          "source_ref": "user-intake",
+          "observed_at": "2026-11-23T08:00:00-08:00"
+        },
+        "vehicle_use": {
+          "value": "commute",
+          "status": "confirmed",
+          "source_ref": "user-intake",
+          "observed_at": "2026-11-23T08:00:00-08:00"
+        },
+        "ownership": {
+          "value": "owned",
+          "status": "confirmed",
+          "source_ref": "user-intake",
+          "observed_at": "2026-11-23T08:00:00-08:00"
+        },
+        "current_policy": {
+          "value": {
+            "ends_on": "2026-12-01",
+            "continuous_months": 36,
+            "lapse_days": 0,
+            "lender_requirements": []
+          },
+          "status": "confirmed",
+          "source_ref": "user-intake",
+          "observed_at": "2026-11-23T08:00:00-08:00"
+        },
+        "monitoring_consent": {
+          "value": false,
+          "status": "confirmed",
+          "source_ref": "user-intake",
+          "observed_at": "2026-11-23T08:00:00-08:00"
+        }
+      }
+    }
+  ],
+  "coverages": [
+    {
+      "id": "coverage-v1",
+      "revision": 1,
+      "at": "2026-11-23T08:00:00-08:00",
+      "starts_on": "2026-12-01",
+      "term_months": 6,
+      "source_ref": "coverage-brief",
+      "terms": {
+        "bi_per_person_cents": {
+          "status": "requested",
+          "value": 10000000
+        },
+        "bi_per_accident_cents": {
+          "status": "requested",
+          "value": 30000000
+        },
+        "property_damage_cents": {
+          "status": "requested",
+          "value": 10000000
+        },
+        "collision_deductible_cents": {
+          "status": "requested",
+          "value": 50000
+        },
+        "comprehensive_deductible_cents": {
+          "status": "requested",
+          "value": 50000
+        },
+        "um_per_person_cents": {
+          "status": "requested",
+          "value": 10000000
+        },
+        "um_per_accident_cents": {
+          "status": "requested",
+          "value": 30000000
+        },
+        "medical_payments_cents": {
+          "status": "requested",
+          "value": 500000
+        },
+        "rental_daily_cents": {
+          "status": "requested",
+          "value": 5000
+        },
+        "rental_total_cents": {
+          "status": "requested",
+          "value": 150000
+        },
+        "rental_days": {
+          "status": "requested",
+          "value": 30
+        },
+        "roadside_limit_cents": {
+          "status": "requested",
+          "value": 10000
+        },
+        "gap": {
+          "status": "requested",
+          "value": false
+        },
+        "pip": {
+          "status": "not_applicable",
+          "value": null
+        }
+      }
+    }
+  ],
+  "providers": [
+    {
+      "id": "insurer-a",
+      "name": "Harbor Mutual",
+      "legal_entity": "Harbor Mutual Demo Insurance Company",
+      "description": "Fictional local provider; published deterministic six-month pricing rules.",
+      "rules": [
+        {
+          "revision": 1,
+          "published_at": "2026-11-01T09:00:00-08:00",
+          "effective_at": "2026-11-01T09:00:00-08:00",
+          "required_fields": [
+            "drivers",
+            "vehicle",
+            "annual_mileage",
+            "garaging",
+            "vehicle_use",
+            "ownership",
+            "current_policy",
+            "coverage"
+          ],
+          "base_premium_cents": 65000,
+          "low_mileage_threshold": 12000,
+          "low_mileage_discount_cents": 5000,
+          "installment_fee_cents": 500,
+          "rental_available": true,
+          "collision_deductible_cents": null,
+          "ask_mileage": true
+        }
+      ]
+    },
+    {
+      "id": "insurer-b",
+      "name": "Juniper Auto",
+      "legal_entity": "Juniper Auto Demo Insurance Company",
+      "description": "Fictional local provider; published deterministic six-month pricing rules.",
+      "rules": [
+        {
+          "revision": 1,
+          "published_at": "2026-11-01T09:00:00-08:00",
+          "effective_at": "2026-11-01T09:00:00-08:00",
+          "required_fields": [
+            "drivers",
+            "vehicle",
+            "annual_mileage",
+            "garaging",
+            "vehicle_use",
+            "ownership",
+            "current_policy",
+            "coverage"
+          ],
+          "base_premium_cents": 68000,
+          "low_mileage_threshold": 12000,
+          "low_mileage_discount_cents": 2000,
+          "installment_fee_cents": 0,
+          "rental_available": false,
+          "collision_deductible_cents": 100000,
+          "ask_mileage": false
+        }
+      ]
+    }
+  ],
+  "grants": [
+    {
+      "id": "grant-a",
+      "provider_id": "insurer-a",
+      "profile_revision": 1,
+      "fields": [
+        "drivers",
+        "vehicle",
+        "annual_mileage",
+        "garaging",
+        "vehicle_use",
+        "ownership",
+        "current_policy",
+        "coverage"
+      ],
+      "purpose": "quote",
+      "expires_at": "2026-12-01T00:00:00-08:00",
+      "revoked": false,
+      "source_ref": "trusted-user-decision-a"
+    },
+    {
+      "id": "grant-b",
+      "provider_id": "insurer-b",
+      "profile_revision": 1,
+      "fields": [
+        "drivers",
+        "vehicle",
+        "annual_mileage",
+        "garaging",
+        "vehicle_use",
+        "ownership",
+        "current_policy",
+        "coverage"
+      ],
+      "purpose": "quote",
+      "expires_at": "2026-12-01T00:00:00-08:00",
+      "revoked": false,
+      "source_ref": "trusted-user-decision-b"
+    }
+  ],
+  "previews": [
+    {
+      "id": "preview-100",
+      "kind": "application",
+      "provider_id": "insurer-a",
+      "profile_revision": 1,
+      "coverage_revision": 1,
+      "rule_revision": 1,
+      "grant_id": "grant-a",
+      "application_id": null,
+      "application_revision": 0,
+      "request_id": null,
+      "payload": {
+        "annual_mileage": 12000,
+        "coverage": {
+          "starts_on": "2026-12-01",
+          "term_months": 6,
+          "terms": {
+            "bi_per_person_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "bi_per_accident_cents": {
+              "status": "requested",
+              "value": 30000000
+            },
+            "property_damage_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "collision_deductible_cents": {
+              "status": "requested",
+              "value": 50000
+            },
+            "comprehensive_deductible_cents": {
+              "status": "requested",
+              "value": 50000
+            },
+            "um_per_person_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "um_per_accident_cents": {
+              "status": "requested",
+              "value": 30000000
+            },
+            "medical_payments_cents": {
+              "status": "requested",
+              "value": 500000
+            },
+            "rental_daily_cents": {
+              "status": "requested",
+              "value": 5000
+            },
+            "rental_total_cents": {
+              "status": "requested",
+              "value": 150000
+            },
+            "rental_days": {
+              "status": "requested",
+              "value": 30
+            },
+            "roadside_limit_cents": {
+              "status": "requested",
+              "value": 10000
+            },
+            "gap": {
+              "status": "requested",
+              "value": false
+            },
+            "pip": {
+              "status": "not_applicable",
+              "value": null
+            }
+          }
+        },
+        "current_policy": {
+          "ends_on": "2026-12-01",
+          "continuous_months": 36,
+          "lapse_days": 0,
+          "lender_requirements": []
+        },
+        "drivers": [
+          {
+            "person_id": "person-maya",
+            "name": "Maya Chen",
+            "years_licensed": 14,
+            "accidents": 0,
+            "violations": 0,
+            "excluded": false
+          }
+        ],
+        "garaging": {
+          "city": "Los Angeles",
+          "state": "CA-DEMO",
+          "zip": "90026"
+        },
+        "ownership": "owned",
+        "vehicle": {
+          "year": 2021,
+          "make": "Honda",
+          "model": "Civic",
+          "vin": "SYNTHETIC00000001"
+        },
+        "vehicle_use": "commute"
+      },
+      "expires_at": "2026-11-24T17:05:00.000Z"
+    },
+    {
+      "id": "preview-108",
+      "kind": "application",
+      "provider_id": "insurer-b",
+      "profile_revision": 1,
+      "coverage_revision": 1,
+      "rule_revision": 1,
+      "grant_id": "grant-b",
+      "application_id": null,
+      "application_revision": 0,
+      "request_id": null,
+      "payload": {
+        "annual_mileage": 12000,
+        "coverage": {
+          "starts_on": "2026-12-01",
+          "term_months": 6,
+          "terms": {
+            "bi_per_person_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "bi_per_accident_cents": {
+              "status": "requested",
+              "value": 30000000
+            },
+            "property_damage_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "collision_deductible_cents": {
+              "status": "requested",
+              "value": 50000
+            },
+            "comprehensive_deductible_cents": {
+              "status": "requested",
+              "value": 50000
+            },
+            "um_per_person_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "um_per_accident_cents": {
+              "status": "requested",
+              "value": 30000000
+            },
+            "medical_payments_cents": {
+              "status": "requested",
+              "value": 500000
+            },
+            "rental_daily_cents": {
+              "status": "requested",
+              "value": 5000
+            },
+            "rental_total_cents": {
+              "status": "requested",
+              "value": 150000
+            },
+            "rental_days": {
+              "status": "requested",
+              "value": 30
+            },
+            "roadside_limit_cents": {
+              "status": "requested",
+              "value": 10000
+            },
+            "gap": {
+              "status": "requested",
+              "value": false
+            },
+            "pip": {
+              "status": "not_applicable",
+              "value": null
+            }
+          }
+        },
+        "current_policy": {
+          "ends_on": "2026-12-01",
+          "continuous_months": 36,
+          "lapse_days": 0,
+          "lender_requirements": []
+        },
+        "drivers": [
+          {
+            "person_id": "person-maya",
+            "name": "Maya Chen",
+            "years_licensed": 14,
+            "accidents": 0,
+            "violations": 0,
+            "excluded": false
+          }
+        ],
+        "garaging": {
+          "city": "Los Angeles",
+          "state": "CA-DEMO",
+          "zip": "90026"
+        },
+        "ownership": "owned",
+        "vehicle": {
+          "year": 2021,
+          "make": "Honda",
+          "model": "Civic",
+          "vin": "SYNTHETIC00000001"
+        },
+        "vehicle_use": "commute"
+      },
+      "expires_at": "2026-11-24T17:05:00.000Z"
+    }
+  ],
+  "applications": [
+    {
+      "id": "application-101",
+      "provider_id": "insurer-a",
+      "revision": 1,
+      "status": "needs_info",
+      "versions": [
+        {
+          "revision": 1,
+          "profile_revision": 1,
+          "coverage_revision": 1,
+          "rule_revision": 1,
+          "disclosure_id": "disclosure-102",
+          "queue_id": "queue-application-101-r1",
+          "submitted_at": "2026-11-24T09:00:00-08:00"
+        }
+      ],
+      "withdrawn_at": null
+    },
+    {
+      "id": "application-109",
+      "provider_id": "insurer-b",
+      "revision": 1,
+      "status": "quoted",
+      "versions": [
+        {
+          "revision": 1,
+          "profile_revision": 1,
+          "coverage_revision": 1,
+          "rule_revision": 1,
+          "disclosure_id": "disclosure-110",
+          "queue_id": "queue-application-109-r1",
+          "submitted_at": "2026-11-24T09:00:00-08:00"
+        }
+      ],
+      "withdrawn_at": null
+    }
+  ],
+  "disclosures": [
+    {
+      "id": "disclosure-102",
+      "application_id": "application-101",
+      "application_revision": 1,
+      "provider_id": "insurer-a",
+      "profile_revision": 1,
+      "coverage_revision": 1,
+      "grant_id": "grant-a",
+      "purpose": "quote",
+      "kind": "application",
+      "request_id": null,
+      "payload": {
+        "annual_mileage": 12000,
+        "coverage": {
+          "starts_on": "2026-12-01",
+          "term_months": 6,
+          "terms": {
+            "bi_per_person_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "bi_per_accident_cents": {
+              "status": "requested",
+              "value": 30000000
+            },
+            "property_damage_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "collision_deductible_cents": {
+              "status": "requested",
+              "value": 50000
+            },
+            "comprehensive_deductible_cents": {
+              "status": "requested",
+              "value": 50000
+            },
+            "um_per_person_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "um_per_accident_cents": {
+              "status": "requested",
+              "value": 30000000
+            },
+            "medical_payments_cents": {
+              "status": "requested",
+              "value": 500000
+            },
+            "rental_daily_cents": {
+              "status": "requested",
+              "value": 5000
+            },
+            "rental_total_cents": {
+              "status": "requested",
+              "value": 150000
+            },
+            "rental_days": {
+              "status": "requested",
+              "value": 30
+            },
+            "roadside_limit_cents": {
+              "status": "requested",
+              "value": 10000
+            },
+            "gap": {
+              "status": "requested",
+              "value": false
+            },
+            "pip": {
+              "status": "not_applicable",
+              "value": null
+            }
+          }
+        },
+        "current_policy": {
+          "ends_on": "2026-12-01",
+          "continuous_months": 36,
+          "lapse_days": 0,
+          "lender_requirements": []
+        },
+        "drivers": [
+          {
+            "person_id": "person-maya",
+            "name": "Maya Chen",
+            "years_licensed": 14,
+            "accidents": 0,
+            "violations": 0,
+            "excluded": false
+          }
+        ],
+        "garaging": {
+          "city": "Los Angeles",
+          "state": "CA-DEMO",
+          "zip": "90026"
+        },
+        "ownership": "owned",
+        "vehicle": {
+          "year": 2021,
+          "make": "Honda",
+          "model": "Civic",
+          "vin": "SYNTHETIC00000001"
+        },
+        "vehicle_use": "commute"
+      },
+      "at": "2026-11-24T09:00:00-08:00"
+    },
+    {
+      "id": "disclosure-110",
+      "application_id": "application-109",
+      "application_revision": 1,
+      "provider_id": "insurer-b",
+      "profile_revision": 1,
+      "coverage_revision": 1,
+      "grant_id": "grant-b",
+      "purpose": "quote",
+      "kind": "application",
+      "request_id": null,
+      "payload": {
+        "annual_mileage": 12000,
+        "coverage": {
+          "starts_on": "2026-12-01",
+          "term_months": 6,
+          "terms": {
+            "bi_per_person_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "bi_per_accident_cents": {
+              "status": "requested",
+              "value": 30000000
+            },
+            "property_damage_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "collision_deductible_cents": {
+              "status": "requested",
+              "value": 50000
+            },
+            "comprehensive_deductible_cents": {
+              "status": "requested",
+              "value": 50000
+            },
+            "um_per_person_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "um_per_accident_cents": {
+              "status": "requested",
+              "value": 30000000
+            },
+            "medical_payments_cents": {
+              "status": "requested",
+              "value": 500000
+            },
+            "rental_daily_cents": {
+              "status": "requested",
+              "value": 5000
+            },
+            "rental_total_cents": {
+              "status": "requested",
+              "value": 150000
+            },
+            "rental_days": {
+              "status": "requested",
+              "value": 30
+            },
+            "roadside_limit_cents": {
+              "status": "requested",
+              "value": 10000
+            },
+            "gap": {
+              "status": "requested",
+              "value": false
+            },
+            "pip": {
+              "status": "not_applicable",
+              "value": null
+            }
+          }
+        },
+        "current_policy": {
+          "ends_on": "2026-12-01",
+          "continuous_months": 36,
+          "lapse_days": 0,
+          "lender_requirements": []
+        },
+        "drivers": [
+          {
+            "person_id": "person-maya",
+            "name": "Maya Chen",
+            "years_licensed": 14,
+            "accidents": 0,
+            "violations": 0,
+            "excluded": false
+          }
+        ],
+        "garaging": {
+          "city": "Los Angeles",
+          "state": "CA-DEMO",
+          "zip": "90026"
+        },
+        "ownership": "owned",
+        "vehicle": {
+          "year": 2021,
+          "make": "Honda",
+          "model": "Civic",
+          "vin": "SYNTHETIC00000001"
+        },
+        "vehicle_use": "commute"
+      },
+      "at": "2026-11-24T09:00:00-08:00"
+    }
+  ],
+  "requests": [
+    {
+      "id": "question-mileage",
+      "provider_id": "insurer-a",
+      "application_id": "application-101",
+      "application_revision": 1,
+      "fields": [
+        "annual_mileage"
+      ],
+      "question": "Please confirm the annual mileage from the supplied owner intake.",
+      "reply_by": "2026-11-25T17:00:00-08:00",
+      "status": "open",
+      "disclosure_id": null,
+      "source_ref": "harbor-question-1"
+    }
+  ],
+  "quotes": [
+    {
+      "id": "quote-application-101-r1-v1",
+      "provider_id": "insurer-a",
+      "application_id": "application-101",
+      "application_revision": 1,
+      "profile_revision": 1,
+      "coverage_revision": 1,
+      "quote_id": "quote-application-101-r1",
+      "quote_revision": 1,
+      "issued_at": "2026-11-24T09:00:00-08:00",
+      "expires_at": "2026-12-01T17:00:00.000Z",
+      "source_ref": "insurer-a-reply-application-101-r1-v1",
+      "terms": {
+        "starts_on": "2026-12-01",
+        "term_months": 6,
+        "terms": {
+          "bi_per_person_cents": {
+            "status": "offered",
+            "value": 10000000
+          },
+          "bi_per_accident_cents": {
+            "status": "offered",
+            "value": 30000000
+          },
+          "property_damage_cents": {
+            "status": "offered",
+            "value": 10000000
+          },
+          "collision_deductible_cents": {
+            "status": "offered",
+            "value": 50000
+          },
+          "comprehensive_deductible_cents": {
+            "status": "offered",
+            "value": 50000
+          },
+          "um_per_person_cents": {
+            "status": "offered",
+            "value": 10000000
+          },
+          "um_per_accident_cents": {
+            "status": "offered",
+            "value": 30000000
+          },
+          "medical_payments_cents": {
+            "status": "offered",
+            "value": 500000
+          },
+          "rental_daily_cents": {
+            "status": "offered",
+            "value": 5000
+          },
+          "rental_total_cents": {
+            "status": "offered",
+            "value": 150000
+          },
+          "rental_days": {
+            "status": "offered",
+            "value": 30
+          },
+          "roadside_limit_cents": {
+            "status": "offered",
+            "value": 10000
+          },
+          "gap": {
+            "status": "offered",
+            "value": false
+          },
+          "pip": {
+            "status": "not_applicable",
+            "value": null
+          }
+        },
+        "stage": "conditional",
+        "premium_cents": 60000,
+        "fees_cents": 3000,
+        "taxes_cents": 0,
+        "total_cents": 63000,
+        "installments_cents": [
+          10500,
+          10500,
+          10500,
+          10500,
+          10500,
+          10500
+        ],
+        "discounts": [
+          {
+            "name": "Low annual mileage",
+            "amount_cents": 5000,
+            "status": "conditional",
+            "condition": "Annual mileage at most 12000; no driving-data enrollment.",
+            "source_ref": "insurer-a-rules-r1"
+          }
+        ],
+        "conditions": [
+          "Personal/commute use only; business use excluded.",
+          "No policy is purchased or bound. Synthetic provider rules."
+        ]
+      },
+      "document_id": "document-105",
+      "terms_document_id": "document-106",
+      "document_sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+    },
+    {
+      "id": "quote-application-109-r1-v1",
+      "provider_id": "insurer-b",
+      "application_id": "application-109",
+      "application_revision": 1,
+      "profile_revision": 1,
+      "coverage_revision": 1,
+      "quote_id": "quote-application-109-r1",
+      "quote_revision": 1,
+      "issued_at": "2026-11-24T09:00:00-08:00",
+      "expires_at": "2026-12-01T17:00:00.000Z",
+      "source_ref": "insurer-b-reply-application-109-r1-v1",
+      "terms": {
+        "starts_on": "2026-12-01",
+        "term_months": 6,
+        "terms": {
+          "bi_per_person_cents": {
+            "status": "offered",
+            "value": 10000000
+          },
+          "bi_per_accident_cents": {
+            "status": "offered",
+            "value": 30000000
+          },
+          "property_damage_cents": {
+            "status": "offered",
+            "value": 10000000
+          },
+          "collision_deductible_cents": {
+            "status": "offered",
+            "value": 100000
+          },
+          "comprehensive_deductible_cents": {
+            "status": "offered",
+            "value": 50000
+          },
+          "um_per_person_cents": {
+            "status": "offered",
+            "value": 10000000
+          },
+          "um_per_accident_cents": {
+            "status": "offered",
+            "value": 30000000
+          },
+          "medical_payments_cents": {
+            "status": "offered",
+            "value": 500000
+          },
+          "rental_daily_cents": {
+            "status": "not_offered",
+            "value": null
+          },
+          "rental_total_cents": {
+            "status": "not_offered",
+            "value": null
+          },
+          "rental_days": {
+            "status": "not_offered",
+            "value": null
+          },
+          "roadside_limit_cents": {
+            "status": "offered",
+            "value": 10000
+          },
+          "gap": {
+            "status": "offered",
+            "value": false
+          },
+          "pip": {
+            "status": "not_applicable",
+            "value": null
+          }
+        },
+        "stage": "written",
+        "premium_cents": 66000,
+        "fees_cents": 0,
+        "taxes_cents": 0,
+        "total_cents": 66000,
+        "installments_cents": [
+          11000,
+          11000,
+          11000,
+          11000,
+          11000,
+          11000
+        ],
+        "discounts": [
+          {
+            "name": "Low annual mileage",
+            "amount_cents": 2000,
+            "status": "applied",
+            "condition": "Annual mileage at most 12000; no driving-data enrollment.",
+            "source_ref": "insurer-b-rules-r1"
+          }
+        ],
+        "conditions": [
+          "Personal/commute use only; business use excluded.",
+          "No policy is purchased or bound. Synthetic provider rules."
+        ]
+      },
+      "document_id": "document-112",
+      "terms_document_id": "document-113",
+      "document_sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+    }
+  ],
+  "documents": [
+    {
+      "id": "document-105",
+      "kind": "quote_pdf",
+      "owner_id": "quote-application-101-r1-v1",
+      "source_ref": "insurer-a-reply-application-101-r1-v1",
+      "at": "2026-11-24T09:00:00-08:00",
+      "asset_id": "original-document-105",
+      "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9",
+      "mime_type": "application/pdf",
+      "bytes": 2638
+    },
+    {
+      "id": "document-106",
+      "kind": "quote_terms",
+      "owner_id": "quote-application-101-r1-v1",
+      "source_ref": "insurer-a-reply-application-101-r1-v1",
+      "at": "2026-11-24T09:00:00-08:00",
+      "asset_id": "original-document-106",
+      "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa",
+      "mime_type": "application/json",
+      "bytes": 2350
+    },
+    {
+      "id": "document-112",
+      "kind": "quote_pdf",
+      "owner_id": "quote-application-109-r1-v1",
+      "source_ref": "insurer-b-reply-application-109-r1-v1",
+      "at": "2026-11-24T09:00:00-08:00",
+      "asset_id": "original-document-112",
+      "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f",
+      "mime_type": "application/pdf",
+      "bytes": 2649
+    },
+    {
+      "id": "document-113",
+      "kind": "quote_terms",
+      "owner_id": "quote-application-109-r1-v1",
+      "source_ref": "insurer-b-reply-application-109-r1-v1",
+      "at": "2026-11-24T09:00:00-08:00",
+      "asset_id": "original-document-113",
+      "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269",
+      "mime_type": "application/json",
+      "bytes": 2352
+    }
+  ],
+  "comparisons": [],
+  "notices": [
+    {
+      "id": "notice-103",
+      "object_id": "application-101",
+      "at": "2026-11-24T09:00:00-08:00",
+      "title": "Application application-101 submitted",
+      "text": "insurer-a received application-101 revision 1. Submission is pending a provider response."
+    },
+    {
+      "id": "notice-104",
+      "object_id": "application-101",
+      "at": "2026-11-24T09:00:00-08:00",
+      "title": "Question for application-101",
+      "text": "Please confirm the annual mileage from the supplied owner intake. Reply by 2026-11-25T17:00:00-08:00. Request question-mileage."
+    },
+    {
+      "id": "notice-107",
+      "object_id": "quote-application-101-r1-v1",
+      "at": "2026-11-24T09:00:00-08:00",
+      "title": "Quote quote-application-101-r1 revision 1 ready",
+      "text": "Quote quote-application-101-r1 revision 1: insurer-a replied to application-101 revision 1 using profile 1 and coverage 1. Expires 2026-12-01T17:00:00.000Z. Read the original written terms."
+    },
+    {
+      "id": "notice-111",
+      "object_id": "application-109",
+      "at": "2026-11-24T09:00:00-08:00",
+      "title": "Application application-109 submitted",
+      "text": "insurer-b received application-109 revision 1. Submission is pending a provider response."
+    },
+    {
+      "id": "notice-114",
+      "object_id": "quote-application-109-r1-v1",
+      "at": "2026-11-24T09:00:00-08:00",
+      "title": "Quote quote-application-109-r1 revision 1 ready",
+      "text": "Quote quote-application-109-r1 revision 1: insurer-b replied to application-109 revision 1 using profile 1 and coverage 1. Expires 2026-12-01T17:00:00.000Z. Read the original written terms."
+    }
+  ]
+}

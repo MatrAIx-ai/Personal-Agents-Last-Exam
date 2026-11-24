@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "app_id": "coverline",
+  "version": "0.1.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "@genglinliu; upstream #46"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "auto.grant_recorded",
+    "auto.grant_revoked",
+    "auto.profile_corrected",
+    "auto.provider_rules_published",
+    "auto.information_requested",
+    "auto.quote_delivered",
+    "auto.application_declined"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "Original Zebra-inspired quote comparison GUI",
+    "real_delivery": false
+  },
+  "limitations": [
+    "M1: one synthetic owner/vehicle and two providers. Full four-provider/three-scene corpus and independent acceptance remain M2/M3.",
+    "No real insurance advice, purchase/binding, payment, credit inquiry or driving-data enrollment."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}
