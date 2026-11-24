@@ -86,7 +86,9 @@ function validateSeed(ctx, data) {
   unique(data.notices, 'notice');
 }
 
-const records = data => data.reservations;
-const objects = data => [...data.facilities, ...data.sites, ...data.reservations].map(x => x.id);
+// Records and objects are the same list, so Core's record import counts
+// (env.load_seed without a bundle) agree with the dataset's expected counts.
+const records = data => [...data.facilities, ...data.sites, ...data.reservations];
+const objects = data => records(data).map(x => x.id);
 
 module.exports = {validateSeed, records, objects, references: () => [], assetReferences: () => []};

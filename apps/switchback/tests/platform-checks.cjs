@@ -112,7 +112,85 @@ async function main() {
       assert.equal(clean.data.notices.length, 0);
     }
     ok('20 resets, one after each anchor run with its audit exported first, restore the loaded state hash', true);
-    console.log(JSON.stringify({app: 'switchback', baseline_sha256: baseline, passed: results}, null, 2));
+
+    // (g) Permissions. Under browse the three confirms and wallet.set_default are
+    // left out of discovery and refused with permission_denied, leaving the state
+    // hash unchanged; under full the same calls on the same previews commit.
+    const gated = ['switchback.reservations.confirm', 'switchback.reservations.modify.confirm', 'switchback.reservations.cancel.confirm', 'switchback.wallet.set_default'];
+    const outcomes = {};
+    for (const profile of ['browse', 'full']) {
+      assert.equal((await infra.call('env.reset', {expected_version: await version(), profile})).status, 'ready');
+      const listed = (await agent.request('tools/list')).result.tools.map(t => t.name);
+      ok(`${profile}: discovery ${profile === 'browse' ? 'leaves out' : 'lists'} the three confirms and wallet.set_default`,
+        gated.every(name => listed.includes(name) === (profile === 'full')));
+      // Previews are allowed under both profiles.
+      const h = (await act('cart.hold', {site_id: 'cf-B12', arrival: '2027-06-25', departure: '2027-06-27'})).hold;
+      const book = (await act('reservations.preview', {hold_id: h.id, card_id: 'card-dana-visa'})).preview;
+      const change = (await act('reservations.modify.preview', {reservation_id: 'res-0001', arrival: '2027-06-19', departure: '2027-06-21'})).preview;
+      const drop = (await act('reservations.cancel.preview', {reservation_id: 'res-0002'})).preview;
+      const calls = [['switchback.reservations.confirm', {preview_id: book.id}], ['switchback.reservations.modify.confirm', {preview_id: change.id}],
+        ['switchback.reservations.cancel.confirm', {preview_id: drop.id}], ['switchback.wallet.set_default', {card_id: 'card-dana-visa'}]];
+      outcomes[profile] = [];
+      for (const [name, args] of calls) {
+        const before = await infra.call('env.snapshot');
+        const out = await agent.call(name, {expected_version: before.version, request_id: `g-${profile}-${name}`, ...args});
+        const after = await infra.call('env.snapshot');
+        if (profile === 'browse') {
+          assert.equal(out.status, 'permission_denied', name);
+          assert.equal(hash(after.snapshot), hash(before.snapshot), name + ' left the hash unchanged');
+          assert.deepEqual(after.version, before.version, name + ' left the version unchanged');
+        } else {
+          assert.equal(out.status, 'committed', name + ': ' + JSON.stringify(out));
+          assert.notEqual(hash(after.snapshot), hash(before.snapshot), name + ' changed state');
+        }
+        outcomes[profile].push(`${name.replace('switchback.', '')}: ${out.status}`);
+      }
+    }
+    ok('(g) browse refuses each confirm and wallet.set_default with the hash unchanged; full commits each', true);
+
+    // (c) on the two larger fixtures, in their own runs: Infra loads the fixture
+    // at its task clock, then 20 runs each apply a prefix of the default schedule
+    // and some Agent writes, export the audit and reset to the loaded hash.
+    const fixtureHashes = {};
+    for (const name of ['high-country', 'desert-rivers']) {
+      const run = 'reset-' + name;
+      const fi = await open('infra', run), fa = await open('agent', run);
+      const seed = require(`../fixtures/${name}.json`), schedule = require(`../fixtures/schedules/${name}.json`);
+      const fv = async () => (await fi.call('env.snapshot')).version;
+      assert.equal((await fi.call('env.reset', {expected_version: await fv(), profile: 'full'})).status, 'ready');
+      assert.equal((await fi.call('env.load_seed', {expected_version: await fv(), data: seed, virtual_now: schedule.initial_time, request_id: 'load'})).status, 'ready');
+      const start = (await fi.call('env.snapshot')).snapshot, base = hash(start);
+      assert.equal(base, hash({data: seed}));
+      let k = 0;
+      const write = async (tool, args) => {
+        const out = await fa.call('switchback.' + tool, {expected_version: await fv(), request_id: `${name}-${++k}`, ...args});
+        assert.equal(out.status, 'committed', tool + ': ' + JSON.stringify(out).slice(0, 300));
+        return out;
+      };
+      // Nights 50 days out stay ahead of every scheduled event's clock.
+      const day = n => new Date(Date.parse(schedule.initial_time.slice(0, 10) + 'T00:00:00Z') + n * 86400000).toISOString().slice(0, 10);
+      const open3 = (await fa.call('switchback.sites.search', {arrival: day(50), departure: day(51), available_only: true})).sites;
+      for (let i = 0; i < 20; i++) {
+        for (const e of schedule.events.slice(0, 3 + (i * 7) % 16)) {
+          assert.equal((await fi.call('env.apply_event', {expected_version: await fv(), event: e})).status, 'committed', e.event_id);
+        }
+        await write('equipment.save', {label: 'Run ' + i, kind: 'tent', length_ft: 0});
+        if (i % 2 === 0) {
+          const hold = (await write('cart.hold', {site_id: open3[i % open3.length].id, arrival: day(50), departure: day(51)})).hold;
+          await write('cart.release', {hold_id: hold.id});
+        }
+        const exported = await fi.call('env.snapshot');
+        assert.ok(exported.snapshot.audit.length > 0 && hash(exported.snapshot) !== base, name + ' run ' + i);
+        assert.equal((await fi.call('env.reset', {expected_version: exported.version})).status, 'ready');
+        const clean = (await fi.call('env.snapshot')).snapshot;
+        assert.equal(hash(clean), base, `${name}: reset ${i + 1}`);
+        assert.equal(clean.virtual_now, schedule.initial_time);
+        assert.equal(clean.data.notices.length, 0);
+      }
+      fixtureHashes[name] = base;
+    }
+    ok('(c) on high-country and desert-rivers: 20 resets each, after schedule events and Agent writes, restore the loaded hash and clock', true);
+    console.log(JSON.stringify({app: 'switchback', baseline_sha256: baseline, fixture_sha256: fixtureHashes, permissions: outcomes, passed: results}, null, 2));
   } finally {
     await Promise.allSettled(clients.map(c => c.close()));
     prepared.cleanup();

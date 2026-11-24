@@ -2,21 +2,27 @@
 
 Switchback is a resettable campground reservation App with synthetic data, built for the approved proposal in [#25](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/25) ([`proposals/environment/switchback.md`](../../proposals/environment/switchback.md)). Its workflows follow Recreation.gov's public pages; the $10 change fee is modelled on its [rules page](https://www.recreation.gov/rules-reservation-policies). The 15-minute cart hold, release schedule, refund ladders, cutoffs and alert effects are Switchback's own rules; `contribution/dataset.json` lists each rule with its source and access date. A booking can check out cleanly and still be wrong for the people going, and the end state shows which happened.
 
-This is the **first version (M1)**: workflows 1-4 through MCP tools, per-facility policy records, one fixture, reset, business tests, check (a), check (c) and a publisher script that delivers notices to real Mail. Pages, more fixtures and the remaining checks follow in M2 and M3 (see [Remaining work](#remaining-work)).
+This is **M2**: workflows 1-4 through MCP tools and nine pages on the public business Web Host, per-facility policy records, three reset fixtures with default scenario schedules, reset, business tests, checks (a) to (e) and (g), and a publisher script that delivers notices to real Mail. Check (f), the independent reproduction, follows in M3 (see [Remaining work](#remaining-work)).
 
 ## Run it
 
-Node.js 18+. No packages to install.
+Node.js 18+. The business tests need no packages; the browser test needs the repository's Playwright dev dependency.
 
 ```sh
-# From this directory: business tests and the example event
+# From this directory: business tests (with checks (a) and (b) and the fixture checks) and the example event
 npm test
 npm run example
 
 # From the repository root: real Core with separate Agent and Infra MCP connections
-npm run app:verify -- --app apps/switchback --output .artifacts/switchback.json
-node apps/switchback/tests/platform-checks.cjs
+node runtime/cli.cjs verify --app apps/switchback
+node runtime/cli.cjs verify --app apps/switchback --with examples/apps/mail
+node apps/switchback/tests/platform-checks.cjs   # (c), (g), retries and stale versions
+node apps/switchback/tests/schedule-checks.cjs   # (d) and (e)
 node apps/switchback/examples/publish-to-mail.cjs
+
+# Pages
+node apps/switchback/examples/web-demo.cjs --fixture minimal
+npm ci && npx playwright install chromium && node apps/switchback/tests/browser.cjs
 ```
 
 ## Workflows
@@ -58,12 +64,45 @@ Infra applies these with `env.apply_event`. An event naming an unknown record, o
 
 Confirmations, changes, cancellations, closures, alerts, no-show releases and posted refunds create a notice in the account's `notices`, in the same commit as the business change. Each notice holds a full CloudEvents message for Mail 1.3.0's `channel.email` receive contract (`urn:pale:email-message:2`, payload `urn:pale:email-payload:1`, type `org.pale.mail.notification.v1`), with the notice ID as the CloudEvents `id`. Every commit validates these messages against a pinned copy of Mail's wire schema ([`schemas/router-message.schema.json`](schemas/router-message.schema.json)). The publish direction is declared in `contribution/contribution.json`. Switchback does not record delivery.
 
-No host-side publisher exists on main, so the package ships one: [`examples/publish-to-mail.cjs`](examples/publish-to-mail.cjs). It replaces the `app:verify --with examples/apps/mail` command named in the proposal, which adds Mail to the assembly but does not start Messaging.
+No host-side publisher exists on main, so the package ships one: [`examples/publish-to-mail.cjs`](examples/publish-to-mail.cjs). The proposal's `app:verify --with examples/apps/mail` command also passes (see below), but it only adds Mail to the assembly and does not start Messaging.
 
 - **What it does:** applies the example closure event through real Core, starts Messaging with `runtime/messaging/service.cjs --publisher switchback` and the trusted config in [`examples/messaging/config.json`](examples/messaging/config.json), calls `router.publish` for each stored notice, and reads each one back with Mail's own `mail.get` using `receipt.event_id`.
 - **When it runs:** after the write or event that creates the notices and before the next `env.advance_time`, because Messaging delivers at the receiver's current virtual time.
 - **Which notices are new:** it offers every stored notice in creation order, with the notice ID as both `request_id` and CloudEvents `id`. Messaging keeps the receipts, so a notice it already delivered returns `duplicate: true` with its original `event_id` and Mail does not change.
 - **Outcomes it shows:** a committed delivery read back from Mail; a retry that is deduplicated; and a rejection before delivery, staged with a config that has no grant for the recipient ([`config-no-grant.json`](examples/messaging/config-no-grant.json)), which returns `recipient_not_authorized` and leaves both Mail and Switchback unchanged. In the reference router a refusal by Mail itself halts the run, so the rejected case uses a missing grant.
+
+`node runtime/cli.cjs verify --app apps/switchback --with examples/apps/mail` (or `npm run app:verify -- --app apps/switchback --with examples/apps/mail`) runs the public verifier with Mail 1.3.0 added to the assembly, as the proposal names it. It checks that Switchback loads and runs next to Mail; it does not start Messaging or deliver anything. The publisher script above is the delivery proof.
+
+## Pages
+
+Nine pages, declared with the optional `pale.web` extension in [`contribution/gui.json`](contribution/gui.json) (`gui_ref` in `contribution.json`) and served by the public business Web Host (`runtime/web/server.cjs`). The Host serves only [`gui/index.html`](gui/index.html) and [`gui/src/app.js`](gui/src/app.js), so the pages are views inside that one controller, picked by the URL fragment:
+
+| Page | Route | Tools it shows |
+| :--- | :--- | :--- |
+| Search | `#/search` | `facilities.search`, `sites.search` with every filter |
+| Facility, with alerts | `#/facility/<id>` | `facilities.get`, `alerts.list` |
+| Site | `#/site/<id>/<arrival>/<departure>` | `sites.get`, `facilities.get`; hold with `cart.hold` |
+| Checkout preview | `#/checkout` | `account.get`, `reservations.preview`, `reservations.confirm`, `cart.release` |
+| Receipt | `#/receipt/<id>` | `reservations.get`, `wallet.list` |
+| Reservations | `#/reservations/<state>` | `reservations.list` (the state filter is the tool's) |
+| Reservation detail | `#/reservation/<id>` | `reservations.get`; modify, cancel and late-arrival panels with their previews and confirms |
+| Account and wallet | `#/account` | `account.get`, `wallet.list`, `wallet.set_default`, `equipment.save`, `companions.save` |
+| Policy | `#/policy/<facility>` | `policy.get` |
+
+Each page renders what its tools return. The controller has no business rules and no browser store: it keeps only the route, the last search form and the hold or preview a checkout write just returned. Writes carry the version the page last read and a request ID that a retry reuses. A refused call shows its error code (for example `site_taken`, `preview_stale`, `permission_denied`). Checkout starts from the saved defaults by leaving those fields out, so the tool's own pre-fill applies and the stale card and trailer show on the preview.
+
+The 15 icons are 24x24 PNG files drawn from simple shapes by [`gui/icons.cjs`](gui/icons.cjs), self-made and dedicated to the public domain (CC0 1.0). The GUI content policy disables SVG and the Host's image policy allows `blob:` but not `data:` URLs, so the PNG bytes are embedded in `app.js` and turned into `blob:` URLs in the browser. `node gui/icons.cjs --check` and a business test confirm the embedded bytes match the drawing code. Styles that `/shared/style.css` lacks are added as a constructed stylesheet, which the Host's style policy allows.
+
+### Start the pages
+
+```sh
+node apps/switchback/examples/web-demo.cjs --fixture minimal          # or high-country, desert-rivers
+node apps/switchback/examples/web-demo.cjs --fixture high-country --until 2026-06-20T12:00:00-06:00
+```
+
+Open the access link it prints. The clock needs care. Core starts a new instance at the registry's `initial_time`, and the shared `apps.registry.json` uses 2026-11-18 for every App, while the minimal fixture's clock is 2027-05-20 (and the other fixtures have their own). At 2026-11-18 the June 2027 nights are unreleased and the seeded upcoming stays read as months away. So the script starts the Host, then acts as the trusted Infra caller: it loads the chosen fixture with `env.load_seed` at that fixture's clock, which also makes that clock the reset point. It loads only when the run is not already at that fixture's baseline (or with `--reload`), so restarting keeps earlier changes. `--until` applies the fixture's default schedule up to that instant and advances the clock. When `apps.registry.json` has no Switchback entry the script uses a disposable registry whose `initial_time` is `fixtures/clock.json`. Starting the Host directly (`node runtime/web/server.cjs --app switchback`) works too, but then the clock is 2026-11-18 until Infra moves it.
+
+The Host's own permissions apply: it offers only the `sandbox` and `scenario` profiles. The browser test, [`tests/browser.cjs`](tests/browser.cjs), drives all four workflows through the pages and compares them with the same tools and Infra snapshots (27 checks: search results, night states, stale defaults on the preview, booking, change fee, cancel refund, late arrival, an alert invisible until Infra applies it, wallet and equipment writes, policy text, icons, 390 px layout, no console or content-policy errors). Screenshots go to `.artifacts/web/switchback/`.
 
 ## Time
 
@@ -75,25 +114,50 @@ Agent reads and writes never move the clock. Time moves only when Infra calls `e
 
 ## Data
 
-[`fixtures/minimal.json`](fixtures/minimal.json) is one account (Dana Okafor) at three fictional facilities with 12 sites, two policy records, three cards and 22 reservations. [`fixtures/generate.cjs`](fixtures/generate.cjs) writes it from a fixed seed: the same seed gives the same bytes. History starts on 2025-01-01 (the earliest record is 2025-01-02), with past stays, cancellations and alerts through April 2027; the task clock is 2027-05-20, and scenario events are on or after 2026-01-01. The saved defaults are stale on purpose. The default card belongs to Dana's mother, one card is expired, the default equipment is an old 18 ft trailer, and one site has an unknown vehicle length. A test enforces both date floors. No real facility, person or payment data is used. See [`contribution/dataset.json`](contribution/dataset.json).
+Three reset fixtures, written by [`fixtures/generate.cjs`](fixtures/generate.cjs) from fixed seeds (the same seeds give the same bytes; `node fixtures/generate.cjs --check` and a test confirm it). All use one account (Dana Okafor) and the identity binding in `fixtures/binding.json`. No real facility, person or payment data is used. See [`contribution/dataset.json`](contribution/dataset.json).
+
+| Fixture | Clock | Facilities | Sites | Reservations | Seeded claims | Schedule events |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| [`minimal.json`](fixtures/minimal.json) (manifest seed) | 2027-05-20 09:00 -07:00 | 3 | 12 | 22 | 0 | 35 |
+| [`high-country.json`](fixtures/high-country.json) | 2026-06-12 08:00 -06:00 | 7 (-06:00 and -07:00) | 308 | 11 | 1,237 | 38 |
+| [`desert-rivers.json`](fixtures/desert-rivers.json) | 2026-10-02 07:30 -07:00 | 6 (-07:00 and -08:00) | 261 | 20 | 1,047 | 38 |
+
+`minimal.json` is the M1 fixture, unchanged: two policy records, three cards, 22 reservations from 2025-01-02 to the two upcoming stays. The saved defaults are stale on purpose. The default card belongs to Dana's mother, one card is expired, the default equipment is an old 18 ft trailer, and one site has an unknown vehicle length.
+
+The two larger fixtures follow the proposal's scale: 6-8 facilities with two or three policy records (the default ladder, the 3-day/50% record and a week-out record), 250-400 sites covering all six attributes with some unknown values, three cards under two cardholders (one expired, the default is Carol's), 2-3 equipment records, 5-6 companions, history from early January 2025 and four upcoming stays. Other bookers' claims fill part of the 180-day released window (busy weekends, quiet weekdays); nights beyond it are unreleased by rule, so no inventory is seeded there. Infra loads them with `env.load_seed` at the clock above; the manifest seed stays `minimal.json`.
+
+Seeded history is on or after 2025-01-01; task clocks and every scheduled event are on or after 2026-01-01. A test checks every date in every fixture, schedule and claim-times file.
+
+### Schedules and hidden values
+
+Each fixture has a default scenario schedule in [`fixtures/schedules/`](fixtures/schedules) with 30-50 events (competing claims, alerts posted, updated and cancelled, closures, a check-in). Applied in order, they check a stay in, cancel one by closure with a refund that posts later, release a no-show, and mark and unmark stays affected. Claim instants were drawn once from OS entropy (`crypto.randomInt`) into [`fixtures/evaluator/`](fixtures/evaluator) and are never regenerated; the generator merges them into the schedule. These files are evaluator and Infra input: no tool, page or business source reads them, and a test enforces that.
+
+Fixture checks, in `tests/fixture-checks.cjs` (run by `npm test` and so by the verifier): each fixture passes the seed schema and `validateSeed`; IDs are unique in every collection; charges equal stay totals and refunds match their history rows to the cent; no site night is held by two stays or claims; every search filter matches some open sites and excludes others, and an unknown attribute never matches; each schedule has 30-50 events in time order that all apply.
 
 ## Checks
 
-| Check | Where | Status |
+| Check | Where | Result |
 | :--- | :--- | :--- |
-| Business rules and every named error | `tests/business.test.cjs` | M1 |
-| (a) Anchor runs: the reference passes every check; do-nothing fails exactly the checks that need a write; each wrong run fails exactly its declared checks | `tests/business.test.cjs` with `tests/checks.cjs` | M1 |
-| (c) Reset: one reset after each anchor run (references, do-nothing and wrong runs, driven through MCP with Infra clock advances and events), the audit exported first, 20 in all; each restores the loaded state hash with no outgoing notice left | `tests/platform-checks.cjs` | M1 |
-| Retries, stale versions and consumed previews through real Core; the `browse` profile refusing a gated write with the state hash unchanged (an early part of (g)) | `tests/platform-checks.cjs` | M1 |
-| Public verifier (MCP discovery, schemas, history load, event, reset, isolation, restart) | `npm run app:verify` | M1 |
-| Delivery to real Mail through Messaging: committed and read back, retried, rejected for a missing grant | `examples/publish-to-mail.cjs` | M1 |
-| (b) Mutation, (d) replay with `env.advance_time`, (e) hidden values, the rest of (g), (f) independent reproduction | | M2-M3 |
+| Business rules and every named error; each enforced rule mapped to its policy text and the preview or page it affects | `tests/business.test.cjs` | `npm test` |
+| (a) Anchor runs: the reference passes every check; do-nothing fails exactly the checks that need a write; each wrong run fails exactly its declared checks | `tests/business.test.cjs`, `tests/scenarios.cjs`, `tests/checks.cjs` | `npm test` |
+| (b) Mutation: 26 single-field mutants of the five reference end states; each fails its own check and only its listed derived checks; checks no mutant fails are reported (none) | `tests/mutation-checks.cjs` | `npm test` |
+| Fixtures and schedules, as listed under Data | `tests/fixture-checks.cjs` | `npm test` |
+| (c) Reset: 20 resets after the minimal fixture's anchor runs (audit exported first), and 20 per larger fixture after schedule events and Agent writes; each restores the loaded hash and clock with no outgoing notice left | `tests/platform-checks.cjs` | real Core |
+| (d) Replay: each of the three schedules applied once with the clock jumping event to event and one `env.advance_time` jump to the end, once in six-hour `env.advance_time` steps with Agent reads between; same state hash, notices and Agent view | `tests/schedule-checks.cjs` | real Core |
+| (e) Hidden values: an observer reads the Agent tools every 12 hours; no output shows an alert, update, cancellation, closure, check-in or claimed night before its event; copies differing only in the claim-times file (all claims redrawn, or one late claim redrawn) give identical traces until the first differing claim; the page files hold no scheduled value | `tests/schedule-checks.cjs` | tool handlers |
+| (g) Permissions: `browse` leaves the three confirms and `wallet.set_default` out of discovery and refuses each with `permission_denied`, hash and version unchanged; `full` lists them and each commits | `tests/platform-checks.cjs` | real Core |
+| Retries, stale versions and consumed previews | `tests/platform-checks.cjs` | real Core |
+| Pages against the tools, in Chromium | `tests/browser.cjs` | Web Host |
+| Public verifier (MCP discovery, schemas, history load, event, reset, isolation, restart), alone and with Mail in the assembly | `node runtime/cli.cjs verify` | real Core |
+| Delivery to real Mail through Messaging: committed and read back, retried, rejected for a missing grant | `examples/publish-to-mail.cjs` | Messaging |
+| (f) Independent reproduction by a second person | | M3 |
+
+(e) runs the tool handlers directly rather than through Core, so the 2,500 reads per trace take seconds; the first probe of each trace compares both paths. Core adds only the status and version fields to those outputs.
 
 ## Remaining work
 
-- Pages (`pale.web`), with PNG icons: M2.
-- Two more fixtures from a seeded generator, each with a scenario schedule: M2.
-- Checks (b), (d), (e) and the rest of (g): M2. Check (f), an independent reproduction: M3.
+- Check (f), an independent reproduction from a clean checkout by someone who did not implement the flows: M3.
+- A recorded human read-through of the three fixtures (the proposal's data deliverable); `dataset.json` review status stays `pending` until then.
 
 ## Dependencies
 
