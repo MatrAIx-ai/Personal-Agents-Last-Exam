@@ -14,7 +14,7 @@
           "format": "date-time"
         },
         "operation": {
-          "const": "parcel.change_resolved"
+          "const": "carrier.change_resolved"
         },
         "payload": {
           "type": "object",
@@ -80,7 +80,7 @@
           "format": "date-time"
         },
         "operation": {
-          "const": "parcel.transit_update"
+          "const": "carrier.transit_update"
         },
         "payload": {
           "type": "object",
@@ -140,7 +140,7 @@
           "format": "date-time"
         },
         "operation": {
-          "const": "parcel.delivery_failed"
+          "const": "carrier.delivery_failed"
         },
         "payload": {
           "type": "object",
@@ -187,7 +187,7 @@
           "format": "date-time"
         },
         "operation": {
-          "const": "parcel.delivered"
+          "const": "carrier.delivered"
         },
         "payload": {
           "type": "object",
@@ -228,7 +228,7 @@
           "format": "date-time"
         },
         "operation": {
-          "const": "parcel.pickup_ready"
+          "const": "carrier.pickup_ready"
         },
         "payload": {
           "type": "object",
@@ -244,12 +244,17 @@
             "point_id": {
               "type": "string",
               "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "pickup_epoch": {
+              "type": "integer",
+              "minimum": 1
             }
           },
           "required": [
             "shipment_id",
             "plan_revision",
-            "point_id"
+            "point_id",
+            "pickup_epoch"
           ],
           "additionalProperties": false
         }
@@ -274,7 +279,7 @@
           "format": "date-time"
         },
         "operation": {
-          "const": "parcel.point_status"
+          "const": "carrier.point_status"
         },
         "payload": {
           "type": "object",
@@ -330,7 +335,7 @@
           "format": "date-time"
         },
         "operation": {
-          "const": "parcel.carrier_relocated"
+          "const": "carrier.relocated"
         },
         "payload": {
           "type": "object",
@@ -382,7 +387,7 @@
           "format": "date-time"
         },
         "operation": {
-          "const": "parcel.collected"
+          "const": "carrier.collected"
         },
         "payload": {
           "type": "object",
@@ -438,7 +443,7 @@
           "format": "date-time"
         },
         "operation": {
-          "const": "parcel.deadline_reached"
+          "const": "carrier.deadline_reached"
         },
         "payload": {
           "type": "object",
@@ -482,7 +487,7 @@
           "format": "date-time"
         },
         "operation": {
-          "const": "parcel.return_completed"
+          "const": "carrier.return_completed"
         },
         "payload": {
           "type": "object",

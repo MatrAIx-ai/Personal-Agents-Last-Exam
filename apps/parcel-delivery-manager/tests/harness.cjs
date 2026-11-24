@@ -75,7 +75,7 @@ function rejects(f, fn, code, message) {
 
 // Build a trusted event with a unique ID.
 let eventSeq = 0;
-const ev = (operation, at, payload) => ({event_id: 'evt-' + (++eventSeq), at, operation: 'parcel.' + operation, payload});
+const ev = (operation, at, payload) => ({event_id: 'evt-' + (++eventSeq), at, operation: 'carrier.' + operation, payload});
 // Preview then submit, as an Agent must. Returns the new change ID.
 function submit(f, id, change) {
   const preview = f.call('change.preview', {id, ...change}).preview;
@@ -85,4 +85,21 @@ function submit(f, id, change) {
 const decide = (f, at, shipment_id, change_id, base_plan_revision, decision = 'applied', reason = null) =>
   f.event(ev('change_resolved', at, {shipment_id, change_id, base_plan_revision, decision, reason}));
 
-module.exports = {fixture, rejects, ev, submit, decide, T, app};
+// Preview then create a collection authorization. Returns {grant_id, pass_id}.
+function authorize(f, id, fields) {
+  const preview = f.call('grant.preview', {id, ...fields}).preview;
+  assert.equal(preview.allowed, true, 'Preview should allow: ' + preview.reason);
+  return f.call('grant.create', {id, ...fields, confirmation: preview.confirmation});
+}
+// A separate seeded run for another acting person over the same ledger and clock, as Infra
+// would load it. Owner, delegate and unauthorized checks never share one session.
+function actAs(f, person) {
+  const account = require('../fixtures/binding.json').accounts.find(a => a.owner_person_id === person).account_id;
+  const seed = f.data;
+  for (const key of ['shipments', 'changes', 'grants', 'passes', 'notices']) seed[key] = seed[key].map(x => ({...x, account_id: account}));
+  seed.account_id = account;
+  seed.owner_person_id = person;
+  return fixture({seed, virtual_now: f.ctx.virtual_now});
+}
+
+module.exports = {fixture, rejects, ev, submit, decide, authorize, actAs, T, app};

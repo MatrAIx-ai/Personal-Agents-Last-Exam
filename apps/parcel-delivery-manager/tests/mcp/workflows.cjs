@@ -35,7 +35,7 @@ const T = name => APP + '.' + name;
     return client;
   }
   let eventSeq = 0;
-  const event = (operation, at, payload) => ({event_id: 'mcp-evt-' + (++eventSeq), at, operation: 'parcel.' + operation, payload});
+  const event = (operation, at, payload) => ({event_id: 'mcp-evt-' + (++eventSeq), at, operation: 'carrier.' + operation, payload});
   const report = {schema: 'parcel-delivery-manager.mcp-workflows.v1', app_id: APP, app_version: require('../../app.json').version,
     runtime_version: require(path.join(runtime, 'package.json')).version, node: process.version, checks, passed: false};
   try {
@@ -111,23 +111,111 @@ const T = name => APP + '.' + name;
     check('Reset restores the clock', Date.parse(snap.snapshot.virtual_now) === Date.parse(require('../../fixtures/clock.json').initial_time));
     check('Pass is valid again after reset', (await agent.call(T('pass.get'), {id: 'S002'})).pass.valid_now === true);
 
-    // ---- W2: two competing handoffs on one parcel ledger ----
-    const collected = at => event('collected', at, {shipment_id: 'S002', point_id: 'P01', pickup_epoch: 1, collector_person_id: 'person-maya', pass_code: 'K7QM-4R2X'});
+    // ---- W3 through real MCP: authorize a collector, with retry ----
+    const grantPreview = await agent.call(T('grant.preview'), {id: 'S002', collector_person_id: 'person-alex', expires_at: '2026-03-04T12:00:00Z'});
+    check('Grant preview is allowed and is a read', grantPreview.preview.allowed === true && JSON.stringify(grantPreview.version) === JSON.stringify(snap.version));
+    const grantArgs = {id: 'S002', collector_person_id: 'person-alex', expires_at: '2026-03-04T12:00:00Z', confirmation: grantPreview.preview.confirmation,
+      expected_version: grantPreview.version, request_id: 'w3-grant'};
+    const granted = await agent.call(T('grant.create'), grantArgs);
+    check('Authorization commits and issues the collector a pass', granted.status === 'committed' && granted.grant_id === 'G001' && granted.pass_id === 'PASS002');
+    check('Retried authorization returns the original receipt', (await agent.call(T('grant.create'), grantArgs)).duplicate === true);
+    const redirect = await agent.call(T('change.preview'), {id: 'S001', kind: 'redirect', point_id: 'P03'});
+    const pendingChange = await agent.call(T('change.submit'), {id: 'S001', kind: 'redirect', point_id: 'P03', confirmation: redirect.preview.confirmation,
+      expected_version: redirect.version, request_id: 'w3-change'});
+    snap = await infra.call('env.snapshot');
+    // History with one live grant, two passes and one pending request, used as a Task seed below.
+    const history = snap.snapshot.data, historyTime = snap.snapshot.virtual_now;
+    check('One authorization and one pending request are committed', history.grants.length === 1 && history.passes.filter(p => p.status === 'active').length === 2 &&
+      history.changes.filter(x => x.status === 'pending').length === 1);
+
+    // ---- Separate seeded runs: the collector and an unauthorized person over the same ledger ----
+    const binding = require('../../fixtures/binding.json');
+    const ledgerFor = (account_id, owner_person_id) => {
+      const data = structuredClone(history);
+      for (const key of ['shipments', 'changes', 'grants', 'passes', 'notices']) data[key] = data[key].map(x => ({...x, account_id}));
+      return {...data, account_id, owner_person_id};
+    };
+    async function seededRun(run, account, person) {
+      const admin = await open('infra', run, {initialProfile: 'sandbox'});
+      const version = (await admin.call('env.snapshot')).version, data = ledgerFor(account, person);
+      // The acting account comes from a trusted binding supplied by Infra, never from the seed alone.
+      const unbound = await admin.call('env.load_seed', {expected_version: version, data, virtual_now: historyTime});
+      check('Another account cannot be loaded for the ' + run + ' run without a trusted binding', unbound.status === 'invalid_seed');
+      const loaded = await admin.call('env.load_seed', {expected_version: version, request_id: run + '-history', data, binding, virtual_now: historyTime});
+      check('Infra loads the ' + run + ' run from history with its binding', loaded.status === 'ready');
+      return {admin, client: await open('agent', run)};
+    }
+    const {client: delegate} = await seededRun('delegate', 'pdm-alex', 'person-alex');
+    const seen = await delegate.call(T('shipments.list'), {include_closed: true});
+    check('Collector sees only the authorized parcel, without tracking number or sender',
+      seen.items.length === 1 && seen.items[0].id === 'S002' && seen.items[0].access === 'delegate' && seen.items[0].tracking_number === null && seen.items[0].sender_label === null);
+    const delegatePass = await delegate.call(T('pass.get'), {id: 'S002'});
+    check('Collector retrieves their own pass', delegatePass.pass.role === 'delegate' && delegatePass.pass.valid_now === true && delegatePass.pass.code !== 'K7QM-4R2X');
+    const detail = await delegate.call(T('shipments.get'), {id: 'S002'});
+    check('Collector sees pickup details but no plan, recipient or timeline', detail.shipment.plan === null && detail.shipment.recipient_person_id === null &&
+      detail.shipment.timeline.length === 0 && detail.shipment.pickup.point_id === 'P01');
+    check('Collector cannot preview a change', (await delegate.call(T('change.preview'), {id: 'S002', kind: 'redirect', point_id: 'P03'})).status === 'not_found');
+    check('Collector cannot authorize anyone else', (await delegate.call(T('grant.create'), {id: 'S002', collector_person_id: 'person-sam', expires_at: '2026-03-04T12:00:00Z',
+      confirmation: 'cf-guess', expected_version: detail.version, request_id: 'onward'})).status === 'not_found');
+    check('Collector cannot revoke or see other parcels', (await delegate.call(T('grant.revoke'), {id: 'G001', expected_version: detail.version, request_id: 'self-revoke'})).status === 'not_found' &&
+      (await delegate.call(T('shipments.get'), {id: 'S001'})).status === 'not_found');
+    check('Caller cannot name another person or account', (await delegate.call(T('shipments.list'), {owner_person_id: 'person-maya'})).status === 'invalid_arguments' &&
+      (await delegate.call(T('shipments.get'), {id: 'S001', account_id: 'pdm-maya'})).status === 'invalid_arguments');
+    const {client: stranger} = await seededRun('stranger', 'pdm-sam', 'person-sam');
+    check('Unauthorized person sees no parcel, pass or notice', (await stranger.call(T('shipments.list'), {include_closed: true})).items.length === 0 &&
+      (await stranger.call(T('shipments.get'), {id: 'S002'})).status === 'not_found' && (await stranger.call(T('pass.get'), {id: 'S002'})).status === 'not_found' &&
+      (await stranger.call(T('notices.list'))).items.length === 0);
+
+    // ---- W4 + reset: a seed with a pending request and a live grant is restored exactly ----
+    const reloaded = await infra.call('env.load_seed', {expected_version: snap.version, request_id: 'history', data: history, virtual_now: historyTime});
+    check('Infra loads history containing a pending request and a live grant', reloaded.status === 'ready');
+    let read = await agent.call(T('grants.list'), {shipment_id: 'S002'});
+    check('Loaded grant is live', read.items.length === 1 && read.items[0].valid_now === true);
+    const revoked = await agent.call(T('grant.revoke'), {id: 'G001', expected_version: read.version, request_id: 'w3-revoke'});
+    check('Recipient revokes the authorization', revoked.status === 'committed' && revoked.grant_status === 'revoked');
+    const cancelled = await agent.call(T('change.cancel'), {id: pendingChange.change_id, expected_version: revoked.version, request_id: 'w3-cancel'});
+    check('Recipient withdraws the pending request', cancelled.status === 'committed');
+    snap = await infra.call('env.snapshot');
+    const tooEarly = await infra.call('env.apply_event', {expected_version: snap.version, event: event('deadline_reached', '2026-03-04T14:59:59Z', {shipment_id: 'S002', deadline: 'pickup'})});
+    check('Deadline event before the deadline is rejected', tooEarly.status === 'invalid_event');
+    const expiry = await infra.call('env.apply_event', {expected_version: snap.version, event: event('deadline_reached', '2026-03-04T15:00:00Z', {shipment_id: 'S002', deadline: 'pickup'})});
+    check('Pickup expiry starts the return', expiry.status === 'committed');
+    read = await agent.call(T('change.preview'), {id: 'S002', kind: 'home_delivery', address_id: 'addr-maya-home'});
+    check('Returning parcel refuses changes', read.preview.allowed === false && read.preview.reason === 'return_started');
+    const forced = await agent.call(T('change.submit'), {id: 'S002', kind: 'home_delivery', address_id: 'addr-maya-home', confirmation: 'cf-guess', expected_version: read.version, request_id: 'w4-forced'});
+    check('Submitting a change on a returning parcel fails with return_started', forced.status === 'return_started');
+    const lateCollect = await infra.call('env.apply_event', {expected_version: read.version,
+      event: event('collected', '2026-03-04T15:30:00Z', {shipment_id: 'S002', point_id: 'P01', pickup_epoch: 1, collector_person_id: 'person-maya', pass_code: 'K7QM-4R2X'})});
+    check('Returning parcel cannot be collected', lateCollect.status === 'invalid_event');
+    const returned = await infra.call('env.apply_event', {expected_version: read.version, event: event('return_completed', '2026-03-06T15:00:00Z', {shipment_id: 'S002'})});
+    check('Only the trusted completion event finishes the return', returned.status === 'committed' &&
+      (await agent.call(T('shipments.get'), {id: 'S002'})).shipment.status === 'returned');
+    snap = await infra.call('env.snapshot');
+    check('Reset after these changes returns ready', (await infra.call('env.reset', {expected_version: snap.version})).status === 'ready');
+    snap = await infra.call('env.snapshot');
+    check('Reset restores the loaded history exactly', JSON.stringify(snap.snapshot.data) === JSON.stringify(history) && Date.parse(snap.snapshot.virtual_now) === Date.parse(historyTime));
+    read = await agent.call(T('grants.list'), {shipment_id: 'S002'});
+    check('Grant and pending request are live again after reset', read.items[0].status === 'active' && read.items[0].valid_now === true &&
+      (await agent.call(T('shipments.get'), {id: 'S001'})).shipment.pending_change.status === 'pending');
+
+    // ---- Two different collectors race for one parcel on one ledger ----
+    const alexCode = history.passes.find(p => p.holder_person_id === 'person-alex').code;
+    const handoff = (at, collector_person_id, pass_code) => event('collected', at, {shipment_id: 'S002', point_id: 'P01', pickup_epoch: 1, collector_person_id, pass_code});
     const second = await open('infra', 'main');
     const [a, b] = await Promise.all([
-      infra.call('env.apply_event', {expected_version: snap.version, event: collected('2026-03-03T15:00:00Z')}),
-      second.call('env.apply_event', {expected_version: snap.version, event: collected('2026-03-03T15:00:00Z')})
+      infra.call('env.apply_event', {expected_version: snap.version, event: handoff('2026-03-03T15:00:00Z', 'person-maya', 'K7QM-4R2X')}),
+      second.call('env.apply_event', {expected_version: snap.version, event: handoff('2026-03-03T15:00:00Z', 'person-alex', alexCode)})
     ]);
     const outcomes = [a.status, b.status].sort();
-    check('Exactly one of two concurrent handoffs commits', outcomes[0] === 'committed' && outcomes[1] === 'stale_version');
+    check('Exactly one of two concurrent collectors commits', outcomes[0] === 'committed' && outcomes[1] === 'stale_version');
     snap = await infra.call('env.snapshot');
-    const again = await infra.call('env.apply_event', {expected_version: snap.version, event: collected('2026-03-03T15:05:00Z')});
-    check('A later handoff with a fresh version is still rejected', again.status === 'invalid_event');
+    const loser = a.status === 'committed' ? handoff('2026-03-03T15:05:00Z', 'person-alex', alexCode) : handoff('2026-03-03T15:05:00Z', 'person-maya', 'K7QM-4R2X');
+    check('The other collector is rejected even with a fresh version', (await infra.call('env.apply_event', {expected_version: snap.version, event: loser})).status === 'invalid_event');
     snap = await infra.call('env.snapshot');
-    check('Parcel was collected once and its pass consumed once', snap.snapshot.data.shipments.find(s => s.id === 'S002').status === 'collected' &&
-      snap.snapshot.data.passes.filter(p => p.status === 'consumed').length === 1);
-    const gone = await agent.call(T('pass.get'), {id: 'S002'});
-    check('Collected parcel has no pass', gone.status === 'not_available');
+    const passStates = snap.snapshot.data.passes.map(p => p.status).sort();
+    check('Parcel was handed over once: one pass consumed, the other invalidated', snap.snapshot.data.shipments.find(s => s.id === 'S002').status === 'collected' &&
+      JSON.stringify(passStates) === JSON.stringify(['consumed', 'invalidated']));
+    check('Collected parcel has no pass', (await agent.call(T('pass.get'), {id: 'S002'})).status === 'not_available');
 
     // ---- Task policy can limit a write to one parcel through the standard `id` constraint ----
     const policies = structuredClone(snap.snapshot.policies);

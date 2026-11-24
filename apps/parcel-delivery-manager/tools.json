@@ -593,6 +593,112 @@
                 }
               ]
             },
+            "point": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "kind": {
+                      "enum": [
+                        "counter",
+                        "locker"
+                      ]
+                    },
+                    "address_text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "time_zone": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "hours": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "weekday": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 6
+                          },
+                          "opens": {
+                            "type": "string",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                          },
+                          "closes": {
+                            "type": "string",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                          }
+                        },
+                        "required": [
+                          "weekday",
+                          "opens",
+                          "closes"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "maxItems": 21
+                    },
+                    "status": {
+                      "enum": [
+                        "open",
+                        "closed"
+                      ]
+                    },
+                    "accessible": {
+                      "type": "boolean"
+                    },
+                    "accepts_redirects": {
+                      "type": "boolean"
+                    },
+                    "status_note": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "open_now": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "kind",
+                    "address_text",
+                    "time_zone",
+                    "hours",
+                    "status",
+                    "accessible",
+                    "accepts_redirects",
+                    "status_note",
+                    "open_now"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "attempt": {
               "anyOf": [
                 {
@@ -636,7 +742,7 @@
                     "reason": {
                       "type": "string",
                       "minLength": 1,
-                      "maxLength": 200
+                      "maxLength": 600
                     },
                     "completed_at": {
                       "anyOf": [
@@ -719,7 +825,7 @@
                   "summary": {
                     "type": "string",
                     "minLength": 1,
-                    "maxLength": 300
+                    "maxLength": 1000
                   }
                 },
                 "required": [
@@ -753,6 +859,7 @@
             "plan",
             "pending_change",
             "pickup",
+            "point",
             "attempt",
             "return_info",
             "completed_at",
@@ -1046,11 +1153,23 @@
                       "type": "null"
                     }
                   ]
+                },
+                "latest_expires_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
                 "allowed",
-                "reason"
+                "reason",
+                "latest_expires_at"
               ],
               "additionalProperties": false
             }
@@ -1335,7 +1454,7 @@
             "summary": {
               "type": "string",
               "minLength": 1,
-              "maxLength": 500
+              "maxLength": 1500
             },
             "confirmation": {
               "anyOf": [
@@ -2046,7 +2165,7 @@
   },
   {
     "name": "parcel-delivery-manager.grants.list",
-    "description": "List collection authorizations for the recipient's parcels, or the authorizations granted to this person when they are a delegate. Read-only.",
+    "description": "List collection authorizations on this person's own parcels with their status, or the current authorizations granted to this person as a collector. Read-only.",
     "read_only": true,
     "scope": "parcel-delivery-manager.grants.list",
     "resource_target": "current account",
@@ -2097,10 +2216,6 @@
                 "type": "string",
                 "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
               },
-              "account_id": {
-                "type": "string",
-                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
-              },
               "shipment_id": {
                 "type": "string",
                 "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
@@ -2108,6 +2223,18 @@
               "collector_person_id": {
                 "type": "string",
                 "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "collector_name": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "point_id": {
                 "type": "string",
@@ -2134,6 +2261,9 @@
                   "invalidated",
                   "consumed"
                 ]
+              },
+              "valid_now": {
+                "type": "boolean"
               },
               "ended_at": {
                 "anyOf": [
@@ -2168,45 +2298,22 @@
                     "type": "null"
                   }
                 ]
-              },
-              "history": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "at": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "action": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 80
-                    }
-                  },
-                  "required": [
-                    "at",
-                    "action"
-                  ],
-                  "additionalProperties": false
-                },
-                "maxItems": 1000
               }
             },
             "required": [
               "id",
-              "account_id",
               "shipment_id",
               "collector_person_id",
+              "collector_name",
               "point_id",
               "pickup_epoch",
               "created_at",
               "expires_at",
               "status",
+              "valid_now",
               "ended_at",
               "end_reason",
-              "replaces_grant_id",
-              "history"
+              "replaces_grant_id"
             ],
             "additionalProperties": false
           },
@@ -2224,7 +2331,7 @@
   },
   {
     "name": "parcel-delivery-manager.grant.preview",
-    "description": "Check whether a trusted collector can be authorized to collect the ready parcel with this ID until the given time, optionally replacing an existing authorization. Returns the limited access granted and a confirmation value. Read-only.",
+    "description": "Check whether a trusted collector can be authorized to collect the ready parcel with this ID until expires_at, optionally replacing an existing authorization. The authorization cannot outlast the pickup deadline or the policy maximum (latest_expires_at). Returns the limited access granted and a confirmation value that grant.create requires. Recipient only. Read-only.",
     "read_only": true,
     "scope": "parcel-delivery-manager.grant.preview",
     "resource_target": "current account",
@@ -2303,7 +2410,7 @@
             "summary": {
               "type": "string",
               "minLength": 1,
-              "maxLength": 500
+              "maxLength": 1500
             },
             "confirmation": {
               "anyOf": [
@@ -2328,7 +2435,18 @@
                 }
               ]
             },
-            "effective_expires_at": {
+            "expires_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "latest_expires_at": {
               "anyOf": [
                 {
                   "type": "string",
@@ -2346,7 +2464,8 @@
             "summary",
             "confirmation",
             "point_id",
-            "effective_expires_at"
+            "expires_at",
+            "latest_expires_at"
           ],
           "additionalProperties": false
         }
@@ -2362,7 +2481,7 @@
   },
   {
     "name": "parcel-delivery-manager.grant.create",
-    "description": "Authorize a trusted collector for the ready parcel with this ID at its current pickup point, or replace an existing authorization. Issues the collector a pass. Requires the confirmation returned by grant.preview.",
+    "description": "Authorize a trusted collector for the ready parcel with this ID at its current pickup point, or replace an existing authorization, repeating the previewed fields and its confirmation. Issues the collector their own pass. The collector can see only this parcel's pickup details and cannot change the parcel or authorize anyone else.",
     "read_only": false,
     "scope": "parcel-delivery-manager.grant.create",
     "resource_target": "current account",
@@ -2471,7 +2590,7 @@
   },
   {
     "name": "parcel-delivery-manager.grant.revoke",
-    "description": "Revoke the active collection authorization with this grant ID and invalidate its pass.",
+    "description": "Revoke the collection authorization with this grant ID and invalidate its pass at once. Fails with grant_not_active if it already ended.",
     "read_only": false,
     "scope": "parcel-delivery-manager.grant.revoke",
     "resource_target": "current account",
@@ -2680,7 +2799,7 @@
   },
   {
     "name": "parcel-delivery-manager.notices.list",
-    "description": "List in-app delivery notices visible to this person, optionally for one parcel. Read-only.",
+    "description": "List in-app delivery notices for parcels this person can currently see, optionally for one parcel. Read-only.",
     "read_only": true,
     "scope": "parcel-delivery-manager.notices.list",
     "resource_target": "current account",
@@ -2768,7 +2887,7 @@
               "message": {
                 "type": "string",
                 "minLength": 1,
-                "maxLength": 500
+                "maxLength": 1500
               }
             },
             "required": [

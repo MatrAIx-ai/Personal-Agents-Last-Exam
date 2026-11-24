@@ -4,6 +4,7 @@
 const crypto = require('node:crypto');
 const c = require('./common.cjs');
 const t = require('./time.cjs');
+const gr = require('./grants.cjs');
 const {fail, ms, now, TERMINAL} = c;
 const HOUR = 3600000;
 
@@ -50,6 +51,8 @@ function gate(ctx, data, s) {
   if (s.status === 'returning') return 'return_started';
   if (s.pending_change_id) return 'change_pending';
   if (s.status === 'out_for_delivery') return 'out_for_delivery';
+  // Once a hold has ended by the clock, its release is due and the plan is about to change.
+  if (s.status === 'in_transit' && s.plan.mode === 'hold' && now(ctx) >= t.startOfDay(s.plan.hold_until, data.carrier.time_zone)) return 'deadline_passed';
   const cutoff = cutoffAt(data, s);
   if (cutoff !== null && now(ctx) >= cutoff) return s.status === 'in_transit' ? 'cutoff_passed' : 'deadline_passed';
   return null;
@@ -130,11 +133,9 @@ function evaluate(ctx, data, s, input) {
 }
 
 function options(ctx, data, s) {
-  const w = windows(ctx, data, s), cutoff = cutoffAt(data, s), policy = c.policyOf(data, s);
+  const w = windows(ctx, data, s), cutoff = cutoffAt(data, s), delegation = gr.gate(ctx, data, s);
   const kind = name => { const reason = kindGate(ctx, data, s, name); return {allowed: !reason, reason}; };
   const reschedule = kind('reschedule'), address = kind('address'), hold = kind('hold'), redirect = kind('redirect'), home = kind('home_delivery');
-  const delegationReason = TERMINAL.includes(s.status) ? 'parcel_closed' : s.status === 'returning' ? 'return_started' : !policy.allow_delegation ? 'not_permitted'
-    : s.status !== 'at_pickup' ? 'not_ready' : now(ctx) >= ms(s.pickup.deadline) ? 'deadline_passed' : null;
   return {
     shipment_id: s.id, plan_revision: s.plan.revision, cutoff_at: cutoff === null ? null : c.iso(cutoff),
     reschedule: {...reschedule, earliest_date: reschedule.allowed ? w.earliestReschedule : null, latest_date: reschedule.allowed ? w.latestDelivery : null},
@@ -142,7 +143,7 @@ function options(ctx, data, s) {
     hold: {...hold, latest_date: hold.allowed ? w.latestHold : null},
     redirect: {...redirect, point_ids: redirect.allowed ? eligiblePoints(data, s) : []},
     home_delivery: {...home, address_ids: home.allowed ? eligibleAddresses(data, s, {excludeCurrent: false}) : []},
-    delegation: {allowed: !delegationReason, reason: delegationReason}
+    delegation: {allowed: !delegation.reason, reason: delegation.reason, latest_expires_at: delegation.latest === null ? null : c.iso(delegation.latest)}
   };
 }
 

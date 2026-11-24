@@ -102,6 +102,8 @@ function validateSeed(ctx, data) {
     if (g.status === 'active' && !(s.pickup && s.pickup.epoch === g.pickup_epoch && s.pickup.point_id === g.point_id)) fail('invalid_seed', 'Active grant ' + g.id + ' does not match the current pickup.');
     if (g.status === 'active' && ms(g.expires_at) > ms(s.pickup.deadline)) fail('invalid_seed', 'Grant ' + g.id + ' outlasts the pickup deadline.');
     if (g.replaces_grant_id) find('grants', g.replaces_grant_id, 'Grant ' + g.id);
+    // Every current authorization carries exactly the pass issued under it.
+    if (g.status === 'active' && data.passes.filter(p => p.grant_id === g.id && p.status === 'active').length !== 1) fail('invalid_seed', 'Active grant ' + g.id + ' must have one active pass.');
   }
   const holders = new Set();
   for (const p of data.passes) {
@@ -111,6 +113,7 @@ function validateSeed(ctx, data) {
       const g = find('grants', p.grant_id, 'Pass ' + p.id);
       if (g.shipment_id !== s.id || g.collector_person_id !== p.holder_person_id || g.pickup_epoch !== p.pickup_epoch) fail('invalid_seed', 'Pass ' + p.id + ' does not match its grant.');
       if (p.status === 'active' && g.status !== 'active') fail('invalid_seed', 'Pass ' + p.id + ' outlived its grant.');
+      if (ms(p.expires_at) > ms(g.expires_at)) fail('invalid_seed', 'Pass ' + p.id + ' outlasts its grant.');
     } else if (p.holder_person_id !== s.recipient_person_id) fail('invalid_seed', 'Pass ' + p.id + ' without a grant must belong to the recipient.');
     if (p.status === 'active') {
       if (!(s.pickup && s.pickup.epoch === p.pickup_epoch && s.pickup.point_id === p.point_id)) fail('invalid_seed', 'Active pass ' + p.id + ' does not match the current pickup.');
@@ -119,6 +122,10 @@ function validateSeed(ctx, data) {
       if (holders.has(key)) fail('invalid_seed', 'More than one active pass for one holder and parcel.');
       holders.add(key);
     }
+  }
+  // A ready parcel always carries the recipient's own pass; no self-delegation grant exists.
+  for (const s of data.shipments) {
+    if (s.status === 'at_pickup' && !holders.has(s.id + '>' + s.recipient_person_id)) fail('invalid_seed', 'Parcel ' + s.id + ' is ready but its recipient has no active pass.');
   }
   for (const n of data.notices) {
     if (n.shipment_id) find('shipments', n.shipment_id, 'Notice ' + n.id);

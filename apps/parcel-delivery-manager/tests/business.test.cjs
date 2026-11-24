@@ -3,18 +3,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const plugin = require('../plugin.cjs');
-const {fixture, rejects} = require('./harness.cjs');
+const {fixture, rejects, actAs} = require('./harness.cjs');
 const build = require('../scripts/build-schemas.cjs');
-
-const binding = require('../fixtures/binding.json');
-const asPerson = (seed, person, account = 'pdm-' + person.split('-')[1]) => {
-  const s = structuredClone(seed), b = structuredClone(binding);
-  const swap = x => (x.account_id === s.account_id ? {...x, account_id: account} : x);
-  for (const key of ['shipments', 'changes', 'grants', 'passes', 'notices']) s[key] = s[key].map(swap);
-  s.account_id = account; s.owner_person_id = person;
-  b.accounts = [{app_id: 'parcel-delivery-manager', account_id: account, owner_person_id: person}];
-  return {seed: s, binding: b};
-};
 
 test('generated contracts match their source definitions', () => {
   assert.deepEqual(build.build({check: true}), []);
@@ -34,8 +24,7 @@ test('fixture loads and reads are side-effect free', () => {
 });
 
 test('unknown and foreign parcels are indistinguishable', () => {
-  const {seed, binding: b} = asPerson(require('../fixtures/minimal.json'), 'person-sam');
-  const f = fixture({seed, binding: b});
+  const f = actAs(fixture(), 'person-sam');
   assert.equal(f.call('shipments.list').items.length, 0);
   for (const id of ['S001', 'missing']) rejects(f, () => f.call('shipments.get', {id}), 'not_found');
   rejects(f, () => f.call('pass.get', {id: 'S002'}), 'not_found');
@@ -102,6 +91,8 @@ test('transit update follows the current plan and rejects superseded or terminal
 // Workflow suites; the public verifier runs this file, which registers them too.
 require('./w1-home-delivery.test.cjs');
 require('./w2-pickup.test.cjs');
+require('./w3-delegation.test.cjs');
+require('./w4-recovery.test.cjs');
 
 test('optional diagnostics cannot change business results', () => {
   const scenario = require('../examples/scenario.json');

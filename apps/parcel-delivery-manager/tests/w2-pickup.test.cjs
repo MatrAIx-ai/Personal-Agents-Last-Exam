@@ -11,7 +11,7 @@ const get = (f, id) => f.call('shipments.get', {id}).shipment;
 const preview = (f, id, change) => f.call('change.preview', {id, ...change}).preview;
 const pass = (f, id) => f.call('pass.get', {id}).pass;
 const collect = (at, fields = {}) => ev('collected', at, {shipment_id: 'S002', point_id: 'P01', pickup_epoch: 1, collector_person_id: 'person-maya', pass_code: 'K7QM-4R2X', ...fields});
-const ready = (at, shipment_id, plan_revision, point_id) => ev('pickup_ready', at, {shipment_id, plan_revision, point_id});
+const ready = (at, shipment_id, plan_revision, point_id, pickup_epoch) => ev('pickup_ready', at, {shipment_id, plan_revision, point_id, pickup_epoch});
 const activePasses = (f, id) => f.data.passes.filter(p => p.shipment_id === id && p.status === 'active');
 
 test('W2 redirect: an applied redirect is not readiness; arrival starts the deadline once', () => {
@@ -28,9 +28,10 @@ test('W2 redirect: an applied redirect is not readiness; arrival starts the dead
   // A home-delivery outcome no longer applies to this plan.
   rejects(f, () => f.event(ev('delivered', '2026-03-03T15:00:00Z', {shipment_id: 'S001', plan_revision: 2})), 'invalid_event');
 
-  rejects(f, () => f.event(ready('2026-03-03T15:00:00Z', 'S001', 2, 'P01')), 'invalid_event');
-  rejects(f, () => f.event(ready('2026-03-03T15:00:00Z', 'S001', 1, 'P03')), 'invalid_event');
-  f.event(ready('2026-03-03T15:00:00Z', 'S001', 2, 'P03'));
+  rejects(f, () => f.event(ready('2026-03-03T15:00:00Z', 'S001', 2, 'P01', 1)), 'invalid_event');
+  rejects(f, () => f.event(ready('2026-03-03T15:00:00Z', 'S001', 1, 'P03', 1)), 'invalid_event');
+  rejects(f, () => f.event(ready('2026-03-03T15:00:00Z', 'S001', 2, 'P03', 2)), 'invalid_event', /must start pickup epoch 1/);
+  f.event(ready('2026-03-03T15:00:00Z', 'S001', 2, 'P03', 1));
   s = get(f, 'S001');
   assert.equal(s.status, 'at_pickup');
   assert.deepEqual(s.pickup, {point_id: 'P03', epoch: 1, ready_at: '2026-03-03T15:00:00Z', deadline: '2026-03-06T15:00:00.000Z'});
@@ -43,7 +44,7 @@ test('W2 redirect: an applied redirect is not readiness; arrival starts the dead
   assert.equal(f.call('notices.list', {shipment_id: 'S001'}).items.at(-1).type, 'pickup_ready');
 
   // A repeated arrival report, even with a new event ID, cannot extend the deadline.
-  rejects(f, () => f.event(ready('2026-03-04T15:00:00Z', 'S001', 2, 'P03')), 'invalid_event', /repeated arrival/);
+  rejects(f, () => f.event(ready('2026-03-04T15:00:00Z', 'S001', 2, 'P03', 2)), 'invalid_event', /repeated arrival/);
   assert.equal(get(f, 'S001').pickup.deadline, '2026-03-06T15:00:00.000Z');
   assert.equal(activePasses(f, 'S001').length, 1);
 });
@@ -120,8 +121,8 @@ test('W2 the carrier cannot apply a redirect to a point that closed after the re
 test('W2 relocation: the old pass dies at once and the new one needs arrival at the new point', () => {
   const f = fixture();
   const pending = submit(f, 'S002', {kind: 'home_delivery', address_id: 'addr-maya-home'});
-  rejects(f, () => f.event(ev('carrier_relocated', '2026-03-02T15:00:00Z', {shipment_id: 'S002', plan_revision: 2, to_point_id: 'P01', reason: 'No move.'})), 'invalid_event');
-  f.event(ev('carrier_relocated', '2026-03-02T15:00:00Z', {shipment_id: 'S002', plan_revision: 2, to_point_id: 'P03', reason: 'The pharmacy counter is over capacity.'}));
+  rejects(f, () => f.event(ev('relocated', '2026-03-02T15:00:00Z', {shipment_id: 'S002', plan_revision: 2, to_point_id: 'P01', reason: 'No move.'})), 'invalid_event');
+  f.event(ev('relocated', '2026-03-02T15:00:00Z', {shipment_id: 'S002', plan_revision: 2, to_point_id: 'P03', reason: 'The pharmacy counter is over capacity.'}));
   let s = get(f, 'S002');
   assert.deepEqual(s.plan, {revision: 3, mode: 'pickup', address_id: null, point_id: 'P03', delivery_date: null, hold_until: null});
   assert.equal(s.status, 'in_transit');
@@ -132,16 +133,19 @@ test('W2 relocation: the old pass dies at once and the new one needs arrival at 
   rejects(f, () => pass(f, 'S002'), 'not_available');
   assert.equal(f.call('notices.list', {shipment_id: 'S002'}).items.at(-1).type, 'relocated');
   // The request based on the old plan was closed and cannot be applied later.
-  assert.equal(f.call('changes.list', {shipment_id: 'S002'}).items.find(x => x.id === pending).status, 'rejected');
+  const superseded = f.call('changes.list', {shipment_id: 'S002'}).items.find(x => x.id === pending);
+  assert.equal(superseded.status, 'rejected');
+  assert.match(superseded.reason, /^relocated: /);
   rejects(f, () => decide(f, '2026-03-02T16:00:00Z', 'S002', pending, 2), 'invalid_event');
 
   // Nothing can be collected at either point until the parcel actually arrives.
   rejects(f, () => f.event(collect('2026-03-02T16:00:00Z')), 'invalid_event');
   rejects(f, () => f.event(collect('2026-03-02T16:00:00Z', {point_id: 'P03'})), 'invalid_event');
-  rejects(f, () => f.event(ready('2026-03-03T14:00:00Z', 'S002', 2, 'P01')), 'invalid_event');
-  rejects(f, () => f.event(ready('2026-03-03T14:00:00Z', 'S002', 3, 'P01')), 'invalid_event');
+  rejects(f, () => f.event(ready('2026-03-03T14:00:00Z', 'S002', 2, 'P01', 2)), 'invalid_event');
+  rejects(f, () => f.event(ready('2026-03-03T14:00:00Z', 'S002', 3, 'P01', 2)), 'invalid_event');
 
-  f.event(ready('2026-03-03T14:00:00Z', 'S002', 3, 'P03'));
+  rejects(f, () => f.event(ready('2026-03-03T14:00:00Z', 'S002', 3, 'P03', 1)), 'invalid_event', /must start pickup epoch 2/);
+  f.event(ready('2026-03-03T14:00:00Z', 'S002', 3, 'P03', 2));
   s = get(f, 'S002');
   assert.deepEqual(s.pickup, {point_id: 'P03', epoch: 2, ready_at: '2026-03-03T14:00:00Z', deadline: '2026-03-06T14:00:00.000Z'});
   const fresh = pass(f, 'S002');
@@ -155,7 +159,7 @@ test('W2 relocation: the old pass dies at once and the new one needs arrival at 
 
   const closed = fixture();
   closed.event(ev('point_status', '2026-03-02T15:00:00Z', {point_id: 'P03', status: 'closed', note: null}));
-  rejects(closed, () => closed.event(ev('carrier_relocated', '2026-03-02T16:00:00Z', {shipment_id: 'S002', plan_revision: 2, to_point_id: 'P03', reason: 'Move.'})), 'invalid_event');
+  rejects(closed, () => closed.event(ev('relocated', '2026-03-02T16:00:00Z', {shipment_id: 'S002', plan_revision: 2, to_point_id: 'P03', reason: 'Move.'})), 'invalid_event');
 });
 
 test('W2 changing back to home delivery: the pass stays valid until the carrier applies it', () => {
@@ -173,7 +177,7 @@ test('W2 changing back to home delivery: the pass stays valid until the carrier 
   assert.equal(f.data.passes.find(p => p.id === 'PASS001').end_reason, 'plan_changed');
   rejects(f, () => pass(f, 'S002'), 'not_available');
   rejects(f, () => f.event(collect('2026-03-02T17:00:00Z')), 'invalid_event');
-  rejects(f, () => f.event(ready('2026-03-02T17:00:00Z', 'S002', 2, 'P01')), 'invalid_event');
+  rejects(f, () => f.event(ready('2026-03-02T17:00:00Z', 'S002', 2, 'P01', 2)), 'invalid_event');
   f.event(ev('delivered', '2026-03-05T16:00:00Z', {shipment_id: 'S002', plan_revision: 3}));
   assert.equal(get(f, 'S002').status, 'delivered');
 });
@@ -185,7 +189,7 @@ test('W2 collecting while a change is pending closes that request', () => {
   assert.equal(get(f, 'S002').status, 'collected');
   const change = f.call('changes.list', {shipment_id: 'S002'}).items.find(x => x.id === id);
   assert.equal(change.status, 'rejected');
-  assert.match(change.reason, /collected/);
+  assert.match(change.reason, /^collected: /);
   rejects(f, () => decide(f, '2026-03-02T16:00:00Z', 'S002', id, 2), 'invalid_event');
 });
 

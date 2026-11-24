@@ -170,6 +170,7 @@ test('W1 hold: ending it resumes delivery but never delivers the parcel', () => 
   rejects(f, () => f.event(ev('transit_update', '2026-03-05T15:00:00Z', {shipment_id: 'S001', plan_revision: 2, status: 'out_for_delivery', estimated_delivery: null})), 'invalid_event');
   rejects(f, () => f.event(ev('deadline_reached', '2026-03-08T04:59:59Z', {shipment_id: 'S001', deadline: 'hold_end'})), 'invalid_event', /not ended yet/);
   const options = f.call('options.get', {id: 'S001'}).options;
+  assert.equal(options.cutoff_at, '2026-03-07T17:00:00.000Z', 'Changes to a held parcel close 12 h before the hold ends');
   assert.equal(options.reschedule.reason, 'not_applicable');
   assert.equal(options.hold.allowed, true);
   assert.equal(options.home_delivery.allowed, true);
@@ -180,7 +181,7 @@ test('W1 hold: ending it resumes delivery but never delivers the parcel', () => 
   s = get(f, 'S001');
   assert.equal(s.plan.mode, 'hold');
   assert.equal(s.deadlines[0].passed, true);
-  assert.equal(preview(f, 'S001', {kind: 'redirect', point_id: 'P01'}).reason, 'cutoff_passed');
+  assert.equal(preview(f, 'S001', {kind: 'redirect', point_id: 'P01'}).reason, 'deadline_passed');
   assert.deepEqual(f.data, before);
 
   f.event(ev('deadline_reached', '2026-03-08T06:00:00Z', {shipment_id: 'S001', deadline: 'hold_end'}));
@@ -207,7 +208,7 @@ test('W1 a hold can be ended early, and a request still pending at hold end is c
   f.event(ev('deadline_reached', '2026-03-08T06:00:00Z', {shipment_id: 'S001', deadline: 'hold_end'}));
   const change = f.call('changes.list', {shipment_id: 'S001'}).items.find(x => x.id === pending);
   assert.equal(change.status, 'rejected');
-  assert.match(change.reason, /hold ended/);
+  assert.match(change.reason, /^hold_ended: /);
   assert.equal(get(f, 'S001').pending_change, null);
   // The old request can no longer be applied over the newer plan.
   rejects(f, () => decide(f, '2026-03-08T07:00:00Z', 'S001', pending, 2), 'invalid_event');

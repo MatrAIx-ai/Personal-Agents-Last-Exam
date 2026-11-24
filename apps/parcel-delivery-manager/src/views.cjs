@@ -28,6 +28,7 @@ function shipmentView(ctx, data, s, access) {
     return {
       id: s.id, access, tracking_number: null, recipient_person_id: null, sender_label: null, contents_label: s.contents_label,
       policy_id: null, status: s.status, estimated_delivery: null, plan: null, pending_change: null, pickup: copy(s.pickup),
+      point: s.pickup ? pointView(ctx, c.pointOf(data, s.pickup.point_id)) : null,
       attempt: null, return_info: null, completed_at: null, deadlines: deadlines(ctx, data, s).filter(d => d.kind === 'pickup'),
       timeline: [], created_at: s.created_at, updated_at: s.updated_at
     };
@@ -36,7 +37,7 @@ function shipmentView(ctx, data, s, access) {
     id: s.id, access, tracking_number: s.tracking_number, recipient_person_id: s.recipient_person_id, sender_label: s.sender_label,
     contents_label: s.contents_label, policy_id: s.policy_id, status: s.status, estimated_delivery: s.estimated_delivery,
     plan: copy(s.plan), pending_change: copy(data.changes.find(x => x.id === s.pending_change_id) ?? null),
-    pickup: copy(s.pickup), attempt: copy(s.attempt), return_info: copy(s.return_info), completed_at: s.completed_at,
+    pickup: copy(s.pickup), point: s.plan.mode === 'pickup' ? pointView(ctx, c.pointOf(data, s.plan.point_id)) : null, attempt: copy(s.attempt), return_info: copy(s.return_info), completed_at: s.completed_at,
     deadlines: deadlines(ctx, data, s), timeline: copy(s.timeline), created_at: s.created_at, updated_at: s.updated_at
   };
 }
@@ -52,4 +53,12 @@ function pointView(ctx, p) {
   return {...view, open_now: openAt(p, now(ctx))};
 }
 
-module.exports = {deadlines, summary, shipmentView, pointView, openAt};
+// A collector sees their own authorization without the recipient's other grant history.
+function grantView(ctx, data, g, access) {
+  const s = data.shipments.find(x => x.id === g.shipment_id);
+  return {id: g.id, shipment_id: g.shipment_id, collector_person_id: g.collector_person_id, collector_name: c.personName(ctx, g.collector_person_id),
+    point_id: g.point_id, pickup_epoch: g.pickup_epoch, created_at: g.created_at, expires_at: g.expires_at, status: g.status,
+    valid_now: c.liveGrant(ctx, s, g), ended_at: g.ended_at, end_reason: g.end_reason, replaces_grant_id: access === 'recipient' ? g.replaces_grant_id : null};
+}
+
+module.exports = {deadlines, summary, shipmentView, pointView, openAt, grantView};

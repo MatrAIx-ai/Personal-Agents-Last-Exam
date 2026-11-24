@@ -4,6 +4,7 @@
 const c = require('./common.cjs');
 const v = require('./views.cjs');
 const ch = require('./changes.cjs');
+const gr = require('./grants.cjs');
 const {fail, copy, now, ms} = c;
 
 const READS = {
@@ -49,13 +50,20 @@ const READS = {
   'grants.list'(ctx, data, args) {
     if (args.shipment_id) c.visibleShipment(ctx, data, args.shipment_id);
     const me = data.owner_person_id;
-    const items = data.grants.filter(g => {
+    const items = [];
+    for (const g of data.grants) {
+      if (args.shipment_id && g.shipment_id !== args.shipment_id) continue;
       const s = data.shipments.find(x => x.id === g.shipment_id);
-      if (args.shipment_id && g.shipment_id !== args.shipment_id) return false;
-      // Recipients see every grant on their parcels; a delegate sees only their own live grants.
-      return s.recipient_person_id === me || (g.collector_person_id === me && c.liveGrant(ctx, s, g));
-    });
-    return {items: copy(items)};
+      // Recipients see every grant on their parcels; a collector sees only their own current grant.
+      if (s.recipient_person_id === me) items.push(v.grantView(ctx, data, g, 'recipient'));
+      else if (g.collector_person_id === me && c.liveGrant(ctx, s, g)) items.push(v.grantView(ctx, data, g, 'delegate'));
+    }
+    return {items};
+  },
+  'grant.preview'(ctx, data, args) {
+    const {shipment} = c.visibleShipment(ctx, data, args.id, {recipientOnly: true});
+    const {id, ...input} = args, {replaced, ...preview} = gr.evaluate(ctx, data, shipment, input);
+    return {preview};
   },
   'pass.get'(ctx, data, args) {
     const {shipment, access} = c.visibleShipment(ctx, data, args.id);
@@ -69,7 +77,10 @@ const READS = {
   'notices.list'(ctx, data, args) {
     if (args.shipment_id) c.visibleShipment(ctx, data, args.shipment_id);
     const me = data.owner_person_id;
-    return {items: copy(data.notices.filter(n => n.audience.includes(me) && (!args.shipment_id || n.shipment_id === args.shipment_id)))};
+    // Access follows current ownership and grants: a notice is readable only while its parcel is.
+    const visible = new Set(data.shipments.filter(s => c.accessTo(ctx, data, s)).map(s => s.id));
+    return {items: copy(data.notices.filter(n => n.audience.includes(me) && (n.shipment_id === null || visible.has(n.shipment_id)) &&
+      (!args.shipment_id || n.shipment_id === args.shipment_id)))};
   }
 };
 
@@ -104,17 +115,22 @@ const WRITES = {
     c.timeline(s, at, 'change_cancelled', 'Change request withdrawn; the delivery plan is unchanged.');
     c.log(ctx, c.APP + '.change_cancelled', {shipment_id: s.id, change_id: change.id});
     return {change_id: change.id, change_status: 'cancelled'};
+  },
+  // Only the recipient can authorize, replace or revoke a collector.
+  'grant.create'(ctx, data, args) {
+    const {shipment} = c.visibleShipment(ctx, data, args.id, {recipientOnly: true});
+    const {id, confirmation, expected_version, request_id, ...input} = args;
+    return gr.create(ctx, data, shipment, input, confirmation);
+  },
+  'grant.revoke'(ctx, data, args) {
+    return gr.revoke(ctx, data, args.id);
   }
 };
-
-// Planned in the next implementation step (W3): collection authorizations.
-const PLANNED = ['grant.preview', 'grant.create', 'grant.revoke'];
 
 function handleTool(ctx, data, tool, args) {
   const op = c.name(tool);
   if (READS[op]) return {data, result: READS[op](ctx, data, args)};
   if (WRITES[op]) return {data, result: WRITES[op](ctx, data, args)};
-  if (PLANNED.includes(op)) fail('not_implemented', 'This operation is not implemented yet.');
   fail('unknown_tool', 'Unknown business operation.');
 }
 
