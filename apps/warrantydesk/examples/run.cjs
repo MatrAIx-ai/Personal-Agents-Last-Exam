@@ -1,0 +1,10 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {fixture,accept,withdraw,dispatch,deliver,request,reply,pickup,collect,receive,release}=require('../tests/harness.cjs');
+const normal=fixture();accept(normal);dispatch(normal,'2027-02-23T17:00:00-06:00');deliver(normal,'2027-02-23T18:00:00-06:00');
+for(const kind of ['independent_bank_login','independent_work_login'])reply(normal,request(normal,kind));
+reply(normal,request(normal,'erasure','OLD-17'));const p=pickup(normal);collect(normal,p);assert.equal(normal.data.receipts.length,0);receive(normal,p);assert.equal(normal.data.cases[0].hold_status,'release_pending');release(normal);normal.call('case.close',{id:'case-1'});
+const cancelled=fixture();accept(cancelled);withdraw(cancelled);cancelled.event('hold.released',{case_id:'case-1',reason:'cancelled_before_dispatch',source_actor_id:'person-manufacturer'});cancelled.call('case.close',{id:'case-1'});
+const reverse=fixture();accept(reverse);dispatch(reverse);withdraw(reverse);deliver(reverse);const replacement=pickup(reverse,'slot-26','NEW-42');collect(reverse,replacement);receive(reverse,replacement);release(reverse,'withdrawal_return','NEW-42');reverse.call('case.close',{id:'case-1'});
+assert.equal(normal.data.cases[0].status,'closed');assert.equal(cancelled.data.cases[0].status,'withdrawn');assert.equal(reverse.data.cases[0].status,'withdrawn');assert.equal(cancelled.data.receipts.length,0);
+console.log(JSON.stringify({app:'warrantydesk',example:'normal original return; pre-dispatch withdrawal; shipped replacement return',normal:normal.data.cases[0].status,pre_dispatch:cancelled.data.cases[0].status,shipped:reverse.data.cases[0].status,settlement_requires_posting:true}));

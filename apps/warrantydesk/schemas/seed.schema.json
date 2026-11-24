@@ -1,0 +1,912 @@
+{
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "source_actor_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 16000
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "source_actor_id",
+          "body",
+          "created_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 256,
+      "minItems": 0
+    },
+    "devices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "owner_person_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 16000
+          },
+          "custody": {
+            "enum": [
+              "user",
+              "provider",
+              "courier"
+            ]
+          },
+          "erased": {
+            "type": "boolean"
+          },
+          "erased_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "owner_person_id",
+          "label",
+          "custody",
+          "erased",
+          "erased_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 64,
+      "minItems": 1
+    },
+    "offers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "case_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "eligible": {
+            "type": "boolean"
+          },
+          "manufacturer_actor_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "courier_actor_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "it_actor_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "hold_amount_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "currency": {
+            "enum": [
+              "USD"
+            ]
+          },
+          "return_due_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "withdrawal_return_due_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "case_id",
+          "eligible",
+          "manufacturer_actor_id",
+          "courier_actor_id",
+          "it_actor_id",
+          "hold_amount_cents",
+          "currency",
+          "return_due_at",
+          "withdrawal_return_due_at",
+          "created_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 64,
+      "minItems": 1
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "old_serial": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "replacement_serial": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "offer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "active",
+              "withdrawal_pending",
+              "return_received",
+              "closed",
+              "withdrawn"
+            ]
+          },
+          "fulfilment": {
+            "enum": [
+              "not_ordered",
+              "ordered",
+              "dispatched",
+              "delivered",
+              "cancelled_before_dispatch"
+            ]
+          },
+          "hold_status": {
+            "enum": [
+              "none",
+              "authorized",
+              "release_pending",
+              "released"
+            ]
+          },
+          "hold_amount_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "return_mode": {
+            "enum": [
+              "original_return",
+              "withdrawal_return"
+            ]
+          },
+          "return_due_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "accepted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "withdraw_requested_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dispatched_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "delivered_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "release_requested_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "released_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "old_serial",
+          "replacement_serial",
+          "offer_id",
+          "status",
+          "fulfilment",
+          "hold_status",
+          "hold_amount_cents",
+          "return_mode",
+          "return_due_at",
+          "created_at",
+          "accepted_at",
+          "withdraw_requested_at",
+          "dispatched_at",
+          "delivered_at",
+          "release_requested_at",
+          "released_at",
+          "closed_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 64,
+      "minItems": 1
+    },
+    "slots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "courier_actor_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "book_before": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancel_before": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "capacity": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          }
+        },
+        "required": [
+          "id",
+          "courier_actor_id",
+          "start_at",
+          "end_at",
+          "book_before",
+          "cancel_before",
+          "capacity"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 64,
+      "minItems": 1
+    },
+    "requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "selector": {
+            "type": "object",
+            "properties": {
+              "case_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              "device_serial": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              "kind": {
+                "enum": [
+                  "independent_bank_login",
+                  "independent_work_login",
+                  "work_enrollment",
+                  "erasure"
+                ]
+              },
+              "request_attempt": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              }
+            },
+            "required": [
+              "case_id",
+              "device_serial",
+              "kind",
+              "request_attempt"
+            ],
+            "additionalProperties": false
+          },
+          "source_actor_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "performed",
+              "refused",
+              "cancelled"
+            ]
+          },
+          "reply": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "source_actor_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                  },
+                  "source_event_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                  },
+                  "status": {
+                    "enum": [
+                      "performed",
+                      "refused"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "success": {
+                            "type": "boolean"
+                          },
+                          "used_old_device": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "success",
+                          "used_old_device"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "source_actor_id",
+                  "source_event_id",
+                  "status",
+                  "result"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "selector",
+          "source_actor_id",
+          "status",
+          "reply",
+          "created_at",
+          "cancelled_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 256,
+      "minItems": 0
+    },
+    "pickups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "selector": {
+            "type": "object",
+            "properties": {
+              "case_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              "return_mode": {
+                "enum": [
+                  "original_return",
+                  "withdrawal_return"
+                ]
+              },
+              "device_serial": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              "pickup_attempt": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              }
+            },
+            "required": [
+              "case_id",
+              "return_mode",
+              "device_serial",
+              "pickup_attempt"
+            ],
+            "additionalProperties": false
+          },
+          "slot_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "status": {
+            "enum": [
+              "scheduled",
+              "cancelled",
+              "collected"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cancel_reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "agent_cancelled",
+                  "rescheduled",
+                  "withdrawal"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "collected_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "collection_event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "selector",
+          "slot_id",
+          "status",
+          "created_at",
+          "cancelled_at",
+          "cancel_reason",
+          "collected_at",
+          "collection_event_id"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 256,
+      "minItems": 0
+    },
+    "receipts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "selector": {
+            "type": "object",
+            "properties": {
+              "case_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              "return_mode": {
+                "enum": [
+                  "original_return",
+                  "withdrawal_return"
+                ]
+              },
+              "device_serial": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              "pickup_attempt": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              }
+            },
+            "required": [
+              "case_id",
+              "return_mode",
+              "device_serial",
+              "pickup_attempt"
+            ],
+            "additionalProperties": false
+          },
+          "pickup_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "source_actor_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "source_event_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "returned_late": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "selector",
+          "pickup_id",
+          "source_actor_id",
+          "source_event_id",
+          "received_at",
+          "returned_late"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 256,
+      "minItems": 0
+    },
+    "postings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "case_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "kind": {
+            "enum": [
+              "authorization",
+              "release_request",
+              "release"
+            ]
+          },
+          "amount_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "currency": {
+            "enum": [
+              "USD"
+            ]
+          },
+          "source_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "case_id",
+          "kind",
+          "amount_cents",
+          "currency",
+          "source_id",
+          "at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 256,
+      "minItems": 0
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "operation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "object_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "source_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "sequence",
+          "operation",
+          "object_id",
+          "source_id",
+          "at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1024,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "records",
+    "devices",
+    "offers",
+    "cases",
+    "slots",
+    "requests",
+    "pickups",
+    "receipts",
+    "postings",
+    "history"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

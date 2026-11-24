@@ -1,0 +1,4752 @@
+[
+  {
+    "name": "warrantydesk.workspace.get",
+    "description": "Read workspace.get in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": true,
+    "scope": "warrantydesk.workspace.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "account_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                },
+                "owner_person_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                },
+                "virtual_now": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "account_id",
+                "owner_person_id",
+                "virtual_now"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.records.list",
+    "description": "Read records.list in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": true,
+    "scope": "warrantydesk.records.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "source_actor_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "body": {
+                        "type": "string",
+                        "maxLength": 16000
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "source_actor_id",
+                      "body",
+                      "created_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 256,
+                  "minItems": 0
+                }
+              },
+              "required": [
+                "items"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.records.get",
+    "description": "Read records.get in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": true,
+    "scope": "warrantydesk.records.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "source_actor_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "body": {
+                      "type": "string",
+                      "maxLength": 16000
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "source_actor_id",
+                    "body",
+                    "created_at"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.case.get",
+    "description": "Read case.get in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": true,
+    "scope": "warrantydesk.case.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "old_serial": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "replacement_serial": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "offer_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "status": {
+                      "enum": [
+                        "open",
+                        "active",
+                        "withdrawal_pending",
+                        "return_received",
+                        "closed",
+                        "withdrawn"
+                      ]
+                    },
+                    "fulfilment": {
+                      "enum": [
+                        "not_ordered",
+                        "ordered",
+                        "dispatched",
+                        "delivered",
+                        "cancelled_before_dispatch"
+                      ]
+                    },
+                    "hold_status": {
+                      "enum": [
+                        "none",
+                        "authorized",
+                        "release_pending",
+                        "released"
+                      ]
+                    },
+                    "hold_amount_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    "return_mode": {
+                      "enum": [
+                        "original_return",
+                        "withdrawal_return"
+                      ]
+                    },
+                    "return_due_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "accepted_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "withdraw_requested_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "dispatched_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "delivered_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "release_requested_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "released_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "closed_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "overdue": {
+                      "type": "boolean"
+                    },
+                    "return_serial": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "held_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "old_serial",
+                    "replacement_serial",
+                    "offer_id",
+                    "status",
+                    "fulfilment",
+                    "hold_status",
+                    "hold_amount_cents",
+                    "return_mode",
+                    "return_due_at",
+                    "created_at",
+                    "accepted_at",
+                    "withdraw_requested_at",
+                    "dispatched_at",
+                    "delivered_at",
+                    "release_requested_at",
+                    "released_at",
+                    "closed_at",
+                    "overdue",
+                    "return_serial",
+                    "held_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                "offer": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "case_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "eligible": {
+                      "type": "boolean"
+                    },
+                    "manufacturer_actor_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "courier_actor_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "it_actor_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "hold_amount_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    "currency": {
+                      "enum": [
+                        "USD"
+                      ]
+                    },
+                    "return_due_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "withdrawal_return_due_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "case_id",
+                    "eligible",
+                    "manufacturer_actor_id",
+                    "courier_actor_id",
+                    "it_actor_id",
+                    "hold_amount_cents",
+                    "currency",
+                    "return_due_at",
+                    "withdrawal_return_due_at",
+                    "created_at"
+                  ],
+                  "additionalProperties": false
+                },
+                "devices": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "owner_person_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "label": {
+                        "type": "string",
+                        "maxLength": 16000
+                      },
+                      "custody": {
+                        "enum": [
+                          "user",
+                          "provider",
+                          "courier"
+                        ]
+                      },
+                      "erased": {
+                        "type": "boolean"
+                      },
+                      "erased_at": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "owner_person_id",
+                      "label",
+                      "custody",
+                      "erased",
+                      "erased_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 2,
+                  "minItems": 0
+                },
+                "receipts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "selector": {
+                        "type": "object",
+                        "properties": {
+                          "case_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                          },
+                          "return_mode": {
+                            "enum": [
+                              "original_return",
+                              "withdrawal_return"
+                            ]
+                          },
+                          "device_serial": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                          },
+                          "pickup_attempt": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 1000000
+                          }
+                        },
+                        "required": [
+                          "case_id",
+                          "return_mode",
+                          "device_serial",
+                          "pickup_attempt"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "pickup_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "source_actor_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "source_event_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "received_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "returned_late": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "selector",
+                      "pickup_id",
+                      "source_actor_id",
+                      "source_event_id",
+                      "received_at",
+                      "returned_late"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 256,
+                  "minItems": 0
+                },
+                "postings": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "case_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "kind": {
+                        "enum": [
+                          "authorization",
+                          "release_request",
+                          "release"
+                        ]
+                      },
+                      "amount_cents": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100000000
+                      },
+                      "currency": {
+                        "enum": [
+                          "USD"
+                        ]
+                      },
+                      "source_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "case_id",
+                      "kind",
+                      "amount_cents",
+                      "currency",
+                      "source_id",
+                      "at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 256,
+                  "minItems": 0
+                }
+              },
+              "required": [
+                "item",
+                "offer",
+                "devices",
+                "receipts",
+                "postings"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.requests.list",
+    "description": "Read requests.list in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": true,
+    "scope": "warrantydesk.requests.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "selector": {
+                        "type": "object",
+                        "properties": {
+                          "case_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                          },
+                          "device_serial": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                          },
+                          "kind": {
+                            "enum": [
+                              "independent_bank_login",
+                              "independent_work_login",
+                              "work_enrollment",
+                              "erasure"
+                            ]
+                          },
+                          "request_attempt": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 1000000
+                          }
+                        },
+                        "required": [
+                          "case_id",
+                          "device_serial",
+                          "kind",
+                          "request_attempt"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "source_actor_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "status": {
+                        "enum": [
+                          "pending",
+                          "performed",
+                          "refused",
+                          "cancelled"
+                        ]
+                      },
+                      "reply": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "source_actor_id": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100,
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                              },
+                              "source_event_id": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100,
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                              },
+                              "status": {
+                                "enum": [
+                                  "performed",
+                                  "refused"
+                                ]
+                              },
+                              "result": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "success": {
+                                        "type": "boolean"
+                                      },
+                                      "used_old_device": {
+                                        "type": "boolean"
+                                      }
+                                    },
+                                    "required": [
+                                      "success",
+                                      "used_old_device"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "at",
+                              "source_actor_id",
+                              "source_event_id",
+                              "status",
+                              "result"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "cancelled_at": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "selector",
+                      "source_actor_id",
+                      "status",
+                      "reply",
+                      "created_at",
+                      "cancelled_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 256,
+                  "minItems": 0
+                }
+              },
+              "required": [
+                "items"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.remedy.preview",
+    "description": "Read remedy.preview in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": true,
+    "scope": "warrantydesk.remedy.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "action": {
+          "enum": [
+            "accept",
+            "withdraw"
+          ]
+        }
+      },
+      "required": [
+        "case_id",
+        "action"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "quote": {
+                  "type": "object",
+                  "properties": {
+                    "case_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "offer_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "action": {
+                      "enum": [
+                        "accept",
+                        "withdraw"
+                      ]
+                    },
+                    "hold_amount_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    "current_hold_status": {
+                      "enum": [
+                        "none",
+                        "authorized",
+                        "release_pending",
+                        "released"
+                      ]
+                    },
+                    "return_mode": {
+                      "enum": [
+                        "original_return",
+                        "withdrawal_return"
+                      ]
+                    },
+                    "return_serial": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "return_due_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "digest": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  },
+                  "required": [
+                    "case_id",
+                    "offer_id",
+                    "action",
+                    "hold_amount_cents",
+                    "current_hold_status",
+                    "return_mode",
+                    "return_serial",
+                    "return_due_at",
+                    "digest"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "quote"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.remedy.accept",
+    "description": "Perform remedy.accept in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": false,
+    "scope": "warrantydesk.remedy.accept",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "quote_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        }
+      },
+      "required": [
+        "case_id",
+        "quote_digest",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "old_serial": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "replacement_serial": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "offer_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "status": {
+                      "enum": [
+                        "open",
+                        "active",
+                        "withdrawal_pending",
+                        "return_received",
+                        "closed",
+                        "withdrawn"
+                      ]
+                    },
+                    "fulfilment": {
+                      "enum": [
+                        "not_ordered",
+                        "ordered",
+                        "dispatched",
+                        "delivered",
+                        "cancelled_before_dispatch"
+                      ]
+                    },
+                    "hold_status": {
+                      "enum": [
+                        "none",
+                        "authorized",
+                        "release_pending",
+                        "released"
+                      ]
+                    },
+                    "hold_amount_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    "return_mode": {
+                      "enum": [
+                        "original_return",
+                        "withdrawal_return"
+                      ]
+                    },
+                    "return_due_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "accepted_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "withdraw_requested_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "dispatched_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "delivered_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "release_requested_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "released_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "closed_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "old_serial",
+                    "replacement_serial",
+                    "offer_id",
+                    "status",
+                    "fulfilment",
+                    "hold_status",
+                    "hold_amount_cents",
+                    "return_mode",
+                    "return_due_at",
+                    "created_at",
+                    "accepted_at",
+                    "withdraw_requested_at",
+                    "dispatched_at",
+                    "delivered_at",
+                    "release_requested_at",
+                    "released_at",
+                    "closed_at"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.remedy.withdraw",
+    "description": "Perform remedy.withdraw in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": false,
+    "scope": "warrantydesk.remedy.withdraw",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "quote_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        }
+      },
+      "required": [
+        "case_id",
+        "quote_digest",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "old_serial": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "replacement_serial": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "offer_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "status": {
+                      "enum": [
+                        "open",
+                        "active",
+                        "withdrawal_pending",
+                        "return_received",
+                        "closed",
+                        "withdrawn"
+                      ]
+                    },
+                    "fulfilment": {
+                      "enum": [
+                        "not_ordered",
+                        "ordered",
+                        "dispatched",
+                        "delivered",
+                        "cancelled_before_dispatch"
+                      ]
+                    },
+                    "hold_status": {
+                      "enum": [
+                        "none",
+                        "authorized",
+                        "release_pending",
+                        "released"
+                      ]
+                    },
+                    "hold_amount_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    "return_mode": {
+                      "enum": [
+                        "original_return",
+                        "withdrawal_return"
+                      ]
+                    },
+                    "return_due_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "accepted_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "withdraw_requested_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "dispatched_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "delivered_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "release_requested_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "released_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "closed_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "old_serial",
+                    "replacement_serial",
+                    "offer_id",
+                    "status",
+                    "fulfilment",
+                    "hold_status",
+                    "hold_amount_cents",
+                    "return_mode",
+                    "return_due_at",
+                    "created_at",
+                    "accepted_at",
+                    "withdraw_requested_at",
+                    "dispatched_at",
+                    "delivered_at",
+                    "release_requested_at",
+                    "released_at",
+                    "closed_at"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.verification.request",
+    "description": "Perform verification.request in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": false,
+    "scope": "warrantydesk.verification.request",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "device_serial": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "kind": {
+          "enum": [
+            "independent_bank_login",
+            "independent_work_login",
+            "work_enrollment",
+            "erasure"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        }
+      },
+      "required": [
+        "case_id",
+        "device_serial",
+        "kind",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "selector": {
+                      "type": "object",
+                      "properties": {
+                        "case_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        "device_serial": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        "kind": {
+                          "enum": [
+                            "independent_bank_login",
+                            "independent_work_login",
+                            "work_enrollment",
+                            "erasure"
+                          ]
+                        },
+                        "request_attempt": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 1000000
+                        }
+                      },
+                      "required": [
+                        "case_id",
+                        "device_serial",
+                        "kind",
+                        "request_attempt"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "source_actor_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "status": {
+                      "enum": [
+                        "pending",
+                        "performed",
+                        "refused",
+                        "cancelled"
+                      ]
+                    },
+                    "reply": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "source_actor_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100,
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                            },
+                            "source_event_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100,
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                            },
+                            "status": {
+                              "enum": [
+                                "performed",
+                                "refused"
+                              ]
+                            },
+                            "result": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "success": {
+                                      "type": "boolean"
+                                    },
+                                    "used_old_device": {
+                                      "type": "boolean"
+                                    }
+                                  },
+                                  "required": [
+                                    "success",
+                                    "used_old_device"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "at",
+                            "source_actor_id",
+                            "source_event_id",
+                            "status",
+                            "result"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "cancelled_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "selector",
+                    "source_actor_id",
+                    "status",
+                    "reply",
+                    "created_at",
+                    "cancelled_at"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.verification.cancel",
+    "description": "Perform verification.cancel in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": false,
+    "scope": "warrantydesk.verification.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "selector": {
+                      "type": "object",
+                      "properties": {
+                        "case_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        "device_serial": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        "kind": {
+                          "enum": [
+                            "independent_bank_login",
+                            "independent_work_login",
+                            "work_enrollment",
+                            "erasure"
+                          ]
+                        },
+                        "request_attempt": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 1000000
+                        }
+                      },
+                      "required": [
+                        "case_id",
+                        "device_serial",
+                        "kind",
+                        "request_attempt"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "source_actor_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "status": {
+                      "enum": [
+                        "pending",
+                        "performed",
+                        "refused",
+                        "cancelled"
+                      ]
+                    },
+                    "reply": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "source_actor_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100,
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                            },
+                            "source_event_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100,
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                            },
+                            "status": {
+                              "enum": [
+                                "performed",
+                                "refused"
+                              ]
+                            },
+                            "result": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "success": {
+                                      "type": "boolean"
+                                    },
+                                    "used_old_device": {
+                                      "type": "boolean"
+                                    }
+                                  },
+                                  "required": [
+                                    "success",
+                                    "used_old_device"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "at",
+                            "source_actor_id",
+                            "source_event_id",
+                            "status",
+                            "result"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "cancelled_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "selector",
+                    "source_actor_id",
+                    "status",
+                    "reply",
+                    "created_at",
+                    "cancelled_at"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.pickup.options",
+    "description": "Read pickup.options in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": true,
+    "scope": "warrantydesk.pickup.options",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        }
+      },
+      "required": [
+        "case_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "courier_actor_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "start_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "end_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "book_before": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "cancel_before": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "capacity": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100000000
+                      },
+                      "available": {
+                        "type": "boolean"
+                      },
+                      "free_capacity": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100000000
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "courier_actor_id",
+                      "start_at",
+                      "end_at",
+                      "book_before",
+                      "cancel_before",
+                      "capacity",
+                      "available",
+                      "free_capacity"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 256,
+                  "minItems": 0
+                }
+              },
+              "required": [
+                "items"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.pickups.list",
+    "description": "Read pickups.list in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": true,
+    "scope": "warrantydesk.pickups.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "selector": {
+                        "type": "object",
+                        "properties": {
+                          "case_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                          },
+                          "return_mode": {
+                            "enum": [
+                              "original_return",
+                              "withdrawal_return"
+                            ]
+                          },
+                          "device_serial": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                          },
+                          "pickup_attempt": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 1000000
+                          }
+                        },
+                        "required": [
+                          "case_id",
+                          "return_mode",
+                          "device_serial",
+                          "pickup_attempt"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "slot_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                      },
+                      "status": {
+                        "enum": [
+                          "scheduled",
+                          "cancelled",
+                          "collected"
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "cancelled_at": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "cancel_reason": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "agent_cancelled",
+                              "rescheduled",
+                              "withdrawal"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "collected_at": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "collection_event_id": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "effective_status": {
+                        "enum": [
+                          "scheduled",
+                          "missed",
+                          "cancelled",
+                          "collected"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "selector",
+                      "slot_id",
+                      "status",
+                      "created_at",
+                      "cancelled_at",
+                      "cancel_reason",
+                      "collected_at",
+                      "collection_event_id",
+                      "effective_status"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 256,
+                  "minItems": 0
+                }
+              },
+              "required": [
+                "items"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.pickup.schedule",
+    "description": "Perform pickup.schedule in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": false,
+    "scope": "warrantydesk.pickup.schedule",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "device_serial": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "slot_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        }
+      },
+      "required": [
+        "case_id",
+        "device_serial",
+        "slot_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "selector": {
+                      "type": "object",
+                      "properties": {
+                        "case_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        "return_mode": {
+                          "enum": [
+                            "original_return",
+                            "withdrawal_return"
+                          ]
+                        },
+                        "device_serial": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        "pickup_attempt": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 1000000
+                        }
+                      },
+                      "required": [
+                        "case_id",
+                        "return_mode",
+                        "device_serial",
+                        "pickup_attempt"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "slot_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "status": {
+                      "enum": [
+                        "scheduled",
+                        "cancelled",
+                        "collected"
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "cancelled_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "cancel_reason": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "agent_cancelled",
+                            "rescheduled",
+                            "withdrawal"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "collected_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "collection_event_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "selector",
+                    "slot_id",
+                    "status",
+                    "created_at",
+                    "cancelled_at",
+                    "cancel_reason",
+                    "collected_at",
+                    "collection_event_id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.pickup.cancel",
+    "description": "Perform pickup.cancel in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": false,
+    "scope": "warrantydesk.pickup.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "selector": {
+                      "type": "object",
+                      "properties": {
+                        "case_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        "return_mode": {
+                          "enum": [
+                            "original_return",
+                            "withdrawal_return"
+                          ]
+                        },
+                        "device_serial": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        "pickup_attempt": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 1000000
+                        }
+                      },
+                      "required": [
+                        "case_id",
+                        "return_mode",
+                        "device_serial",
+                        "pickup_attempt"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "slot_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "status": {
+                      "enum": [
+                        "scheduled",
+                        "cancelled",
+                        "collected"
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "cancelled_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "cancel_reason": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "agent_cancelled",
+                            "rescheduled",
+                            "withdrawal"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "collected_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "collection_event_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "selector",
+                    "slot_id",
+                    "status",
+                    "created_at",
+                    "cancelled_at",
+                    "cancel_reason",
+                    "collected_at",
+                    "collection_event_id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.pickup.reschedule",
+    "description": "Perform pickup.reschedule in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": false,
+    "scope": "warrantydesk.pickup.reschedule",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "slot_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        }
+      },
+      "required": [
+        "id",
+        "slot_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "selector": {
+                      "type": "object",
+                      "properties": {
+                        "case_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        "return_mode": {
+                          "enum": [
+                            "original_return",
+                            "withdrawal_return"
+                          ]
+                        },
+                        "device_serial": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        "pickup_attempt": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 1000000
+                        }
+                      },
+                      "required": [
+                        "case_id",
+                        "return_mode",
+                        "device_serial",
+                        "pickup_attempt"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "slot_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "status": {
+                      "enum": [
+                        "scheduled",
+                        "cancelled",
+                        "collected"
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "cancelled_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "cancel_reason": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "agent_cancelled",
+                            "rescheduled",
+                            "withdrawal"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "collected_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "collection_event_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "selector",
+                    "slot_id",
+                    "status",
+                    "created_at",
+                    "cancelled_at",
+                    "cancel_reason",
+                    "collected_at",
+                    "collection_event_id"
+                  ],
+                  "additionalProperties": false
+                },
+                "cancelled": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "selector": {
+                      "type": "object",
+                      "properties": {
+                        "case_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        "return_mode": {
+                          "enum": [
+                            "original_return",
+                            "withdrawal_return"
+                          ]
+                        },
+                        "device_serial": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        "pickup_attempt": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 1000000
+                        }
+                      },
+                      "required": [
+                        "case_id",
+                        "return_mode",
+                        "device_serial",
+                        "pickup_attempt"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "slot_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "status": {
+                      "enum": [
+                        "scheduled",
+                        "cancelled",
+                        "collected"
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "cancelled_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "cancel_reason": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "agent_cancelled",
+                            "rescheduled",
+                            "withdrawal"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "collected_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "collection_event_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "selector",
+                    "slot_id",
+                    "status",
+                    "created_at",
+                    "cancelled_at",
+                    "cancel_reason",
+                    "collected_at",
+                    "collection_event_id"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "item",
+                "cancelled"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "warrantydesk.case.close",
+    "description": "Perform case.close in the bound replacement workspace; see README for branch and settlement rules.",
+    "read_only": false,
+    "scope": "warrantydesk.case.close",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "warrantydesk"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "old_serial": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "replacement_serial": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "offer_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                    },
+                    "status": {
+                      "enum": [
+                        "open",
+                        "active",
+                        "withdrawal_pending",
+                        "return_received",
+                        "closed",
+                        "withdrawn"
+                      ]
+                    },
+                    "fulfilment": {
+                      "enum": [
+                        "not_ordered",
+                        "ordered",
+                        "dispatched",
+                        "delivered",
+                        "cancelled_before_dispatch"
+                      ]
+                    },
+                    "hold_status": {
+                      "enum": [
+                        "none",
+                        "authorized",
+                        "release_pending",
+                        "released"
+                      ]
+                    },
+                    "hold_amount_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    "return_mode": {
+                      "enum": [
+                        "original_return",
+                        "withdrawal_return"
+                      ]
+                    },
+                    "return_due_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "accepted_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "withdraw_requested_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "dispatched_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "delivered_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "release_requested_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "released_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "closed_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "old_serial",
+                    "replacement_serial",
+                    "offer_id",
+                    "status",
+                    "fulfilment",
+                    "hold_status",
+                    "hold_amount_cents",
+                    "return_mode",
+                    "return_due_at",
+                    "created_at",
+                    "accepted_at",
+                    "withdraw_requested_at",
+                    "dispatched_at",
+                    "delivered_at",
+                    "release_requested_at",
+                    "released_at",
+                    "closed_at"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+]

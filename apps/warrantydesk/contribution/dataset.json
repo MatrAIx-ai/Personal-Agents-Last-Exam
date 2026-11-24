@@ -1,0 +1,46 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "warrantydesk-reference",
+  "version": "0.1.0",
+  "description": "Original private replacement-coordination fixtures for three independent accounts, not a model-evaluation task.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Original identities, serials, context, slots and synthetic provider/hold rules.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "deterministic authored fixtures",
+        "tool": "Python standard library",
+        "tool_version": "3.12",
+        "seed": 0,
+        "parameters": {
+          "accounts": 3
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Original UTF-8 text/JSON. Distinct performed-check attempts, physical receipts and financial postings may repeat content, but IDs, selectors, serial links, chronology and source provenance are mandatory."
+  ],
+  "expected_counts": {
+    "records": 12,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "allow",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}
