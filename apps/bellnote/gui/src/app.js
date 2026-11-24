@@ -9,7 +9,7 @@ body[data-app=bellnote]{--accent:#2f6b5a;--soft:#e8f2ee}
 body[data-app=bellnote] .toolbar input[type=search],body[data-app=bellnote] .collection-count{display:none}
 body[data-app=bellnote] .toolbar{gap:12px}
 .bn-today{display:flex;flex-direction:column;min-width:0}.bn-today strong{font-size:15px;letter-spacing:-.01em}.bn-today small{font-size:11px}
-.bn-list{padding:0 14px 18px;display:grid;gap:8px}.bn-list>h3,.bn-group{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:14px 8px 2px}
+.bn-list{padding:0 14px 18px;display:grid;gap:8px}.bn-earlier>summary{cursor:pointer;list-style-position:inside}.bn-earlier[open]>summary{margin-bottom:8px}.bn-card .bn-earlier>summary{font-size:13px;color:var(--muted);margin-top:10px}.bn-list>h3,.bn-group{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:14px 8px 2px}
 .bn-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px 14px}
 .bn-row[aria-pressed=true]{border-color:var(--accent);background:var(--soft);box-shadow:inset 3px 0 var(--accent)}
 .bn-row strong{display:block;font-size:13px}.bn-row small{font-size:11px}.bn-row .bn-right{text-align:right;font-size:12px;font-weight:600}
@@ -296,15 +296,19 @@ function attendanceView(ui){
  const upcoming=el('section',{class:'bn-card'},el('h3',{},'Coming school days at '+a.school.school.name),el('div',{class:'bn-days'},days.map(d=>el('div',{class:'bn-day'},el('strong',{},day(d.date)),
   el('span',{},clock(d.start_local)+'–'+clock(d.dismissal_local)+(d.kind==='early_dismissal'?' (early dismissal)':'')),el('small',{},'Report absences by '+when(d.absence_cutoff_at,{month:undefined,day:undefined}))))),
   a.school.days.some(d=>d.kind==='closed')?el('p',{class:'bn-note'},'No school: '+a.school.days.filter(d=>d.kind==='closed').map(d=>day(d.date)+(d.reason?' ('+d.reason+')':'')).join(', ')):null);
- const reports=[...a.reports].sort((x,y)=>Date.parse(y.submitted_at)-Date.parse(x.submitted_at));
- const reportCard=el('section',{class:'bn-card'},el('h3',{},'Reports to the school'),reports.length?el('div',{class:'bn-items'},reports.map(r=>{
-  const open=r.state==='submitted'&&r.days.some(d=>d.state==='reported'&&!d.cutoff_passed);
-  return el('div',{class:'bn-item','data-report-id':r.id},el('div',{},el('strong',{},REPORT[r.kind]+' · '+r.dates.map(d=>day(d)).join(', ')+(r.time_local?' at '+clock(r.time_local):'')),
+ // Reports of earlier school years (every day before the current term) are folded under the current ones.
+ const since=a.school.school.term.start_date,past=r=>[...r.dates,...r.cancelled_dates].every(d=>d<since);
+ const sorted=[...a.reports].sort((x,y)=>Date.parse(y.submitted_at)-Date.parse(x.submitted_at)),reports=sorted.filter(r=>!past(r)),earlier=sorted.filter(past);
+ const reportRow=r=>{
+  const open=r.state==='submitted'&&r.days.some(d=>d.state==='reported'&&!d.cutoff_passed),dd=d=>d<since?day(d,{year:'numeric',month:'short',day:'numeric'}):day(d);
+  return el('div',{class:'bn-item','data-report-id':r.id},el('div',{},el('strong',{},REPORT[r.kind]+' · '+r.dates.map(dd).join(', ')+(r.time_local?' at '+clock(r.time_local):'')),
    el('small',{},'Sent by '+personName(a,r.submitted_by)+' · '+when(r.submitted_at))),
    el('div',{class:'bn-buttons'},badge(words(r.state),REPORT_STATE[r.state]),open&&ui.has('bellnote.absences.cancel')&&can(k,'custodial')?button('Cancel report',()=>confirmWrite(ui,{title:'Cancel this report?',
     lead:REPORT[r.kind]+' for '+k.display_name+' on '+r.dates.map(d=>day(d)).join(', ')+'. Days already past their cut-off stay reported.',tool:'bellnote.absences.cancel',args:{id:r.id},submit:'Cancel report'})):null),
    el('div',{class:'bn-sub'},'“'+r.reason+'”'+(r.review_note?' · Office: '+r.review_note:'')+(r.cancelled_dates.length?' · Cancelled: '+r.cancelled_dates.map(d=>day(d)).join(', '):'')+(r.moot_dates?.length?' · No school on '+r.moot_dates.map(d=>day(d)).join(', '):'')));
- })):el('p',{class:'bn-note'},'No reports for '+first(k.display_name)+'.'));
+ };
+ const reportCard=el('section',{class:'bn-card'},el('h3',{},'Reports to the school'),reports.length?el('div',{class:'bn-items'},reports.map(reportRow)):el('p',{class:'bn-note'},'No reports for '+first(k.display_name)+' this school year.'),
+  earlier.length?el('details',{class:'bn-earlier','data-group':'earlier-reports'},el('summary',{},'Earlier school years · '+earlier.length),el('div',{class:'bn-items'},earlier.map(reportRow))):null);
  const recs=[...a.attendance].sort((x,y)=>y.date.localeCompare(x.date));
  const missed=recs.filter(r=>r.status!=='present').length;
  const record=el('section',{class:'bn-card'},el('h3',{},'Last four weeks',el('small',{},missed?missed+(missed===1?' day':' days')+' not fully present':'Present every marked day')),recs.length?el('div',{class:'bn-days'},recs.map(r=>el('div',{class:'bn-day marked','data-attendance-id':r.id},
@@ -317,18 +321,22 @@ function formStatus(a,f){
  const todo=f.accepting_answers&&f.child_ids.some(id=>{const k=a.kids.find(x=>x.id===id),r=f.responses.find(x=>x.child_id===id&&x.effective_state!=='withdrawn');return k&&can(k,'can_sign')&&(!r||r.effective_state==='needs_review'&&r.mine);});
  return todo?'todo':f.accepting_answers?'answered':'closed';
 }
+// Closed forms of earlier school years (due before the current term) form their own group, folded by default.
 function formGroups(a){
  const q=nav.formFilter.toLowerCase(),forms=a.forms.filter(f=>!q||(f.title+' '+FORM_KIND[f.kind]+' '+f.child_ids.map(id=>kidName(a,id)).join(' ')).toLowerCase().includes(q));
- return [['todo','To do'],['answered','Open, answered'],['closed','Closed']].map(([id,label])=>({id,label,items:forms.filter(f=>formStatus(a,f)===id).sort((x,y)=>(Date.parse(x.due_at)-Date.parse(y.due_at))*(id==='closed'?-1:1))}));
+ const status=f=>{const s=formStatus(a,f);return s==='closed'&&f.due_at.slice(0,10)<a.school.school.term.start_date?'earlier':s;};
+ return [['todo','To do'],['answered','Open, answered'],['closed','Closed'],['earlier','Earlier school years']].map(([id,label])=>({id,label,items:forms.filter(f=>status(f)===id).sort((x,y)=>(Date.parse(x.due_at)-Date.parse(y.due_at))*(id==='closed'||id==='earlier'?-1:1))}));
 }
 function formsList(ui){
  const a=ui.aux,box=el('div',{});
  const filter=el('input',{type:'search',class:'bn-filter',placeholder:'Filter forms','aria-label':'Filter forms',value:nav.formFilter});
  filter.addEventListener('input',()=>{nav.formFilter=filter.value;box.replaceChildren(filter,groups());filter.focus();});
- const groups=()=>{const list=el('div',{class:'bn-list'});for(const g of formGroups(a)){if(!g.items.length)continue;list.append(el('h3',{class:'bn-group'},g.label+' · '+g.items.length));
-  for(const f of g.items)list.append(el('button',{type:'button',class:'bn-row','aria-pressed':String(f.id===a.form?.id),'data-form-id':f.id,onclick:()=>go(ui,'forms',{form:f.id})},
+ const groups=()=>{const list=el('div',{class:'bn-list'});for(const g of formGroups(a)){if(!g.items.length)continue;
+  const rows=g.items.map(f=>el('button',{type:'button',class:'bn-row','aria-pressed':String(f.id===a.form?.id),'data-form-id':f.id,onclick:()=>go(ui,'forms',{form:f.id})},
    el('span',{class:'bn-avatar','aria-hidden':'true'},f.fee_cents?'$':'✎'),el('span',{},el('strong',{},f.title),el('small',{},FORM_KIND[f.kind]+' · '+f.child_ids.map(id=>first(kidName(a,id))).join(', '))),
-   el('span',{class:'bn-right'},g.id==='closed'?'Closed':'Due '+when(f.due_at,{hour:undefined,minute:undefined}))));}
+   el('span',{class:'bn-right'},g.id==='closed'||g.id==='earlier'?'Closed':'Due '+when(f.due_at,{hour:undefined,minute:undefined}))));
+  if(g.id==='earlier')list.append(el('details',{class:'bn-earlier','data-group':'earlier',open:!!nav.formFilter||g.items.some(f=>f.id===a.form?.id)},el('summary',{class:'bn-group'},g.label+' · '+g.items.length),...rows));
+  else list.append(el('h3',{class:'bn-group'},g.label+' · '+g.items.length),...rows);}
   if(!list.children.length)list.append(el('p',{class:'bn-note'},'No forms match.'));return list;};
  box.append(filter,groups());return box;
 }

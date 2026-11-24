@@ -4,13 +4,16 @@
 // hand when the fixture is edited, never at run time; the JSON output is what is committed and
 // loaded. Deterministic: no randomness and no wall clock. Everything is fictional; phone numbers
 // use the 555-01xx range. `--check` fails if the committed JSON differs from the builder.
+// The records below are the hand-written 2026–27 school year; scripts/history.cjs generates the
+// family's earlier history (from 2025-01-01, the environment's history floor) in front of them.
 const fs = require('node:fs'), path = require('node:path');
 const time = require('../src/time.cjs');
+const history = require('./history.cjs');
 const root = path.resolve(__dirname, '..'), TZ = 'America/Los_Angeles';
 const at = (date, hm) => time.zonedIso(date, hm, TZ);
 const h = (when, action, extra = {}) => ({at: when, action, ...extra});
 
-function build() {
+function build({withHistory = true} = {}) {
   const d = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/minimal.json'), 'utf8'));
   for (const k of ['dismissal_changes', 'attendance', 'absence_reports', 'forms', 'form_responses', 'lunch_transactions', 'menu_days', 'payments', 'notifications']) d[k] = [];
   // ---- schools: a 12-week window (5 October to 25 December 2026) with 3 closed days and 2 early dismissals each.
@@ -265,13 +268,17 @@ function build() {
   note('dismissal.recorded', at('2026-11-16', '21:15'), 'child-theo', 'dismissal_change', 'dc-0004', 'Dana Okafor changed Theo Okafor\'s way home on Friday, November 20', 'Dana Okafor recorded that Theo Okafor will be collected by Dana Okafor on Friday, November 20.');
   nt.sort((a, b) => Date.parse(a.at) - Date.parse(b.at)).forEach((x, i) => { x.id = 'ntf-' + String(i + 1).padStart(4, '0'); });
   d.notifications = nt;
-  return d;
+  // The family's earlier history, from 2025-01-01 to the summer of 2026, generated in front of the
+  // hand-written school year (scripts/history.cjs; fixed seed, no clock).
+  return withHistory ? history.merge(d) : d;
 }
-module.exports = {build};
+const file = path.join(root, 'fixtures/reference.json');
+const text = () => JSON.stringify(build(), null, 2) + '\n';
+const matches = () => fs.existsSync(file) && fs.readFileSync(file, 'utf8') === text();
+module.exports = {build, matches};
 if (require.main === module) {
-  const text = JSON.stringify(build(), null, 2) + '\n', file = path.join(root, 'fixtures/reference.json');
   if (process.argv.includes('--check')) {
-    if (!fs.existsSync(file) || fs.readFileSync(file, 'utf8') !== text) { console.error('fixtures/reference.json differs from its builder'); process.exitCode = 1; }
+    if (!matches()) { console.error('fixtures/reference.json differs from its builder'); process.exitCode = 1; }
     else console.log('fixtures/reference.json matches its builder.');
-  } else { fs.writeFileSync(file, text); console.log('Wrote fixtures/reference.json (' + Buffer.byteLength(text) + ' bytes).'); }
+  } else { const t = text(); fs.writeFileSync(file, t); console.log('Wrote fixtures/reference.json (' + Buffer.byteLength(t) + ' bytes).'); }
 }

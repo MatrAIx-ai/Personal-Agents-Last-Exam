@@ -185,11 +185,12 @@ test('T12 an explicit person_id never takes another known person\'s phone number
 test('T09 pickup.get shows pickup people in every state, including denied and removed', () => {
   const f = fixture({seed: require('../fixtures/reference.json')});
   const theo = f.call('bellnote.pickup.get', {id: 'child-theo'}).pickup_people.map(p => [p.id, p.status]);
-  assert.deepEqual(theo, [['pp-0001', 'approved'], ['pp-0003', 'denied'], ['pp-0005', 'removed']]);
+  // pp-h0001 / pp-h0002: the babysitter of the generated history, removed in June 2026.
+  assert.deepEqual(theo, [['pp-h0001', 'removed'], ['pp-0001', 'approved'], ['pp-0003', 'denied'], ['pp-0005', 'removed']]);
   const ines = f.call('bellnote.pickup.get', {id: 'child-ines'}).pickup_people.map(p => [p.id, p.status]);
-  assert.deepEqual(ines, [['pp-0002', 'pending_review'], ['pp-0004', 'approved']]);
+  assert.deepEqual(ines, [['pp-h0002', 'removed'], ['pp-0002', 'pending_review'], ['pp-0004', 'approved']]);
   // Denied and removed people cannot be named.
-  for (const person_id of ['person-lena', 'person-owen']) {
+  for (const person_id of ['person-lena', 'person-owen', 'person-marisol']) {
     assert.equal(f.try('bellnote.dismissal.set', {id: 'child-theo', date: '2026-11-19', mode: 'pickup', person_id}).status, 'not_authorized_person', person_id);
   }
 });

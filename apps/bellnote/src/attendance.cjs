@@ -18,11 +18,14 @@ const insideDay = (info, timeLocal) => {
 };
 // Per day: `moot` when that day became a closed day, or (late arrival / early leave) when an
 // early dismissal moved the end of the day to or before the reported time; otherwise `reported`.
+// A day of an earlier school year (before the current term, whose calendar the App does not hold)
+// stays `reported` with its cut-off passed: the school year it belonged to has simply ended.
 // The whole report reads `moot` only when every one of its days is moot; otherwise it keeps its
 // stored state and lists its moot_dates. Nothing here is stored.
 function reportView(ctx, data, r) {
   const s = c.schoolOf(data, r.child_id);
   const days = r.dates.map(date => {
+    if (date < s.term.start_date) return {date, state: 'reported', moot_reason: null, closed: false, cutoff_at: null, cutoff_passed: true};
     const info = c.dayInfo(data, s, date);
     const reason = info.kind === 'closed' ? 'closed' : !info.school_day ? info.kind
       : r.kind !== 'absent' && !insideDay(info, r.time_local) ? 'time_outside_day' : null;

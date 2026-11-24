@@ -158,7 +158,7 @@ async function run() {
     // Another run is separate.
     const other = await open('infra', 'bellnote-other');
     check('A separate run keeps the package seed', (await other.call('env.snapshot')).snapshot.data.account_id === 'bellnote-maya' &&
-      (await other.call('env.snapshot')).snapshot.data.absence_reports.length === 6);
+      (await other.call('env.snapshot')).snapshot.data.absence_reports.length === JSON.parse(fs.readFileSync(path.join(locate.packageDir, 'fixtures/reference.json'), 'utf8')).absence_reports.length);
     // A task policy narrows an operation to named objects; Core enforces it before any App code.
     const pinfra = await open('infra', 'bellnote-policy'), pagent = await open('agent', 'bellnote-policy');
     const policies = JSON.parse(fs.readFileSync(path.join(locate.packageDir, 'fixtures/policies.json'), 'utf8'));
