@@ -1,0 +1,92 @@
+[
+  {
+    "event_id": "stroller-weekend-1",
+    "at": "2026-12-11T19:00:00-05:00",
+    "operation": "service.alert_published",
+    "payload": {
+      "alert_id": "al-40-weekend",
+      "version": 1,
+      "msg_type": "alert",
+      "cause": "construction",
+      "effect": "stop_moved",
+      "informed": {
+        "route_ids": [
+          "rt-40"
+        ],
+        "stop_ids": [
+          "st-elm-3rd"
+        ]
+      },
+      "replacement_stop_id": "st-elm-4th",
+      "active_periods": [
+        {
+          "start": "2026-12-12T08:00:00-05:00",
+          "end": "2026-12-12T18:00:00-05:00"
+        }
+      ],
+      "header": "Route 40: Elm & 3rd stop moved to Elm & 4th on Saturday"
+    }
+  },
+  {
+    "event_id": "stroller-weekend-2",
+    "at": "2026-12-11T21:30:00-05:00",
+    "operation": "service.alert_published",
+    "payload": {
+      "alert_id": "al-40-weekend",
+      "version": 2,
+      "msg_type": "update",
+      "active_periods": [
+        {
+          "start": "2026-12-12T08:00:00-05:00",
+          "end": "2026-12-13T18:00:00-05:00"
+        }
+      ],
+      "header": "Route 40: Elm & 3rd stop moved to Elm & 4th all weekend",
+      "references": [
+        {
+          "alert_id": "al-40-weekend",
+          "version": 1
+        }
+      ]
+    }
+  },
+  {
+    "event_id": "stroller-weekend-3",
+    "at": "2026-12-12T08:15:00-05:00",
+    "operation": "facility.status_changed",
+    "payload": {
+      "facility_id": "fac-es21",
+      "status": "out_of_service",
+      "since": "2026-12-12T08:10:00-05:00",
+      "expected_return": "2026-12-12T16:00:00-05:00"
+    }
+  },
+  {
+    "event_id": "stroller-weekend-4",
+    "at": "2026-12-12T09:52:00-05:00",
+    "operation": "fare.tap_recorded",
+    "payload": {
+      "tap_id": "tp-tomas-sat-1",
+      "card_id": "cd-tomas",
+      "stop_id": "st-elm-4th",
+      "route_id": "rt-40",
+      "mode": "bus"
+    }
+  },
+  {
+    "event_id": "stroller-weekend-5",
+    "at": "2026-12-13T19:00:00-05:00",
+    "operation": "service.alert_published",
+    "payload": {
+      "alert_id": "al-40-weekend",
+      "version": 3,
+      "msg_type": "cancel",
+      "references": [
+        {
+          "alert_id": "al-40-weekend",
+          "version": 2
+        }
+      ]
+    }
+  }
+]

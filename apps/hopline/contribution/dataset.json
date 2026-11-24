@@ -1,0 +1,56 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "hopline-minimal",
+  "version": "1.0.0",
+  "description": "Synthetic transit network, fare card and subscription fixture for package validation; not an evaluation task.",
+  "record_source_ids": [
+    "hopline-generator"
+  ],
+  "sources": [
+    {
+      "source_id": "hopline-generator",
+      "kind": "synthetic",
+      "description": "The fictional metro Ashford (stops, stations, pathways, facilities, routes and frequency schedules) and rider histories written by the seeded generator, which produces taps, loads and settlements by running Hopline's own handlers. All places, people, fares and cards are fictional.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "seeded procedural generation",
+        "tool": "apps/hopline/scripts/generate-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20261207,
+        "parameters": {
+          "prng": "mulberry32"
+        }
+      }
+    },
+    {
+      "source_id": "gtfs-reference",
+      "kind": "reused",
+      "description": "GTFS and GTFS Realtime are used only as format references for stops, pathways, frequencies, alerts and trip updates; no feed data is copied.",
+      "uri": "https://gtfs.org/",
+      "license": "Apache-2.0 (specification text)",
+      "usage": "permitted",
+      "collection": null,
+      "generation": null
+    }
+  ],
+  "transformations": [
+    "All times are RFC 3339 with UTC offsets in America/New_York; money is integer US cents."
+  ],
+  "expected_counts": {
+    "records": 120,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automatic checks do not replace human review of realism, wording and provenance."
+  }
+}
