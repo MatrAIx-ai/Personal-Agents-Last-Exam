@@ -1,6 +1,6 @@
 {
   "schema": "pegboard.v1-evidence-index",
-  "recorded_at": "2026-11-22T04:44:07Z",
+  "recorded_at": "2026-11-24T20:09:29Z",
   "app_id": "pegboard",
   "app_version": "1.0.0",
   "runtime_version": "1.6.0",
@@ -8,20 +8,22 @@
   "mail_version": "1.3.0",
   "proposal_commit": "aa98311bef207f31440e1d67082580b519d5f752",
   "proposal_status": "plan approved for implementation (/approve-plan on PR #173); the proposal file is unchanged since that commit",
-  "public_runtime_base_commit": "61b637164e4abddf81536bb48935cdb688a69ff1",
-  "app_package_commit": "70c014687f353dee747a13f98409d209e9190a58",
-  "app_package_sha256": "65c57b8e0fcfa0402d37063ce2b849ea6737831b420a8cf7382b3a1f068217a0",
-  "app_package_git_tree": "80da54f46ac2f584168cb670f3caf020cfeaaf31",
+  "public_runtime_base_commit": "ae889d2cbbfc72242fc5e70b877f3f2a2f029618",
+  "app_package_commit": "d047d9c96f4f141c8aba7b679a14d92da68024da",
+  "app_package_sha256": "d5c4b6dcc1a4b4910b09b6647713ee919dfa96dbd2a7bea6ad4c05d8839bde39",
+  "app_package_git_tree": "cc3d4b80178a45e713b6f47ce0330410fea11508",
   "package_hash_agrees_in": [
     "public-runtime.node22.json",
     "public-runtime.node18.json",
-    "base-runtime.json"
+    "base-runtime.json",
+    "web-browser.node22.json",
+    "web-browser.node18.json"
   ],
   "tested_node": {
     "22": "v22.23.4",
     "18": "v18.20.8"
   },
-  "tested_os": "Linux 6.18.44-fc-v726 x86_64",
+  "tested_os": "Linux 6.18.44-fc-v819 x86_64",
   "interface": {
     "operations": 22,
     "read": 12,
@@ -31,28 +33,28 @@
   "checks": {
     "standalone_business": {
       "node22": {
-        "tests": 24,
-        "pass": 22,
+        "tests": 25,
+        "pass": 23,
         "fail": 0,
         "skipped": 2
       },
       "node18": {
-        "tests": 24,
-        "pass": 22,
+        "tests": 25,
+        "pass": 23,
         "fail": 0,
         "skipped": 2
       }
     },
     "business_with_runtime": {
       "node22": {
-        "tests": 24,
-        "pass": 24,
+        "tests": 25,
+        "pass": 25,
         "fail": 0,
         "skipped": 0
       },
       "node18": {
-        "tests": 24,
-        "pass": 24,
+        "tests": 25,
+        "pass": 25,
         "fail": 0,
         "skipped": 0
       }
@@ -97,7 +99,12 @@
       "node22": "22/22",
       "node18": "22/22"
     },
-    "shared_contract_copies": "runtime/sdk/sync.cjs --check and runtime/build-contracts.cjs --check passed on both Node versions"
+    "shared_contract_copies": "runtime/sdk/sync.cjs --check and runtime/build-contracts.cjs --check passed on both Node versions",
+    "web_pages_in_browser": {
+      "node22": 57,
+      "node18": 57
+    },
+    "browser": "153.0.8010.12"
   },
   "reports": [
     "base-runtime.json",
@@ -110,11 +117,14 @@
     "random-walk.node18.json",
     "random-walk.node22.json",
     "reference-suite.node18.json",
-    "reference-suite.node22.json"
+    "reference-suite.node22.json",
+    "web-browser.node18.json",
+    "web-browser.node22.json"
   ],
   "not_claimed": [
     "No agent trials or model runs.",
-    "No GUI or Web/CUA evidence: the first version is MCP only.",
+    "No user-simulator or computer-use agent runs against the web pages; the browser checks are scripted.",
+    "No production deployment: the pages are served by the public Web Host on loopback.",
     "No acceptance, merge or authorship credit.",
     "The two skipped standalone tests are the real-MCP scripts, which need the runtime; they pass in business_with_runtime."
   ],
