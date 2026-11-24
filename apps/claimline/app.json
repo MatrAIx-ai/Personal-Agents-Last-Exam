@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "app_id": "claimline",
+  "version": "0.1.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "@genglinliu; upstream PR #42"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "expense.charge_recorded",
+    "expense.receipt_delivered",
+    "expense.request_replied",
+    "expense.policy_published",
+    "expense.review_recorded",
+    "expense.payment_recorded"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "App-owned SAP Concur-inspired GUI through the public Web Host",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Simulated employer/employee, USD and one reviewer stage; no real payments.",
+    "Trusted Infra supplies reviews, payment proofs and source corrections.",
+    "First runnable conference scene; advanced OCR, FX, ERP, live cards, optional Finance bridge and additional scenes are deferred."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}

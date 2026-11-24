@@ -12,7 +12,7 @@ async function start({app,registry=path.join(root,'apps.registry.json'),run='web
   const web=gui.extensions.find(e=>e.namespace==='pale.web'&&e.version==='1')?.data;
   if(!web)throw Error('App has no public web controller');
   function inside(relative){const f=path.resolve(pkg.dir,relative);if(!f.startsWith(pkg.dir+path.sep)||!fs.realpathSync(f).startsWith(fs.realpathSync(pkg.dir)+path.sep))throw Error('Invalid App web path');return f;}
-  const page=inside(web.page),controller=inside(web.controller);
+  const page=inside(web.page),controller=inside(web.controller),stylesheet=web.stylesheet?inside(web.stylesheet):null;
   // Core initializes the selected policy atomically with first state creation.
   // No separate web lock or subsequent reset can strand or overwrite a run.
   const infra=new Client(app,'infra',run,stateDir,'pale-web-initializer',{registry,initialProfile:profile});
@@ -46,6 +46,7 @@ async function start({app,registry=path.join(root,'apps.registry.json'),run='web
         return json(res,200,{csrf});
       }
       const staticFiles={'/':[page,'text/html'],'/app.js':[controller,'text/javascript'],'/shared/client.js':[path.join(__dirname,'client.js'),'text/javascript'],'/shared/style.css':[path.join(__dirname,'style.css'),'text/css']};
+      if(stylesheet)staticFiles['/app.css']=[stylesheet,'text/css'];
       if(req.method==='GET'&&staticFiles[u.pathname]){
         const [file,type]=staticFiles[u.pathname];res.writeHead(200,{'Content-Type':type+'; charset=utf-8','Cache-Control':'no-store'});return res.end(fs.readFileSync(file));
       }

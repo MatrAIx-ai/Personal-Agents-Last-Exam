@@ -1,0 +1,118 @@
+TAP version 13
+# Subtest: regression: a new trip and report can be created through the public Core
+not ok 1 - regression: a new trip and report can be created through the public Core
+  ---
+  duration_ms: 86.712334
+  type: 'test'
+  location: '/Users/genglinliu/Documents/GitHub/Personal-Agents-Last-Exam/apps/claimline/tests/runtime.test.cjs:15:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"status":"invalid_event","message":"Data does not match schemas/seed.schema.json","applied":false,"version":{"epoch":1,"revision":0}}
+    + actual - expected
+
+    + 'invalid_event'
+    - 'committed'
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'committed'
+  actual: 'invalid_event'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/Users/genglinliu/Documents/GitHub/Personal-Agents-Last-Exam/apps/claimline/tests/runtime.test.cjs:17:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: regression: hotel meal itemizations require attendees and an over-limit explanation
+not ok 2 - regression: hotel meal itemizations require attendees and an over-limit explanation
+  ---
+  duration_ms: 340.698
+  type: 'test'
+  location: '/Users/genglinliu/Documents/GitHub/Personal-Agents-Last-Exam/apps/claimline/tests/runtime.test.cjs:21:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+
+      assert.ok(flags.some(v=>v.code==='attendees'))
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/Users/genglinliu/Documents/GitHub/Personal-Agents-Last-Exam/apps/claimline/tests/runtime.test.cjs:25:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: regression: new card charges retain one lineage through pending, settlement and refund
+not ok 3 - regression: new card charges retain one lineage through pending, settlement and refund
+  ---
+  duration_ms: 65.576416
+  type: 'test'
+  location: '/Users/genglinliu/Documents/GitHub/Personal-Agents-Last-Exam/apps/claimline/tests/runtime.test.cjs:30:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"status":"invalid_arguments","message":"Arguments do not match inputSchema","applied":false,"version":{"epoch":1,"revision":0}}
+    + actual - expected
+
+    + 'invalid_arguments'
+    - 'committed'
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'committed'
+  actual: 'invalid_arguments'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/Users/genglinliu/Documents/GitHub/Personal-Agents-Last-Exam/apps/claimline/tests/runtime.test.cjs:32:167)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: regression: failed payments obey the approved outstanding balance without counting as paid
+not ok 4 - regression: failed payments obey the approved outstanding balance without counting as paid
+  ---
+  duration_ms: 335.90275
+  type: 'test'
+  location: '/Users/genglinliu/Documents/GitHub/Personal-Agents-Last-Exam/apps/claimline/tests/runtime.test.cjs:39:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+
+    + 'committed'
+    - 'overpayment'
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'overpayment'
+  actual: 'committed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/Users/genglinliu/Documents/GitHub/Personal-Agents-Last-Exam/apps/claimline/tests/runtime.test.cjs:43:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 0
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 931.690458

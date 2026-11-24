@@ -59,9 +59,11 @@ test('clock retries retain their first receipt even after later operations, with
  assert.equal(conflict.result.status,'idempotency_conflict');assert.deepEqual(stable(conflict.state),stable(later.state));
 });
 
-test('all seven existing App packages consume a platform clock without new declarations or schema',()=>{
+test('all registered App packages consume a platform clock without new declarations or schema',()=>{
  const m=createRuntime({registryFile:path.resolve(__dirname,'../../apps.registry.json')});
- assert.equal(m.configs.size,7);
+ const declared=require('../../apps.registry.json').apps.map(a=>a.app_id);
+ assert.deepEqual([...m.configs.keys()].sort(),declared.slice().sort());
+ for(const app of ['mail','calendar','files','messages','notes','tasks','contacts'])assert.ok(m.configs.has(app));
  for(const app of m.configs.keys()){
   const s=m.create(app,'shared','sandbox'),peer=m.create(app,'other','sandbox'),args=request(m,s);
   const out=m.execute(s,'infra','env.advance_time',args);

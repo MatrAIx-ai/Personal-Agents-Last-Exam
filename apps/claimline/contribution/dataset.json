@@ -1,0 +1,47 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "claimline-conference",
+  "version": "0.1.0",
+  "description": "Original fictional company, trip, charges and electronic receipts. No actual employer or purchase data.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Deterministically authored fictional conference and receipt originals.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "deterministic script",
+        "tool": "Claimline build-package.py",
+        "tool_version": "0.1.0",
+        "seed": 1,
+        "parameters": {
+          "scene": "conference-first-runnable"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Saved originals intentionally preserve the source bytes under separate resource parents.",
+    "Amounts are integer USD cents; no live financial data."
+  ],
+  "expected_counts": {
+    "records": 38,
+    "assets": 14
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "allow",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}
