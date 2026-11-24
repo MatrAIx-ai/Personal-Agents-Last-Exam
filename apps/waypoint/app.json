@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "app_id": "waypoint",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:waypoint (proposal #193, @RuihongY)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "waypoint.receive",
+    "waypoint.transfer.settle",
+    "waypoint.bonus.start",
+    "waypoint.bonus.end"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "business web app and reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "A transfer is delivered only when the host publishes its message through Messaging and records the outcome with waypoint.transfer.settle; the App never sends by itself.",
+    "An unknown delivery acknowledgement leaves the transfer pending for reconciliation; there is no automatic refund or republish.",
+    "Points are earned only as seeded history; no card spending, buying or selling points, elite status or expiry in Waypoint.",
+    "Text only; one member per App instance."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}

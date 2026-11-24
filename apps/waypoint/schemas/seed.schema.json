@@ -1,0 +1,597 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:waypoint:seed:1",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "member_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "household": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "waypoint_account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          }
+        },
+        "required": [
+          "person_id",
+          "name",
+          "waypoint_account_id"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 8,
+      "description": "Other members of the household who may combine points with this member."
+    },
+    "balance": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100000000
+    },
+    "ledger": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "kind": {
+            "enum": [
+              "opening",
+              "earn",
+              "transfer_out",
+              "combine_out",
+              "combine_in",
+              "refund",
+              "adjustment"
+            ]
+          },
+          "points": {
+            "type": "integer",
+            "minimum": -10000000,
+            "maximum": 100000000
+          },
+          "balance_after": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "description": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 200
+          },
+          "ref": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "transfer",
+                      "combine",
+                      "message"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                  },
+                  "app_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                  },
+                  "account_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                  },
+                  "message_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 150
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "sent_at": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "kind",
+                  "id"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "at",
+          "kind",
+          "points",
+          "balance_after",
+          "description",
+          "ref"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "partners": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "app_id": {
+            "enum": [
+              "skyline",
+              "harbor"
+            ]
+          },
+          "recipient_account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+            "description": "The member's own account in the partner App; credits are routed only there."
+          },
+          "member_number": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ratio": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              },
+              "to": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              }
+            },
+            "required": [
+              "from",
+              "to"
+            ],
+            "additionalProperties": false
+          },
+          "increment": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "minimum": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "delay_minutes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 20160,
+            "description": "0 for an instant transfer; otherwise the credit is released this long after the transfer."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "app_id",
+          "recipient_account_id",
+          "member_number",
+          "ratio",
+          "increment",
+          "minimum",
+          "delay_minutes"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 40
+    },
+    "bonuses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "partner_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "percent": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "id",
+          "partner_id",
+          "percent",
+          "starts_at",
+          "ends_at",
+          "created_at",
+          "updated_at",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "transfers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "partner_transfer",
+              "household_combine"
+            ]
+          },
+          "partner_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "to_person_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recipient": {
+            "type": "object",
+            "properties": {
+              "app_id": {
+                "enum": [
+                  "waypoint",
+                  "skyline",
+                  "harbor"
+                ]
+              },
+              "account_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "required": [
+              "app_id",
+              "account_id"
+            ],
+            "additionalProperties": false
+          },
+          "member_number": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ratio": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              },
+              "to": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              }
+            },
+            "required": [
+              "from",
+              "to"
+            ],
+            "additionalProperties": false,
+            "description": "The partner ratio when the transfer was made."
+          },
+          "base_points": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000000
+          },
+          "bonus_pct": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 200
+          },
+          "points": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000000
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "completed",
+              "rejected"
+            ]
+          },
+          "available_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "debit_ledger_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "refund_ledger_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "receipt": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "event_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                  },
+                  "target_app_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                  },
+                  "target_account_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                  }
+                },
+                "required": [
+                  "event_id",
+                  "target_app_id",
+                  "target_account_id"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rejection": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "code",
+                  "reason"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "settled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "partner_id",
+          "to_person_id",
+          "recipient",
+          "member_number",
+          "ratio",
+          "base_points",
+          "bonus_pct",
+          "points",
+          "status",
+          "available_at",
+          "debit_ledger_id",
+          "refund_ledger_id",
+          "receipt",
+          "rejection",
+          "settled_at",
+          "created_at",
+          "updated_at",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "member_name",
+    "household",
+    "balance",
+    "ledger",
+    "partners",
+    "bonuses",
+    "transfers"
+  ],
+  "additionalProperties": false
+}
