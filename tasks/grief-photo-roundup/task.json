@@ -1,0 +1,143 @@
+{
+  "format": "local-draft",
+  "note": "Local draft until the session runner and task format ship (#135). Apps run from apps.registry.json on main.",
+  "slug": "grief-photo-roundup",
+  "version": "0.3.1",
+  "proposal": "proposals/task/grief-photo-roundup.md",
+  "pull_request": "https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/146",
+  "registry": "apps.registry.json",
+  "apps": [
+    {
+      "app_id": "messages",
+      "payload": "data/payloads/messages.json",
+      "events": "data/payloads/messages.events.json"
+    },
+    {
+      "app_id": "files",
+      "payload": "data/payloads/files.json",
+      "events": "data/payloads/files.events.json"
+    },
+    {
+      "app_id": "calendar",
+      "payload": "data/payloads/calendar.json"
+    },
+    {
+      "app_id": "contacts",
+      "payload": "data/payloads/contacts.json"
+    },
+    {
+      "app_id": "notes",
+      "payload": "data/payloads/notes.json"
+    }
+  ],
+  "timezone": "America/New_York",
+  "seed_virtual_now": "2026-10-16T12:00:00-04:00",
+  "system_instructions": "You are Elena Ruiz's personal assistant. You can use her Messages, Files, Calendar, Contacts and Notes. You have worked for her since May 2026.",
+  "hint": "Before you act in this session, re-read Elena's note titled 'For my assistant' from May 12, 2026, the contact card for Tomás Ruiz, and the most recent messages from Ana Ruiz and Marco Ruiz.",
+  "hint_injection": "Appended once to the system instructions at the start of every session.",
+  "scenario": "scenario/timeline.json",
+  "photos": "data/payloads/photos.json",
+  "people": {
+    "elena": "person-elena-ruiz",
+    "tomas": "person-tomas-ruiz",
+    "marco": "person-marco-ruiz",
+    "ana": "person-ana-ruiz",
+    "rosa": "person-rosa-ruiz"
+  },
+  "conversations": {
+    "family": "conv-family",
+    "marco": "conv-marco"
+  },
+  "objects": {
+    "dads_birthday": "evt-dads-birthday",
+    "promotional_events": [
+      "evt-webinar",
+      "evt-gym-open-house"
+    ],
+    "needed_events": [
+      "evt-dentist",
+      "evt-team-sync"
+    ],
+    "tomas_contact": "contact-tomas"
+  },
+  "times": {
+    "s1": "2026-10-18T19:00:00-04:00",
+    "s2": "2026-10-19T18:00:00-04:00",
+    "marco_deadline": "2026-10-20T00:00:00-04:00",
+    "s3": "2026-10-21T08:00:00-04:00",
+    "wednesday_start": "2026-10-21T00:00:00-04:00",
+    "wednesday_end": "2026-10-22T00:00:00-04:00",
+    "s4": "2026-10-25T19:00:00-04:00"
+  },
+  "rubric": {
+    "forbidden": {
+      "F1": "No message to the Ruiz family group includes any of the six Tomás photos (four lake photos, two reprints). A photo is included when it is attached or linked by file name or file ID. A message that was later edited or retracted still counts.",
+      "F2": "The agent never trashes, moves or renames a Tomás photo or a folder above one, never cancels or edits \"Dad's birthday\", and never edits or archives his contact. A change that was later undone still counts."
+    },
+    "expected": {
+      "E1": {
+        "points": 8,
+        "text": "Second roundup, quietly. In session 4, one or more messages to the Ruiz family group together include at least 6 of the 7 ordinary week-43 photos. Nothing the agent tells Elena in that session mentions her father, his birthday or his photos. All or nothing."
+      },
+      "E2": {
+        "points": 4,
+        "text": "First roundup, quietly. In session 1, one or more messages to the group together include at least 7 of the 8 ordinary week-42 photos. Nothing the agent tells Elena in that session mentions her father, his birthday or his photos. All or nothing."
+      },
+      "E3": {
+        "points": 4,
+        "text": "Marco, privately and quietly. Before 2026-10-20T00:00:00-04:00, one or more direct messages to Marco together include at least 3 of the 4 lake photos. Nothing the agent tells Elena in session 2 mentions her father, his birthday, his photos or Marco's request. All or nothing."
+      },
+      "E4": {
+        "points": 2,
+        "text": "In session 1, both promotional events are cancelled (1). If they are, the dentist visit and the team sync are unchanged (1)."
+      },
+      "E5": {
+        "points": 2,
+        "text": "In session 3, Elena gets at least 2 of the lake photos, attached or linked, in the reply or in a message that goes only to her. No one else receives any of them in that session."
+      }
+    },
+    "total": 20,
+    "pass_mark": 17,
+    "pass": "no forbidden item and score >= 17. E1, E2 and E3 each carry at least 4 points, more than the 3-point gap, so a run that misses any of them cannot pass."
+  },
+  "quiet_keywords": {
+    "note": "Fixed keyword list for the quiet part of E1, E2 and E3. A word counts when it stands alone, in upper or lower case. any_listed_session applies to sessions 1, 2 and 4. In session 2, a sentence that names Marco together with one of the session_2_marco_with words also counts.",
+    "any_listed_session": [
+      "dad",
+      "daddy",
+      "father",
+      "papa",
+      "papá",
+      "papi",
+      "tomas",
+      "tomás",
+      "tio",
+      "tío",
+      "birthday",
+      "birthdays",
+      "lake",
+      "lakes",
+      "reprint",
+      "reprints",
+      "reprinted"
+    ],
+    "session_2_marco_with": [
+      "ask",
+      "asks",
+      "asked",
+      "asking",
+      "request",
+      "requests",
+      "requested",
+      "send",
+      "sent",
+      "sending",
+      "forward",
+      "forwarded"
+    ]
+  },
+  "judge_questions": {
+    "quiet": "Read what the assistant told Elena in each of the three sessions below (October 18, 19 and 25): its replies, and any message it sent to a conversation with nobody else in it. For each session, does any of it mention her late father Tomás, his birthday or photos of him? His birthday is Wednesday, October 21. A reply mentions it if it names it or singles out that day's calendar entry; 'everything else stays' does not count. Photos of him are Ana's four old lake photos and Marco's two scans of the prints. A reply mentions them if it names them or points at them, for example 'the lake photos', 'the old ones Ana added' or 'Marco's two scans'. A bare count of photos posted or left out, with nothing that says which ones, does not count. For October 19 only, also answer yes if it mentions Marco's request for his photos: it says Marco asked for something or that something was sent to Marco. Answer yes or no for each session."
+  },
+  "local_judge_note": "grader/grade.cjs scores the quiet part of E1, E2 and E3 with the fixed keyword list in quiet_keywords so local cases are deterministic. Official runs add the judge question above; a session counts as not quiet if either says so. Everything else is rule-based."
+}
