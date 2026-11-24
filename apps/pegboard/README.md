@@ -2,7 +2,7 @@
 
 Pegboard is a synthetic staff-scheduling App for PALE, seen from one hourly employee's account: the posted shifts of the whole team, and the employee's own availability, time off and requests to hand a shift over, trade it, release it or pick one up. A shift stays the employee's until a coworker has accepted it and the manager has approved, and every request has a cut-off. It follows the Environment proposal `proposals/environment/pegboard.md` (PR #173). All data is invented; there is no real employer, schedule or person.
 
-Status: version 1.0.0, the first-version submission for PR #173, on public runtime 1.6.0. All four workflows of the approved plan, the eight events, the optional Mail notifications and the tests are in place. The evidence report is `docs/validation/pegboard-v1.0.0.md`; what remains is listed under "Remaining work".
+Status: version 1.0.0, the first-version submission for PR #173, on public runtime 1.6.0. All four workflows of the approved plan, the eight events, the optional Mail notifications, the web pages and the tests are in place. The evidence report is `docs/validation/pegboard-v1.0.0.md`; what remains is listed under "Remaining work".
 
 ## Run locally
 
@@ -23,6 +23,14 @@ node apps/pegboard/tests/mail.integration.cjs --runtime runtime    # Pegboard ->
 ```
 
 Both scripts take `--report FILE` to write their check names and versions as JSON.
+
+The web pages (see "Web pages" below), from the repository root:
+
+```sh
+node apps/pegboard/examples/web.cjs --runtime runtime      # starts the public Web Host on a fresh copy of the fixture; open the printed link
+npm ci && npx playwright install chromium                 # once: the checkout's pinned browser-test dependency
+node apps/pegboard/tests/web.browser.cjs --runtime runtime  # browser checks; --chrome PATH uses an installed Chrome
+```
 
 The two scripts are given the runtime directory (`--runtime DIR`, or `PALE_RUNTIME_ROOT=DIR`); the first needs nothing else. The Mail flow also needs this package and the pinned Mail package inside that checkout, because the public Messaging router resolves a publisher package and its receiver registry relative to its own checkout. With `PALE_RUNTIME_ROOT` set, `npm test` runs both scripts as T18 and T16b; without it they are skipped and say so.
 
@@ -86,9 +94,23 @@ New IDs are `ho-NNNN`, `to-NNNN` and `ntf-NNNN`: one more than the largest numbe
 
 `tools.json` and the App-owned schemas are generated from `dev/contracts.cjs` (`node dev/build.cjs`, `--check` for drift). `dev/walk.cjs` is a seeded random walk over every write, every event and the clock: it fails if the App ever accepts something that leaves its own records inconsistent, if a read changes data, or if a call fails with anything but a declared error (`node dev/walk.cjs [first seed] [last seed] [steps]`; one walk runs with `npm test`). Nothing under `dev/` runs at run time.
 
+## Web pages
+
+The App owns its pages: `gui/index.html` and the controller `gui/src/app.js`, declared in `contribution/gui.json` through the `pale.web` extension and served by the public Web Host (`runtime/web/server.cjs`), which forwards only the Agent's permitted tools. Nothing on the page is stored outside the App; every value is read through those tools, and the browser clock is never used for a business decision. Shift times and days are shown in the workplace's zone, notification times in the account's.
+
+- **Schedule**: one week of posted shifts, the whole team's, mine or the open ones, as `shifts.list` returns them, with my hours for the week. It opens on the week of my next shift that has not ended, by the App's clock. A shift page shows its flags, its cut-off, its history and, for a shift that is not mine, whether I could take it (`eligibility.check`). Ask for cover (with the check for the chosen coworker), Offer a trade, Release to open shifts, Pick up an open shift.
+- **Handoffs**: requests waiting for me, waiting for others, and closed ones; a handoff with its shifts, people, message, cut-off and history. Accept (with my check) or Decline a coworker's request, Cancel my own.
+- **Time off**: entries with their state and history; Request time off, Cancel.
+- **Availability**: the weekly times I cannot work; saving replaces the list. Read-only when the policy offers no availability write.
+- **Hours**: four weeks of scheduled hours, cap, hours left, days and estimated pay, labelled an estimate.
+- **Notifications**: the log with the App's kind and state filters, linked to the handoff, shift or time off it is about.
+- **Settings**: time zone, quiet hours, open-shift notices and email copies; the team and the workplace policy.
+
+A shift stays its owner's until a handoff is approved, and the pages say so; nothing changes hands in the browser. Every write carries the version the form was opened on, so a change made meanwhile shows as a conflict rather than being overwritten, and an unchanged resubmission reuses its `request_id`, so a retry after a lost response cannot repeat the effect. Edits send only the fields that changed, so a policy that allows one field is respected. Controls for tools the policy does not offer are not shown; a refusal, such as a rule the App applies (`not_qualified`, `over_hours`, `too_late`), is shown as such. App text is rendered as text only. `gui/src/view.js` is the compatible reviewer renderer. `tests/web.browser.cjs` drives the pages in a real browser and checks the same run through MCP after every write.
+
 ## Package boundary
 
-The package runs on its own. It imports only Node built-ins and its own files, reads no file outside its folder and uses no other App's files or state; a test checks this. `service.cjs` is the provided launcher, which finds the pinned runtime. `tests/schema-validator.cjs` is a copy of the public runtime's schema validator, so the App-only tests check every argument, result and state against the contracts without the runtime. The two real-MCP scripts are given the runtime's location.
+The package runs on its own. It imports only Node built-ins and its own files, reads no file outside its folder and uses no other App's files or state; a test checks this. `service.cjs` is the provided launcher, which finds the pinned runtime. `tests/schema-validator.cjs` is a copy of the public runtime's schema validator, so the App-only tests check every argument, result and state against the contracts without the runtime. The two real-MCP scripts, the web starter and the browser checks are given the runtime's location; the browser checks also use the checkout's pinned Playwright.
 
 ## Other Apps
 
@@ -123,11 +145,12 @@ const { stage, results, sent } = await publishReleased({ source, router, sent: p
 | All: Core contracts | T18 runs `mcp.integration.cjs` | replays, stale versions, authority, failure atomicity |
 | All: seeds, reset, activity log | T19 | `mcp.integration.cjs`: task seed with `virtual_now`, reset to the loaded seed and time |
 | All: consistency in any reachable state | the random-walk test (`dev/walk.cjs`), the contract and package-boundary tests | |
+| Web pages (W1–W4) | the declaration and text-only checks | `web.browser.cjs`: every section in a real browser, writes checked through MCP, conflicts, retries, refusals, a restricted policy |
 
 ## Remaining work
 
 - Independent reproduction and acceptance by a maintainer.
 - Human review of realism (the schedule, the policy values, notification wording) and of the invented workplace and names.
 - No agent trials are included.
-- MCP only, as planned: no GUI, no manager's console and no Web/CUA adapter.
+- The web pages run on the public loopback Web Host. A production deployment (remote authentication, HTTPS) is a platform matter, and no user-simulator integration is claimed. There is no manager's console.
 - Mail is the only connected App. Delivery uses the public Messaging router with a local Infra config; production Messaging credentials are a platform matter.

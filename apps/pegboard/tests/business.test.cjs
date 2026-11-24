@@ -1144,6 +1144,22 @@ test('contracts, fixture and declarations are in step', () => {
   assert.equal(fixture().call(cases.read.name.slice(9), cases.read.args).shifts.length, 4, 'the read case of the public verifier returns my week');
 });
 
+test('the web pages are declared, cover every tool and render text only', () => {
+  const root = path.resolve(__dirname, '..'), contribution = require('../contribution/contribution.json');
+  assert.equal(contribution.gui_ref, 'gui.json');
+  const gui = require('../contribution/gui.json'), web = gui.extensions.find(e => e.namespace === 'pale.web' && e.version === '1');
+  assert.deepEqual([gui.audience, gui.status, web.required, web.data.status, web.data.transport], [['reviewer'], 'declared', false, 'implemented', 'agent-mcp-bridge']);
+  assert.deepEqual(gui.content_policy, { untrusted_html: 'text_only', svg: 'disabled', remote_fetch: 'disabled', remote_allowlist: [], missing_asset_behavior: 'placeholder' });
+  for (const ref of [web.data.page, web.data.controller, gui.renderer_ref]) assert.ok(fs.existsSync(path.join(root, ref)), ref + ' is in the package');
+  const controller = fs.readFileSync(path.join(root, web.data.controller), 'utf8');
+  for (const tool of require('../tools.json')) assert.ok(controller.includes("'" + tool.name + "'"), 'the controller names ' + tool.name);
+  // The page is built from text nodes: no HTML strings, no code from strings, no inline styles (the Host's content policy blocks them).
+  assert.doesNotMatch(controller, /innerHTML|outerHTML|insertAdjacentHTML|document\.write|\beval\(|new Function|setAttribute\(\s*['"]style/);
+  // The only file the page loads besides itself is the Host's shared client.
+  assert.deepEqual([...controller.matchAll(/^import .* from '([^']+)'/gm)].map(m => m[1]), ['/shared/client.js']);
+  assert.doesNotMatch(controller, /\bfetch\(|XMLHttpRequest|WebSocket|Date\.now\(|new Date\(\)/, 'the controller calls tools only through the shared client and never reads the browser clock');
+});
+
 test('the package runs on its own: no import or file path leaves its folder', () => {
   const root = path.resolve(__dirname, '..'), files = [];
   const walk = dir => { for (const e of fs.readdirSync(dir, { withFileTypes: true })) { const f = path.join(dir, e.name); if (e.isDirectory()) walk(f); else if (/\.(cjs|js|mjs)$/.test(e.name)) files.push(f); } };
