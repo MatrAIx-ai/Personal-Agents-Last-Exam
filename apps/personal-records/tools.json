@@ -69,7 +69,8 @@
           "content_bytes": { "type": "string", "description": "Base64-encoded raw file bytes" },
           "mime_type": { "type": "string" },
           "change_summary": { "type": "string", "description": "Reason for the version update" },
-          "expected_parent_version": { "type": "integer", "description": "Optimistic lock check against current version" }
+          "expected_parent_version": { "type": "integer", "description": "Optimistic lock check against current version" },
+          "idempotency_key": { "type": "string" }
         },
         "required": ["document_id", "content_bytes", "mime_type"]
       }
@@ -157,7 +158,7 @@
         "type": "object",
         "properties": {
           "proposal_id": { "type": "string" },
-          "decision": { "type": "string", "enum": ["APPROVE", "REJECT"] },
+          "decision": { "type": "string", "enum": ["APPROVE", "REJECT", "CANCEL"] },
           "rejection_reason": { "type": "string" }
         },
         "required": ["proposal_id", "decision"]

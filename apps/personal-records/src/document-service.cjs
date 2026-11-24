@@ -129,7 +129,7 @@ class DocumentService {
       try {
         this.db.prepare(`
           UPDATE documents 
-          SET current_version_number = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+          SET current_version_number = ?, verification_state = 'INFERRED', updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
           WHERE document_id = ?
         `).run(newVersionNumber, documentId);
 

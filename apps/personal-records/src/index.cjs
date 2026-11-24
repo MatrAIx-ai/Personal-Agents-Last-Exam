@@ -87,13 +87,15 @@ class PersonalRecordsApp {
       }
 
       case 'records.create_version': {
-        return this.docService.createVersion({
-          accountId,
-          documentId: params.document_id,
-          contentBytes: params.content_bytes,
-          mimeType: params.mime_type,
-          changeSummary: params.change_summary,
-          expectedParentVersion: params.expected_parent_version
+        return this.platform.executeIdempotent(accountId, name, idempotencyKey, async () => {
+          return this.docService.createVersion({
+            accountId,
+            documentId: params.document_id,
+            contentBytes: params.content_bytes,
+            mimeType: params.mime_type,
+            changeSummary: params.change_summary,
+            expectedParentVersion: params.expected_parent_version
+          });
         });
       }
 

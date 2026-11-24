@@ -184,16 +184,17 @@ class EvidenceService {
     }
 
     // Handle rejection
-    if (decision === 'REJECT') {
+    if (decision === 'CANCEL' || decision === 'REJECT') {
+      const targetStatus = decision === 'CANCEL' ? 'CANCELLED' : 'REJECTED';
       this.db.prepare(`
         UPDATE proposals
-        SET status = 'REJECTED', decision_reason = ?, resolved_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+        SET status = ?, decision_reason = ?, resolved_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
         WHERE proposal_id = ?
-      `).run(rejectionReason || 'User rejected', proposalId);
+      `).run(targetStatus, rejectionReason || `User ${decision.toLowerCase()}ed`, proposalId);
 
       return {
         proposal_id: proposalId,
-        status: 'REJECTED'
+        status: targetStatus
       };
     }
 
@@ -215,6 +216,21 @@ class EvidenceService {
         err.code = 'STALE_PROPOSAL_VERSION';
         throw err;
       }
+    } else if (proposal.target_type === 'claim') {
+      this.db.prepare(`
+        UPDATE evidence_claims
+        SET verification_state = 'USER_CONFIRMED'
+        WHERE claim_id = ?
+      `).run(proposal.target_id);
+    } else if (proposal.target_type === 'link') {
+      const linkData = JSON.parse(proposal.proposed_changes);
+      this.linkDocuments({
+        accountId,
+        sourceId: linkData.source_id,
+        targetId: linkData.target_id,
+        relationshipType: linkData.relationship_type,
+        metadata: linkData.metadata || {}
+      });
     }
 
     // Apply approved mutation atomically
