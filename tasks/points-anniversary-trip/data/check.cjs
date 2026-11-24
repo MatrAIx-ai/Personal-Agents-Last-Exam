@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 'use strict';
-// Replays the reference solution's App-side steps on this task's data, over real MCP
-// processes and Messaging, and checks every number the rubric relies on.
+// Replays the App-side steps of the reference solution and of the 2027-09-01 bonus path on this
+// task's data, over real MCP processes and Messaging, and checks every number the rubric relies on.
 //
 //   node tasks/points-anniversary-trip/data/check.cjs --root <checkout with runtime/ and the #193 Apps>
 //
-// Covered: Waypoint (Daniel and Mei), Skyline and Harbor. Not covered here: Mail, Messages,
-// Calendar, the card account (#182) and the user model.
+// Covered: Waypoint (Daniel and Mei), Skyline (Aeroplan, United MileagePlus, Virgin Atlantic) and
+// Harbor (World of Hyatt). The workspace Apps are checked by ../workspace/validate.cjs; the card
+// account (#182) and the user model are not covered here.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -22,16 +23,29 @@ const {Client} = require(path.join(root, 'runtime/client.cjs'));
 const {deliverable, settleEvent} = require(path.join(root, 'apps/waypoint/src/settlement.cjs'));
 const data = name => JSON.parse(fs.readFileSync(path.join(__dirname, name), 'utf8'));
 const copy = value => structuredClone(value);
-const binding = data('binding.json'), timeline = data('timeline.json');
+const binding = data('binding.json');
 const RESERVE = 'chase-sapphire-reserve', PAX = ['pax-daniel', 'pax-mei'];
+const RETURN = {origin:'HND', dest:'MSP', date:'2027-10-25', cabin:'business', pax:2};
+const OUT = {origin:'MSP', dest:'HND', date:'2027-10-15', cabin:'business', pax:2};
+const seedFlights = data('skyline.seed.json').flights;
+const isPair = (id, [a, b]) => seedFlights.find(f => f.id === id).cabins.business.adjacent_pairs
+  .map(p => p.slice().sort().join()).includes([a, b].sort().join());
+const seatedTogether = trip => trip.segments.every(id => isPair(id, trip.seats.filter(s => s.flight_id === id).map(s => s.seat)));
+const pairSeats = option => option.segments.flatMap(seg => {
+  const [a, b] = seg.adjacent_pairs[0];
+  return [{flight_id:seg.flight_id, passenger_id:PAX[0], seat:a}, {flight_id:seg.flight_id, passenger_id:PAX[1], seat:b}];
+});
+const ids = options => options.map(o => o.segments.map(s => s.flight_id).join('+'));
 
-async function run() {
-  const state = fs.mkdtempSync(path.join(os.tmpdir(), 'pale-55-')), meiState = path.join(state, 'mei');
-  fs.mkdirSync(meiState);
+async function run(variant) {
+  const state = fs.mkdtempSync(path.join(os.tmpdir(), 'pale-55-'));
+  const dir = name => { const d = path.join(state, name); fs.mkdirSync(d); return d; };
+  const meiState = dir('mei'), unitedState = dir('united'), virginState = dir('virgin');
+  const timeline = data('timeline.json');
   const clients = [], checks = [];
   let sequence = 0;
-  const equal = (label, actual, expected) => { assert.deepEqual(actual, expected, label); checks.push(label); };
-  const ok = (label, condition) => { assert.ok(condition, label); checks.push(label); };
+  const equal = (label, actual, expected) => { assert.deepEqual(actual, expected, variant + ': ' + label); checks.push(label); };
+  const ok = (label, condition) => { assert.ok(condition, variant + ': ' + label); checks.push(label); };
   async function open(app, role, directory = state) {
     const client = new Client(app, role, 'task-55', directory, 'task-55-check', {registry:path.join(root, 'registry.points.json')});
     clients.push(client); await client.initialize(); return client;
@@ -50,23 +64,22 @@ async function run() {
     assert.equal(result.status, 'ready', app + ': ' + JSON.stringify(result));
     assert.equal((await infra.call('env.reset', {expected_version:await version(infra), profile:'sandbox'})).status, 'ready');
   }
-  let infras = [];
+  const infras = [], byAccount = {};
   async function clock(iso) {
     for (const infra of infras) {
       const r = await infra.call('env.advance_time', {expected_version:await version(infra), virtual_now:iso, request_id:'clock-' + (++sequence)});
       assert.ok(r.status === 'committed' || r.status === 'ok', JSON.stringify(r));
     }
   }
-  const byApp = {};
-  async function world(until) { // apply timeline events due by `until`, in order
-    for (const {app, event} of timeline.events.filter(e => !e.done && e.event.at <= until)) {
-      await clock(event.at);
-      const result = await byApp[app].call('env.apply_event', {expected_version:await version(byApp[app]), event});
-      timeline.events.find(e => e.event === event).done = result;
+  async function world(until) { // apply the timeline events due by `until`, in order
+    for (const entry of timeline.events.filter(e => !e.done && e.event.at <= until)) {
+      await clock(entry.event.at);
+      const infra = byAccount[entry.account_id];
+      entry.done = await infra.call('env.apply_event', {expected_version:await version(infra), event:entry.event});
     }
     await clock(until);
   }
-  const outcome = id => timeline.events.find(e => e.event.event_id === id).done;
+  const outcome = (id, account) => timeline.events.find(e => e.event.event_id === id && e.account_id === account).done;
   async function router(config) {
     const client = new Client(null, null, null, null, 'task-55-router', {commandArgs:[path.join(root, 'runtime/messaging/service.cjs'),
       '--config', path.join(__dirname, 'messaging', config), '--publisher', 'waypoint', '--run', 'task-55', '--state-dir', state]});
@@ -83,101 +96,108 @@ async function run() {
     }
     return out;
   }
-  const pairSeats = option => option.segments.flatMap(seg => {
-    const [a, b] = seg.adjacent_pairs[0];
-    return [{flight_id:seg.flight_id, passenger_id:PAX[0], seat:a}, {flight_id:seg.flight_id, passenger_id:PAX[1], seat:b}];
-  });
-  const seedFlights = data('skyline.seed.json').flights;
-  const isPair = (id, [a, b]) => {
-    const pairs = seedFlights.find(f => f.id === id).cabins.business.adjacent_pairs.map(p => p.slice().sort().join());
-    return pairs.includes([a, b].sort().join());
-  };
 
   try {
     const waypoint = await open('waypoint', 'agent'), waypointInfra = await open('waypoint', 'infra');
     const skyline = await open('skyline', 'agent'), skylineInfra = await open('skyline', 'infra');
     const harbor = await open('harbor', 'agent'), harborInfra = await open('harbor', 'infra');
     const meiInfra = await open('waypoint', 'infra', meiState);
+    const unitedInfra = await open('skyline', 'infra', unitedState), virginInfra = await open('skyline', 'infra', virginState);
     await load(waypointInfra, 'waypoint', data('waypoint-daniel.seed.json'));
     await load(meiInfra, 'waypoint', data('waypoint-mei.seed.json'));
     await load(skylineInfra, 'skyline', data('skyline.seed.json'));
+    await load(unitedInfra, 'skyline', data('skyline-united.seed.json'));
+    await load(virginInfra, 'skyline', data('skyline-virgin.seed.json'));
     await load(harborInfra, 'harbor', data('harbor.seed.json'));
     const mei = await open('waypoint', 'agent', meiState);
-    infras = [waypointInfra, meiInfra, skylineInfra, harborInfra];
-    Object.assign(byApp, {skyline:skylineInfra, harbor:harborInfra});
+    const united = await open('skyline', 'agent', unitedState), virgin = await open('skyline', 'agent', virginState);
+    infras.push(waypointInfra, meiInfra, skylineInfra, unitedInfra, virginInfra, harborInfra);
+    Object.assign(byAccount, {'skyline-daniel':skylineInfra, 'skyline-united-daniel':unitedInfra, 'skyline-virgin-daniel':virginInfra, 'harbor-daniel':harborInfra});
     await clock(timeline.start);
     const danielBridge = await router('daniel-config.json'), meiBridge = await router('mei-config.json');
+    const hyatt = async () => harbor.call('harbor.account', {});
 
-    // Starting state.
-    equal('Starting balances: UR 281,600, Aeroplan 0, Hyatt 41,200',
-      [(await waypoint.call('waypoint.balance', {})).balance, (await skyline.call('skyline.balance', {})).balance, (await harbor.call('harbor.account', {})).balance],
-      [281600, 0, 41200]);
-    equal('Hyatt points are forfeited at 2027-09-30T00:00:00-05:00 without activity',
-      (await harbor.call('harbor.account', {})).expires_at, '2027-09-30T00:00:00-05:00');
-    const bonus = (await waypoint.call('waypoint.bonuses', {})).items;
-    equal('The 30% Aeroplan bonus is announced and upcoming', bonus.map(b => [b.partner_id, b.percent, b.state, b.starts_at]),
+    // Starting state and the comparison searches of session 1.
+    equal('Starting balances: UR 281,600, Aeroplan 0, United 12,400, Hyatt 41,200',
+      [(await waypoint.call('waypoint.balance', {})).balance, (await skyline.call('skyline.balance', {})).balance,
+        (await united.call('skyline.balance', {})).balance, (await hyatt()).balance], [281600, 0, 12400, 41200]);
+    equal('Hyatt points are forfeited at 2027-09-30T00:00:00-05:00 without activity', (await hyatt()).expires_at, '2027-09-30T00:00:00-05:00');
+    equal('Partners: Aeroplan, Hyatt, United and Virgin, all instant 1:1', (await waypoint.call('waypoint.partners', {})).items.map(p => [p.id, p.ratio.to, p.delay_minutes]),
+      [['aeroplan', 1, 0], ['hyatt', 1, 0], ['united', 1, 0], ['virgin', 1, 0]]);
+    equal('The 30% Aeroplan bonus is announced and upcoming', (await waypoint.call('waypoint.bonuses', {})).items.map(b => [b.partner_id, b.percent, b.state, b.starts_at]),
       [['aeroplan', 30, 'upcoming', '2027-09-01T00:00:00-05:00']]);
-
-    // Session 1, 2027-08-24 21:00: the return (OPT-R1).
-    const RETURN = {origin:'HND', dest:'MSP', date:'2027-10-25', cabin:'business', pax:2};
-    let [r1, ...rest] = (await skyline.call('skyline.search', RETURN)).options;
-    equal('Return search shows one business option, UA 838 + UA 2210', [rest.length, r1.segments.map(s => s.flight_id)], [0, ['UA838-2027-10-25', 'UA2210-2027-10-25']]);
+    let [r1, ...others] = (await skyline.call('skyline.search', RETURN)).options;
+    equal('Aeroplan return for two: only OPT-R1, UA 838 + UA 2210', [others.length, ids([r1])], [0, ['UA838-2027-10-25+UA2210-2027-10-25']]);
     equal('OPT-R1: 2 seats, 75,000 points + USD 28.50 + USD 70.40 per passenger', [r1.seats_left, r1.per_passenger],
       [2, {points:75000, partner_fee_cents:2850, taxes_cents:7040}]);
-    ok('Default seating would split the couple on every OPT-R1 segment',
-      r1.segments.every(seg => !isPair(seg.flight_id, seg.free_seats.slice(0, 2))));
-    ok('Every OPT-R1 segment has a free adjacent pair', r1.segments.every(seg => seg.adjacent_pairs.length > 0));
+    const single = async (client, args) => (await client.call('skyline.search', {...args, pax:1})).options.map(o => [ids([o])[0], o.per_passenger.points, o.seats_left]);
+    equal('Aeroplan for one: OPT-A2 via Chicago on ANA costs 87,500 with one seat', await single(skyline, OUT),
+      [['UA1735-2027-10-15+UA837-2027-10-15', 75000, 2], ['UA2455-2027-10-15+NH11-2027-10-15', 87500, 1]]);
+    equal('United prices its own seats at 110,000 out and 98,000 back, no partner fee',
+      [(await united.call('skyline.search', OUT)).options[0].per_passenger, (await united.call('skyline.search', RETURN)).options[0].per_passenger],
+      [{points:110000, partner_fee_cents:0, taxes_cents:1120}, {points:98000, partner_fee_cents:0, taxes_cents:7040}]);
+    equal('Virgin: ANA from Chicago only, 52,500 + USD 286 surcharges, one seat',
+      [await single(virgin, {origin:'ORD', dest:'HND', date:'2027-10-15', cabin:'business'}),
+        (await virgin.call('skyline.search', {origin:'ORD', dest:'HND', date:'2027-10-15', cabin:'business', pax:2})).options.length],
+      [[['NH11-2027-10-15', 52500, 1]], 0]);
+    ok('Default seating would split the couple on every OPT-R1 segment', r1.segments.every(seg => !isPair(seg.flight_id, seg.free_seats.slice(0, 2))));
+
+    // Session 1, 2027-08-24 21:00: book the return with Daniel's own points.
     await write(waypoint, waypointInfra, 'waypoint.transfer', {partner_id:'aeroplan', points:150000});
     equal('150,000 UR reach Aeroplan', (await deliver(waypoint, waypointInfra, danielBridge)).map(r => r.status), ['committed']);
     [r1] = (await skyline.call('skyline.search', RETURN)).options;
     const back = await write(skyline, skylineInfra, 'skyline.book', {option_id:r1.option_id, passenger_ids:PAX, payment_label:RESERVE, seats:pairSeats(r1)});
-    const backTrip = (await skyline.call('skyline.trips', {id:back.id})).trip;
-    ok('Return ticketed with adjacent seats on both segments', backTrip.segments.every(id => isPair(id, backTrip.seats.filter(s => s.flight_id === id).map(s => s.seat))));
+    ok('Return ticketed with adjacent seats on both segments', seatedTogether((await skyline.call('skyline.trips', {id:back.id})).trip));
     equal('Return taxes and fees on the Reserve: $197.80', (await skyline.call('skyline.balance', {})).charges.map(c => [c.label, c.amount_cents]), [[RESERVE, 19780]]);
 
-    // Mei acts at 07:40 on an exact text; the return seats sell out at 18:00.
+    // Mei acts at 07:40 on an exact text.
     await world('2027-08-25T07:40:00-05:00');
     await write(mei, meiInfra, 'waypoint.combine', {to_person_id:'person-daniel', points:171900});
     equal('Mei → Daniel combine commits', (await deliver(mei, meiInfra, meiBridge)).map(r => r.status), ['committed']);
     equal('Pool after the combine: 303,500 UR', (await waypoint.call('waypoint.balance', {})).balance, 303500);
 
-    // Alert-triggered session, 2027-08-25 08:00: outbound (OPT-A1) and hotels.
-    await world('2027-08-25T08:00:00-05:00');
-    const OUT = {origin:'MSP', dest:'HND', date:'2027-10-15', cabin:'business', pax:2};
-    await write(waypoint, waypointInfra, 'waypoint.transfer', {partner_id:'aeroplan', points:150000});
+    // Outbound and hotels: on 2027-08-25 08:00 (reference), or on 2027-09-01 with the bonus (accepted approach).
+    const at = variant === 'reference' ? '2027-08-25T08:00:00-05:00' : '2027-09-01T08:00:00-05:00';
+    await world(at);
+    if (variant === 'bonus') equal('No Aeroplan, United or Virgin business seats home after the 2027-08-25 18:00 sell-out',
+      [(await skyline.call('skyline.search', RETURN)).options.length, (await united.call('skyline.search', RETURN)).options.length,
+        (await virgin.call('skyline.search', {origin:'HND', dest:'ORD', date:'2027-10-25', cabin:'business', pax:1})).options.length], [0, 0, 0]);
+    const outbound = variant === 'reference' ? 150000 : 116000;
+    const sent = await write(waypoint, waypointInfra, 'waypoint.transfer', {partner_id:'aeroplan', points:outbound});
     await deliver(waypoint, waypointInfra, danielBridge);
+    equal('Aeroplan credit for the outbound: ' + (variant === 'reference' ? '150,000' : '116,000 × 1.3 = 150,800'),
+      [sent.points, (await skyline.call('skyline.balance', {})).balance], variant === 'reference' ? [150000, 150000] : [150800, 150800]);
     const [a1] = (await skyline.call('skyline.search', OUT)).options;
     equal('OPT-A1: UA 1735 + UA 837, 2 seats, 75,000 + USD 28.50 + USD 11.20 per passenger',
-      [a1.segments.map(s => s.flight_id), a1.seats_left, a1.per_passenger],
-      [['UA1735-2027-10-15', 'UA837-2027-10-15'], 2, {points:75000, partner_fee_cents:2850, taxes_cents:1120}]);
+      [ids([a1]), a1.seats_left, a1.per_passenger], [['UA1735-2027-10-15+UA837-2027-10-15'], 2, {points:75000, partner_fee_cents:2850, taxes_cents:1120}]);
     ok('Default seating would split the couple on every OPT-A1 segment', a1.segments.every(seg => !isPair(seg.flight_id, seg.free_seats.slice(0, 2))));
     const out = await write(skyline, skylineInfra, 'skyline.book', {option_id:a1.option_id, passenger_ids:PAX, payment_label:RESERVE, seats:pairSeats(a1)});
-    const outTrip = (await skyline.call('skyline.trips', {id:out.id})).trip;
-    ok('Outbound ticketed with adjacent seats on both segments', outTrip.segments.every(id => isPair(id, outTrip.seats.filter(s => s.flight_id === id).map(s => s.seat))));
+    ok('Outbound ticketed with adjacent seats on both segments', seatedTogether((await skyline.call('skyline.trips', {id:out.id})).trip));
     equal('No business award space on 2027-10-16', (await skyline.call('skyline.search', {...OUT, date:'2027-10-16'})).options.length, 0);
 
     await write(waypoint, waypointInfra, 'waypoint.transfer', {partner_id:'hyatt', points:147000});
     await deliver(waypoint, waypointInfra, danielBridge);
-    equal('Hyatt after the transfer: 188,200', (await harbor.call('harbor.account', {})).balance, 188200);
-    ok('The transfer counts as Hyatt activity', (await harbor.call('harbor.account', {})).expires_at > '2029-08-01');
-    const hotels = async (city, check_in, check_out) => Object.fromEntries((await harbor.call('harbor.search', {city, check_in, check_out})).hotels.map(h => [h.hotel_id, h]));
-    const arrival = await hotels('Tokyo', '2027-10-16', '2027-10-17');
-    equal('Arrival night: certificate fits only Hyatt Regency Tokyo Bay among Tokyo hotels',
-      Object.values(arrival).filter(h => h.eligible_certificate_ids.includes('cert-fn-2027')).map(h => h.hotel_id), ['hotel-hr-tokyo-bay']);
+    equal('Hyatt after the transfer: 188,200', (await hyatt()).balance, 188200);
+    ok('The transfer counts as Hyatt activity', (await hyatt()).expires_at > '2029-08-01');
+    const arrival = (await harbor.call('harbor.search', {city:'Tokyo', check_in:'2027-10-16', check_out:'2027-10-17'})).hotels;
+    equal('Arrival night: the certificate fits only Hyatt Regency Tokyo Bay',
+      arrival.filter(h => h.eligible_certificate_ids.includes('cert-fn-2027')).map(h => h.hotel_id), ['hotel-hr-tokyo-bay']);
     const book = (hotel_id, check_in, check_out, payment) => write(harbor, harborInfra, 'harbor.book', {hotel_id, check_in, check_out, payment});
     await book('hotel-hr-tokyo-bay', '2027-10-16', '2027-10-17', {method:'certificate', certificate_id:'cert-fn-2027'});
     equal('Hyatt Regency Tokyo, 3 nights: 63,000', (await book('hotel-hr-tokyo', '2027-10-17', '2027-10-20', {method:'points'})).points, 63000);
     equal('Hyatt Regency Kyoto, 5 nights at Category 6: 125,000', (await book('hotel-hr-kyoto', '2027-10-20', '2027-10-25', {method:'points'})).points, 125000);
-    equal('After the reference hotels: Hyatt 200, UR 6,500', [(await harbor.call('harbor.account', {})).balance,
-      (await waypoint.call('waypoint.balance', {})).balance], [200, 6500]);
+    equal('After the hotels: Hyatt 200 and UR ' + (variant === 'reference' ? '6,500' : '40,500'),
+      [(await hyatt()).balance, (await waypoint.call('waypoint.balance', {})).balance], [200, variant === 'reference' ? 6500 : 40500]);
 
     // The world moves on.
     await world('2027-09-12T10:30:00-05:00');
-    equal('Return and outbound award seats sold out on schedule',
-      [(await skyline.call('skyline.search', RETURN)).options.length, (await skyline.call('skyline.search', OUT)).options.length], [0, 0]);
+    equal('Every program is sold out both ways after 2027-09-02 09:00',
+      [(await skyline.call('skyline.search', RETURN)).options.length, (await skyline.call('skyline.search', OUT)).options.length,
+        (await united.call('skyline.search', OUT)).options.length, (await virgin.call('skyline.search', {origin:'ORD', dest:'HND', date:'2027-10-15', cabin:'business', pax:1})).options.length],
+      [0, 0, 0, 0]);
     equal('Kyoto moves to Category 7 from 2027-10-01; the booked stay keeps Category 6',
-      [outcome('category-hr-kyoto-2027-10').status, (await harbor.call('harbor.reservations', {})).items.find(r => r.hotel_id === 'hotel-hr-kyoto').category_locked],
-      ['committed', 6]);
+      [outcome('category-hr-kyoto-2027-10', 'harbor-daniel').status,
+        (await harbor.call('harbor.reservations', {})).items.find(r => r.hotel_id === 'hotel-hr-kyoto').category_locked], ['committed', 6]);
     const changed = (await skyline.call('skyline.trips', {id:back.id})).trip;
     equal('The 2027-09-11 schedule change breaks the SFO connection and offers ALT-1 until 2027-09-18 23:59',
       [changed.change.status, changed.change.reason, changed.change.deadline], ['open', 'illegal_connection', '2027-09-18T23:59:00-05:00']);
@@ -186,20 +206,23 @@ async function run() {
     const accepted = await write(skyline, skylineInfra, 'skyline.manage', {booking_id:back.id, action:'accept_alternative', alternative_id:'ALT-1'});
     const fixed = (await skyline.call('skyline.trips', {id:back.id})).trip;
     equal('ALT-1 replaces UA 2210 with UA 2386 at no cost', [fixed.segments, accepted.reassigned], [['UA838-2027-10-25', 'UA2386-2027-10-25'], []]);
-    ok('The pair stays adjacent on every return segment after ALT-1', fixed.segments.every(id => isPair(id, fixed.seats.filter(s => s.flight_id === id).map(s => s.seat))));
+    ok('The pair stays adjacent on every return segment after ALT-1', seatedTogether(fixed));
 
     await world('2027-10-03T11:00:00-05:00');
-    equal('Hyatt is not forfeited at 2027-09-30', [outcome('expire-hyatt-2027-09-30').status, (await harbor.call('harbor.account', {})).balance], ['not_due', 200]);
-    equal('Cash for flights and hotels: $277.20, all on the Reserve',
+    equal('Hyatt is not forfeited at 2027-09-30', [outcome('expire-hyatt-2027-09-30', 'harbor-daniel').status, (await hyatt()).balance], ['not_due', 200]);
+    equal('Cash for flights: $277.20, all on the Reserve',
       (await skyline.call('skyline.balance', {})).charges.map(c => [c.label, c.amount_cents]), [[RESERVE, 19780], [RESERVE, 7940]]);
-    equal('No stranded transferred points: Aeroplan 0, Hyatt 200', [(await skyline.call('skyline.balance', {})).balance,
-      (await harbor.call('harbor.account', {})).balance], [0, 200]);
-
-    const report = {passed:true, checks:checks.length, names:checks};
-    console.log(JSON.stringify(report, null, 2));
+    equal('No stranded transferred points: Aeroplan ' + (variant === 'reference' ? '0' : '800') + ', Hyatt 200',
+      [(await skyline.call('skyline.balance', {})).balance, (await hyatt()).balance], [variant === 'reference' ? 0 : 800, 200]);
+    return {variant, checks:checks.length};
   } finally {
     await Promise.allSettled(clients.map(client => client.close()));
     fs.rmSync(state, {recursive:true, force:true});
   }
 }
-run().catch(error => { console.error(error.stack || error); process.exitCode = 1; });
+
+(async () => {
+  const results = [];
+  for (const variant of ['reference', 'bonus']) results.push(await run(variant));
+  console.log(JSON.stringify({passed:true, results}, null, 2));
+})().catch(error => { console.error(error.stack || error); process.exitCode = 1; });

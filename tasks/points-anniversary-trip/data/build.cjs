@@ -14,7 +14,7 @@ const path = require('node:path');
 const out = __dirname;
 
 const DANIEL = 'person-daniel', MEI = 'person-mei';
-const AC_NUMBER = '519384207', HYATT_NUMBER = '418370526B';
+const AC_NUMBER = '519384207', HYATT_NUMBER = '418370526B', UA_NUMBER = 'QX418362', VS_NUMBER = '1093847562';
 const CARDS = ['chase-sapphire-reserve', 'chase-freedom-unlimited', 'hilton-honors-amex'];
 const T0 = '2027-08-24T21:00:00-05:00';
 const jpy = yen => Math.round(yen / 146 * 100); // USD cents
@@ -41,6 +41,10 @@ const waypointDaniel = {
     {id:'aeroplan', name:'Air Canada Aeroplan', app_id:'skyline', recipient_account_id:'skyline-daniel', member_number:AC_NUMBER,
       ratio:{from:1, to:1}, increment:1000, minimum:1000, delay_minutes:0},
     {id:'hyatt', name:'World of Hyatt', app_id:'harbor', recipient_account_id:'harbor-daniel', member_number:HYATT_NUMBER,
+      ratio:{from:1, to:1}, increment:1000, minimum:1000, delay_minutes:0},
+    {id:'united', name:'United MileagePlus', app_id:'skyline', recipient_account_id:'skyline-united-daniel', member_number:UA_NUMBER,
+      ratio:{from:1, to:1}, increment:1000, minimum:1000, delay_minutes:0},
+    {id:'virgin', name:'Virgin Atlantic Flying Club', app_id:'skyline', recipient_account_id:'skyline-virgin-daniel', member_number:VS_NUMBER,
       ratio:{from:1, to:1}, increment:1000, minimum:1000, delay_minutes:0}
   ],
   bonuses:[{id:'bonus-aeroplan-2027-09', partner_id:'aeroplan', percent:30,
@@ -67,11 +71,14 @@ function cabin(layout, free, saver) {
   if (!free.every(s => seats.includes(s))) throw new Error('unknown seat in ' + free);
   return {saver_seats:saver, seats, adjacent_pairs, taken:seats.filter(s => !free.includes(s))};
 }
-function flight(number, date, origin, dest, departs_at, arrives_at, cabins) {
-  return {id:'UA' + number + '-' + date, flight_number:'UA' + number, operating_carrier:'United Airlines', origin, dest, departs_at, arrives_at, cabins};
+function flight(number, date, origin, dest, departs_at, arrives_at, cabins, carrier = 'UA') {
+  return {id:carrier + number + '-' + date, flight_number:carrier + number, operating_carrier:carrier === 'NH' ? 'All Nippon Airways' : 'United Airlines',
+    origin, dest, departs_at, arrives_at, cabins};
 }
 // The first free seats in order are never an adjacent pair, so default seating splits the couple.
 // Each segment of OPT-A1, OPT-R1 and ALT-1 keeps at least one free adjacent pair.
+const AIRPORTS = [{code:'MSP', city:'Minneapolis', timezone:'America/Chicago'}, {code:'ORD', city:'Chicago', timezone:'America/Chicago'},
+  {code:'SFO', city:'San Francisco', timezone:'America/Los_Angeles'}, {code:'HND', city:'Tokyo', timezone:'Asia/Tokyo'}];
 const econ = cabin(ECONOMY, ['20C', '21A', '21B', '22D', '22E', '23F'], 4);
 const flights = [
   // Outbound 2027-10-15 (OPT-A1): two business award seats.
@@ -97,20 +104,44 @@ const flights = [
     flight(2210, date, 'SFO', 'MSP', date + 'T10:40:00-07:00', date + 'T16:35:00-05:00', {business:cabin(DOMESTIC_FIRST, ['4A', '4B'], 0), economy:econ})
   ])
 ];
+// ANA via Chicago (OPT-A2 and OPT-R2): one business award seat each way, so a search for two finds none.
+const ana = [
+  flight(2455, '2027-10-15', 'MSP', 'ORD', '2027-10-15T07:15:00-05:00', '2027-10-15T08:50:00-05:00',
+    {business:cabin(DOMESTIC_FIRST, ['1B', '2E', '4A', '4B'], 2), economy:econ}),
+  flight(11, '2027-10-15', 'ORD', 'HND', '2027-10-15T10:40:00-05:00', '2027-10-16T14:05:00+09:00',
+    {business:cabin(POLARIS, ['3K', '6D', '6F'], 1), economy:econ}, 'NH'),
+  flight(12, '2027-10-25', 'HND', 'ORD', '2027-10-25T17:30:00+09:00', '2027-10-25T15:10:00-05:00',
+    {business:cabin(POLARIS, ['1A', '4D', '4F'], 1), economy:econ}, 'NH'),
+  flight(3561, '2027-10-25', 'ORD', 'MSP', '2027-10-25T17:15:00-05:00', '2027-10-25T18:40:00-05:00',
+    {business:cabin(DOMESTIC_FIRST, ['2A', '3E', '3F'], 2), economy:econ})
+];
 // CAD 39 partner booking fee = USD 28.50 per passenger; taxes per passenger as in the pilot.
-const chart = (origin, dest, taxes) => ['business', 'economy'].map(cabinName =>
-  ({origin, dest, cabin:cabinName, points:cabinName === 'business' ? 75000 : 35000, partner_fee_cents:2850, taxes_cents:taxes}));
+const chart = (origin, dest, taxes, {business = 75000, economy = 35000, fee = 2850, carrier} = {}) => ['business', 'economy'].map(cabinName =>
+  ({origin, dest, cabin:cabinName, points:cabinName === 'business' ? business : economy, partner_fee_cents:fee, taxes_cents:taxes,
+    ...(carrier ? {operating_carrier:carrier} : {})}));
 const skyline = {
   account_id:'skyline-daniel', owner_person_id:DANIEL, member_number:AC_NUMBER, mail_account_id:'mail-daniel',
   balance:0, ledger:[{id:'ledger-1', at:'2025-11-03T19:20:00-06:00', kind:'opening', points:0, balance_after:0, ref:null}],
   payment_labels:CARDS, charges:[], notices:[],
   passengers:[{id:'pax-daniel', person_id:DANIEL, name:'Daniel Cho'}, {id:'pax-mei', person_id:MEI, name:'Mei Cho'}],
-  airports:[{code:'MSP', city:'Minneapolis', timezone:'America/Chicago'}, {code:'SFO', city:'San Francisco', timezone:'America/Los_Angeles'},
-    {code:'HND', city:'Tokyo', timezone:'Asia/Tokyo'}],
-  award_chart:[...chart('MSP', 'HND', 1120), ...chart('HND', 'MSP', 7040)],
+  airports:AIRPORTS,
+  award_chart:[...chart('MSP', 'HND', 1120), ...chart('HND', 'MSP', 7040),
+    ...chart('MSP', 'HND', 1120, {business:87500, carrier:'All Nippon Airways'}), ...chart('HND', 'MSP', 7040, {business:87500, carrier:'All Nippon Airways'})],
   rules:{min_connection_minutes:60, max_connection_minutes:360},
-  flights, inventory_revision:0, bookings:[]
+  flights:[...flights, ...ana], inventory_revision:0, bookings:[]
 };
+// United MileagePlus prices its own flights dynamically: 110,000 out and 98,000 back per person, no partner fee.
+// Daniel's 12,400 miles are a distractor. Virgin Atlantic books only ANA's Chicago flights, 52,500 each way
+// plus USD 286 in carrier surcharges, one seat. Both sell out with the Aeroplan space (see timeline.json).
+const program = (account_id, member_number, balance, opened, award_chart, programFlights) => ({...skyline, account_id, member_number, balance,
+  ledger:[{id:'ledger-1', at:opened, kind:'opening', points:balance, balance_after:balance, ref:null}], award_chart,
+  flights:programFlights.map(f => structuredClone(f))});
+const united = program('skyline-united-daniel', UA_NUMBER, 12400, '2025-10-14T18:00:00-05:00',
+  [...chart('MSP', 'HND', 1120, {business:110000, economy:40000, fee:0}), ...chart('HND', 'MSP', 7040, {business:98000, economy:40000, fee:0})],
+  flights.map(f => ({...f, cabins:{...f.cabins, business:{...f.cabins.business, saver_seats:f.cabins.business.saver_seats ? 4 : 0}}})));
+const virgin = program('skyline-virgin-daniel', VS_NUMBER, 0, '2026-02-02T12:00:00-06:00',
+  [...chart('ORD', 'HND', 28600, {business:52500, economy:30000, fee:0}), ...chart('HND', 'ORD', 28600, {business:52500, economy:30000, fee:0})],
+  ana.filter(f => f.operating_carrier === 'All Nippon Airways'));
 
 // ---- Harbor: World of Hyatt -------------------------------------------
 const hotel = (id, name, city, timezone, category, cashYen) =>
@@ -158,35 +189,42 @@ const binding = {
     {app_id:'waypoint', account_id:'waypoint-daniel', owner_person_id:DANIEL},
     {app_id:'waypoint', account_id:'waypoint-mei', owner_person_id:MEI},
     {app_id:'skyline', account_id:'skyline-daniel', owner_person_id:DANIEL},
+    {app_id:'skyline', account_id:'skyline-united-daniel', owner_person_id:DANIEL},
+    {app_id:'skyline', account_id:'skyline-virgin-daniel', owner_person_id:DANIEL},
     {app_id:'harbor', account_id:'harbor-daniel', owner_person_id:DANIEL},
     {app_id:'mail', account_id:'mail-daniel', owner_person_id:DANIEL}
   ]
 };
 const RETURN = ['UA838-2027-10-25', 'UA2210-2027-10-25'], OUTBOUND = ['UA1735-2027-10-15', 'UA837-2027-10-15'];
-const sold = (at, id) => ({app:'skyline', event:{event_id:'sold-' + id, at, operation:'skyline.inventory.sold',
-  payload:{flight_id:id, cabin:'business', seats:'all'}}});
+const sold = (at, id, account_id = 'skyline-daniel') => ({app:'skyline', account_id, event:{event_id:'sold-' + id + '-' + account_id, at,
+  operation:'skyline.inventory.sold', payload:{flight_id:id, cabin:'business', seats:'all'}}});
+const R_AT = '2027-08-25T18:00:00-05:00', A_AT = '2027-09-02T09:00:00-05:00';
+const scheduleChange = account_id => ({app:'skyline', account_id, event:{event_id:'schedule-ua838-2027-10-25', at:'2027-09-11T03:12:00-05:00',
+  operation:'skyline.schedule.changed', payload:{change_id:'chg-ua838-2027-10-25', flight_id:'UA838-2027-10-25',
+    departs_at:'2027-10-25T16:50:00+09:00', arrives_at:'2027-10-25T10:05:00-07:00',
+    alternatives:[{id:'ALT-1', flight_ids:['UA838-2027-10-25', 'UA2386-2027-10-25']}], deadline:'2027-09-18T23:59:00-05:00'}}});
+const altExpired = account_id => ({app:'skyline', account_id, event:{event_id:'expire-chg-ua838-2027-10-25', at:'2027-09-18T23:59:00-05:00',
+  operation:'skyline.alternative.expired', payload:{change_id:'chg-ua838-2027-10-25'}}});
 const timeline = {
   start:T0,
   note:'World events on the #193 Apps. Mail, Messages, card posting and the user model are scripted elsewhere.',
   events:[
-    ...RETURN.map(id => sold('2027-08-25T18:00:00-05:00', id)),
-    ...OUTBOUND.map(id => sold('2027-09-02T09:00:00-05:00', id)),
-    {app:'harbor', event:{event_id:'category-hr-kyoto-2027-10', at:'2027-09-10T09:00:00-05:00', operation:'harbor.category.change',
+    ...[...RETURN, 'NH12-2027-10-25', 'UA3561-2027-10-25'].map(id => sold(R_AT, id)),
+    ...RETURN.map(id => sold(R_AT, id, 'skyline-united-daniel')), sold(R_AT, 'NH12-2027-10-25', 'skyline-virgin-daniel'),
+    ...[...OUTBOUND, 'UA2455-2027-10-15', 'NH11-2027-10-15'].map(id => sold(A_AT, id)),
+    ...OUTBOUND.map(id => sold(A_AT, id, 'skyline-united-daniel')), sold(A_AT, 'NH11-2027-10-15', 'skyline-virgin-daniel'),
+    {app:'harbor', account_id:'harbor-daniel', event:{event_id:'category-hr-kyoto-2027-10', at:'2027-09-10T09:00:00-05:00', operation:'harbor.category.change',
       payload:{hotel_id:'hotel-hr-kyoto', category:7, effective_at:'2027-10-01T00:00:00-05:00'}}},
-    {app:'skyline', event:{event_id:'schedule-ua838-2027-10-25', at:'2027-09-11T03:12:00-05:00', operation:'skyline.schedule.changed',
-      payload:{change_id:'chg-ua838-2027-10-25', flight_id:'UA838-2027-10-25',
-        departs_at:'2027-10-25T16:50:00+09:00', arrives_at:'2027-10-25T10:05:00-07:00',
-        alternatives:[{id:'ALT-1', flight_ids:['UA838-2027-10-25', 'UA2386-2027-10-25']}], deadline:'2027-09-18T23:59:00-05:00'}}},
-    {app:'skyline', event:{event_id:'expire-chg-ua838-2027-10-25', at:'2027-09-18T23:59:00-05:00', operation:'skyline.alternative.expired',
-      payload:{change_id:'chg-ua838-2027-10-25'}}},
-    {app:'harbor', event:{event_id:'expire-hyatt-2027-09-30', at:'2027-09-30T00:00:00-05:00', operation:'harbor.points.expire', payload:{}}}
+    scheduleChange('skyline-daniel'), scheduleChange('skyline-united-daniel'),
+    altExpired('skyline-daniel'), altExpired('skyline-united-daniel'),
+    {app:'harbor', account_id:'harbor-daniel', event:{event_id:'expire-hyatt-2027-09-30', at:'2027-09-30T00:00:00-05:00', operation:'harbor.points.expire', payload:{}}}
   ]
 };
 
 function outputs() {
   return {
     'waypoint-daniel.seed.json':waypointDaniel, 'waypoint-mei.seed.json':waypointMei,
-    'skyline.seed.json':skyline, 'harbor.seed.json':harbor, 'binding.json':binding, 'timeline.json':timeline
+    'skyline.seed.json':skyline, 'skyline-united.seed.json':united, 'skyline-virgin.seed.json':virgin, 'harbor.seed.json':harbor, 'binding.json':binding, 'timeline.json':timeline
   };
 }
 function build({check = false} = {}) {
