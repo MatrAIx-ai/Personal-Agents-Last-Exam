@@ -182,4 +182,4 @@ const READS = {
   'fernshelf.removals.list': removalsList,
   'fernshelf.notifications.list': notificationsList
 };
-module.exports = {READS, mine, album, viewView};
+module.exports = {READS, viewView};

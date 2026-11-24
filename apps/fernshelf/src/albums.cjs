@@ -152,4 +152,4 @@ function linkRevoke(ctx, data, args) {
 
 module.exports = {WRITES: {'fernshelf.albums.create': create, 'fernshelf.albums.update': update, 'fernshelf.albums.delete': remove,
   'fernshelf.albums.members.invite': invite, 'fernshelf.albums.members.update': memberUpdate, 'fernshelf.albums.save_item': saveItem,
-  'fernshelf.links.create': linkCreate, 'fernshelf.links.revoke': linkRevoke}, liveAlbum, dropContributions};
+  'fernshelf.links.create': linkCreate, 'fernshelf.links.revoke': linkRevoke}, dropContributions};

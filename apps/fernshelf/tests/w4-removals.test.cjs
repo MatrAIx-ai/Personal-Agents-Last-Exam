@@ -82,6 +82,14 @@ test('T11 scope everywhere, scope by album_match, decline then honour, withdrawa
   assert.deepEqual(album(f, quiet.id).item_ids, ['it-m01'], 'an album shared with no one is never touched');
   assert.equal(f.call('fernshelf.exposure.get', {id: 'it-m01'}).visible, false);
   assert.ok(f.call('fernshelf.items.search', {}).rows.some(x => x.id === 'it-m01'), 'the library itself is never touched');
+  // Honour also clears a trashed item from the album records in scope, so a restore does not show it again.
+  const tr = fixture();
+  tr.call('fernshelf.items.trash', {ids: ['it-m03']});
+  tr.event(requested('2026-11-20T09:30:00-08:00', {removal_id: 'rr-t', from_person_id: 'person-kofi', item_ids: ['it-m03'], scope: {type: 'everywhere'}}));
+  assert.deepEqual(tr.call('fernshelf.exposure.get', {id: 'it-m03'}).returns_on_restore.map(a => a.album_id), ['al-reunion'], 'the preview');
+  assert.deepEqual(tr.call('fernshelf.removals.respond', {id: 'rr-t', decision: 'honor'}).cleared, [{item_id: 'it-m03', album_ids: ['al-reunion'], link_ids: ['ln-m1']}]);
+  const back = tr.call('fernshelf.items.restore', {ids: ['it-m03']});
+  assert.deepEqual([back.warnings, tr.call('fernshelf.exposure.get', {id: 'it-m03'}).visible], [[], false]);
   // Album scope by album_match; decline, then honour later.
   const g = fixture({mutate: twoAlbums});
   g.event(requested('2026-11-20T09:30:00-08:00', {removal_id: 'rr-fam', from_person_id: 'person-kofi', item_ids: ['it-m13'], scope: {type: 'album', album_match: {title: 'family'}}}));

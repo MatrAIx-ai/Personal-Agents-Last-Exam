@@ -72,9 +72,7 @@ function activity(ctx, data, row) {
 function history(ctx, item, action, {request_id = null, event_id = null, changes} = {}) {
   item.history.push({at: ctx.virtual_now, action, actor: event_id ? 'event' : 'agent', request_id, event_id, ...(changes ? {changes} : {})});
 }
-const byId = list => new Map(list.map(x => [x.id, x]));
 const person = (data, id) => data.people.find(p => p.person_id === id) || null;
 const nameOf = (data, id) => person(data, id)?.display_name || id;
 
-module.exports = {fail, copy, ms, GB, BATCH_LIMIT, shift, addDays, zoneOffset, localDayStart, localDate, isDate, nextDate, windowBounds,
-  nextId, activity, history, byId, person, nameOf};
+module.exports = {fail, copy, ms, GB, BATCH_LIMIT, addDays, zoneOffset, localDate, windowBounds, nextId, activity, history, person, nameOf};

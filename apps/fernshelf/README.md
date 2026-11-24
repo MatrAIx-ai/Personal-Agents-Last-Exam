@@ -1,3 +1,123 @@
 # Fernshelf
 
-A resettable personal photo library App (MCP only). Full documentation follows in this file.
+Fernshelf is a resettable personal photo library seen from one person's account. A photo can be visible in several places at once (shared albums and the links to them), and a copy someone has saved cannot be called back, so an action the App accepts can still be wrong for the account holder, the people in the picture or the family. Fernshelf records who could see what and when; it does not judge consent.
+
+- App ID `fernshelf`, version 1.0.0, Core API 1.2.0, public runtime 1.6.0. MCP only (no GUI).
+- Approved plan: [`proposals/environment/fernshelf.md`](../../proposals/environment/fernshelf.md). Validation evidence: [VALIDATION.md](VALIDATION.md).
+- Node.js 18 or later, built-ins only. Nothing to install.
+
+## Workflows
+
+| Workflow | Agent operations (`fernshelf.*`) |
+| --- | --- |
+| W1 Library, search and storage (read-only) | `account.get`, `items.search`, `items.get`, `items.read`, `albums.list`, `albums.get`, `storage.summary`, `exposure.get`, `notifications.list` |
+| W2 Organising | `items.update` (caption, favourite, archived, corrected time, people labels, `make_cover`), `albums.create`, `albums.update` (title, `add_ids`, `remove_ids`, `order`), `albums.delete` |
+| W3 Sharing | `albums.members.invite`, `albums.members.update`, `albums.save_item`, `links.create`, `links.revoke` |
+| W4 Removal requests | `removals.list`, `exposure.get`, `removals.respond` (`honor` or `decline`) |
+| W5 Storage, versions and trash | `items.trash`, `items.restore`, `items.purge` (`confirm: true`), with `items.get`, `storage.summary` and `items.update` `make_cover` |
+
+There are 23 operations: 10 reads and 13 writes. Every write takes Core's `request_id` and `expected_version` (`{epoch, revision}`). It returns the object's `id` (or `ids` for calls on several items), its own state under `state` (Core sets `status` to `committed`) and, where the write shows items to someone, `warnings`. Calls on several items take 1 to 50 IDs and are all or nothing. The input schemas accept longer lists, so that the App can answer `limit_exceeded` itself.
+
+Other people act only through seven Infra events (`env.apply_event`). In the following list, the first word is the event name and the rest is what it does:
+
+- `item.added`: the device backs up a new item. Metadata only; waiting items go first.
+- `backup.resumed`: the device syncs with no new item.
+- `member.changed`: a member joins, declines or leaves.
+- `contribution.changed`: a joined contributor adds or removes their own items.
+- `share.viewed`: a view, with saves, of an active link or of a shared album by a joined member.
+- `removal.requested` and `removal.withdrawn`: someone asks for items to be taken down, or withdraws that request.
+
+Fernshelf has no clock event and no scheduler.
+
+### Rules in brief
+
+- **Time.** Every time-based state is a stored due time read against `ctx.virtual_now`. An item reads `purged` once its `purge_at` has passed. A link reads `expired` once its `expires_at` has passed. Bytes used leave out purged items. After Core's `env.advance_time` no App code runs, yet every read changes consistently. The next committed write or event stores the purge and drops the file reference; nothing a read returns changes when that happens.
+- **Visibility** (`plugin.visibility(data, at)`, a pure function for graders). An item is visible to a person when it is active and either sits in an album where that person is `joined`, or sits in an album that an `active` link shows, to anyone who holds the link. The same rule drives `exposure.get`, the warnings and `removals.respond`. A trashed item is visible nowhere, but album records keep it, so a restore brings it back.
+- **Removal requests.** `honor` with scope `album` clears the named items from that album. With scope `everywhere` it clears them from every album that has an invited or joined member or an active link. Links follow their album. Albums shared with no one, the library itself and other members' contributions (`not_removable`) are never touched. Each honoured item gets a `removal_history` row. Any later write that would show it to someone again is accepted and returns one `removal_honored` warning per person and item, which is also kept on the activity row. The writes that do this are `albums.update` adding to a shared album, `albums.members.invite`, `links.create` and `items.restore`. Recorded views and saves are never removed; they are listed by `exposure.get` and in the honour result (`already_seen`).
+- **Storage.** `used_bytes` counts `declared_bytes` of backed-up items that are active or trashed. Items not yet backed up count only in `pending_bytes`. Members' contributions count only once saved. Only a purge frees bytes.
+- **Items not yet backed up.** These are recorded by `item.added` when they do not fit under the quota. They are searchable and editable, have no file, and cannot be added to an album (`not_backed_up`), so they are never visible to anyone. They are backed up only inside the next `item.added` or `backup.resumed`, oldest first, while each fits.
+- **Notifications** are written only inside events, for what others and the device do: `album.activity`, `removal.requested`, `removal.withdrawn`, and `storage.threshold` (level `80` once per crossing; `full` when an item starts waiting while none was waiting). While the account's `email_notices` is on, each notification also stores a full Mail wire message.
+- **Events name albums and links made during the run** by `album_match` (`person_id`, `contains_item_ids`, `title`), resolved at the event's time over albums that are not deleted, newest first. The resolved album and link IDs are written to the event's activity rows. A replay of the same `event_id` is answered by Core from its stored receipt and does not resolve the match again.
+
+## Data and fixtures
+
+- `fixtures/reference.json` is the package seed. It describes the fictional Maya Fenwick on a 15 GB plan at 13.95 GB used (0.41 GB of it in the trash) on 2026-11-20 09:00 (`fixtures/clock.json`). It holds 420 items (380 photos, 40 videos as metadata), 12 people labels, 30 places, 26 stacks (10 edit, 8 burst, 8 duplicate), 6 exact-duplicate pairs and 12 albums. Four albums are shared, with 9 members and 14 contributions between them. There are 4 links with 11 views and 5 saves, 6 removal requests in every state, and 20 items in the trash, 4 of them past retention. The fixture also carries 18 notifications.
+- The library was opened on 2026-01-03. Only capture times go back further.
+- `scripts/build-reference-fixture.cjs` writes the fixture, `assets/` and `contribution/assets.catalog.json` deterministically. `--check` reports drift.
+- `assets/` holds 48 PNG stand-ins (128×96, at most 13,242 bytes each, 580,479 bytes in all) drawn by `dev/draw-images.cjs` with `zlib`. They show flat scenes of colour fields and shapes with a stamped caption: no people, faces or photographs. Storage is counted from `declared_bytes`, not from these files.
+- `fixtures/minimal.json` is a small hand-authored library that most business tests start from.
+- `scripts/check-fixtures.cjs` checks both fixtures: references, `purge_at` against the retention, storage against the rule, honoured requests against the albums, dates (only `taken_at` before 2026), image hashes, sizes and dimensions, wire messages, and the reference counts above.
+- A task loads its own library, people, albums, shares, history, clock and image files with `env.load_seed` through the same seed schema.
+
+## Commands
+
+From this folder (`apps/fernshelf`):
+
+```sh
+npm test                     # business tests (node --test tests/business.test.cjs)
+npm run example              # walkthrough on the reference library (examples/run.cjs)
+npm run contracts:check      # tools.json and seed/events/state schemas match scripts/build-contracts.cjs
+npm run fixtures:check       # fixture consistency
+node scripts/build-reference-fixture.cjs --check
+npm run mcp                  # real MCP checks on the public runtime (scripts/real-mcp.cjs)
+npm run mail-flow            # Fernshelf -> Mail on real processes (scripts/mail-flow.cjs)
+```
+
+From the repository root:
+
+```sh
+npm run app:verify -- --app apps/fernshelf --output .artifacts/fernshelf.json
+node runtime/ci/verify-submissions.cjs . .artifacts/submissions <base-sha>
+npm test
+```
+
+The business tests and the example need only this folder. `scripts/real-mcp.cjs` and `scripts/mail-flow.cjs` look upwards for a public checkout. From a copy of the package alone, pass `--runtime DIR` (and `--mail DIR` for the Mail flow).
+
+## Resource registration and its fallback
+
+`items.read` returns an item's image bytes through Core's `ctx.assets.read`, under the parent item. This needs the platform registration `runtime/registrations/fernshelf.json` (`{"app_id":"fernshelf","resource_access":{"item":"fernshelf.items.get"}}`), submitted with this package for Infra review. A task policy still decides access: for example, a constraint on `fernshelf.items.get` to some IDs limits whose bytes can be read.
+
+If maintainers decline the registration, delete that one file. Every other operation is unchanged, and `items.read` is then refused by Core with `not_available`. To withhold the tool from discovery as well, load `fixtures/policies.metadata-only.json` (the same profiles without `fernshelf.items.read`) as the task policy. `scripts/real-mcp.cjs` checks both on a runtime copy without the registration.
+
+A trashed item's file is not offered to Core (`assetReferences` lists active items only), because Core asks for those references without a clock. `items.read` answers `in_trash`, and Core's generic `resources/read` refuses, until the item is restored.
+
+## Mail notices (optional)
+
+Fernshelf declares one `messaging.publishes` entry: `channel.email` with Mail 1.3.0's wire schema `urn:pale:email-message:2`. The schema is copied byte for byte into `schemas/router-message.schema.json`. Fernshelf builds no inbox.
+
+`src/publisher.cjs` is the Infra-run sender. Infra runs it with its own Fernshelf Infra connection and a Messaging publisher connection. It reads a notification's stored wire message through `env.snapshot` and calls `router.publish` with a request ID derived from the run epoch and the notification ID. It never writes back into Fernshelf.
+
+`scripts/mail-flow.cjs` shows the following on real processes:
+
+- the received Mail record and its committed receipt;
+- an identical retry, and a re-run under a new request ID, each answered from the first receipt with one inbox record;
+- a second sender process refused for the same run;
+- no message while email notices are off;
+- a rejected delivery without an Infra grant, which leaves no Mail record and Fernshelf unchanged.
+
+## Files
+
+| Path | Contents |
+| --- | --- |
+| `plugin.cjs` | Core hooks (`validateSeed`, `handleTool`, `applyEvent`, `records`, `objects`, `references`, `assetReferences`) and `visibility` |
+| `src/derive.cjs` | Clock-derived states, the visibility rule, storage, warnings, `settle` |
+| `src/reads.cjs`, `src/library.cjs`, `src/albums.cjs`, `src/removals.cjs`, `src/events.cjs` | W1 reads; item edits and trash; albums, members, saving and links; answering removal requests; the seven events |
+| `src/model.cjs` | Seed validation, records, objects and media references |
+| `src/notify.cjs`, `src/publisher.cjs` | Notifications with their wire messages; the Infra-run Mail sender |
+| `scripts/` | Contract and fixture builders, consistency checks, real-MCP and Mail-flow scripts |
+| `tests/` | Business tests (`business.test.cjs` loads them all), App-only harness, verifier inputs (`cases.json`) |
+| `examples/` | `run.cjs` walkthrough and `scenario.json` (Dana's removal request) |
+
+## Limitations
+
+These follow the approved plan:
+
+- There is no GUI, reviewer console or view for other people.
+- One account per instance, and every album is the account holder's.
+- There is no face recognition, visual search or pixel-level duplicate detection.
+- The Agent cannot upload or edit pixels. Videos are metadata only.
+- People labels, the plan, the quota and preferences are seed data.
+- There are no payments.
+- There is no outbox or cross-App transaction for Mail notices.
+
+Deferred to a later version: partner sharing, albums owned by others, links to loose items, conversion to a smaller quality, memories, and creating or renaming people labels.

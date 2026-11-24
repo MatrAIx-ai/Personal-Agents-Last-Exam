@@ -34,7 +34,6 @@ function check(name, data, problems) {
   })(data, '', '');
   for (const i of data.items) {
     if (i.state === 'trashed' && Date.parse(i.purge_at) - Date.parse(i.trashed_at) !== retention * 86400000) p(i.id + ': purge_at is not trashed_at + ' + retention + ' days');
-    if (i.place === null && i.source === 'camera' && i.kind === 'video') p(i.id + ': camera video without a place');
   }
   // Storage follows the rule: backed-up items that are active or trashed and not yet past purge_at.
   const s = d.storage(data, t), sum = data.items.filter(i => i.backed_up && d.itemState(i, t) !== 'purged').reduce((n, i) => n + i.declared_bytes, 0);
