@@ -82,7 +82,7 @@ const CERTIFICATE = object({
 });
 const RESERVATION_STATUS = {enum:['confirmed','cancelled']};
 const RESERVATION = object({
-  id:ID, confirmation:{type:'string', pattern:'^HH[0-9A-F]{8}$'}, hotel_id:ID, check_in:DATE, check_out:DATE,
+  id:ID, confirmation:{type:'string', pattern:'^[A-Z0-9]{6,12}$'}, hotel_id:ID, check_in:DATE, check_out:DATE,
   nights:{type:'integer', minimum:1, maximum:30}, status:RESERVATION_STATUS,
   payment:object({method:METHOD, certificate_id:nullable(ID), payment_label:nullable(LABEL)}),
   category_locked:{...CATEGORY, description:'Category in effect when the reservation was booked; later changes do not reprice it.'},
@@ -145,7 +145,7 @@ function tools(email) {
     tool('harbor.book', 'Book a stay. payment.method is points, certificate (give certificate_id; exactly 1 night), points_cash or cash (give payment_label for both). Check-in must be after today\'s date at the hotel. Award methods need every night free of blackout dates. The price uses the category in effect now and is locked on the reservation. Points and Points + Cash redemptions count as account activity; cash and certificate stays do not.',
       false, object({hotel_id:ID, ...STAY, payment:object({method:METHOD, certificate_id:ID, payment_label:LABEL}, ['method']), ...WRITE},
         ['hotel_id','check_in','check_out','payment','expected_version','request_id']),
-      committed({id:ID, confirmation:{type:'string', pattern:'^HH[0-9A-F]{8}$'}, category_locked:CATEGORY,
+      committed({id:ID, confirmation:{type:'string', pattern:'^[A-Z0-9]{6,12}$'}, category_locked:CATEGORY,
         nights:{type:'integer', minimum:1, maximum:30}, points:POINTS, cash_cents:CENTS, charge_id:nullable(ID),
         certificate_id:nullable(ID), balance:POINTS, last_activity_at:DT, notice_id:ID})),
     tool('harbor.reservations', 'List reservations, optionally by status, in check-in order; give id to read one reservation (also returned as item). Reading changes nothing.',

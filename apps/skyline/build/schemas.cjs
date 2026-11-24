@@ -80,7 +80,7 @@ const OPTION = object({option_id:{type:'string', pattern:'^opt-[0-9a-f]{16}$'}, 
   seats_left:{type:'integer', minimum:0}, per_passenger:PRICE, total:PRICE, currency:{const:'USD'}});
 
 const SEED = {$schema:'https://json-schema.org/draft/2020-12/schema', $id:'urn:pale:skyline:seed:1', ...object({
-  account_id:ID, owner_person_id:ID, member_number:{type:'string', pattern:'^SK-[0-9]{8}$'}, mail_account_id:{anyOf:[ID, {type:'null'}]},
+  account_id:ID, owner_person_id:ID, member_number:{type:'string', minLength:1, maxLength:40, description:'The program\'s member number, as printed on the account.'}, mail_account_id:{anyOf:[ID, {type:'null'}]},
   balance:POINTS, ledger:list(LEDGER_ENTRY, 5000), payment_labels:list(LABEL, 20, {uniqueItems:true}), charges:list(CHARGE, 2000),
   notices:list(NOTICE, 1000), passengers:{...list(PASSENGER, 9), minItems:1}, airports:{...list(AIRPORT, 50), minItems:2},
   award_chart:list(CHART_ROW, 500), rules:RULES, flights:list(FLIGHT, 1000), inventory_revision:{type:'integer', minimum:0},
