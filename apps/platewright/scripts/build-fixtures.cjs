@@ -102,20 +102,20 @@ function minimal() {
 
 
 // ---- Reference household ----------------------------------------------------------------------------
-// The reference fixture starts from seeded records (tables, recipes, profiles, pantry) and then
-// replays five weeks of household life through the App's own hooks: the account's plan writes and
-// marks, and fourteen events from the other members. Replaying keeps every history row, slot state,
+// The reference fixture starts from seeded records (tables, recipes, profiles) and then replays the
+// household's life through the App's own hooks: generated history from 2025-01-01 (scripts/history.cjs,
+// fixed seed) and five hand-written weeks from 2026-10-12, with the account's plan, pantry and list
+// writes and the other members' events. Replaying keeps every history row, slot state, pantry row,
 // notification and activity row consistent with the rules. Rows written by the account during the
 // replay are then marked `seed` (they happened before any run), and only the event rows stay in the
 // activity log, one per notification.
 const plugin = require('../plugin.cjs');
 const BINDING = require('../fixtures/binding.json');
-const EDT = '-04:00', EST = '-05:00';
-const ts = (date, time) => `${date}T${time}:00${date < '2026-11-01' ? EDT : EST}`;
+const History = require('./history.cjs');
+const ts = (date, time) => `${date}T${time}:00${History.offset(date)}`;
 const NORA = 'person-nora', EVAN = 'person-evan', ELI = 'person-eli', ADA = 'person-ada';
 const FAMILY = [NORA, EVAN, ELI, ADA];
 const EVENT_RECIPES = ['rec-soba-salad', 'rec-gochujang-chicken'];
-const REPLAY_START = '2026-10-10T16:00:00-04:00';
 
 function referenceBase() {
   const allIngredients = [...D.MINIMAL_INGREDIENTS, ...D.MORE_INGREDIENTS].map(ingredient);
@@ -128,7 +128,7 @@ function referenceBase() {
   };
   const archived = {'rec-focaccia': '2026-09-02T20:00:00-04:00'};
   const recipes = seeded.map((x, i) => {
-    const at = `2026-${String(1 + (i % 9)).padStart(2, '0')}-${String(3 + (i % 25)).padStart(2, '0')}T20:00:00Z`;
+    const at = History.recipeCreated(i);
     const hist = (revised[x.id] || []).map(([when, change]) => [when, change]);
     // The given row is the latest content; the change object is what the earlier revision had.
     return recipe(x, at, i % 3 ? NORA : EVAN, {revisions: hist, archived: archived[x.id]});
@@ -160,7 +160,7 @@ function referenceBase() {
         c('con-ada-05', {kind: 'dislike', ingredient_id: 'ing-mushroom', effective_from: '2026-09-01', expires_on: null, note: null}, '2026-08-30T19:00:00-04:00', ADA)]}
     ],
     ingredients: allIngredients, substitution_rules: [...D.MINIMAL_RULES, ...D.MORE_RULES].map(rule), recipes, plan: [],
-    pantry: PANTRY.filter(([, , , , at]) => Date.parse(at) <= Date.parse(REPLAY_START)).map(([id, q, unit, useBy, at]) => pantry(id, q, unit, useBy, at, NORA)),
+    pantry: [],
     shopping: null, notifications: [], activity: []
   };
 }
@@ -240,6 +240,7 @@ const MENU = [
 
 const MEAL_TIME = {breakfast: '09:30', lunch: '13:00', snack: '16:00', dinner: '20:30'};
 const LOADED = '2026-11-08T08:00:00-05:00';
+const WEEKS_START = '2026-10-10T16:00:00-04:00'; // the first hand-written step
 const addDays = (date, n) => { const d = new Date(date + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const monday = date => { const d = new Date(date + 'T12:00:00Z'); return addDays(date, -((d.getUTCDay() + 6) % 7)); };
 const MAYA = {guest_id: 'guest-maya', name: 'Maya', constraints: [{kind: 'allergy', allergen: 'tree_nut', strict: true}]};
@@ -305,17 +306,22 @@ function reference() {
     }
   }
   for (const [at, tool, args] of ACTIONS) steps.push({at, order: '', tool, args});
-  // Pantry records last set after the replay starts are set by the account at that time.
-  for (const [id, quantity, unit, use_by, at] of PANTRY) {
-    if (Date.parse(at) > Date.parse(REPLAY_START)) steps.push({at, order: '', tool: 'pantry.set', args: {id, quantity, unit, use_by}});
-  }
+  // Each pantry item's hand-written row is the last row of its history, set by the account at that time.
+  for (const [id, quantity, unit, use_by, at] of PANTRY) steps.push({at, order: '', tool: 'pantry.set', args: {id, quantity, unit, use_by}});
+  // The generated history before the hand-written weeks.
+  const history = History.generate(data, new Map(PANTRY.map(([id, , , , at]) => [id, at])));
+  for (const step of history.steps) steps.push(step);
   for (const [event_id, at, op, payload] of EVENTS) steps.push({at, order: '', event: {event_id, at, operation: 'platewright.' + op, payload}});
   steps.sort((a, b) => Date.parse(a.at) - Date.parse(b.at) || a.order.localeCompare(b.order));
   const ctx = (now, role = 'agent') => ({app_id: 'platewright', run_id: 'build', role, binding: BINDING, virtual_now: now});
   const lineOf = ingredientId => { const l = data.shopping.lines.find(x => x.ingredient_id === ingredientId && x.kind === 'derived'); if (!l) throw Error('No derived line for ' + ingredientId + ': ' + data.shopping.lines.map(x => x.ingredient_id).join(' ')); return l.id; };
   for (const step of steps) {
     if (Date.parse(step.at) >= Date.parse(LOADED)) throw Error('Replay step after the loaded time: ' + step.at);
-    const work = structuredClone(data);
+    // A refused step stops the build, so steps before the hand-written weeks run on the data itself
+    // (fast; the seeded base already holds records dated up to October 2026, so it is validated once
+    // at the end); the hand-written weeks keep a working copy and a validation after each step.
+    const careful = Date.parse(step.at) >= Date.parse(WEEKS_START);
+    const work = careful ? structuredClone(data) : data;
     try {
       if (step.event) {
         const e = structuredClone(step.event);
@@ -326,12 +332,21 @@ function reference() {
         if (args.line) { args.id = lineOf(args.line); delete args.line; }
         data = plugin.handleTool(ctx(step.at), work, 'platewright.' + step.tool, args).data;
       }
-      plugin.validateSeed(ctx(step.at), data);
+      if (careful) plugin.validateSeed(ctx(step.at), data);
     } catch (e) { e.message += ' (replay step ' + JSON.stringify(step).slice(0, 300) + ')'; throw e; }
   }
   // What the account did before the run is part of the seed: keep only the events' activity rows and
   // mark the account's history rows `seed`.
   data.activity = data.activity.filter(a => a.actor === 'event').map((a, i) => ({...a, seq: i + 1}));
+  // A cooked dish records the recipe revision current when it was cooked (the base table already
+  // holds later revisions while the history is replayed).
+  for (const s of data.plan) if (s.cooked) for (const p of s.cooked.portions) {
+    const r = data.recipes.find(x => x.id === p.recipe_id);
+    p.revision = r.revisions.filter(x => Date.parse(x.at) <= Date.parse(s.cooked.at)).length;
+  }
+  // Generated notifications take their own ID series, so the hand-written ones keep ntf-0001 to ntf-0014.
+  let own = 0, gen = 0;
+  for (const n of data.notifications) n.id = n.event_id.startsWith('ev-pw-h') ? 'ntf-h' + String(++gen).padStart(4, '0') : 'ntf-' + String(++own).padStart(4, '0');
   (function mark(x) {
     if (Array.isArray(x)) return x.forEach(mark);
     if (!x || typeof x !== 'object') return;

@@ -183,7 +183,7 @@ async function run() {
     // Another run keeps the package's own reference seed.
     const peer = await open('infra', 'platewright-other');
     const other = (await peer.call('env.snapshot')).snapshot;
-    check('A separate run starts from the package reference seed', other.data.recipes.length === 66 && other.data.plan.length === 71 && other.virtual_now === '2026-11-08T08:00:00-05:00');
+    check('A separate run starts from the package reference seed', other.data.recipes.length === 66 && other.data.plan.length === 880 && other.virtual_now === '2026-11-08T08:00:00-05:00');
     return {schema: 'platewright.real-mcp.v1', runtime_version: require(path.join(runtime, 'package.json')).version, node: process.version, passed: true, checks};
   } catch (e) {
     return {schema: 'platewright.real-mcp.v1', node: process.version, passed: false, error: e.message, checks};
