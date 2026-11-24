@@ -1,0 +1,418 @@
+/* PALE Personal Records GUI Stylesheet - Zero Dependencies */
+:root {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent-blue: #38bdf8;
+  --accent-green: #4ade80;
+  --accent-amber: #fbbf24;
+  --accent-red: #f87171;
+  --border-color: #334155;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-layout {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.brand h2 {
+  font-size: 1.15rem;
+  color: var(--text-main);
+}
+
+.badge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.badge.verified {
+  background-color: rgba(56, 189, 248, 0.15);
+  color: var(--accent-blue);
+  border: 1px solid var(--accent-blue);
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.95rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.nav-item:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-main);
+}
+
+.nav-item.active {
+  background-color: rgba(56, 189, 248, 0.15);
+  color: var(--accent-blue);
+  font-weight: 600;
+}
+
+.counter-badge {
+  margin-left: auto;
+  background-color: var(--accent-amber);
+  color: #000;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.sidebar-footer {
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+  font-size: 0.85rem;
+}
+
+.sidebar-footer label {
+  display: block;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.session-select {
+  width: 100%;
+  padding: 0.5rem;
+  background-color: var(--bg-tertiary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.view-panel {
+  display: none;
+}
+
+.view-panel.active {
+  display: block;
+}
+
+.panel-header {
+  margin-bottom: 1.5rem;
+}
+
+.panel-header h1 {
+  font-size: 1.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* Library Controls & Data Table */
+.library-controls {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.library-controls input,
+.library-controls select {
+  padding: 0.6rem 0.8rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+.library-controls input {
+  flex: 1;
+}
+
+.table-container {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.9rem;
+}
+
+.data-table th {
+  background-color: rgba(51, 65, 85, 0.4);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.data-table tbody tr:hover {
+  background-color: rgba(51, 65, 85, 0.25);
+  cursor: pointer;
+}
+
+/* Status Badges */
+.status-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-pill.USER_CONFIRMED {
+  background-color: rgba(74, 222, 128, 0.15);
+  color: var(--accent-green);
+  border: 1px solid var(--accent-green);
+}
+
+.status-pill.INFERRED {
+  background-color: rgba(251, 191, 36, 0.15);
+  color: var(--accent-amber);
+  border: 1px solid var(--accent-amber);
+}
+
+.status-pill.SUPERSEDED {
+  background-color: rgba(148, 163, 184, 0.15);
+  color: var(--text-muted);
+  border: 1px solid var(--text-muted);
+}
+
+/* Document & Passage Viewer Split */
+.viewer-split {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 1.5rem;
+  height: calc(100vh - 180px);
+}
+
+.text-pane, .citations-pane {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.text-pane h3, .citations-pane h3 {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.document-text-content {
+  flex: 1;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 1rem;
+  white-space: pre-wrap;
+  font-family: monospace;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  overflow-y: auto;
+}
+
+/* Passage Highlight */
+mark.passage-highlight {
+  background-color: rgba(56, 189, 248, 0.35);
+  color: #fff;
+  border-bottom: 2px solid var(--accent-blue);
+  padding: 2px 0;
+  border-radius: 2px;
+}
+
+.claims-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow-y: auto;
+}
+
+.claim-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.claim-card p.claim-header {
+  font-size: 0.8rem;
+  color: var(--accent-blue);
+  margin-bottom: 0.25rem;
+}
+
+.claim-card blockquote {
+  font-family: monospace;
+  font-size: 0.85rem;
+  background: var(--bg-secondary);
+  padding: 4px 6px;
+  border-radius: 4px;
+  margin: 0.4rem 0;
+  border-left: 3px solid var(--accent-blue);
+}
+
+/* Proposals View */
+.proposals-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.proposal-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.proposal-card.pending {
+  border-left: 4px solid var(--accent-amber);
+}
+
+.proposal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.proposal-body {
+  margin: 0.75rem 0;
+  font-size: 0.9rem;
+}
+
+.diff-preview {
+  background-color: var(--bg-primary);
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.proposal-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn:hover {
+  opacity: 0.85;
+}
+
+.btn-approve {
+  background-color: var(--accent-green);
+  color: #000;
+}
+
+.btn-reject {
+  background-color: var(--accent-red);
+  color: #fff;
+}
+
+/* Relationship Links */
+.links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.link-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.link-edge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.link-type {
+  font-size: 0.75rem;
+  font-weight: bold;
+  background-color: var(--bg-tertiary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--accent-blue);
+}
