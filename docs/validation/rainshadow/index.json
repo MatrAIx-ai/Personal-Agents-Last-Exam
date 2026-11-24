@@ -1,6 +1,6 @@
 {
   "schema": "rainshadow.v1-evidence-index",
-  "recorded_at": "2026-11-24T06:14:56Z",
+  "recorded_at": "2026-11-24T19:28:13Z",
   "app_id": "rainshadow",
   "app_version": "1.0.0",
   "runtime_version": "1.6.0",
@@ -8,13 +8,15 @@
   "mail_version": "1.3.0",
   "proposal_commit": "d08ce78fd3b8939c554dcf4e6f8dff683d906943",
   "proposal_status": "plan approved for implementation (/approve-plan on PR #123, recorded 2026-11-22T22:24:35Z); the proposal file is unchanged since that commit",
-  "public_runtime_base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
-  "app_package_sha256": "ef67fb49c9dc5066be6a54dd64810593ca95c9c273095261807496b4d9334cb6",
-  "app_package_git_tree": "a2f755ea17ccbea99a29f7ce008a4f8caa7f9fbc",
+  "public_runtime_base_commit": "ae889d2cbbfc72242fc5e70b877f3f2a2f029618",
+  "app_package_sha256": "ec9b7e0dda7e50de78eef2995fffb271f969e0d89fe994ff43d3031e397f1032",
+  "app_package_git_tree": "3e9b43a1fa1f9c7ebe41281ae6c3abbabbf2b6a6",
   "package_hash_agrees_in": [
     "public-runtime.node22.json",
     "public-runtime.node18.json",
-    "base-runtime.json"
+    "base-runtime.json",
+    "web-browser.node22.json",
+    "web-browser.node18.json"
   ],
   "tested_node": {
     "22": "v22.23.4",
@@ -30,28 +32,28 @@
   "checks": {
     "standalone_business": {
       "node22": {
-        "tests": 23,
-        "pass": 21,
+        "tests": 24,
+        "pass": 22,
         "fail": 0,
         "skipped": 2
       },
       "node18": {
-        "tests": 23,
-        "pass": 21,
+        "tests": 24,
+        "pass": 22,
         "fail": 0,
         "skipped": 2
       }
     },
     "business_with_runtime": {
       "node22": {
-        "tests": 23,
-        "pass": 23,
+        "tests": 24,
+        "pass": 24,
         "fail": 0,
         "skipped": 0
       },
       "node18": {
-        "tests": 23,
-        "pass": 23,
+        "tests": 24,
+        "pass": 24,
         "fail": 0,
         "skipped": 0
       }
@@ -83,7 +85,12 @@
       "node22": "22/22",
       "node18": "22/22"
     },
-    "shared_contract_copies": "runtime/sdk/sync.cjs --check and runtime/build-contracts.cjs --check passed on both Node versions"
+    "shared_contract_copies": "runtime/sdk/sync.cjs --check and runtime/build-contracts.cjs --check passed on both Node versions",
+    "web_pages_in_browser": {
+      "node22": 53,
+      "node18": 53
+    },
+    "browser": "153.0.8010.12"
   },
   "reports": [
     "base-runtime.json",
@@ -94,11 +101,14 @@
     "public-runtime.node18.json",
     "public-runtime.node22.json",
     "reference-suite.node18.json",
-    "reference-suite.node22.json"
+    "reference-suite.node22.json",
+    "web-browser.node18.json",
+    "web-browser.node22.json"
   ],
   "not_claimed": [
     "No agent trials or model runs.",
-    "No GUI or Web/CUA evidence: the first version is MCP only.",
+    "No user-simulator or computer-use agent runs against the web pages; the browser checks are scripted.",
+    "No production deployment: the pages are served by the public Web Host on loopback.",
     "No acceptance, merge or authorship credit.",
     "The two skipped standalone tests are the real-MCP scripts, which need the runtime; they pass in business_with_runtime."
   ],
