@@ -1,0 +1,44 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "bellnote-minimal",
+  "version": "1.0.0",
+  "description": "Hand-authored synthetic records of a fictional school district (Merrow Vale Unified), two fictional schools and one fictional family, for reproducible acceptance; not a benchmark task. Workflow shapes were informed by public product pages of ParentSquare (https://www.parentsquare.com/) and the PowerSchool parent portal (https://www.powerschool.com/); no data, text, branding or icons were taken from them.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-authored synthetic records; no external collection. Phone numbers use the fictional 555-01xx range.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "Bellnote fixture authoring",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Timestamps carry explicit UTC offsets; school days and cut-offs are resolved in America/Los_Angeles."
+  ],
+  "expected_counts": {
+    "records": 41,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism (policy values, school calendar, notification wording) and of the fictional status of the district and people."
+  }
+}

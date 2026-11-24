@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "app_id": "bellnote",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:bellnote (Junnan Li, @lijrjyan)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "bellnote.attendance.marked",
+    "bellnote.absence.reviewed",
+    "bellnote.form.published",
+    "bellnote.form.changed",
+    "bellnote.form.answered",
+    "bellnote.pickup.person_reviewed",
+    "bellnote.dismissal.recorded",
+    "bellnote.lunch.charged",
+    "bellnote.school.day_changed"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none (MCP-only first version)",
+    "real_delivery": false
+  },
+  "limitations": [
+    "MCP-only: no GUI, reviewer console or staff console; staff, the cafeteria and the other guardian act only through events.",
+    "One guardian account in one district per App instance; guardian links and restrictions are set only by the seed.",
+    "No real payments: a payment method is a record with a status and an expiry month.",
+    "Forms are structured JSON; no PDF or image attachments.",
+    "Mail notices are stored as wire messages and dispatched only by the Infra-run sender (src/publisher.cjs); no outbox or cross-App transaction."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}
