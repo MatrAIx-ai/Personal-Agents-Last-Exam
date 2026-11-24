@@ -92,9 +92,11 @@ function addValue(ctx, data, {card_id, amount_cents, payment_method_id}) {
   return {entry_id: e.entry_id, spendable_cents: c.balance_cents, pending_cents: pendingOf(data, c)};
 }
 const pendingOf = (data, c) => data.ledger.filter(e => e.card_id === c.card_id && e.kind === 'load_pending').reduce((s, e) => s + e.amount_cents, 0);
-function setAutoreload(ctx, data, {card_id, rule}) {
+// Without a rule (omitted or null), autoreload is turned off.
+function setAutoreload(ctx, data, {card_id, rule = null}) {
   const c = live(data, card_id);
   if (rule) {
+    if (rule.threshold_cents === undefined || rule.amount_cents === undefined || !rule.payment_method_id) fail('invalid_amount', 'A rule needs threshold_cents, amount_cents and payment_method_id.');
     method(data, rule.payment_method_id);
     if (rule.amount_cents < 500 || rule.amount_cents > 50000 || rule.threshold_cents < 0 || rule.threshold_cents > 10000) fail('invalid_amount', 'Autoreload amount $5.00-$500.00, threshold $0.00-$100.00.');
   }

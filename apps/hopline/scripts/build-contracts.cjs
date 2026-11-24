@@ -25,6 +25,10 @@ const mode = enumOf(['rail', 'bus']);
 const delivery = enumOf(['mail', 'in_app']);
 const weekWindow = obj({days: arr(int(1, 7), 7, {minItems: 1}), start: hhmm, end: hhmm});
 const quiet = nullable(obj({start: hhmm, end: hhmm}));
+// Tool inputs: nested fields are optional in the schema (forms can leave an optional object empty);
+// the handlers check that a given window, quiet period or rule is complete.
+const windowIn = obj({days: arr(int(1, 7), 7), start: hhmm, end: hhmm}, []);
+const quietIn = nullable(obj({start: hhmm, end: hhmm}, []));
 const freq = arr(obj({start: hhmm, end: hhmm, headway_min: int(1, 240)}), 10);
 
 const defs = {
@@ -134,14 +138,14 @@ const tools = [
     readOut({catalog_version: text(40), fares: any, products: arr(any, 10), replacement_fee_cents: cents, reduced_fare_programs: arr(enumOf(PROGRAMS), 5)})),
   tool('saved.add', 'Save a place, or a commute between two saved places with days, a departure window and preferences (at most 20).', false,
     writeIn({kind: enumOf(['place', 'commute']), label: text(80), place_ref: id, from_saved_id: id, to_saved_id: id, days: arr(int(1, 7), 7, {minItems: 1}),
-      window: obj({start: hhmm, end: hhmm}), step_free: bool, max_walk_m: int(0, 5000), max_transfers: int(0, 4), avoid_modes: arr(mode, 2, {uniqueItems: true})}, ['kind', 'label']),
+      window: obj({start: hhmm, end: hhmm}, []), step_free: bool, max_walk_m: int(0, 5000), max_transfers: int(0, 4), avoid_modes: arr(mode, 2, {uniqueItems: true})}, ['kind', 'label']),
     writeOut({saved_id: id})),
   tool('saved.remove', 'Remove a saved place or commute that no subscription refers to.', false, writeIn({saved_id: id}, ['saved_id']), writeOut({saved_id: id})),
   tool('subscriptions.create', 'Subscribe to a route, stop, facility, saved commute or card (at most 25).', false,
-    writeIn({target: obj({kind: enumOf(['route', 'stop', 'facility', 'commute', 'card']), id}), window: weekWindow, delay_threshold_min: int(1, 240),
-      low_balance_cents: int(0, 100000), quiet_hours: quiet, urgent_override: bool, delivery}, ['target']), writeOut({subscription_id: id})),
+    writeIn({target: obj({kind: enumOf(['route', 'stop', 'facility', 'commute', 'card']), id}), window: windowIn, delay_threshold_min: int(1, 240),
+      low_balance_cents: int(0, 100000), quiet_hours: quietIn, urgent_override: bool, delivery}, ['target']), writeOut({subscription_id: id})),
   tool('subscriptions.update', 'Change a subscription, or pause or resume it.', false,
-    writeIn({subscription_id: id, window: nullable(weekWindow), delay_threshold_min: int(1, 240), low_balance_cents: int(0, 100000), quiet_hours: quiet, urgent_override: bool,
+    writeIn({subscription_id: id, window: nullable(windowIn), delay_threshold_min: int(1, 240), low_balance_cents: int(0, 100000), quiet_hours: quietIn, urgent_override: bool,
       delivery, status: enumOf(['active', 'paused'])}, ['subscription_id']), writeOut({subscription_id: id, revision: int(1, 100000)})),
   tool('subscriptions.delete', 'Delete a subscription (kept as a tombstone with its revisions).', false, writeIn({subscription_id: id}, ['subscription_id']), writeOut({subscription_id: id})),
   tool('notifications.acknowledge', 'Mark a notification as read.', false, writeIn({notification_id: id}, ['notification_id']), writeOut({notification_id: id, acknowledged_at: time})),
@@ -149,7 +153,7 @@ const tools = [
     writeIn({card_id: id, amount_cents: int(1, 1000000), payment_method_id: id}, ['card_id', 'amount_cents', 'payment_method_id']),
     writeOut({entry_id: id, spendable_cents: cents, pending_cents: cents})),
   tool('cards.set_autoreload', 'Set or clear (null) a card\'s autoreload rule; it is checked only after a charged tap.', false,
-    writeIn({card_id: id, rule: nullable(obj({threshold_cents: int(0, 100000), amount_cents: int(1, 1000000), payment_method_id: id}))}, ['card_id', 'rule']),
+    writeIn({card_id: id, rule: nullable(obj({threshold_cents: int(0, 100000), amount_cents: int(1, 1000000), payment_method_id: id}, []))}, ['card_id']),
     writeOut({card_id: id, autoreload: nullable(ref('autoreload'))})),
   tool('passes.purchase', 'Buy a monthly pass from the settled balance, for this month or a later one.', false,
     writeIn({card_id: id, product: enumOf(['monthly']), start_month: monthP}, ['card_id', 'product', 'start_month']), writeOut({pass_id: id, balance_cents: cents})),

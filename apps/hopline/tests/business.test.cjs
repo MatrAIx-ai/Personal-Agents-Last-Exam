@@ -530,6 +530,17 @@ test('a plan without a card applies the transfer rule', () => {
   assert.equal(p.itineraries[0].fare.card_id, null);
 });
 
+test('incomplete windows, quiet hours and autoreload rules are refused by the handlers; no rule turns autoreload off', () => {
+  const f = fixture();
+  fails(f, () => f.call('hopline.subscriptions.create', {target: {kind: 'route', id: 'rt-12'}, window: {days: [1], start: '08:00'}}), 'invalid_window');
+  fails(f, () => f.call('hopline.subscriptions.create', {target: {kind: 'route', id: 'rt-12'}, quiet_hours: {start: '22:00'}}), 'invalid_window');
+  fails(f, () => f.call('hopline.subscriptions.update', {subscription_id: 'sub-1', quiet_hours: {end: '07:00'}}), 'invalid_window');
+  fails(f, () => f.call('hopline.saved.add', {kind: 'commute', label: 'X', from_saved_id: 'sv-1', to_saved_id: 'sv-2', days: [1], window: {start: '08:00'}}), 'invalid_window');
+  fails(f, () => f.call('hopline.cards.set_autoreload', {card_id: 'cd-lee', rule: {threshold_cents: 500}}), 'invalid_amount');
+  f.call('hopline.cards.set_autoreload', {card_id: 'cd-lee', rule: {threshold_cents: 500, amount_cents: 2000, payment_method_id: 'pm-visa'}});
+  assert.equal(f.call('hopline.cards.set_autoreload', {card_id: 'cd-lee'}).autoreload, null);
+});
+
 // ---- Reads, seeds, packs ----
 test('reads never change data and every read carries as_of', () => {
   const f = fixture();
@@ -555,15 +566,18 @@ test('seed validation rejects inconsistent records', () => {
   bad(s => { s.stops[0].external_ref = {app_id: 'switchback', account_id: 'sb-1', object_id: 'x'}; }, 'binding');
 });
 
-test('fixture history: reconciled balances, reproducible charges, history from 2026-01-01, seeds under 400 KB', () => {
-  for (const p of ['wheelchair-commute', 'stroller-weekend', 'airport-lost-card']) {
-    const file = path.resolve(__dirname, `../examples/packs/${p}/seed.json`), seed = require(file);
+test('fixture history: reconciled balances, reproducible charges, history from 2025-01-01, seeds under 400 KB', () => {
+  for (const p of ['../fixtures/minimal.json', ...['wheelchair-commute', 'stroller-weekend', 'airport-lost-card'].map(x => `../examples/packs/${x}/seed.json`)]) {
+    const file = path.resolve(__dirname, p), seed = require(file);
     assert.ok(fs.statSync(file).size < 400 * 1024, p + ' size');
-    assert.ok(seed.taps.every(t => t.at >= '2026-01-01') && seed.ledger.every(e => e.at >= '2026-01-01'));
+    assert.ok(seed.taps.every(t => t.at >= '2025-01-01') && seed.ledger.every(e => e.at >= '2025-01-01'));
+    assert.ok(seed.ledger[0].at < '2025-04-01', p + ': history starts in early 2025');
     assert.equal(seed.notifications.filter(n => n.status === 'pending_delivery').length, 0, 'nothing waits for Mail in a seed');
   }
   const ines = require('../examples/packs/wheelchair-commute/seed.json');
-  assert.ok(ines.taps.length > 250 && ines.taps[0].at < '2026-01-10');
+  assert.ok(ines.taps.length > 300 && ines.taps[0].at < '2025-01-20');
+  const dana = require('../fixtures/minimal.json');
+  assert.ok(dana.taps.some(t => t.card_id === 'cd-dana' && t.at < '2026-03-02' && t.basis === 'fare' && t.mode === 'rail' && t.charged_cents === 240), 'full fares before the reduced fare');
   assert.ok(ines.ledger.filter(e => e.source === 'autoreload').length > 5);
   const kenji = require('../examples/packs/airport-lost-card/seed.json');
   assert.deepEqual(kenji.cards.map(c => [c.card_id, c.status]), [['cd-kenji', 'blocked'], ['cd-kenji~r1', 'active']]);

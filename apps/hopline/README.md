@@ -45,6 +45,27 @@ The second covers four delivery cases:
 - an ungranted recipient;
 - a quiet-hour release (a declined-tap card notice at 00:20).
 
+## Web page
+
+Hopline has a business web page served by the shared Web Host (`runtime/web/server.cjs`), following the `apps/notes` convention: `contribution/gui.json` declares the `pale.web` extension, `gui/index.html` is the page and `gui/src/app.js` the controller. From the repository root:
+
+```sh
+node runtime/web/server.cjs --app hopline --registry <registry listing apps/hopline> --run web-demo --profile sandbox
+```
+
+The page has seven sections:
+- **saved trips:** places and commutes, each with a plan action;
+- **stations and elevators:** each facility's status, estimate and whether the estimate has passed;
+- **alerts:** with their version chains;
+- **routes:** patterns, frequencies and the trip-ID rule;
+- **cards:** balance, pending loads, passes, weekly cap, reduced fare and autoreload;
+- **subscriptions:** with their revisions;
+- **notices.**
+
+Record actions open forms built from the live tool schemas with the record's IDs filled in. They plan a trip, show departures, subscribe, add value, buy or cancel a pass, set autoreload, apply for a reduced fare, report a card lost and show history. Pause, resume, delete and mark-as-read run in one click. Global actions plan a trip, list departures, save a place or commute, and create a subscription. Read results, such as a plan or departures, show in the detail pane.
+
+All data comes from the Agent MCP tools through the Host, and times are shown in the network's time zone. `npm run gui` (`tests/gui.browser.cjs`, which needs Playwright at the repository root) drives the page in Chromium. It checks every effect in MCP state, including an outage applied through Infra and then seen after Refresh, and writes screenshots to `.artifacts/web/`.
+
 ## Package boundary
 
 Business tests and the example run from this folder with only the package. MCP verification needs the pinned public runtime (runtime 1.6.0, Core API 1.2.0). The package carries a byte-identical copy of Mail's wire schema (`schemas/mail-router-message.schema.json`) for its `messaging.publishes` declaration. Mail 1.3.0 and Messaging are needed only for the integration example, where Mail is a scenario recipient in the run assembly. Mail is not listed in `app.json` dependencies. No external service is used.
@@ -194,13 +215,13 @@ Each pack in `examples/packs/<name>/` has a `seed.json`, `binding.json` and `clo
 
 | Pack | Contents |
 | :--- | :--- |
-| `wheelchair-commute` | A wheelchair user with a reduced-fare card and autoreload, commuting from Elm & 3rd to Mill Street through Central. About 300 taps since January 2026. Events: EL-12 fails before dawn (held by quiet hours), a Bus 12 delay, a later estimate, then the restoration. There is no step-free alternative to Mill Street |
-| `stroller-weekend` | A parent with a stroller who rides 3–5 days a week from June 2026, with a saved Saturday outing to the aquarium. Events: a weekend `stop_moved` detour that is updated and then cancelled, an escalator outage, and a tap at the moved stop |
+| `wheelchair-commute` | A wheelchair user with a reduced-fare card and autoreload, commuting from Elm & 3rd to Mill Street through Central. About 380 taps since January 2025 (one commuting day a week in 2025, then up to four). Events: EL-12 fails before dawn (held by quiet hours), a Bus 12 delay, a later estimate, then the restoration. There is no step-free alternative to Mill Street |
+| `stroller-weekend` | A parent with a stroller who rides on Saturdays from January 2025 and 3–5 days a week from June 2026, with a saved Saturday outing to the aquarium. Events: a weekend `stop_moved` detour that is updated and then cancelled, an escalator outage, and a tap at the moved stop |
 | `airport-lost-card` | An airport visitor whose stored-value card was reported lost with a load pending. Events: a settlement written against the old card (redirected), a tap with the old card (declined), and taps with the replacement |
 
 ## Data
 
-`scripts/generate-fixtures.cjs` writes every fixture and pack deterministically from a fixed seed; `npm run check` fails if a regenerated file differs. Rider history (taps, loads, settlements, saved items and subscriptions) is produced by running Hopline's own handlers in time order. Every seeded charge and balance is therefore one the App computes, and balances reconcile with the ledger. History is dated from 2026-01-01, and each seed stays under 400 KB. The network, schedules, fares, riders and cards are synthetic. GTFS and GTFS Realtime are format references only (`contribution/dataset.json`).
+`scripts/generate-fixtures.cjs` writes every fixture and pack deterministically from a fixed seed; `npm run check` fails if a regenerated file differs. Rider history (taps, loads, settlements, saved items and subscriptions) is produced by running Hopline's own handlers in time order. Every seeded charge and balance is therefore one the App computes, and balances reconcile with the ledger. History starts in January 2025, about two years before the core examples, and the task timeline starts in 2026. Each seed stays under 400 KB. Dana's card has full fares until her reduced fare is approved in March 2026, and Lee's card joins the account in June 2026. The network, schedules, fares, riders and cards are synthetic. GTFS and GTFS Realtime are format references only (`contribution/dataset.json`).
 
 ## Implementation notes
 
@@ -213,6 +234,7 @@ Other details the approved plan left open:
 - **Short-turn trips:** Bus 40 runs a weekday-peak short turn from Market & 5th, so the 07:56 trip in the core examples does not serve Elm & 3rd.
 - **Departure window:** the first ride must leave within 30 minutes of `depart_at`. Without a window, a later direct bus would always exist, and `no_step_free_route` could never occur.
 - **Dominated alternatives:** an alternative no better than an earlier itinerary in arrival, transfers or walking is dropped, so a step-free request at 07:35 returns Bus 40 alone.
+- **Nested inputs are optional in tool schemas:** a subscription's `window` and `quiet_hours`, a commute's `window`, and `set_autoreload`'s `rule` have no required inner fields, so a form can leave them empty. The handlers check that a given one is complete (`invalid_window`, `invalid_amount`). `set_autoreload` without a `rule` turns autoreload off.
 - **`reduced_fare.apply`** returns `application_status`, because Core reserves `status` in every result.
 - **`not_eligible_program`** is returned when the card already has an approved, unexpired reduced fare.
 - **Error codes beyond the proposal's lists:** `alert_not_found` (`alerts.get`), `pass_not_found` (`passes.cancel`), `load_not_pending` and `application_not_pending` (events). An unknown facility is `unknown_facility` everywhere.
@@ -226,5 +248,5 @@ Other details the approved plan left open:
 ## Limitations
 
 - Frequency-based schedules, not per-trip timetables. No vehicle positions, crowding, maps, paratransit, bike share or multi-agency fares.
-- One account per App instance; MCP only, no GUI.
+- One account per App instance; one business web page (see Web page), no reviewer console.
 - Automatic invocation of the outbound adapter belongs to the planned runner; the example and tests invoke it explicitly.

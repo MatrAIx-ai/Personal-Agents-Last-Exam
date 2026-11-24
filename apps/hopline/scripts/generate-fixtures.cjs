@@ -61,11 +61,23 @@ function minimal() {
   const bind = binding('person-dana', 'Dana Brooks', 'hopline-dana', ['st-central', 'fac-el12', 'pl-elm-3rd', 'pl-harbor-sq']);
   const data = account({account_id: 'hopline-dana', person: 'person-dana', name: 'Dana Brooks',
     methods: [{payment_method_id: 'pm-visa', label: 'Visa', last4: '4242', fails: false}, {payment_method_id: 'pm-debit', label: 'Debit card', last4: '1881', fails: false}]});
-  data.cards = [card('cd-dana', 'Dana Brooks', "Dana's card", '2026-03-02T09:00:00-05:00', {program: 'disability', approved_at: '2026-03-02T09:00:00-05:00', expires_at: '2027-06-30T23:59:00-04:00'}),
-    card('cd-lee', 'Lee Brooks', "Dad's card (Lee)", '2026-06-01T09:00:00-04:00')];
-  data.applications = [{application_id: 'ap-cd-dana-1', card_id: 'cd-dana', program: 'disability', status: 'approved', submitted_at: '2026-02-20T10:00:00-05:00',
-    decided_at: '2026-03-02T09:00:00-05:00', expires_at: '2027-06-30T23:59:00-04:00', history: [{at: '2026-03-02T09:00:00-05:00', action: 'approved'}]}];
+  data.cards = [card('cd-dana', 'Dana Brooks', "Dana's card", '2025-01-03T09:00:00-05:00')];
   const s = simulate(data, bind);
+  // Dana's history since January 2025: one commuting day a week, loads by autoreload (turned off since).
+  // Full fares until her disability reduced fare is approved on Mon Mar 2, 2026.
+  s.tool('2025-01-03T09:30:00-05:00', 'hopline.cards.add_value', {card_id: 'cd-dana', amount_cents: 2000, payment_method_id: 'pm-debit'});
+  s.settleAll('2025-01-04T09:00:00-05:00', 'cd-dana');
+  s.tool('2025-01-04T09:05:00-05:00', 'hopline.cards.set_autoreload', {card_id: 'cd-dana', rule: {threshold_cents: 500, amount_cents: 2000, payment_method_id: 'pm-debit'}});
+  s.plan = {out: 'bus12-elm', back: 'blue-harbor'};
+  const dana = prng(SEED + 7);
+  commuteHistory(s, dana, 'cd-dana', {from: '2025-01-06', to: '2026-02-19', days: [3], outbound: '07:40', back: '17:20', skip: 0.25});
+  s.tool('2026-02-20T10:00:00-05:00', 'hopline.reduced_fare.apply', {card_id: 'cd-dana', program: 'disability'});
+  s.event('2026-03-02T09:00:00-05:00', 'fare.eligibility_decided', {card_id: 'cd-dana', decision: 'approved', program: 'disability', expires_at: '2027-06-30T23:59:00-04:00'});
+  commuteHistory(s, dana, 'cd-dana', {from: '2026-03-03', to: '2026-05-31', days: [3], outbound: '07:40', back: '17:20', skip: 0.25});
+  // Dana manages her father's card from June 2026.
+  s.data.cards.push(card('cd-lee', 'Lee Brooks', "Dad's card (Lee)", '2026-06-01T09:00:00-04:00'));
+  commuteHistory(s, dana, 'cd-dana', {from: '2026-06-01', to: '2026-11-20', days: [3], outbound: '07:40', back: '17:20', skip: 0.25});
+  s.tool('2026-11-21T10:00:00-05:00', 'hopline.cards.set_autoreload', {card_id: 'cd-dana', rule: null});
   s.tool('2026-11-23T08:00:00-05:00', 'hopline.cards.add_value', {card_id: 'cd-lee', amount_cents: 1060, payment_method_id: 'pm-visa'});
   s.settleAll('2026-11-23T12:00:00-05:00', 'cd-lee');
   for (const at of ['2026-11-24T09:05:00-05:00', '2026-11-24T15:20:00-05:00', '2026-11-26T10:10:00-05:00', '2026-11-26T16:40:00-05:00']) ride(s, at, 'cd-lee', 'blue-harbor');
@@ -107,12 +119,13 @@ function commuteHistory(s, rand, cardId, {from, to, days, outbound, back, skip =
 function wheelchairCommute(rand) {
   const bind = binding('person-ines', 'Ines Ortega', 'hopline-ines', ['st-central', 'fac-el12', 'st-mill']);
   const data = account({account_id: 'hopline-ines', person: 'person-ines', name: 'Ines Ortega', methods: [{payment_method_id: 'pm-visa', label: 'Visa', last4: '7310', fails: false}]});
-  data.cards = [card('cd-ines', 'Ines Ortega', 'My card', '2026-01-02T09:00:00-05:00', {program: 'disability', approved_at: '2026-01-02T09:00:00-05:00', expires_at: '2028-01-01T23:59:00-05:00'})];
+  data.cards = [card('cd-ines', 'Ines Ortega', 'My card', '2025-01-02T09:00:00-05:00', {program: 'disability', approved_at: '2026-01-02T09:00:00-05:00', expires_at: '2028-01-01T23:59:00-05:00'})];
   const s = simulate(data, bind);
-  s.tool('2026-01-02T09:30:00-05:00', 'hopline.cards.add_value', {card_id: 'cd-ines', amount_cents: 3000, payment_method_id: 'pm-visa'});
-  s.settleAll('2026-01-03T09:00:00-05:00', 'cd-ines');
-  s.tool('2026-01-03T09:05:00-05:00', 'hopline.cards.set_autoreload', {card_id: 'cd-ines', rule: {threshold_cents: 1000, amount_cents: 3000, payment_method_id: 'pm-visa'}});
+  s.tool('2025-01-02T09:30:00-05:00', 'hopline.cards.add_value', {card_id: 'cd-ines', amount_cents: 3000, payment_method_id: 'pm-visa'});
+  s.settleAll('2025-01-03T09:00:00-05:00', 'cd-ines');
+  s.tool('2025-01-03T09:05:00-05:00', 'hopline.cards.set_autoreload', {card_id: 'cd-ines', rule: {threshold_cents: 1000, amount_cents: 3000, payment_method_id: 'pm-visa'}});
   s.plan = {out: 'blue-central', back: 'blue-mill'};
+  commuteHistory(s, rand, 'cd-ines', {from: '2025-01-06', to: '2025-12-31', days: [2], outbound: '08:05', back: '16:40', skip: 0.45});
   commuteHistory(s, rand, 'cd-ines', {from: '2026-01-05', to: '2026-11-27', days: [1, 2, 3, 4], outbound: '08:05', back: '16:40'});
   const add = (at, a) => s.tool(at, 'hopline.saved.add', a).saved_id;
   const home = add('2026-11-28T10:00:00-05:00', {kind: 'place', label: 'Home', place_ref: 'pl-elm-3rd'});
@@ -133,12 +146,13 @@ function wheelchairCommute(rand) {
 function strollerWeekend(rand) {
   const bind = binding('person-tomas', 'Tomas Reyes', 'hopline-tomas', ['st-elm-3rd', 'st-seaport', 'fac-es21']);
   const data = account({account_id: 'hopline-tomas', person: 'person-tomas', name: 'Tomas Reyes', methods: [{payment_method_id: 'pm-mc', label: 'Mastercard', last4: '5502', fails: false}]});
-  data.cards = [card('cd-tomas', 'Tomas Reyes', 'Family card', '2026-05-30T09:00:00-04:00')];
+  data.cards = [card('cd-tomas', 'Tomas Reyes', 'Family card', '2025-01-03T09:00:00-05:00')];
   const s = simulate(data, bind);
-  s.tool('2026-05-31T09:00:00-04:00', 'hopline.cards.add_value', {card_id: 'cd-tomas', amount_cents: 4000, payment_method_id: 'pm-mc'});
-  s.settleAll('2026-06-01T08:00:00-04:00', 'cd-tomas');
-  s.tool('2026-06-01T08:05:00-04:00', 'hopline.cards.set_autoreload', {card_id: 'cd-tomas', rule: {threshold_cents: 800, amount_cents: 4000, payment_method_id: 'pm-mc'}});
+  s.tool('2025-01-03T09:05:00-05:00', 'hopline.cards.add_value', {card_id: 'cd-tomas', amount_cents: 4000, payment_method_id: 'pm-mc'});
+  s.settleAll('2025-01-04T08:00:00-05:00', 'cd-tomas');
+  s.tool('2025-01-04T08:05:00-05:00', 'hopline.cards.set_autoreload', {card_id: 'cd-tomas', rule: {threshold_cents: 800, amount_cents: 4000, payment_method_id: 'pm-mc'}});
   s.plan = {out: 'bus40-elm', back: 'bus40-seaport'};
+  commuteHistory(s, rand, 'cd-tomas', {from: '2025-01-04', to: '2026-05-31', days: [6], outbound: '09:30', back: '14:10', skip: 0.35});
   commuteHistory(s, rand, 'cd-tomas', {from: '2026-06-01', to: '2026-12-10', days: [1, 3, 5, 6], outbound: '09:30', back: '14:10', skip: 0.25});
   const add = (at, a) => s.tool(at, 'hopline.saved.add', a).saved_id;
   const home = add('2026-12-10T20:00:00-05:00', {kind: 'place', label: 'Home', place_ref: 'pl-elm-3rd'});
@@ -164,11 +178,11 @@ function strollerWeekend(rand) {
 function airportLostCard(rand) {
   const bind = binding('person-kenji', 'Kenji Sato', 'hopline-kenji', ['st-airport']);
   const data = account({account_id: 'hopline-kenji', person: 'person-kenji', name: 'Kenji Sato', methods: [{payment_method_id: 'pm-amex', label: 'Amex', last4: '3005', fails: false}]});
-  data.cards = [card('cd-kenji', 'Kenji Sato', 'Visitor card', '2026-09-28T14:00:00-04:00')];
+  data.cards = [card('cd-kenji', 'Kenji Sato', 'Visitor card', '2025-03-10T14:00:00-04:00')];
   const s = simulate(data, bind);
-  s.tool('2026-09-28T14:05:00-04:00', 'hopline.cards.add_value', {card_id: 'cd-kenji', amount_cents: 2000, payment_method_id: 'pm-amex'});
-  s.settleAll('2026-09-28T14:30:00-04:00', 'cd-kenji');
-  for (const [d, n] of [['2026-09-29', 3], ['2026-10-19', 4], ['2026-11-09', 4], ['2026-12-07', 2]]) {
+  s.tool('2025-03-10T14:05:00-04:00', 'hopline.cards.add_value', {card_id: 'cd-kenji', amount_cents: 2000, payment_method_id: 'pm-amex'});
+  s.settleAll('2025-03-10T14:30:00-04:00', 'cd-kenji');
+  for (const [d, n] of [['2025-03-11', 3], ['2025-08-18', 3], ['2026-09-29', 3], ['2026-10-19', 4], ['2026-11-09', 4], ['2026-12-07', 2]]) {
     for (let i = 0; i < n; i++) {
       const day = addDays(d, i);
       ride(s, local(day, '09:' + String(10 + Math.floor(rand() * 40)).padStart(2, '0')), 'cd-kenji', i === 0 ? 'blue-airport' : 'blue-harbor');

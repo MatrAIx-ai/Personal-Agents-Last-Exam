@@ -14,7 +14,10 @@ function getSaved(data, id) {
 }
 function checkWindow(w, needed) {
   if (!w) { if (needed) fail('invalid_window', 'A window is required.'); return; }
-  if (!w.days.length || minutes(w.end) === minutes(w.start)) fail('invalid_window', 'A window needs days and different start and end times.');
+  if (!w.days || !w.days.length || !w.start || !w.end || minutes(w.end) === minutes(w.start)) fail('invalid_window', 'A window needs days and different start and end times.');
+}
+function checkQuiet(q) {
+  if (q && (!q.start || !q.end || q.start === q.end)) fail('invalid_window', 'Quiet hours need different start and end times.');
 }
 function refExists(data, ref) {
   if (!data.places.some(p => p.place_id === ref) && !data.stops.some(s => s.stop_id === ref)) fail('place_not_found', 'No place or stop with that ID.');
@@ -60,6 +63,7 @@ function createSub(ctx, data, a) {
   if (live(data.subscriptions).length >= LIMITS.subscriptions) fail('subscription_limit', 'At most 25 subscriptions.');
   target(data, a.target);
   checkWindow(a.window, false);
+  checkQuiet(a.quiet_hours);
   const now = stamp(ctx, data);
   const s = {subscription_id: nextId(data.subscriptions, 'subscription_id', 'sub'), target: copy(a.target), window: a.window ? {...a.window, days: [...new Set(a.window.days)].sort()} : null,
     delay_threshold_min: a.delay_threshold_min ?? (['route', 'stop', 'commute'].includes(a.target.kind) ? 10 : null),
@@ -78,6 +82,7 @@ function updateSub(ctx, data, a) {
   for (const k of [...FIELDS, 'status']) if (a[k] !== undefined) changes[k] = a[k];
   if (!Object.keys(changes).length) fail('invalid_window', 'Nothing to change.');
   if (changes.window !== undefined) checkWindow(changes.window, false);
+  if (changes.quiet_hours !== undefined) checkQuiet(changes.quiet_hours);
   Object.assign(s, copy(changes));
   s.revision++; s.history.push({revision: s.revision, at: stamp(ctx, data), action: 'updated', changes: copy(changes)});
   return {subscription_id: s.subscription_id, revision: s.revision};
