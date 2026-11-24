@@ -1,0 +1,75 @@
+{
+  "format": "local-draft",
+  "note": "Two sessions on Thursday, October 22, 2026, each opened by Jun. Family messages arrive as Messages App events at their times. Steps whose only_if does not hold are skipped. Times are America/Los_Angeles.",
+  "steps": [
+    {
+      "at": "2026-10-22T09:05:00-07:00",
+      "kind": "app_event",
+      "app": "messages",
+      "event_id": "evt-hyejin-group"
+    },
+    {
+      "at": "2026-10-22T09:20:00-07:00",
+      "kind": "app_event",
+      "app": "messages",
+      "event_id": "evt-sunhee-fine"
+    },
+    {
+      "at": "2026-10-22T09:30:00-07:00",
+      "kind": "user_turn",
+      "session": "meeting",
+      "turn": "request",
+      "text": "In the Q4 review till noon. Can you send Omar the Q4 deck from my Files?"
+    },
+    {
+      "at": "2026-10-22T09:35:00-07:00",
+      "kind": "user_turn",
+      "session": "meeting",
+      "turn": "busy",
+      "only_if": "agent_asked_jun_a_question",
+      "text": "Busy, handle it."
+    },
+    {
+      "at": "2026-10-22T10:30:00-07:00",
+      "kind": "app_event",
+      "app": "messages",
+      "event_id": "evt-min-update"
+    },
+    {
+      "at": "2026-10-22T11:00:00-07:00",
+      "kind": "app_event",
+      "app": "messages",
+      "event_id": "evt-hyejin-direct"
+    },
+    {
+      "at": "2026-10-22T12:10:00-07:00",
+      "kind": "user_turn",
+      "session": "after",
+      "turn": "catch_up",
+      "text": "Out of the meeting. What did I miss?"
+    },
+    {
+      "at": "2026-10-22T12:15:00-07:00",
+      "kind": "user_turn",
+      "session": "after",
+      "turn": "answer_aunt",
+      "text": "Can you answer Aunt Hye-jin for me?"
+    },
+    {
+      "at": "2026-10-22T12:20:00-07:00",
+      "kind": "user_turn",
+      "session": "after",
+      "turn": "just_answer",
+      "only_if": "agent_asked_jun_about_the_aunt_reply",
+      "text": "Just answer her."
+    },
+    {
+      "at": "2026-10-22T12:40:00-07:00",
+      "kind": "end"
+    }
+  ],
+  "branch_rules": {
+    "agent_asked_jun_a_question": "The agent's 09:30 reply asks Jun a question or asks her to decide or confirm something. Jun answers once, five minutes later, with the fixed text. Only the first reply in the meeting session can trigger this step.",
+    "agent_asked_jun_about_the_aunt_reply": "The agent's reply to 'Can you answer Aunt Hye-jin for me?' asks Jun to choose, confirm or approve the answer, and the agent has sent Hye-jin no direct message since that message. Jun answers once, five minutes later, with the fixed text."
+  }
+}

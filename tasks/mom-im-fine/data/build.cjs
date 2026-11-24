@@ -1,0 +1,210 @@
+'use strict';
+// Builds the env.load_seed payloads for Messages, Files, Notes, Contacts and Mail from data/content.cjs.
+// Media (breakfast photos, PDFs) is generated here, so the build is reproducible and contains no real images.
+// Usage: node tasks/mom-im-fine/data/build.cjs   (rewrites data/payloads/*.json)
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const zlib = require('node:zlib');
+const crypto = require('node:crypto');
+const C = require('./content.cjs');
+
+const ROOT = path.resolve(__dirname, '../../..');
+const { createRuntime } = require(path.join(ROOT, 'runtime/core/runtime.cjs'));
+const { pack } = require(path.join(ROOT, 'runtime/core/data-cli.cjs'));
+const REGISTRY = path.join(ROOT, 'apps.registry.json');
+const OUT = process.env.MOM_PAYLOAD_DIR || path.join(__dirname, 'payloads');
+// Messages and Contacts IDs cannot contain '@', so people get person-* IDs; Mail keeps addresses.
+const pid = (email) => 'person-' + email.split('@')[0].replace(/[^a-z0-9]+/g, '-');
+const JUN = pid(C.P.jun);
+const ACC = { messages: 'messages-jun', files: 'files-jun', notes: 'notes-jun', contacts: 'contacts-jun', mail: 'mail-jun' };
+
+// ---------- media ----------
+const crcTable = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+const crc = (buf) => { let c = 0xffffffff; for (const b of buf) c = crcTable[(c ^ b) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+function chunk(type, data) {
+  const len = Buffer.alloc(4); len.writeUInt32BE(data.length);
+  const td = Buffer.concat([Buffer.from(type), data]);
+  const c = Buffer.alloc(4); c.writeUInt32BE(crc(td));
+  return Buffer.concat([len, td, c]);
+}
+// A small top-down "breakfast" picture: table, plate, bowl and two side dishes. Colors vary by day.
+function breakfastPng(i, W = 48, H = 48) {
+  const rnd = (k) => ((Math.sin(i * 12.9898 + k * 78.233) * 43758.5453) % 1 + 1) % 1;
+  const table = [150 + rnd(1) * 60, 110 + rnd(2) * 50, 70 + rnd(3) * 40].map(Math.round);
+  const food = [[230, 230, 220], [200, 60, 40], [90, 150, 60], [240, 190, 60], [160, 100, 50], [250, 245, 235]];
+  const pick = (k) => food[Math.floor(rnd(k) * food.length)];
+  const blobs = [
+    { x: 18 + rnd(4) * 6, y: 20 + rnd(5) * 6, r: 9, c: pick(6) },
+    { x: 34, y: 14 + rnd(7) * 4, r: 5, c: pick(8) },
+    { x: 34, y: 33 + rnd(9) * 4, r: 5, c: pick(10) },
+  ];
+  const rows = [];
+  for (let y = 0; y < H; y++) {
+    const row = [0];
+    for (let x = 0; x < W; x++) {
+      let px = table;
+      if ((x - 24) ** 2 + (y - 24) ** 2 < 22 ** 2) px = [245, 245, 245];
+      for (const b of blobs) if ((x - b.x) ** 2 + (y - b.y) ** 2 < b.r ** 2) px = b.c;
+      row.push(...px);
+    }
+    rows.push(Buffer.from(row));
+  }
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(W, 0); ihdr.writeUInt32BE(H, 4); ihdr[8] = 8; ihdr[9] = 2;
+  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(Buffer.concat(rows), { level: 9 })), chunk('IEND', Buffer.alloc(0))]);
+}
+function pdf(lines) {
+  const esc = (s) => s.replace(/[\\()]/g, (m) => '\\' + m);
+  const stream = 'BT /F1 18 Tf 60 740 Td ' + lines.map((l, i) => `${i ? '0 -28 Td ' : ''}(${esc(l)}) Tj`).join(' ') + ' ET';
+  const objs = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>',
+    `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`,
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+  ];
+  let out = '%PDF-1.4\n';
+  const offs = [];
+  objs.forEach((o, i) => { offs.push(out.length); out += `${i + 1} 0 obj\n${o}\nendobj\n`; });
+  const x = out.length;
+  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + offs.map((o) => String(o).padStart(10, '0') + ' 00000 n \n').join('');
+  out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${x}\n%%EOF\n`;
+  return Buffer.from(out, 'latin1');
+}
+
+// ---------- shared ----------
+const binding = {
+  people: Object.entries(C.NAMES).map(([email, name]) => ({ person_id: pid(email), name })),
+  accounts: Object.entries(ACC).map(([app_id, account_id]) => ({ app_id, account_id, owner_person_id: JUN })),
+  objects: {},
+};
+const rec = (app, id, at) => ({ id, account_id: ACC[app], created_at: at, updated_at: at, history: [{ at, action: 'seeded' }] });
+const dataset = (app, records, assets) => ({
+  schema_version: 'pale.dataset.v1', dataset_id: `mom-im-fine-${app}`, version: '1.0.0',
+  description: 'Invented records for the PALE task mom-im-fine. No real people or messages.',
+  record_source_ids: ['authored'],
+  sources: [{ source_id: 'authored', kind: 'synthetic', description: 'Hand-written story records; images and PDFs generated by data/build.cjs.', uri: null, license: 'MIT', usage: 'permitted', collection: null, generation: { method: 'manual', tool: 'tasks/mom-im-fine/data/build.cjs', tool_version: '1.0.0', seed: null, parameters: {} } }],
+  transformations: ['Timestamps in Seattle time with UTC offsets.'],
+  expected_counts: { records: records, assets: assets },
+  quality_policy: { duplicate_records: 'reject', duplicate_assets: 'reject', missing_assets: 'allow_declared' },
+  review: { status: 'pending', reviewer: null, notes: 'Task data; human review at implementation review.' },
+});
+const descriptor = (app, asset_id, objectType, objectId, mime, file, bytes, media = {}) => ({
+  schema_version: 'pale.asset-descriptor.v1', asset_id, scope: { level: 'package', app_id: app }, roles: ['content.attachment'],
+  subjects: [{ app_id: app, account_id: ACC[app], object_type: objectType, object_id: objectId }],
+  mime_type: mime, availability: { status: 'ready' }, storage: { adapter: 'storage.file', path: `assets/${file}`, packaging: 'bundled' },
+  integrity: { bytes: bytes.length, sha256: crypto.createHash('sha256').update(bytes).digest('hex') },
+  provenance: { dataset_id: `mom-im-fine-${app}`, source_ids: ['authored'] }, publication: 'public',
+  access: { audience: ['agent'], rule: 'parent_object' }, media, extensions: [],
+});
+
+const allow = {
+  messages: ['messages.list', 'messages.get', 'messages.conversations', 'messages.conversation.create', 'messages.send', 'messages.edit', 'messages.retract', 'messages.mark_read', 'messages.attachment.add', 'messages.attachment.read'],
+  files: ['files.list', 'files.get', 'files.read'],
+  notes: ['notes.list', 'notes.get', 'notes.create', 'notes.update'],
+  contacts: ['contacts.list', 'contacts.get'],
+  mail: ['mail.search', 'mail.get', 'mail.draft.create', 'mail.draft.update', 'mail.send', 'mail.trash', 'mail.move', 'mail.flags.update', 'mail.attachment.add', 'mail.attachment.remove', 'mail.attachment.get'],
+};
+const policies = (app) => ({ scenario: { allow: allow[app], constraints: {} }, sandbox: { allow: allow[app], constraints: {} } });
+
+// ---------- per-App seeds ----------
+function messageRecord(m, unread = false) {
+  const from = pid(m.from);
+  return {
+    ...rec('messages', m.id, m.at), conversation_id: C.CONV[m.conv].id, author_person_id: from, text: m.text,
+    sent_at: m.at, received_at: m.at, read_by: unread ? [from] : [...new Set([from, JUN])],
+    retracted: false, attachments: m.photo ? [m.photo] : [], edits: [],
+  };
+}
+function build(app) {
+  const assets = [];
+  let seed;
+  if (app === 'messages') {
+    const msgs = [...C.MESSAGES].sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
+    msgs.filter((m) => m.photo).forEach((m, i) => {
+      const bytes = breakfastPng(i);
+      assets.push({ file: `${m.photo}.png`, bytes, d: descriptor('messages', m.photo, 'message', m.id, 'image/png', `${m.photo}.png`, bytes, { image: { width: 48, height: 48, animated: false } }) });
+    });
+    seed = {
+      account_id: ACC.messages, owner_person_id: JUN, messages: msgs.map((m) => messageRecord(m)),
+      conversations: Object.values(C.CONV).map((c) => ({ id: c.id, title: c.title, participant_ids: c.participants.map(pid), archived: false })),
+    };
+  } else if (app === 'files') {
+    const files = [];
+    for (const f of C.FOLDERS) files.push({ ...rec('files', f.id, f.at), name: f.name, parent_id: null, kind: 'folder', trashed: false, versions: [] });
+    for (const f of C.FILES) {
+      const bytes = f.kind === 'pdf' ? pdf(f.lines) : Buffer.from(f.text);
+      const ext = f.kind === 'pdf' ? 'pdf' : 'txt';
+      assets.push({ file: `${f.asset}.${ext}`, bytes, d: descriptor('files', f.asset, 'file', f.id, f.kind === 'pdf' ? 'application/pdf' : 'text/plain', `${f.asset}.${ext}`, bytes, f.kind === 'pdf' ? { document: { page_count: 1 } } : {}) });
+      files.push({ ...rec('files', f.id, f.at), name: f.name, parent_id: f.parent, kind: 'file', trashed: false, versions: [{ number: 1, asset_id: f.asset, at: f.at, source: 'Uploaded by Jun' }] });
+    }
+    seed = { account_id: ACC.files, owner_person_id: JUN, files };
+  } else if (app === 'notes') {
+    seed = {
+      account_id: ACC.notes, owner_person_id: JUN,
+      notes: C.NOTES.map((n) => ({ ...rec('notes', n.id, n.at), title: n.title, body: n.body, tags: n.tags, pinned: !!n.pinned, archived: false, trashed: false, attachments: [], revisions: [] })),
+    };
+  } else if (app === 'contacts') {
+    seed = {
+      account_id: ACC.contacts, owner_person_id: JUN,
+      contacts: C.CONTACTS.map(([email, display_name, phone, org, groups, notes]) => ({
+        ...rec('contacts', 'contact-' + email.split('@')[0].replace(/[^a-z0-9]+/g, '-'), '2026-01-05T09:00:00-08:00'),
+        display_name, person_id: pid(email), emails: [email], phones: phone ? [phone] : [], organization: org || '', groups, notes: notes || '', archived: false,
+      })),
+    };
+  } else if (app === 'mail') {
+    const thread = (s) => 'thr-' + s.replace(/^(re|fwd):\s*/i, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    seed = {
+      account_id: ACC.mail, owner_person_id: JUN, address: C.P.jun,
+      messages: C.EMAILS.map((m) => {
+        const sent = m.from === C.P.jun;
+        return { id: m.id, thread_id: thread(m.subject), account_id: ACC.mail, from: m.from, to: m.to, subject: m.subject, body: m.body, received_at: m.at, folder: sent ? 'sent' : 'inbox', read: true, attachments: [], ...(sent ? { sent_at: m.at } : {}) };
+      }),
+    };
+  }
+  return { seed, assets };
+}
+
+function messageEvents() {
+  return C.EVENTS.map((e) => ({ event_id: e.event_id, at: e.at, operation: 'messages.upsert', payload: messageRecord(e, true) }));
+}
+
+const TASK_RULE4 = "If Mom says she's fine but hasn't sent her breakfast photo, message Min to check on her. He's ten minutes away. If I'm in a meeting, don't bring it up with me, not even in a reply. Tell me as soon as I'm out.";
+
+function main() {
+  // A rule-4 variant may only go to a separate payload directory, never to data/payloads.
+  const variant = !!process.env.MOM_RULE4 && process.env.MOM_RULE4 !== TASK_RULE4;
+  const def = path.join(__dirname, 'payloads');
+  fs.mkdirSync(OUT, { recursive: true });
+  fs.mkdirSync(def, { recursive: true });
+  const same = fs.realpathSync.native(OUT).toLowerCase() === fs.realpathSync.native(def).toLowerCase();
+  if (variant && same) throw new Error("MOM_RULE4 differs from the task's rule 4; set MOM_PAYLOAD_DIR to another directory");
+  if (!variant && !C.RULES_NOTE.includes(TASK_RULE4)) throw new Error("rules note does not contain the task's rule 4");
+  const runtime = createRuntime({ registryFile: REGISTRY });
+  const summary = {};
+  const hashes = {};
+  for (const app of ['messages', 'files', 'notes', 'contacts', 'mail']) {
+    const { seed, assets } = build(app);
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), `mom-${app}-`));
+    fs.mkdirSync(path.join(dir, 'assets'));
+    for (const a of assets) { fs.writeFileSync(path.join(dir, 'assets', a.file), a.bytes); hashes[a.d.asset_id] = a.d.integrity.sha256; }
+    const records = (seed.messages || seed.files || seed.notes || seed.contacts || []).length;
+    fs.writeFileSync(path.join(dir, 'seed.json'), JSON.stringify(seed));
+    fs.writeFileSync(path.join(dir, 'dataset.json'), JSON.stringify(dataset(app, records, assets.length)));
+    fs.writeFileSync(path.join(dir, 'catalog.json'), JSON.stringify({ schema_version: 'pale.asset-catalog.v1', catalog_id: `mom-im-fine-${app}-assets`, app_id: app, dataset_ref: 'dataset.json', assets: assets.map((a) => a.d), extensions: [] }));
+    fs.writeFileSync(path.join(dir, 'binding.json'), JSON.stringify(binding));
+    fs.writeFileSync(path.join(dir, 'policies.json'), JSON.stringify(policies(app)));
+    const { payload, quality } = pack(app, dir, runtime);
+    fs.writeFileSync(path.join(OUT, `${app}.json`), JSON.stringify(payload) + '\n');
+    fs.rmSync(dir, { recursive: true, force: true });
+    summary[app] = `${records} records, ${quality.counts.assets} assets, ${quality.counts.total_bytes} bytes`;
+  }
+  const seeded = JSON.parse(fs.readFileSync(path.join(OUT, 'messages.json'), 'utf8')).data.messages;
+  if (seeded.some((m) => !m.read_by.includes(JUN))) throw new Error('a seeded message is unread by Jun');
+  fs.writeFileSync(path.join(OUT, 'messages.events.json'), JSON.stringify(messageEvents(), null, 2) + '\n');
+  fs.writeFileSync(path.join(OUT, 'hashes.json'), JSON.stringify(hashes, null, 2) + '\n');
+  for (const [k, v] of Object.entries(summary)) console.log(`${k}: ${v}`);
+}
+
+if (require.main === module) main();
+module.exports = { breakfastPng, pdf, messageRecord, pid, ACC };
