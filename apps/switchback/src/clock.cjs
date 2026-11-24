@@ -17,8 +17,12 @@ function at(date, time, offset) {
   return ms(`${date}T${time}:00${offset}`);
 }
 
-function iso(t) {
-  return new Date(t).toISOString().replace('.000Z', 'Z');
+// An instant as an ISO timestamp in a facility's fixed offset (UTC when none is given).
+function iso(t, offset) {
+  if (!offset) return new Date(t).toISOString().replace('.000Z', 'Z');
+  const sign = offset[0] === '-' ? -1 : 1;
+  const [h, m] = offset.slice(1).split(':').map(Number);
+  return new Date(t + sign * (h * 60 + m) * MINUTE).toISOString().replace(/\.\d{3}Z$/, offset);
 }
 
 function addDays(date, n) {

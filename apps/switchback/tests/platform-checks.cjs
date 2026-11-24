@@ -65,20 +65,53 @@ async function main() {
     ok('browse profile refuses wallet.set_default', denied.status === 'permission_denied');
     ok('a refused call leaves the state hash unchanged', hash((await infra.call('env.snapshot')).snapshot) === baseline);
 
-    // (c) Reset: 20 cycles, each after a write, restore the loaded hash with no outgoing notice left.
+    // (c) Reset after every anchor run: each run goes through MCP (Agent writes,
+    // Infra clock advances and events), its audit is exported with env.snapshot,
+    // then env.reset must restore the loaded hash with no outgoing notice left.
     await infra.call('env.reset', {expected_version: (await infra.call('env.snapshot')).version, profile: 'full'});
+    let seq = 0;
+    const version = async () => (await infra.call('env.snapshot')).version;
+    const act = async (name, args) => {
+      const out = await agent.call('switchback.' + name, {expected_version: await version(), request_id: 'anchor-' + (++seq), ...args});
+      assert.equal(out.status, 'committed', name + ': ' + JSON.stringify(out));
+      return out;
+    };
+    const advance = async when => assert.equal((await infra.call('env.advance_time', {expected_version: await version(), request_id: 'clock-' + (++seq), virtual_now: when})).status, 'committed');
+    const event = async e => assert.equal((await infra.call('env.apply_event', {expected_version: await version(), event: e})).status, 'committed');
+    const book = async (site, previewArgs) => {
+      const h = (await act('cart.hold', {site_id: site, arrival: '2027-06-25', departure: '2027-06-27'})).hold;
+      const pv = (await act('reservations.preview', {hold_id: h.id, ...previewArgs})).preview;
+      await act('reservations.confirm', {preview_id: pv.id});
+    };
+    const cancel = async id => act('reservations.cancel.confirm', {preview_id: (await act('reservations.cancel.preview', {reservation_id: id})).preview.id});
+    const smoke = {event_id: 'smoke', at: '2027-06-28T08:00:00-07:00', operation: 'switchback.alert.posted', payload: {alert_id: 'al-9',
+      kind: 'smoke_advisory', facility_id: 'lakeshore', site_ids: [], from: '2027-07-01T00:00:00-07:00', to: '2027-07-04T00:00:00-07:00', text: 'Smoke from a distant fire.'}};
+    const anchors = {
+      'lake_weekend reference': async () => {
+        await act('equipment.save', {label: 'New trailer', kind: 'trailer', length_ft: 26, make_default: true});
+        await book('cf-B12', {card_id: 'card-dana-visa'});
+      },
+      'lake_weekend saved_defaults': async () => book('cf-B14', {}),
+      'free_window reference': async () => { await advance('2027-06-29T17:00:00-07:00'); await cancel('res-0002'); },
+      'free_window cancel_one_rung_late': async () => { await advance('2027-06-29T18:30:00-07:00'); await cancel('res-0002'); },
+      'delayed_drive reference': async () => { await advance('2027-06-18T19:00:00-07:00'); await act('reservations.late_arrival', {reservation_id: 'res-0001'}); },
+      'delayed_drive no_late_notice': async () => advance('2027-06-19T08:00:00-07:00'),
+      'closure reference (no action)': async () => event(require('../examples/scenario.json')),
+      'restriction cancel_on_restriction': async () => { await event(smoke); await cancel('res-0002'); },
+    };
+    const names = Object.keys(anchors);
     for (let i = 0; i < 20; i++) {
-      snap = await infra.call('env.snapshot');
-      const changed = await agent.call('switchback.companions.save', {expected_version: snap.version, request_id: 'cycle-' + i, display_name: 'Guest ' + i});
-      assert.equal(changed.status, 'committed');
-      const dirty = await infra.call('env.snapshot');
-      assert.notEqual(hash(dirty.snapshot), baseline);
-      assert.equal((await infra.call('env.reset', {expected_version: dirty.version})).status, 'ready');
+      const name = names[i % names.length];
+      await anchors[name]();
+      const exported = await infra.call('env.snapshot');
+      assert.ok(hash(exported.snapshot) !== baseline || exported.snapshot.virtual_now !== loaded.virtual_now, name + ' changed state or clock');
+      assert.ok(exported.snapshot.audit.length > 0, name + ' audit exported before reset');
+      assert.equal((await infra.call('env.reset', {expected_version: exported.version})).status, 'ready');
       const clean = (await infra.call('env.snapshot')).snapshot;
-      assert.equal(hash(clean), baseline, 'reset cycle ' + i);
+      assert.equal(hash(clean), baseline, 'reset after ' + name);
       assert.equal(clean.data.notices.length, 0);
     }
-    ok('20 reset cycles restore the loaded state hash', true);
+    ok('20 resets, one after each anchor run with its audit exported first, restore the loaded state hash', true);
     console.log(JSON.stringify({app: 'switchback', baseline_sha256: baseline, passed: results}, null, 2));
   } finally {
     await Promise.allSettled(clients.map(c => c.close()));

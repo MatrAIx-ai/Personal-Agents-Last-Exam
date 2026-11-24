@@ -324,3 +324,35 @@ test('fixture history starts on or after 2025-01-01, and the task clock on or af
   }
   for (const [stamp] of JSON.stringify(require('../examples/scenario.json')).matchAll(/\d{4}-\d{2}-\d{2}/g)) assert.ok(stamp >= '2026-01-01', stamp);  // scenario events are on the task timeline
 });
+
+test('nights before today, facility time, cannot be held or moved to', () => {
+  const f = fixture();  // clock 2027-05-20 09:00 -07:00
+  unchanged(f, () => f.call('cart.hold', {site_id: 'cf-B10', arrival: '2027-05-01', departure: '2027-05-03'}), 'night_in_past');
+  unchanged(f, () => f.call('cart.hold', {site_id: 'cf-B10', arrival: '2027-05-19', departure: '2027-05-21'}), 'night_in_past');
+  f.call('cart.hold', {site_id: 'cf-B10', arrival: '2027-05-20', departure: '2027-05-21'});  // tonight is fine
+  unchanged(f, () => f.call('reservations.modify.preview', {reservation_id: 'res-0001', arrival: '2027-05-10', departure: '2027-05-12'}), 'night_in_past');
+  const g = fixture({now: '2027-05-20T23:30:00-07:00'});  // still the 20th at the facility, already the 21st in UTC
+  g.call('cart.hold', {site_id: 'cf-B10', arrival: '2027-05-20', departure: '2027-05-21'});
+});
+
+test('a closure also cancels a stay already in progress, with a full refund and a notice', () => {
+  const f = fixture();
+  f.event({event_id: 'ci', at: '2027-06-18T16:10:00-07:00', operation: 'switchback.reservation.checked_in', payload: {reservation_id: 'res-0001'}});
+  f.event({event_id: 'cl', at: '2027-06-19T07:00:00-07:00', operation: 'switchback.closure.ordered',
+    payload: {closure_id: 'cl-2', facility_id: 'cedar-flat', site_ids: [], from: '2027-06-19', to: '2027-06-22', reason: 'flash flood warning'}});
+  const r = f.data.reservations.find(x => x.id === 'res-0001');
+  assert.equal(r.state, 'closure_cancelled');
+  assert.equal(f.data.payments.at(-1).amount_cents, r.total_cents);
+  assert.equal(f.data.notices.at(-1).kind, 'closure');
+});
+
+test('computed stamps are in facility time, so dates in notices are local', () => {
+  const f = fixture({now: '2027-05-20T20:30:00-07:00'});  // 03:30 the next day in UTC
+  f.event({event_id: 'cl', at: '2027-05-20T20:30:00-07:00', operation: 'switchback.closure.ordered',
+    payload: {closure_id: 'cl-3', facility_id: 'cedar-flat', site_ids: [], from: '2027-06-15', to: '2027-06-22', reason: 'road washout'}});
+  const pay = f.data.payments.at(-1);
+  assert.equal(pay.posts_at, '2027-05-23T20:30:00-07:00');
+  assert.match(f.data.notices.at(-1).message.data.content.body.text, /Refund posts: 2027-05-23/);
+  const hold = f.call('cart.hold', {site_id: 'cf-B10', arrival: '2027-06-25', departure: '2027-06-26'}).hold;
+  assert.equal(hold.expires_at, '2027-05-20T20:45:00-07:00');
+});

@@ -91,7 +91,9 @@ function nightState(data, s, date, now, {ignoreHold = null, ignoreReservation = 
 }
 
 function requireOpen(data, s, dates, now, options) {
+  const today = localDate(now, offsetOf(data, s));
   for (const date of dates) {
+    if (date < today) fail('night_in_past', `The night of ${date} has already passed.`);
     const state = nightState(data, s, date, now, options);
     if (state === 'unreleased') fail('not_yet_released', `The night of ${date} is not released yet.`);
     if (state === 'closed') fail('site_closed', `The site is closed on ${date}.`);
@@ -117,7 +119,7 @@ function currentRung(data, r, now) {
 
 function nextRungChange(data, r, now) {
   const x = currentRung(data, r, now);
-  return x.ends_at === null ? null : iso(x.ends_at);
+  return x.ends_at === null ? null : iso(x.ends_at, facility(data, r.facility_id).utc_offset);
 }
 
 function cancelRefund(r, rung) {

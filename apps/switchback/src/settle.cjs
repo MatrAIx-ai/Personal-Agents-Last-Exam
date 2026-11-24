@@ -28,7 +28,8 @@ function settle(ctx, data) {
   }
   due.sort((a, b) => a.t - b.t || (a.r || a.p).id.localeCompare((b.r || b.p).id));
   for (const item of due) {
-    const stamp = iso(item.t);
+    const r = item.r || data.reservations.find(x => x.id === item.p.reservation_id);
+    const stamp = iso(item.t, R.facility(data, r.facility_id).utc_offset);
     if (item.kind === 'no_show') {
       item.r.state = 'no_show';
       history(item.r, stamp, 'no_show_released');

@@ -79,6 +79,11 @@ const READS = {
 
 // ---- Shared write helpers ----------------------------------------------------
 
+// Facility offset for a reservation, so computed stamps read in local time.
+function offsetFor(data, reservationId) {
+  return R.facility(data, R.reservation(data, reservationId).facility_id).utc_offset;
+}
+
 function card(data, id) {
   return R.byId(data.wallet.cards, id, 'not_found', 'Card');
 }
@@ -87,7 +92,7 @@ function newHold(ctx, data, {site, arrival, departure, purpose, reservation_id =
   const now = ms(ctx.virtual_now);
   const hold = {id: nextId(data.holds, 'hold'), site_id: site.id, facility_id: site.facility_id,
     arrival, departure, nights: nightList(arrival, departure), purpose, reservation_id,
-    created_at: ctx.virtual_now, expires_at: iso(now + R.HOLD_MINUTES * MINUTE), status: 'active'};
+    created_at: ctx.virtual_now, expires_at: iso(now + R.HOLD_MINUTES * MINUTE, R.offsetOf(data, site)), status: 'active'};
   data.holds.push(hold);
   return hold;
 }
@@ -137,7 +142,7 @@ function usePreview(ctx, data, id, kind) {
 function charge(ctx, data, {reservation_id, card_id, amount_cents, kind = 'charge', reason}) {
   const p = {id: nextId(data.payments, 'pay'), reservation_id, card_id, amount_cents, kind, reason,
     created_at: ctx.virtual_now,
-    posts_at: kind === 'refund' ? iso(ms(ctx.virtual_now) + R.REFUND_DELAY_DAYS * DAY) : ctx.virtual_now,
+    posts_at: kind === 'refund' ? iso(ms(ctx.virtual_now) + R.REFUND_DELAY_DAYS * DAY, offsetFor(data, reservation_id)) : ctx.virtual_now,
     status: kind === 'refund' ? 'pending' : 'posted'};
   data.payments.push(p);
   return p;
@@ -217,7 +222,7 @@ const WRITES = {
     history(r, ctx.virtual_now, 'late_arrival_notice');
     notify(ctx, data, {kind: 'late_arrival', object_type: 'reservation', object_id: r.id,
       title: `Late arrival noted for ${r.id}: site held until 12:00 the next day`,
-      fields: [['Reservation', r.id], ['Arrival', r.arrival], ['Site held until', iso(R.releaseAt(data, r))]]});
+      fields: [['Reservation', r.id], ['Arrival', r.arrival], ['Site held until', iso(R.releaseAt(data, r), f.utc_offset)]]});
     return {reservation: V.reservationView(data, r, now)};
   },
   'reservations.modify.preview'(ctx, data, args, now) {
@@ -236,7 +241,7 @@ const WRITES = {
     const p = previewRecord(ctx, data, {kind: 'modify', reservation_id: r.id, hold_id: hold.id, site_id: s.id,
       arrival: args.arrival, departure: args.departure, nights: dates, nightly_cents: nightly, total_cents: total,
       price_difference_cents: diff, change_fee_cents: fee, charge_cents: Math.max(0, diff) + fee,
-      refund_cents: Math.max(0, -diff), card_id: r.card_id, rung: rung.index + 1}, iso(expires));
+      refund_cents: Math.max(0, -diff), card_id: r.card_id, rung: rung.index + 1}, iso(expires, offsetFor(data, r.id)));
     return {preview: {...copy(p), card: V.cardView(data, card(data, r.card_id), now),
       note: 'Confirming releases the original nights and cannot be undone.'}};
   },
@@ -270,7 +275,7 @@ const WRITES = {
     const rung = R.currentRung(data, r, now), refund = R.cancelRefund(r, rung.rung);
     const expires = Math.min(now + R.HOLD_MINUTES * MINUTE, rung.ends_at === null ? Infinity : rung.ends_at);
     const p = previewRecord(ctx, data, {kind: 'cancel', reservation_id: r.id, rung: rung.index + 1,
-      refund_cents: refund, card_id: r.card_id, next_rung_change_at: R.nextRungChange(data, r, now)}, iso(expires));
+      refund_cents: refund, card_id: r.card_id, next_rung_change_at: R.nextRungChange(data, r, now)}, iso(expires, offsetFor(data, r.id)));
     return {preview: {...copy(p), card: V.cardView(data, card(data, r.card_id), now)}};
   },
   'reservations.cancel.confirm'(ctx, data, args, now) {
@@ -287,7 +292,7 @@ const WRITES = {
       title: `Cancelled: ${r.id}, refund ${money(p.refund_cents)}`,
       fields: [['Reservation', r.id], ['Nights', `${r.arrival} to ${r.departure}`], ['Refund rung', p.rung],
         ['Refund', `${money(p.refund_cents)} to ${R.cardLabel(c)}`],
-        ['Refund posts', p.refund_cents > 0 ? iso(now + R.REFUND_DELAY_DAYS * DAY) : 'no refund']]});
+        ['Refund posts', p.refund_cents > 0 ? iso(now + R.REFUND_DELAY_DAYS * DAY, offsetFor(data, r.id)).slice(0, 10) : 'no refund']]});
     return {reservation: V.reservationView(data, r, now)};
   },
   'wallet.set_default'(ctx, data, args) {

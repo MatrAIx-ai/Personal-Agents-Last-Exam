@@ -1,7 +1,7 @@
 'use strict';
 // Read models. Each function takes data and an instant and returns plain copies.
 const R = require('./rules.cjs');
-const {at, iso, addDays, nights: nightList} = require('./clock.cjs');
+const {at, iso, nights: nightList} = require('./clock.cjs');
 
 const copy = value => structuredClone(value);
 
@@ -17,7 +17,7 @@ function siteSummary(data, s, now) {
 
 function ladder(data, r) {
   return R.rungs(data, r).map(x => ({
-    rung: x.index + 1, ends_at: x.ends_at === null ? null : iso(x.ends_at),
+    rung: x.index + 1, ends_at: x.ends_at === null ? null : iso(x.ends_at, R.facility(data, r.facility_id).utc_offset),
     cancel: copy(x.rung.cancel), change: copy(x.rung.change),
   }));
 }
@@ -33,7 +33,7 @@ function reservationView(data, r, now) {
   const out = copy(r);
   out.state = state;
   out.affected_by_alerts = R.LIVE.has(state) ? R.affectedBy(data, r, now) : [];
-  out.release_at = iso(R.releaseAt(data, r));
+  out.release_at = iso(R.releaseAt(data, r), R.facility(data, r.facility_id).utc_offset);
   out.ladder = ladder(data, r);
   if (R.LIVE.has(state)) {
     const rung = R.currentRung(data, r, now);
@@ -78,4 +78,4 @@ function policyText(data, f) {
   };
 }
 
-module.exports = {copy, siteSummary, ladder, cardView, reservationView, nightsFor, facilityView, policyText, at, addDays};
+module.exports = {copy, siteSummary, ladder, cardView, reservationView, nightsFor, facilityView, policyText, at};

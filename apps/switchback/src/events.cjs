@@ -76,13 +76,15 @@ const HANDLERS = {
       reason: p.reason, ordered_at: ctx.virtual_now};
     data.closures.push(closure);
     for (const r of data.reservations) {
-      if (R.currentState(data, r, now) !== 'confirmed') continue;
+      // The approved rule: a closure covering any night cancels the whole stay with a
+      // full refund, whether the stay has started (checked_in) or not.
+      if (!R.LIVE.has(R.currentState(data, r, now))) continue;
       const s = R.site(data, r.site_id);
       if (!r.nights.some(d => R.closureFor(data, s, d) === closure)) continue;
       r.state = 'closure_cancelled';
       history(r, ctx.virtual_now, 'closure_cancelled', {closure_id: closure.id});
       const pay = {id: nextId(data.payments, 'pay'), reservation_id: r.id, card_id: r.card_id, amount_cents: r.total_cents,
-        kind: 'refund', reason: 'closure', created_at: ctx.virtual_now, posts_at: iso(now + R.REFUND_DELAY_DAYS * DAY), status: 'pending'};
+        kind: 'refund', reason: 'closure', created_at: ctx.virtual_now, posts_at: iso(now + R.REFUND_DELAY_DAYS * DAY, f.utc_offset), status: 'pending'};
       data.payments.push(pay);
       const c = data.wallet.cards.find(x => x.id === r.card_id);
       notify(ctx, data, {kind: 'closure', object_type: 'reservation', object_id: r.id,
