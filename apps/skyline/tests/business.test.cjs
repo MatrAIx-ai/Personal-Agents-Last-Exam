@@ -95,6 +95,18 @@ test('search finds nonstop and one-stop options by the local date of the first d
   assert.throws(() => f.call('skyline.search', {origin:'ORD', dest:'ORD', date:'2027-10-14', cabin:'business', pax:1}), code('invalid_arguments'));
 });
 
+test('a chart row naming an operating carrier prices itineraries that fly it', () => {
+  const f = fixture();
+  const data = f.data;
+  data.award_chart.push({origin:'HND', dest:'ORD', cabin:'business', points:87500, partner_fee_cents:3900, taxes_cents:4620, operating_carrier:'Lakeshore Air'});
+  f.load(data);
+  // PC12 + LK480 has a Lakeshore Air segment, so the carrier row applies; a Pacific Crest-only itinerary keeps the plain row.
+  assert.equal(search(f, {})[0].per_passenger.points, 87500);
+  assert.equal(f.call('skyline.search', {origin:'ORD', dest:'HND', date:'2027-10-14', cabin:'business', pax:2}).options[0].per_passenger.points, 75000);
+  const dup = f.data; dup.award_chart.push({...dup.award_chart.at(-1), points:90000});
+  assert.throws(() => plugin.validateSeed(f.ctx, dup), /award chart row/);
+});
+
 test('search drops itineraries where a segment has fewer saver seats than passengers', () => {
   const f = fixture();
   const hndSfo = pax => f.call('skyline.search', {origin:'HND', dest:'SFO', date:'2027-10-19', cabin:'business', pax}).options;

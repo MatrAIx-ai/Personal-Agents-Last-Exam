@@ -46,7 +46,7 @@ function validateSeed(ctx, data) {
   if (data.airports.some(a => !validTimeZone(a.timezone))) bad('Airport time zone is not a valid IANA zone.');
   const airport = code => data.airports.find(a => a.code === code) || bad('Unknown airport ' + code + '.');
   if (data.rules.min_connection_minutes > data.rules.max_connection_minutes) bad('Connection limits are reversed.');
-  unique(data.award_chart.map(r => [r.origin, r.dest, r.cabin].join('|')), 'award chart row');
+  unique(data.award_chart.map(r => [r.origin, r.dest, r.cabin, r.operating_carrier ?? ''].join('|')), 'award chart row');
   for (const r of data.award_chart) { airport(r.origin); airport(r.dest); if (r.origin === r.dest) bad('Award chart row has one airport.'); }
 
   unique(data.flights.map(f => f.id), 'flight ID');

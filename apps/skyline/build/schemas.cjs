@@ -41,7 +41,9 @@ const NOTICE = object({id:ID, created_at:DT, updated_at:DT, history:HISTORY, kin
 const PASSENGER = object({id:ID, person_id:ID, name:{...text(1, 120), description:'Name as on the ticket.'}});
 const AIRPORT = object({code:CODE, city:text(1, 80), timezone:{...text(1, 64), description:'IANA time zone of the airport.'}});
 const CHART_ROW = object({origin:CODE, dest:CODE, cabin:CABIN, points:{type:'integer', minimum:1, maximum:10000000},
-  partner_fee_cents:CENTS, taxes_cents:CENTS});
+  partner_fee_cents:CENTS, taxes_cents:CENTS,
+  operating_carrier:{...text(1, 80), description:'Optional. This row prices any itinerary with a segment operated by this carrier; otherwise the row without a carrier applies.'}},
+  ['origin', 'dest', 'cabin', 'points', 'partner_fee_cents', 'taxes_cents']);
 const RULES = object({min_connection_minutes:{type:'integer', minimum:0, maximum:1440}, max_connection_minutes:{type:'integer', minimum:1, maximum:2880}});
 const CABIN_MAP = object({
   saver_seats:{type:'integer', minimum:0, maximum:500, description:'Award (saver) seats left for sale. Never more than the free seats.'},

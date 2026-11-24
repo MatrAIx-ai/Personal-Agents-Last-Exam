@@ -28,13 +28,18 @@ function connections(data, flights) {
 }
 const legal = (data, flights) => connections(data, flights).every(x => x.legal);
 
-const chartRow = (data, origin, dest, cabin) => data.award_chart.find(r => r.origin === origin && r.dest === dest && r.cabin === cabin);
+// A row naming an operating carrier prices any itinerary with a segment that carrier operates (first such row in chart
+// order); otherwise the row for the endpoints and cabin without a carrier applies.
+function chartRow(data, path, cabin) {
+  const rows = data.award_chart.filter(r => r.origin === path[0].origin && r.dest === path.at(-1).dest && r.cabin === cabin);
+  return rows.find(r => r.operating_carrier && path.some(f => f.operating_carrier === r.operating_carrier)) || rows.find(r => !r.operating_carrier);
+}
 const optionId = (flightIds, cabin, pax, revision) =>
   'opt-' + crypto.createHash('sha256').update(JSON.stringify([flightIds, cabin, pax, revision])).digest('hex').slice(0, 16);
 
 // Every bookable itinerary at `now`: a nonstop or a one-stop with a legal connection, first flight
 // not yet departed, the cabin on every segment with at least pax saver seats, and a chart price
-// for its endpoints (a connection is priced by its endpoints).
+// for its endpoints (a connection is priced by its endpoints and, where the chart says so, its operating carrier).
 function itineraries(data, now, cabin, pax) {
   const open = f => f.cabins[cabin] && f.cabins[cabin].saver_seats >= pax;
   const paths = [];
@@ -43,7 +48,7 @@ function itineraries(data, now, cabin, pax) {
     paths.push([f]);
     for (const g of data.flights) if (g !== f && g.origin === f.dest && g.dest !== f.origin && open(g) && legal(data, [f, g])) paths.push([f, g]);
   }
-  return paths.filter(p => chartRow(data, p[0].origin, p.at(-1).dest, cabin));
+  return paths.filter(p => chartRow(data, p, cabin));
 }
 
 function segmentView(f, cabin) {
@@ -54,7 +59,7 @@ function segmentView(f, cabin) {
 }
 
 function option(data, path, cabin, pax) {
-  const row = chartRow(data, path[0].origin, path.at(-1).dest, cabin);
+  const row = chartRow(data, path, cabin);
   const each = {points:row.points, partner_fee_cents:row.partner_fee_cents, taxes_cents:row.taxes_cents};
   return {option_id:optionId(path.map(f => f.id), cabin, pax, data.inventory_revision), cabin, pax,
     origin:path[0].origin, dest:path.at(-1).dest, segments:path.map(f => segmentView(f, cabin)),
