@@ -1,0 +1,45 @@
+{
+  "schema_version": "pale.gui.v1",
+  "status": "declared",
+  "surface_id": "delivery-web",
+  "audience": [
+    "agent"
+  ],
+  "state_connection": {
+    "app_ids": [
+      "delivery"
+    ],
+    "adapter": "pale.mcp_bridge",
+    "authoritative_state": "app_runtime"
+  },
+  "routes": [
+    {
+      "route_id": "main",
+      "path": "/",
+      "asset_bindings": [
+        {
+          "slot": "header.logo",
+          "asset_id": "delivery-logo",
+          "required": false
+        },
+        {
+          "slot": "product-card.image",
+          "asset_id": "product-drink",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "content_policy": {
+    "untrusted_html": "text_only",
+    "svg": "disabled",
+    "remote_fetch": "disabled",
+    "remote_allowlist": [],
+    "missing_asset_behavior": "placeholder"
+  },
+  "observation": {
+    "mechanism": "screen_observation",
+    "payload_policy": "visible_surface_only"
+  },
+  "extensions": []
+}
