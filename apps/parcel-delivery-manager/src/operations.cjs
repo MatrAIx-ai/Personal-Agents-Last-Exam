@@ -31,6 +31,10 @@ const READS = {
     const {id, ...input} = args, e = ch.evaluate(ctx, data, shipment, input);
     return {preview: {allowed: e.allowed, reason: e.reason, summary: e.summary, confirmation: e.confirmation, current_plan: copy(shipment.plan), proposed_plan: e.target}};
   },
+  // Only the acting person's own address book; a collector never sees the recipient's.
+  'addresses.list'(ctx, data) {
+    return {items: data.addresses.filter(a => a.person_id === data.owner_person_id).map(({person_id, ...address}) => copy(address))};
+  },
   'points.list'(ctx, data, args) {
     const query = (args.query || '').toLocaleLowerCase();
     const items = data.pickup_points.map(p => v.pointView(ctx, p))

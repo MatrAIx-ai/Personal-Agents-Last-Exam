@@ -97,7 +97,8 @@ test('W3 a grant gives the collector one parcel\'s pickup details and their own 
     () => d.call('pass.get', {id: 'S001'})
   ]) rejects(d, call, 'not_found');
   assert.equal(d.call('changes.list').items.length, 0);
-  assert.equal(d.call('collectors.list').items.length, 0, 'The recipient\'s address book is not shared');
+  assert.equal(d.call('collectors.list').items.length, 0, 'The recipient\'s collectors are not shared');
+  assert.deepEqual(d.call('addresses.list').items.map(a => a.id), ['addr-alex-home'], 'Only the collector\'s own addresses');
   assert.deepEqual(d.data, before);
 });
 

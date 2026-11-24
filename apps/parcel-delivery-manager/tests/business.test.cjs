@@ -10,6 +10,26 @@ test('generated contracts match their source definitions', () => {
   assert.deepEqual(build.build({check: true}), []);
 });
 
+test('Web App declaration, registry and controller are consistent with the package', () => {
+  const fs = require('node:fs'), path = require('node:path'), root = path.resolve(__dirname, '..');
+  const manifest = require('../app.json'), tools = require('../tools.json'), registry = require('../web.registry.json');
+  const web = require('../contribution/gui.json').extensions.find(e => e.namespace === 'pale.web').data;
+  assert.equal(require('../contribution/contribution.json').gui_ref, 'gui.json');
+  assert.deepEqual([web.page, web.controller, web.host, web.status], ['gui/index.html', 'gui/src/app.js', 'runtime/web/server.cjs', 'implemented']);
+  for (const file of [web.page, web.controller]) assert.ok(fs.existsSync(path.join(root, file)), file);
+  // The package-local registry starts the shared Web Host on this package at the fixture clock.
+  assert.deepEqual(registry.apps, [{app_id: manifest.app_id, version: manifest.version, path: '.'}]);
+  assert.equal(registry.initial_time, require('../fixtures/clock.json').initial_time);
+  const controller = fs.readFileSync(path.join(root, web.controller), 'utf8');
+  for (const tool of tools) assert.ok(controller.includes("'" + tool.name + "'"), 'Controller uses ' + tool.name);
+  // The Host allows no inline script or style; the controller builds text nodes only.
+  assert.doesNotMatch(controller, /innerHTML|outerHTML|insertAdjacentHTML|document\.write|\beval\(|style\s*[:=]/);
+  assert.doesNotMatch(controller, /Date\.now|new Date\(\)/, 'The page never uses the browser clock for business state');
+  const policies = require('../fixtures/policies.json');
+  assert.deepEqual(policies.sandbox.allow.slice().sort(), tools.map(t => t.name).sort());
+  assert.deepEqual(policies.scenario.allow.slice().sort(), tools.filter(t => t.read_only).map(t => t.name).sort());
+});
+
 test('fixture loads and reads are side-effect free', () => {
   const f = fixture(), before = f.data;
   const list = f.call('shipments.list').items;
@@ -18,6 +38,8 @@ test('fixture loads and reads are side-effect free', () => {
   assert.equal(f.call('points.list', {accessible_only: true}).items.length, 2);
   assert.equal(f.call('changes.list', {shipment_id: 'S002'}).items[0].status, 'applied');
   assert.equal(f.call('collectors.list').items[0].name, 'Alex Rivera');
+  assert.deepEqual(f.call('addresses.list').items.map(a => [a.id, a.label, a.verified, a.delivery_restricted]),
+    [['addr-maya-home', 'Home', true, false], ['addr-maya-work', 'Studio', true, false], ['addr-maya-pobox', 'Mail box', true, true], ['addr-maya-cottage', 'Cottage', false, false]]);
   assert.equal(f.call('pass.get', {id: 'S002'}).pass.code, 'K7QM-4R2X');
   assert.equal(f.call('notices.list').items.length, 1);
   assert.deepEqual(f.data, before);
@@ -34,6 +56,7 @@ test('unknown and foreign parcels are indistinguishable', () => {
   rejects(f, () => f.call('change.cancel', {id: 'C001'}), 'not_found');
   assert.equal(f.call('notices.list').items.length, 0);
   assert.equal(f.call('changes.list').items.length, 0);
+  assert.equal(f.call('addresses.list').items.length, 0, 'Another person\'s addresses are never listed');
 });
 
 test('pickup deadline is evaluated at the committed clock without writing state', () => {

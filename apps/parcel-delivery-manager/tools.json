@@ -1198,6 +1198,135 @@
     }
   },
   {
+    "name": "parcel-delivery-manager.addresses.list",
+    "description": "List this person's own saved delivery addresses with their label and whether each is verified or restricted for delivery. Address IDs returned by options.get refer to these. Read-only.",
+    "read_only": true,
+    "scope": "parcel-delivery-manager.addresses.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "parcel-delivery-manager"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "recipient_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "line1": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "line2": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "city": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "region": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "postal_code": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20
+              },
+              "country": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2
+              },
+              "verified": {
+                "type": "boolean"
+              },
+              "delivery_restricted": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "recipient_name",
+              "line1",
+              "line2",
+              "city",
+              "region",
+              "postal_code",
+              "country",
+              "verified",
+              "delivery_restricted"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
     "name": "parcel-delivery-manager.points.list",
     "description": "Search the pickup-point directory with hours, accessibility and current status. Read-only.",
     "read_only": true,

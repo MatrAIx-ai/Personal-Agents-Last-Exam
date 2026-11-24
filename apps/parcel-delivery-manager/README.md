@@ -2,7 +2,7 @@
 
 Recipient-facing parcel management for a fictional carrier, built as a PALE App package (version 0.1.0, Core API 1.2.0, public runtime 1.6.0). It covers changing home delivery, redirecting to a pickup point, authorizing another collector, and recovering from failed deliveries or expiring pickups. Approved design: [proposals/environment/parcel-delivery-management.md](../../proposals/environment/parcel-delivery-management.md) (PR MatrAIx-ai/Personal-Agents-Last-Exam#101).
 
-> **Status: in progress.** The four workflows W1–W4 are implemented as Agent MCP tools and trusted events, with App-only tests and a real-MCP check. Still to do: the Web App on the shared Web Host, the full fixture catalog with eight seed scenarios, Agent trials and independent reproduction. `app.json` declares `ui: none` until the Web App is delivered.
+> **Status: in progress.** The four workflows W1–W4 are implemented as Agent MCP tools, trusted events and a business Web App on the shared Web Host, with App-only tests, a real-MCP check and browser acceptance. Still to do: the full fixture catalog with eight seed scenarios, the validation report, Agent trials and independent reproduction.
 
 ## Run locally
 
@@ -21,18 +21,29 @@ npm run app:verify -- --app apps/parcel-delivery-manager --output .artifacts/par
 node apps/parcel-delivery-manager/tests/mcp/workflows.cjs .artifacts/parcel-mcp-workflows.json
 ```
 
-`tests/mcp/workflows.cjs` is the only script that needs the runtime (repository checkout or `PALE_RUNTIME_ROOT`). It covers permissions, retries, stale versions, clock-only advances, separate runs for the collector and an unauthorized person, reset from a seed with a pending request and a live grant, returns, and two collectors racing for one parcel.
+`tests/mcp/workflows.cjs` needs the runtime (repository checkout or `PALE_RUNTIME_ROOT`). It covers permissions, retries, stale versions, clock-only advances, separate runs for the collector and an unauthorized person, reset from a seed with a pending request and a live grant, returns, repeated arrivals, collection exactly at the deadline, and two collectors racing for one parcel.
+
+## Web App
+
+The business page is served by the shared Web Host; this package supplies only `gui/index.html` and `gui/src/app.js`, declared with the `pale.web` extension in `contribution/gui.json`. From the repository root:
+
+```sh
+node runtime/web/server.cjs --app parcel-delivery-manager --registry apps/parcel-delivery-manager/web.registry.json --run web-demo --profile sandbox
+node apps/parcel-delivery-manager/tests/web/acceptance.cjs .artifacts/parcel-web   # browser acceptance; needs Playwright
+```
+
+`web.registry.json` lists only this package, so the root `apps.registry.json` is unchanged. The page and MCP use the same App state. See [gui/README.md](gui/README.md) for the six views, behaviour and limits.
 
 ## Workflows
 
 | Workflow | Agent tools | Trusted events | Tests |
 | --- | --- | --- | --- |
-| W1 Change home delivery | `options.get`, `change.preview`, `change.submit`, `change.cancel`, `changes.list` | `change_resolved`, `transit_update`, `delivered`, `deadline_reached` (`hold_end`) | `tests/w1-home-delivery.test.cjs` |
+| W1 Change home delivery | `options.get`, `addresses.list`, `change.preview`, `change.submit`, `change.cancel`, `changes.list` | `change_resolved`, `transit_update`, `delivered`, `deadline_reached` (`hold_end`) | `tests/w1-home-delivery.test.cjs` |
 | W2 Redirect to a pickup point | the W1 tools plus `points.list`, `pass.get` | `pickup_ready`, `point_status`, `relocated`, `collected` | `tests/w2-pickup.test.cjs` |
 | W3 Authorize another collector | `collectors.list`, `grant.preview`, `grant.create`, `grant.revoke`, `grants.list`, `pass.get` | `collected` | `tests/w3-delegation.test.cjs` |
 | W4 Recover from failure or expiry | the W1–W3 tools after a failure or closure | `delivery_failed`, `point_status`, `deadline_reached` (`failure_action`, `pickup`), `return_completed` | `tests/w4-recovery.test.cjs` |
 
-Tool names are prefixed with `parcel-delivery-manager.` and event operations with `carrier.`. `shipments.list`, `shipments.get` and `notices.list` serve every workflow.
+Tool names are prefixed with `parcel-delivery-manager.` and event operations with `carrier.`. `shipments.list`, `shipments.get` and `notices.list` serve every workflow. Every workflow is available both through MCP and in the Web App.
 
 - **Changes** are preview, then submit with the returned `confirmation`, then a carrier decision event. A submitted request is `pending` and changes nothing. Only an `applied` decision replaces the delivery plan and increments `plan.revision`. Each parcel has one effective plan and at most one pending request.
 - **Pickup.** Arrival (`pickup_ready`) starts the next pickup epoch, sets its deadline once and issues the recipient's own pass. A repeated arrival cannot extend the deadline. Leaving a pickup arrangement (plan change, relocation, return or handoff) ends its readiness and every pass and authorization issued for it.

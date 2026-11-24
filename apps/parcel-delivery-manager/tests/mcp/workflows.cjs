@@ -102,6 +102,12 @@ const T = name => APP + '.' + name;
     const gap = await agent.call(T('change.preview'), {id: 'S002', kind: 'redirect', point_id: 'P03'});
     check('Changes are refused after the deadline passes by the clock', gap.preview.allowed === false && gap.preview.reason === 'deadline_passed');
     check('Parcel status is unchanged in the gap', (await agent.call(T('shipments.get'), {id: 'S002'})).shipment.status === 'at_pickup');
+    const gapGrant = await agent.call(T('grant.preview'), {id: 'S002', collector_person_id: 'person-alex', expires_at: '2026-03-04T18:00:00Z'});
+    check('Authorizing a collector is refused after the deadline passes by the clock', gapGrant.preview.allowed === false && gapGrant.preview.reason === 'deadline_passed');
+    const forcedGrant = await agent.call(T('grant.create'), {id: 'S002', collector_person_id: 'person-alex', expires_at: '2026-03-04T18:00:00Z', confirmation: 'cf-guess',
+      expected_version: gapGrant.version, request_id: 'gap-grant'});
+    check('Creating an authorization in the gap fails with deadline_passed and writes nothing', forcedGrant.status === 'deadline_passed' &&
+      (await infra.call('env.snapshot')).snapshot.data.grants.length === 0);
 
     // ---- Reset restores the loaded baseline, including credentials and clock ----
     const reset = await infra.call('env.reset', {expected_version: snap.version});
@@ -176,6 +182,10 @@ const T = name => APP + '.' + name;
     const cancelled = await agent.call(T('change.cancel'), {id: pendingChange.change_id, expected_version: revoked.version, request_id: 'w3-cancel'});
     check('Recipient withdraws the pending request', cancelled.status === 'committed');
     snap = await infra.call('env.snapshot');
+    const lateApproval = await infra.call('env.apply_event', {expected_version: snap.version,
+      event: event('change_resolved', '2026-03-02T16:00:00Z', {shipment_id: 'S001', change_id: pendingChange.change_id, base_plan_revision: 1, decision: 'applied', reason: null})});
+    const afterLate = (await infra.call('env.snapshot')).snapshot.data.shipments.find(x => x.id === 'S001').plan;
+    check('Cancel first: a later carrier approval cannot apply', lateApproval.status === 'invalid_event' && afterLate.revision === 1 && afterLate.mode === 'home');
     const tooEarly = await infra.call('env.apply_event', {expected_version: snap.version, event: event('deadline_reached', '2026-03-04T14:59:59Z', {shipment_id: 'S002', deadline: 'pickup'})});
     check('Deadline event before the deadline is rejected', tooEarly.status === 'invalid_event');
     const expiry = await infra.call('env.apply_event', {expected_version: snap.version, event: event('deadline_reached', '2026-03-04T15:00:00Z', {shipment_id: 'S002', deadline: 'pickup'})});
@@ -228,6 +238,24 @@ const T = name => APP + '.' + name;
     const p3 = await agent.call(T('change.preview'), {id: 'S003', kind: 'redirect', point_id: 'P03'});
     const inside = await agent.call(T('change.submit'), {id: 'S003', kind: 'redirect', point_id: 'P03', confirmation: p3.preview.confirmation, expected_version: p3.version, request_id: 'constrained-2'});
     check('Write on the permitted parcel commits', inside.status === 'committed');
+
+    // ---- Arrival sets the deadline once; collection exactly at the deadline fails ----
+    const apply = async e => infra.call('env.apply_event', {expected_version: (await infra.call('env.snapshot')).version, event: e});
+    check('Carrier applies the redirect', (await apply(event('change_resolved', '2026-03-03T15:10:00Z',
+      {shipment_id: 'S003', change_id: inside.change_id, base_plan_revision: 1, decision: 'applied', reason: null}))).status === 'committed');
+    const arrival = (at, pickup_epoch) => event('pickup_ready', at, {shipment_id: 'S003', plan_revision: 2, point_id: 'P03', pickup_epoch});
+    check('Arrival makes the parcel ready', (await apply(arrival('2026-03-03T16:00:00Z', 1))).status === 'committed');
+    const readyParcel = async () => (await infra.call('env.snapshot')).snapshot.data.shipments.find(x => x.id === 'S003');
+    const firstDeadline = (await readyParcel()).pickup.deadline;
+    check('Deadline is the arrival time plus the policy window', firstDeadline === '2026-03-05T16:00:00.000Z');
+    const repeats = [await apply(arrival('2026-03-04T16:00:00Z', 1)), await apply(arrival('2026-03-04T16:00:00Z', 2))];
+    check('A repeated arrival, with either epoch, is rejected', repeats.every(r => r.status === 'invalid_event'));
+    check('The pickup deadline was not extended', (await readyParcel()).pickup.deadline === firstDeadline && (await readyParcel()).pickup.epoch === 1);
+    const ownPass = (await infra.call('env.snapshot')).snapshot.data.passes.find(p => p.shipment_id === 'S003' && p.status === 'active');
+    const take = at => event('collected', at, {shipment_id: 'S003', point_id: 'P03', pickup_epoch: 1, collector_person_id: 'person-maya', pass_code: ownPass.code});
+    const atDeadline = await apply(take('2026-03-05T16:00:00Z')); // Thursday 11:00 local: the point is open, only the deadline blocks it
+    check('Collection exactly at the deadline fails', atDeadline.status === 'invalid_event' && /deadline/.test(atDeadline.message) && (await readyParcel()).status === 'at_pickup');
+    check('Collection one second before the deadline succeeds', (await apply(take('2026-03-05T15:59:59Z'))).status === 'committed' && (await readyParcel()).status === 'collected');
 
     report.passed = true;
   } catch (e) {
