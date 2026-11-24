@@ -1,0 +1,167 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "name": "personal-records",
+  "version": "1.0.0",
+  "description": "Personal document management and verifiable intelligence environment",
+  "tools": [
+    {
+      "name": "records.upload_document",
+      "description": "Directly upload a digital document (PDF, PNG, JPEG, TXT). Enforces SHA-256 deduplication and initiates version 1.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Human-readable document title" },
+          "content_bytes": { "type": "string", "description": "Base64-encoded raw file bytes" },
+          "mime_type": {
+            "type": "string",
+            "enum": ["application/pdf", "image/png", "image/jpeg", "text/plain", "application/octet-stream"],
+            "description": "Standard MIME type"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["tax", "employment", "insurance", "property", "utilities", "healthcare", "banking", "legal", "other"],
+            "description": "Primary domain classification"
+          },
+          "tags": { "type": "array", "items": { "type": "string" }, "description": "Searchable tags" },
+          "valid_until": { "type": "string", "format": "date-time", "description": "Document expiry or renewal ISO 8601 timestamp" },
+          "idempotency_key": { "type": "string", "description": "Unique key to ensure idempotent replay" }
+        },
+        "required": ["title", "content_bytes", "mime_type"]
+      }
+    },
+    {
+      "name": "records.import_from_source",
+      "description": "Import a document from connected apps (Mail attachments or Files) via public read contracts.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "source_app": { "type": "string", "enum": ["mail", "files"] },
+          "title": { "type": "string", "description": "Document title in Records" },
+          "mail_params": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Mail message ID" },
+              "asset_id": { "type": "string", "description": "Attachment asset ID" }
+            },
+            "required": ["id", "asset_id"]
+          },
+          "files_params": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Files file ID" },
+              "number": { "type": "integer", "description": "Optional version number" }
+            },
+            "required": ["id"]
+          },
+          "category": { "type": "string" },
+          "idempotency_key": { "type": "string" }
+        },
+        "required": ["source_app", "title"]
+      }
+    },
+    {
+      "name": "records.create_version",
+      "description": "Upload a new version for an existing document. Increments version_number and triggers citation invalidation checks.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "document_id": { "type": "string", "description": "Target document ID" },
+          "content_bytes": { "type": "string", "description": "Base64-encoded raw file bytes" },
+          "mime_type": { "type": "string" },
+          "change_summary": { "type": "string", "description": "Reason for the version update" },
+          "expected_parent_version": { "type": "integer", "description": "Optimistic lock check against current version" }
+        },
+        "required": ["document_id", "content_bytes", "mime_type"]
+      }
+    },
+    {
+      "name": "records.get_document",
+      "description": "Retrieve document metadata, version history, and extracted text/passages. Non-mutating.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "document_id": { "type": "string", "description": "Target document ID" },
+          "version_number": { "type": "integer", "description": "Specific version (defaults to latest if omitted)" },
+          "include_extracted_text": { "type": "boolean", "default": true },
+          "include_claims": { "type": "boolean", "default": false }
+        },
+        "required": ["document_id"]
+      }
+    },
+    {
+      "name": "records.search",
+      "description": "Full-text (FTS5) and metadata search across document titles, tags, and extracted text. Non-mutating.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "SQLite FTS5 query string" },
+          "category": { "type": "string" },
+          "verification_state": { "type": "string", "enum": ["INFERRED", "USER_CONFIRMED", "SUPERSEDED"] },
+          "valid_before": { "type": "string", "format": "date-time" },
+          "valid_after": { "type": "string", "format": "date-time" },
+          "limit": { "type": "integer", "default": 20, "maximum": 50 },
+          "offset": { "type": "integer", "default": 0 }
+        }
+      }
+    },
+    {
+      "name": "records.link_documents",
+      "description": "Create a directed relationship link between two documents (e.g. 'supersedes', 'receipt_for', 'tax_supporting_document').",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "source_id": { "type": "string", "description": "Origin document ID" },
+          "target_id": { "type": "string", "description": "Destination document ID" },
+          "relationship_type": { "type": "string", "description": "Open relationship identifier string" },
+          "metadata": { "type": "object", "description": "Optional arbitrary link attributes" }
+        },
+        "required": ["source_id", "target_id", "relationship_type"]
+      }
+    },
+    {
+      "name": "records.create_evidence_claim",
+      "description": "Bind a factual statement to a precise text span anchored to a specific document version and extraction revision.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "document_id": { "type": "string" },
+          "version_number": { "type": "integer" },
+          "extraction_revision": { "type": "string" },
+          "start_offset": { "type": "integer", "minimum": 0 },
+          "end_offset": { "type": "integer", "minimum": 0 },
+          "cited_text": { "type": "string", "description": "Exact text substring between offsets" },
+          "claim_text": { "type": "string", "description": "Factual claim or assertion supported by cited text" }
+        },
+        "required": ["document_id", "version_number", "extraction_revision", "start_offset", "end_offset", "cited_text", "claim_text"]
+      }
+    },
+    {
+      "name": "records.propose_update",
+      "description": "Agent tool: Propose a high-consequence update (metadata edit, deletion, or confirmed record mutation) pending human review.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "target_type": { "type": "string", "enum": ["document_metadata", "link", "claim", "document_version"] },
+          "target_id": { "type": "string" },
+          "expected_version": { "type": "integer" },
+          "proposed_changes": { "type": "object", "description": "Key-value changes requested" },
+          "rationale": { "type": "string", "description": "Explanation presented to user" }
+        },
+        "required": ["target_type", "target_id", "proposed_changes", "rationale"]
+      }
+    },
+    {
+      "name": "records.confirm_update",
+      "description": "User-only tool: Approve or reject a pending proposal. Requires authenticated user session token; agents are rejected.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "proposal_id": { "type": "string" },
+          "decision": { "type": "string", "enum": ["APPROVE", "REJECT"] },
+          "rejection_reason": { "type": "string" }
+        },
+        "required": ["proposal_id", "decision"]
+      }
+    }
+  ]
+}

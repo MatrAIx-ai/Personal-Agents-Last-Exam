@@ -1,0 +1,29 @@
+{
+  "scenario_id": "tax_and_employment_audit",
+  "account_id": "acc_user_123",
+  "documents": [
+    {
+      "fixture_id": "fix_payslip_nov",
+      "title": "Payslip November 2026",
+      "category": "employment",
+      "mime_type": "text/plain",
+      "content_text": "ACME Corporation. Gross Pay: $5,000.00. Federal Tax: $750.00. Net Pay: $4,250.00.",
+      "tags": ["salary", "payslip"]
+    },
+    {
+      "fixture_id": "fix_contract",
+      "title": "Employment Contract",
+      "category": "employment",
+      "mime_type": "text/plain",
+      "content_text": "Employment Agreement between ACME Corporation and User. Base salary: $60,000 annually.",
+      "tags": ["contract", "legal"]
+    }
+  ],
+  "links": [
+    {
+      "source_ref": "fix_payslip_nov",
+      "target_ref": "fix_contract",
+      "relationship_type": "receipt_for"
+    }
+  ]
+}
