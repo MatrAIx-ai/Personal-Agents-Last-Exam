@@ -8,7 +8,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**188 open non-draft proposals · 0 awaiting initial review · 5 drafts.**
+**188 open non-draft proposals · 0 awaiting initial review · 6 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
@@ -25,10 +25,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🏗️ Environment Track
 
-**104 proposals.**
+**105 proposals.**
 
 | Submitted (UTC) | PR / app or website | Primary domain | Scope and app connections | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-24 23:05:00 | [#242](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/242) · Google Account Security and Gmail forwarding settings; workflow references only, not runtime dependencies or copied…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/242/files) | Work &amp; business | Build Gatehouse, a standalone synthetic business-account security center with an Agent-facing MCP interface and a Web interface over the same state. Reusable workflows include reviewing sign-in activity, inspecting and selectively revoking… | Draft | Awaiting review |  | [XinyiXiang](https://github.com/XinyiXiang) |  |
 | 2026-11-24 22:02:23 | [#240](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/240) · LookBoard is an independently branded synthetic visual-discovery, room/wardrobe moodboard, and constraint-aware…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/240/files) | Shopping &amp; groceries<br>Also: Home &amp; utilities | LookBoard lets a personal agent search a visual catalog of home-decor, furniture, and everyday-wear items using both structured constraints (exact width/depth/height dimensions, washability, pet/allergy-safe materials, price ceiling) and… | Draft | Awaiting review |  | [Aria068](https://github.com/Aria068) |  |
 | 2026-11-24 22:02:19 | [#239](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/239) · CutRoom is an independently branded synthetic video-creator workspace combining editing review, multimodal B-roll/audio…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/239/files) | Media &amp; entertainment<br>Also: Work &amp; business | CutRoom lets a personal agent manage a creator's video projects from rough cut to release: search B-roll shots, storyboard keyframe strips, transcripts, and background music tracks by visual/mood tags and commercial-license scope; inspect… | Design review | Review requested<br>@Chenngzz |  | [Aria068](https://github.com/Aria068) |  |
 | 2026-11-24 22:02:13 | [#238](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/238) · ReelPulse is an independently branded synthetic visual social-media and short-form creator platform seen from one…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/238/files) | Social &amp; communities<br>Also: Media &amp; entertainment | ReelPulse lets a personal agent manage a user's visual social posts (photo carousels and short-video cover frames stored as synthetic \`ctx.assets\` PNGs), enforce audience-scoped privacy circles (\`draft\`, \`close\_friends\`, \`subscribers\`… | Design review | Review requested<br>@Chenngzz |  | [Aria068](https://github.com/Aria068) |  |
