@@ -1,0 +1,44 @@
+{
+  "about": "Hand-written expected visibility for a small fixture: one group with both privacy flags on, every role and membership state, every audience. Written from the rules on the help page, before the visibility function. tests/business.test.cjs expands `fixture` into a full seed and compares canSee, canSeeGuests and canSeeDirectory against `expected`.",
+  "fixture": {
+    "group": {"id": "g-test", "hide_from_member_list": true, "hide_rsvps": true},
+    "members": [
+      {"id": "m-001", "state": "member", "role": "organizer", "note": "the user"},
+      {"id": "m-002", "state": "member", "role": "co_organizer"},
+      {"id": "m-003", "state": "member", "role": "event_host", "note": "hosts e-0001"},
+      {"id": "m-004", "state": "member", "role": "member", "note": "RSVP yes"},
+      {"id": "m-005", "state": "member", "role": "member", "note": "RSVP waitlist"},
+      {"id": "m-006", "state": "member", "role": "member", "note": "RSVP no"},
+      {"id": "m-007", "state": "pending", "role": "member"},
+      {"id": "m-008", "state": "left", "role": "member"},
+      {"id": "m-009", "state": "removed", "role": "member"},
+      {"id": "m-010", "state": "declined", "role": "member"},
+      {"id": "m-011", "state": "member", "role": "member", "note": "RSVP needs_reconfirm"},
+      {"id": "m-012", "state": "member", "role": "event_host", "note": "a host, but not of e-0001"}
+    ],
+    "event": {"id": "e-0001", "hosts": ["m-003"]},
+    "rsvps": {"m-004": "yes", "m-005": "waitlist", "m-006": "no", "m-011": "needs_reconfirm"},
+    "posts": [
+      {"id": "p-group", "kind": "post", "audience": "group", "author": "m-004"},
+      {"id": "p-guests", "kind": "post", "audience": "event_guests", "event_id": "e-0001", "author": "m-002"},
+      {"id": "c-guests", "kind": "comment", "audience": "event_guests", "parent_id": "p-guests", "author": "m-003"},
+      {"id": "p-hosts", "kind": "post", "audience": "hosts_only", "author": "m-004"},
+      {"id": "p-ann", "kind": "announcement", "audience": "group", "author": "m-002"},
+      {"id": "p-del", "kind": "post", "audience": "group", "author": "m-001", "deleted": true}
+    ],
+    "sheet": {"id": "s-0001"}
+  },
+  "expected": {
+    "group:g-test":     {"m-001": true,  "m-002": true,  "m-003": true,  "m-004": true,  "m-005": true,  "m-006": true,  "m-007": true,  "m-008": true,  "m-009": true,  "m-010": true,  "m-011": true,  "m-012": true},
+    "event:e-0001":     {"m-001": true,  "m-002": true,  "m-003": true,  "m-004": true,  "m-005": true,  "m-006": true,  "m-007": false, "m-008": false, "m-009": false, "m-010": false, "m-011": true,  "m-012": true},
+    "sheet:s-0001":     {"m-001": true,  "m-002": true,  "m-003": true,  "m-004": true,  "m-005": true,  "m-006": true,  "m-007": false, "m-008": false, "m-009": false, "m-010": false, "m-011": true,  "m-012": true},
+    "post:p-group":     {"m-001": true,  "m-002": true,  "m-003": true,  "m-004": true,  "m-005": true,  "m-006": true,  "m-007": false, "m-008": false, "m-009": false, "m-010": false, "m-011": true,  "m-012": true},
+    "post:p-guests":    {"m-001": false, "m-002": true,  "m-003": true,  "m-004": true,  "m-005": false, "m-006": false, "m-007": false, "m-008": false, "m-009": false, "m-010": false, "m-011": true,  "m-012": false},
+    "post:c-guests":    {"m-001": false, "m-002": true,  "m-003": true,  "m-004": true,  "m-005": false, "m-006": false, "m-007": false, "m-008": false, "m-009": false, "m-010": false, "m-011": true,  "m-012": false},
+    "post:p-hosts":     {"m-001": true,  "m-002": true,  "m-003": true,  "m-004": true,  "m-005": false, "m-006": false, "m-007": false, "m-008": false, "m-009": false, "m-010": false, "m-011": false, "m-012": true},
+    "post:p-ann":       {"m-001": true,  "m-002": true,  "m-003": true,  "m-004": true,  "m-005": true,  "m-006": true,  "m-007": false, "m-008": false, "m-009": false, "m-010": false, "m-011": true,  "m-012": true},
+    "post:p-del":       {"m-001": false, "m-002": false, "m-003": false, "m-004": false, "m-005": false, "m-006": false, "m-007": false, "m-008": false, "m-009": false, "m-010": false, "m-011": false, "m-012": false},
+    "guests:e-0001":    {"m-001": true,  "m-002": true,  "m-003": true,  "m-004": false, "m-005": false, "m-006": false, "m-007": false, "m-008": false, "m-009": false, "m-010": false, "m-011": false, "m-012": false},
+    "directory:g-test": {"m-001": true,  "m-002": true,  "m-003": false, "m-004": false, "m-005": false, "m-006": false, "m-007": false, "m-008": false, "m-009": false, "m-010": false, "m-011": false, "m-012": false}
+  }
+}

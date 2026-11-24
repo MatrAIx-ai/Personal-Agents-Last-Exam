@@ -1,0 +1,50 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "stoopside-maple-street",
+  "version": "0.1.0",
+  "description": "Synthetic community groups on a fictional Maple St: four groups, 64 members, 37 events and two years of RSVP and post history. For reproducible checks; not a benchmark task. No real group, person or post.",
+  "record_source_ids": [
+    "generated"
+  ],
+  "sources": [
+    {
+      "source_id": "generated",
+      "kind": "synthetic",
+      "description": "Hand-written people, groups, upcoming events, sheets and key posts, plus fixed-seed generated past RSVPs and monthly background posts (scripts/generate-fixture.cjs). Workflow structure (groups, roles, events, RSVPs, waitlists) follows Meetup's public help pages; the claim window, post audiences, child counts, sign-up sheets, member export and view-as are Stoopside's own rules.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/stoopside/scripts/generate-fixture.cjs",
+        "tool_version": "0.1.0",
+        "seed": 20270301,
+        "parameters": {
+          "fixture_sha256": "86fe8a45b202397096e78b329ab02abde3412f4a8590795fa67525fa4a0500ce",
+          "binding_sha256": "d142277ba9064803d9079347152c3d4828b99bb22adb72e4a3c57b53e7469cb8",
+          "history_from": "2025-01-06",
+          "clock": "2027-03-01T09:00:00-05:00"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Fixed UTC-05:00 group times; IDs stable across resets.",
+    "Deliveries are recorded for posts from 2027-01-01 on; older notification history was not imported."
+  ],
+  "expected_counts": {
+    "records": 37,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace a human read of every member and event row."
+  }
+}

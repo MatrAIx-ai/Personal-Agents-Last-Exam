@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "app_id": "stoopside",
+  "version": "0.1.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Rohan Pandey (@Rohan-Pandey1729), Stoopside environment proposal"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "stoopside.member.joined",
+    "stoopside.member.removed",
+    "stoopside.membership.decided",
+    "stoopside.rsvp.changed_by_other",
+    "stoopside.event.changed_by_cohost",
+    "stoopside.signup.claimed_by_other",
+    "stoopside.signup.released_by_other",
+    "stoopside.swap.proposed_by_other",
+    "stoopside.swap.answered",
+    "stoopside.post.created_by_other"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "none (pages arrive in M2)",
+    "real_delivery": false
+  },
+  "limitations": [
+    "First version: MCP tools only; pages arrive in M2.",
+    "One fixture; two more arrive in M2.",
+    "Groups use a fixed UTC offset with no daylight-saving changes.",
+    "Notices are stored as Mail channel.email messages; examples/publish-to-mail.cjs publishes them through Messaging."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}

@@ -1,0 +1,1093 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Stoopside account, community groups and their committed history",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "user_member_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "next_seq": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000000
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 2000
+          },
+          "utc_offset": {
+            "type": "string",
+            "pattern": "^[+-]\\d{2}:\\d{2}$"
+          },
+          "tz_label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10
+          },
+          "requires_approval": {
+            "type": "boolean"
+          },
+          "hide_from_member_list": {
+            "type": "boolean"
+          },
+          "hide_rsvps": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "digest_through": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "utc_offset",
+          "tz_label",
+          "requires_approval",
+          "hide_from_member_list",
+          "hide_rsvps",
+          "created_at",
+          "digest_through"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "bio": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 1000
+          },
+          "email": {
+            "type": "string",
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+            "maxLength": 200
+          },
+          "person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "bio",
+          "email",
+          "person_id",
+          "created_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "memberships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "group_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "member",
+              "declined",
+              "left",
+              "removed"
+            ]
+          },
+          "role": {
+            "enum": [
+              "member",
+              "event_host",
+              "co_organizer",
+              "organizer"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revisions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "seq": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000000
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "state": {
+                  "enum": [
+                    "pending",
+                    "member",
+                    "declined",
+                    "left",
+                    "removed"
+                  ]
+                },
+                "role": {
+                  "enum": [
+                    "member",
+                    "event_host",
+                    "co_organizer",
+                    "organizer"
+                  ]
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                }
+              },
+              "required": [
+                "seq",
+                "at",
+                "state",
+                "role",
+                "reason"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 500
+          }
+        },
+        "required": [
+          "id",
+          "group_id",
+          "member_id",
+          "state",
+          "role",
+          "created_at",
+          "revisions"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20000
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "group_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 4000
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "venue": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "capacity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "guest_limit": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 20
+          },
+          "rsvp_open": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rsvp_close": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "host_member_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "minItems": 1,
+            "maxItems": 20
+          },
+          "state": {
+            "enum": [
+              "published",
+              "cancelled"
+            ]
+          },
+          "created_by": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revisions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "seq": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000000
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "enum": [
+                    "created",
+                    "edited",
+                    "cancelled"
+                  ]
+                },
+                "state": {
+                  "enum": [
+                    "published",
+                    "cancelled"
+                  ]
+                },
+                "fields": {
+                  "type": "object"
+                },
+                "notify": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "guests",
+                        "group"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "actor": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "previous": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "seq",
+                "at",
+                "action",
+                "state",
+                "fields",
+                "notify",
+                "actor"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 500
+          }
+        },
+        "required": [
+          "id",
+          "group_id",
+          "title",
+          "description",
+          "start",
+          "end",
+          "venue",
+          "capacity",
+          "guest_limit",
+          "rsvp_open",
+          "rsvp_close",
+          "host_member_ids",
+          "state",
+          "created_by",
+          "created_at",
+          "revisions"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "rsvps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "event_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "answer": {
+            "enum": [
+              "yes",
+              "no",
+              "waitlist",
+              "offered",
+              "expired",
+              "needs_reconfirm"
+            ]
+          },
+          "guests": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 20
+          },
+          "children": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 20
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "waitlisted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "offer_expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reconfirm_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revisions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "seq": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000000
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "answer": {
+                  "enum": [
+                    "yes",
+                    "no",
+                    "waitlist",
+                    "offered",
+                    "expired",
+                    "needs_reconfirm"
+                  ]
+                },
+                "guests": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 20
+                },
+                "children": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 20
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                }
+              },
+              "required": [
+                "seq",
+                "at",
+                "answer",
+                "guests",
+                "children",
+                "reason"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 500
+          }
+        },
+        "required": [
+          "id",
+          "event_id",
+          "member_id",
+          "answer",
+          "guests",
+          "children",
+          "created_at",
+          "updated_at",
+          "waitlisted_at",
+          "offer_expires_at",
+          "reconfirm_by",
+          "revisions"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 50000
+    },
+    "posts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "group_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "post",
+              "comment",
+              "announcement"
+            ]
+          },
+          "audience": {
+            "enum": [
+              "group",
+              "event_guests",
+              "hosts_only"
+            ]
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "author_member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 5000
+          },
+          "state": {
+            "enum": [
+              "published",
+              "edited",
+              "deleted"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revisions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "seq": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000000
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "state": {
+                  "enum": [
+                    "published",
+                    "edited",
+                    "deleted"
+                  ]
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 5000
+                }
+              },
+              "required": [
+                "seq",
+                "at",
+                "state",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 500
+          }
+        },
+        "required": [
+          "id",
+          "group_id",
+          "kind",
+          "audience",
+          "event_id",
+          "parent_id",
+          "author_member_id",
+          "text",
+          "state",
+          "created_at",
+          "updated_at",
+          "revisions"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20000
+    },
+    "digests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "group_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "post_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "id",
+          "group_id",
+          "due_at",
+          "post_ids"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "sheets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "event_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "lock_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100
+                },
+                "claims": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 100
+                }
+              },
+              "required": [
+                "id",
+                "label",
+                "quantity",
+                "claims"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 50
+          },
+          "revisions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "seq": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000000
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "enum": [
+                    "claim",
+                    "release",
+                    "swap"
+                  ]
+                },
+                "slot_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "member_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                }
+              },
+              "required": [
+                "seq",
+                "at",
+                "action",
+                "slot_id",
+                "member_id",
+                "reason"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 5000
+          }
+        },
+        "required": [
+          "id",
+          "event_id",
+          "title",
+          "lock_at",
+          "slots",
+          "revisions"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1000
+    },
+    "swaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "sheet_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "from_member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "to_member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "give_slot": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "want_slot": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "state": {
+            "enum": [
+              "proposed",
+              "accepted",
+              "declined",
+              "withdrawn",
+              "expired"
+            ]
+          },
+          "proposed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "sheet_id",
+          "from_member_id",
+          "to_member_id",
+          "give_slot",
+          "want_slot",
+          "state",
+          "proposed_at",
+          "expires_at",
+          "decided_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "deliveries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000000
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recipient_member_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "object_type": {
+            "enum": [
+              "post",
+              "event",
+              "rsvp",
+              "digest",
+              "swap",
+              "membership"
+            ]
+          },
+          "object_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "channel": {
+            "enum": [
+              "email",
+              "in_app"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          }
+        },
+        "required": [
+          "id",
+          "seq",
+          "at",
+          "recipient_member_id",
+          "object_type",
+          "object_id",
+          "channel",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100000
+    },
+    "previews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "event",
+              "rsvp",
+              "post"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "consumed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "request": {
+            "type": "object"
+          },
+          "basis": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 500000
+          },
+          "summary": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "created_at",
+          "expires_at",
+          "consumed_at",
+          "request",
+          "basis",
+          "summary"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "object_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "object_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "message": {
+            "$ref": "router-message.schema.json"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "created_at",
+          "object_type",
+          "object_id",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "user_member_id",
+    "next_seq",
+    "groups",
+    "members",
+    "memberships",
+    "events",
+    "rsvps",
+    "posts",
+    "digests",
+    "sheets",
+    "swaps",
+    "deliveries",
+    "previews",
+    "notices"
+  ],
+  "additionalProperties": false
+}
