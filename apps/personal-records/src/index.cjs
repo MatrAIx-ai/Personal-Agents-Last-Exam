@@ -22,18 +22,14 @@ class PersonalRecordsApp {
     this.platform = new PlatformManager(this.db, this.blobStore, this.docService, this.evidenceService);
   }
 
-  /**
-   * Universal MCP tool dispatcher.
-   * Maps tool names defined in tools.json to underlying service methods.
-   */
   async callTool(name, params = {}, context = {}) {
     const accountId = context.accountId || params.account_id || 'default_user';
-    const callerRole = context.callerRole || 'agent'; // Defaults to agent role
+    const callerRole = context.callerRole || 'agent';
     const idempotencyKey = params.idempotency_key;
 
     switch (name) {
       case 'records.upload_document': {
-        return this.platform.executeIdempotent(accountId, name, idempotencyKey, () => {
+        return this.platform.executeIdempotent(accountId, name, idempotencyKey, async () => {
           return this.docService.uploadDocument({
             accountId,
             title: params.title,
@@ -67,12 +63,25 @@ class PersonalRecordsApp {
             throw err;
           }
 
+          // Optional Contact entity matching during import
+          const tags = params.tags || [];
+          if (context.adapters?.contactsClient) {
+            const matchedContact = await AppAdapters.matchContact({
+              contactsClient: context.adapters.contactsClient,
+              query: params.title
+            });
+            if (matchedContact) {
+              tags.push(`contact:${matchedContact.contact_id}`);
+            }
+          }
+
           return this.docService.uploadDocument({
             accountId,
             title: params.title || fileData.filename,
             contentBytes: fileData.bytes,
             mimeType: fileData.mimeType,
-            category: params.category
+            category: params.category,
+            tags
           });
         });
       }
@@ -164,7 +173,6 @@ class PersonalRecordsApp {
     }
   }
 
-  // Platform Lifecycle Operations
   seed(manifest) {
     return this.platform.seed(manifest);
   }

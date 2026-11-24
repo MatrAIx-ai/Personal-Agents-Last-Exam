@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 
 class PlatformManager {
   constructor(db, blobStore, docService, evidenceService) {
@@ -16,10 +15,8 @@ class PlatformManager {
     const accountId = manifest.account_id;
 
     this.db.prepare('INSERT OR IGNORE INTO accounts (account_id) VALUES (?)').run(accountId);
-
     const docIdMap = {};
 
-    // Seed baseline documents
     if (Array.isArray(manifest.documents)) {
       for (const d of manifest.documents) {
         const res = this.docService.uploadDocument({
@@ -35,7 +32,6 @@ class PlatformManager {
       }
     }
 
-    // Seed baseline relationships
     if (Array.isArray(manifest.links)) {
       for (const l of manifest.links) {
         const sourceId = docIdMap[l.source_ref] || l.source_id;
@@ -60,7 +56,6 @@ class PlatformManager {
   }
 
   snapshot(accountId) {
-    // Immutable dump for evaluation grading prior to reset
     const documents = this.db.prepare('SELECT * FROM documents WHERE account_id = ?').all(accountId);
     const versions = this.db.prepare(`
       SELECT v.* FROM document_versions v
@@ -89,7 +84,6 @@ class PlatformManager {
   }
 
   reset(accountId) {
-    // 1. Clear database tables
     this.db.exec('BEGIN TRANSACTION;');
     try {
       this.db.prepare('DELETE FROM idempotency_keys WHERE account_id = ?').run(accountId);
@@ -105,14 +99,12 @@ class PlatformManager {
       throw err;
     }
 
-    // 2. Wipe physical blobs for this account
     const accBlobDir = path.join(this.blobStore.rootDir, accountId);
     if (fs.existsSync(accBlobDir)) {
       fs.rmSync(accBlobDir, { recursive: true, force: true });
       fs.mkdirSync(accBlobDir, { recursive: true });
     }
 
-    // 3. Re-seed to pristine state if baseline manifest exists
     if (this.baselineManifest && this.baselineManifest.account_id === accountId) {
       this.seed(this.baselineManifest);
     }
@@ -123,7 +115,7 @@ class PlatformManager {
     };
   }
 
-  async executeIdempotent(accountId, operation, key, execFn) {
+  executeIdempotent(accountId, operation, key, execFn) {
     if (!key) {
       return execFn();
     }
@@ -138,6 +130,18 @@ class PlatformManager {
 
     const result = execFn();
 
+    // If execFn returned a Promise (e.g. async import_from_source)
+    if (result && typeof result.then === 'function') {
+      return result.then((resolved) => {
+        this.db.prepare(`
+          INSERT INTO idempotency_keys (key, account_id, operation, response_payload)
+          VALUES (?, ?, ?, ?)
+        `).run(key, accountId, operation, JSON.stringify(resolved));
+        return resolved;
+      });
+    }
+
+    // Synchronous execution path (e.g. upload_document)
     this.db.prepare(`
       INSERT INTO idempotency_keys (key, account_id, operation, response_payload)
       VALUES (?, ?, ?, ?)
