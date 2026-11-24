@@ -62,3 +62,32 @@ test('session texts and answers are fixed', () => {
   assert.equal(m.answer('Should I use Mei\'s points too?'), 'Yes, use whatever of hers you need.');
   assert.equal(m.answer('Wait for the September bonus?'), 'You know my rule.');
 });
+
+test('the amount is the points quantity, not a year or an account number', () => {
+  const cases = [
+    ['For our 2027 Japan trip, use Combine points to send 165,400 points to me (Daniel)', 165400],
+    ['Please Combine points: send all your points to my Chase account (ending 4417).', 'all'],
+    ['Use Combine points to send 170,000 to me (Daniel).', 170000],
+    ['Combine points: 166k UR to me please', 166000],
+    ['For 2027, Combine points to me', null]];
+  for (const [text, amount] of cases) assert.equal(m.classify(text).amount, amount, text);
+  assert.equal(m.mei([{at:'2027-08-24T21:40:00-05:00', text:cases[0][0]}]).combine.points, 165400);
+});
+
+test('a reminder that mentions Progressive is not a payment instruction', () => {
+  const remind = m.daniel([alert('r', '2027-08-25T08:00:00-05:00', 'Message assistant: review Progressive renewal and Hilton Amex welcome offer')]);
+  assert.deepEqual([remind.actions, remind.sessions.length], [[], 1]);
+  assert.equal(m.daniel([alert('p', '2027-08-25T08:00:00-05:00', 'Prepay Progressive $642 with the Hilton Amex')]).actions[0].card, 'hilton-honors-amex');
+});
+
+test('exact steps sent after her night shifts still count', () => {
+  const out = m.mei([{at:'2027-08-24T21:40:00-05:00', text:'can you send me your points?'},
+    {at:'2027-08-28T10:00:00-05:00', text:'Use Combine points to send 165,400 points to me (Daniel).'}]);
+  assert.deepEqual(out.combine, {at:'2027-08-28T11:00:00-05:00', to_person_id:'person-daniel', points:165400});
+  assert.equal(out.replies[0].at, '2027-08-25T07:40:00-05:00');
+});
+
+test('equivalent wordings of an assistant check-in start a session', () => {
+  for (const title of ['Chat with assistant: finish Japan booking', 'Check-in with assistant', 'Assistant check-in: book the outbound'])
+    assert.equal(m.daniel([alert('c', '2027-08-25T08:00:00-05:00', title)]).sessions.length, 1, title);
+});

@@ -29,7 +29,12 @@ const SESSION1_ANSWERS = [
 
 const ms = iso => Date.parse(iso);
 const localTime = iso => iso.slice(11, 16); // all scenario times carry the -05:00 offset
-const asksForSession = title => /\b(message|text|ping|open|check in with|talk to)\b[^.]*\bassistant\b/i.test(title);
+// An alert brings Daniel back to the assistant when its title asks him to contact it, however worded.
+const asksForSession = title => /\b(message|text|ping|open|chat with|talk to|reply to|contact|ask|check[ -]?in with)\b[^.:+]*\bassistant\b/i.test(title)
+  || /\bassistant\b[^.:+]*\b(check[ -]?in|session|chat)\b/i.test(title);
+// The Progressive renewal is paid only when the alert tells him to pay it (pay, prepay, settle); a title
+// that only mentions Progressive or the card is a reminder, not an instruction.
+const asksToPayProgressive = title => /\b(pay|prepay|settle)\b[^.;]*\bprogressive\b|\bprogressive\b[^.;]*\b(pay|prepay|settle)\b/i.test(title);
 
 // Two business days after a card purchase (Mon–Fri), same clock time.
 const local = date => new Date(date.getTime() - 5 * 3600000); // wall clock at -05:00, as a UTC Date
@@ -54,7 +59,7 @@ function daniel(alerts) {
     if (t >= '23:30' || t < '07:00') { muted.push({...alert, reason:'asleep'}); continue; }
     fired.push(alert);
     // A small task runs only if the alert spells it out, including the card.
-    if (/progressive/i.test(alert.title)) {
+    if (asksToPayProgressive(alert.title)) {
       const card = /hilton/i.test(alert.title) ? 'hilton-honors-amex' : 'debit';
       actions.push({kind:'card.purchase', at:alert.fire_at, merchant:'Progressive', amount_cents:64200, card,
         posts_at:card === 'debit' ? alert.fire_at : postsAt(alert.fire_at)});
@@ -67,41 +72,50 @@ function daniel(alerts) {
 }
 
 // What makes a text to Mei exact: an amount (a number or "all"), the Combine points method, and Daniel as destination.
+// The amount is the quantity of points asked for: a number with a points unit (points, pts, UR, k), or a
+// number right after send/transfer/move; years, dates and account numbers are not amounts.
+function amountOf(text) {
+  const plain = text.replace(/(\d),(\d{3})/g, '$1$2');
+  const unit = plain.match(/\b(\d{1,7}(?:\.\d+)?)\s*(k\b|thousand\b)?\s*(?:chase\s+|ultimate rewards\s+|ur\s+)?(points|pts|ur)\b/i)
+    || plain.match(/\b(\d{1,4}(?:\.\d+)?)\s*(k|thousand)\b/i);
+  if (unit) return Math.round(Number(unit[1]) * (unit[2] ? 1000 : 1));
+  if (/\ball\s+(of\s+)?(your|her|the)?\s*(chase\s+|ur\s+)?points\b/i.test(plain)) return 'all';
+  const verb = plain.match(/\b(?:send|transfer|move|combine)\b(?:\s+(?:at least|about|exactly|over|me|us|daniel))*\s+(\d{4,7})\b/i);
+  return verb ? Number(verb[1]) : null;
+}
 function classify(text) {
-  const all = /\ball\b(?! good| set| done)/i.test(text) && /point/i.test(text);
-  const number = text.replace(/(\d),(\d{3})/g, '$1$2').match(/\b(\d{4,7})\b/);
-  const k = text.match(/\b(\d{2,3}(?:\.\d)?)\s*k\b/i);
-  const amount = number ? Number(number[1]) : k ? Math.round(Number(k[1]) * 1000) : all ? 'all' : null;
+  const amount = amountOf(text);
   const method = /combine/i.test(text);
   const destination = /\b(daniel|danny|me|my (chase|account|sapphire|reserve|ur))\b/i.test(text) || /to (my|daniel'?s?)\b/i.test(text);
   return {amount, method, destination, exact:amount !== null && method && destination};
 }
 
-// Mei works nights 2027-08-24 to 2027-08-26 and reads messages at 07:30 and 15:00 on those days.
-// An exact text read at 07:30 is done at 07:40; a vague one gets a question back, and she acts at 15:00
-// only if exact steps have arrived by then. On other days she acts within the hour between 09:00 and 21:00.
-const NIGHT_DAYS = ['2027-08-25', '2027-08-26', '2027-08-27'];
-const readSlots = sentAt => NIGHT_DAYS.flatMap(d => ['07:30', '15:00'].map(t => d + 'T' + t + ':00' + TZ)).filter(slot => ms(slot) >= ms(sentAt));
+// Mei works nights 2027-08-24 to 2027-08-26 and reads messages at 07:30 and 15:00 the following days,
+// the last read at 2027-08-27 15:00. An exact text read at 07:30 is done at 07:40, one read at 15:00 at
+// 15:00; a vague one read at 07:30 gets a question back. After her shifts she handles each text within the
+// hour, between 09:00 and 21:00. Every read considers all texts so far, so later exact steps still count.
+const NIGHT_SLOTS = ['2027-08-25', '2027-08-26', '2027-08-27'].flatMap(d => ['07:30', '15:00'].map(t => d + 'T' + t + ':00' + TZ));
+const SHIFTS_END = NIGHT_SLOTS.at(-1);
+function dayRead(sentAt) { // within the hour, between 09:00 and 21:00
+  const at = new Date(ms(sentAt) + 3600000), clock = local(at).toISOString().slice(11, 16);
+  if (clock < '09:00') return iso(at).slice(0, 10) + 'T09:00:00' + TZ;
+  if (clock > '21:00') return iso(new Date(at.getTime() + 86400000)).slice(0, 10) + 'T09:00:00' + TZ;
+  return iso(at);
+}
 function mei(texts) {
   const ordered = [...texts].sort((a, b) => ms(a.at) - ms(b.at));
   if (!ordered.length) return {replies:[], combine:null};
   const replies = [];
-  const first = ordered[0];
-  const nightShift = ms(first.at) < ms('2027-08-27T07:30:00' + TZ);
-  if (!nightShift) {
-    const exact = ordered.find(m => classify(m.text).exact);
-    if (!exact) return {replies:[{at:first.at, text:'how many and where exactly?'}], combine:null};
-    const at = new Date(ms(exact.at) + 3600000), clock = local(at).toISOString().slice(11, 16);
-    const when = clock < '09:00' ? iso(at).slice(0, 10) + 'T09:00:00' + TZ
-      : clock > '21:00' ? iso(new Date(at.getTime() + 86400000)).slice(0, 10) + 'T09:00:00' + TZ : iso(at);
-    return act(exact, when, replies);
-  }
-  for (const slot of readSlots(first.at)) {
-    const seen = ordered.filter(m => ms(m.at) <= ms(slot));
-    const exact = seen.find(m => classify(m.text).exact);
-    if (exact) return act(exact, slot.endsWith('07:30:00' + TZ) ? slot.replace('07:30', '07:40') : slot, replies);
-    if (slot.endsWith('07:30:00' + TZ) && !replies.length)
-      replies.push({at:slot.replace('07:30', '07:40'), text:'how many and where exactly? going to sleep, text me the steps'});
+  const reads = [...NIGHT_SLOTS.filter(slot => ms(slot) >= ms(ordered[0].at)).map(at => ({at, night:true})),
+    ...ordered.filter(m => ms(m.at) > ms(SHIFTS_END)).map(m => ({at:dayRead(m.at), night:false}))]
+    .sort((a, b) => ms(a.at) - ms(b.at));
+  for (const read of reads) {
+    const seen = ordered.filter(m => ms(m.at) <= ms(read.at));
+    if (!seen.length) continue;
+    const exact = [...seen].reverse().find(m => classify(m.text).exact); // the latest exact instructions win
+    const actAt = read.night && read.at.endsWith('07:30:00' + TZ) ? read.at.replace('07:30', '07:40') : read.at;
+    if (exact) return act(exact, actAt, replies);
+    if (!replies.length) replies.push({at:actAt, text:read.night ? 'how many and where exactly? going to sleep, text me the steps' : 'how many and where exactly?'});
   }
   return {replies, combine:null};
 }

@@ -28,8 +28,10 @@ Every segment of OPT-A1 (UA 1735 + UA 837 on 2027-10-15), OPT-R1 (UA 838 + UA 22
 node tasks/points-anniversary-trip/data/check.cjs --root <checkout with runtime/ and the #193 Apps>
 ```
 
-- **Reference** (34 checks): the comparison searches (Aeroplan, ANA at 87,500, United, Virgin), the return booked in session 1 with Daniel's own points, Mei's combine, the outbound and three Hyatt stays at 08:00 the next morning, both sell-outs, the Kyoto price lock, ALT-1 keeping the pair together, no forfeiture, $277.20 on the Reserve and no stranded points.
-- **Bonus path** (35 checks), the first accepted alternative: the outbound on 2027-09-01 with 116,000 UR credited as 150,800 Aeroplan, after checking that no program still has business seats home.
+- **Reference** (39 checks): the comparison searches (Aeroplan, ANA at 87,500, United, Virgin), the return booked in session 1 with Daniel's own points, Mei's combine, the outbound and three Hyatt stays at 08:00 the next morning, both sell-outs, the Kyoto price lock, ALT-1 keeping the pair together, no forfeiture, $277.20 on the Reserve and no stranded points.
+- **Bonus path** (39 checks), the first accepted alternative: the outbound on 2027-09-01 with 116,000 UR credited as 150,800 Aeroplan.
+
+In both, each sell-out is checked on award seats nobody booked (ANA's one seat on Aeroplan, United's own space, Virgin's ANA seat): open one minute before the cutoff and gone at it. Every world event must have its expected outcome: committed, except the Hyatt forfeiture (`not_due` after the transfer) and United's copy of the schedule-change expiry (`not_found`, no booking there).
 
 ## Not covered here
 

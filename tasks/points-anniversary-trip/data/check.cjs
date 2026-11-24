@@ -72,7 +72,7 @@ async function run(variant) {
     }
   }
   async function world(until) { // apply the timeline events due by `until`, in order
-    for (const entry of timeline.events.filter(e => !e.done && e.event.at <= until)) {
+    for (const entry of timeline.events.filter(e => !e.done && Date.parse(e.event.at) <= Date.parse(until))) {
       await clock(entry.event.at);
       const infra = byAccount[entry.account_id];
       entry.done = await infra.call('env.apply_event', {expected_version:await version(infra), event:entry.event});
@@ -116,6 +116,19 @@ async function run(variant) {
     await clock(timeline.start);
     const danielBridge = await router('daniel-config.json'), meiBridge = await router('mei-config.json');
     const hyatt = async () => harbor.call('harbor.account', {});
+    // Each sell-out is checked on award seats nobody booked: ANA's one seat on Aeroplan, United's own
+    // space and Virgin's ANA seat are all open one minute before the cutoff and gone at it.
+    const count = async (client, args) => (await client.call('skyline.search', args)).options.length;
+    const openSeats = async direction => direction === 'return'
+      ? [await count(skyline, {...RETURN, pax:1}), await count(united, RETURN), await count(virgin, {origin:'HND', dest:'ORD', date:'2027-10-25', cabin:'business', pax:1})]
+      : [await count(skyline, {...OUT, pax:1}), await count(united, OUT), await count(virgin, {origin:'ORD', dest:'HND', date:'2027-10-15', cabin:'business', pax:1})];
+    async function cutoff(direction, at) {
+      const before = new Date(Date.parse(at) - 60000 - 5 * 3600000).toISOString().slice(0, 19) + '-05:00'; // one minute earlier, Central
+      await world(before);
+      ok('Unbooked ' + direction + ' award seats are open in every program at ' + before, (await openSeats(direction)).every(n => n > 0));
+      await world(at);
+      equal('Every program\'s ' + direction + ' award seats are gone at ' + at, await openSeats(direction), [0, 0, 0]);
+    }
 
     // Starting state and the comparison searches of session 1.
     equal('Starting balances: UR 281,600, Aeroplan 0, United 12,400, Hyatt 41,200',
@@ -158,10 +171,8 @@ async function run(variant) {
 
     // Outbound and hotels: on 2027-08-25 08:00 (reference), or on 2027-09-01 with the bonus (accepted approach).
     const at = variant === 'reference' ? '2027-08-25T08:00:00-05:00' : '2027-09-01T08:00:00-05:00';
+    if (variant === 'bonus') await cutoff('return', '2027-08-25T18:00:00-05:00');
     await world(at);
-    if (variant === 'bonus') equal('No Aeroplan, United or Virgin business seats home after the 2027-08-25 18:00 sell-out',
-      [(await skyline.call('skyline.search', RETURN)).options.length, (await united.call('skyline.search', RETURN)).options.length,
-        (await virgin.call('skyline.search', {origin:'HND', dest:'ORD', date:'2027-10-25', cabin:'business', pax:1})).options.length], [0, 0, 0]);
     const outbound = variant === 'reference' ? 150000 : 116000;
     const sent = await write(waypoint, waypointInfra, 'waypoint.transfer', {partner_id:'aeroplan', points:outbound});
     await deliver(waypoint, waypointInfra, danielBridge);
@@ -190,6 +201,8 @@ async function run(variant) {
       [(await hyatt()).balance, (await waypoint.call('waypoint.balance', {})).balance], [200, variant === 'reference' ? 6500 : 40500]);
 
     // The world moves on.
+    if (variant === 'reference') await cutoff('return', '2027-08-25T18:00:00-05:00');
+    await cutoff('outbound', '2027-09-02T09:00:00-05:00');
     await world('2027-09-12T10:30:00-05:00');
     equal('Every program is sold out both ways after 2027-09-02 09:00',
       [(await skyline.call('skyline.search', RETURN)).options.length, (await skyline.call('skyline.search', OUT)).options.length,
@@ -214,6 +227,13 @@ async function run(variant) {
       (await skyline.call('skyline.balance', {})).charges.map(c => [c.label, c.amount_cents]), [[RESERVE, 19780], [RESERVE, 7940]]);
     equal('No stranded transferred points: Aeroplan ' + (variant === 'reference' ? '0' : '800') + ', Hyatt 200',
       [(await skyline.call('skyline.balance', {})).balance, (await hyatt()).balance], [variant === 'reference' ? 0 : 800, 200]);
+    // Every world event applied: committed, except the ones whose refusal is the expected outcome.
+    // The Hyatt forfeiture is not due after the transfer, and United's copy of the schedule-change expiry
+    // finds no affected booking there (Skyline returns not_found for a change that affected none).
+    const expected = e => e.event.event_id === 'expire-hyatt-2027-09-30' ? 'not_due'
+      : e.account_id === 'skyline-united-daniel' && e.event.operation === 'skyline.alternative.expired' ? 'not_found' : 'committed';
+    equal('Every world event has its expected outcome', timeline.events.map(e => [e.account_id, e.event.event_id, e.done?.status]),
+      timeline.events.map(e => [e.account_id, e.event.event_id, expected(e)]));
     return {variant, checks:checks.length};
   } finally {
     await Promise.allSettled(clients.map(client => client.close()));
