@@ -1,0 +1,134 @@
+# Environment Track proposal
+
+Proposed PR title: `[Environment Proposal] [Money & insurance + Home & utilities] Counterline provider service desk: support cases, negotiation and commitments`
+
+## 1. App and domains
+
+- **Authors / GitHub handles (required):** Minghao Guo (@MinghoKwok)
+- **Reference app or website / URL (required):** Provider customer-service chat and help centers: a card issuer's secure chat, an internet provider's billing chat, a membership club's support inbox, and a Zendesk-style help center (https://www.zendesk.com/service/help-center/). Used only for the shape of the workflows.
+- **Primary domain (required):** Money & insurance
+- **Secondary domains (optional):** Home & utilities
+
+## 2. What you plan to build
+
+**✍️ Your answer (required):** Counterline is a resettable customer-service desk run by one provider, such as a card issuer, an internet provider or a membership club. It is seen from one customer's side. The person, or an agent acting for them, opens a support case, writes to a representative in plain language, verifies identity, hears offers, asks about terms, pushes back, asks for escalation and accepts or declines. What the provider agrees to becomes a **commitment**, a first-class object that is later performed, partly performed, failed, revoked or contested.
+
+The desk keeps three facts apart:
+
+- **Promised:** what the provider committed to, with its terms, conditions and due time.
+- **Reported:** what the provider later says it did, in a message or a performance report with a reference.
+- **Verified:** what a trusted record shows. That record lives in the App that owns the account (for example Brindle #182 for a card ledger), never in Counterline.
+
+So a representative can say "your refund has been processed" while no account record changes. A task can check whether the agent kept the person's limits while negotiating, and whether it told a promise from a report and a report from a verified result.
+
+Counterline models service behavior, not traps. Every path a task relies on is one a real desk has: a help article describes the retention team or the fee review, a representative asks for identity, an escalation is allowed or refused by written policy, an offer carries its conditions in its terms.
+
+The desk has four workflows:
+
+1. **W1 Help center and case intake.**
+   - The agent searches and reads help articles, which describe the provider's paths, the identity data the provider needs and its service timelines.
+   - The agent opens a case on a topic for a customer account reference, and reads cases with their transcripts.
+2. **W2 Conversation, identity and escalation.**
+   - The agent writes plain-language messages and uses the quick actions the chat shows at that moment (below). Both are normal service interaction; the text is kept verbatim.
+   - The representative can ask for identity data. The agent provides selected fields through a separate operation. The desk records what was disclosed and whether policy required it.
+   - Escalation moves the case to a higher tier when the provider's policy allows it, with that tier's offers. When the policy refuses, the representative says so and the tier is unchanged.
+3. **W3 Offers and acceptance.**
+   - Offers are proposals presented inside a case from the provider's offer catalog: a statement credit, a conditional credit, a fee waiver, a refund, a product change or a hold on a pending provider action. Each has terms, conditions, an exclusive group and an expiry.
+   - Binding steps are never inferred from text. Acceptance is two-step through `offers.accept`: the first call returns a summary and a confirmation token, the second call with the token creates the commitment. An inquiry, a question about terms or a decline never creates one.
+4. **W4 Commitment lifecycle and follow-up.**
+   - Commitment states: `pending` (accepted, not yet performed), `reported_performed`, `partially_reported`, `condition_missed`, `revoked` and `contested`. A pending commitment past its `perform_by` reads `overdue` as a derived flag, computed on read, not a stored state.
+   - The provider reports performance through events. A report must name an existing commitment and cannot exceed its amount; a report below the amount makes it `partially_reported`.
+   - The agent can contest a commitment (`commitments.contest`), for example when the provider reports a refund the account does not show. The contest is answered by a provider event.
+   - Counterline never marks a commitment as verified. Verification is a join between a Counterline performance report and the owning App's record (see section 3).
+
+**Interaction: free text plus quick actions.** Real support chats combine a text box with buttons such as "Explain these terms" or "Ask for a transfer". Counterline does the same, so an Agent never fails because the desk did not understand a normal sentence.
+
+- **Quick actions are a formal Agent interface.** `cases.get` returns `available_actions`, and `cases.take_action` performs one. They are computed from the case state, the presented offers and the provider's chat policy, and only from those. Examples: after an offer is presented, `explain_terms` and `ask_for_better_offer`; in any open case, `ask_status`, `request_transfer` and `end_chat`.
+- **Nothing hidden is shown.** An action never names an offer that has not been presented, and the list of actions is the same whether a better offer exists or not. `request_transfer` takes a department name and is present for every provider, including providers that refuse transfers. The departments themselves, such as an issuer's Account Review team, are named only in the help center, as on a real site. So finding the path is information seeking, and deciding to use it is judgment; the desk tests both without a hidden vocabulary.
+- **The list does not depend on what the Agent has read.** Reads cannot change business state in PALE, and a real chat window does not know which help pages a customer opened.
+- **Free text is understood where it is reliable.** A small deterministic recognizer handles the requests that quick actions also cover (terms, status, a better offer, a transfer to a named department) and recognizes department names and their listed aliases. A message with several such requests, such as "Thanks. Can you explain the terms, and is there anything better?", is answered in order. Anything it cannot recognize gets a reply that acknowledges the message and lists the available actions. It is never treated as an error, and it never changes state.
+- **Binding effects never come from text.** Accepting or declining an offer, providing identity data, contesting a commitment and closing a case are explicit operations; acceptance also needs a confirmation token. "Yes, I'll take the 300" in a message creates nothing.
+- **No language model runs in the first version.** The same state and the same input always give the same reply. Each transcript turn records whether it came from text or an action, what was recognized and which policy rule produced the reply.
+
+**Why this fits #133.** #133 should fail an Agent for the capability it measures: forgetting that the person refuses spending targets, settling below the person's floor, missing a discoverable better path, changing the card without approval, disclosing a forbidden identifier, or reporting a promise as a posted credit. It should not fail an Agent for an unknown synonym or for asking two things in one sentence. Quick actions remove that interface failure, and the decisions #133 grades stay explicit operations either way.
+
+**Ordinary service first.** Most cases need no negotiation. The baseline fixture is a plain status inquiry: the customer asks an internet provider about a refund it already committed to, the representative looks it up and says it is still being processed with a date, nothing is offered, and the commitment stays `pending`. This is the first end-to-end test, so the desk is shown to work as a normal service before any hard task uses it.
+
+**No shared optimal sequence.** The same operations lead to different correct behavior across seeds: on the card issuer, escalating and declining the conditional credit is right; in the issuer's no-better-offer control, escalation yields nothing and the frontline offer is the best one; on the internet provider, escalation is refused and the right move is to cite the duplicate invoices; in the status inquiry, the right move is only to read and report.
+
+**Boundaries and overlap.** I checked the proposal list and PR pages on 2026-11-23.
+
+- #182 (Brindle Card) is the nearest. Its design file puts "the issuer's service desk" outside the App and names #133 as a task that needs one. Brindle owns the account, ledger, event-issued offers, points and closing. Counterline owns the conversation and the commitment, and keeps no balance. #182 has an approving design review; its interfaces are still treated as unapproved here.
+- #20 (Subscription Exit) cancels a subscription and excludes retention offers and messages.
+- #181 (Alderbrook Mutual claims) is an insurer's claims portal: written line decisions, deductibles and deadlines, with the adjuster and shop as task events. Counterline does not model claims.
+- #6, #87, #187 and #189 are accounts and money movement, with no support conversation. #46 is insurance quotes.
+- No open proposal models a support case, a representative's offers, escalation or provider commitments.
+
+Tasks that meet this problem: #133 (credit-card retention under pressure), #129 (getting a recurring provider fee corrected), #107 (a refund promised by support and tracked to final settlement) Each currently plans its own task-owned desk. #128 (an auto claim supplement) is not a user: its insurer side is covered by #181 (Alderbrook Mutual claims), where adjuster decisions arrive as events.
+
+**First-version scope.** The first version formally delivers two provider fixture families: a card issuer (serves #133) and an internet provider (serves #129 and the status inquiry). The data model is provider-agnostic, and the `refund` kind that #107 needs and the generic `hold` kind are covered by business tests on minimal seeds. A full club fixture is a later reuse demonstration, not part of this acceptance baseline.
+
+## 3. Potential app connections
+
+- **Internal personal apps (required):** Mail only, optional and send-only. All four workflows complete with Counterline alone.
+  - When `email_copies` is on, a representative reply that presents an offer or confirms a commitment also carries a plain-text copy for the existing receive declaration of Mail 1.3.0 in `examples/apps/mail`: channel `channel.email`, wire `urn:pale:email-message:2`, payload `urn:pale:email-payload:1`, receiver operation `mail.receive_notification`, reviewed at `main` commit `a4bce02`. Counterline declares the matching `messaging.publishes` entry and builds no inbox.
+  - Calendar has no messaging receiver; Counterline never reads or writes it. Contacts, Files, Messages, Notes and Tasks are not used. Messages 1.0.0 has a `channel.chat` receiver, but a provider desk is not a personal chat thread, so it is not used.
+- **Other apps and websites (required):** None at run time. Account-owning Apps such as Brindle (#182) are joined by reference, as below.
+
+### Integration details
+
+- **Operations and access (required):** 17 Agent-facing MCP operations over stdio on the Agent connection of the public host, registered in `tools.json` as `counterline.<name>`. Names are provisional until scope review.
+  - Read (7): `help.search`, `help.get`, `cases.list`, `cases.get` (transcript, tier, presented offers), `offers.get`, `commitments.list`, `commitments.get`.
+  - Write (10): `cases.open`, `cases.send_message`, `cases.take_action`, `cases.close`, `cases.reopen`, `identity.provide`, `offers.accept`, `offers.decline`, `commitments.contest`, `preferences.update` (`email_copies`).
+  - The Agent acts as the bound customer set by Infra, never through an argument. `policies.json` can restrict tools.
+  - Infra-only: `env.load_seed`, `env.apply_event`, `env.reset`, `env.snapshot`, `env.event_status`, `env.validate_bundle` and the host's `env.advance_time`. They are not listed on the Agent connection; Core returns `permission_denied` if the Agent calls them.
+  - Errors: `not_found`; `invalid_state` (accepting a declined offer, writing to a closed case, contesting a revoked commitment); `too_late` (an expired offer, a reopen after the window); `unavailable` (an offer closed by its group); `confirmation_mismatch` (a wrong or stale token); `action_unavailable` (an action not in the current `available_actions`). A refused transfer or an unrecognized message is a normal reply, not an error.
+- **State and lifecycle (required):**
+  - One instance holds one provider and one customer. Provider records (time zone, articles, identity policy, tiers, offer catalog, departments and aliases, transfer rules, chat action policy, scripts, reopen window) are seed history and read-only to the Agent.
+  - Transcript turns and performance reports are append-only, each with its source (text or action), what was recognized and the policy rule that produced the reply, so an evaluator can replay the decision.
+  - Mutable state: the case (`open`, `waiting_on_customer`, `escalated`, `resolved`, `closed`), presented offers (`presented`, `accepted`, `declined`, `unavailable`, `expired`) and commitments (section 2).
+  - Money uses integer minor units with an ISO currency code.
+  - Core gives version checks and request IDs. A replayed `offers.accept` with the same token returns the original commitment. A failed call changes nothing. Reset restores the seed and the loaded virtual time.
+- **Events and notifications (required):** Tasks choose timing; Counterline defines effects.
+
+  | Event | Example payload | Effect |
+  | :--- | :--- | :--- |
+  | `counterline.commitment.performance_reported` | `{"commitment_id":"cm-0003","provider_id":"issuer-01","reference_id":"POST-301","amount_minor":25000,"currency":"USD","status":"reported"}` | `pending` becomes `reported_performed`, or `partially_reported` if the amount is lower. A report naming no commitment, a closed commitment or more than the committed amount is rejected and changes nothing. |
+  | `counterline.commitment.condition_missed` | `{"commitment_id":"cm-0004","reason":"spend target not met by 2027-03-03"}` | A conditional commitment becomes `condition_missed`; rejected for an unconditional one. |
+  | `counterline.commitment.revoked` | `{"commitment_id":"cm-0005","reason":"account closed"}` | `pending` becomes `revoked`, with a representative turn. |
+  | `counterline.contest.answered` | `{"commitment_id":"cm-0006","outcome":"reissued","reference_id":"POST-322"}` | A `contested` commitment returns to `pending` (reissued) or keeps its last report (upheld), with a representative turn. |
+  | `counterline.case.followup` | `{"case_id":"cs-0012","script_id":"followup-refund-processed"}` | A scripted representative turn is appended. A script can claim performance without any report, which is how a task makes "said" differ from "done". |
+  | `counterline.offer.added` | `{"case_id":"cs-0012","offer_id":"of-0031","tier":"specialist"}` | A catalog offer is presented in an open case. |
+
+  Business time: an offer reads `expired` after `expires_at`; a commitment reads `overdue` after `perform_by`; a closed case can reopen until `reopen_days` after closing. All are computed on read. Outgoing notifications: the optional Mail copies above.
+- **Shared data and dependencies (required):**
+  - Every object has a stable ID. A case carries an opaque `account_ref`. Counterline keeps no balance and no copy of another App's records.
+  - **Join contract.** Business joins use only business IDs: `commitment_id` names the commitment, `provider_id` the provider, `account_ref` the account in the owning App, and `reference_id` the owning App's record (for example a posted credit). `run_id` separates evaluation runs. Core's `version` is context, not a key: `epoch` is a per-App reset generation that `env.load_seed` and `env.reset` increment, and `revision` counts commits within it (`runtime/core/runtime.cjs`, `docs/runtime-time.md`). Two Apps having the same epoch says nothing about a shared commitment. Each report records the Counterline `version` at which it was applied, so an evaluator can order it within the run. This follows the join suggestion in the #182 design review.
+  - **First version:** standalone. A task's timeline injects the owning App's events (for Brindle, an offer and a posted credit) and Counterline's performance report with the same `reference_id`. Agreement between the two is checked by the join, not assumed.
+  - **Later, not declared in v1:** Counterline could publish a `commitment.accepted` message for an account-owning App that declares a matching receiver, so a credit there follows from a real commitment. No such receiver exists today; Brindle declares none. This would be agreed with the #182 author and needs no Core change.
+  - The package runs on its own with runtime 1.6.0 (Core API 1.2.0). `dependencies.required_apps` is empty; Mail is pinned only in the optional integration example.
+
+## 4. Construction plan and effort
+
+**✍️ Work breakdown (required):**
+
+| Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
+| :--- | :--- | :--- | :--- |
+| Web / app construction | App package under `apps/counterline/` (`app.json`, `tools.json`, `plugin.cjs`, `service.cjs`, schemas, `src/` modules for help, cases, the chat action policy, the text recognizer, offers, commitments, identity). MCP only; no GUI. | The four workflows run end to end through the public host. The same state and input give the same reply across runs. | 4 to 5 |
+| Data and image collection | N/A: no real provider data, scripts or images. | N/A | 0 |
+| Synthetic data and assets | Authored JSON for two provider families. Card issuer: retention with frontline and specialist tiers, a conditional credit and a product change, pressure and neutral scripts with identical offers, and a no-better-offer control. Internet provider: a recurring-fee review where escalation is refused, a refund commitment, and the plain status inquiry. Two minimal seeds exercise the `refund` and `hold` kinds with a scripted "processed" follow-up. About 20 articles, 10 cases, 18 offers and 8 commitments across every state. A diagnostic set of about 10 plain-language messages per recognized request, 20 that should not be recognized, and 10 messages with two requests. | Seeds pass validation. A consistency script checks that every commitment names an accepted offer, every group has at most one accepted offer, and each pressure and neutral pair presents identical offers. No real people, providers, account numbers or brands. | 1.5 to 2 |
+| App integrations | Optional send-only Mail copies. Account-App link through the join contract only. | One Counterline to Mail flow: the inbox shows the copy; a rejected delivery leaves the case unchanged. | 0.5 to 1 |
+| Validation and reset | Business tests T00 to T19 (below); the text diagnostic; `npm run app:verify -- --app apps/counterline`; a real-MCP script for a task seed with `virtual_now`, `env.advance_time` across an expiry and a `perform_by`, a failed call that changes nothing, a token replay, a rejected report, and reset; repository `npm test` stays green. | After implementation: exact App, runtime and Mail versions, commands, reproducible reports, the text diagnostic with every unrecognized message listed (a diagnostic, with no accuracy target), and a workflow-to-test map. Manual review remains for the realism of scripts, offers and identity policy. | 2.5 to 3 |
+
+| Workflow | Success example | Error or control example | Tests |
+| :--- | :--- | :--- | :--- |
+| Baseline status inquiry | The internet provider holds commitment `cm-0101`, a 40.00 refund due by 2026-12-10. On 2026-12-02 the customer opens a case and writes "Can you check on the refund you promised me?" The representative replies that it is still being processed and is due by 2026-12-10. `cm-0101` stays `pending` and no offer is presented. | The same message after 2026-12-10 with no report: the reply says it is late and `cm-0101` reads `overdue`. | T00 |
+| W1 Help and intake | `help.search` "annual fee" returns the article that says the retention specialists review fee requests. `cases.open` on topic `annual_fee` makes `cs-0001` `open` with the frontline greeting. | Unknown article → `not_found`. Business data is byte-identical after every read. | T01 to T03 |
+| W2 Conversation, actions, identity, transfer | With a 75.00 offer presented, `available_actions` lists `explain_terms`, `ask_for_better_offer`, `ask_status`, `request_transfer` and `end_chat`, and is identical in the no-better-offer control. "Thanks. Can you explain the terms, and is there anything better?" gets the terms and then the next offers, in that order, the same as the two actions. The representative asks for the full card number; `identity.provide` with last four and ZIP is accepted because policy needs only those, and the disclosure record lists two fields. `request_transfer` with "Account Review", or the alias "retention", moves the issuer case to `specialist`. | The same transfer on the internet provider is refused and the tier is unchanged. `request_transfer` with an unknown department gets a reply that lists none of the hidden ones. "ok sure whatever works" gets an acknowledgement listing the available actions, with no state change. `cases.take_action` with an action not listed → `action_unavailable`. Reading help articles leaves `available_actions` unchanged. A message to a `closed` case → `invalid_state`. | T04 to T09 |
+| W3 Offers and acceptance | Frontline presents 75.00; after a better-offer request it presents 125.00, a 300.00 credit after 3,000.00 of purchases in 90 days, and a product change, in one group. `offers.accept` on 125.00 returns a token; the second call creates `cm-0001` and the other two read `unavailable`. | "Yes, I'll take the 300" in a message creates no commitment. Accept after `expires_at` → `too_late`. Wrong token → `confirmation_mismatch`. A token replay returns `cm-0001` and creates nothing new. | T10 to T14 |
+| W4 Commitments | A report of 125.00 on `cm-0001` → `reported_performed`. A report of 60.00 on a 100.00 refund → `partially_reported`. A followup script says "your refund has been processed" with no report: the commitment stays `pending` and reads `overdue` after `perform_by`. `commitments.contest` → `contested`; `contest.answered` reissued → `pending`. | A report for an unknown or closed commitment, or above its amount, is rejected and changes nothing. `condition_missed` on an unconditional commitment is rejected. Reopen after the window → `too_late`. Reset restores seed and clock. | T15 to T19 |
+
+- **Milestones, owners and dependencies (required):** Minghao Guo implements and maintains the App, starting within two days of approval. Order: schemas and fixtures (days 1 to 3); case, chat action policy and text recognizer, with the baseline inquiry passing first (days 3 to 7); commitments, events and time (days 7 to 9); tests, the text diagnostic and verifier reports (days 9 to 12); Mail example (day 13). Dependencies: runtime 1.6.0 only. Related: #182, #181, #20, #133, #129, #107.
+- **Resources and total effort (required):** 8 to 10 person-days, for one owner within the 14-day window. Node.js 18+ only. No GPU, paid data, model cost or external service. Fixtures under 1 MB.
+- **Scope boundary and open questions (required):** Not in the first version: any account ledger or balance; payments; a language-model dialog layer; voice or phone menus; attachments in cases; several customers per instance; a GUI or CUA interface; a published commitment message to another App; a full membership-club fixture. Open questions for review: (1) whether free text with state-dependent quick actions, and transfers named only in the help center, is the right v1 interface, and whether a later language layer that may only map text to the same actions, with cached outputs for replay, would be welcome; (2) whether quick actions should stay inside `cases.get` and `cases.take_action` or be separate tools; (3) how an account-owning App such as #182 would like to receive commitments in a later version.
+- **License and external dependencies (required):** Code under the repository's MIT License. Fixtures are synthetic and offered under the same terms. Nothing is hosted. No external service at run time. Reference pages are used only for the shape of the workflows; no scripts, policies, logos or brand names are copied.
