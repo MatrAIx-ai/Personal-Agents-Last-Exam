@@ -24,7 +24,7 @@ test('T01 search: each filter alone and combined, local-day windows across a tim
   // Each filter alone.
   assert.deepEqual(ids(search(f, {label_id: 'pl-dana'}).rows), ['it-m01']);
   assert.deepEqual(ids(search(f, {label_id: 'pl-dana', collapse_stacks: false}).rows), ['it-m02', 'it-m01']);
-  assert.deepEqual(ids(search(f, {place: 'alder'}).rows), ['it-m03', 'it-m01']);
+  assert.deepEqual(ids(search(f, {place: 'grange'}).rows), ['it-m03', 'it-m01']);
   assert.deepEqual(ids(search(f, {kind: 'video'}).rows), ['it-m06']);
   assert.deepEqual(ids(search(f, {source: 'screenshot'}).rows), ['it-m07', 'it-m12']);
   assert.deepEqual(ids(search(f, {source: 'download'}).rows), ['it-m08']);
@@ -80,7 +80,7 @@ test('T02 account, items, albums and notifications reads', () => {
     [['it-m04', false, 5120000, 'photo', 'active'], ['it-m05', true, 5300000, 'photo', 'active']]);
   assert.deepEqual(edited.albums, []);
   const cover = f.call('fernshelf.items.get', {id: 'it-m05'}).item;
-  assert.deepEqual(cover.albums.map(a => [a.album_id, a.album_state, a.shows_item, a.has_audience]), [['al-garden', 'private', true, false]]);
+  assert.deepEqual(cover.albums.map(a => [a.album_id, a.album_state, a.shows_item, a.shared]), [['al-garden', 'private', true, false]]);
   const shared = f.call('fernshelf.items.get', {id: 'it-m01'}).item;
   assert.deepEqual(shared.removal_requests.map(r => [r.id, r.state, r.scope.album_id]), [['rr-m1', 'pending', 'al-reunion']]);
   assert.deepEqual(shared.history.map(h => h.action), ['added']);

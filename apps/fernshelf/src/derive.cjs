@@ -27,8 +27,15 @@ function index(data) {
   return {items, contributions, stackOf, albums, links};
 }
 const activeLinks = (data, albumId, t) => data.links.filter(l => l.album_id === albumId && linkState(l, t) === 'active');
-// An album "has an audience" when it has an invited or joined member or an active link.
-const hasAudience = (data, album, t) => !album.deleted_at && (album.members.some(m => OPEN.has(m.status)) || activeLinks(data, album.id, t).length > 0);
+// Two definitions, kept apart on purpose:
+// - isShared: the album has an invited or joined member or an active link. This is the plan's
+//   "shared" scope: what removals.respond (honor) clears, what exposure.get lists as a place the
+//   item is shared, and the albums where a write that shows an item returns removal_honored warnings.
+// - isSeen: someone can see the album now, that is a joined member or an active link. This is the
+//   visibility rule (visibility(), exposure.get visible_to/visible) and what makes albums.delete ask
+//   for confirm. An invited member cannot see anything until they join.
+const isShared = (data, album, t) => !album.deleted_at && (album.members.some(m => OPEN.has(m.status)) || activeLinks(data, album.id, t).length > 0);
+const isSeen = (data, album, t) => !album.deleted_at && (album.members.some(m => m.status === 'joined') || activeLinks(data, album.id, t).length > 0);
 
 // What an album (and every link to it) shows at time t: my active items and present contributions, in album order.
 function albumShows(album, idx, t) {
@@ -47,10 +54,9 @@ function albumShows(album, idx, t) {
 function visibility(data, at) {
   const t = typeof at === 'number' ? at : ms(at), idx = index(data), rows = new Map();
   for (const album of data.albums) {
-    if (album.deleted_at) continue;
+    if (!isSeen(data, album, t)) continue;
     const joined = album.members.filter(m => m.status === 'joined').map(m => m.person_id);
     const links = activeLinks(data, album.id, t).map(l => l.id);
-    if (!joined.length && !links.length) continue;
     for (const id of albumShows(album, idx, t)) {
       if (!rows.has(id)) rows.set(id, {item_id: id, mine: idx.items.has(id), people: [], albums: [], links: []});
       const row = rows.get(id);
@@ -135,6 +141,13 @@ function removalWarnings(data, itemIds) {
   return out;
 }
 
+// A purged item stays a record with its ID, times and history: no file and no content metadata.
+const PURGED_KEEP = ['id', 'kind', 'taken_at', 'added_at', 'state', 'trashed_at', 'purge_at', 'purged_at', 'history', 'removal_history'];
+function purgeRecord(item, at) {
+  Object.assign(item, {state: 'purged', purged_at: at, file: null, caption: null, people: [], place: null, content_hash: null});
+}
+// What reads return for an item that is purged (by the clock or by items.purge).
+const purgedView = (item, t) => Object.fromEntries(PURGED_KEEP.map(k => [k, k === 'state' ? 'purged' : k === 'purged_at' ? purgedAt(item, t) : item[k]]));
 // Drop what the clock has already made unreachable: an item whose purge_at has passed becomes a
 // stored `purged` record without its file reference and leaves album records. Run only when a
 // write or event commits; nothing a read returns changes because reads derive the same state.
@@ -143,14 +156,12 @@ function settle(ctx, data) {
   const gone = new Set();
   for (const item of data.items) {
     if (item.state === 'trashed' && ms(item.purge_at) <= t) {
-      item.state = 'purged';
-      item.purged_at = item.purge_at;
-      item.file = null;
+      purgeRecord(item, item.purge_at);
       gone.add(item.id);
     }
   }
   if (gone.size) for (const album of data.albums) album.item_ids = album.item_ids.filter(id => !gone.has(id));
 }
 
-module.exports = {now, itemState, purgedAt, linkState, albumState, index, activeLinks, hasAudience, albumShows, visibility, storage,
-  waitingQueue, usedBytes, newestActive, removalWarnings, settle, OPEN};
+module.exports = {now, itemState, purgedAt, linkState, albumState, index, activeLinks, isShared, isSeen, albumShows, visibility, storage,
+  waitingQueue, usedBytes, newestActive, removalWarnings, settle, purgeRecord, purgedView, OPEN};

@@ -27,6 +27,7 @@ function accountGet(ctx, data) {
 }
 
 function row(data, idx, item, t, zone, stackInfo) {
+  if (d.itemState(item, t) === 'purged') return {...d.purgedView(item, t), local_date: c.localDate(item.taken_at, zone), stack_id: null, stack_kind: null, stack_size: null, is_cover: false};
   return {id: item.id, kind: item.kind, taken_at: item.taken_at, local_date: c.localDate(item.taken_at, zone), added_at: item.added_at,
     place: placeLabel(item), people: item.people.slice(), caption: item.caption, source: item.source, favorite: item.favorite, archived: item.archived,
     backed_up: item.backed_up, declared_bytes: item.declared_bytes, state: d.itemState(item, t), has_file: item.file !== null && d.itemState(item, t) !== 'purged',
@@ -39,7 +40,10 @@ function search(ctx, data, args) {
   const inAlbum = args.album_id ? new Set(album(data, args.album_id).item_ids) : null;
   const state = args.state || 'active', place = args.place?.toLowerCase(), text = args.text?.toLowerCase();
   const pool = data.items.filter(i => d.itemState(i, t) === state);
+  // A purged item keeps only its ID, kind, times and history, so only the time window and kind can match it.
+  const contentFilter = ['place', 'label_id', 'album_id', 'source', 'favorite', 'archived', 'backed_up', 'min_bytes', 'text'].some(k => args[k] !== undefined);
   const match = i => {
+    if (state === 'purged' && contentFilter) return false;
     const at = c.ms(i.taken_at);
     return at >= lo && at < hi && (!place || (i.place && i.place.label.toLowerCase().includes(place))) && (!args.label_id || i.people.includes(args.label_id)) &&
       (!inAlbum || inAlbum.has(i.id)) && (!args.kind || i.kind === args.kind) && (!args.source || i.source === args.source) &&
@@ -75,10 +79,11 @@ function versionView(item, stack, t) {
 function itemGet(ctx, data, args) {
   const t = d.now(ctx), item = mine(data, args.id), idx = d.index(data), state = d.itemState(item, t);
   const stack = idx.stackOf.get(item.id);
-  const view = c.copy(item);
-  Object.assign(view, {state, purged_at: d.purgedAt(item, t), file: state === 'purged' || item.file === null ? null : {asset_id: item.file}});
+  // A purged item is a record with its ID, times and history only.
+  const view = state === 'purged' ? c.copy(d.purgedView(item, t)) : Object.assign(c.copy(item), {purged_at: null, file: item.file === null ? null : {asset_id: item.file}});
+  view.file = view.file || null;
   view.albums = state === 'purged' ? [] : data.albums.filter(a => !a.deleted_at && a.item_ids.includes(item.id)).map(a => ({album_id: a.id, title: a.title,
-    album_state: d.albumState(a), shows_item: state === 'active', has_audience: d.hasAudience(data, a, t)}));
+    album_state: d.albumState(a), shows_item: state === 'active', shared: d.isShared(data, a, t)}));
   view.removal_requests = data.removals.filter(r => r.item_ids.includes(item.id)).map(r => ({id: r.id, from_person_id: r.from_person_id, state: r.state,
     scope: c.copy(r.scope), requested_at: r.requested_at}));
   view.stack = !stack || state === 'purged' ? null : {id: stack.id, kind: stack.kind, cover_id: stack.cover_id,
@@ -92,7 +97,6 @@ function itemRead(ctx, data, args) {
   if (d.itemState(item, t) === 'trashed') c.fail('in_trash', 'Item ' + item.id + ' is in the trash; restore it to open its file.');
   if (item.file === null) c.fail('no_file', 'Item ' + item.id + (item.backed_up ? ' has no image file (videos and some items are metadata only).' : ' is not backed up; its original is still on the device.'));
   if (args.asset_id !== undefined && args.asset_id !== item.file) c.fail('not_found', 'Asset ' + args.asset_id + ' is not the file of item ' + item.id + '.');
-  if (!ctx.assets?.read) c.fail('unsupported_capability', 'Reading image bytes needs the host asset reader.');
   return {item_id: item.id, asset_id: item.file, file: ctx.assets.read(item.file)};
 }
 
@@ -113,6 +117,12 @@ function albumsList(ctx, data, args) {
   });
   return {albums};
 }
+// A contribution that has left the album (its contributor withdrew it, left or was removed, or the
+// album was deleted) is listed only as a dated record, with none of its content.
+function contributionView(a, k) {
+  if (!k.removed_at && !a.deleted_at) return {...c.copy(k), state: 'present'};
+  return {id: k.id, person_id: k.person_id, added_at: k.added_at, removed_at: k.removed_at || a.deleted_at, removed_reason: k.removed_reason || 'album_deleted', state: 'removed'};
+}
 function albumGet(ctx, data, args) {
   const t = d.now(ctx), a = album(data, args.id), idx = d.index(data);
   const entries = d.albumShows(a, idx, t).map(id => {
@@ -125,7 +135,7 @@ function albumGet(ctx, data, args) {
     revoked_at: l.revoked_at, revoke_reason: l.revoke_reason, views: data.views.filter(v => v.surface.link_id === l.id).map(v => viewView(data, v))}));
   return {album: {id: a.id, title: a.title, state: d.albumState(a), created_at: a.created_at, created_by: a.created_by, deleted_at: a.deleted_at,
     entries, hidden_item_ids: a.item_ids.filter(id => idx.items.has(id) && d.itemState(idx.items.get(id), t) === 'trashed'),
-    members: a.members.map(m => memberView(data, m)), contributions: a.contributions.map(k => ({...c.copy(k), state: k.removed_at ? 'removed' : 'present'})),
+    members: a.members.map(m => memberView(data, m)), contributions: a.contributions.map(k => contributionView(a, k)),
     links, member_views: data.views.filter(v => v.surface.type === 'album' && v.surface.album_id === a.id).map(v => viewView(data, v))}};
 }
 
@@ -142,12 +152,12 @@ function exposure(ctx, data, args) {
   let state, albums = [], returns = [];
   if (item) {
     state = d.itemState(item, t);
-    const holding = data.albums.filter(a => a.item_ids.includes(item.id) && d.hasAudience(data, a, t));
+    const holding = data.albums.filter(a => a.item_ids.includes(item.id) && d.isShared(data, a, t));
     if (state === 'active') albums = holding.map(a => surfaceEntry(data, a, t));
     if (state === 'trashed') returns = holding.map(a => surfaceEntry(data, a, t));
   } else {
     state = k.contribution.removed_at || k.album.deleted_at ? 'removed' : 'active';
-    if (state === 'active' && d.hasAudience(data, k.album, t)) albums = [surfaceEntry(data, k.album, t)];
+    if (state === 'active' && d.isShared(data, k.album, t)) albums = [surfaceEntry(data, k.album, t)];
   }
   const visibleTo = [...new Set(albums.flatMap(a => a.visible_to))];
   const views = data.views.filter(v => v.viewed_item_ids.includes(args.id)).map(v => viewView(data, v));

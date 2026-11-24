@@ -11,9 +11,9 @@ const {viewView} = require('./reads.cjs');
 function targets(data, r, t) {
   if (r.scope.type === 'album') {
     const album = data.albums.find(a => a.id === r.scope.album_id);
-    return album && d.hasAudience(data, album, t) ? [album] : [];
+    return album && d.isShared(data, album, t) ? [album] : [];
   }
-  return data.albums.filter(a => d.hasAudience(data, a, t));
+  return data.albums.filter(a => d.isShared(data, a, t));
 }
 
 function respond(ctx, data, args) {

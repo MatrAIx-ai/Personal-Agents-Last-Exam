@@ -4,13 +4,20 @@
 // When email notices are on at that moment, the notification also stores the full wire message
 // for Mail's existing receive contract (urn:pale:email-message:2). Fernshelf never delivers it:
 // the Infra-run sender (src/publisher.cjs) reads it from a snapshot.
+const crypto = require('node:crypto');
 const c = require('./common.cjs');
 
 const KINDS = Object.freeze(['album.activity', 'removal.requested', 'removal.withdrawn', 'storage.threshold']);
 const sourceURI = accountId => 'urn:pale:app:fernshelf:account:' + encodeURIComponent(accountId);
+// The wire message ID is the notification ID plus a digest of what the notification says and which
+// event caused it. Notification IDs restart after a Fernshelf-only reset, while the router and Mail
+// deduplicate on (source, id): an identical notification produced again by the same event keeps its
+// ID and is delivered once; a different notification that reuses the number gets a new ID.
+const wireId = n => 'fernshelf-' + n.id + '-' + crypto.createHash('sha256')
+  .update(JSON.stringify([n.event_id, n.at, n.kind, n.object_type, n.object_id, n.title, n.body])).digest('hex').slice(0, 16);
 function wireMessage(data, n) {
   return {
-    specversion: '1.0', id: n.id, source: sourceURI(data.account_id), type: 'org.pale.mail.notification.v1', time: n.at,
+    specversion: '1.0', id: wireId(n), source: sourceURI(data.account_id), type: 'org.pale.mail.notification.v1', time: n.at,
     datacontenttype: 'application/json', dataschema: 'urn:pale:email-payload:1',
     data: {
       channel: 'channel.email',
@@ -33,4 +40,4 @@ function notify(ctx, data, {kind, object_type, object_id, title, body, event_id,
 }
 const plural = (n, one, many = one + 's') => n + ' ' + (n === 1 ? one : many);
 const itemWord = (kinds, n) => plural(n, kinds.every(k => k === 'video') ? 'video' : kinds.every(k => k === 'photo') ? 'photo' : 'item');
-module.exports = {KINDS, notify, wireMessage, sourceURI, plural, itemWord};
+module.exports = {KINDS, notify, wireMessage, wireId, sourceURI, plural, itemWord};

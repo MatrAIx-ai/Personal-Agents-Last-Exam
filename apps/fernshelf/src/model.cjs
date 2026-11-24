@@ -87,7 +87,8 @@ function validateSeed(ctx, data) {
     if (!album) bad('Link ' + l.id + ' shows unknown album ' + l.album_id);
     if (l.expires_at && ts(l.expires_at) <= ts(l.created_at)) bad('Link ' + l.id + ' expires before it was created.');
     if (!!l.revoked_at !== !!l.revoke_reason) bad('Link ' + l.id + ': revoked_at goes with revoke_reason.');
-    if (album.deleted_at && !l.revoked_at) bad('Link ' + l.id + ' of deleted album ' + album.id + ' is not revoked.');
+    // A link that was active when its album was deleted is revoked; an expired one stays expired.
+    if (album.deleted_at && !l.revoked_at && !(l.expires_at && ts(l.expires_at) <= ts(album.deleted_at))) bad('Link ' + l.id + ' of deleted album ' + album.id + ' was active and is not revoked.');
   }
   const links = new Map(data.links.map(l => [l.id, l]));
   for (const v of data.views) {

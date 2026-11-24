@@ -34,6 +34,7 @@ function update(ctx, data, args) {
   if (p.taken_at !== undefined && c.ms(p.taken_at) > c.ms(item.added_at)) c.fail('invalid_arguments', 'A capture time cannot be after the item was added (' + item.added_at + ').');
   const stack = idx.stackOf.get(item.id);
   if (p.make_cover && !stack) c.fail('not_stacked', 'Item ' + item.id + ' is not in a stack.');
+  if (p.make_cover && stack.cover_id === item.id) c.fail('invalid_arguments', 'Item ' + item.id + ' is already the cover of ' + stack.id + '.');
   // Decided; now change.
   const changes = {};
   for (const k of ['caption', 'favorite', 'archived', 'taken_at']) if (k in p) { changes[k] = {from: item[k], to: p[k]}; item[k] = p[k]; }
@@ -97,7 +98,7 @@ function restore(ctx, data, args) {
   for (const stack of touched) if (!stack.cover_id) stack.cover_id = d.newestActive(stack, idx, t).id;
   // Restored items return to the albums whose records still hold them; warn where that shows
   // an item with an honoured removal request to someone again.
-  const shown = items.filter(i => data.albums.some(a => a.item_ids.includes(i.id) && d.hasAudience(data, a, t))).map(i => i.id);
+  const shown = items.filter(i => data.albums.some(a => a.item_ids.includes(i.id) && d.isShared(data, a, t))).map(i => i.id);
   const warnings = d.removalWarnings(data, shown);
   c.activity(ctx, data, {actor: 'agent', action: 'items.restore', object_ids: args.ids.slice(), request_id: args.request_id, warnings});
   return {ids: args.ids.slice(), items: items.map(i => ({id: i.id, state: 'active'})), warnings};
@@ -116,7 +117,7 @@ function purge(ctx, data, args) {
   const ids = new Set(args.ids);
   for (const item of items) {
     if (item.backed_up) freed += item.declared_bytes;
-    item.state = 'purged'; item.purged_at = ctx.virtual_now; item.file = null;
+    d.purgeRecord(item, ctx.virtual_now);
     c.history(ctx, item, 'purged', {request_id: args.request_id});
   }
   for (const album of data.albums) album.item_ids = album.item_ids.filter(id => !ids.has(id));

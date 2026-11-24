@@ -152,7 +152,7 @@
   },
   {
     "name": "fernshelf.items.search",
-    "description": "Search my items. Filters: start/end (capture time; a date means that local day in the account time zone, a date-time needs an offset), place (text in the place label), label_id (people label), album_id, kind, source, favorite, archived, backed_up, min_bytes, text (in the caption), state (active by default; trashed or purged). Stacks are collapsed to one row (the cover when it matches) with stack_size unless collapse_stacks is false. Newest capture first; page with limit and cursor.",
+    "description": "Search my items. Filters: start/end (capture time; a date means that local day in the account time zone, a date-time needs an offset), place (text in the place label), label_id (people label), album_id, kind, source, favorite, archived, backed_up, min_bytes, text (in the caption), state (active by default; trashed or purged: a purged item is a record with its ID, kind, times and history, so only start/end and kind filter it). Stacks are collapsed to one row (the cover when it matches) with stack_size unless collapse_stacks is false. Newest capture first; page with limit and cursor.",
     "read_only": true,
     "scope": "fernshelf.items.search",
     "resource_target": "item",
@@ -287,8 +287,6 @@
               "kind",
               "taken_at",
               "state",
-              "backed_up",
-              "declared_bytes",
               "stack_id",
               "stack_size",
               "is_cover"
@@ -324,7 +322,7 @@
   },
   {
     "name": "fernshelf.items.get",
-    "description": "Read one of my items (id): metadata, state (active, trashed, purged) with purge_at, whether it is backed up, its file (if any), its history, the albums whose records hold it, its removal history and the removal requests about it, and, when it is in a stack, every version with its size, kind, state and whether it is the cover. A member's contribution is not my item: read it with albums.get.",
+    "description": "Read one of my items (id): metadata, state (active, trashed, purged) with purge_at, whether it is backed up, its file (if any), its history, the albums whose records hold it, its removal history and the removal requests about it, and, when it is in a stack, every version with its size, kind, state and whether it is the cover. A purged item is returned as a record with its ID, kind, times and history only. A member's contribution is not my item: read it with albums.get.",
     "read_only": true,
     "scope": "fernshelf.items.get",
     "resource_target": "item",
@@ -376,8 +374,6 @@
             "state",
             "taken_at",
             "added_at",
-            "backed_up",
-            "declared_bytes",
             "file",
             "history",
             "albums",
@@ -704,7 +700,7 @@
   },
   {
     "name": "fernshelf.albums.get",
-    "description": "Read one album (id): its entries in order (my items and members' contributions that it shows now), items held but hidden (in the trash), members with role and status, every contribution (present or removed), and its links with state, views and saves.",
+    "description": "Read one album (id): its entries in order (my items and members' contributions that it shows now), items held but hidden (in the trash), members with role and status, every contribution present in it (one that has left is listed only with its contributor and times), and its links with state, views and saves.",
     "read_only": true,
     "scope": "fernshelf.albums.get",
     "resource_target": "album",
@@ -1938,7 +1934,7 @@
   },
   {
     "name": "fernshelf.albums.delete",
-    "description": "Delete an album (id). Its items stay in the library and its links are revoked. An album that still has an invited or joined member or an active link needs confirm: true.",
+    "description": "Delete an album (id). Its items stay in the library. Its active links are revoked (an expired link stays expired). An album that still has a joined member or an active link needs confirm: true.",
     "read_only": false,
     "scope": "fernshelf.albums.delete",
     "resource_target": "album",

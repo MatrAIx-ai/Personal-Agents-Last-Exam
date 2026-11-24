@@ -9,6 +9,7 @@ const path = require('node:path');
 const {fixture, ev} = require('./harness.cjs');
 const {compile} = require('./schema-validator.cjs');
 const plugin = require('../plugin.cjs');
+const {wireId} = require('../src/notify.cjs');
 const minimal = require('../fixtures/minimal.json');
 const binding = require('../fixtures/binding.json');
 
@@ -154,7 +155,7 @@ test('T15 wire messages: stored only while email notices are on, valid against t
   const n = on.data.notifications.at(-1);
   assert.ok(wire(n.wire), 'valid wire message');
   assert.deepEqual([n.wire.id, n.wire.source, n.wire.data.recipient, n.wire.data.source_object.object_id, n.wire.data.content.title],
-    [n.id, 'urn:pale:app:fernshelf:account:fernshelf-maya', {kind: 'person_ref', id: 'person-maya'}, 'rr-0007', n.title]);
+    [wireId(n), 'urn:pale:app:fernshelf:account:fernshelf-maya', {kind: 'person_ref', id: 'person-maya'}, 'rr-0007', n.title]);
   const noRecipient = structuredClone(n.wire); delete noRecipient.data.recipient;
   const withAsset = structuredClone(n.wire); withAsset.data.content.asset_ids = ['asset-x'];
   assert.equal(wire(noRecipient), false);

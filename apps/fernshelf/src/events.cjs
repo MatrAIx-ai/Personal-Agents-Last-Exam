@@ -23,7 +23,7 @@ function matches(album, m) {
 }
 // Resolve the album an event names. `accept(album)` is the extra condition the event needs
 // (e.g. the event's person invited there); with a match it is part of the match.
-function resolveAlbum(data, ref, accept = () => true, {allowEmptyMatch = false, why = 'the event does not apply to it'} = {}) {
+function resolveAlbum(data, ref, accept = () => true, {allowEmptyMatch = false, why = 'the event does not apply to it', none = 'album_match found no album.'} = {}) {
   if (ref.album_id !== undefined) {
     const album = data.albums.find(a => a.id === ref.album_id);
     if (!album) reject('Unknown album ' + ref.album_id + '.');
@@ -37,7 +37,7 @@ function resolveAlbum(data, ref, accept = () => true, {allowEmptyMatch = false, 
     if (album.deleted_at || !matches(album, ref.album_match) || !accept(album)) return;
     if (!found || c.ms(album.created_at) >= c.ms(found.created_at)) found = album;
   });
-  if (!found) reject('album_match found no album.');
+  if (!found) reject(none);
   return {album: found, by_match: true};
 }
 const member = (album, personId) => album.members.find(m => m.person_id === personId);
@@ -57,20 +57,19 @@ const base = (ctx, data, event, object_ids, details) =>
 const effect = (ctx, data, event, cause_seq, action, object_ids, details) =>
   c.activity(ctx, data, {actor: 'event', action, object_ids, event_id: event.event_id, cause_seq, details});
 
-// Backing up happens only inside an event: take waiting items oldest first while each fits.
+// Backing up happens only inside an event: take waiting items oldest first while each fits, and stop
+// at the first that does not.
 function backupPass(ctx, data, event, cause) {
   const t = d.now(ctx), quota = data.account.quota_bytes;
   let used = d.usedBytes(data, t);
-  const queue = d.waitingQueue(data, t);
-  let k = 0;
-  for (; k < queue.length && used + queue[k].declared_bytes <= quota; k++) {
-    const item = queue[k];
+  for (const item of d.waitingQueue(data, t)) {
+    if (used + item.declared_bytes > quota) break;
     item.backed_up = true;
     used += item.declared_bytes;
     c.history(ctx, item, 'backed_up', {event_id: event.event_id});
     effect(ctx, data, event, cause, 'effect.item.backed_up', [item.id], {declared_bytes: item.declared_bytes});
   }
-  return {used, waiting: queue.length - k};
+  return used;
 }
 // storage.threshold: once when an event takes used_bytes from below to at or above 80% of the
 // quota, and once when it leaves an item waiting while none was waiting before it.
@@ -100,8 +99,10 @@ function itemAdded(ctx, data, event) {
   if (p.kind === 'photo' && p.duration_ms !== undefined) reject('A photo has no duration.');
   const before = snapshotStorage(data, t);
   const cause = base(ctx, data, event, [p.item_id, ...(p.stack ? [p.stack.stack_id] : [])], {declared_bytes: p.declared_bytes});
-  const pass = backupPass(ctx, data, event, cause);
-  const fits = pass.waiting === 0 && pass.used + p.declared_bytes <= data.account.quota_bytes;
+  const used = backupPass(ctx, data, event, cause);
+  // Waiting items went first (oldest first, stopping at the first that does not fit); the new item
+  // is then judged on its own bytes against the quota at T.
+  const fits = used + p.declared_bytes <= data.account.quota_bytes;
   const item = {id: p.item_id, kind: p.kind, taken_at: p.taken_at, added_at: ctx.virtual_now, place: place(p.place), people: (p.people || []).slice(),
     caption: p.caption ?? null, source: p.source, favorite: false, archived: false, backed_up: fits, declared_bytes: p.declared_bytes,
     content_hash: p.content_hash ?? null, width: p.width ?? null, height: p.height ?? null, duration_ms: p.duration_ms ?? null, file: null, state: 'active',
@@ -195,7 +196,10 @@ function shareViewed(ctx, data, event) {
     if (!link) reject('Unknown link ' + s.id + '.');
     album = data.albums.find(a => a.id === link.album_id);
   } else {
-    ({album, by_match: byMatch} = resolveAlbum(data, s));
+    // A link named through a match resolves to the newest matching album that has an active link.
+    const forLink = s.type === 'link' && s.album_match !== undefined;
+    ({album, by_match: byMatch} = resolveAlbum(data, s, forLink ? a => d.activeLinks(data, a.id, t).length > 0 : undefined,
+      forLink ? {none: 'album_match found no album with an active link.'} : {}));
     if (s.type === 'link') {
       const active = d.activeLinks(data, album.id, t);
       if (!active.length) reject('Album ' + album.id + ' has no active link.');

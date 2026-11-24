@@ -7,4 +7,5 @@ require('./w3-sharing.test.cjs');
 require('./w4-removals.test.cjs');
 require('./w5-storage.test.cjs');
 require('./cross.test.cjs');
+require('./review.test.cjs');
 require('./fixtures.test.cjs');

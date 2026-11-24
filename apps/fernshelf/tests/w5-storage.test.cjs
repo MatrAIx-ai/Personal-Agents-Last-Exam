@@ -81,28 +81,42 @@ test('T13 items that are not backed up: recorded past the quota, searchable, ref
   refused(f, 'fernshelf.items.read', {id: 'it-big'}, 'no_file');
   // It can be edited like any item.
   f.call('fernshelf.items.update', {id: 'it-big', patch: {caption: 'Recital, full length'}});
-  // A small photo arriving behind it waits too (oldest first); no second "full" notification.
-  f.event(added('2026-11-20T10:05:00-08:00', {item_id: 'it-small', declared_bytes: 1000000}));
-  assert.equal(item(f, 'it-small').backed_up, false);
-  assert.deepEqual(thresholds(f), ['full']);
-  // backup.resumed while the first still does not fit leaves both waiting and writes nothing but its own row.
+  // A new item that fits is backed up on arrival even while an older, larger one still waits: the
+  // waiting pass runs first and stops at it-big; the new item is judged on its own bytes.
+  f.event(added('2026-11-20T10:05:00-08:00', {item_id: 'it-mid', declared_bytes: 1000000000}));
+  assert.deepEqual([item(f, 'it-mid').backed_up, item(f, 'it-big').backed_up, storage(f).used_bytes], [true, false, USED + 1000000000]);
+  assert.deepEqual(thresholds(f), ['full', 80], 'it took used_bytes past 80%; no second "full" while it-big still waits');
+  // One that does not fit waits behind it-big.
+  f.event(added('2026-11-20T10:06:00-08:00', {item_id: 'it-small', declared_bytes: 100000000}));
+  assert.deepEqual([item(f, 'it-small').backed_up, thresholds(f)], [false, ['full', 80]]);
+  // Freeing space by purge lowers used_bytes at once and changes no backed_up flag.
+  f.call('fernshelf.items.trash', {ids: ['it-mid']});
+  assert.equal(f.call('fernshelf.items.purge', {ids: ['it-mid'], confirm: true}).freed_bytes, 1000000000);
+  assert.deepEqual([storage(f).used_bytes, item(f, 'it-small').backed_up], [USED, false]);
+  // backup.resumed stops at the first waiting item that does not fit: it-big (1.2 GB > 1.05 GB free)
+  // stays, and so does it-small behind it although it alone would fit. Only the event's own row is written.
   const rows = f.data.activity.length;
   f.event(ev('backup.resumed', '2026-11-20T10:10:00-08:00', {}));
-  assert.deepEqual([item(f, 'it-big').backed_up, item(f, 'it-small').backed_up, f.data.activity.length, thresholds(f)], [false, false, rows + 1, ['full']]);
-  // Freeing space by purge lowers used_bytes at once and changes no backed_up flag.
+  assert.deepEqual([item(f, 'it-big').backed_up, item(f, 'it-small').backed_up, f.data.activity.length, thresholds(f)], [false, false, rows + 1, ['full', 80]]);
   f.call('fernshelf.items.trash', {ids: ['it-m06']});
   const p = f.call('fernshelf.items.purge', {ids: ['it-m06'], confirm: true});
   assert.equal(p.freed_bytes, 820000000);
   s = storage(f);
-  assert.deepEqual([s.used_bytes, item(f, 'it-big').backed_up, s.pending_bytes], [USED - 820000000, false, 1201000000]);
+  assert.deepEqual([s.used_bytes, item(f, 'it-big').backed_up, s.pending_bytes], [USED - 820000000, false, 1300000000]);
   // The next sync backs both up, oldest first, one activity row each.
   f.event(ev('backup.resumed', '2026-11-20T11:00:00-08:00', {}, 'ev-sync'));
   assert.deepEqual([item(f, 'it-big').backed_up, item(f, 'it-small').backed_up], [true, true]);
   assert.deepEqual(f.data.activity.filter(a => a.event_id === 'ev-sync').map(a => [a.action, a.object_ids[0] || null]),
     [['event.backup.resumed', null], ['effect.item.backed_up', 'it-big'], ['effect.item.backed_up', 'it-small']]);
   s = storage(f);
-  assert.deepEqual([s.used_bytes, s.pending_bytes], [USED - 820000000 + 1201000000, 0]);
+  assert.deepEqual([s.used_bytes, s.pending_bytes], [USED - 820000000 + 1300000000, 0]);
   assert.equal(item(f, 'it-big').history.at(-1).action, 'backed_up');
+  // The audit's case: 8.1 MB free; a 9 MB item waits, then a 1 kB item is backed up on arrival.
+  const q = fixture({mutate: d => { d.account.quota_bytes = 860000000; }});
+  q.event(added('2026-11-20T10:00:00-08:00', {item_id: 'it-w1', kind: 'video', declared_bytes: 9000000}));
+  q.event(added('2026-11-20T10:05:00-08:00', {item_id: 'it-w2', declared_bytes: 1000}));
+  assert.deepEqual([item(q, 'it-w1').backed_up, item(q, 'it-w2').backed_up, storage(q).used_bytes, storage(q).pending_bytes, thresholds(q)],
+    [false, true, USED + 1000, 9000000, ['full']]);
   // An item trashed while it waits is not backed up later and frees no bytes when purged.
   const g = fixture({mutate: d => { d.account.quota_bytes = USED + 1000; }});
   g.event(added('2026-11-20T10:00:00-08:00', {item_id: 'it-w', declared_bytes: 5000}));

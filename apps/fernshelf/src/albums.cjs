@@ -47,8 +47,7 @@ function update(ctx, data, args) {
   const after = album.item_ids.filter(id => !remove.includes(id)).concat(add);
   for (const id of order) if (!after.includes(id)) c.fail('not_in_album', id + ' is not in album ' + album.id + ' after this change.');
   // Warnings: added items that become visible to someone through this album or its links.
-  const audience = d.hasAudience(data, album, t);
-  const warnings = audience ? d.removalWarnings(data, add) : [];
+  const warnings = d.isShared(data, album, t) ? d.removalWarnings(data, add) : [];
   album.item_ids = order.concat(after.filter(id => !order.includes(id)));
   if (title !== undefined) album.title = title;
   c.activity(ctx, data, {actor: 'agent', action: 'albums.update', object_ids: [album.id, ...remove, ...add], request_id: args.request_id, warnings,
@@ -58,9 +57,10 @@ function update(ctx, data, args) {
 
 function remove(ctx, data, args) {
   const t = d.now(ctx), album = liveAlbum(data, args.id);
-  if (d.hasAudience(data, album, t) && args.confirm !== true) c.fail('confirm_required', 'Album ' + album.id + ' still has members or an active link; repeat with confirm: true to delete it.');
+  if (d.isSeen(data, album, t) && args.confirm !== true) c.fail('confirm_required', 'Album ' + album.id + ' still has joined members or an active link; repeat with confirm: true to delete it.');
+  // Only links that are active now become revoked; an expired or revoked link keeps its state.
   const revoked = d.activeLinks(data, album.id, t).map(l => l.id);
-  for (const l of data.links) if (l.album_id === album.id && !l.revoked_at) { l.revoked_at = ctx.virtual_now; l.revoke_reason = 'album_deleted'; }
+  for (const l of data.links) if (revoked.includes(l.id)) { l.revoked_at = ctx.virtual_now; l.revoke_reason = 'album_deleted'; }
   album.deleted_at = ctx.virtual_now;
   c.activity(ctx, data, {actor: 'agent', action: 'albums.delete', object_ids: [album.id, ...revoked], request_id: args.request_id});
   return {id: album.id, state: 'deleted', revoked_link_ids: revoked};

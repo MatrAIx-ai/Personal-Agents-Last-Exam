@@ -89,6 +89,30 @@ async function run() {
     check('A second sender process for the same run is refused before any dispatch', reconnect === 'refused', reconnect);
     check('Mail still holds one record for the notification', (await inbox(a.mailInfra)).length === inboxAfter.length);
 
+    // A Fernshelf-only reset restarts notification IDs at the seed's last one, so the next notification
+    // reuses the delivered ntf ID. Its wire message ID also depends on the notification's content and
+    // cause, so a different notification is a new Mail message, while the same notification produced
+    // again by the same event is still one Mail message.
+    const resetOnce = async () => { const v = (await a.infra.call('env.snapshot')).version; assert.equal((await a.infra.call('env.reset', {expected_version: v})).status, 'ready'); };
+    await resetOnce();
+    let snapR = await a.infra.call('env.snapshot');
+    const other = await a.infra.call('env.apply_event', {expected_version: snapR.version, event: {event_id: 'ev-fs-445', at: '2026-11-20T19:20:00-08:00',
+      operation: 'fernshelf.removal.withdrawn', payload: {removal_id: 'rr-0005', message: 'Leave it, it is fine.'}}});
+    assert.equal(other.status, 'committed', JSON.stringify(other));
+    const reused = (await a.infra.call('env.snapshot')).snapshot.data.notifications.at(-1);
+    check('After a Fernshelf-only reset the next notification reuses the delivered notification ID', reused.id === a.notification.id && reused.title !== a.notification.title);
+    const different = await publisher.send({infra: a.infra, router: sender, notificationId: reused.id});
+    check('The different notification is delivered as a new Mail message', different.stage === 'delivered' && different.result.event_id !== sent.result.event_id &&
+      (await inbox(a.mailInfra)).length === inboxAfter.length + 1, different.result);
+    await resetOnce();
+    snapR = await a.infra.call('env.snapshot');
+    assert.equal((await a.infra.call('env.apply_event', {expected_version: snapR.version, event: JSON.parse(fs.readFileSync(path.join(locate.packageDir, 'examples/scenario.json'), 'utf8'))})).status, 'committed');
+    const again = (await a.infra.call('env.snapshot')).snapshot.data.notifications.at(-1);
+    check('The same event after a reset rebuilds the identical wire message', JSON.stringify(again.wire) === JSON.stringify(a.notification.wire));
+    const resent = await publisher.send({infra: a.infra, router: sender, notificationId: again.id});
+    check('...which Mail answers from its first receipt: no second email', resent.stage === 'delivered' && resent.result.event_id === sent.result.event_id &&
+      (await inbox(a.mailInfra)).length === inboxAfter.length + 1, resent.result);
+
     // 2. Email notices off: no wire message, nothing to publish.
     const off = await prepare('flow-off', false);
     check('With email notices off the notification has no wire message', off.notification.wire === null);

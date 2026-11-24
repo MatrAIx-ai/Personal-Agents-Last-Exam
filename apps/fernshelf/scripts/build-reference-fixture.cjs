@@ -44,18 +44,9 @@ const labels = [['pl-maya', 'Maya', 'person-maya'], ['pl-dana', 'Dana', 'person-
   ['pl-ruth', 'Mum', 'person-ruth'], ['pl-theo', 'Theo', 'person-theo'], ['pl-iris', 'Iris', 'person-iris'], ['pl-sam', 'Sam', 'person-sam'],
   ['pl-june', 'June', 'person-june'], ['pl-nico', 'Nico', 'person-nico'], ['pl-pip', 'Pip (dog)', null], ['pl-walt', 'Grandpa Walt', null]]
   .map(([id, name, person_id]) => ({id, name, person_id}));
-// 30 fictional places: [label, scene kind for the stand-in image, lat, lon]
-const PLACES = [['Alder Hall, Portland', 'hall', 45.519, -122.679], ['Quarry Lane garden', 'garden', null, null], ['Cormorant Beach', 'beach', 45.88, -123.96],
-  ['Larch Ridge trailhead', 'mountain', 45.37, -121.70], ['Fenwick kitchen', 'kitchen', null, null], ['Harbor Street', 'city', 45.52, -122.67],
-  ['Bellweather Park', 'garden', 45.53, -122.64], ['Owl Creek cabin', 'mountain', 44.98, -121.80], ['Mirror Lake', 'mountain', 45.31, -121.79],
-  ['Copper Kettle cafe', 'kitchen', null, null], ['Wren Street community garden', 'garden', null, null], ['Saltmarsh boardwalk', 'beach', 46.30, -124.03],
-  ['Thistle Hill orchard', 'garden', 45.40, -122.95], ['Grandpa Walt\'s porch', 'hall', null, null], ['Riverside market', 'city', 45.51, -122.66],
-  ['Elk Meadow', 'mountain', 45.33, -121.64], ['Lantern Square', 'night', 45.52, -122.68], ['Juniper Point lookout', 'mountain', 44.37, -121.14],
-  ['Driftwood Cove', 'beach', 45.03, -124.01], ['Maple Row school hall', 'hall', null, null], ['Granary Lofts rooftop', 'city', null, null],
-  ['Pinecone ski lodge', 'snow', 45.30, -121.75], ['Frost Hollow sled hill', 'snow', null, null], ['Blue Heron marsh', 'beach', 45.70, -122.76],
-  ['Cedar Bend campsite', 'mountain', 44.70, -122.10], ['Old Mill bakery', 'kitchen', null, null], ['Tidewater ferry dock', 'beach', 46.19, -123.83],
-  ['Ashgrove station', 'city', null, null], ['Starfield overlook', 'night', 44.05, -121.31], ['Hawthorn Avenue', 'city', null, null]];
-const place = k => (k === null ? null : {label: PLACES[k][0], lat: PLACES[k][2], lon: PLACES[k][3]});
+// 30 fictional places (dev/places.cjs): [label, scene kind for the stand-in image]; no coordinates.
+const PLACES = require('../dev/places.cjs').PLACES;
+const place = k => (k === null ? null : {label: PLACES[k][0], lat: null, lon: null});
 const PLACE = Object.fromEntries(PLACES.map((p, k) => [p[0], k]));
 
 // ---- items --------------------------------------------------------------------------------------
@@ -82,7 +73,7 @@ function special(id, wall, o) {
   return it;
 }
 // The reunion on 14 November 2026 and the rest of November with Dana (exactly 7 search rows).
-const alder = place(PLACE['Alder Hall, Portland']), reunionAdded = local('2026-11-14T18:02:00');
+const alder = place(PLACE['Wrenfield Grange Hall']), reunionAdded = local('2026-11-14T18:02:00');
 special('it-2611-0931', '2026-11-14T16:41:10', {place: alder, people: ['pl-dana', 'pl-maya'], caption: 'Everyone on the hall steps', bytes: 4812300, added_at: reunionAdded});
 special('it-2611-0932', '2026-11-14T16:41:11', {place: alder, people: ['pl-dana', 'pl-maya'], bytes: 4798000, added_at: reunionAdded});
 special('it-2611-0933', '2026-11-14T16:41:12', {place: alder, people: ['pl-dana', 'pl-maya'], bytes: 4805500, added_at: reunionAdded});
@@ -94,13 +85,13 @@ special('it-2611-0940', '2026-11-14T17:45:00', {place: alder, people: ['pl-dana'
 special('it-2611-0941', '2026-11-14T17:45:00', {place: alder, people: ['pl-dana', 'pl-iris'], caption: 'Dana and Iris at the cake table (warmer)', bytes: 5310000, added_at: local('2026-11-15T21:10:00')});
 special('it-2611-0942', '2026-11-14T17:45:00', {place: alder, people: ['pl-dana', 'pl-iris'], caption: 'Dana and Iris at the cake table (cropped)', bytes: 4410000, favorite: true, added_at: local('2026-11-16T07:40:00')});
 special('it-2611-0943', '2026-11-14T17:50:00', {place: alder, people: ['pl-maya', 'pl-ruth'], caption: 'Mum and me', bytes: 4120000, favorite: true, added_at: reunionAdded});
-special('it-2610-0949', '2026-10-31T23:30:00', {place: place(PLACE['Lantern Square']), people: ['pl-dana', 'pl-maya'], caption: 'Lantern walk, just before midnight', bytes: 3650000});
-special('it-2611-0950', '2026-11-03T08:15:00', {place: place(PLACE['Copper Kettle cafe']), people: ['pl-dana'], caption: 'Coffee before work', bytes: 2890000});
-special('it-2611-0952', '2026-11-08T11:20:00', {place: place(PLACE['Larch Ridge trailhead']), people: ['pl-dana', 'pl-sam'], bytes: 6120000});
-special('it-2611-0955', '2026-11-18T19:30:00', {place: place(PLACE['Old Mill bakery']), people: ['pl-dana', 'pl-maya', 'pl-theo'], caption: 'Dana\'s birthday dinner', bytes: 3980000});
+special('it-2610-0949', '2026-10-31T23:30:00', {place: place(PLACE['Lanternby Square']), people: ['pl-dana', 'pl-maya'], caption: 'Lantern walk, just before midnight', bytes: 3650000});
+special('it-2611-0950', '2026-11-03T08:15:00', {place: place(PLACE['Kettlewhistle cafe']), people: ['pl-dana'], caption: 'Coffee before work', bytes: 2890000});
+special('it-2611-0952', '2026-11-08T11:20:00', {place: place(PLACE['Larchcombe Ridge trailhead']), people: ['pl-dana', 'pl-sam'], bytes: 6120000});
+special('it-2611-0955', '2026-11-18T19:30:00', {place: place(PLACE['Millwhistle bakery']), people: ['pl-dana', 'pl-maya', 'pl-theo'], caption: 'Dana\'s birthday dinner', bytes: 3980000});
 special('it-2611-0957', '2026-11-19T08:05:00', {place: null, people: ['pl-dana'], bytes: 2750000});
 special('it-2611-0958', '2026-11-19T08:05:02', {place: null, people: ['pl-dana'], bytes: 2700000});
-special('it-2611-0960', '2026-11-01T16:20:00', {place: place(PLACE['Hawthorn Avenue']), people: [], caption: 'Gift for Mum: the blue scarf', bytes: 3300000});
+special('it-2611-0960', '2026-11-01T16:20:00', {place: place(PLACE['Hawcombe Avenue']), people: [], caption: 'Gift for Mum: the blue scarf', bytes: 3300000});
 
 // Procedural outings across three years of capture time.
 const OUTING_PEOPLE = [['pl-maya'], ['pl-ruth'], ['pl-theo'], ['pl-pip'], ['pl-maya', 'pl-pip'], ['pl-sam', 'pl-maya'], ['pl-iris'], ['pl-nico'],
@@ -116,13 +107,13 @@ for (let y = 2024; y <= 2026; y++) for (let m = 1; m <= 12; m++) {
   }
 }
 // The August cabin trip and the spring recital are dated outings used by albums.
-outings.push({wall: '2026-08-15T10:00:00', place: PLACE['Owl Creek cabin'], people: ['pl-sam', 'pl-june', 'pl-maya'], cabin: true});
-outings.push({wall: '2026-08-16T09:30:00', place: PLACE['Mirror Lake'], people: ['pl-sam', 'pl-june'], cabin: true});
-outings.push({wall: '2026-04-18T18:00:00', place: PLACE['Maple Row school hall'], people: ['pl-theo'], recital: true});
-outings.push({wall: '2026-04-26T10:00:00', place: PLACE['Quarry Lane garden'], people: ['pl-ruth'], garden: true});
-outings.push({wall: '2026-06-07T09:00:00', place: PLACE['Wren Street community garden'], people: ['pl-nico', 'pl-maya'], garden: true});
+outings.push({wall: '2026-08-15T10:00:00', place: PLACE['Hobbleford cabin'], people: ['pl-sam', 'pl-june', 'pl-maya'], cabin: true});
+outings.push({wall: '2026-08-16T09:30:00', place: PLACE['Glimmerwell Lake'], people: ['pl-sam', 'pl-june'], cabin: true});
+outings.push({wall: '2026-04-18T18:00:00', place: PLACE['Maplewick school hall'], people: ['pl-theo'], recital: true});
+outings.push({wall: '2026-04-26T10:00:00', place: PLACE['Tamsin Row garden'], people: ['pl-ruth'], garden: true});
+outings.push({wall: '2026-06-07T09:00:00', place: PLACE['Thimble Lane community garden'], people: ['pl-nico', 'pl-maya'], garden: true});
 outings.push({wall: '2025-12-27T13:00:00', place: PLACE['Grandpa Walt\'s porch'], people: ['pl-ruth', 'pl-walt'], winter: true});
-outings.push({wall: '2026-01-02T11:00:00', place: PLACE['Frost Hollow sled hill'], people: ['pl-theo', 'pl-maya'], winter: true});
+outings.push({wall: '2026-01-02T11:00:00', place: PLACE['Frostcombe sled hill'], people: ['pl-theo', 'pl-maya'], winter: true});
 outings.sort((a, b) => (a.wall < b.wall ? -1 : 1));
 
 // Counts: 380 photos and 40 videos in all.
@@ -258,16 +249,16 @@ const cabin = album('al-cabin-2026', 'Cabin trip, August', local('2026-08-18T20:
 cabin.members = [member('person-sam', 'contributor', 'joined', local('2026-08-18T20:05:00'), local('2026-08-18T21:00:00')),
   member('person-june', 'contributor', 'left', local('2026-08-18T20:05:00'), local('2026-08-19T07:30:00'), local('2026-09-01T12:00:00'))];
 const samAt = local('2026-08-19T09:00:00');
-cabin.contributions = [1, 2, 3, 4].map(n => contrib('ct-sam-000' + n, 'person-sam', {taken_at: local('2026-08-15T1' + n + ':20:00'), place: place(PLACE['Owl Creek cabin']),
+cabin.contributions = [1, 2, 3, 4].map(n => contrib('ct-sam-000' + n, 'person-sam', {taken_at: local('2026-08-15T1' + n + ':20:00'), place: place(PLACE['Hobbleford cabin']),
   people: n % 2 ? ['pl-maya'] : [], bytes: 3500000 + n * 111000, added_at: samAt}))
-  .concat([1, 2].map(n => contrib('ct-june-000' + n, 'person-june', {taken_at: local('2026-08-16T1' + n + ':00:00'), place: place(PLACE['Mirror Lake']),
+  .concat([1, 2].map(n => contrib('ct-june-000' + n, 'person-june', {taken_at: local('2026-08-16T1' + n + ':00:00'), place: place(PLACE['Glimmerwell Lake']),
     people: ['pl-sam'], bytes: 3300000 + n * 97000, added_at: local('2026-08-19T08:00:00'), removed_at: local('2026-09-01T12:00:00')})));
 cabin.item_ids.push(...cabin.contributions.filter(k => !k.removed_at).map(k => k.id));
 // Shared: Garden swap (Nico joined as contributor).
 const gardenItems = base.filter(i => ok(i) && i.outing.garden && !used.has(i.id)).slice(0, 6);
 const garden = album('al-garden-swap', 'Garden swap', local('2026-05-02T09:00:00'), gardenItems.map(i => i.id));
 garden.members = [member('person-nico', 'contributor', 'joined', local('2026-05-02T09:05:00'), local('2026-05-03T18:00:00'))];
-garden.contributions = [1, 2].map(n => contrib('ct-nico-000' + n, 'person-nico', {taken_at: local('2026-05-01T1' + n + ':00:00'), place: place(PLACE['Wren Street community garden']),
+garden.contributions = [1, 2].map(n => contrib('ct-nico-000' + n, 'person-nico', {taken_at: local('2026-05-01T1' + n + ':00:00'), place: place(PLACE['Thimble Lane community garden']),
   people: ['pl-nico'], caption: n === 1 ? 'Seedlings to swap' : null, bytes: 2900000 + n * 50000, added_at: local('2026-05-04T08:00:00')}));
 garden.item_ids.push(...garden.contributions.map(k => k.id));
 // Private albums.
