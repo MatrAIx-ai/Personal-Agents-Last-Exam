@@ -2,7 +2,7 @@
 
 Recipient-facing parcel management for a fictional carrier, built as a PALE App package (version 0.1.0, Core API 1.2.0, public runtime 1.6.0). It covers changing home delivery, redirecting to a pickup point, authorizing another collector, and recovering from failed deliveries or expiring pickups. Approved design: [proposals/environment/parcel-delivery-management.md](../../proposals/environment/parcel-delivery-management.md) (PR MatrAIx-ai/Personal-Agents-Last-Exam#101).
 
-> **Status: in progress.** The four workflows W1–W4 are implemented as Agent MCP tools, trusted events and a business Web App on the shared Web Host, with App-only tests, a real-MCP check and browser acceptance. The data catalog (24 parcels in eight seed scenarios) is included. Still to do: the validation report, Agent trials and independent reproduction.
+> **Status: first runnable version (v1), under implementation review.** The four workflows W1–W4 are implemented as Agent MCP tools, trusted events and a business Web App on the shared Web Host, with the data catalog, App-only tests, a real-MCP check and browser acceptance. Evidence, the changes since the approved proposal and the remaining work are in [docs/validation.md](docs/validation.md); sources and licenses are in [PROVENANCE.md](PROVENANCE.md). This is not an accepted contribution until a maintainer accepts and merges it.
 
 ## Run locally
 
