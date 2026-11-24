@@ -223,6 +223,14 @@ const T = name => APP + '.' + name;
       JSON.stringify(passStates) === JSON.stringify(['consumed', 'invalidated']));
     check('Collected parcel has no pass', (await agent.call(T('pass.get'), {id: 'S002'})).status === 'not_available');
 
+    // ---- Host diagnostics for this run: App steps are recorded, with identifiers only ----
+    const debugFile = path.join(stateDir, 'main', APP + '.debug.jsonl');
+    const debug = fs.existsSync(debugFile) ? fs.readFileSync(debugFile, 'utf8') : '';
+    check('Host diagnostics record this App\'s steps for committed operations and events', ['change_submitted', 'grant_created', 'grant_revoked', 'event_prepared', 'notice']
+      .every(step => debug.includes('"' + APP + '.' + step + '"')));
+    check('Diagnostics hold no pass code, address, name, tracking number or parcel description', !['K7QM-4R2X', alexCode, 'Larchmere', 'Maya Chen', 'Alex Rivera', 'NL4471200019', 'Wool blanket']
+      .some(secret => debug.includes(secret)));
+
     // ---- Task policy can limit a write to one parcel through the standard `id` constraint ----
     const policies = structuredClone(snap.snapshot.policies);
     policies.sandbox.constraints[T('change.submit')] = {ids: ['S003']};
