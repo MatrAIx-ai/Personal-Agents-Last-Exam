@@ -2,7 +2,7 @@
 
 Fernshelf is a resettable personal photo library seen from one person's account. A photo can be visible in several places at once (shared albums and the links to them), and a copy someone has saved cannot be called back, so an action the App accepts can still be wrong for the account holder, the people in the picture or the family. Fernshelf records who could see what and when; it does not judge consent.
 
-- App ID `fernshelf`, version 1.0.0, Core API 1.2.0, public runtime 1.6.0. MCP only (no GUI).
+- App ID `fernshelf`, version 1.0.0, Core API 1.2.0, public runtime 1.6.0. MCP, plus a web page for the account holder served by the repository's shared Web Host ([`gui/`](gui/README.md)). The approved plan was MCP-only; the page was added after approval at the maintainers' request.
 - Approved plan: [`proposals/environment/fernshelf.md`](../../proposals/environment/fernshelf.md). Validation evidence: [VALIDATION.md](VALIDATION.md).
 - Node.js 18 or later, built-ins only. Nothing to install.
 
@@ -43,6 +43,16 @@ Fernshelf has no clock event and no scheduler.
 - **Notifications** are written only inside events, for what others and the device do: `album.activity`, `removal.requested`, `removal.withdrawn`, and `storage.threshold` (level `80` once per crossing; `full` when an item starts waiting while none was waiting). While the account's `email_notices` is on, each notification also stores a full Mail wire message.
 - **Events name albums and links made during the run** by `album_match` (`person_id`, `contains_item_ids`, `title`), resolved at the event's time over albums that are not deleted, newest first. A link named through a match (`{"type":"link","album_match":…}`) resolves to the newest matching album that has an active link, and then to that album's newest active link. The resolved album and link IDs are written to the event's activity rows. A replay of the same `event_id` is answered by Core from its stored receipt and does not resolve the match again.
 
+## Web page
+
+```sh
+node runtime/web/server.cjs --app fernshelf --registry apps/fernshelf/web.registry.json --run web-demo --profile sandbox
+```
+
+Run it from the repository root and open the access link it prints. `web.registry.json` is a one-App registry for this folder, so neither `runtime/` nor the repository's `apps.registry.json` changes. The page has Photos, Favourites, Albums (with each album's members, links and contributions), Sharing, Requests, Storage, Activity, Archive and Trash, and a photo panel that shows who can see the item. All 13 Agent writes are reachable from it. Images come only from `items.read` on the Agent connection. `--profile scenario` on a new run gives the read-only page. Infra operations (events, clock, seed, reset) have no browser route. Details, the list of what is deliberately not in the page, and the performance note are in [`gui/README.md`](gui/README.md).
+
+`contribution/gui.json` declares the page in the same way as the other Apps with a page: the legacy reviewer-renderer profile (`gui/src/view.js`) plus the optional `pale.web` extension (`page`, `controller`, `status: implemented`).
+
 ## Data and fixtures
 
 - All places are invented names (`dev/places.cjs`) without coordinates; no real street, venue, park or landmark is named.
@@ -66,6 +76,8 @@ npm run fixtures:check       # fixture consistency
 node scripts/build-reference-fixture.cjs --check
 npm run mcp                  # real MCP checks on the public runtime (scripts/real-mcp.cjs)
 npm run mail-flow            # Fernshelf -> Mail on real processes (scripts/mail-flow.cjs)
+npm run test:web             # the page on the real shared Web Host, no npm dependency (tests/web-smoke.cjs)
+npm run test:browser         # clicks in Chromium (tests/web-browser.cjs); needs the repository's Playwright
 ```
 
 From the repository root:
@@ -76,7 +88,7 @@ node runtime/ci/verify-submissions.cjs . .artifacts/submissions <base-sha>
 npm test
 ```
 
-The business tests and the example need only this folder. `scripts/real-mcp.cjs` and `scripts/mail-flow.cjs` look upwards for a public checkout. From a copy of the package alone, pass `--runtime DIR` (and `--mail DIR` for the Mail flow).
+The business tests and the example need only this folder. `scripts/real-mcp.cjs`, `scripts/mail-flow.cjs` and the two web tests look upwards for a public checkout. From a copy of the package alone, pass `--runtime DIR` (and `--mail DIR` for the Mail flow).
 
 ## Resource registration and its fallback
 
@@ -113,14 +125,16 @@ The wire message ID is `fernshelf-<notification ID>-<digest>`, where the digest 
 | `src/model.cjs` | Seed validation, records, objects and media references |
 | `src/notify.cjs`, `src/publisher.cjs` | Notifications with their wire messages; the Infra-run Mail sender |
 | `scripts/` | Contract and fixture builders, consistency checks, real-MCP and Mail-flow scripts |
-| `tests/` | Business tests (`business.test.cjs` loads them all), App-only harness, verifier inputs (`cases.json`) |
+| `tests/` | Business tests (`business.test.cjs` loads them all), App-only harness, verifier inputs (`cases.json`); `web-smoke.cjs` and `web-browser.cjs` for the page |
+| `gui/` | `index.html`, `src/app.js` (the page's controller), `src/view.js` (reviewer renderer), `README.md` |
+| `web.registry.json` | One-App registry used to start the shared Web Host for this package |
 | `examples/` | `run.cjs` walkthrough and `scenario.json` (Dana's removal request) |
 
 ## Limitations
 
 These follow the approved plan:
 
-- There is no GUI, reviewer console or view for other people.
+- The web page is the account holder's view only. There is no reviewer console or view for other people.
 - One account per instance, and every album is the account holder's.
 - There is no face recognition, visual search or pixel-level duplicate detection.
 - The Agent cannot upload or edit pixels. Videos are metadata only.

@@ -1,6 +1,8 @@
 # Fernshelf 1.0.0 validation
 
-Checked on 23 November 2026 (America/Los_Angeles) against base `main` commit `a4bce02`. Environment: Node.js v22.23.1 (Linux), public runtime 1.6.0, Core API 1.2.0, contribution revision 0.4.0, Mail 1.3.0. Scope: the approved Environment proposal [`proposals/environment/fernshelf.md`](../../proposals/environment/fernshelf.md). The package checks also passed on Node.js v18.20.8 and v20.19.6. All data is synthetic. No network, credentials or model API were used.
+Checked on 23 November 2026 (America/Los_Angeles) against base `main` commit `a4bce02`; the web page and its checks were added and everything below was re-run on 23–24 November 2026. Environment: Node.js v22.23.1 and v18.20.8 (Linux), public runtime 1.6.0, Core API 1.2.0, contribution revision 0.4.0, Mail 1.3.0; for the browser test, the repository's pinned Playwright 1.56.1 with Chromium 141.0.7390.37 (headless). Scope: the approved Environment proposal [`proposals/environment/fernshelf.md`](../../proposals/environment/fernshelf.md). The package checks of the first version also passed on Node.js v20.19.6. All data is synthetic. No credentials or model API were used; the only network use was installing Playwright and Chromium for the browser test.
+
+**The web page was added after plan approval, at the maintainers' request.** The approved plan said MCP-only; the maintainers later asked every Environment for an App-owned page served by the shared Web Host. The page changed no business schema, tool, event, seed format or `src/` behaviour.
 
 **Automated outcome: passed. Human workflow, media and provenance review: pending.** No acceptance is claimed.
 
@@ -21,10 +23,40 @@ Checked on 23 November 2026 (America/Los_Angeles) against base `main` commit `a4
 | Base-revision validator | `git archive a4bce02 runtime package.json`, then `node <base>/runtime/ci/verify-submissions.cjs . <out> a4bce02` | all 8 Apps PASS. This run has no `fernshelf.json` registration, so it is also the fallback case |
 | Shared contracts | `npm run contracts:check` (repository) | passed |
 | Repository suite | `npm test` | 22/22 stages passed |
-| Node 18 and 20 | the same package commands with `~/.nvm/versions/node/v18.20.8/bin` and `v20.19.6/bin` | 38/38 tests, example, contracts, fixture builder and consistency, real MCP 60/60, Mail flow 25/25 on each |
+| Web page on the shared Host | `cd apps/fernshelf && npm run test:web` (`tests/web-smoke.cjs`, no npm dependency) | 14 tests (2 top-level, 12 subtests), 14 passed |
+| Web page in a browser | `node apps/fernshelf/tests/web-browser.cjs --out DIR` (needs `npm ci && npx playwright install chromium` at the root) | 50 checks passed, no JavaScript errors, 18 screenshots (see "Web page" below) |
+| Repository Web Host tests | `npm run test:web` | 4/4 passed |
+| Node 18 and Node 22 | every command in this table on v18.20.8 and on v22.23.1 | all passed on both (counts as above on each) |
+| Node 20 (first version) | the package commands with `v20.19.6/bin` | 38/38 tests, example, contracts, fixture builder and consistency, real MCP 60/60, Mail flow 25/25 |
 | Isolated package | a copy of `apps/fernshelf` alone: `npm test`, `npm run example`; then `scripts/real-mcp.cjs --runtime DIR` and `scripts/mail-flow.cjs --runtime DIR --mail DIR` | 38/38; example passed; 60/60; 25/25. Without `--runtime` the scripts stop with a message naming the option |
 
-Captured outputs are kept with the review notes for this submission, outside the repository.
+Captured outputs (per Node version, including the browser report and screenshots) are kept with the review notes for this submission, outside the repository.
+
+## Web page
+
+Start: `node runtime/web/server.cjs --app fernshelf --registry apps/fernshelf/web.registry.json --run web-demo --profile sandbox` from the repository root. `web.registry.json` is a one-App registry inside the package (`"path": "."`, the package clock), so the shared Host serves this App without any change to `runtime/` or to the repository's `apps.registry.json`. Views, covered workflows and what is deliberately not in the page are listed in [`gui/README.md`](gui/README.md).
+
+`tests/web-smoke.cjs` starts the real Host on a fresh run and uses the page's own session (access token, HttpOnly cookie, CSRF header) against the same HTTP API:
+
+- page, controller and shared files served; the controller is the package file, names all 23 tools and contains no markup sink, code evaluation or `fetch`;
+- 18 hidden paths (package sources, fixtures, the registry, assets, state, invented Infra routes) answer 403 or 404 with no data, a query string is refused, all 7 `env.*` operations answer 403, and a client-chosen role is refused;
+- no session cookie: 401; wrong CSRF token, foreign Origin or non-JSON: 403; a wrong access token opens no session;
+- discovery lists exactly the 23 `fernshelf.*` tools;
+- reads for Photos (both pages), Trash (16), Albums (12), an album's members and links, Requests (2 pending), Storage, Activity (18), `exposure.get` and `items.read` bytes equal to the catalogue SHA-256;
+- writes for W2 (create, add, rename), W3 (invite, create and revoke a link), W4 (honour with note) and W5 plus W2 (favourite and a hostile caption, trash, restore, purge), each confirmed through a separate Agent MCP connection to the same run;
+- refusals `confirm_required` and `already_in_album` with their messages and no version change; a stale version refused while the concurrent change stays; the same request ID sent twice commits one album;
+- a fresh run with `--profile scenario`: discovery has the 10 reads, three forced writes answer 403, every write control in the controller is gated on discovery, and image bytes are still readable.
+
+`tests/web-browser.cjs` (Chromium, kept out of `npm test`) clicks through the real controls and checks each result with an independent MCP read: new album (with a dropped response retried once and committed once), Add items, Move later, Invite, Create link, Revoke, Favourite, Edit details (only four fields shown), a hostile caption shown as text and not executed, people add and remove, Make cover, Move to trash, Restore, multi-select trash and Delete forever (freed space shown), Honor (summary of what was taken down and already seen) and Decline, re-sharing an honoured item (the `removal_honored` warning names the requester), Change role, Save to my library, a refused album delete showing `confirm_required` and its message, a stale form showing `stale_version`, an Infra event that appears only after Refresh, reload persistence, no horizontal overflow at 390 px (five views, the album page) and 1280 px, and a restricted-profile run with no write controls and a forced write refused. No JavaScript errors were reported. The screenshots were reviewed by eye: the Photos grid by month with the drawn stand-in images and placeholders, the photo panel with "who can see this", album pages with members and links, request cards, the storage meter, and the phone layouts.
+
+Choices where the brief was silent:
+
+- **Starting the Host.** A package-local one-App registry instead of editing `apps.registry.json` (which other submissions did): no file outside the package changes.
+- **App styles.** The Host serves only one shared stylesheet and its Content-Security-Policy forbids inline styles, so the controller adds its rules to that stylesheet through the CSS object model at start-up, scoped to `body[data-app=fernshelf]`.
+- **Which fields a form shows.** Forms are the shared schema forms; Fernshelf hides fields an action does not use (for example `add_people` in Edit details, which the people chips handle) and keeps prefilled hidden values (album ID, decision).
+- **Album delete.** The confirmation offers "also end access"; if it is not ticked and the album still has joined members or an active link, the App's `confirm_required` refusal is shown rather than sending `confirm: true` silently.
+- **Loading.** Each MCP call costs about 0.25 s here (Core reads and validates the 420-item state per call) and the Agent process answers one call at a time. A refresh reads the library, trash, account, albums and requests; album details, storage and notifications are read when their view opens; thumbnails load as they scroll into view, two at a time; the search box refreshes after a pause in typing.
+- **Independent checks and Core's lock.** A second MCP process that reads while the page's write holds Core's lock is answered "App is locked; retry later". The browser test's checks retry that answer; the page itself is the Host's single process and never sees it.
 
 ## Workflow-to-test mapping
 
@@ -111,7 +143,7 @@ Against [docs/review/app-implementation-checklist.md](../../docs/review/app-impl
 
 | Item | Verdict | Evidence / gap |
 | --- | --- | --- |
-| 1.1 Promised workflows and modes | met | W1–W5, 23 MCP operations, 7 events, optional Mail notices; MCP-only by the approved plan |
+| 1.1 Promised workflows and modes | met | W1–W5, 23 MCP operations, 7 events, optional Mail notices; MCP by the approved plan, plus the web page the maintainers asked for after approval |
 | 1.2 Versions, paths, schemas, tools, hooks, events, dependencies | met | loader and verifier; `contracts:check`; contribution declarations derived and checked |
 | 1.3 Reproduce startup and tests from a clean public checkout | partly met | reproduced in the working checkout and from an isolated package copy; a fresh clone by a reviewer was not run |
 | 1.4 Receiving Apps at pinned versions; contracts reused | met | Mail is optional; its 1.3.0 wire schema is reused byte for byte; no Mail state or code is copied |
@@ -124,7 +156,7 @@ Against [docs/review/app-implementation-checklist.md](../../docs/review/app-impl
 | 3.3 Seed/reset, separate runs, versions, retries, events, supplied time | met | verifier and real MCP |
 | 3.4 Declared messaging: receiver records, receipts, refusals, duplicates | met | Mail flow |
 | 3.5 Candidate and independently selected base validators | met, with one caveat | the candidate validator and the `a4bce02` validator (from `git archive`) both pass. Both ran on this machine, not in CI |
-| GUI acceptance | not applicable | MCP-only by the approved plan |
+| GUI acceptance | met (automated); human review pending | Requested after plan approval. Runnable delivery on the shared Host; real browser clicks for W2–W5; MCP inspection after each write, reload, an Infra event seen after Refresh; refusals, stale forms and a lost response without false success or double effect; direct forbidden requests refused; image bytes only through `items.read`; hostile text not executed. No user-simulator or model-agent run |
 | 4.1 Every essential workflow has evidence; human review | not met (human) | automated evidence complete. Pending: realism of the library and metadata, adequacy of the stand-in images, notification wording, and that every person and place is fictional |
 | 4.2 Modes reported separately | met | this document |
 | 4.3 Gaps and Host dependencies listed | met | below |
@@ -175,11 +207,13 @@ Against [docs/review/app-implementation-checklist.md](../../docs/review/app-impl
 ## Files outside the package
 
 - `runtime/registrations/fernshelf.json`: the resource registration named by the plan, for Infra review. Remove it to fall back, as described in the README.
+- None for the web page: it, its registry and its tests are inside `apps/fernshelf/`.
 
 ## Remaining gaps and dependencies
 
 - Human review is pending: realism, the stand-in images, notification wording, provenance, and the fictional status of every name and place.
 - Infra must decide on the registration.
 - A fresh clone was not reproduced by a reviewer.
-- CI's Node 18 and 22 matrix and its base-revision job were not run here. Their commands were run locally on Node 18, 20 and 22.
+- CI's Node 18 and 22 matrix and its base-revision job were not run in GitHub Actions. Their commands were run locally on Node 18 and 22 (and the first version also on 20).
+- The web page was checked by browser automation, not by a person or a model agent. Its speed follows Core's per-call cost; a refresh takes a few seconds on the reference library.
 - There is no outbox or cross-App transaction for Mail notices (a platform limitation, as planned).
