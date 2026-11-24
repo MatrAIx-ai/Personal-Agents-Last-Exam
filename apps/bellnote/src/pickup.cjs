@@ -4,7 +4,11 @@ const c = require('./common.cjs');
 const {notify, longDate} = require('./notify.cjs');
 const MODE_TEXT = {guardian_pickup: 'collected by a guardian', bus: 'the bus', after_care: 'after-care', walker: 'walking home'};
 
-const digits = phone => String(phone || '').replace(/\D/g, '');
+// Phone numbers compare by digits, ignoring a leading country code 1.
+function digits(phone) {
+  const d = String(phone || '').replace(/\D/g, '');
+  return (d.length === 8 || d.length === 11) && d[0] === '1' ? d.slice(1) : d;
+}
 function changeView(ctx, data, d) {
   const s = c.schoolOf(data, d.child_id), info = c.dayInfo(data, s, d.date);
   const moot = info.kind === 'closed' && d.status === 'active';
@@ -68,7 +72,7 @@ function addPerson(ctx, data, args) {
     history: [{at: ctx.virtual_now, action: review ? 'added_pending_review' : 'added_approved', by: data.owner_person_id, request_id: args.request_id}]};
   data.pickup_people.push(pp);
   c.activity(ctx, data, {actor: 'agent', action: 'pickup.person_add', child_id: kid.id, object_id: pp.id, request_id: args.request_id});
-  return {id: pp.id, child_id: kid.id, person_id, person_record: created ? 'created' : 'existing', status: pp.status};
+  return {id: pp.id, child_id: kid.id, person_id, person_record: created ? 'created' : 'existing', state: pp.status};
 }
 function removePerson(ctx, data, args) {
   const pp = c.find(data.pickup_people, args.id, 'Pickup person');
@@ -80,7 +84,7 @@ function removePerson(ctx, data, args) {
   pp.status = 'removed';
   pp.history.push({at: ctx.virtual_now, action: 'removed', by: data.owner_person_id, request_id: args.request_id});
   c.activity(ctx, data, {actor: 'agent', action: 'pickup.person_remove', child_id: pp.child_id, object_id: pp.id, request_id: args.request_id});
-  return {id: pp.id, status: pp.status};
+  return {id: pp.id, state: pp.status};
 }
 // Who may be named as the collector for this child: restriction first, then guardians, then the list.
 function checkCollector(data, childId, personId, code) {
@@ -117,7 +121,7 @@ function set(ctx, data, args) {
     history: [{at: ctx.virtual_now, action: 'set', by: data.owner_person_id, request_id: args.request_id}]};
   data.dismissal_changes.push(d);
   c.activity(ctx, data, {actor: 'agent', action: 'dismissal.set', child_id: kid.id, object_id: id, request_id: args.request_id});
-  return {id, child_id: kid.id, date: args.date, status: 'active', replaced_id: prior ? prior.id : null, cutoff_at: info.dismissal_change_cutoff_at};
+  return {id, child_id: kid.id, date: args.date, state: 'active', replaced_id: prior ? prior.id : null, cutoff_at: info.dismissal_change_cutoff_at};
 }
 function cancel(ctx, data, args) {
   const d = c.find(data.dismissal_changes, args.id, 'Dismissal change');
@@ -128,7 +132,7 @@ function cancel(ctx, data, args) {
   d.status = 'cancelled';
   d.history.push({at: ctx.virtual_now, action: 'cancelled', by: data.owner_person_id, request_id: args.request_id});
   c.activity(ctx, data, {actor: 'agent', action: 'dismissal.cancel', child_id: d.child_id, object_id: d.id, request_id: args.request_id});
-  return {id: d.id, status: d.status, default_dismissal: c.child(data, d.child_id).default_dismissal};
+  return {id: d.id, state: d.status, default_dismissal: c.child(data, d.child_id).default_dismissal};
 }
 
 // ---- events ----------------------------------------------------------------------------------

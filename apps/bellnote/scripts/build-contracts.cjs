@@ -170,13 +170,13 @@ tool('forms.withdraw', false, 'Withdraw your own answer (form response id) while
   W(), {id: ID, state: {const: 'withdrawn'}, refunded_cents: CENTS}, [], 'form_response');
 tool('pickup.person_add', false, 'Add a person who may collect child id (name, relationship, phone, or the person_id the school already holds). Needs your custodial right; a new person counts only once the office approves them where the district reviews additions.',
   W({name: str(120), relationship: str(60), phone: {type: 'string', pattern: '^[0-9+() .-]{7,20}$'}, person_id: ID}),
-  {id: ID, child_id: ID, person_id: ID, person_record: en('created', 'existing'), status: en('pending_review', 'approved')}, ['person_id'], 'child');
+  {id: ID, child_id: ID, person_id: ID, person_record: en('created', 'existing'), state: en('pending_review', 'approved')}, ['person_id'], 'child');
 tool('pickup.person_remove', false, 'Remove a pickup person (id) from a child\'s list. Refused while a dismissal change still ahead names them.',
-  W(), {id: ID, status: {const: 'removed'}}, [], 'pickup_person');
+  W(), {id: ID, state: {const: 'removed'}}, [], 'pickup_person');
 tool('dismissal.set', false, 'Set how child id goes home on one school day (date): mode pickup with the person_id of an approved guardian or pickup person, or bus, after_care, walker. Replaces an earlier change for that day; must be made before that day\'s cut-off.',
-  W({date: DATE, mode: MODE, person_id: ID, note: str(300)}), {id: ID, child_id: ID, date: DATE, status: {const: 'active'}, replaced_id: nul(ID), cutoff_at: TS}, ['person_id', 'note'], 'child');
+  W({date: DATE, mode: MODE, person_id: ID, note: str(300)}), {id: ID, child_id: ID, date: DATE, state: {const: 'active'}, replaced_id: nul(ID), cutoff_at: TS}, ['person_id', 'note'], 'child');
 tool('dismissal.cancel', false, 'Cancel an active dismissal change (id) before that day\'s cut-off; the child\'s default way home applies.',
-  W(), {id: ID, status: {const: 'cancelled'}, default_dismissal: str(20)}, [], 'dismissal_change');
+  W(), {id: ID, state: {const: 'cancelled'}, default_dismissal: str(20)}, [], 'dismissal_change');
 tool('lunch.topup', false, 'Top up lunch account id by amount_cents from payment_method_id (or the default). The amount must be inside the district\'s top-up range. A top-up is final in the portal.',
   W({amount_cents: {type: 'integer', minimum: 1, maximum: 10000000}, payment_method_id: ID}), {id: ID, transaction_id: ID, payment: inline(defs.payment), balance_cents: INT}, ['payment_method_id'], 'lunch_account');
 tool('lunch.settings_update', false, 'Set the low-balance threshold and/or the daily spending limit (null clears it) of lunch account id.',
