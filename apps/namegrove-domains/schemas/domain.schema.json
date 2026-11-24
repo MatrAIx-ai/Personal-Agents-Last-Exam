@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:namegrove:domain:1",
+  "$defs": {
+    "id": {"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"},
+    "nullableId": {"anyOf":[{"$ref":"#/$defs/id"},{"type":"null"}]},
+    "version": {"type":"object","properties":{"epoch":{"type":"integer","minimum":1},"revision":{"type":"integer","minimum":0}},"required":["epoch","revision"],"additionalProperties":false},
+    "record": {"type":"object","properties":{"id":{"$ref":"#/$defs/id"}},"required":["id"],"additionalProperties":true}
+  }
+}

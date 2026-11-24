@@ -1,0 +1,26 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"urn:pale:namegrove:seed:1",
+  "type":"object",
+  "properties":{
+    "fixture_generated_at":{"type":"string","format":"date-time"},
+    "account_id":{"$ref":"domain.schema.json#/$defs/id"},
+    "owner_person_id":{"$ref":"domain.schema.json#/$defs/id"},
+    "settings":{"type":"object","properties":{"email_enabled":{"type":"boolean"},"mail_account_id":{"$ref":"domain.schema.json#/$defs/nullableId"},"tax_basis_points":{"type":"integer","minimum":0,"maximum":5000}},"required":["email_enabled","mail_account_id","tax_basis_points"],"additionalProperties":false},
+    "tld_policies":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/record"},"minItems":6,"maxItems":20},
+    "availability":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/record"},"minItems":40,"maxItems":1000},
+    "contact_profiles":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/record"},"minItems":5,"maxItems":100},
+    "payment_methods":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/record"},"minItems":2,"maxItems":100},
+    "quotes":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/record"},"maxItems":1000},
+    "domains":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/record"},"minItems":10,"maxItems":1000},
+    "zones":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/record"},"minItems":10,"maxItems":1000},
+    "charges":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/record"},"maxItems":5000},
+    "renewal_attempts":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/record"},"maxItems":5000},
+    "transfers":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/record"},"minItems":5,"maxItems":5000},
+    "notifications":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/record"},"maxItems":10000},
+    "inbound_authorizations":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/record"},"maxItems":100},
+    "processed_event_ids":{"type":"array","items":{"$ref":"domain.schema.json#/$defs/id"},"uniqueItems":true,"maxItems":10000}
+  },
+  "required":["fixture_generated_at","account_id","owner_person_id","settings","tld_policies","availability","contact_profiles","payment_methods","quotes","domains","zones","charges","renewal_attempts","transfers","notifications","inbound_authorizations","processed_event_ids"],
+  "additionalProperties":false
+}
