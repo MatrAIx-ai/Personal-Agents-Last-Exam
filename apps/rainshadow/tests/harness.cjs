@@ -21,7 +21,9 @@ const schemas = {
 };
 const fail = (code, message) => { throw Object.assign(new Error(message), { code }); };
 
-function fixture({ seed, now, binding, logging = false } = {}) {
+// `deferStateSchema` is for long authoring-time replays (dev/build-fixture.cjs): the seed
+// rules still run after every step, the state schema once the replay calls verify().
+function fixture({ seed, now, binding, logging = false, deferStateSchema = false } = {}) {
   const logs = [];
   const initial = structuredClone(seed ?? require('../fixtures/minimal.json'));
   let data = structuredClone(initial);
@@ -33,15 +35,19 @@ function fixture({ seed, now, binding, logging = false } = {}) {
   };
   const loadedAt = ctx.virtual_now;
   if (logging) ctx.log = (step, details = {}) => logs.push({ step, details: structuredClone(details) });
-  const check = (candidate, context = ctx) => {
-    if (!schemas.seed(candidate)) fail('schema_mismatch', 'State does not match schemas/seed.schema.json');
+  const check = (candidate, context = ctx, withSchema = !deferStateSchema) => {
+    if (withSchema && !schemas.seed(candidate)) fail('schema_mismatch', 'State does not match schemas/seed.schema.json');
     plugin.validateSeed(context, candidate);
   };
-  check(data);
+  check(data, ctx, true);
   return {
     ctx,
     get now() { return ctx.virtual_now; },
     get data() { return structuredClone(data); },
+    // The business data as one string: a cheap way to assert that nothing changed.
+    get text() { return JSON.stringify(data); },
+    // Full check of the current state, schema included.
+    verify() { check(data, ctx, true); return true; },
     get logs() { return structuredClone(logs); },
     // Call a tool by its short name, for example call('places.save', { id }).
     call(name, args = {}) {
@@ -49,12 +55,12 @@ function fixture({ seed, now, binding, logging = false } = {}) {
       if (!readOnly.has(full)) fail('unknown_tool', full);
       const input = write ? { request_id: 'unit-' + (++requests), ...args } : { ...args };
       if (!schemas.input.get(full)(write ? { expected_version: { epoch: 1, revision: 0 }, ...input } : input)) fail('invalid_arguments', 'Arguments do not match inputSchema of ' + full);
-      const before = JSON.stringify(data);
       const out = plugin.handleTool(ctx, structuredClone(data), full, structuredClone(input));
-      if (!write && JSON.stringify(out.data) !== before) fail('invalid_plugin_result', 'Read tool ' + full + ' changed business data');
-      check(out.data);
+      // A read must return the state as it was: that state was checked when it was loaded or written.
+      if (!write && JSON.stringify(out.data) !== JSON.stringify(data)) fail('invalid_plugin_result', 'Read tool ' + full + ' changed business data');
+      if (write) check(out.data);
       if (!schemas.output.get(full)({ ...out.result, status: write ? 'committed' : 'ok', app_id: APP, version: { epoch: 1, revision: 0 } })) fail('schema_mismatch', 'Result of ' + full + ' does not match its outputSchema');
-      data = out.data;
+      if (write) data = out.data;
       return structuredClone(out.result);
     },
     // Apply an event the way Infra does with env.apply_event: the handler and the checks

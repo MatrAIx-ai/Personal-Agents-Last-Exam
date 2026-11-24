@@ -34,6 +34,9 @@ if (!runtime) {
 }
 const { prepare } = require(path.join(runtime.root, 'prepare.cjs')), { Client } = require(path.join(runtime.root, 'client.cjs'));
 const A = 'rainshadow.', WREN = 'pl-wren-lake';
+// The fixture's history holds 27 earlier watches and 58 earlier notices: W(n) and N(n) name
+// the n-th watch and notice of the last three days and the ones made after them.
+const W = n => 'w-' + String(27 + n).padStart(4, '0'), N = n => 'ntc-' + String(58 + n).padStart(4, '0');
 const FRI = '2026-11-20', SAT = '2026-11-21', SUN = '2026-11-22';
 const at = (date, hhmm, offset = '-07:00') => date + 'T' + hhmm + ':00' + offset;
 const clone = x => structuredClone(x);
@@ -77,7 +80,7 @@ async function main() {
     const reads = [
       ['places.search', { query: 'wren' }], ['places.list', {}], ['sources.list', {}], ['forecast.issuances', { id: WREN }], ['forecast.hourly', window], ['forecast.daily', window],
       ['forecast.daily', { ...window, source_id: 'src-aqb' }], ['conditions.get', { id: WREN }], ['alerts.list', { id: 'pl-marrowby', include_closed: true }], ['alerts.get', { id: 'al-0003' }],
-      ['watches.list', { include_closed: true }], ['watches.get', { id: 'w-0002' }], ['notices.list', { limit: 100 }], ['preferences.get', {}],
+      ['watches.list', { include_closed: true }], ['watches.get', { id: W(2) }], ['notices.list', { limit: 100 }], ['preferences.get', {}],
     ];
     const timings = [];
     for (const [name, args] of reads) { const t0 = Date.now(), r = await agent.call(A + name, args); timings.push(Date.now() - t0); check('read ' + name + ' returns ok', r.status === 'ok' && r.app_id === 'rainshadow'); }
@@ -90,7 +93,7 @@ async function main() {
     const created = await write('watches.create', { id: WREN, ...hike, linked_object: { app_id: 'calendar', object_id: 'evt-hike' } });
     writes.push(created, await write('watches.update', { id: created.id, patch: { label: 'Afternoon', conditions: [{ variable: 'aqi', value: 101 }, { variable: 'alert' }] } }), await write('watches.cancel', { id: created.id }));
     equal('all 8 writes commit through MCP', writes.map(w => w.status), Array(8).fill('committed'));
-    check('a committed write returns the object id and the new version', created.id === 'w-0004' && created.version.revision === (await version()).revision - 2);
+    check('a committed write returns the object id and the new version', created.id === W(4) && created.version.revision === (await version()).revision - 2);
     equal('a watch that gains an aqi condition takes the account\'s default air-quality source', writes[6].watch.aq_source_id, 'src-aqb');
     const after = await state();
     equal('each committed write added one activity row with its request_id', after.data.activity.slice(baseline.data.activity.length).map(a => [a.actor, a.action, a.request_id]), ['places.save', 'places.update', 'places.remove', 'preferences.update', 'alerts.acknowledge', 'watches.create', 'watches.update', 'watches.cancel'].map((x, i) => ['agent', x, 'int-' + (n - 7 + i)]));
@@ -127,8 +130,8 @@ async function main() {
     const applied = await event(scenario), stored = await state();
     check('the declared event commits and moves the clock to its own time', applied.status === 'committed' && stored.virtual_now === scenario.at);
     equal('the event receipt is queryable', (await infra.call('env.event_status', { event_id: scenario.event_id })).receipt.event_id, scenario.event_id);
-    const watch = (await agent.call(A + 'watches.get', { id: 'w-0002' })).watch, newest = (await agent.call(A + 'notices.list', { limit: 1 })).notices[0];
-    equal('the watch was evaluated again and a notice was written at the event time', [watch.status, watch.evaluation.issuance.id, watch.evaluation.evaluated_at, newest.kind, newest.object.id, newest.created_at, newest.release_at], ['triggered', 'iss-pfo-wren-4', scenario.at, 'watch.triggered', 'w-0002', scenario.at, scenario.at]);
+    const watch = (await agent.call(A + 'watches.get', { id: W(2) })).watch, newest = (await agent.call(A + 'notices.list', { limit: 1 })).notices[0];
+    equal('the watch was evaluated again and a notice was written at the event time', [watch.status, watch.evaluation.issuance.id, watch.evaluation.evaluated_at, newest.kind, newest.object.id, newest.created_at, newest.release_at], ['triggered', 'iss-pfo-wren-4', scenario.at, 'watch.triggered', W(2), scenario.at, scenario.at]);
     const beforeReplay = await state(), replayed = await event(scenario), afterReplay = await state();
     equal('a repeated event returns the stored receipt and writes nothing: same version, no activity row and no audit row', [replayed.duplicate, afterReplay.revision, afterReplay.data.activity.length, afterReplay.audit.length], [true, beforeReplay.revision, beforeReplay.data.activity.length, beforeReplay.audit.length]);
     await agent.call(A + 'forecast.hourly', window);
@@ -141,16 +144,16 @@ async function main() {
     const t0 = await state(), heldNotice = t0.data.notices.at(-1);
     const noticeState = async () => (await agent.call(A + 'notices.list', { limit: 1 })).notices[0].state;
     const alertStatus = async () => (await agent.call(A + 'alerts.get', { id: 'al-0030' })).alert.status;
-    const watchStatus = async () => (await agent.call(A + 'watches.get', { id: 'w-0002' })).watch.status;
+    const watchStatus = async () => (await agent.call(A + 'watches.get', { id: W(2) })).watch.status;
     equal('the notice is held with a release time at the end of the quiet period, and its wire message is dated then', [heldNotice.created_at, heldNotice.release_at, heldNotice.wire.time, await noticeState(), await alertStatus(), await watchStatus()], [at(FRI, '23:10'), at(SAT, '07:00'), at(SAT, '07:00'), 'held', 'upcoming', 'triggered']);
-    equal('before the release time the sender has only the notice that is already released', sender.pending(t0).map(x => x.id), ['ntc-0009']);
+    equal('before the release time the sender has only the notice that is already released', sender.pending(t0).map(x => x.id), [N(9)]);
     const backwards = await advance('clock-back', at(FRI, '22:00'));
     check('an earlier time is refused with invalid_time', backwards.status === 'invalid_time');
     const moved = await advance('clock-0700', at(SAT, '07:00')), t1 = await state();
     equal('env.advance_time commits, names the clock before and after and adds one revision', [moved.status, moved.advanced, moved.previous_virtual_now, moved.virtual_now, moved.version.revision], ['committed', true, at(FRI, '23:10'), at(SAT, '07:00'), t0.revision + 1]);
     equal('moving the clock changes no business record and writes no activity row', [t1.data, t1.virtual_now], [t0.data, at(SAT, '07:00')]);
     equal('the held notice now reads released, with no App event', await noticeState(), 'released');
-    equal('and the sender picks it up from the snapshot', sender.pending(t1).map(x => [x.id, x.wire.time]), [['ntc-0009', scenario.at], [heldNotice.id, at(SAT, '07:00')]]);
+    equal('and the sender picks it up from the snapshot', sender.pending(t1).map(x => [x.id, x.wire.time]), [[N(9), scenario.at], [heldNotice.id, at(SAT, '07:00')]]);
     const clockRow = t1.audit.at(-1);
     equal('Core records the clock move: an audit row with the clock before and after, and a receipt', [clockRow.tool, clockRow.decision, clockRow.clock, t1.receipts['clock:clock-0700'] !== undefined], ['env.advance_time', 'allow', { request_id: 'clock-0700', from: at(FRI, '23:10'), requested: at(SAT, '07:00'), to: at(SAT, '07:00') }, true]);
     const sameClock = await infra.call('env.advance_time', { request_id: 'clock-0700', expected_version: t0.version || { epoch: t0.epoch, revision: t0.revision }, virtual_now: at(SAT, '07:00') });
@@ -158,11 +161,11 @@ async function main() {
     check('the same clock request ID for another time is rejected', (await advance('clock-0700', at(SAT, '08:00'))).status === 'idempotency_conflict');
     const still = await advance('clock-0700-again', at(SAT, '07:00'));
     equal('the same instant is acknowledged without advancing', [still.status, still.advanced, (await state()).revision], ['committed', false, t1.revision]);
-    check('a write with a version from before the clock move is stale', (await agent.call(A + 'watches.cancel', { id: 'w-0002', request_id: 'old-observation', expected_version: { epoch: t0.epoch, revision: t0.revision } })).status === 'stale_version');
+    check('a write with a version from before the clock move is stale', (await agent.call(A + 'watches.cancel', { id: W(2), request_id: 'old-observation', expected_version: { epoch: t0.epoch, revision: t0.revision } })).status === 'stale_version');
 
     check('the clock moves to the end of the watch window', (await advance('clock-1300', at(SAT, '13:00'))).status === 'committed');
-    equal('a watch past its window reads ended and is listed as closed', [await watchStatus(), (await agent.call(A + 'watches.list', {})).watches.map(w => w.id)], ['ended', ['w-0003']]);
-    equal('an ended watch cannot be edited or cancelled', [(await write('watches.update', { id: 'w-0002', patch: { label: 'Too late' } })).status, (await write('watches.cancel', { id: 'w-0002' })).status], ['invalid_state', 'invalid_state']);
+    equal('a watch past its window reads ended and is listed as closed', [await watchStatus(), (await agent.call(A + 'watches.list', {})).watches.map(w => w.id)], ['ended', [W(3)]]);
+    equal('an ended watch cannot be edited or cancelled', [(await write('watches.update', { id: W(2), patch: { label: 'Too late' } })).status, (await write('watches.cancel', { id: W(2) })).status], ['invalid_state', 'invalid_state']);
     equal('an ended watch no longer holds its place', (await write('places.remove', { id: WREN })).status, 'committed');
     equal('the alert is still upcoming', await alertStatus(), 'upcoming');
     await advance('clock-1800', at(SAT, '18:00'));
@@ -177,10 +180,10 @@ async function main() {
 
     // A task seed with its own clock, then reset to that seed and that time (T18).
     const task = clone(baseline.data), taskNow = '2026-11-21T06:30:00-06:00';
-    task.saved_places = task.saved_places.slice(0, 1); task.watches = []; task.notices = []; task.acknowledgements = []; task.activity = [];
+    task.saved_places = task.saved_places.filter(s => s.place_id === WREN); task.watches = []; task.notices = []; task.acknowledgements = []; task.activity = [];
     task.preferences = { units: 'us', default_source_id: 'src-skyline', default_air_source_id: null, timezone: 'America/Chicago', quiet_hours: { enabled: false, start: '23:00', end: '06:00' }, email_notices: false };
     const loaded = await infra.call('env.load_seed', { expected_version: await version(), data: task, virtual_now: taskNow, request_id: 'task-seed' });
-    check('Infra loads a task seed with its own virtual_now', loaded.status === 'ready' && loaded.loaded === 89);
+    check('Infra loads a task seed with its own virtual_now', loaded.status === 'ready' && loaded.loaded === 219);
     const taskSnap = await state();
     equal('the loaded seed and time are the baseline', [taskSnap.data, taskSnap.virtual_now, taskSnap.initial_virtual_now, taskSnap.audit.length], [task, taskNow, taskNow, 1]);
     const prefs = (await agent.call(A + 'preferences.get', {})).preferences;
@@ -204,7 +207,7 @@ async function main() {
     equal('reset restores the loaded seed and the loaded time, and clears the audit and the clock receipts', [restored.data, restored.virtual_now, restored.audit.length, restored.epoch > taskSnap.epoch, Object.keys(restored.receipts).filter(k => k.startsWith('clock:'))], [task, taskNow, 1, true, []]);
     check('a version from before the reset is stale', (await agent.call(A + 'places.remove', { id: WREN, request_id: 'old-epoch', expected_version: taskSnap.version || { epoch: taskSnap.epoch, revision: taskSnap.revision } })).status === 'stale_version');
     const peer = await client('infra', 'other-run');
-    equal('another run still has the package fixture', [(await peer.call('env.snapshot')).snapshot.data.watches.length, (await peer.call('env.snapshot')).snapshot.virtual_now], [3, at(FRI, '20:00')]);
+    equal('another run still has the package fixture', [(await peer.call('env.snapshot')).snapshot.data.watches.length, (await peer.call('env.snapshot')).snapshot.virtual_now], [30, at(FRI, '20:00')]);
 
     const report = { schema: 'rainshadow.mcp-integration.v2', app_version: require('../app.json').version, runtime_version: runtime.version, node: process.version, checks: checks.length, passed: true, read_call_ms: { max: Math.max(...timings), mean: Math.round(timings.reduce((a, b) => a + b, 0) / timings.length) }, duration_ms: Date.now() - started, names: checks };
     if (opts.report) fs.writeFileSync(path.resolve(opts.report), JSON.stringify(report, null, 2) + '\n');

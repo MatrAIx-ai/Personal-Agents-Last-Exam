@@ -6,8 +6,10 @@
 const { fixture } = require('../tests/harness.cjs');
 const app = fixture(), event = require('./scenario.json');
 const window = { id: 'pl-wren-lake', start: '2026-11-21T10:00:00-07:00', end: '2026-11-21T13:00:00-07:00' };
+// The one open watch at Wren Lake: Saturday's hike.
+const hike = app.call('watches.list', { place_id: 'pl-wren-lake' }).watches[0].id;
 const brief = () => {
-  const f = app.call('forecast.hourly', window), w = app.call('watches.get', { id: 'w-0002' }).watch;
+  const f = app.call('forecast.hourly', window), w = app.call('watches.get', { id: hike }).watch;
   return {
     clock: app.now, issuance: f.issuance, hours: f.rows.map(r => ({ start: r.start, pop: r.pop, thunder_prob: r.thunder_prob })),
     daily_headline: app.call('forecast.daily', window).rows[0].headline, watch: { id: w.id, label: w.label, status: w.status, issuance_used: w.evaluation.issuance },

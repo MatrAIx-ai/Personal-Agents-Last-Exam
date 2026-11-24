@@ -36,6 +36,9 @@ if (!packageRoot || packageRoot.startsWith('..') || path.isAbsolute(packageRoot)
 const { prepare } = require(path.join(runtime, 'prepare.cjs')), { Client } = require(path.join(runtime, 'client.cjs'));
 
 const FRI = '2026-11-20', SAT = '2026-11-21', SUN = '2026-11-22';
+// The fixture's history holds 58 earlier notices: N(n) names the n-th notice of the last
+// three days and the ones written after them.
+const N = n => 'ntc-' + String(58 + n).padStart(4, '0');
 const at = (date, hhmm) => date + 'T' + hhmm + ':00-07:00';
 
 async function main() {
@@ -65,25 +68,25 @@ async function main() {
     equal('Messaging reads a send-only declaration from the Rainshadow package', [capabilities.app_messaging.direction, capabilities.channels.map(c => [c.channel, c.schema_id])], ['publish-only', [['channel.email', 'urn:pale:email-message:2']]]);
     const inbox = async query => (await mail.call('mail.search', { query })).messages;
     const start = await snapshot();
-    equal('notices that came with the seed are history and are not dispatched', [start.data.notices.length, pending(start).length, (await publishReleased({ source: infra, router: publisher })).results.length, (await inbox('Watch triggered')).length], [8, 0, 0, 0]);
+    equal('notices that came with the seed are history and are not dispatched', [start.data.notices.length, pending(start).length, (await publishReleased({ source: infra, router: publisher })).results.length, (await inbox('Watch triggered')).length], [66, 0, 0, 0]);
 
     // A notice that is released as it is written.
     check('a new issuance triggers the saved watch', (await infra.call('env.apply_event', { expected_version: versionOf(start), event: scenario })).status === 'committed');
     const before = await snapshot(), notice = before.data.notices.at(-1);
-    equal('the notice carries its wire message, dated at its release time', [notice.id, notice.kind, notice.release_at, notice.wire.time, notice.wire.data.recipient, pending(before).map(n => n.id)], ['ntc-0009', 'watch.triggered', scenario.at, scenario.at, { kind: 'person_ref', id: 'person-maya' }, ['ntc-0009']]);
+    equal('the notice carries its wire message, dated at its release time', [notice.id, notice.kind, notice.release_at, notice.wire.time, notice.wire.data.recipient, pending(before).map(n => n.id)], [N(9), 'watch.triggered', scenario.at, scenario.at, { kind: 'person_ref', id: 'person-maya' }, [N(9)]]);
     check('Infra brings Mail to the same time', (await syncMail('sync-2030', scenario.at)).status === 'committed');
     const sent = {}, first = await publishReleased({ source: infra, router: publisher, sent });
     const receipt = first.results[0].result;
-    equal('Messaging commits the delivery to the bound Mail account', [first.stage, first.results.length, receipt.status, receipt.target, receipt.channel, receipt.cloud_event.id, receipt.cloud_event.time], ['delivered', 1, 'committed', { app_id: 'mail', account_id: 'mail-maya' }, 'channel.email', 'ntc-0009', notice.release_at]);
+    equal('Messaging commits the delivery to the bound Mail account', [first.stage, first.results.length, receipt.status, receipt.target, receipt.channel, receipt.cloud_event.id, receipt.cloud_event.time], ['delivered', 1, 'committed', { app_id: 'mail', account_id: 'mail-maya' }, 'channel.email', N(9), notice.release_at]);
     const received = await mail.call('mail.get', { id: receipt.event_id });
     equal('the Mail Agent reads the notice as a received message', [received.status, received.message.subject, received.message.body], ['ok', notice.title, notice.body]);
     equal('one inbox record', (await inbox('Watch triggered')).length, 1);
 
     equal('the sender does not publish a notice twice', (await publishReleased({ source: infra, router: publisher, sent })).results.length, 0);
-    const retry = await publisher.call('router.publish', { request_id: 'rainshadow:retry:ntc-0009', message: notice.wire });
+    const retry = await publisher.call('router.publish', { request_id: 'rainshadow:retry:' + N(9), message: notice.wire });
     equal('an identical retry returns the first receipt and leaves one inbox record', [retry.duplicate, retry.event_id, (await inbox('Watch triggered')).length], [true, receipt.event_id, 1]);
     const changed = structuredClone(notice.wire); changed.data.content.title = 'Changed';
-    check('the same notice ID with different content is rejected', (await publisher.call('router.publish', { request_id: 'rainshadow:changed:ntc-0009', message: changed })).code === 'idempotency_conflict');
+    check('the same notice ID with different content is rejected', (await publisher.call('router.publish', { request_id: 'rainshadow:changed:' + N(9), message: changed })).code === 'idempotency_conflict');
     const forged = structuredClone(notice.wire); forged.id = 'ntc-forged'; forged.source = 'urn:pale:app:rainshadow:account:someone-else'; forged.data.source_object.account_id = 'someone-else';
     check('a message for another source account is rejected', (await publisher.call('router.publish', { request_id: 'rainshadow:forged', message: forged })).code === 'source_identity_mismatch');
     const after = await snapshot();
@@ -94,7 +97,7 @@ async function main() {
     const alert = { event_id: 'ev-al-0030', at: at(FRI, '23:10'), operation: 'rainshadow.alert.issued', payload: { alert_id: 'al-0030', source_id: 'src-pfo', category: 'flood', zone_ids: ['z-wren'], message: { message_id: 'al-0030-m1', type: 'alert', sent_at: at(FRI, '23:10'), event: 'Flood Watch', severity: 'moderate', urgency: 'future', certainty: 'possible', onset: at(SAT, '18:00'), ends: at(SUN, '02:00'), headline: 'Flood Watch from Saturday evening through late Saturday night', description: 'Heavy rain may cause flooding of creeks and low crossings.', instruction: 'Be ready to move to higher ground.' } } };
     check('an alert arrives in quiet hours', (await infra.call('env.apply_event', { expected_version: versionOf(after), event: alert })).status === 'committed');
     const night = await snapshot(), held = night.data.notices.at(-1);
-    equal('its notice is held until 07:00 and already carries the wire message for that time', [held.id, held.kind, held.created_at, held.release_at, held.wire.time, pending(night, sent).length], ['ntc-0010', 'alert.issued', at(FRI, '23:10'), at(SAT, '07:00'), at(SAT, '07:00'), 0]);
+    equal('its notice is held until 07:00 and already carries the wire message for that time', [held.id, held.kind, held.created_at, held.release_at, held.wire.time, pending(night, sent).length], [N(10), 'alert.issued', at(FRI, '23:10'), at(SAT, '07:00'), at(SAT, '07:00'), 0]);
     await syncMail('sync-2310', at(FRI, '23:10'));
     equal('a held notice is not published', [(await publishReleased({ source: infra, router: publisher, sent })).stage, (await inbox('Flood Watch')).length], ['nothing_pending', 0]);
     const tooEarly = await infra.call('env.advance_time', { request_id: 'night-0659', expected_version: versionOf(night), virtual_now: '2026-11-21T06:59:59-07:00' });
@@ -105,10 +108,10 @@ async function main() {
     const day = await snapshot();
     equal('the clock move changed no Rainshadow record', day.data, night.data);
     const second = await publishReleased({ source: infra, router: publisher, sent }), receipt2 = second.results[0].result;
-    equal('the released notice is published once the clock has passed its release time', [second.stage, second.results.map(r => r.notice_id), receipt2.status, receipt2.cloud_event.id, receipt2.cloud_event.time], ['delivered', ['ntc-0010'], 'committed', 'ntc-0010', at(SAT, '07:00')]);
+    equal('the released notice is published once the clock has passed its release time', [second.stage, second.results.map(r => r.notice_id), receipt2.status, receipt2.cloud_event.id, receipt2.cloud_event.time], ['delivered', [N(10)], 'committed', N(10), at(SAT, '07:00')]);
     const morningMail = await mail.call('mail.get', { id: receipt2.event_id });
     equal('Mail has the alert notice, received at the synchronized time', [morningMail.status, morningMail.message.subject, morningMail.message.received_at, (await inbox('Flood Watch')).length], ['ok', held.title, at(SAT, '07:00'), 1]);
-    equal('the sender log holds both deliveries and Rainshadow is unchanged by them', [Object.keys(sent), (await snapshot()).revision], [['ntc-0009', 'ntc-0010'], day.revision]);
+    equal('the sender log holds both deliveries and Rainshadow is unchanged by them', [Object.keys(sent), (await snapshot()).revision], [[N(9), N(10)], day.revision]);
 
     // Without a grant the delivery is rejected before dispatch and Mail has no record.
     const infra2 = await rainshadow('infra', 'denied'), denied = await router('denied', writeConfig('denied.config.json', [])), mail2 = await mailClient('agent', 'denied');
@@ -117,7 +120,7 @@ async function main() {
     const refused = await publishReleased({ source: infra2, router: denied });
     equal('no grant: the delivery is rejected', [refused.stage, refused.results.length, refused.results[0].result.status, refused.results[0].result.code, Object.keys(refused.sent).length], ['router_rejected', 1, 'rejected', 'recipient_not_authorized', 0]);
     equal('no grant: Mail has no record', (await mail2.call('mail.search', { query: 'Watch triggered' })).messages.length, 0);
-    check('no grant: the Rainshadow notice is unaffected', (await infra2.call('env.snapshot')).snapshot.data.notices.at(-1).id === 'ntc-0009');
+    check('no grant: the Rainshadow notice is unaffected', (await infra2.call('env.snapshot')).snapshot.data.notices.at(-1).id === N(9));
 
     const mailVersion = JSON.parse(fs.readFileSync(path.join(checkout, 'examples/apps/mail/app.json'), 'utf8')).version;
     const report = { schema: 'rainshadow.mail-integration.v1', app_version: require('../app.json').version, runtime_version: runtimeVersion, mail_version: mailVersion, node: process.version, checks: checks.length, passed: true, duration_ms: Date.now() - started, names: checks };

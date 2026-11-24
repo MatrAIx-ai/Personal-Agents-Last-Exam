@@ -68,9 +68,24 @@ Time is the environment's. Rainshadow has no timers, no scheduler and no clock e
 
 ## Data and seeds
 
-`fixtures/minimal.json` is a snapshot of a scripted synthetic history (two invented regions in two time zones, 6 places, 8 zones, 3 sources, 54 issuances, 12 observations, 6 alert threads, one account with 3 saved places, 3 watches and 8 notices). `dev/build-fixture.cjs` rebuilds it by replaying that history through the App's own functions; `dev/check-fixture.cjs` checks it independently. The tests build their small variations from this fixture in code.
+`fixtures/minimal.json` is a snapshot of a scripted synthetic history: two invented regions in two time zones (6 places, 8 zones, 3 sources) and one account's use of the app from January 2025 to the fixture clock, Friday 20 November 2026 at 20:00 in Denver.
 
-A task supplies its own records in the same shape (`schemas/seed.schema.json`) through `env.load_seed`, with its own `virtual_now`. The seed is history: every record in it counts as already issued. A seed stores no time-based state: a notice carries `release_at`, a watch its window, and both are read against the clock. The fixture's own records run from 10 to 26 November 2026. New watch and notice IDs are `w-NNNN` and `ntc-NNNN`: one more than the largest number in use, and never an ID that another record has.
+- **The last three days** (18 to 20 November 2026) are kept in full: 54 issuances (48 hourly and 7 daily rows from both weather sources for every place, and three days of air quality), 12 observations and 6 alert threads.
+- **The archive** before them holds what the account's history refers to: 57 issuances (24 hourly and 5 daily rows around each past watch), 27 observations and 46 alert threads through two winters and two summers. Archive records carry dated IDs such as `iss-pfo-wren-20250523-15` and `al-20250124-1`.
+- **The account** has 3 saved places at the clock, 30 watches (two still open), 66 notices, 23 acknowledgements and 368 activity rows. Quiet hours were turned on in January 2025 and email copies in February 2026, so only the notices written since then carry a stored wire message.
+
+What the history shows, for tasks that depend on knowing the person:
+
+- Friday drives over Cinderhorn Pass in winter, watched for gusts: at 70 km/h in January 2025 and at 60 km/h ever since.
+- Saturday hikes at Wren Lake from May to October, watched for 40 % rain or 20 % thunder, usually from 10:00 to 13:00; a watch is moved when the plan moves.
+- Her mother's walks at Marrowby in smoke season, watched for an air-quality index of 101 or an air-quality alert.
+- The alert rule of the cabin road is paused each April and resumed each November; Wren Lake is saved for the season and removed after it.
+- The default weather source was Skyline Weather from mid-June to mid-August 2025, and the Public Forecast Office before and since.
+- In the archive, every flood and air-quality alert for her mother's house was acknowledged within hours and no wind or heat alert was; alerts for the pass were acknowledged when a drive was planned.
+
+`dev/build-fixture.cjs` rebuilds the fixture by replaying that history through the App's own functions (the long-range part of the timeline is `dev/history.cjs`); `dev/check-fixture.cjs` checks it independently. The tests build their small variations from this fixture in code.
+
+A task supplies its own records in the same shape (`schemas/seed.schema.json`) through `env.load_seed`, with its own `virtual_now`. The seed is history: every record in it counts as already issued. A seed stores no time-based state: a notice carries `release_at`, a watch its window, and both are read against the clock. The fixture's own records are dated from 1 January 2025 to its clock, and its forecast rows reach to 26 November 2026. New watch and notice IDs are `w-NNNN` and `ntc-NNNN`: one more than the largest number in use, and never an ID that another record has.
 
 `tools.json` and the App-owned schemas are generated from `dev/contracts.cjs` (`node dev/build.cjs`, `--check` for drift). Nothing under `dev/` runs at run time.
 

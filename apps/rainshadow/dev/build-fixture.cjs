@@ -5,15 +5,18 @@
 //   node dev/build-fixture.cjs --check  exit 1 if the committed fixture differs
 //
 // The fixture is a snapshot of a scripted, fully synthetic history: a small invented world
-// (two regions in two time zones) and three days of forecasts, observations, alerts and
-// account activity, replayed through the App's own business functions so that notices,
-// watch evaluations and the activity log are consistent with the rules. Forecast numbers
-// come from the closed-form toy model below (no random numbers, no observed weather).
+// (two regions in two time zones) and one account's use of the app from January 2025 to
+// 20 November 2026, replayed through the App's own business functions so that notices,
+// watch evaluations and the activity log are consistent with the rules. The long-range part
+// of the timeline is dev/history.cjs; this file holds the world, the model of the last three
+// days (18 to 20 November 2026, with full 48-hour issuances from every source for every
+// place) and the replay. Forecast numbers come from closed-form toy models (no random
+// numbers, no observed weather).
 const fs = require('node:fs'), path = require('node:path');
 const { fixture } = require('../tests/harness.cjs');
 const { HOUR, isoAt, localDate, localMinutes, localToInstant, addDays } = require('../src/util.cjs');
 
-const MODEL_VERSION = '1';
+const MODEL_VERSION = '2';
 const A = 'America/Denver', B = 'America/Los_Angeles';
 const at = (date, hhmm, tz) => localToInstant(date, hhmm, tz);
 const iso = (date, hhmm, tz) => isoAt(at(date, hhmm, tz), tz);
@@ -112,12 +115,20 @@ const regionHumidity = (p, n) => (p.tz === A ? 38 : 71) + n * 3;
 
 // ---- scripted history -------------------------------------------------------------------
 const steps = [];
-const push = (t, run) => steps.push({ t, order: steps.length, run });
+const push = (t, run, numbered = true) => steps.push({ t, order: steps.length, run, numbered });
 const event = (t, tz, operation, payload) => push(t, (app, id) => app.event({ event_id: id, at: isoAt(t, tz), operation: 'rainshadow.' + operation, payload }));
 // An agent action happens in a session that Infra opens by moving the clock to that time
 // (Core's env.advance_time on a real host; no App code runs and nothing is recorded).
-const agent = (t, tz, name, args) => push(t, (app, id) => { app.advance(isoAt(t, tz)); app.call(name, { ...args, request_id: id.replace('ev', 'req') }); });
+// `args` may be a function of the replayed state, for a call that names a generated ID.
+const agent = (t, tz, name, args) => push(t, (app, id) => { app.advance(isoAt(t, tz)); app.call(name, { ...(typeof args === 'function' ? args(app) : args), request_id: id.replace('ev', 'req') }); });
+// A check of the replayed state between two steps; it moves no clock and takes no ID.
+const step = (t, run) => push(t, run, false);
 const message = (id, type, t, tz, fields) => ({ message_id: id, type, sent_at: isoAt(t, tz), ...fields });
+
+// January 2025 to mid-November 2026.
+require('./history.cjs')({ P, step, event, agent, message });
+
+// The last three days, in full.
 
 for (const key of Object.keys(P)) {
   const tz = P[key].tz;
@@ -182,27 +193,28 @@ agent(at(FRI, '16:30', A), A, 'watches.create', {
 });
 
 function base() {
-  const all = ['flood', 'storm', 'winter', 'wind', 'temperature', 'fire', 'air_quality', 'other'];
   return {
     account_id: 'rainshadow-maya', owner_person_id: 'person-maya', zones, places, sources, issuances: [], observations: [], alerts: [],
-    preferences: { units: 'metric', default_source_id: 'src-pfo', default_air_source_id: 'src-aqb', timezone: A, quiet_hours: { enabled: true, start: '22:00', end: '07:00' }, email_notices: true },
-    saved_places: [
-      { place_id: P.wren.id, label: 'Saturday hike', alert_rule: { categories: all, min_severity: 'moderate', paused: false }, saved_at: iso('2026-11-10', '19:20', A) },
-      { place_id: P.marrow.id, label: 'Mom\'s house', alert_rule: { categories: ['flood', 'storm', 'wind', 'temperature', 'air_quality'], min_severity: 'minor', paused: false }, saved_at: iso('2026-11-10', '19:24', A) },
-      { place_id: P.cinder.id, label: 'Ski cabin road', alert_rule: { categories: ['winter', 'wind'], min_severity: 'moderate', paused: false }, saved_at: iso('2026-11-12', '08:05', A) },
-    ],
-    acknowledgements: [], watches: [], notices: [], activity: [],
+    // The account as it was opened: nothing saved, no quiet hours and no email copies yet.
+    preferences: { units: 'metric', default_source_id: 'src-pfo', default_air_source_id: 'src-aqb', timezone: A, quiet_hours: { enabled: false, start: '22:00', end: '07:00' }, email_notices: false },
+    saved_places: [], acknowledgements: [], watches: [], notices: [], activity: [],
   };
 }
 const binding = { people: [{ person_id: 'person-maya', name: 'Maya Chen' }], accounts: [{ app_id: 'rainshadow', account_id: 'rainshadow-maya', owner_person_id: 'person-maya' }], objects: {} };
 const CLOCK = iso(FRI, '20:00', A);
 
+const START = iso('2025-01-01', '00:00', A);
+
 function build() {
-  const app = fixture({ seed: base(), now: iso(WED, '08:00', A), binding });
-  steps.sort((a, b) => a.t - b.t || a.order - b.order).forEach((step, i) => step.run(app, 'seed-ev-' + String(i + 1).padStart(3, '0')));
+  // The seed rules run after every step of the replay; the state schema is checked at the end
+  // and again whenever the written fixture is loaded.
+  const app = fixture({ seed: base(), now: START, binding, deferStateSchema: true });
+  let n = 0;
+  steps.sort((a, b) => a.t - b.t || a.order - b.order).forEach(s => s.run(app, s.numbered ? 'seed-ev-' + String(++n).padStart(3, '0') : null));
   app.advance(CLOCK);
+  app.verify();
   const data = app.data;
-  const count = { zones: 8, places: 6, sources: 3, issuances: 54, observations: 12, alerts: 6, saved_places: 3, watches: 3, notices: 8 };
+  const count = COUNT;
   for (const [key, n] of Object.entries(count)) if (data[key].length !== n) throw Error('Fixture count drift: ' + key + ' = ' + data[key].length + ', expected ' + n);
   return data;
 }
@@ -222,7 +234,9 @@ function print(value, indent = '') {
   return '{\n' + entries.map(([k, v]) => indent + ' ' + JSON.stringify(k) + ': ' + print(v, indent + ' ')).join(',\n') + '\n' + indent + '}';
 }
 
-module.exports = { build, print, CLOCK, MODEL_VERSION, sample, dailyRow, P, REV };
+const COUNT = { zones: 8, places: 6, sources: 3, issuances: 111, observations: 39, alerts: 52, saved_places: 3, acknowledgements: 23, watches: 30, notices: 66 };
+
+module.exports = { build, print, CLOCK, START, COUNT, MODEL_VERSION, sample, dailyRow, P, REV };
 if (require.main === module) {
   const file = path.join(__dirname, '../fixtures/minimal.json'), text = print(build()) + '\n';
   if (process.argv.includes('--check')) {
