@@ -65,19 +65,33 @@ class FakeAPI:
 
 
 class ProposalSyncTests(unittest.TestCase):
+    def test_owner_proposal_is_not_external_reviewer_backlog(self):
+        api = FakeAPI(pr(user={"login": "DavidZWZ", "id": 57624585}), self.task)
+        records = sync.collect(api, self.domains, "main")
+        self.assertEqual(records[0]["review"], "Owner review; no external reviewer required")
+        self.assertIn("0 awaiting initial review", sync.render(records, api.repository))
+        api.pr["user"]["id"] = 17
+        self.assertEqual(sync.collect(api, self.domains, "main")[0]["review"], "Awaiting review")
+
     def setUp(self):
         self.domains = sync.domains_from_readme((ROOT / "README.md").read_text())
         template = (ROOT / "proposals/templates/task-proposal.md").read_text()
         self.task = template.replace("`[Fill in: a concise task title]`", "Airport pickup")
         self.task = self.task.replace("`[Fill in: one domain from the table below]`", "Travel & commuting")
         self.task = self.task.replace("`[Fill in: other relevant domains, or None]`", "Money & insurance")
-        self.task = self.task.replace("`[Fill in: the central personalization challenge or insight]`",
-                                      "Resolve a changed arrival time against the user's mobility needs.")
+        self.task = self.task.replace(
+            "`[Fill in: 1–2 sentences on why the right action depends on this person's history, boundaries or relationships rather than the surface request alone]`",
+            "Resolve a changed arrival time against the user's mobility needs.",
+        )
 
     def test_real_templates_and_domains_are_readable(self):
         self.assertEqual(len(self.domains), 15)
         self.assertEqual(sync.field(self.task, "Primary domain"), "Travel & commuting")
         self.assertTrue(sync.answer(self.task, "What makes this distinct and personal").startswith("Resolve"))
+        legacy = "## 4. What makes this distinct and personal\n\n**✍️ Your answer (required):** Legacy summary.\n\nDetails."
+        self.assertEqual(sync.answer(legacy, "What makes this distinct and personal"), "Legacy summary.")
+        example = (ROOT / "proposals/task/lena-spring-gathering.md").read_text()
+        self.assertTrue(sync.answer(example, "What makes this distinct and personal").startswith("When an earlier cutoff"))
         empty = (ROOT / "proposals/templates/task-proposal.md").read_text()
         self.assertEqual(sync.field(empty, "Short task title"), "")
         self.assertEqual(sync.answer(empty, "What makes this distinct and personal"), "")
@@ -244,6 +258,19 @@ class ProposalSyncTests(unittest.TestCase):
         text, _, issue = sync.proposal_text(api, api.pr, "task")
         self.assertEqual(text, "")
         self.assertIn("200 KB", issue)
+
+    def test_workload_counts_only_pending_open_non_draft_requests(self):
+        api = FakeAPI(pr(requested_reviewers=[{"login": "haolun-wu"}]), self.task)
+        active = sync.collect(api, self.domains, "main")[0]
+        records = [active, {**active, "number": 43, "status": "Draft"},
+                   {**active, "number": 44, "status": "Accepted"},
+                   {**active, "number": 45, "status": "Closed"},
+                   {**active, "number": 46, "reviewers": [], "review": "Approved (1)"},
+                   {**active, "number": 47, "reviewers": [], "review": "Awaiting review"}]
+        rendered = sync.render(records, api.repository)
+        self.assertIn("3 open non-draft proposals · 1 awaiting initial review · 1 drafts", rendered)
+        line = next(x for x in rendered.splitlines() if x.startswith("| Task | [haolun-wu]"))
+        self.assertTrue(line.endswith("| 1 |"), line)
 
 
 if __name__ == "__main__":

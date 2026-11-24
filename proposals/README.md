@@ -7,12 +7,16 @@
 | Template | What to prepare | Where it goes |
 | :--- | :--- | :--- |
 | [Environment proposal](templates/environment-proposal.md) | App or website, domains, workflows, connections and construction plan | `proposals/environment/<slug>.md` in your PR branch |
-| [Task proposal](templates/task-proposal.md) | Domains, user persona, story, personalization insight and construction plan | `proposals/task/<slug>.md` in your PR branch |
+| [Task proposal](templates/task-proposal.md) | Domains, user persona, story, personalization insight, rubric, hint, reference solution and construction plan | `proposals/task/<slug>.md` in your PR branch |
 | [PR summary](templates/pr-summary.md) | Track, stage, design link, summary and progress | Your PR description |
 
 Replace each `[Fill in: …]` with your answer. Required and optional fields are marked; explain how unresolved decisions will be settled.
 
 ## One PR through review and implementation
+
+Review requests are assigned automatically by Track and primary domain, with continuity for repeated proposals from the same author in that domain. Drafts wait for Ready for review. Existing manual assignments are preserved. The [routing policy](../docs/review/reviewer-routing.md) lists the six reviewers, exceptions and workload counts.
+
+DavidZWZ's PRs are owner-managed: no automatic reviewer assignment or external approval is required. The owner may record their own plan and implementation acceptance; evidence and CI requirements remain. Other contributors follow the reviewer process below.
 
 Submit the completed proposal in a PR. An assigned Track reviewer or non-author maintainer posts `/approve-plan <commit-sha>`; the bot records the approved scope and applies `plan-approved`. The PR stays open. Add implementation and evidence against the agreed deliverables to the same PR. Substantial scope changes receive another design review. Only the final validated merge counts as acceptance.
 
