@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:mail:seed:1",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "owner_person_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "address": {
+      "type": "string",
+      "minLength": 1
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "thread_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "account_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "from": {
+            "type": "string",
+            "minLength": 1
+          },
+          "to": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 20000
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "folder": {
+            "enum": [
+              "inbox",
+              "archive",
+              "trash",
+              "drafts",
+              "sent"
+            ]
+          },
+          "read": {
+            "type": "boolean"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "uniqueItems": true
+          },
+          "event_ref": {
+            "type": "object",
+            "properties": {
+              "app_id": {
+                "const": "calendar"
+              },
+              "account_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "object_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              }
+            },
+            "required": [
+              "app_id",
+              "account_id",
+              "object_id"
+            ],
+            "additionalProperties": false
+          },
+          "sent_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "thread_id",
+          "account_id",
+          "from",
+          "to",
+          "subject",
+          "body",
+          "received_at",
+          "folder",
+          "read",
+          "attachments"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1000
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "address",
+    "messages"
+  ],
+  "additionalProperties": false
+}
