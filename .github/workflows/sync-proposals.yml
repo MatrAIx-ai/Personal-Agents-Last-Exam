@@ -1,11 +1,8 @@
 name: Sync proposal list
 
 on:
-  pull_request_target:
-    branches: [main]
-    types: [opened, edited, synchronize, reopened, closed, labeled, unlabeled, ready_for_review, converted_to_draft, review_requested, review_request_removed]
   workflow_run:
-    workflows: [Proposal review event]
+    workflows: [Proposal lifecycle, Assign proposal reviewers]
     types: [completed]
   push:
     branches: [main]
@@ -13,6 +10,7 @@ on:
       - .github/workflows/sync-proposals.yml
       - .github/workflows/proposal-review-events.yml
       - scripts/sync_proposals.py
+      - scripts/proposal_lifecycle.py
       - tests/test_sync_proposals.py
       - proposals/**
       - README.md
@@ -25,11 +23,13 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: proposal-list-sync
+  group: proposal-automation-writer
+  queue: max
   cancel-in-progress: false
 
 jobs:
   sync:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -39,7 +39,7 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           persist-credentials: false
       - name: Check synchronization logic
-        run: python3 -m unittest discover -s tests -p test_sync_proposals.py -v
+        run: python3 -m unittest discover -s tests -v
       - name: Refresh the proposal list
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

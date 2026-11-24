@@ -1,0 +1,85 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),crypto=require('node:crypto');
+const {createRuntime}=require('../core/runtime.cjs'),assets=require('../core/assets.cjs'),{Client}=require('../client.cjs'),{pack}=require('../core/data-cli.cjs');
+const root=path.resolve(__dirname,'../..'),m=createRuntime(),clone=structuredClone;let n=0;
+function ok(value,message){assert.ok(value,message);n++;}
+const read=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8'));
+function invalid(change,label){const p=clone(read('runtime/tests/fixtures/task-data/mail/task-load.json'));change(p);let rejected=false;try{rejected=!assets.inspect(m.get('mail'),p.data,p.bundle).automated_pass;}catch(e){rejected=e.code==='invalid_bundle';}ok(rejected,label);}
+(async()=>{
+ const mail=read('runtime/tests/fixtures/task-data/mail/task-load.json'),calendar=read('runtime/tests/fixtures/task-data/calendar/task-load.json');
+ for(const app of ['mail','calendar']){
+  const p=m.get(app);ok(p.quality.automated_pass,app+' package assets pass');ok(!p.quality.submission_ready,app+' never claims human review completed');
+  for(const name of ['asset-descriptor','asset-catalog','dataset','bundle','quality','resources'])ok(fs.readFileSync(path.join(root,'runtime/core/schemas/'+name+'.schema.json'),'utf8')===fs.readFileSync(path.join(p.dir,'schemas/'+name+'.schema.json'),'utf8'),app+' uses canonical '+name+' schema');
+  const packed=pack(app,path.join(__dirname,'fixtures/task-data',app,'task-data'),m);ok(packed.quality.automated_pass,app+' task files package correctly');
+ }
+ invalid(p=>delete p.bundle.dataset,'dataset required');
+ invalid(p=>p.bundle.dataset.sources[0].generation=null,'synthetic generation declaration required');
+ invalid(p=>{p.bundle.dataset.sources[0].kind='collected';},'collection source URL and method required');
+ invalid(p=>p.bundle.dataset.sources[0].license='','asset source license required');
+ invalid(p=>p.bundle.catalog.assets[0].provenance.source_ids[0]='missing','source reference verified');
+ invalid(p=>p.bundle.catalog.assets[0].storage.path='../escape.json','path traversal rejected');
+ invalid(p=>p.bundle.catalog.assets[0].integrity.bytes++,'size checked');
+ const video=clone(m.get('mail').bundle);delete video.catalog.assets.find(a=>a.mime_type==='video/mp4').media.video.fps;let badVideo=false;try{badVideo=!assets.inspect(m.get('mail'),m.get('mail').fixtures.seed,video).automated_pass;}catch(e){badVideo=e.code==='invalid_bundle';}ok(badVideo,'video-specific metadata is mandatory');
+ invalid(p=>p.bundle.catalog.assets[0].integrity.sha256='0'.repeat(64),'hash checked');
+ invalid(p=>delete p.bundle.blobs[p.bundle.catalog.assets[0].asset_id],'missing bytes rejected');
+ invalid(p=>p.bundle.blobs.extra='eA==','undeclared blob rejected');
+ invalid(p=>p.bundle.blobs[p.bundle.catalog.assets[0].asset_id]='broken base64','invalid encoding rejected');
+ invalid(p=>{p.bundle.catalog.assets[0].mime_type='image/png';},'MIME signature checked');
+ invalid(p=>p.bundle.catalog.assets[0].scope.app_id='calendar','cross App descriptor rejected');
+ invalid(p=>p.bundle.catalog.assets[0].subjects[0].account_id='other','cross account descriptor rejected');
+ invalid(p=>p.bundle.catalog.assets[0].subjects[0].object_id='confirmation','wrong parent attachment rejected');
+ invalid(p=>p.data.messages[0].attachments=['not-in-catalog'],'dangling attachment rejected');
+ invalid(p=>p.bundle.dataset.expected_counts.records++,'counts checked');
+ invalid(p=>p.bundle.catalog.assets.push(clone(p.bundle.catalog.assets[0])),'duplicate asset IDs rejected');
+ invalid(p=>{p.data.messages.push({...p.data.messages[1],id:'duplicate'});p.bundle.dataset.expected_counts.records++;},'duplicate record bodies rejected');
+ invalid(p=>{const a=clone(p.bundle.catalog.assets[0]);a.asset_id='duplicate-bytes';p.bundle.catalog.assets.push(a);p.bundle.blobs[a.asset_id]=p.bundle.blobs[p.bundle.catalog.assets[0].asset_id];p.bundle.dataset.expected_counts.assets++;},'duplicate bytes require explicit permission');
+ invalid(p=>{p.bundle.dataset.review={status:'approved',reviewer:null,notes:'Checked'};},'human review cannot be approved without reviewer');
+ const collected=clone(mail);Object.assign(collected.bundle.dataset.sources[0],{kind:'collected',uri:'https://example.com/synthetic-test-source',collection:{method:'test fixture; no network request',collected_at:'2026-11-15T09:00:00Z'},generation:null});ok(assets.inspect(m.get('mail'),collected.data,collected.bundle).automated_pass,'collected sources supported in synthetic App execution');
+ const reused=clone(collected);reused.bundle.dataset.sources[0].kind='reused';ok(assets.inspect(m.get('mail'),reused.data,reused.bundle).automated_pass,'reuse provenance supported');
+ const missing=clone(mail),a=missing.bundle.catalog.assets[0];a.availability={status:'missing',reason:'Fixture explicitly missing'};delete a.integrity;a.storage.packaging='not_materialized';missing.bundle.blobs={};ok(assets.inspect(m.get('mail'),missing.data,missing.bundle).automated_pass,'declared missing with policy allowed');missing.bundle.dataset.quality_policy.missing_assets='reject';ok(!assets.inspect(m.get('mail'),missing.data,missing.bundle).automated_pass,'missing rejected by strict policy');
+ const large=clone(mail),largeBytes=Buffer.from(JSON.stringify({text:'x'.repeat(assets.MAX_BYTES)}));large.bundle.blobs[large.bundle.catalog.assets[0].asset_id]=largeBytes.toString('base64');large.bundle.catalog.assets[0].integrity.bytes=largeBytes.length;large.bundle.catalog.assets[0].integrity.sha256=crypto.createHash('sha256').update(largeBytes).digest('hex');let oversize=false;try{oversize=!assets.inspect(m.get('mail'),large.data,large.bundle).automated_pass;}catch(e){oversize=e.code==='invalid_bundle';}ok(oversize,'oversized bundle rejected');
+ let s=m.create('mail','unit');const before=JSON.stringify({data:s.data,resources:s.resources,version:m.version(s)}),bad=clone(mail);bad.bundle.catalog.assets[0].integrity.sha256='0'.repeat(64);
+ const rejected=m.execute(s,'infra','env.load_seed',{...bad,expected_version:m.version(s),request_id:'bad'});ok(rejected.result.status==='invalid_bundle','load checks asset integrity');ok(JSON.stringify({data:rejected.state.data,resources:rejected.state.resources,version:m.version(rejected.state)})===before,'rejected load has no partial state');
+ const preview=m.execute(s,'infra','env.validate_bundle',{data:mail.data,bundle:mail.bundle});ok(preview.result.quality.automated_pass&&m.version(preview.state).epoch===s.epoch,'validate bundle is read-only');
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'pale-assets-')),clients=[];
+ try{
+  const make=async(app,role,run='shared')=>{const c=new Client(app,role,run,dir);clients.push(c);await c.initialize();return c;};
+  const mi=await make('mail','infra'),ci=await make('calendar','infra'),ma=await make('mail','agent'),ca=await make('calendar','agent');
+  const ms=await mi.call('env.snapshot'),cs=await ci.call('env.snapshot');
+  ok(!((await ma.request('tools/list')).result.tools.some(t=>t.name==='env.validate_bundle')),'bundle checks not discoverable to Agent');
+  ok((await ma.call('env.load_seed',{...mail,expected_version:ms.version,request_id:'deny'})).status==='permission_denied','Agent cannot import assets');
+  const args={...mail,expected_version:ms.version,request_id:'task-bundle-1'};const loaded=await mi.call('env.load_seed',args);ok(loaded.status==='ready'&&loaded.quality.automated_pass,'Mail bundle commits through MCP');
+  ok((await mi.call('env.load_seed',args)).duplicate,'same bundle retry is idempotent despite stale expected version');
+  const conflict=clone(args);conflict.data.messages[0].subject='Other';ok((await mi.call('env.load_seed',conflict)).status==='idempotency_conflict','bundle ID cannot be reused for different data');
+  ok((await mi.call('env.load_seed',{...args,request_id:'stale'})).status==='stale_version','stale bundle version rejected');
+  ok((await ci.call('env.snapshot')).version.epoch===cs.version.epoch,'Mail load leaves Calendar unchanged');
+  let list=(await ma.request('resources/list')).result.resources;ok(list.length===1&&list[0].uri.endsWith('task-mail-materials'),'existing Agent process discovers new run catalog');
+  const result=await ma.request('resources/read',{uri:list[0].uri});ok(JSON.parse(result.result.contents[0].text).app==='mail','MCP reads imported bytes');
+  ok(!!(await ma.request('resources/read',{uri:'pale://shared/mail/assets/room-image'})).error,'old package-only resource inaccessible');
+  const calLoad=await ci.call('env.load_seed',{...calendar,expected_version:cs.version,request_id:'calendar-load'});ok(calLoad.status==='ready','Calendar imports own task assets');
+  const calList=(await ca.request('resources/list')).result.resources;ok(calList.length===1&&calList[0].uri.includes('/calendar/'),'Calendar exposes own resources');
+  ok(JSON.parse((await ca.request('resources/read',{uri:calList[0].uri})).result.contents[0].text).app==='calendar','Calendar resource bytes shared with Agent');
+  ok(!!(await ma.request('resources/read',{uri:calList[0].uri})).error,'cross App URI denied');
+  const otherInfra=await make('mail','infra','other'),otherAgent=await make('mail','agent','other');
+  ok(!!(await otherAgent.request('resources/read',{uri:list[0].uri})).error,'cross run URI denied');
+  ok(!(await otherAgent.request('resources/list')).result.resources.some(r=>r.uri.endsWith('task-mail-materials')),'other run retains baseline catalog');
+  const ma2=await make('mail','agent');ok(JSON.parse((await ma2.request('resources/read',{uri:list[0].uri})).result.contents[0].text).app==='mail','new process reads same committed bytes');
+  const snap=await mi.call('env.snapshot');ok(snap.snapshot.resources.bundle.blobs['task-mail-materials']===mail.bundle.blobs['task-mail-materials'],'snapshot contains exact asset bytes and metadata');
+  const event=clone(read('examples/apps/mail/examples/scenario.json'));event.payload.attachments=['event-material'];const eventBundle=clone(mail.bundle),asset=clone(eventBundle.catalog.assets[0]);asset.asset_id='event-material';asset.subjects[0].object_id=event.payload.id;asset.storage.path='assets/event.json';const b=Buffer.from('{"dynamic":true}');asset.integrity.bytes=b.length;asset.integrity.sha256=crypto.createHash('sha256').update(b).digest('hex');eventBundle.catalog.assets.push(asset);eventBundle.blobs[asset.asset_id]=b.toString('base64');eventBundle.dataset.expected_counts.records++;eventBundle.dataset.expected_counts.assets++;
+  const brokenEventBundle=clone(eventBundle);brokenEventBundle.catalog.assets[1].integrity.sha256='0'.repeat(64);
+  const rejectedEvent=await mi.call('env.apply_event',{event,bundle:brokenEventBundle,expected_version:snap.version});ok(rejectedEvent.status==='invalid_bundle','dynamic event rejects corrupt asset');
+  const unchanged=await mi.call('env.snapshot');ok(JSON.stringify(unchanged.snapshot.data)===JSON.stringify(snap.snapshot.data)&&JSON.stringify(unchanged.snapshot.resources)===JSON.stringify(snap.snapshot.resources)&&JSON.stringify(unchanged.version)===JSON.stringify(snap.version),'failed dynamic event preserves records, assets and version');
+  ok((await mi.call('env.event_status',{event_id:event.event_id})).receipt===null,'failed event has no committed receipt');
+  const ea={event,bundle:eventBundle,expected_version:snap.version};ok((await mi.call('env.apply_event',ea)).status==='committed','dynamic event and its new attachment commit together');
+  ok((await mi.call('env.apply_event',ea)).duplicate,'dynamic asset event is idempotent');
+  ok((await ma.request('resources/read',{uri:'pale://shared/mail/assets/event-material'})).result.contents[0].text==='{"dynamic":true}','new event asset readable immediately');
+  const cur=await mi.call('env.snapshot');await mi.call('env.reset',{expected_version:cur.version});
+  ok((await ma.request('resources/list')).result.resources.length===1,'reset restores imported baseline catalog');
+  ok(!!(await ma.request('resources/read',{uri:'pale://shared/mail/assets/event-material'})).error,'reset removes event asset');
+  ok(JSON.parse((await ma.request('resources/read',{uri:list[0].uri})).result.contents[0].text).app==='mail','reset preserves loaded baseline bytes');
+  ok((await ca.call('calendar.get',{id:'evt-review'})).event.title.startsWith('Task'),'Mail reset preserves Calendar Task data');
+  const calSnap=await ci.call('env.snapshot'),restricted=clone(calendar);restricted.policies.scenario.constraints['calendar.get']={ids:['evt-lunch']};await ci.call('env.load_seed',{...restricted,expected_version:calSnap.version,request_id:'restricted'});
+  ok((await ca.request('resources/list')).result.resources.length===0,'resource access respects parent get permission');
+ }finally{await Promise.all(clients.map(c=>c.close()));fs.rmSync(dir,{recursive:true,force:true});}
+ console.log('PASS: '+n+' dataset, quality, atomic asset, reset and real MCP checks.');
+})().catch(e=>{console.error(e);process.exitCode=1;});
