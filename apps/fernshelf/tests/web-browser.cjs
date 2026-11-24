@@ -36,7 +36,12 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     const errors = [];
     let expectNetworkError = false;
     page.on('pageerror', e => errors.push('pageerror: ' + e.message));
-    page.on('console', m => { if (m.type() === 'error' && !(expectNetworkError && /Failed to load resource|ERR_FAILED/.test(m.text()))) errors.push('console: ' + m.text()); });
+    // Business HTTP answers that are not 200 are recorded with their body. The only ones expected
+    // are Core's "App is locked" while this test's own MCP or Infra process commits; the page
+    // retries those reads. The browser logs such answers as a failed resource load.
+    const answers = [];
+    page.on('response', async res => { if (res.url().endsWith('/api/call') && res.status() !== 200) answers.push({status: res.status(), body: await res.text().catch(() => '')}); });
+    page.on('console', m => { if (m.type() === 'error' && !(expectNetworkError && /Failed to load resource|ERR_FAILED/.test(m.text())) && !/status of 400/.test(m.text())) errors.push('console: ' + m.text()); });
     const idle = () => page.locator('#app[aria-busy=false]').waitFor();
     const nav = async label => { await page.locator('nav button').filter({hasText: label}).first().click(); await idle(); };
     const dialog = page.locator('dialog[open]');
@@ -242,6 +247,7 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     await nav('Albums'); await page.locator('[data-album-id="al-reunion-2026"]').click(); await idle(); await select('it-2611-0931');
     check('Reload: committed caption and favourite are read back', (await page.locator('.detail h2').innerText()) === HOSTILE && (await detailButton('♥ Favourite').count()) === 1);
     check('No JavaScript errors on the desktop page', errors.length === 0, errors);
+    check('Every non-200 business answer was Core\'s lock during an outside commit (' + answers.length + ')', answers.every(a => a.status === 400 && /locked/i.test(a.body)), answers);
 
     // Phone width.
     const phone = await browser.newContext({viewport: {width: 390, height: 844}, isMobile: true, hasTouch: true});

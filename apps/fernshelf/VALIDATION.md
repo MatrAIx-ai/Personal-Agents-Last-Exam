@@ -24,7 +24,7 @@ Checked on 23 November 2026 (America/Los_Angeles) against base `main` commit `a4
 | Shared contracts | `npm run contracts:check` (repository) | passed |
 | Repository suite | `npm test` | 22/22 stages passed |
 | Web page on the shared Host | `cd apps/fernshelf && npm run test:web` (`tests/web-smoke.cjs`, no npm dependency) | 14 tests (2 top-level, 12 subtests), 14 passed |
-| Web page in a browser | `node apps/fernshelf/tests/web-browser.cjs --out DIR` (needs `npm ci && npx playwright install chromium` at the root) | 50 checks passed, no JavaScript errors, 18 screenshots (see "Web page" below) |
+| Web page in a browser | `node apps/fernshelf/tests/web-browser.cjs --out DIR` (needs `npm ci && npx playwright install chromium` at the root) | 51 checks passed, no JavaScript errors, 18 screenshots (see "Web page" below) |
 | Repository Web Host tests | `npm run test:web` | 4/4 passed |
 | Node 18 and Node 22 | every command in this table on v18.20.8 and on v22.23.1 | all passed on both (counts as above on each) |
 | Node 20 (first version) | the package commands with `v20.19.6/bin` | 38/38 tests, example, contracts, fixture builder and consistency, real MCP 60/60, Mail flow 25/25 |
@@ -56,7 +56,7 @@ Choices where the brief was silent:
 - **Which fields a form shows.** Forms are the shared schema forms; Fernshelf hides fields an action does not use (for example `add_people` in Edit details, which the people chips handle) and keeps prefilled hidden values (album ID, decision).
 - **Album delete.** The confirmation offers "also end access"; if it is not ticked and the album still has joined members or an active link, the App's `confirm_required` refusal is shown rather than sending `confirm: true` silently.
 - **Loading.** Each MCP call costs about 0.25 s here (Core reads and validates the 420-item state per call) and the Agent process answers one call at a time. A refresh reads the library, trash, account, albums and requests; album details, storage and notifications are read when their view opens; thumbnails load as they scroll into view, two at a time; the search box refreshes after a pause in typing.
-- **Independent checks and Core's lock.** A second MCP process that reads while the page's write holds Core's lock is answered "App is locked; retry later". The browser test's checks retry that answer; the page itself is the Host's single process and never sees it.
+- **Core's lock.** A process that reads while another process commits is answered "App is locked; retry later". The page's background reads (thumbnails, album details, storage, notifications, "who can see this") retry that answer a few times; a refresh that meets it shows the message and the user presses Refresh. The browser test's own MCP checks retry it too, and the test asserts that every non-200 answer the page received was this lock answer during an outside commit. The browser logs those answers as failed resource loads; they are not JavaScript errors.
 
 ## Workflow-to-test mapping
 

@@ -42,6 +42,9 @@ const hue=id=>{let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))>>>0;re
 // Each MCP call costs a full state read in Core, and the Agent process answers one call at a time,
 // so image reads go through a short queue (two in flight) and never hold up a click for long.
 const queue=[];let inFlight=0;
+// While another process (Infra, another MCP client) commits, Core answers a read "App is locked;
+// retry later". Background reads of this page retry that answer a few times before giving up.
+async function read(name,args){for(let i=0;;i++){try{return await ui.call(name,args);}catch(e){if(!/locked/i.test(e.message)||i>=5)throw e;await new Promise(r=>setTimeout(r,250*(i+1)));}}}
 function later(job){return new Promise((resolve,reject)=>{queue.push({job,resolve,reject});pump();});}
 function pump(){while(inFlight<2&&queue.length){const {job,resolve,reject}=queue.shift();inFlight++;job().then(resolve,reject).finally(()=>{inFlight--;pump();});}}
 const observer=new IntersectionObserver(entries=>{for(const e of entries)if(e.isIntersecting){observer.unobserve(e.target);e.target.loadImage?.();}},{rootMargin:'200px'});
@@ -54,7 +57,7 @@ function media(item,{large=false,known=true}={}){
  if(large)box.append(el('small',{},reading?'Loading image…':note));
  else if(item.caption||placeOf(item))box.append(el('span',{class:'fs-caption'},item.caption||placeOf(item)));
  if(reading){
-  box.loadImage=()=>later(()=>box.isConnected?ui.call(T.read,{id:item.id}):Promise.resolve(null)).then(r=>{
+  box.loadImage=()=>later(()=>box.isConnected?read(T.read,{id:item.id}):Promise.resolve(null)).then(r=>{
    if(!r||!box.isConnected)return;
    const bytes=Uint8Array.from(atob(r.file.base64),c=>c.charCodeAt(0)),url=URL.createObjectURL(new Blob([bytes],{type:r.file.mime_type}));blobs.push(url);
    box.replaceChildren(el('img',{src:url,alt:item.caption||titleOf(item),'data-sha256':r.file.sha256}));box.classList.add('loaded');
@@ -215,7 +218,7 @@ function albumsView(){
 function cover(a){
  const box=el('div',{class:'fs-media empty-album'},el('span',{class:'fs-glyph','aria-hidden':'true'},'▣'));
  if(!a.item_count||!can(T.album))return box;
- box.loadImage=()=>later(()=>A.details[a.id]?Promise.resolve(null):ui.call(T.album,{id:a.id}).then(r=>{A.details[a.id]=r.album;})).then(()=>{
+ box.loadImage=()=>later(()=>A.details[a.id]?Promise.resolve(null):read(T.album,{id:a.id}).then(r=>{A.details[a.id]=r.album;})).then(()=>{
   const d=A.details[a.id],first=d?.entries.find(e=>e.mine&&record(e.id)?.has_file);
   if(first&&box.isConnected)box.replaceWith(media(record(first.id)));
  }).catch(()=>{});
@@ -276,7 +279,7 @@ function contribution(a,c){
   row('From',personName(c.person_id)),row('Caption',c.caption||'—'),row('Taken',when(c.taken_at)),row('Place',placeOf(c)),
   row('People',(c.people||[]).map(labelName).join(', ')||'—'),row('Size',size(c.declared_bytes)),row('Added',when(c.added_at)),area];
  const d=dialog('Shared by '+personName(c.person_id),body,can(T.save)?{confirm:'Save to my library',run:()=>write(T.save,{id:a.id,item_id:c.id})}:{});
- if(can(T.exposure))ui.call(T.exposure,{id:c.id}).then(x=>{if(d.isConnected)area.replaceChildren(exposureView(x));}).catch(e=>area.replaceChildren(el('p',{class:'muted'},problem(e))));
+ if(can(T.exposure))read(T.exposure,{id:c.id}).then(x=>{if(d.isConnected)area.replaceChildren(exposureView(x));}).catch(e=>area.replaceChildren(el('p',{class:'muted'},problem(e))));
  else area.remove();
 }
 function sharingView(){
@@ -417,7 +420,7 @@ function photoView(item){
  if(can(T.exposure)){
   const area=el('div',{class:'fs-exposure'},el('p',{class:'muted'},'Checking…'));
   art.append(el('section',{},el('h3',{},'Who can see this'),area));
-  ui.call(T.exposure,{id:item.id}).then(x=>{if(area.isConnected)area.replaceChildren(exposureView(x));}).catch(e=>area.replaceChildren(el('p',{class:'muted'},problem(e))));
+  read(T.exposure,{id:item.id}).then(x=>{if(area.isConnected)area.replaceChildren(exposureView(x));}).catch(e=>area.replaceChildren(el('p',{class:'muted'},problem(e))));
  }
  if(item.removal_requests.length||item.removal_history.length)art.append(el('section',{},el('h3',{},'Removal requests'),el('ul',{class:'fs-list'},
   item.removal_requests.map(r=>el('li',{},personName(r.from_person_id)+' · '+human(r.state))),
@@ -433,10 +436,10 @@ function photoView(item){
 // past the next refresh.
 function missing(section){
  const need=[];
- if(section.startsWith('album:')){const id=section.slice(6);if(A.albums.some(a=>a.id===id&&!a.deleted_at)&&!A.details[id]&&can(T.album))need.push(()=>ui.call(T.album,{id}).then(r=>{A.details[id]=r.album;}));}
- if(section==='sharing'&&can(T.album))for(const a of A.albums.filter(a=>!a.deleted_at&&(a.members.joined||a.members.invited||a.active_links.length)&&!A.details[a.id]))need.push(()=>ui.call(T.album,{id:a.id}).then(r=>{A.details[a.id]=r.album;}));
- if(section==='storage'&&A.storage===undefined)need.push(()=>can(T.storage)?ui.call(T.storage,{}).then(r=>{A.storage=r.storage;}):Promise.resolve(A.storage=null));
- if(section==='activity'&&A.notifications===undefined)need.push(()=>can(T.notifications)?ui.call(T.notifications,{}).then(r=>{A.notifications=r.notifications;}):Promise.resolve(A.notifications=[]));
+ if(section.startsWith('album:')){const id=section.slice(6);if(A.albums.some(a=>a.id===id&&!a.deleted_at)&&!A.details[id]&&can(T.album))need.push(()=>read(T.album,{id}).then(r=>{A.details[id]=r.album;}));}
+ if(section==='sharing'&&can(T.album))for(const a of A.albums.filter(a=>!a.deleted_at&&(a.members.joined||a.members.invited||a.active_links.length)&&!A.details[a.id]))need.push(()=>read(T.album,{id:a.id}).then(r=>{A.details[a.id]=r.album;}));
+ if(section==='storage'&&A.storage===undefined)need.push(()=>can(T.storage)?read(T.storage,{}).then(r=>{A.storage=r.storage;}):Promise.resolve(A.storage=null));
+ if(section==='activity'&&A.notifications===undefined)need.push(()=>can(T.notifications)?read(T.notifications,{}).then(r=>{A.notifications=r.notifications;}):Promise.resolve(A.notifications=[]));
  return need;
 }
 const ensure=section=>Promise.all(missing(section).map(f=>f()));
