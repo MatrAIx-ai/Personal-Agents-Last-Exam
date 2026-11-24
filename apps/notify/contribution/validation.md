@@ -8,7 +8,7 @@ Notify 1.0.0, public runtime 1.6.0, Core API 1.2.0, Calendar 1.3.0 (reference Ap
 
 | Command | Result |
 | --- | --- |
-| `node --test apps/notify/tests/business.test.cjs` | 18/18 tests pass |
+| `node --test apps/notify/tests/business.test.cjs` | 20/20 tests pass |
 | `node apps/notify/examples/run.cjs` | Two due reminders fired in order: 17:30 delivered, 23:00 silenced by Sleep focus |
 | `node runtime/cli.cjs verify --app apps/notify --output .artifacts/notify.json` | `passed: true`, 38 checks, business and event-example stages passed |
 | `npm run example:calendar-reminder` | `passed: true`, 23 checks over real MCP and Messaging |
@@ -23,7 +23,7 @@ The Web Host page was also exercised by hand (`node runtime/web/server.cjs --app
 | Planned deliverable | Evidence |
 | --- | --- |
 | `apps/notify/` package: 8 Agent tools, reminder state machine, focus and silence at `ctx.virtual_now`, feed store, fire and push handlers, GUI | `tools.json`, `src/`, `gui/`; verifier report |
-| Business tests for every transition and error: create, update, cancel; fire when due, early, twice, after cancel; silenced inside focus or silence; push received, read, dismissed | `tests/business.test.cjs` (18 tests, including overnight focus windows, a daylight-saving change, Calendar-anchor arithmetic with fractional seconds, fire-event IDs for the longest reminder IDs, seed invariants, diagnostics and renderer escaping) |
+| Business tests for every transition and error: create, update, cancel; fire when due, early, twice, after cancel; silenced inside focus or silence; push received, read, dismissed | `tests/business.test.cjs` (20 tests, including overnight focus windows, a daylight-saving change, Calendar-anchor arithmetic with fractional seconds, fire-event IDs for the longest reminder IDs and for a literal ID shaped like a shortened one, an Edit form that leaves the fire time out, seed invariants, diagnostics and renderer escaping) |
 | Example seed: one owner, a weekday focus schedule, reminders tied to Calendar events, past feed items | `fixtures/minimal.json`: Sleep and Work focus, 4 reminders (one Calendar-anchored, delivered), 2 feed items from a reminder and a push sender. Reset restores it exactly (verifier). |
 | Push receive contract `urn:pale:push-payload:1` in `messaging.receives`, plus a publish-only test sender | `schemas/push-payload.schema.json`, `schemas/router-message.schema.json`, `contribution/contribution.json`; sender in `examples/workflows/calendar-reminder/publisher/` |
 | Calendar workflow example: create an event, a reminder 15 minutes before, advance time, fire, read the feed; repeat inside focus to see `silenced` | `examples/workflows/calendar-reminder/run.cjs` |

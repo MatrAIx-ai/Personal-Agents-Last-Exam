@@ -35,7 +35,7 @@ Core 1.2 gives a package's tools only to the Agent role, and the Web Host connec
 
 ## Finding due reminders
 
-The App never schedules itself, and Core 1.2 exposes only its fixed Infra lifecycle operations. A runner reads `data.reminders` from `env.snapshot`, selects the due ones with `src/due.cjs` (`due(data, from, to)` returns scheduled reminders with `from ≤ fire_at < to` in time order), and applies `fireEvent(reminder)` for each at its own time. The event ID is `fire-<reminder_id>` (for a reminder ID too long to fit the 100-character event ID, a prefix plus a hash of the full ID), so a retry is deduplicated. Whether a delivered `actionable` reminder starts a user session is the runner's decision; the feed item and the reminder's `fired_at` are the evidence.
+The App never schedules itself, and Core 1.2 exposes only its fixed Infra lifecycle operations. A runner reads `data.reminders` from `env.snapshot`, selects the due ones with `src/due.cjs` (`due(data, from, to)` returns scheduled reminders with `from ≤ fire_at < to` in time order), and applies `fireEvent(reminder)` for each at its own time. The event ID is `fire-<reminder_id>`; a reminder ID too long to fit the 100-character event ID gets `fireh-<prefix>-<hash of the full ID>` instead, a form no literal ID can produce. A retry is deduplicated. Whether a delivered `actionable` reminder starts a user session is the runner's decision; the feed item and the reminder's `fired_at` are the evidence.
 
 ## State and time
 

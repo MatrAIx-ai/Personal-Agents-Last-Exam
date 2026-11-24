@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const plugin = require('../plugin.cjs');
 const {fixture} = require('./harness.cjs');
-const {due, fireEvent} = require('../src/due.cjs');
+const {due, fireEvent, fireEventId} = require('../src/due.cjs');
 const {quietAt} = require('../src/attention.cjs');
 
 const code = value => ({code:value});
@@ -206,6 +206,35 @@ test('fire events stay within the event ID limit for the longest reminder IDs', 
   assert.deepEqual(fireEvent({reminder_id:long, fire_at:pantry.fire_at}), events[1]);
   for (const e of events) f.event(e); // the harness checks each event against events.schema.json
   assert.equal(reminder(f, long).status, 'delivered');
+});
+
+test('a shortened fire-event ID never equals the literal ID of another reminder', () => {
+  const f = fixture();
+  const data = f.data, long = 'r' + 'x'.repeat(99);
+  // A literal ID shaped like a shortened one: prefix of the long ID, '-', its 24-character hash.
+  const hash = require('node:crypto').createHash('sha256').update(long).digest('hex').slice(0, 24);
+  const lookalike = long.slice(0, 100 - 'fire-'.length - hash.length - 1) + '-' + hash;
+  assert.ok(('fire-' + lookalike).length <= 100);
+  const pantry = data.reminders.find(r => r.id === 'reminder-pantry');
+  data.reminders.push({...structuredClone(pantry), id:long}, {...structuredClone(pantry), id:lookalike, fire_at:'2026-11-18T17:31:00-08:00'});
+  f.load(data);
+  const events = due(f.data, '2026-11-18T17:00:00-08:00', '2026-11-18T18:00:00-08:00').map(fireEvent);
+  assert.deepEqual(events.map(e => e.payload.reminder_id), ['reminder-pantry', long, lookalike]);
+  assert.equal(new Set(events.map(e => e.event_id)).size, 3);
+  for (const e of events) f.event(e);
+  assert.equal(reminder(f, long).status, 'delivered');
+  assert.equal(reminder(f, lookalike).status, 'delivered');
+});
+
+test('the Edit form leaves the fire time out so a text-only edit keeps it', () => {
+  const source = require('node:fs').readFileSync(require('node:path').join(__dirname, '../gui/src/app.js'), 'utf8')
+    .replace(/^import .*$/m, 'const el=()=>null,time=String,tag=()=>null,textBlock=()=>null,metadata=()=>null,mount=()=>{};')
+    .replace('export const config', 'const config');
+  const config = new Function(source + '\nreturn config;')();
+  const edit = config.actions.find(a => a.tool === 'notify.reminder.update');
+  const r = {title:'Pantry', body:'', fire_at:'2026-11-18T12:45:30.500-08:00', actionable:true};
+  assert.deepEqual(edit.prefill(r), {patch:{title:'Pantry', body:'', actionable:true}});
+  assert.match(config.field('patch.fire_at').help, /keep the current time/);
 });
 
 test('seed validation rejects unbound accounts, bad zones, broken links and reversed history', () => {

@@ -14,12 +14,15 @@ const {createHash} = require('node:crypto');
 const MAX_EVENT_ID = 100; // event_id limit in schemas/events.schema.json
 
 // Stable event ID for one reminder: `fire-<reminder_id>`, or for a reminder ID too long
-// to fit, a prefix of it plus a hash of the whole ID, so it stays unique and under the limit.
+// to fit, `fireh-<prefix of the ID>-<hash of the whole ID>`. The two forms differ in their
+// fifth character ('-' versus 'h'), so a shortened ID never equals the literal ID of another
+// reminder, and the hash keeps long IDs with the same prefix apart.
+const LITERAL = 'fire-', HASHED = 'fireh-', HASH_LENGTH = 24;
 function fireEventId(reminderId) {
-  const plain = 'fire-' + reminderId;
+  const plain = LITERAL + reminderId;
   if (plain.length <= MAX_EVENT_ID) return plain;
-  const hash = createHash('sha256').update(reminderId).digest('hex').slice(0, 24);
-  return plain.slice(0, MAX_EVENT_ID - hash.length - 1) + '-' + hash;
+  const hash = createHash('sha256').update(reminderId).digest('hex').slice(0, HASH_LENGTH);
+  return HASHED + reminderId.slice(0, MAX_EVENT_ID - HASHED.length - HASH_LENGTH - 1) + '-' + hash;
 }
 
 // The event a runner applies for one due reminder. The ID is stable, so a retry is deduplicated by Core.

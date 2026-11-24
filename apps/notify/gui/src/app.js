@@ -11,7 +11,9 @@ export const config={
  actions:[
   {label:'New reminder',tool:'notify.reminder.create',primary:true,success:'Reminder scheduled.'},
   {label:'Edit reminder',tool:'notify.reminder.update',selected:true,available:r=>r.status==='scheduled',
-   prefill:r=>({patch:{title:r.title,body:r.body,fire_at:r.fire_at,actionable:r.actionable}})},
+   // fire_at stays empty: the browser time control holds only minutes, so prefilling it would
+   // resubmit a rounded time on a text-only edit and detach a Calendar anchor.
+   prefill:r=>({patch:{title:r.title,body:r.body,actionable:r.actionable}})},
   {label:'Cancel reminder',tool:'notify.reminder.cancel',selected:true,available:r=>r.status==='scheduled'}
  ]
 };
@@ -53,7 +55,7 @@ Object.assign(config,{
   textBlock(r.body||'No details'),metadata('Remind at',time(r.fire_at)),
   r.fired_at?metadata('Reached the phone',time(r.fired_at)+(r.status==='silenced'?' (silently)':'')):null,
   r.anchor?metadata('Calendar event',r.anchor.minutes_before+' min before '+time(r.anchor.event_start)):null),
- field:name=>name.endsWith('calendar_account_id')?{help:'Optional. Instead of a fixed time, fill all four calendar fields to remind before an event.'}:{},
+ field:name=>name==='patch.fire_at'?{help:'Leave empty to keep the current time. A new time replaces any Calendar anchor.'}:name.endsWith('calendar_account_id')?{help:'Optional. Instead of a fixed time, fill all four calendar fields to remind before an event.'}:{},
  emptyView:ui=>el('div',{class:'empty'},quietBanner(ui),el('h3',{},'No reminder selected'),el('p',{},'Choose a reminder, or open Lock screen to see what reached the phone.')),
  sectionAfter:tool=>tool==='notify.reminder.cancel'?'cancelled':tool==='notify.reminder.create'?'upcoming':null
 });
