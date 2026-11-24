@@ -58,32 +58,32 @@ const scenarioWire = () => { const app = fixture(); app.event(scenario()); retur
 const actions = (app, from = 0) => app.data.activity.slice(from).map(a => a.actor + ':' + a.action + ':' + a.object_id);
 
 test('T01 [W1] search, save, update label and rule, list; duplicate and unknown IDs', () => {
-  const app = fixture(), found = app.call('places.search', { query: 'tallow' });
+  const app = fixture(), found = app.call('places.search', { query: 'quill' });
   assert.equal(found.total, 3);
   assert.equal(found.places.find(p => p.id === WREN).label, 'Saturday hike');
-  assert.equal(found.places.find(p => p.id === 'pl-tallowmere').saved, false);
-  assert.equal(app.call('places.search', { query: 'tallow', limit: 1 }).places.length, 1);
+  assert.equal(found.places.find(p => p.id === 'pl-quillmere').saved, false);
+  assert.equal(app.call('places.search', { query: 'quill', limit: 1 }).places.length, 1);
 
-  const saved = app.call('places.save', { id: 'pl-tallowmere', label: 'Dad\'s shop', alert_rule: { categories: ['wind', 'flood'], min_severity: 'severe' } });
-  assert.equal(saved.id, 'pl-tallowmere');
+  const saved = app.call('places.save', { id: 'pl-quillmere', label: 'Dad\'s shop', alert_rule: { categories: ['wind', 'flood'], min_severity: 'severe' } });
+  assert.equal(saved.id, 'pl-quillmere');
   assert.deepEqual(saved.place.alert_rule, { categories: ['flood', 'wind'], min_severity: 'severe', paused: false });
   assert.equal(saved.place.saved_at, app.now);
-  rejects(app, () => app.call('places.save', { id: 'pl-tallowmere' }), 'already_saved');
+  rejects(app, () => app.call('places.save', { id: 'pl-quillmere' }), 'already_saved');
   rejects(app, () => app.call('places.save', { id: 'pl-nowhere' }), 'not_found');
   rejects(app, () => app.call('places.save', { id: 'pl-port-brindle', label: '   ' }), 'invalid_arguments');
 
-  const updated = app.call('places.update', { id: 'pl-tallowmere', patch: { label: 'Workshop', alert_rule: { paused: true } } }).place;
+  const updated = app.call('places.update', { id: 'pl-quillmere', patch: { label: 'Workshop', alert_rule: { paused: true } } }).place;
   assert.equal(updated.label, 'Workshop');
   assert.deepEqual(updated.alert_rule, { categories: ['flood', 'wind'], min_severity: 'severe', paused: true });
   rejects(app, () => app.call('places.update', { id: 'pl-port-brindle', patch: { label: 'Harbor' } }), 'not_found');
-  rejects(app, () => app.call('places.update', { id: 'pl-tallowmere', patch: {} }), 'invalid_arguments');
+  rejects(app, () => app.call('places.update', { id: 'pl-quillmere', patch: {} }), 'invalid_arguments');
 
   const plain = app.call('places.save', { id: 'pl-port-brindle' }).place;
   assert.equal(plain.label, 'Port Brindle');
   assert.equal(plain.alert_rule.min_severity, 'moderate');
   assert.equal(plain.alert_rule.categories.length, 8);
   const list = app.call('places.list').places;
-  assert.deepEqual(list.map(p => p.id), [MARROW, CINDER, WREN, 'pl-tallowmere', 'pl-port-brindle'], 'in the order they were saved');
+  assert.deepEqual(list.map(p => p.id), [MARROW, CINDER, WREN, 'pl-quillmere', 'pl-port-brindle'], 'in the order they were saved');
   assert.deepEqual(list.map(p => p.open_watches), [1, 0, 1, 0, 0]);
   assert.deepEqual(list.slice(0, 3).map(p => p.saved_at.slice(0, 10)), ['2025-01-01', '2025-01-01', '2026-11-10']);
 });
@@ -156,9 +156,9 @@ test('T04 [W2] the latest issuance per source and place; explicit issuance_id; i
   assert.deepEqual(earlier.rows.map(r => r.pop), [10, 10, 15, 15, 25, 30, 40]);
   const other = app.call('forecast.hourly', { ...window, source_id: 'src-skyline' });
   assert.deepEqual(other.issuance, { id: 'iss-sky-wren-3', issued_at: at(FRI, '18:00'), is_latest: true });
-  assert.equal(app.call('forecast.hourly', { ...window, id: 'pl-tallowmere' }).issuance.id, 'iss-pfo-tallow-3', 'another place is not affected');
+  assert.equal(app.call('forecast.hourly', { ...window, id: 'pl-quillmere' }).issuance.id, 'iss-pfo-quill-3', 'another place is not affected');
 
-  rejects(app, () => app.call('forecast.hourly', { ...window, id: 'pl-tallowmere', issuance_id: 'iss-pfo-wren-3' }), 'not_found');
+  rejects(app, () => app.call('forecast.hourly', { ...window, id: 'pl-quillmere', issuance_id: 'iss-pfo-wren-3' }), 'not_found');
   rejects(app, () => app.call('forecast.hourly', { ...window, source_id: 'src-skyline', issuance_id: 'iss-pfo-wren-3' }), 'not_found');
   rejects(app, () => app.call('forecast.hourly', { ...window, id: 'pl-nowhere' }), 'not_found');
   rejects(app, () => app.call('forecast.hourly', { ...window, source_id: 'src-none' }), 'not_found');
@@ -179,7 +179,10 @@ test('T04 [W2] the latest issuance per source and place; explicit issuance_id; i
   assert.deepEqual(app.data, before, 'reads leave state identical');
 
   // The latest issuance is the one with the newest issued_at, whatever order they arrive in.
+  const evaluated = app.call('watches.get', { id: W(2) }).watch.evaluation, rowsBefore = app.data.activity.length;
   app.event(issued('iss-pfo-wren-late', at(FRI, '20:50'), [[12, { pop: 95 }]], { issued_at: at(FRI, '19:00') }));
+  assert.deepEqual(app.call('watches.get', { id: W(2) }).watch.evaluation, evaluated, 'the late arrival re-evaluates no watch: cause and evaluated_at keep naming the arrival of iss-pfo-wren-4');
+  assert.equal(app.data.activity.length, rowsBefore + 1, 'one activity row, for the arrival itself');
   assert.deepEqual(app.call('forecast.hourly', window).issuance, { id: 'iss-pfo-wren-4', issued_at: at(FRI, '20:30'), is_latest: true }, 'a late arrival with an older issue time does not take over');
   assert.deepEqual(app.call('forecast.issuances', { id: WREN, source_id: 'src-pfo' }).issuances.slice(0, 3).map(i => [i.id, i.is_latest]), [['iss-pfo-wren-4', true], ['iss-pfo-wren-late', false], ['iss-pfo-wren-3', false]]);
   assert.deepEqual(app.call('forecast.hourly', { ...window, issuance_id: 'iss-pfo-wren-late' }).issuance, { id: 'iss-pfo-wren-late', issued_at: at(FRI, '19:00'), is_latest: false });
@@ -197,8 +200,8 @@ test('T05 [W2] coverage and gaps; no issuance; pagination; no fallback to anothe
   const half = app.call('forecast.hourly', { id: WREN, start: at(SAT, '09:30'), end: at(SAT, '10:30') });
   assert.deepEqual(half.rows.map(r => r.start), [at(SAT, '09:00'), at(SAT, '10:00')], 'hours that intersect the window');
 
-  // Tallowmere without any Skyline issuance (no watch was ever evaluated against one there).
-  const seed = seedCopy(), TOWN = 'pl-tallowmere';
+  // Quillmere without any Skyline issuance (no watch was ever evaluated against one there).
+  const seed = seedCopy(), TOWN = 'pl-quillmere';
   seed.issuances = seed.issuances.filter(i => !(i.source_id === 'src-skyline' && i.place_id === TOWN));
   const sparse = fixture({ seed }), none = sparse.call('forecast.hourly', { id: TOWN, start: at(SAT, '09:00'), end: at(SAT, '11:00'), source_id: 'src-skyline' });
   assert.equal(none.issuance, null);
@@ -206,7 +209,7 @@ test('T05 [W2] coverage and gaps; no issuance; pagination; no fallback to anothe
   assert.deepEqual(none.coverage, { requested_hours: 2, covered_hours: 0, missing: [at(SAT, '09:00'), at(SAT, '10:00')], reason: 'no_issuance' });
   assert.equal(none.source.id, 'src-skyline', 'no fallback to the other source');
   assert.equal(sparse.call('forecast.daily', { id: TOWN, source_id: 'src-skyline' }).coverage.reason, 'no_issuance');
-  assert.equal(sparse.call('forecast.hourly', { id: TOWN, start: at(SAT, '09:00'), end: at(SAT, '11:00') }).issuance.id, 'iss-pfo-tallow-3', 'the other source still answers when it is asked');
+  assert.equal(sparse.call('forecast.hourly', { id: TOWN, start: at(SAT, '09:00'), end: at(SAT, '11:00') }).issuance.id, 'iss-pfo-quill-3', 'the other source still answers when it is asked');
   assert.equal(app.call('forecast.hourly', { id: WREN, source_id: 'src-aqb' }).coverage.reason, 'no_hourly_product');
 
   const window = { id: WREN, start: at(SAT, '09:00'), end: at(SAT, '16:00') };
@@ -406,7 +409,7 @@ test('T12 [W4] create and evaluate to clear, triggered and no_data; every condit
   assert.deepEqual(us.evaluation.conditions.map(c => c.matches.map(m => [m.start.slice(11, 13), m.value])), [[['19', 29.2], ['20', 29.83]], [['21', 40.1]], [['19', 0.07], ['20', 0.08], ['21', 0.08]]]);
   assert.equal(make([{ variable: 'wind_gust', value: 47, unit: 'km/h' }], evening).evaluation.conditions[0].matches.length, 2, 'an explicit unit is kept');
   rejects(app, () => make([{ variable: 'pop', value: 40, unit: 'mph' }]), 'invalid_arguments');
-  rejects(app, () => app.call('watches.create', { ...HIKE, id: 'pl-tallowmere', conditions: [{ variable: 'pop', value: 40 }] }), 'not_found');
+  rejects(app, () => app.call('watches.create', { ...HIKE, id: 'pl-quillmere', conditions: [{ variable: 'pop', value: 40 }] }), 'not_found');
   rejects(app, () => make([{ variable: 'pop', value: 40 }], { source_id: 'src-aqb' }), 'not_found');
   rejects(app, () => make([{ variable: 'aqi', value: 100 }], { aq_source_id: 'src-pfo' }), 'not_found');
   rejects(app, () => make([{ variable: 'pop', value: 40 }], { aq_source_id: 'src-aqb' }), 'invalid_arguments');
@@ -481,8 +484,11 @@ test('T13 [W4] re-evaluation only on new information (weather and air-quality is
   coast.event(airIssued('aq-marrow-6', at(FRI, '21:00'), [[SAT, 80]]));
   air = notices(coast);
   assert.deepEqual([walk().status, air.length, air[0].kind], ['clear', base + 2, 'watch.cleared']);
+  const settled = walk().evaluation;
   coast.event(airIssued('aq-marrow-old', at(FRI, '21:10'), [[SAT, 300]], at(FRI, '12:00')));
   assert.deepEqual([walk().status, walk().evaluation.aq_issuance.id, notices(coast).length], ['clear', 'aq-marrow-6', base + 2], 'a late arrival with an older issue time changes nothing');
+  assert.deepEqual(walk().evaluation, settled, 'and is not an evaluation: cause and evaluated_at still name the issuance that produced the result');
+  assert.deepEqual(coast.call('forecast.issuances', { id: MARROW, source_id: 'src-aqb', limit: 2 }).issuances.map(i => [i.id, i.is_latest]), [['aq-marrow-6', true], ['aq-marrow-5', false]], 'the late arrival is stored behind the newer ones');
 });
 
 test('T13b [W4] alert conditions follow alert messages; the last started hour freezes hourly results', () => {
@@ -774,7 +780,7 @@ test('T18 [all] seed validation failures; one activity row per write, event and 
   for (const read of [['places.list'], ['forecast.hourly', { id: WREN }], ['alerts.list', { id: MARROW }], ['watches.list'], ['notices.list'], ['preferences.get']]) app.call(...read);
   assert.equal(rows(), n, 'reads write no row');
   const writes = [
-    ['places.save', { id: 'pl-tallowmere' }], ['places.update', { id: 'pl-tallowmere', patch: { label: 'Town' } }], ['places.remove', { id: 'pl-tallowmere' }],
+    ['places.save', { id: 'pl-quillmere' }], ['places.update', { id: 'pl-quillmere', patch: { label: 'Town' } }], ['places.remove', { id: 'pl-quillmere' }],
     ['preferences.update', { patch: { units: 'us' } }], ['alerts.acknowledge', { id: 'al-0002', message_id: 'al-0002-m2' }],
     ['watches.create', { ...HIKE, conditions: [{ variable: 'pop', value: 40 }] }], ['watches.update', { id: W(4), patch: { label: 'Second' } }], ['watches.cancel', { id: W(4) }],
   ];
@@ -844,6 +850,22 @@ test('contracts, fixture and declarations are in step', () => {
   assert.equal(require('../contribution/dataset.json').expected_counts.records, plugin.records(seedCopy()).length);
   const event = scenario();
   assert.ok(manifest.event_types.includes(event.operation));
+});
+
+test('the web pages are declared, cover every tool and render text only', () => {
+  const root = path.resolve(__dirname, '..'), contribution = require('../contribution/contribution.json');
+  assert.equal(contribution.gui_ref, 'gui.json');
+  const gui = require('../contribution/gui.json'), web = gui.extensions.find(e => e.namespace === 'pale.web' && e.version === '1');
+  assert.deepEqual([gui.audience, gui.status, web.required, web.data.status, web.data.transport], [['reviewer'], 'declared', false, 'implemented', 'agent-mcp-bridge']);
+  assert.deepEqual(gui.content_policy, { untrusted_html: 'text_only', svg: 'disabled', remote_fetch: 'disabled', remote_allowlist: [], missing_asset_behavior: 'placeholder' });
+  for (const ref of [web.data.page, web.data.controller, gui.renderer_ref]) assert.ok(fs.existsSync(path.join(root, ref)), ref + ' is in the package');
+  const controller = fs.readFileSync(path.join(root, web.data.controller), 'utf8');
+  for (const tool of require('../tools.json')) assert.ok(controller.includes("'" + tool.name + "'"), 'the controller names ' + tool.name);
+  // The page is built from text nodes: no HTML strings, no code from strings, no inline styles (the Host's content policy blocks them).
+  assert.doesNotMatch(controller, /innerHTML|outerHTML|insertAdjacentHTML|document\.write|\beval\(|new Function|setAttribute\(\s*['"]style/);
+  // The only file the page loads besides itself is the Host's shared client.
+  assert.deepEqual([...controller.matchAll(/^import .* from '([^']+)'/gm)].map(m => m[1]), ['/shared/client.js']);
+  assert.doesNotMatch(controller, /\bfetch\(|XMLHttpRequest|WebSocket|Date\.now\(|new Date\(\)/, 'the controller calls tools only through the shared client and never reads the browser clock');
 });
 
 test('the package runs on its own: no import or file path leaves its folder', () => {

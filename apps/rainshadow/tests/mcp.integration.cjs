@@ -64,7 +64,7 @@ async function main() {
     equal('scenario profile lists the 13 reads and 5 narrowed writes', [scenarioTools.length, scenarioTools.filter(x => x.startsWith('env.')).length], [18, 0]);
     const infraTools = (await infra.request('tools/list')).result.tools.map(t => t.name).filter(x => x.startsWith('env.')).sort();
     check('the host offers its clock operation on the Infra connection (runtime 1.6.0 or later)', infraTools.includes('env.advance_time'));
-    check('a write outside the scenario profile is denied', (await write('places.save', { id: 'pl-tallowmere' })).status === 'permission_denied');
+    check('a write outside the scenario profile is denied', (await write('places.save', { id: 'pl-quillmere' })).status === 'permission_denied');
     const hike = { start: at(SAT, '14:00'), end: at(SAT, '17:00'), conditions: [{ variable: 'pop', value: 40 }] };
     check('an object outside the policy ids is denied', (await write('watches.create', { id: 'pl-marrowby', ...hike })).status === 'permission_denied');
     check('a field outside the policy fields is denied', (await write('places.update', { id: WREN, patch: { label: 'Elsewhere' } })).status === 'permission_denied');
@@ -87,8 +87,8 @@ async function main() {
     const afterReads = await state();
     equal('reads leave business data and the version unchanged', [afterReads.data, afterReads.revision], [baseline.data, baseline.revision]);
     equal('each allowed read has one audit row', afterReads.audit.slice(-reads.length).map(r => [r.tool, r.decision]), reads.map(([name]) => [A + name, 'allow']));
-    const saved = await write('places.save', { id: 'pl-tallowmere', label: 'Town' });
-    const writes = [saved, await write('places.update', { id: 'pl-tallowmere', patch: { alert_rule: { paused: true } } }), await write('places.remove', { id: 'pl-tallowmere' }),
+    const saved = await write('places.save', { id: 'pl-quillmere', label: 'Town' });
+    const writes = [saved, await write('places.update', { id: 'pl-quillmere', patch: { alert_rule: { paused: true } } }), await write('places.remove', { id: 'pl-quillmere' }),
       await write('preferences.update', { patch: { units: 'us' } }), await write('alerts.acknowledge', { id: 'al-0002', message_id: 'al-0002-m2' })];
     const created = await write('watches.create', { id: WREN, ...hike, linked_object: { app_id: 'calendar', object_id: 'evt-hike' } });
     writes.push(created, await write('watches.update', { id: created.id, patch: { label: 'Afternoon', conditions: [{ variable: 'aqi', value: 101 }, { variable: 'alert' }] } }), await write('watches.cancel', { id: created.id }));

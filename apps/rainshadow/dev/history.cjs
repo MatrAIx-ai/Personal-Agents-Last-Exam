@@ -31,7 +31,7 @@ const compact = date => date.replace(/-/g, '');
 // ---- archive forecast model ------------------------------------------------------------
 // Seasonal swing in degrees C per place, written so that it is zero in late November: the
 // archive then meets the model of the three detailed days without a jump.
-const SWING = { wren: 9, tallow: 10, cinder: 9, brindle: 3.5, marrow: 3.5, tamsin: 7 };
+const SWING = { wren: 9, quill: 10, cinder: 9, brindle: 3.5, marrow: 3.5, tamsin: 7 };
 function dayOfYear(date) {
   const [y, m, d] = date.split('-').map(Number);
   return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 1)) / DAY) + 1;
@@ -317,7 +317,7 @@ module.exports = function history({ P, step, event, agent, message }) {
   walk('2026-09-18', '18:00', [66, 72, 58], [108, 94, 61], ['clear', 'triggered']);
 
   // ---- alert threads through the seasons ---------------------------------------------------
-  const PASS = ['z-cinder'], HIGH = ['z-tallow-high', 'z-cinder'], COAST = ['z-saltgrass-coast'], BAY = ['z-marrow'];
+  const PASS = ['z-cinder'], HIGH = ['z-quill-high', 'z-cinder'], COAST = ['z-saltgrass-coast'], BAY = ['z-marrow'];
   thread('al-20250102-1', B, ['2025-01-02', '14:00'], 'Coastal Flood Advisory', BAY, ['2025-01-03', '08:00'], ['2025-01-03', '14:00'], { acks: [['2025-01-02', '16:30', 1]] });
   thread('al-20250109-1', A, ['2025-01-09', '09:00'], 'Winter Weather Advisory', HIGH, ['2025-01-10', '12:00'], ['2025-01-11', '06:00'], { acks: [['2025-01-09', '12:40', 1]] });
   thread('al-20250124-1', A, ['2025-01-24', '13:00'], 'Winter Storm Warning', PASS, ['2025-01-24', '20:00'], ['2025-01-25', '16:00'], {
@@ -327,13 +327,13 @@ module.exports = function history({ P, step, event, agent, message }) {
   thread('al-20250213-1', A, ['2025-02-13', '10:00'], 'Winter Weather Advisory', PASS, ['2025-02-14', '06:00'], ['2025-02-14', '20:00'], { acks: [['2025-02-13', '18:15', 1]] });
   thread('al-20250227-1', B, ['2025-02-27', '09:30'], 'Coastal Flood Advisory', BAY, ['2025-02-28', '08:00'], ['2025-02-28', '14:00'], { acks: [['2025-02-27', '12:05', 1]] });
   thread('al-20250306-1', A, ['2025-03-06', '15:00'], 'High Wind Warning', HIGH, ['2025-03-07', '10:00'], ['2025-03-08', '00:00'], { acks: [['2025-03-06', '17:30', 1]] });
-  thread('al-20250319-1', A, ['2025-03-19', '08:00'], 'Dense Fog Advisory', ['z-tallow-valley'], ['2025-03-19', '08:00'], ['2025-03-19', '11:00'], { urgency: 'immediate', certainty: 'observed' });
+  thread('al-20250319-1', A, ['2025-03-19', '08:00'], 'Dense Fog Advisory', ['z-quill-valley'], ['2025-03-19', '08:00'], ['2025-03-19', '11:00'], { urgency: 'immediate', certainty: 'observed' });
   thread('al-20250408-1', B, ['2025-04-08', '11:00'], 'Wind Advisory', COAST, ['2025-04-08', '18:00'], ['2025-04-09', '06:00'], { description: 'Northwest gusts are expected along the coast.' });
   thread('al-20250422-1', A, ['2025-04-22', '14:00'], 'Winter Weather Advisory', PASS, ['2025-04-23', '00:00'], ['2025-04-23', '12:00'], { description: 'A late-season storm will bring wet snow to the pass.' });
   thread('al-20250520-1', A, ['2025-05-20', '10:00'], 'Flood Watch', ['z-wren'], ['2025-05-21', '00:00'], ['2025-05-23', '00:00'], {
     urgency: 'future', certainty: 'possible', updates: [{ at: ['2025-05-22', '09:00'], ends: ['2025-05-24', '06:00'], urgency: 'future', certainty: 'possible', description: 'Warm nights keep the creeks high into Saturday morning.' }],
   });
-  thread('al-20250610-1', A, ['2025-06-10', '15:30'], 'Severe Thunderstorm Watch', ['z-wren', 'z-tallow-valley'], ['2025-06-10', '16:00'], ['2025-06-10', '22:00'], {
+  thread('al-20250610-1', A, ['2025-06-10', '15:30'], 'Severe Thunderstorm Watch', ['z-wren', 'z-quill-valley'], ['2025-06-10', '16:00'], ['2025-06-10', '22:00'], {
     urgency: 'future', certainty: 'possible', cancel: { at: ['2025-06-10', '19:00'], description: 'Storms stayed east of the basin and the threat has ended.' },
   });
   thread('al-20250626-1', B, ['2025-06-26', '12:00'], 'Heat Advisory', ['z-saltgrass-inland', 'z-tamsin'], ['2025-06-27', '11:00'], ['2025-06-28', '20:00']);
@@ -341,8 +341,8 @@ module.exports = function history({ P, step, event, agent, message }) {
     description: 'Northwest gusts are expected along the coast and across the harbor.', cancel: { at: ['2025-07-05', '05:30'], description: 'Winds stayed below advisory levels overnight.' },
   });
   thread('al-20250718-1', A, ['2025-07-18', '14:30'], 'Severe Thunderstorm Warning', ['z-wren'], ['2025-07-18', '14:30'], ['2025-07-18', '16:30'], { urgency: 'immediate', certainty: 'observed' });
-  thread('al-20250729-1', A, ['2025-07-29', '16:00'], 'Flash Flood Warning', ['z-tallow-valley'], ['2025-07-29', '16:00'], ['2025-07-29', '19:00'], { urgency: 'immediate', certainty: 'observed' });
-  thread('al-20250812-1', A, ['2025-08-12', '11:00'], 'Red Flag Warning', ['z-tallow-high', 'z-wren'], ['2025-08-12', '12:00'], ['2025-08-13', '21:00']);
+  thread('al-20250729-1', A, ['2025-07-29', '16:00'], 'Flash Flood Warning', ['z-quill-valley'], ['2025-07-29', '16:00'], ['2025-07-29', '19:00'], { urgency: 'immediate', certainty: 'observed' });
+  thread('al-20250812-1', A, ['2025-08-12', '11:00'], 'Red Flag Warning', ['z-quill-high', 'z-wren'], ['2025-08-12', '12:00'], ['2025-08-13', '21:00']);
   thread('al-20250820-1', B, ['2025-08-20', '09:00'], 'Air Quality Alert', COAST, ['2025-08-20', '12:00'], ['2025-08-22', '12:00'], {
     updates: [{ at: ['2025-08-21', '08:00'], severity: 'severe', ends: ['2025-08-22', '20:00'], certainty: 'observed', headline: 'Air Quality Alert extended to Friday 8 PM; smoke is now unhealthy', description: 'Monitors along the coast report unhealthy smoke levels.', instruction: 'Everyone should limit time outdoors; keep windows closed.' }],
     acks: [['2025-08-20', '11:30', 1], ['2025-08-21', '10:10', 2]],
@@ -364,16 +364,16 @@ module.exports = function history({ P, step, event, agent, message }) {
   thread('al-20251223-1', B, ['2025-12-23', '15:00'], 'Coastal Flood Advisory', BAY, ['2025-12-24', '07:00'], ['2025-12-24', '13:00'], { acks: [['2025-12-23', '17:40', 1]] });
   thread('al-20260108-1', B, ['2026-01-08', '10:00'], 'Wind Advisory', COAST, ['2026-01-08', '16:00'], ['2026-01-09', '04:00'], { description: 'South gusts are expected along the coast ahead of a front.' });
   thread('al-20260115-1', A, ['2026-01-15', '14:00'], 'Winter Weather Advisory', PASS, ['2026-01-16', '02:00'], ['2026-01-16', '18:00'], { acks: [['2026-01-15', '18:05', 1]] });
-  thread('al-20260128-1', A, ['2026-01-28', '08:00'], 'Cold Weather Advisory', ['z-tallow-valley', 'z-tallow-high'], ['2026-01-28', '22:00'], ['2026-01-29', '10:00'], { urgency: 'future' });
+  thread('al-20260128-1', A, ['2026-01-28', '08:00'], 'Cold Weather Advisory', ['z-quill-valley', 'z-quill-high'], ['2026-01-28', '22:00'], ['2026-01-29', '10:00'], { urgency: 'future' });
   thread('al-20260205-1', A, ['2026-02-05', '13:00'], 'Winter Storm Warning', PASS, ['2026-02-06', '10:00'], ['2026-02-07', '10:00'], {
     updates: [{ at: ['2026-02-06', '23:30'], event: 'Blizzard Warning', ends: ['2026-02-07', '04:00'], urgency: 'immediate', certainty: 'observed' }], acks: [['2026-02-05', '18:10', 1]],
   });
   thread('al-20260226-1', A, ['2026-02-26', '09:00'], 'Winter Weather Advisory', PASS, ['2026-02-26', '18:00'], ['2026-02-27', '09:00'], { acks: [['2026-02-26', '12:30', 1]] });
-  thread('al-20260319-1', A, ['2026-03-19', '11:00'], 'Wind Advisory', ['z-tallow-high'], ['2026-03-20', '12:00'], ['2026-03-21', '00:00'], { description: 'West winds with strong gusts are expected in the high country.', acks: [['2026-03-19', '18:45', 1]] });
+  thread('al-20260319-1', A, ['2026-03-19', '11:00'], 'Wind Advisory', ['z-quill-high'], ['2026-03-20', '12:00'], ['2026-03-21', '00:00'], { description: 'West winds with strong gusts are expected in the high country.', acks: [['2026-03-19', '18:45', 1]] });
   thread('al-20260330-1', B, ['2026-03-30', '16:00'], 'Coastal Flood Advisory', BAY, ['2026-03-31', '09:00'], ['2026-03-31', '15:00'], { acks: [['2026-03-30', '18:30', 1]] });
   thread('al-20260421-1', B, ['2026-04-21', '09:00'], 'Wind Advisory', COAST, ['2026-04-21', '15:00'], ['2026-04-22', '03:00'], { description: 'Northwest gusts are expected along the coast.' });
   thread('al-20260521-1', A, ['2026-05-21', '14:00'], 'Flood Watch', ['z-wren'], ['2026-05-22', '00:00'], ['2026-05-23', '06:00'], { urgency: 'future', certainty: 'possible' });
-  thread('al-20260616-1', A, ['2026-06-16', '15:00'], 'Severe Thunderstorm Watch', ['z-wren', 'z-tallow-valley'], ['2026-06-16', '15:30'], ['2026-06-16', '21:00'], {
+  thread('al-20260616-1', A, ['2026-06-16', '15:00'], 'Severe Thunderstorm Watch', ['z-wren', 'z-quill-valley'], ['2026-06-16', '15:30'], ['2026-06-16', '21:00'], {
     urgency: 'future', certainty: 'possible', cancel: { at: ['2026-06-16', '18:40'], description: 'The storms weakened before reaching the basin.' },
   });
   thread('al-20260709-1', B, ['2026-07-09', '12:00'], 'Heat Advisory', ['z-saltgrass-inland', 'z-saltgrass-coast'], ['2026-07-10', '11:00'], ['2026-07-11', '20:00']);
@@ -381,7 +381,7 @@ module.exports = function history({ P, step, event, agent, message }) {
     updates: [{ at: ['2026-07-31', '07:00'], severity: 'severe', certainty: 'observed', headline: 'Air Quality Alert: smoke along the coast is now unhealthy', description: 'Monitors along the coast report unhealthy smoke levels.', instruction: 'Everyone should limit time outdoors; keep windows closed.' }],
     acks: [['2026-07-30', '10:25', 1], ['2026-07-31', '09:05', 2]],
   });
-  thread('al-20260811-1', A, ['2026-08-11', '13:00'], 'Red Flag Warning', ['z-tallow-high', 'z-wren'], ['2026-08-11', '14:00'], ['2026-08-12', '21:00']);
+  thread('al-20260811-1', A, ['2026-08-11', '13:00'], 'Red Flag Warning', ['z-quill-high', 'z-wren'], ['2026-08-11', '14:00'], ['2026-08-12', '21:00']);
   thread('al-20260820-1', B, ['2026-08-20', '09:00'], 'Air Quality Alert', COAST, ['2026-08-20', '12:00'], ['2026-08-21', '21:00'], {
     cancel: { at: ['2026-08-21', '05:00'], description: 'A wind shift carried the smoke offshore overnight.' }, acks: [['2026-08-20', '11:15', 1]],
   });

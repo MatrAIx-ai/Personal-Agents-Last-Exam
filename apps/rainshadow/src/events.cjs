@@ -6,7 +6,7 @@
 // ended by T is not open and is left alone; a notice written at T is held or released by
 // the quiet hours at T.
 const { fail, ms } = require('./util.cjs');
-const { validateSeed, objects, index, latestMessage, sharesZone, watchOpen } = require('./model.cjs');
+const { validateSeed, objects, index, issuancesOf, latestMessage, sharesZone, watchOpen } = require('./model.cjs');
 const { record } = require('./notices.cjs');
 const { alertNotice } = require('./alerts.cjs');
 const { reevaluate } = require('./watches.cjs');
@@ -33,7 +33,12 @@ const handlers = {
     if (p.daily !== undefined) issuance.daily = p.daily;
     data.issuances.push(issuance);
     record(data, { at: event.at, actor: 'event', action: 'forecast.issued', object_id: issuance.id, event_id: event.event_id });
-    for (const w of openWatches(data, T, w => w.place_id === place.id && (w.source_id === source.id || w.aq_source_id === source.id))) reevaluate(data, w, event.at, 'forecast.issued', event.event_id, { source_id: source.id });
+    // Only an issuance that becomes the latest of its source for the place is new information
+    // for a watch. A late arrival with an older issue time changes no evaluation, so the
+    // evaluation record (its cause included) keeps naming what produced its result.
+    if (issuancesOf(data, place.id, source.id)[0].id === issuance.id) {
+      for (const w of openWatches(data, T, w => w.place_id === place.id && (w.source_id === source.id || w.aq_source_id === source.id))) reevaluate(data, w, event.at, 'forecast.issued', event.event_id, { source_id: source.id });
+    }
     return issuance.id;
   },
   'observation.recorded'(data, event, T) {

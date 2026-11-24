@@ -23,15 +23,15 @@ const iso = (date, hhmm, tz) => isoAt(at(date, hhmm, tz), tz);
 const WED = '2026-11-18', THU = '2026-11-19', FRI = '2026-11-20', SAT = '2026-11-21', SUN = '2026-11-22';
 
 const zones = [
-  ['z-wren', 'Wren Lake Basin'], ['z-tallow-valley', 'Tallowmere Valley'], ['z-tallow-high', 'Tallowmere High Country'], ['z-cinder', 'Cinderhorn Pass Corridor'],
+  ['z-wren', 'Wren Lake Basin'], ['z-quill-valley', 'Quillmere Valley'], ['z-quill-high', 'Quillmere High Country'], ['z-cinder', 'Cinderhorn Pass Corridor'],
   ['z-saltgrass-coast', 'Saltgrass Coast'], ['z-marrow', 'Marrowby Bay Shore'], ['z-tamsin', 'Tamsin Heights'], ['z-saltgrass-inland', 'Saltgrass Inland Valleys'],
 ].map(([id, name]) => ({ id, name }));
 
 // Place records plus the toy-model parameters used only by this script.
 const P = {
-  wren: { id: 'pl-wren-lake', name: 'Wren Lake', region: 'Tallowmere County', tz: A, zones: ['z-wren'], base: 9, amp: 6, wind: 10 },
-  tallow: { id: 'pl-tallowmere', name: 'Tallowmere', region: 'Tallowmere County', tz: A, zones: ['z-tallow-valley'], base: 11, amp: 7, wind: 8 },
-  cinder: { id: 'pl-cinderhorn-pass', name: 'Cinderhorn Pass', region: 'Tallowmere County', tz: A, zones: ['z-tallow-high', 'z-cinder'], base: 2, amp: 5, wind: 28 },
+  wren: { id: 'pl-wren-lake', name: 'Wren Lake', region: 'Quillmere County', tz: A, zones: ['z-wren'], base: 9, amp: 6, wind: 10 },
+  quill: { id: 'pl-quillmere', name: 'Quillmere', region: 'Quillmere County', tz: A, zones: ['z-quill-valley'], base: 11, amp: 7, wind: 8 },
+  cinder: { id: 'pl-cinderhorn-pass', name: 'Cinderhorn Pass', region: 'Quillmere County', tz: A, zones: ['z-quill-high', 'z-cinder'], base: 2, amp: 5, wind: 28 },
   brindle: { id: 'pl-port-brindle', name: 'Port Brindle', region: 'Saltgrass Coast', tz: B, zones: ['z-saltgrass-coast'], base: 13, amp: 3, wind: 14 },
   marrow: { id: 'pl-marrowby', name: 'Marrowby', region: 'Saltgrass Coast', tz: B, zones: ['z-saltgrass-coast', 'z-marrow'], base: 12.5, amp: 3, wind: 16 },
   tamsin: { id: 'pl-tamsin-heights', name: 'Tamsin Heights', region: 'Saltgrass Coast', tz: B, zones: ['z-tamsin', 'z-saltgrass-inland'], base: 8, amp: 6, wind: 9 },
@@ -96,7 +96,7 @@ function weatherIssuance(key, sourceId, n, date, hhmm) {
 
 // Air quality: wildfire smoke drifts over the coast on Thursday and Friday, then clears.
 const AQ = {
-  wren: [[24, 28, 31], [27, 30, 33], [29, 34, 30]], tallow: [[35, 38, 41], [37, 42, 44], [40, 43, 39]], cinder: [[18, 20, 22], [19, 22, 24], [21, 23, 20]],
+  wren: [[24, 28, 31], [27, 30, 33], [29, 34, 30]], quill: [[35, 38, 41], [37, 42, 44], [40, 43, 39]], cinder: [[18, 20, 22], [19, 22, 24], [21, 23, 20]],
   brindle: [[58, 95, 120], [132, 141, 110], [96, 62, 48]], marrow: [[52, 88, 112], [124, 133, 104], [90, 57, 44]], tamsin: [[44, 61, 78], [83, 90, 72], [66, 49, 38]],
 };
 function airIssuance(key, n, date) {
@@ -145,7 +145,7 @@ event(t, A, 'alert.issued', {
 });
 t = at(THU, '09:00', A);
 event(t, A, 'alert.issued', {
-  alert_id: 'al-0002', source_id: 'src-pfo', category: 'wind', zone_ids: ['z-tallow-high'],
+  alert_id: 'al-0002', source_id: 'src-pfo', category: 'wind', zone_ids: ['z-quill-high'],
   message: message('al-0002-m1', 'alert', t, A, { event: 'Wind Advisory', severity: 'moderate', urgency: 'expected', certainty: 'likely', onset: iso(FRI, '12:00', A), ends: iso(SAT, '00:00', A), headline: 'Wind Advisory from Friday noon to midnight', description: 'West winds with strong gusts are expected in the high country.', instruction: 'Secure loose objects and use caution with high-profile vehicles.' }),
 });
 agent(at(THU, '12:00', A), A, 'alerts.acknowledge', { id: 'al-0002', message_id: 'al-0002-m1' });
@@ -181,7 +181,7 @@ event(t, B, 'alert.issued', {
 });
 t = at(FRI, '13:00', A);
 event(t, A, 'alert.issued', {
-  alert_id: 'al-0006', source_id: 'src-pfo', category: 'other', zone_ids: ['z-tallow-valley'],
+  alert_id: 'al-0006', source_id: 'src-pfo', category: 'other', zone_ids: ['z-quill-valley'],
   message: message('al-0006-m1', 'alert', t, A, { event: 'Dense Fog Advisory', severity: 'minor', urgency: 'future', certainty: 'possible', onset: iso(SAT, '04:00', A), ends: iso(SAT, '09:00', A), headline: 'Dense Fog Advisory from 4 AM to 9 AM Saturday', description: 'Patchy dense fog may reduce visibility in the valley.', instruction: 'Use low beams and leave extra following distance.' }),
 });
 agent(at(FRI, '16:00', A), A, 'watches.create', {

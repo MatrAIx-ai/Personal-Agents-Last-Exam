@@ -2,7 +2,7 @@
 
 Rainshadow is a synthetic weather App for PALE: forecasts that always name their source and issue time, alerts that are message threads, and a personal layer of saved places, alert rules and weather watches. It follows the Environment proposal `proposals/environment/rainshadow.md` (PR #123). All data is invented; there is no weather model and no live service.
 
-Status: version 1.0.0, the first-version submission for PR #123, on public runtime 1.6.0. All four workflows of the approved plan, the five events, the optional Mail notices and the tests are in place. The evidence report is `docs/validation/rainshadow-v1.0.0.md`; what remains is listed under "Remaining work".
+Status: version 1.0.0, the first-version submission for PR #123, on public runtime 1.6.0. All four workflows of the approved plan, the five events, the optional Mail notices, the web pages and the tests are in place. The evidence report is `docs/validation/rainshadow-v1.0.0.md`; what remains is listed under "Remaining work".
 
 ## Run locally
 
@@ -23,6 +23,14 @@ node apps/rainshadow/tests/mail.integration.cjs --runtime runtime    # Rainshado
 ```
 
 Both scripts take `--report FILE` to write their check names and versions as JSON.
+
+The web pages (see "Web pages" below), from the repository root:
+
+```sh
+node apps/rainshadow/examples/web.cjs --runtime runtime      # starts the public Web Host on a fresh copy of the fixture; open the printed link
+npm ci && npx playwright install chromium                   # once: the checkout's pinned browser-test dependency
+node apps/rainshadow/tests/web.browser.cjs --runtime runtime  # browser checks; --chrome PATH uses an installed Chrome
+```
 
 The two scripts are given the runtime directory (`--runtime DIR`, or `PALE_RUNTIME_ROOT=DIR`); the first needs nothing else. The Mail flow also needs this package and the pinned Mail package inside that checkout, because the public Messaging router resolves a publisher package and its receiver registry relative to its own checkout. With `PALE_RUNTIME_ROOT` set, `npm test` runs both scripts as T17 and T15b; without it they are skipped and say so.
 
@@ -53,7 +61,7 @@ Time is the environment's. Rainshadow has no timers, no scheduler and no clock e
 - A forecast read returns the latest issuance of the chosen source for the place, and names it (`issuance.id`, `issued_at`, `is_latest`). The latest issuance is the stored one with the newest `issued_at`, whatever order they arrived in. Rows are returned as issued. `coverage.missing` lists requested hours or days the issuance does not contain. Nothing is interpolated and no other source is used as a fallback.
 - Stored values are metric. Results are converted to the account's units, and `units` names them. A watch threshold keeps the unit it was given and is compared on unrounded values.
 - An alert affects a place when they share a zone. Its status is `upcoming`, `active`, `expired` or `cancelled`.
-- A watch needs a saved place. It stores a weather source and, exactly when it has an `aqi` condition, an air-quality source; each defaults to the account's default (`preferences.default_source_id`, `preferences.default_air_source_id`). It is evaluated when it is created or changed and whenever an issuance from one of its two sources for its place, or an alert message for its zones, arrives.
+- A watch needs a saved place. It stores a weather source and, exactly when it has an `aqi` condition, an air-quality source; each defaults to the account's default (`preferences.default_source_id`, `preferences.default_air_source_id`). It is evaluated when it is created or changed, whenever an issuance from one of its two sources for its place arrives and becomes that source's latest, and whenever an alert message for its zones arrives. An issuance that arrives late, with an older issue time than one already stored, changes no evaluation: `evaluation.cause` names the arrival that produced the current result and `evaluation.issuance` the issuance it used.
 - Hourly conditions look at the window hours that have not started; if none is left, the earlier hourly results stand until the window ends. `aqi` conditions use the daily rows for the dates the rest of the window touches. The evaluation record names the weather issuance and the air-quality issuance it used, the hours and dates covered or missed, and what met each condition.
 - Notices: one per alert message that matches a saved place's rule, and one when new information makes a watch `triggered` or takes it from `triggered` to `clear`. Other status changes (between `clear` and `no_data`, `triggered` to `no_data`) are recorded in the activity log without a notice. Changes made by the Agent write no notice.
 - A notice written in quiet hours gets the end of that quiet period as its release time; any other notice is released as it is written. Notices for `extreme` alerts are not held; a cancellation is never treated as extreme.
@@ -89,9 +97,21 @@ A task supplies its own records in the same shape (`schemas/seed.schema.json`) t
 
 `tools.json` and the App-owned schemas are generated from `dev/contracts.cjs` (`node dev/build.cjs`, `--check` for drift). Nothing under `dev/` runs at run time.
 
+## Web pages
+
+The App owns its pages: `gui/index.html` and the controller `gui/src/app.js`, declared in `contribution/gui.json` through the `pale.web` extension and served by the public Web Host (`runtime/web/server.cjs`), which forwards only the Agent's permitted tools. Nothing on the page is stored outside the App; every value is read through those tools, and the browser clock is never used for a business decision.
+
+- **Places**: the saved places in the order they were saved, each with its live alerts and open watches. A place page has the latest observation, the alerts in effect, the forecast from one source (picker) and one issuance (latest by default; an earlier one is marked as such), the next 24 hours, the daily forecast, air quality and the open watches. Times are shown in the place's own zone. Add place (search and save), Edit place (label and alert rule), Pause or Resume alerts, Remove place, New watch here.
+- **Alerts**: the alert threads that affect a saved place, in effect first; a thread with every message and Acknowledge for its latest message.
+- **Watches**: open and ended watches; a watch with its conditions, what met them and the issuances its latest evaluation used. New watch, Edit watch (times are typed in the place's zone), Cancel watch.
+- **Notices**: the notice log with the App's kind and state filters, newest first, and a link to the alert or watch.
+- **Settings**: units, default sources, time zone, quiet hours and email copies; read-only when the policy offers no settings write.
+
+Every write carries the version the form was opened on, so a change made meanwhile shows as a conflict rather than being overwritten, and an unchanged resubmission reuses its `request_id`, so a retry after a lost response cannot repeat the effect. Edits send only the fields that changed, so a policy that allows one field (for example the alert rule) is respected. Controls for tools the policy does not offer are not shown; a refusal is shown as such. App text is rendered as text only. `gui/src/view.js` is the compatible reviewer renderer. `tests/web.browser.cjs` drives the pages in a real browser and checks the same run through MCP after every write.
+
 ## Package boundary
 
-The package runs on its own. It imports only Node built-ins and its own files, reads no file outside its folder and uses no other App's files or state; a test checks this. `service.cjs` is the provided launcher, which finds the pinned runtime. `tests/schema-validator.cjs` is a copy of the public runtime's schema validator, so the App-only tests check every argument, result and state against the contracts without the runtime. The two real-MCP scripts are given the runtime's location.
+The package runs on its own. It imports only Node built-ins and its own files, reads no file outside its folder and uses no other App's files or state; a test checks this. `service.cjs` is the provided launcher, which finds the pinned runtime. `tests/schema-validator.cjs` is a copy of the public runtime's schema validator, so the App-only tests check every argument, result and state against the contracts without the runtime. The two real-MCP scripts, the web starter and the browser checks are given the runtime's location; the browser checks also use the checkout's pinned Playwright.
 
 ## Other Apps
 
@@ -124,11 +144,12 @@ const { stage, results, sent } = await publishReleased({ source, router, sent: p
 | All: the platform clock | T16, T16b | `mcp.integration.cjs`: `env.advance_time` with no App event |
 | All: Core contracts | T17 runs `mcp.integration.cjs` | replays, stale versions, authority, failure atomicity |
 | All: seeds, reset, activity log | T18 | `mcp.integration.cjs`: task seed with `virtual_now`, reset to the loaded seed and time |
+| Web pages (W1–W4) | the declaration and text-only checks | `web.browser.cjs`: every section in a real browser, writes checked through MCP, conflicts, retries, refusals, a restricted policy |
 
 ## Remaining work
 
 - Independent reproduction and acceptance by a maintainer.
 - Human review of realism (forecast numbers, alert and notice wording) and of the invented names.
 - No agent trials are included; the first design review left that question to a maintainer.
-- MCP only, as planned: no GUI, and no Web/CUA adapter.
+- The web pages run on the public loopback Web Host. A production deployment (remote authentication, HTTPS) is a platform matter, and no user-simulator integration is claimed.
 - Mail is the only connected App. Delivery uses the public Messaging router with a local Infra config; production Messaging credentials are a platform matter.
