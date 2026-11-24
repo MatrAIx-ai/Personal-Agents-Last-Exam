@@ -16,10 +16,12 @@ const CATEGORY_TEXT = {good: 'Good', moderate: 'Moderate', unhealthy_for_sensiti
 
 const human = (instant, zone) => new Intl.DateTimeFormat('en-US', {timeZone: zone, weekday: 'short', month: 'short',
   day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZoneName: 'short'}).format(new Date(instant));
+// Lower-case a label for use mid-sentence, keeping acronyms such as AQI and UV.
+const lower = label => (/^[A-Z]{2,}\b/.test(label) ? label : label[0].toLowerCase() + label.slice(1));
 const compare = (rule, value) => typeof value === 'number' && (rule.comparator === 'gte' ? value >= rule.threshold : value <= rule.threshold);
 const thresholdText = rule => rule.metric === 'aqi_forecast_category'
   ? `${CATEGORY_TEXT[aqi.CATEGORIES[rule.threshold - 1]]} or ${rule.comparator === 'gte' ? 'worse' : 'better'}`
-  : `${LABELS[rule.metric][0].toLowerCase()} ${rule.threshold}${LABELS[rule.metric][1]} or ${rule.comparator === 'gte' ? 'higher' : 'lower'}`;
+  : `${lower(LABELS[rule.metric][0])} ${rule.threshold}${LABELS[rule.metric][1]} or ${rule.comparator === 'gte' ? 'higher' : 'lower'}`;
 function windowText(rule) {
   const w = rule.window;
   if (!w) return '';
@@ -101,17 +103,24 @@ function forecastRules(ctx, data, issuance) {
     const ref = placeFor(data, rule);
     if (!ref || ref.place.zone_id !== issuance.zone_id) continue;
     const end = at + rule.look_ahead_hours * 3600e3, field = METRICS[rule.metric].field, met = new Map(), evaluated = new Set();
+    // High and low temperature rules compare each occurrence's warmest or coolest forecast hour, so
+    // "high at most X" means the whole period stays at or below X, not that one cool hour exists.
+    const extreme = {temp_max_c: Math.max, temp_min_c: Math.min}[rule.metric], peaks = new Map();
     for (const h of issuance.hourly) {
       const t = ms(h.start);
       if (t < at || t >= end) continue;
       const occ = occurrence(rule, ref.place.time_zone, t);
       if (!occ) continue;
-      if (compare(rule, h[field]) && !met.has(occ) && (rule.window || met.size === 0)) met.set(occ, {occ, value: h[field], at: t});
       evaluated.add(occ);
+      if (extreme) {
+        const cur = peaks.get(occ);
+        if (typeof h[field] === 'number' && (!cur || extreme(cur.value, h[field]) !== cur.value)) peaks.set(occ, {occ, value: h[field], at: t});
+      } else if (compare(rule, h[field]) && !met.has(occ) && (rule.window || met.size === 0)) met.set(occ, {occ, value: h[field], at: t});
     }
+    for (const [occ, d] of peaks) if (compare(rule, d.value) && (rule.window || met.size === 0)) met.set(occ, d);
     settle(ctx, data, rule, ref.place, met, evaluated, {kind: 'issuance', id: issuance.issuance_id, version: null}, (d, isMet) => isMet ? {
       title: `${LABELS[rule.metric][0]} ${d.value}${LABELS[rule.metric][1]} forecast at ${ref.saved.label}`,
-      body: `The ${issuance.provider} forecast issued ${human(ms(issuance.issued_at), ref.place.time_zone)} shows ${LABELS[rule.metric][0].toLowerCase()} ${d.value}${LABELS[rule.metric][1]} at ${human(d.at, ref.place.time_zone)} for ${ref.saved.label} (${ref.place.name}). Your rule: ${thresholdText(rule)} within ${rule.look_ahead_hours} h${windowText(rule)}.`
+      body: `The ${issuance.provider} forecast issued ${human(ms(issuance.issued_at), ref.place.time_zone)} shows ${lower(LABELS[rule.metric][0])} ${d.value}${LABELS[rule.metric][1]} at ${human(d.at, ref.place.time_zone)} for ${ref.saved.label} (${ref.place.name}). Your rule: ${thresholdText(rule)} within ${rule.look_ahead_hours} h${windowText(rule)}.`
     } : {
       title: `${LABELS[rule.metric][0]} no longer forecast to reach your limit at ${ref.saved.label}`,
       body: `The ${issuance.provider} forecast issued ${human(ms(issuance.issued_at), ref.place.time_zone)} no longer meets your rule (${thresholdText(rule)}) for ${ref.saved.label}.`

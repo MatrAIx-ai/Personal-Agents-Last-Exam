@@ -192,7 +192,7 @@ const tools = [
   tool('rules.pause', 'Pause a rule; it is not evaluated while paused.', false, writeIn({rule_id: id}, ['rule_id']), writeOut({rule_id: id, revision: int(1)})),
   tool('rules.resume', 'Resume a paused rule from the next event, with no retroactive notification.', false,
     writeIn({rule_id: id}, ['rule_id']), writeOut({rule_id: id, revision: int(1)})),
-  tool('rules.delete', 'Delete a rule. Its notifications are kept.', false, writeIn({rule_id: id}, ['rule_id']), writeOut({rule_id: id})),
+  tool('rules.delete', 'Delete a rule. Notifications already sent are kept; any still held by quiet hours or waiting for delivery are withdrawn.', false, writeIn({rule_id: id}, ['rule_id']), writeOut({rule_id: id})),
   tool('notifications.acknowledge', 'Mark a notification as read.', false,
     writeIn({notification_id: id}, ['notification_id']), writeOut({notification_id: id, acknowledged_at: time}))
 ];

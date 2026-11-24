@@ -5,11 +5,11 @@ const H = 3600e3;
 let seq = 0;
 
 // A forecast issuance with `hours` hourly periods starting one hour after issue; `gust(t)` sets each gust.
-function issuance({id, provider = 'gustline', zone = 'z-cedar', tz = 'America/Los_Angeles', issued, hours = 72, gust = () => 20, precip = () => 10}) {
+function issuance({id, provider = 'gustline', zone = 'z-cedar', tz = 'America/Los_Angeles', issued, hours = 72, gust = () => 20, precip = () => 10, temp = () => 18}) {
   const start = Date.parse(issued) + H, hourly = [];
   for (let i = 0; i < hours; i++) {
     const t = start + i * H;
-    hourly.push({start: render(t, tz), temp_c: 18, wind_kph: 12, gust_kph: gust(t), precip_prob_pct: precip(t)});
+    hourly.push({start: render(t, tz), temp_c: temp(t), wind_kph: 12, gust_kph: gust(t), precip_prob_pct: precip(t)});
   }
   return {issuance_id: id, provider, zone_id: zone, issued_at: render(Date.parse(issued), tz), valid_from: render(start, tz),
     valid_to: render(start + hours * H, tz), hourly, daily: [{date: render(start, tz).slice(0, 10), high_c: 22, low_c: 12, precip_prob_pct: 30, headline: 'Breezy'}], products: []};

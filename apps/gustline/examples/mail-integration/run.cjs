@@ -16,6 +16,7 @@ const MAIL_REGISTRY = path.join(root, 'examples/registry.mail.json');
 function seed() {
   const data = structuredClone(require('../../fixtures/minimal.json'));
   data.account_id = 'gustline-maya'; data.owner_person_id = 'person-maya';
+  for (const n of data.notifications) n.recipient_person_id = 'person-maya';
   return data;
 }
 const binding = {people: [{person_id: 'person-maya', name: 'Maya Chen'}], accounts: [{app_id: 'gustline', account_id: 'gustline-maya', owner_person_id: 'person-maya'}],
@@ -56,7 +57,8 @@ async function world(granted) {
     const r = await gustline.call('env.advance_time', {expected_version: s.version, request_id: 'clock-' + to, virtual_now: to});
     assert.equal(r.status, 'committed', JSON.stringify(r));
   };
-  const notifications = async () => (await gustline.call('env.snapshot')).snapshot.data.notifications;
+  // Only notices created in this run; the seed's history since 2025 is already delivered.
+  const notifications = async () => (await gustline.call('env.snapshot')).snapshot.data.notifications.filter(n => !/^(h-|al-h-)/.test(n.source.id));
   const inbox = async () => (await mail.call('mail.search', {})).messages;
   return {dir, gustline, mail, router, apply, advance, notifications, inbox,
     close: async () => { await Promise.allSettled(clients.map(c => c.close())); fs.rmSync(dir, {recursive: true, force: true}); }};

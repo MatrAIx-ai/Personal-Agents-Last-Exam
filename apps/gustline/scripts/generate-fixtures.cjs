@@ -3,6 +3,7 @@
 const fs = require('node:fs'), path = require('node:path');
 const {render, instantOf, addDays} = require('../src/time.cjs');
 const root = path.resolve(__dirname, '..');
+const {backfill} = require('./history.cjs');
 const SEED = 20271008;
 
 function prng(seed) { // mulberry32
@@ -314,21 +315,37 @@ function commuterPack() {
     events: sortEvents(events)};
 }
 
+// Each fixture's own activity starts on these dates; history from 2025-01-01 is backfilled before them.
+const HISTORY_UNTIL = {minimal: '2027-09-01', 'desert-storm': '2026-09-01', 'smoke-week': '2027-09-01', 'commuter-week': '2027-06-01'};
+
 function packs() {
   const out = {};
-  for (const [name, make] of [['desert-storm', desertPack], ['smoke-week', smokePack], ['commuter-week', commuterPack]]) {
+  for (const [i, [name, make]] of [['desert-storm', desertPack], ['smoke-week', smokePack], ['commuter-week', commuterPack]].entries()) {
     const p = make();
-    out[`examples/packs/${name}/seed.json`] = p.seed;
+    out[`examples/packs/${name}/seed.json`] = backfill(p.seed, p.binding, prng(SEED + 100 + i), HISTORY_UNTIL[name]);
     out[`examples/packs/${name}/binding.json`] = p.binding;
     out[`examples/packs/${name}/events.json`] = {virtual_now: p.now, events: p.events};
   }
   return out;
 }
 
+// Pack files keep one record per line: close to compact JSON in size, still readable in a diff.
+function lines(value) {
+  const parts = Object.entries(value).map(([k, v]) => '  ' + JSON.stringify(k) + ': ' + (Array.isArray(v) && v.length
+    ? '[\n' + v.map(x => '    ' + JSON.stringify(x)).join(',\n') + '\n  ]' : JSON.stringify(v)));
+  return '{\n' + parts.join(',\n') + '\n}\n';
+}
+
 function build({check = false} = {}) {
-  const outputs = {'fixtures/minimal.json': minimal(), ...packs()};
+  const binding = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/binding.json'), 'utf8'));
+  const seed = backfill(minimal(), binding, prng(SEED + 99), HISTORY_UNTIL.minimal);
+  // The package dataset's record count follows the minimal fixture (Core checks it at load).
+  const dataset = JSON.parse(fs.readFileSync(path.join(root, 'contribution/dataset.json'), 'utf8'));
+  dataset.expected_counts.records = require('../src/model.cjs').records(seed).length;
+  const outputs = {'fixtures/minimal.json': seed, 'contribution/dataset.json': dataset, ...packs()};
   for (const [file, value] of Object.entries(outputs)) {
-    const expected = JSON.stringify(value, null, 2) + '\n', target = path.join(root, file);
+    const pack = file.startsWith('examples/packs/') && !file.endsWith('binding.json');
+    const expected = pack ? lines(value) : JSON.stringify(value, null, 2) + '\n', target = path.join(root, file);
     fs.mkdirSync(path.dirname(target), {recursive: true});
     if (check) { if (!fs.existsSync(target) || fs.readFileSync(target, 'utf8') !== expected) throw new Error('Generated fixture drift: ' + file); }
     else fs.writeFileSync(target, expected);

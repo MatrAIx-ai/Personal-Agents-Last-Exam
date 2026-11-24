@@ -10,7 +10,11 @@ const {issuance, forecastEvent, airEvent, alertEvent, alert, deliveryEvent} = re
 const aqi = require('../src/aqi.cjs');
 
 const unchanged = (f, fn, code) => { const before = f.data; assert.throws(fn, e => e.code === code || new RegExp(code).test(e.message)); assert.deepEqual(f.data, before); };
-const list = (f, status) => f.call('gustline.notifications.list', status ? {status} : {}).notifications;
+// Seeded history (2025 onward) is replayed from alerts, forecasts and observations whose IDs start with
+// `h-` or `al-h-`; most tests look only at what happens during the test.
+const history = n => /^(h-|al-h-)/.test(n.source ? n.source.id : n.alert_id);
+const list = (f, status) => f.call('gustline.notifications.list', status ? {status} : {}).notifications.filter(n => !history(n));
+const alerts = (f, place) => f.call('gustline.alerts.list', {place_id: place}).alerts.filter(a => !history(a));
 
 test('generated contracts and fixtures match their generators', () => {
   require('../scripts/build-contracts.cjs').build({check: true});
@@ -142,14 +146,14 @@ test('W4 alert chains: update extends, unknown cancel is refused, status is deri
   unchanged(f, () => f.event(alertEvent('2027-10-08T10:10:00-07:00', alert({alert_id: 'aqa-99', version: 2, msg_type: 'cancel', issued_at: '2027-10-08T10:10:00-07:00'}))), 'alert_reference_unknown');
   unchanged(f, () => f.event(alertEvent('2027-10-08T10:10:00-07:00', {...alert({alert_id: 'aqa-77', version: 2, msg_type: 'update', issued_at: '2027-10-08T10:10:00-07:00'})})), 'stale_alert_version');
   f.advance('2027-10-11T00:00:00-07:00');
-  assert.equal(f.call('gustline.alerts.list', {place_id: 'pl-school'}).alerts[0].status, 'expired');
+  assert.equal(alerts(f, 'pl-school')[0].status, 'expired');
 });
 
 test('W4 area_closure is informational', () => {
   const f = fixture();
   f.event(alertEvent('2027-10-08T10:00:00-07:00', alert({alert_id: 'cl-1', event: 'area_closure', issuer: 'Dune Flats Park Service',
     areas: {place_ids: ['pl-dunes']}, issued_at: '2027-10-08T10:00:00-07:00', headline: 'Dunes closed for range testing'})));
-  const a = f.call('gustline.alerts.list', {place_id: 'pl-dunes'}).alerts[0];
+  const a = alerts(f, 'pl-dunes')[0];
   assert.equal(a.informational, true);
   assert.equal(a.status, 'upcoming');
 });
@@ -189,7 +193,7 @@ test('W5 quiet hours hold a forecast notification; the clock releases it; same I
   n = list(f);
   assert.equal(n[0].status, 'pending_delivery');
   assert.equal(n[0].notification_id, id);
-  assert.equal(f.data.notifications[0].status, 'held_quiet_hours'); // stored record unchanged; status is derived
+  assert.equal(f.data.notifications.filter(n => !history(n))[0].status, 'held_quiet_hours'); // stored record unchanged; status is derived
 });
 
 test('W5 a held notification is withdrawn when the condition clears before release', () => {
@@ -336,11 +340,23 @@ test('W2 forecast history lists three issuances with two superseded (desert pack
   assert.deepEqual(h.map(i => i.status), ['current', 'superseded', 'superseded']);
 });
 
-test('fixtures: every seeded record is dated on or after 2026-01-01', () => {
-  const floor = Date.parse('2026-01-01T00:00:00Z');
-  const seeds = [require('../fixtures/minimal.json'), ...['desert-storm', 'smoke-week', 'commuter-week'].map(p => require(`../examples/packs/${p}/seed.json`))];
+test('fixtures: history runs from January 2025; the task timeline starts in 2026; packs stay under 400 KB', () => {
+  const packs = ['desert-storm', 'smoke-week', 'commuter-week'];
+  const seeds = [['minimal', require('../fixtures/minimal.json'), require('../fixtures/clock.json').initial_time],
+    ...packs.map(p => [p, require(`../examples/packs/${p}/seed.json`), require(`../examples/packs/${p}/events.json`).virtual_now])];
   const walk = v => typeof v === 'string' ? (/^\d{4}-\d{2}-\d{2}T/.test(v) ? [v] : []) : v && typeof v === 'object' ? Object.values(v).flatMap(walk) : [];
-  for (const s of seeds) for (const t of walk(s)) assert.ok(Date.parse(t) >= floor, 'too early: ' + t);
+  for (const [name, seed, now] of seeds) {
+    const times = walk(seed).map(Date.parse);
+    assert.ok(Math.min(...times) >= Date.parse('2025-01-01T00:00:00Z'), name + ': nothing before 2025-01-01');
+    assert.ok(Math.min(...times) < Date.parse('2025-02-01T00:00:00Z'), name + ': history reaches January 2025');
+    assert.ok(Date.parse(now) >= Date.parse('2026-01-01T00:00:00Z'), name + ': the task timeline starts in 2026');
+    assert.ok(seed.notifications.some(n => history(n) && Date.parse(n.created_at) < Date.parse('2026-01-01T00:00:00Z')), name + ': 2025 activity');
+  }
+  for (const p of packs) {
+    const dir = path.resolve(__dirname, '../examples/packs', p);
+    const bytes = fs.readdirSync(dir).reduce((sum, f) => sum + fs.statSync(path.join(dir, f)).size, 0);
+    assert.ok(bytes < 400 * 1024, p + ' is ' + bytes + ' bytes');
+  }
 });
 
 test('W5 rule writes: validation, revisions, pause and resume, delete keeps notifications', () => {
@@ -365,6 +381,25 @@ test('W5 rule writes: validation, revisions, pause and resume, delete keeps noti
   assert.ok(f.call('gustline.notifications.acknowledge', {notification_id}).acknowledged_at);
 });
 
+test('W5 high and low temperature rules compare the warmest or coolest hour of each occurrence', () => {
+  const f = fixture();
+  // Every hour is 18 °C except one cool hour at 03:00: the high stays 18, so "high at most 15" is not met.
+  const cool = t => (new Date(t).getUTCHours() === 10 ? 9 : 18);
+  f.call('gustline.rules.create', {saved_place_id: 'sp-2', kind: 'forecast_threshold', metric: 'temp_max_c', comparator: 'lte', threshold: 15, look_ahead_hours: 24});
+  f.call('gustline.rules.create', {saved_place_id: 'sp-2', kind: 'forecast_threshold', metric: 'temp_min_c', comparator: 'lte', threshold: 10, look_ahead_hours: 24});
+  f.event(forecastEvent('2027-10-08T11:02:00-07:00', issuance({id: 'fc-cool', issued: '2027-10-08T11:00:00-07:00', temp: cool})));
+  const fired = list(f).map(n => n.rule_id);
+  assert.ok(!fired.includes('rule-3'), 'a single cool hour does not make the high 15 or lower');
+  assert.ok(fired.includes('rule-4'), 'the low reaches 9');
+  assert.match(list(f).find(n => n.rule_id === 'rule-4').title, /^Low temperature 9°C forecast/);
+});
+
+test('W5 notice text keeps acronyms in rule descriptions', () => {
+  const f = fixture();
+  f.event(require('../examples/scenario.json'));
+  assert.match(list(f)[0].body, /Your rule: AQI 101 or higher/);
+});
+
 test('W5 delivery outcomes map to notification status', () => {
   const f = fixture();
   f.event(require('../examples/scenario.json'));
@@ -382,6 +417,14 @@ test('W5 delivery outcomes map to notification status', () => {
   g.event(require('../examples/scenario.json'));
   g.event(deliveryEvent('2027-10-08T10:06:00-07:00', list(g)[0].notification_id, 'rejected', 'recipient_not_authorized'));
   assert.equal(list(g)[0].status, 'delivery_failed');
+  // Halting outcomes keep the notification pending, with the code stored for reconciliation.
+  for (const [status, code] of [['rejected', 'receiver_rejected'], ['halted', 'run_halted']]) {
+    const h = fixture();
+    h.event(require('../examples/scenario.json'));
+    h.event(deliveryEvent('2027-10-08T10:06:00-07:00', list(h)[0].notification_id, status, code, {stop_run: true}));
+    assert.equal(list(h)[0].status, 'pending_delivery', status);
+    assert.deepEqual([list(h)[0].outcome.status, list(h)[0].outcome.code, list(h)[0].outcome.stop_run], [status, code, true]);
+  }
 });
 
 test('W5 a held notification cannot be delivered before release', () => {
@@ -447,6 +490,6 @@ for (const name of ['desert-storm', 'smoke-week', 'commuter-week']) {
       const r = aqi.compute(mine, at);
       assert.ok(Number.isInteger(r.aqi) && r.category === aqi.category(r.aqi), 'recomputed AQI and category agree');
     }
-    assert.ok(data.notifications.length > 0, 'the pack exercises at least one rule');
+    assert.ok(data.notifications.some(n => !history(n) && !seed.notifications.some(x => x.notification_id === n.notification_id)), 'the pack exercises at least one rule');
   });
 }

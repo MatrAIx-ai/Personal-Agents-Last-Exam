@@ -9,7 +9,8 @@ const forecast = f.call('gustline.forecast.get', {place_id: 'pl-dunes', from: '2
 const before = f.call('gustline.air.current', {place_id: 'pl-school'});
 f.event(require('./scenario.json'));
 const after = f.call('gustline.air.current', {place_id: 'pl-school'});
-const notifications = f.call('gustline.notifications.list').notifications;
+// The fixture also carries the account's history since 2025; this walkthrough looks at the new notice.
+const notifications = f.call('gustline.notifications.list', {status: 'pending_delivery'}).notifications;
 assert.equal(after.aqi, 132);
 assert.equal(notifications.length, 1);
 assert.equal(notifications[0].status, 'pending_delivery');

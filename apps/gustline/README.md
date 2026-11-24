@@ -76,7 +76,9 @@ Each pack in `examples/packs/<name>/` has a `seed.json` and `binding.json` that 
 
 ## Data
 
-`scripts/generate-fixtures.cjs` writes every fixture and pack deterministically from a fixed seed; `npm run check` fails if a regenerated file differs. All places, stations, issuances, observations, alerts, people and rules are synthetic. The EPA AQI breakpoints and the NOAA solar equations are public-domain U.S. government works, recorded in `contribution/dataset.json`.
+`scripts/generate-fixtures.cjs` writes every fixture and pack deterministically from a fixed seed; `npm run check` fails if a regenerated file differs.
+
+**History from 2025-01-01.** Each account's history starts in January 2025, while each fixture's own clock (the task timeline) is in 2026 or 2027. Saved places and rules date from January 2025. Past official alerts are kept, about one per zone every other month. Past notifications come from replaying synthetic alerts, short forecasts and observations through Gustline's own event handlers in time order (`scripts/history.cjs`), so each one has exactly the trigger key, text and status rules the App itself would produce. The short forecasts and observations used for that replay are not kept, as a real service keeps its alerts and notifications but not every superseded issuance; their IDs start with `h-`, and past alerts start with `al-h-`. Every pack stays under 400 KB in total, and pack files keep one record per line. All places, stations, issuances, observations, alerts, people and rules are synthetic. The EPA AQI breakpoints and the NOAA solar equations are public-domain U.S. government works, recorded in `contribution/dataset.json`.
 
 ## Implementation notes
 
@@ -87,6 +89,7 @@ Each pack in `examples/packs/<name>/` has a `seed.json` and `binding.json` that 
 - **Repeat notifications:** within one window occurrence, a "met" notification is sent once. If the person already heard "met", clearing sends "cleared" (when `notify_on_clear` is set). A met notice still held by quiet hours is withdrawn without a "cleared". A condition that returns after a clear notifies again (`|met|2`). A rule without a window notifies for the first date that meets it in each evaluation.
 - **Alert updates and cancels:** they must reference the latest version and keep the same `event`. Version numbers may skip but must increase.
 - **Corrections:** a correction may name the observation's current or any earlier ID.
+- **High and low temperature rules:** `temp_max_c` compares the warmest forecast hour of each window occurrence (or local date) within the look-ahead, and `temp_min_c` the coolest. So "high at most 15 °C" means the whole period stays at or below 15 °C, not that one cool hour exists.
 - **Places:** all places are fictional. The proposal planned about six real places sourced from USGS GNIS. They were replaced so that no synthetic record implies conditions at a real location.
 
 ## Limitations
