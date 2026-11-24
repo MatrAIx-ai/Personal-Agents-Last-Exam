@@ -147,7 +147,7 @@ const virgin = program('skyline-virgin-daniel', VS_NUMBER, 0, '2026-02-02T12:00:
 const hotel = (id, name, city, timezone, category, cashYen) =>
   ({id, name, city, timezone, category, category_changes:[], cash_rate_cents:jpy(cashYen), blackout_dates:[]});
 const harbor = {
-  account_id:'harbor-daniel', owner_person_id:DANIEL, member_number:HYATT_NUMBER, mail_account_id:'mail-daniel',
+  account_id:'harbor-daniel', owner_person_id:DANIEL, member_number:HYATT_NUMBER, mail_account_id:'mail-daniel', program_name:'World of Hyatt',
   balance:41200,
   ledger:[
     {id:'ledger-1', at:'2025-09-02T09:00:00-05:00', kind:'opening', points:56200, balance_after:56200, ref:null},
