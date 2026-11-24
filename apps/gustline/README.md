@@ -23,6 +23,9 @@ npm run app:verify -- --app apps/gustline --output .artifacts/gustline.json
 
 # Runtime and Mail integration through real MCP processes (needs the full checkout)
 cd apps/gustline && npm run integration
+# The web pages, through the shared Web Host (from the repository root; see gui/README.md)
+node runtime/web/server.cjs --app gustline --registry apps/gustline/registry.json --run web-demo --profile sandbox
+node apps/gustline/tests/browser.test.cjs   # needs `npm ci` and `npx playwright install chromium`
 ```
 
 `npm run integration` runs `tests/runtime.integration.cjs` and then `examples/mail-integration/run.cjs`. The first checks a repeated `request_id`, `stale_version` after an event, `env.advance_time` releasing a quiet-hour hold, and two byte-identical resets. The second checks Mail delivery, duplicate republishing, an ungranted recipient, and a quiet-hour release.
@@ -30,6 +33,10 @@ cd apps/gustline && npm run integration
 ## Package boundary
 
 Business tests and the example run from this folder with only the package. MCP verification needs the pinned public runtime (runtime 1.6.0, Core API 1.2.0). The package carries a byte-identical copy of Mail's wire schema (`schemas/mail-router-message.schema.json`) for its `messaging.publishes` declaration. Mail 1.3.0 and Messaging are needed only for the integration example, where Mail is a scenario recipient in the run assembly. Mail is not listed in `app.json` dependencies. No external service is used.
+
+## Web pages
+
+Gustline has its own web pages (`gui/index.html`, `gui/src/app.js`, declared in `contribution/gui.json`), served by the shared Web Host like the personal Apps. They cover all 25 business tools: saved places with forecasts, observations, air quality, alerts and daylight; rules; notifications; the gazetteer; and settings. See [gui/README.md](gui/README.md) for how to start them and the browser check.
 
 ## Workflows
 
@@ -96,5 +103,5 @@ Each pack in `examples/packs/<name>/` has a `seed.json` and `binding.json` that 
 
 - PM2.5 and PM10 AQI use hourly concentrations, not EPA NowCast; reads label each pollutant's averaging basis.
 - No live feeds, radar, maps, pollen, marine or aviation products.
-- One account per App instance; MCP only, no GUI.
+- One account per App instance. The web pages run on the shared loopback Web Host; there is no production remote deployment.
 - Automatic invocation of the outbound adapter after events belongs to the planned runner; the example and tests invoke it explicitly.
