@@ -1,6 +1,8 @@
 # Bellnote 1.0.0 validation
 
-Checked 23 November 2026 (America/Los_Angeles) on Node.js v22.23.1 (Linux), public runtime 1.6.0, Core API 1.2.0, contribution revision 0.4.0, Mail 1.3.0, against base `main` commit `a4bce02`. Scope: the approved Environment proposal [`proposals/environment/bellnote.md`](../../proposals/environment/bellnote.md). All data is synthetic; no network, credentials or model API were used. The business tests, `scripts/real-mcp.cjs` and `scripts/mail-flow.cjs` also passed on Node.js v20.19.6; Node 18 was not available locally.
+Checked 24 November 2026 (America/Los_Angeles) on Node.js v22.23.1 and v18.20.8 (Linux), public runtime 1.6.0, Core API 1.2.0, contribution revision 0.4.0, Mail 1.3.0, Chromium 141.0.7390.37 (Playwright 1.56.1), against base `main` commit `a4bce02`. Scope: the approved Environment proposal [`proposals/environment/bellnote.md`](../../proposals/environment/bellnote.md). All data is synthetic; no network, credentials or model API were used. Before the GUI was added, the business tests, `scripts/real-mcp.cjs` and `scripts/mail-flow.cjs` also passed on Node.js v20.19.6 (not re-run for this revision).
+
+The web GUI was added after plan approval at the maintainers' request; the approved plan said MCP-only. The proposal file is unchanged.
 
 **Automated outcome: passed. Human workflow and provenance review: pending.** No acceptance is claimed.
 
@@ -8,19 +10,46 @@ Checked 23 November 2026 (America/Los_Angeles) on Node.js v22.23.1 (Linux), publ
 
 | Evidence | Command | Result |
 | --- | --- | --- |
-| App-only business tests | `cd apps/bellnote && npm test` | 41 tests, 41 passed, 0 failed |
+| App-only business tests | `cd apps/bellnote && npm test` | 42 tests, 42 passed, 0 failed (Node 22 and 18) |
 | Walkthrough | `cd apps/bellnote && npm run example` | Report before the cut-off, two office marks: one explained and quiet, one unexplained with one notification |
 | Generated contracts | `cd apps/bellnote && npm run contracts:check` | `tools.json` and the seed/events/state schemas match `scripts/build-contracts.cjs`; `fixtures/reference.json` matches its builder |
 | Fixture consistency | `cd apps/bellnote && npm run fixtures:check` | `minimal.json` and `reference.json`: no problems |
-| Package real MCP | `node apps/bellnote/scripts/real-mcp.cjs` | 54 checks passed |
-| Bellnote → Mail | `node apps/bellnote/scripts/mail-flow.cjs` | 17 checks passed (Mail 1.3.0, real router and receiver) |
-| Public verifier | `npm run app:verify -- --app apps/bellnote --output .artifacts/bellnote.json` | passed: 46 checks; `business` and `event-example` stages passed from an isolated package copy |
-| CI submission validator | `node runtime/ci/verify-submissions.cjs . .artifacts/submissions a4bce02` | selection `["bellnote"]` (App-only change), `bellnote: PASS` |
+| Package real MCP | `node apps/bellnote/scripts/real-mcp.cjs` | 54 checks passed (Node 22 and 18) |
+| Bellnote → Mail | `node apps/bellnote/scripts/mail-flow.cjs` | 17 checks passed (Mail 1.3.0, real router and receiver; Node 22 and 18) |
+| Web smoke (real shared Host, no browser) | `cd apps/bellnote && npm run web:smoke` | 14 tests, 14 passed (Node 22 and 18) |
+| Web browser (Chromium) | `cd apps/bellnote && npm run web:browser` | 45 checks passed (Node 22 and 18), 17 screenshots and `report.json` |
+| Public verifier | `npm run app:verify -- --app apps/bellnote --output .artifacts/bellnote.json` | passed: 46 checks; `business` and `event-example` stages passed from an isolated package copy (Node 22 and 18) |
+| CI selection | `node runtime/ci/select-apps.cjs . a4bce02` | `{"full":false,"ids":["bellnote"]}` |
+| CI submission validator | `node runtime/ci/verify-submissions.cjs . .artifacts/submissions a4bce02` | `bellnote: PASS` (Node 22 and 18) |
 | Shared contracts | `npm run contracts:check` | passed |
-| Repository suite | `npm test` | 22/22 stages passed |
-| Isolated package | copy of `apps/bellnote` alone: `npm test`, `npm run example`; `scripts/real-mcp.cjs --runtime DIR`, `scripts/mail-flow.cjs --runtime DIR --mail DIR` | 41/41; example passed; 54/54; 17/17. Without `--runtime` the scripts stop with a clear message |
+| Repository suite | `npm test` | 22/22 stages passed (Node 22 and 18) |
+| Shared Web Host tests | `npm run test:web` | 4 tests, 4 passed (Node 22 and 18) |
+| Isolated package (first version, not re-run for the GUI revision) | copy of `apps/bellnote` alone: `npm test`, `npm run example`; `scripts/real-mcp.cjs --runtime DIR`, `scripts/mail-flow.cjs --runtime DIR --mail DIR` | 41/41; example passed; 54/54; 17/17. Without `--runtime` the scripts stop with a clear message |
 
 The runtime directory is unchanged from `a4bce02`, so the CI validator above is the base validator run from the same checkout, not from a separately selected base checkout.
+
+## Web GUI
+
+`gui/index.html` and `gui/src/app.js` are served by the unchanged shared Host (`runtime/web/server.cjs`). The Host takes `--registry`; `web.registry.json` in this package registers Bellnote alone (path `.`, initial time from `fixtures/clock.json`), so neither `runtime/` nor the repository-wide `apps.registry.json` changes and CI still selects only `bellnote`. `contribution/gui.json` follows the Notes convention (legacy reviewer renderer `gui/src/view.js` plus the `pale.web` extension with `status: implemented`); Core's contribution loader and the verifier accept it. Views, workflows and design choices: [gui/README.md](gui/README.md).
+
+What ran in a real browser (`tests/web-browser.cjs`, headless Chromium 141, fresh run per start), every write confirmed by an independent Agent MCP client on the same run:
+
+| Area | Browser actions | Observed |
+| --- | --- | --- |
+| W1 | Attendance → Report absence (shared schema form) with a hostile reason; Cancel report (confirmation) | MCP: report `submitted` with the exact reason, then `cancelled`; reason shown as literal text, no element or script created |
+| W2 | Forms → Review and sign again (App answer sheet, prefilled); Winter concert → Withdraw answer; Band festival | MCP: `signed` on version 2, still one payment; withdrawal `withdrawn` with the payment `refunded`; no Answer control for Nico, the page says Sam Reyes signs |
+| W3 | Add pickup person; Change way home for Wed 18 (Pickup, Rosa); Cancel change; select Nico | MCP: person `pending_review`; plan names Rosa, then default again; Nico: no list, no controls |
+| W4 | Add money 2.00 (refused); an MCP write while the next form is open, then Add money 20.00 (stale); Refresh; Add money with the response dropped, then resubmit; Alerts and limits | `amount_out_of_range` and its message stay in the form; `stale_version` with nothing charged; both submits carry one request ID and MCP shows one top-up (23.10); threshold 8.00, no limit |
+| Account | Edit preferences | MCP: email copies off, default card pm-0002 |
+| Shared state | Infra `env.apply_event` `lunch.charged` (peanut item), Refresh, reload | new transaction flagged restricted, balance 18.85; kept after reload |
+| Boundary | `fetch` from the page's session to `env.snapshot`, `env.reset`, `env.apply_event`, `/fixtures/reference.json` | 403, 403, 403, 404 |
+| Layout | all seven views at 1280 px and 390 px | no horizontal page overflow; screenshots reviewed |
+| Restricted | fresh run with `--profile scenario` | "View only" in the toolbar; no write controls |
+| Errors | console and page errors over the whole run | no script errors; the only failed requests are the five provoked ones (dropped response, three management calls, fixture) |
+
+`tests/web-smoke.cjs` (no browser, default-runnable) covers served page/controller/shared files; refused hidden paths, fixtures, state, Infra routes and `env.*` calls; session, CSRF, origin and content-type checks; discovery of exactly the 23 Agent tools; six read views; one write per workflow confirmed over MCP; three refusals with data unchanged; a stale version; a request-ID retry committing once and `idempotency_conflict` on a changed retry; and the scenario profile (12 read tools, writes refused by the Host).
+
+Choices and limits: App styles are a constructed stylesheet added from `app.js` (the Host serves only `/`, `/app.js` and shared files, and its CSP allows no inline style); the shared toolbar search is hidden and Forms and Notifications have their own filters; refusal codes are shown with the message via the stylesheet (`code · message`). Chromium needed `libasound.so.2`, which this machine lacks; the browser runs used a locally extracted copy through `LD_LIBRARY_PATH` (no system change). Not run: other browsers, a real model agent or user simulator driving the page, and a fresh clone by a reviewer.
 
 ## Workflow-to-test mapping (acceptance plan)
 
@@ -67,11 +96,11 @@ Against [docs/review/app-implementation-checklist.md](../../docs/review/app-impl
 
 | Item | Verdict | Evidence / gap |
 | --- | --- | --- |
-| 1.1 Promised workflows and modes from the approved proposal | met | W1–W4, 23 MCP operations, 9 events, optional Mail notices; MCP-only by approval (no GUI promised) |
+| 1.1 Promised workflows and modes from the approved proposal | met | W1–W4, 23 MCP operations, 9 events, optional Mail notices; the web GUI requested by the maintainers after approval is delivered (below) |
 | 1.2 Versions, paths, schemas, tools, hooks, events, dependencies against files | met | loader + verifier; `contracts:check`; contribution declarations derived and checked |
 | 1.3 Reproduce documented startup/tests from a clean public checkout | partly met | reproduced in the working checkout and from an isolated package copy; a fresh clone by a reviewer is not run |
 | 1.4 Required receiving Apps at pinned versions; contracts reused | met | Mail is optional; its 1.3.0 receive contract and wire schema are reused byte-identically; no Mail state or code copied |
-| 2.1 App-only tests on real functions, invalid transitions, missing objects, read-only | met | 41 tests |
+| 2.1 App-only tests on real functions, invalid transitions, missing objects, read-only | met | 42 tests |
 | 2.2 Create/read/update/cancel flows and history; failures preserve data | met | In the App-only harness, which discards a refused call's working copy exactly as Core does, "data unchanged" holds by construction; what those tests do check is that every Agent-write refusal is decided before the handler changes anything in its working copy. Atomicity itself is checked on real Core (`scripts/real-mcp.cjs`): stale form, declined top-up, debt-limit event, other guardian's fee answer without `can_pay`, dismissal change for a past day, a range report refused on its last day, and a committed multi-record write in one revision |
 | 2.3 Data/media references and provenance | met (automated); human review pending | no media; `contribution/dataset.json` records the synthetic source and the two workflow references |
 | 2.4 Optional diagnostics do not change results | met | `package.test.cjs` |
@@ -80,7 +109,13 @@ Against [docs/review/app-implementation-checklist.md](../../docs/review/app-impl
 | 3.3 Seed/reset, separate runs, versions, retries, events, supplied time | met | verifier and real MCP |
 | 3.4 Declared messaging: receiver records, receipts, refusals, duplicates | met | Mail flow: committed receipt, inbox record, identical retry, ungranted refusal with no record, Bellnote unchanged |
 | 3.5 Candidate and independently selected base validators | partly met | base runtime `a4bce02` equals the candidate runtime and its CI validator passed from this checkout; a separate base checkout was not used |
-| GUI acceptance | not applicable | MCP-only by the approved plan |
+| GUI runnable delivery | met | package page/controller on the shared Host via `web.registry.json`; `web:smoke`, `web:browser` |
+| GUI actual controls | met | Chromium clicks through report/cancel, sign/withdraw, add person, change/cancel way home, top-up, settings, preferences, navigation, child picker, form filter |
+| GUI shared state | met | every browser write read back over MCP; Infra event + Refresh; reload |
+| GUI failure behavior | met | refusal code and message kept in the form; stale form; lost response retried with the same request ID, one commit |
+| GUI business-only access | met | direct `env.*`, fixture and hidden-path requests refused (browser and smoke); scenario profile hides and the Host refuses writes |
+| GUI files and content | met / not applicable | no file uploads in Bellnote; hostile text rendered as text |
+| GUI evidence | met | this section; screenshots and `report.json`; human review of the page pending |
 | 4.1 Essential workflows have evidence; human review of realism, usability, provenance | not met (human) | automated evidence complete; human review pending: realism of the policy values and school calendar, notification wording, fictional status of the district and people |
 | 4.2 Modes reported separately | met | this document: business, real MCP, verifier, messaging, manual |
 | 4.3 Remaining gaps and Host dependencies listed | met | below |
@@ -103,10 +138,11 @@ Against [docs/review/app-implementation-checklist.md](../../docs/review/app-impl
 - **Attendance corrections.** A second `attendance.marked` for the same child and day corrects the record and keeps its history.
 - **Extra event refusals** beyond the plan's list: a mark for a future day or a non-school day, a calendar change for a past day, an early dismissal outside the usual day, a staff ID unknown to the school, a `form.changed` on a closed form, a `dismissal.recorded` for a day whose dismissal has passed.
 - **Write results** use `state` for the object's state, because Core owns `status` (`committed`).
+- **Lunch account ID in `children.list`** (fix made while building the GUI). No read returned a lunch account ID, so `lunch.account_get`, `lunch.topup` and `lunch.settings_update` could be reached only by guessing the fixture's naming; W4 promises reading each child's balance. `children.list` now gives `lunch_account_id` (null without an account), declared as an optional output property; test in `tests/rules.test.cjs`.
 
 ## Remaining gaps and dependencies
 
 - Human review (realism, wording, provenance and the fictional status of all names) is pending.
 - `schemas/router-message.schema.json` is a byte-identical copy of Mail's generated wire schema. The repository generator (`runtime/build-contracts.cjs`, runtime-owned) does not list it, so `npm run contracts:check` does not detect drift; `scripts/mail-flow.cjs` compares it with Mail's copy and the router rejects a mismatched contract hash. Adding it to the generator's copy list is a runtime change for Infra review.
-- Node 18 was not run locally (Node 22.23.1 and 20.19.6 were); CI runs the Node 18/22 matrix.
+- The GUI is a local, loopback, single-session Host page; it is not a deployed remote service, and no model agent or user simulator was run against it.
 - No outbox or cross-App transaction for Mail notices (platform limitation, as planned).
