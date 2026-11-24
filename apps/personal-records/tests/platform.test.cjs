@@ -30,42 +30,46 @@ test('Platform seed, mutation, snapshot, and deterministic reset', () => {
       fs.readFileSync(path.join(__dirname, '../fixtures/truth.json'), 'utf-8')
     );
 
+    const initialDocCount = truthFixture.documents.length;
+    const initialLinkCount = truthFixture.links.length;
+    const accountId = truthFixture.account_id;
+
     // 1. Initial Seed
     const seedResult = platform.seed(truthFixture);
     assert.strictEqual(seedResult.status, 'SEEDED');
-    assert.strictEqual(seedResult.documents_seeded, 2);
+    assert.strictEqual(seedResult.documents_seeded, initialDocCount);
 
-    // Check baseline document count
-    const baselineDocs = docService.search({ accountId: 'acc_user_123' });
-    assert.strictEqual(baselineDocs.length, 2);
+    // Verify baseline documents are queryable (pass limit: 50 to cover all 20+ docs)
+    const baselineDocs = docService.search({ accountId, limit: 50 });
+    assert.strictEqual(baselineDocs.length, initialDocCount);
 
     // 2. Perform a mutation (upload extra document)
     docService.uploadDocument({
-      accountId: 'acc_user_123',
+      accountId,
       title: 'Ephemeral Receipt',
       contentBytes: Buffer.from('Expense $45.00'),
       mimeType: 'text/plain'
     });
 
-    const mutatedDocs = docService.search({ accountId: 'acc_user_123' });
-    assert.strictEqual(mutatedDocs.length, 3);
+    const mutatedDocs = docService.search({ accountId, limit: 50 });
+    assert.strictEqual(mutatedDocs.length, initialDocCount + 1);
 
     // 3. Snapshot verification
-    const snapshot = platform.snapshot('acc_user_123');
-    assert.strictEqual(snapshot.documents.length, 3);
-    assert.strictEqual(snapshot.links.length, 1);
+    const snapshot = platform.snapshot(accountId);
+    assert.strictEqual(snapshot.documents.length, initialDocCount + 1);
+    assert.strictEqual(snapshot.links.length, initialLinkCount);
 
     // 4. Reset
-    const resetResult = platform.reset('acc_user_123');
+    const resetResult = platform.reset(accountId);
     assert.strictEqual(resetResult.status, 'RESET_COMPLETE');
 
     // 5. Assert exact baseline restored
-    const restoredDocs = docService.search({ accountId: 'acc_user_123' });
-    assert.strictEqual(restoredDocs.length, 2);
-    const titles = restoredDocs.map((d) => d.title);
-    assert.ok(titles.includes('Payslip November 2026'));
-    assert.ok(titles.includes('Employment Contract'));
-    assert.ok(!titles.includes('Ephemeral Receipt'));
+    const restoredDocs = docService.search({ accountId, limit: 50 });
+    assert.strictEqual(restoredDocs.length, initialDocCount);
+
+    const restoredTitles = new Set(restoredDocs.map((d) => d.title));
+    assert.ok(restoredTitles.has(truthFixture.documents[0].title));
+    assert.ok(!restoredTitles.has('Ephemeral Receipt'));
   } finally {
     db.close();
     fs.rmSync(tempDir, { recursive: true, force: true });
@@ -96,7 +100,7 @@ test('Idempotent operation execution', () => {
 
     // Second call with same idempotency key
     const res2 = runOp();
-    assert.strictEqual(execCount, 1); // Should not have executed closure again
+    assert.strictEqual(execCount, 1); // Closure must not execute again
     assert.strictEqual(res1.document_id, res2.document_id);
     assert.strictEqual(res1.sha256, res2.sha256);
   } finally {

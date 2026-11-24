@@ -1,28 +1,490 @@
 {
   "scenario_id": "tax_and_employment_audit",
   "account_id": "acc_user_123",
+  "total_documents": 20,
   "documents": [
     {
-      "fixture_id": "fix_payslip_nov",
-      "title": "Payslip November 2026",
+      "fixture_id": "doc_emp_contract_2024",
+      "title": "Employment Agreement 2024 - Apex Tech",
       "category": "employment",
       "mime_type": "text/plain",
-      "content_text": "ACME Corporation. Gross Pay: $5,000.00. Federal Tax: $750.00. Net Pay: $4,250.00.",
-      "tags": ["salary", "payslip"]
+      "content_text": "EMPLOYMENT AGREEMENT\nEmployer: Apex Technologies Inc\nEmployee: Alex Mercer\nRole: Staff Systems Engineer\nEffective Date: 2024-01-15\nBase Salary: $120,000.00 annually\nHealth Benefits: Eligible for comprehensive medical/dental plan.\nTermination Notice: 30 days written notice required.",
+      "tags": [
+        "employment",
+        "contract",
+        "salary"
+      ],
+      "valid_until": null,
+      "expected_fields": {
+        "base_salary": 120000,
+        "employer": "Apex Technologies Inc",
+        "role": "Staff Systems Engineer"
+      },
+      "evidence_spans": [
+        {
+          "label": "salary",
+          "text": "$120,000.00",
+          "start": 144,
+          "end": 155
+        },
+        {
+          "label": "employer",
+          "text": "Apex Technologies Inc",
+          "start": 31,
+          "end": 52
+        }
+      ]
     },
     {
-      "fixture_id": "fix_contract",
-      "title": "Employment Contract",
+      "fixture_id": "doc_emp_payslip_2026_11",
+      "title": "Payslip 2026-11 - Apex Tech",
       "category": "employment",
       "mime_type": "text/plain",
-      "content_text": "Employment Agreement between ACME Corporation and User. Base salary: $60,000 annually.",
-      "tags": ["contract", "legal"]
+      "content_text": "PAYSLIP FOR PERIOD: 2026-11\nEmployer: Apex Technologies Inc\nEmployee: Alex Mercer (ID: EMP-9042)\nGross Monthly Pay: $10416.67\nFederal Income Tax: $2291.67\nNet Disbursed Pay: $8125.00\nDeposit Date: 2026-11-28",
+      "tags": [
+        "employment",
+        "payslip",
+        "salary"
+      ],
+      "valid_until": null,
+      "expected_fields": {
+        "gross_pay": 10416.67,
+        "net_pay": 8125,
+        "period": "2026-11"
+      },
+      "evidence_spans": [
+        {
+          "label": "net_pay",
+          "text": "$8125.00",
+          "start": 174,
+          "end": 182
+        }
+      ]
+    },
+    {
+      "fixture_id": "doc_emp_payslip_2026_12",
+      "title": "Payslip 2026-12 - Apex Tech",
+      "category": "employment",
+      "mime_type": "text/plain",
+      "content_text": "PAYSLIP FOR PERIOD: 2026-12\nEmployer: Apex Technologies Inc\nEmployee: Alex Mercer (ID: EMP-9042)\nGross Monthly Pay: $10416.67\nFederal Income Tax: $2291.67\nNet Disbursed Pay: $8125.00\nDeposit Date: 2026-12-28",
+      "tags": [
+        "employment",
+        "payslip",
+        "salary"
+      ],
+      "valid_until": null,
+      "expected_fields": {
+        "gross_pay": 10416.67,
+        "net_pay": 8125,
+        "period": "2026-12"
+      },
+      "evidence_spans": [
+        {
+          "label": "net_pay",
+          "text": "$8125.00",
+          "start": 174,
+          "end": 182
+        }
+      ]
+    },
+    {
+      "fixture_id": "doc_tax_w2_2025",
+      "title": "Form W-2 Wage Statement 2025",
+      "category": "tax",
+      "mime_type": "text/plain",
+      "content_text": "FORM W-2 WAGE AND TAX STATEMENT 2025\nEmployer Name: Apex Technologies Inc\nEmployee Name: Alex Mercer (SSN: ***-**-4821)\nBox 1 Wages & Tips: $120,000.00\nBox 2 Federal Tax Withheld: $26,400.00\nState Tax Withheld: $6,000.00",
+      "tags": [
+        "tax",
+        "w2",
+        "irs"
+      ],
+      "valid_until": null,
+      "expected_fields": {
+        "wages": 120000,
+        "federal_withholding": 26400,
+        "tax_year": 2025
+      },
+      "evidence_spans": [
+        {
+          "label": "wages",
+          "text": "$120,000.00",
+          "start": 140,
+          "end": 151
+        }
+      ]
+    },
+    {
+      "fixture_id": "doc_tax_1040_2025",
+      "title": "Form 1040 Federal Tax Return 2025",
+      "category": "tax",
+      "mime_type": "text/plain",
+      "content_text": "FORM 1040 U.S. INDIVIDUAL INCOME TAX RETURN 2025\nTaxpayer: Alex Mercer\nFiling Status: Single\nTotal Adjusted Gross Income: $120,000.00\nStandard Deduction: $14,600.00\nTaxable Income: $105,400.00\nTotal Tax Liability: $18,450.00\nRefund Amount: $1,950.00",
+      "tags": [
+        "tax",
+        "1040",
+        "filing"
+      ],
+      "valid_until": null,
+      "expected_fields": {
+        "adjusted_gross_income": 120000,
+        "refund_amount": 1950,
+        "tax_year": 2025
+      },
+      "evidence_spans": [
+        {
+          "label": "refund",
+          "text": "$1,950.00",
+          "start": 240,
+          "end": 249
+        }
+      ]
+    },
+    {
+      "fixture_id": "doc_tax_receipt_1",
+      "title": "Donation Tax Receipt #1001",
+      "category": "tax",
+      "mime_type": "text/plain",
+      "content_text": "CHARITABLE DONATION OFFICIAL TAX RECEIPT\nOrganization: Global Environmental Fund\nDonor: Alex Mercer\nContribution Amount: $75.00\nDate: 2025-02-15\nEligible under IRC Section 501(c)(3).",
+      "tags": [
+        "tax",
+        "deduction",
+        "charity"
+      ],
+      "valid_until": null,
+      "expected_fields": {
+        "donation_amount": 75
+      },
+      "evidence_spans": [
+        {
+          "label": "amount",
+          "text": "$75.00",
+          "start": 121,
+          "end": 127
+        }
+      ]
+    },
+    {
+      "fixture_id": "doc_ins_auto_2026",
+      "title": "Auto Insurance Policy 2026-2027",
+      "category": "insurance",
+      "mime_type": "text/plain",
+      "content_text": "AUTO INSURANCE POLICY SUMMARY\nCarrier: GuardPoint Mutual Insurance\nPolicyholder: Alex Mercer\nVehicle: 2022 Honda Civic (VIN: 1HGCR2F83NA109432)\nPolicy Number: GP-AUTO-94022\nCoverage Period: 2026-06-01 to 2027-05-31\nCollision Deductible: $500.00\nSix-Month Premium: $640.00",
+      "tags": [
+        "insurance",
+        "auto",
+        "vehicle"
+      ],
+      "valid_until": "2027-05-31T23:59:59Z",
+      "expected_fields": {
+        "policy_number": "GP-AUTO-94022",
+        "deductible": 500,
+        "annual_premium": 1280
+      },
+      "evidence_spans": [
+        {
+          "label": "policy_number",
+          "text": "GP-AUTO-94022",
+          "start": 159,
+          "end": 172
+        }
+      ]
+    },
+    {
+      "fixture_id": "doc_ins_record_1",
+      "title": "Renters Policy Rider #1",
+      "category": "insurance",
+      "mime_type": "text/plain",
+      "content_text": "INSURANCE SCHEDULE & BENEFIT OVERVIEW\nCarrier: GuardPoint Mutual Insurance\nPolicy Number: GP-RENT-4001\nNamed Insured: Alex Mercer\nCoverage Type: Tenant Renter's Liability\nEffective Date: 2026-01-01\nExpiry Date: 2026-12-31\nMax Limit: $100,000.00",
+      "tags": [
+        "insurance",
+        "property"
+      ],
+      "valid_until": "2026-12-31T23:59:59Z",
+      "expected_fields": {
+        "policy_number": "GP-RENT-4001"
+      },
+      "evidence_spans": []
+    },
+    {
+      "fixture_id": "doc_prop_lease_2026",
+      "title": "Apartment Lease Agreement 2026-2027",
+      "category": "property",
+      "mime_type": "text/plain",
+      "content_text": "RESIDENTIAL LEASE AGREEMENT\nLandlord: Skyline Urban Living LLC\nTenant: Alex Mercer\nPremises: Apt 4B, 742 Evergreen Terrace, Springfield\nLease Term: 2026-06-01 to 2027-05-31\nMonthly Rent: $2,250.00 due on 1st of month.\nSecurity Deposit: $2,250.00\nRenewal Notice Window: 60 days prior to expiration.",
+      "tags": [
+        "property",
+        "lease",
+        "housing"
+      ],
+      "valid_until": "2027-05-31T23:59:59Z",
+      "expected_fields": {
+        "monthly_rent": 2250,
+        "deposit": 2250,
+        "premises": "Apt 4B, 742 Evergreen Terrace"
+      },
+      "evidence_spans": [
+        {
+          "label": "monthly_rent",
+          "text": "$2,250.00",
+          "start": 187,
+          "end": 196
+        }
+      ]
+    },
+    {
+      "fixture_id": "doc_prop_receipt_1",
+      "title": "Rent Receipt #201",
+      "category": "property",
+      "mime_type": "text/plain",
+      "content_text": "MONTHLY RENTAL RECEIPT\nLandlord: Skyline Urban Living LLC\nTenant: Alex Mercer (Apt 4B)\nPayment Amount Received: $2,250.00\nPayment Method: ACH Transfer\nTransaction Date: 2026-02-01\nBalance Remaining: $0.00",
+      "tags": [
+        "property",
+        "receipt",
+        "rent"
+      ],
+      "valid_until": null,
+      "expected_fields": {
+        "rent_paid": 2250
+      },
+      "evidence_spans": []
+    },
+    {
+      "fixture_id": "doc_util_1",
+      "title": "Broadband Internet Bill #1",
+      "category": "utilities",
+      "mime_type": "text/plain",
+      "content_text": "MONTHLY UTILITY INVOICE\nProvider: Metro Fiber Broadband\nAccount Number: ACCT-UTIL-5001\nCustomer Name: Alex Mercer\nBilling Cycle: Month 1\nTotal Amount Due: $65.00\nDue Date: 2026-02-20",
+      "tags": [
+        "utilities",
+        "internet"
+      ],
+      "valid_until": "2026-02-20T00:00:00Z",
+      "expected_fields": {
+        "amount_due": 65
+      },
+      "evidence_spans": [
+        {
+          "label": "amount_due",
+          "text": "$65.00",
+          "start": 155,
+          "end": 161
+        }
+      ]
+    },
+    {
+      "fixture_id": "doc_util_2",
+      "title": "Electric Energy Bill #2",
+      "category": "utilities",
+      "mime_type": "text/plain",
+      "content_text": "MONTHLY UTILITY INVOICE\nProvider: Springfield Clean Energy Power Co\nAccount Number: ACCT-UTIL-5002\nCustomer Name: Alex Mercer\nBilling Cycle: Month 2\nTotal Amount Due: $109.50\nDue Date: 2026-03-20",
+      "tags": [
+        "utilities",
+        "electric"
+      ],
+      "valid_until": "2026-03-20T00:00:00Z",
+      "expected_fields": {
+        "amount_due": 109.5
+      },
+      "evidence_spans": [
+        {
+          "label": "amount_due",
+          "text": "$109.50",
+          "start": 167,
+          "end": 174
+        }
+      ]
+    },
+    {
+      "fixture_id": "doc_health_1",
+      "title": "Medical Encounter Record #1",
+      "category": "healthcare",
+      "mime_type": "text/plain",
+      "content_text": "CLINICAL VISIT ENCOUNTER SUMMARY\nFacility: St. Jude Health Medical Center\nAttending Physician: Dr. Sarah Jenkins, MD\nPatient Name: Alex Mercer (DOB: 1994-08-12)\nVisit Date: 2026-02-10\nChief Complaint: Annual Physical & Preventative Consultation\nBlood Pressure: 118/76 mmHg\nDiagnostic Assessment: Normal health profile, recommended annual follow-up.",
+      "tags": [
+        "healthcare",
+        "medical",
+        "clinic"
+      ],
+      "valid_until": null,
+      "expected_fields": {
+        "clinic": "St. Jude Health Medical Center",
+        "doctor": "Dr. Sarah Jenkins, MD"
+      },
+      "evidence_spans": []
+    },
+    {
+      "fixture_id": "doc_health_2",
+      "title": "Medical Encounter Record #2",
+      "category": "healthcare",
+      "mime_type": "text/plain",
+      "content_text": "CLINICAL VISIT ENCOUNTER SUMMARY\nFacility: St. Jude Health Medical Center\nAttending Physician: Dr. Sarah Jenkins, MD\nPatient Name: Alex Mercer (DOB: 1994-08-12)\nVisit Date: 2026-03-10\nChief Complaint: Annual Physical & Preventative Consultation\nBlood Pressure: 118/76 mmHg\nDiagnostic Assessment: Normal health profile, recommended annual follow-up.",
+      "tags": [
+        "healthcare",
+        "medical",
+        "clinic"
+      ],
+      "valid_until": null,
+      "expected_fields": {
+        "clinic": "St. Jude Health Medical Center",
+        "doctor": "Dr. Sarah Jenkins, MD"
+      },
+      "evidence_spans": []
+    },
+    {
+      "fixture_id": "doc_bank_1",
+      "title": "Bank Statement Month 1",
+      "category": "banking",
+      "mime_type": "text/plain",
+      "content_text": "MONTHLY ACCOUNT STATEMENT\nBank: First Horizon National Bank\nAccount Holder: Alex Mercer\nAccount Number: *******3492 (Checking)\nStatement Period: Month 1, 2026\nEnding Cleared Balance: $14850.00\nInterest Earned: $12.45\nFDIC Insured up to $250,000.",
+      "tags": [
+        "banking",
+        "statement",
+        "checking"
+      ],
+      "valid_until": null,
+      "expected_fields": {
+        "ending_balance": 14850
+      },
+      "evidence_spans": [
+        {
+          "label": "balance",
+          "text": "$14850.00",
+          "start": 183,
+          "end": 192
+        }
+      ]
+    },
+    {
+      "fixture_id": "doc_bank_2",
+      "title": "Bank Statement Month 2",
+      "category": "banking",
+      "mime_type": "text/plain",
+      "content_text": "MONTHLY ACCOUNT STATEMENT\nBank: First Horizon National Bank\nAccount Holder: Alex Mercer\nAccount Number: *******3492 (Checking)\nStatement Period: Month 2, 2026\nEnding Cleared Balance: $15200.00\nInterest Earned: $12.45\nFDIC Insured up to $250,000.",
+      "tags": [
+        "banking",
+        "statement",
+        "checking"
+      ],
+      "valid_until": null,
+      "expected_fields": {
+        "ending_balance": 15200
+      },
+      "evidence_spans": [
+        {
+          "label": "balance",
+          "text": "$15200.00",
+          "start": 183,
+          "end": 192
+        }
+      ]
+    },
+    {
+      "fixture_id": "doc_legal_1",
+      "title": "Power of Attorney Document #1",
+      "category": "legal",
+      "mime_type": "text/plain",
+      "content_text": "LEGAL INSTRUMENT & FORMAL NOTICE\nClassification: Statutory Power of Attorney\nParties: Alex Mercer & Affiliated Representatives\nExecuted Date: 2024-03-12\nExpiration Date: 2029-03-12\nGoverning Law: State Jurisdiction\nStatus: Legally Binding & Active",
+      "tags": [
+        "legal",
+        "poa"
+      ],
+      "valid_until": "2029-03-12T00:00:00Z",
+      "expected_fields": {
+        "status": "Legally Binding & Active"
+      },
+      "evidence_spans": []
+    },
+    {
+      "fixture_id": "doc_legal_2",
+      "title": "Mutual NDA #2",
+      "category": "legal",
+      "mime_type": "text/plain",
+      "content_text": "LEGAL INSTRUMENT & FORMAL NOTICE\nClassification: Mutual Non-Disclosure Agreement\nParties: Alex Mercer & Affiliated Representatives\nExecuted Date: 2024-03-12\nExpiration Date: 2029-03-12\nGoverning Law: State Jurisdiction\nStatus: Legally Binding & Active",
+      "tags": [
+        "legal",
+        "nda"
+      ],
+      "valid_until": "2029-03-12T00:00:00Z",
+      "expected_fields": {
+        "status": "Legally Binding & Active"
+      },
+      "evidence_spans": []
+    },
+    {
+      "fixture_id": "doc_emp_payslip_2025_12",
+      "title": "Payslip 2025-12 - Apex Tech",
+      "category": "employment",
+      "mime_type": "text/plain",
+      "content_text": "PAYSLIP FOR PERIOD: 2025-12\nEmployer: Apex Technologies Inc\nEmployee: Alex Mercer (ID: EMP-9042)\nGross Monthly Pay: $10000.00\nFederal Income Tax: $2200.00\nNet Disbursed Pay: $7800.00\nDeposit Date: 2025-12-28",
+      "tags": [
+        "employment",
+        "payslip",
+        "salary"
+      ],
+      "valid_until": null,
+      "expected_fields": {
+        "gross_pay": 10000,
+        "net_pay": 7800,
+        "period": "2025-12"
+      },
+      "evidence_spans": [
+        {
+          "label": "net_pay",
+          "text": "$7800.00",
+          "start": 174,
+          "end": 182
+        }
+      ]
+    },
+    {
+      "fixture_id": "doc_tax_receipt_2",
+      "title": "Donation Tax Receipt #1002",
+      "category": "tax",
+      "mime_type": "text/plain",
+      "content_text": "CHARITABLE DONATION OFFICIAL TAX RECEIPT\nOrganization: Global Environmental Fund\nDonor: Alex Mercer\nContribution Amount: $100.00\nDate: 2025-03-15\nEligible under IRC Section 501(c)(3).",
+      "tags": [
+        "tax",
+        "deduction",
+        "charity"
+      ],
+      "valid_until": null,
+      "expected_fields": {
+        "donation_amount": 100
+      },
+      "evidence_spans": [
+        {
+          "label": "amount",
+          "text": "$100.00",
+          "start": 121,
+          "end": 128
+        }
+      ]
     }
   ],
   "links": [
     {
-      "source_ref": "fix_payslip_nov",
-      "target_ref": "fix_contract",
+      "source_ref": "doc_emp_payslip_2025_12",
+      "target_ref": "doc_emp_contract_2024",
+      "relationship_type": "receipt_for"
+    },
+    {
+      "source_ref": "doc_emp_payslip_2026_11",
+      "target_ref": "doc_emp_contract_2024",
+      "relationship_type": "receipt_for"
+    },
+    {
+      "source_ref": "doc_emp_payslip_2026_12",
+      "target_ref": "doc_emp_contract_2024",
+      "relationship_type": "receipt_for"
+    },
+    {
+      "source_ref": "doc_tax_w2_2025",
+      "target_ref": "doc_tax_1040_2025",
+      "relationship_type": "tax_supporting_document"
+    },
+    {
+      "source_ref": "doc_prop_receipt_1",
+      "target_ref": "doc_prop_lease_2026",
       "relationship_type": "receipt_for"
     }
   ]
