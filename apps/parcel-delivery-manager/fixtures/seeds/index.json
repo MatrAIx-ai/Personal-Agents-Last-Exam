@@ -1,0 +1,449 @@
+{
+  "schema": "parcel-delivery-manager.seed-index.v1",
+  "binding": "binding.json",
+  "note": "Each seed is a full ledger for env.load_seed, to be loaded with its virtual_now and the binding. Example schedules are valid only for the untouched seed; a Task supplies its own events.",
+  "seeds": [
+    {
+      "id": "01-normal-delivery",
+      "title": "Normal delivery",
+      "workflows": [
+        "W1"
+      ],
+      "summary": "One parcel on its way home with every change still open, one delivered in January after an applied date change, and another recipient's parcel in the same ledger.",
+      "seed": "seeds/01-normal-delivery.json",
+      "example_schedule": "seeds/schedules/01-normal-delivery.json",
+      "virtual_now": "2026-03-02T14:00:00Z",
+      "actors": [
+        {
+          "account_id": "pdm-maya",
+          "owner_person_id": "person-maya",
+          "role": "recipient",
+          "sees": [
+            "S101",
+            "S102"
+          ]
+        },
+        {
+          "account_id": "pdm-sam",
+          "owner_person_id": "person-sam",
+          "role": "unauthorized",
+          "sees": []
+        }
+      ],
+      "shipments": [
+        {
+          "id": "S101",
+          "recipient_person_id": "person-maya",
+          "policy_id": "pol-standard",
+          "status": "in_transit",
+          "plan_mode": "home"
+        },
+        {
+          "id": "S102",
+          "recipient_person_id": "person-maya",
+          "policy_id": "pol-standard",
+          "status": "delivered",
+          "plan_mode": "home"
+        },
+        {
+          "id": "S103",
+          "recipient_person_id": "person-idris",
+          "policy_id": "pol-compact",
+          "status": "in_transit",
+          "plan_mode": "home"
+        }
+      ]
+    },
+    {
+      "id": "02-pending-changes",
+      "title": "Pending changes",
+      "workflows": [
+        "W1",
+        "W2"
+      ],
+      "summary": "Two parcels each with a request the carrier has not decided, and a collected parcel whose history holds a rejected, a withdrawn and an applied request.",
+      "seed": "seeds/02-pending-changes.json",
+      "example_schedule": "seeds/schedules/02-pending-changes.json",
+      "virtual_now": "2026-03-03T15:00:00Z",
+      "actors": [
+        {
+          "account_id": "pdm-idris",
+          "owner_person_id": "person-idris",
+          "role": "recipient",
+          "sees": [
+            "S104",
+            "S105",
+            "S106"
+          ]
+        },
+        {
+          "account_id": "pdm-sam",
+          "owner_person_id": "person-sam",
+          "role": "unauthorized",
+          "sees": []
+        }
+      ],
+      "shipments": [
+        {
+          "id": "S104",
+          "recipient_person_id": "person-idris",
+          "policy_id": "pol-standard",
+          "status": "in_transit",
+          "plan_mode": "home"
+        },
+        {
+          "id": "S105",
+          "recipient_person_id": "person-idris",
+          "policy_id": "pol-standard",
+          "status": "in_transit",
+          "plan_mode": "home"
+        },
+        {
+          "id": "S106",
+          "recipient_person_id": "person-idris",
+          "policy_id": "pol-compact",
+          "status": "collected",
+          "plan_mode": "pickup"
+        }
+      ]
+    },
+    {
+      "id": "03-restricted-changes",
+      "title": "Restricted changes",
+      "workflows": [
+        "W1",
+        "W2"
+      ],
+      "summary": "Three parcels under restrictive profiles: signature (no address change or hold, counters only; one date change already applied), bulky (home delivery only; an address change the carrier declined) and recipient-only with its change cutoff already passed.",
+      "seed": "seeds/03-restricted-changes.json",
+      "example_schedule": "seeds/schedules/03-restricted-changes.json",
+      "virtual_now": "2026-03-03T16:00:00Z",
+      "actors": [
+        {
+          "account_id": "pdm-chloe",
+          "owner_person_id": "person-chloe",
+          "role": "recipient",
+          "sees": [
+            "S107",
+            "S108",
+            "S109"
+          ]
+        },
+        {
+          "account_id": "pdm-sam",
+          "owner_person_id": "person-sam",
+          "role": "unauthorized",
+          "sees": []
+        }
+      ],
+      "shipments": [
+        {
+          "id": "S107",
+          "recipient_person_id": "person-chloe",
+          "policy_id": "pol-signature",
+          "status": "in_transit",
+          "plan_mode": "home"
+        },
+        {
+          "id": "S108",
+          "recipient_person_id": "person-chloe",
+          "policy_id": "pol-bulky",
+          "status": "in_transit",
+          "plan_mode": "home"
+        },
+        {
+          "id": "S109",
+          "recipient_person_id": "person-chloe",
+          "policy_id": "pol-recipient-only",
+          "status": "in_transit",
+          "plan_mode": "home"
+        }
+      ]
+    },
+    {
+      "id": "04-redirect-readiness",
+      "title": "Redirect and readiness",
+      "workflows": [
+        "W2"
+      ],
+      "summary": "One parcel with an applied redirect that has not arrived yet, one ready at a counter and one sent straight to a step-free locker; each ready parcel has the recipient's pass.",
+      "seed": "seeds/04-redirect-readiness.json",
+      "example_schedule": "seeds/schedules/04-redirect-readiness.json",
+      "virtual_now": "2026-03-03T15:00:00Z",
+      "actors": [
+        {
+          "account_id": "pdm-maya",
+          "owner_person_id": "person-maya",
+          "role": "recipient",
+          "sees": [
+            "S110",
+            "S111",
+            "S112"
+          ]
+        },
+        {
+          "account_id": "pdm-sam",
+          "owner_person_id": "person-sam",
+          "role": "unauthorized",
+          "sees": []
+        }
+      ],
+      "shipments": [
+        {
+          "id": "S110",
+          "recipient_person_id": "person-maya",
+          "policy_id": "pol-standard",
+          "status": "in_transit",
+          "plan_mode": "pickup"
+        },
+        {
+          "id": "S111",
+          "recipient_person_id": "person-maya",
+          "policy_id": "pol-standard",
+          "status": "at_pickup",
+          "plan_mode": "pickup"
+        },
+        {
+          "id": "S112",
+          "recipient_person_id": "person-maya",
+          "policy_id": "pol-compact",
+          "status": "at_pickup",
+          "plan_mode": "pickup"
+        }
+      ]
+    },
+    {
+      "id": "05-delegation",
+      "title": "Delegation",
+      "workflows": [
+        "W3"
+      ],
+      "summary": "A ready parcel with a current authorization for one collector after an earlier one was revoked, a signature parcel that cannot be delegated, and a February parcel collected by an authorized collector.",
+      "seed": "seeds/05-delegation.json",
+      "example_schedule": "seeds/schedules/05-delegation.json",
+      "virtual_now": "2026-03-03T15:00:00Z",
+      "actors": [
+        {
+          "account_id": "pdm-maya",
+          "owner_person_id": "person-maya",
+          "role": "recipient",
+          "sees": [
+            "S113",
+            "S114",
+            "S115"
+          ]
+        },
+        {
+          "account_id": "pdm-alex",
+          "owner_person_id": "person-alex",
+          "role": "delegate",
+          "sees": [
+            "S113"
+          ]
+        },
+        {
+          "account_id": "pdm-noor",
+          "owner_person_id": "person-noor",
+          "role": "delegate",
+          "sees": []
+        },
+        {
+          "account_id": "pdm-sam",
+          "owner_person_id": "person-sam",
+          "role": "unauthorized",
+          "sees": []
+        }
+      ],
+      "shipments": [
+        {
+          "id": "S113",
+          "recipient_person_id": "person-maya",
+          "policy_id": "pol-standard",
+          "status": "at_pickup",
+          "plan_mode": "pickup"
+        },
+        {
+          "id": "S114",
+          "recipient_person_id": "person-maya",
+          "policy_id": "pol-standard",
+          "status": "collected",
+          "plan_mode": "pickup"
+        },
+        {
+          "id": "S115",
+          "recipient_person_id": "person-maya",
+          "policy_id": "pol-signature",
+          "status": "at_pickup",
+          "plan_mode": "pickup"
+        }
+      ]
+    },
+    {
+      "id": "06-failed-delivery",
+      "title": "Failed delivery",
+      "workflows": [
+        "W4"
+      ],
+      "summary": "Two failed deliveries waiting for the recipient, one with a day and a half left and a signature parcel with six hours left, plus a February failure that was recovered by redelivery.",
+      "seed": "seeds/06-failed-delivery.json",
+      "example_schedule": "seeds/schedules/06-failed-delivery.json",
+      "virtual_now": "2026-03-03T15:00:00Z",
+      "actors": [
+        {
+          "account_id": "pdm-idris",
+          "owner_person_id": "person-idris",
+          "role": "recipient",
+          "sees": [
+            "S116",
+            "S117",
+            "S118"
+          ]
+        },
+        {
+          "account_id": "pdm-sam",
+          "owner_person_id": "person-sam",
+          "role": "unauthorized",
+          "sees": []
+        }
+      ],
+      "shipments": [
+        {
+          "id": "S116",
+          "recipient_person_id": "person-idris",
+          "policy_id": "pol-standard",
+          "status": "attempt_failed",
+          "plan_mode": "home"
+        },
+        {
+          "id": "S117",
+          "recipient_person_id": "person-idris",
+          "policy_id": "pol-standard",
+          "status": "delivered",
+          "plan_mode": "home"
+        },
+        {
+          "id": "S118",
+          "recipient_person_id": "person-idris",
+          "policy_id": "pol-signature",
+          "status": "attempt_failed",
+          "plan_mode": "home"
+        }
+      ]
+    },
+    {
+      "id": "07-closure-relocation",
+      "title": "Closure and relocation",
+      "workflows": [
+        "W2",
+        "W3",
+        "W4"
+      ],
+      "summary": "A ready parcel, with an authorized collector, at a point that has closed with its deadline unchanged, and a parcel the carrier is moving to another point after its first pass was invalidated.",
+      "seed": "seeds/07-closure-relocation.json",
+      "example_schedule": "seeds/schedules/07-closure-relocation.json",
+      "virtual_now": "2026-03-03T16:00:00Z",
+      "actors": [
+        {
+          "account_id": "pdm-chloe",
+          "owner_person_id": "person-chloe",
+          "role": "recipient",
+          "sees": [
+            "S119",
+            "S120"
+          ]
+        },
+        {
+          "account_id": "pdm-alex",
+          "owner_person_id": "person-alex",
+          "role": "delegate",
+          "sees": [
+            "S119"
+          ]
+        },
+        {
+          "account_id": "pdm-sam",
+          "owner_person_id": "person-sam",
+          "role": "unauthorized",
+          "sees": []
+        }
+      ],
+      "shipments": [
+        {
+          "id": "S119",
+          "recipient_person_id": "person-chloe",
+          "policy_id": "pol-standard",
+          "status": "at_pickup",
+          "plan_mode": "pickup"
+        },
+        {
+          "id": "S120",
+          "recipient_person_id": "person-chloe",
+          "policy_id": "pol-standard",
+          "status": "in_transit",
+          "plan_mode": "pickup"
+        }
+      ]
+    },
+    {
+      "id": "08-expiry-return",
+      "title": "Expiry and return",
+      "workflows": [
+        "W2",
+        "W4"
+      ],
+      "summary": "A ready parcel with three hours left, one whose pickup deadline has passed by the clock with no deadline event applied yet, one being returned after expiry, and a January parcel returned after an unanswered failed delivery.",
+      "seed": "seeds/08-expiry-return.json",
+      "example_schedule": "seeds/schedules/08-expiry-return.json",
+      "virtual_now": "2026-03-04T12:00:00Z",
+      "actors": [
+        {
+          "account_id": "pdm-maya",
+          "owner_person_id": "person-maya",
+          "role": "recipient",
+          "sees": [
+            "S121",
+            "S122",
+            "S123",
+            "S124"
+          ]
+        },
+        {
+          "account_id": "pdm-sam",
+          "owner_person_id": "person-sam",
+          "role": "unauthorized",
+          "sees": []
+        }
+      ],
+      "shipments": [
+        {
+          "id": "S121",
+          "recipient_person_id": "person-maya",
+          "policy_id": "pol-express",
+          "status": "at_pickup",
+          "plan_mode": "pickup"
+        },
+        {
+          "id": "S122",
+          "recipient_person_id": "person-maya",
+          "policy_id": "pol-standard",
+          "status": "at_pickup",
+          "plan_mode": "pickup"
+        },
+        {
+          "id": "S123",
+          "recipient_person_id": "person-maya",
+          "policy_id": "pol-standard",
+          "status": "returning",
+          "plan_mode": "pickup"
+        },
+        {
+          "id": "S124",
+          "recipient_person_id": "person-maya",
+          "policy_id": "pol-standard",
+          "status": "returned",
+          "plan_mode": "home"
+        }
+      ]
+    }
+  ]
+}

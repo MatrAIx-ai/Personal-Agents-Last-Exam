@@ -7,13 +7,13 @@ const c = require('./common.cjs');
 
 function passCode(data, s, holder, passId) {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const bytes = crypto.createHash('sha256').update([data.account_id, s.id, s.pickup.epoch, holder, passId].join('|')).digest();
+  const bytes = crypto.createHash('sha256').update([s.id, s.pickup.epoch, holder, passId].join('|')).digest();
   const code = [...bytes.subarray(0, 8)].map(b => alphabet[b % alphabet.length]).join('');
   return code.slice(0, 4) + '-' + code.slice(4);
 }
 function issuePass(data, s, at, holder, expiresAt, grantId = null) {
   const id = c.nextId(data.passes, 'PASS');
-  const pass = {id, account_id: data.account_id, shipment_id: s.id, holder_person_id: holder, grant_id: grantId, point_id: s.pickup.point_id,
+  const pass = {id, shipment_id: s.id, holder_person_id: holder, grant_id: grantId, point_id: s.pickup.point_id,
     pickup_epoch: s.pickup.epoch, code: passCode(data, s, holder, id), issued_at: at, expires_at: expiresAt, status: 'active', ended_at: null, end_reason: null};
   data.passes.push(pass);
   return pass;

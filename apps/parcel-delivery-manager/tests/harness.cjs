@@ -95,11 +95,8 @@ function authorize(f, id, fields) {
 // would load it. Owner, delegate and unauthorized checks never share one session.
 function actAs(f, person) {
   const account = require('../fixtures/binding.json').accounts.find(a => a.owner_person_id === person).account_id;
-  const seed = f.data;
-  for (const key of ['shipments', 'changes', 'grants', 'passes', 'notices']) seed[key] = seed[key].map(x => ({...x, account_id: account}));
-  seed.account_id = account;
-  seed.owner_person_id = person;
-  return fixture({seed, virtual_now: f.ctx.virtual_now});
+  // Records carry no account: the same ledger is loaded with another acting account.
+  return fixture({seed: {...f.data, account_id: account, owner_person_id: person}, virtual_now: f.ctx.virtual_now});
 }
 
 module.exports = {fixture, rejects, ev, submit, decide, authorize, actAs, T, app};

@@ -65,7 +65,7 @@ function timeline(shipment, at, kind, summary, action = kind) {
   shipment.timeline.push({at, kind, summary});
 }
 function notify(ctx, data, {shipment_id = null, at, type, audience, message}) {
-  const notice = {id: nextId(data.notices, 'N'), account_id: data.account_id, shipment_id, at, type, audience: [...new Set(audience)], message};
+  const notice = {id: nextId(data.notices, 'N'), shipment_id, at, type, audience: [...new Set(audience)], message};
   data.notices.push(notice);
   log(ctx, APP + '.notice', {notice_id: notice.id, shipment_id, type});
   return notice;

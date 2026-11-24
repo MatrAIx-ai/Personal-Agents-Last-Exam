@@ -67,7 +67,7 @@ function create(ctx, data, s, input, confirmation) {
     if (old !== e.replaced && old.shipment_id === s.id && old.collector_person_id === collector && old.status === 'active') cr.endGrant(data, old, at, 'expired', 'expired');
   }
   if (e.replaced) cr.endGrant(data, e.replaced, at, 'replaced', 'replaced');
-  const grant = {id: c.nextId(data.grants, 'G'), account_id: data.account_id, shipment_id: s.id, collector_person_id: collector, point_id: s.pickup.point_id,
+  const grant = {id: c.nextId(data.grants, 'G'), shipment_id: s.id, collector_person_id: collector, point_id: s.pickup.point_id,
     pickup_epoch: s.pickup.epoch, created_at: at, expires_at: input.expires_at, status: 'active', ended_at: null, end_reason: null,
     replaces_grant_id: e.replaced?.id ?? null, history: [{at, action: 'created'}]};
   data.grants.push(grant);

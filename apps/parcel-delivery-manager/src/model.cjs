@@ -12,7 +12,6 @@ function unique(data) {
     for (const item of data[key]) {
       if (seen.has(item.id)) fail('invalid_seed', 'Duplicate ID in ' + key + ': ' + item.id);
       seen.add(item.id);
-      if ('account_id' in item && item.account_id !== data.account_id) fail('invalid_seed', 'Record belongs to another account: ' + item.id);
     }
   }
 }

@@ -97,7 +97,7 @@ const WRITES = {
     if (!e.allowed) fail(e.reason, e.summary);
     if (confirmation !== e.confirmation) fail('stale_confirmation', ch.MESSAGES.stale_confirmation);
     const at = ctx.virtual_now;
-    const change = {id: c.nextId(data.changes, 'C'), account_id: data.account_id, shipment_id: s.id, kind: input.kind,
+    const change = {id: c.nextId(data.changes, 'C'), shipment_id: s.id, kind: input.kind,
       requested_by_person_id: data.owner_person_id, created_at: at, updated_at: at, base_plan_revision: s.plan.revision,
       target: e.target, status: 'pending', decided_at: null, reason: null, history: [{at, action: 'submitted'}]};
     data.changes.push(change);

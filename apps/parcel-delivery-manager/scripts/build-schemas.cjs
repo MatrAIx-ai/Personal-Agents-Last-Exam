@@ -69,7 +69,7 @@ const policy = obj({
 });
 const collector = obj({recipient_person_id: id, person_id: id, relationship: text(80)});
 const shipment = obj({
-  id, account_id: id, tracking_number: text(40), recipient_person_id: id,
+  id, tracking_number: text(40), recipient_person_id: id,
   sender_label: text(120), contents_label: text(200), policy_id: id,
   created_at: time, updated_at: time, estimated_delivery: nullable(day),
   status: oneOf(PHYSICAL), plan, pending_change_id: nullable(id),
@@ -79,22 +79,24 @@ const shipment = obj({
 });
 const target = obj({mode: oneOf(MODES), address_id: nullable(id), point_id: nullable(id), delivery_date: nullable(day), hold_until: nullable(day)});
 const change = obj({
-  id, account_id: id, shipment_id: id, kind: oneOf(CHANGE_KINDS), requested_by_person_id: id,
+  id, shipment_id: id, kind: oneOf(CHANGE_KINDS), requested_by_person_id: id,
   created_at: time, updated_at: time, base_plan_revision: int(1), target,
   status: oneOf(CHANGE_STATUS), decided_at: nullable(time), reason: nullable(text(300)), history
 });
 const grant = obj({
-  id, account_id: id, shipment_id: id, collector_person_id: id, point_id: id, pickup_epoch: int(1),
+  id, shipment_id: id, collector_person_id: id, point_id: id, pickup_epoch: int(1),
   created_at: time, expires_at: time, status: oneOf(GRANT_STATUS), ended_at: nullable(time),
   end_reason: nullable(text(200)), replaces_grant_id: nullable(id), history
 });
 const pass = obj({
-  id, account_id: id, shipment_id: id, holder_person_id: id, grant_id: nullable(id), point_id: id,
+  id, shipment_id: id, holder_person_id: id, grant_id: nullable(id), point_id: id,
   pickup_epoch: int(1), code: {type: 'string', pattern: '^[A-Z0-9]{4}-[A-Z0-9]{4}$'}, issued_at: time, expires_at: time,
   status: oneOf(PASS_STATUS), ended_at: nullable(time), end_reason: nullable(text(200))
 });
-const notice = obj({id, account_id: id, shipment_id: nullable(id), at: time, type: text(80), audience: list(id, 20, {minItems: 1, uniqueItems: true}), message: text(1500)});
+const notice = obj({id, shipment_id: nullable(id), at: time, type: text(80), audience: list(id, 20, {minItems: 1, uniqueItems: true}), message: text(1500)});
 
+// The seed is one carrier ledger. `account_id` / `owner_person_id` name the acting person for a run;
+// records carry no account, so the same ledger can be loaded for a recipient, a collector or anyone else.
 const seed = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
   $id: 'urn:pale:parcel-delivery-manager:seed:1',

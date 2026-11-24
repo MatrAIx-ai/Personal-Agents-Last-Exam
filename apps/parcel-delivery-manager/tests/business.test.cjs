@@ -82,7 +82,7 @@ test('pickup opening hours use the point time zone', () => {
 test('seed validation rejects inconsistent history', () => {
   const f = fixture(), good = f.data;
   const cases = [
-    [d => { d.shipments[0].account_id = 'other'; }, /another account/],
+    [d => { d.owner_person_id = 'person-alex'; }, /binding/],
     [d => { d.shipments[1].pickup.epoch = 2; }, /readiness/],
     [d => { d.shipments[1].status = 'in_transit'; }, /readiness/],
     [d => { d.passes[0].expires_at = '2026-03-05T15:00:00Z'; }, /outlasts/],
@@ -116,6 +116,7 @@ require('./w1-home-delivery.test.cjs');
 require('./w2-pickup.test.cjs');
 require('./w3-delegation.test.cjs');
 require('./w4-recovery.test.cjs');
+require('./catalog.test.cjs');
 
 test('optional diagnostics cannot change business results', () => {
   const scenario = require('../examples/scenario.json');

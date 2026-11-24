@@ -136,11 +136,7 @@ const T = name => APP + '.' + name;
 
     // ---- Separate seeded runs: the collector and an unauthorized person over the same ledger ----
     const binding = require('../../fixtures/binding.json');
-    const ledgerFor = (account_id, owner_person_id) => {
-      const data = structuredClone(history);
-      for (const key of ['shipments', 'changes', 'grants', 'passes', 'notices']) data[key] = data[key].map(x => ({...x, account_id}));
-      return {...data, account_id, owner_person_id};
-    };
+    const ledgerFor = (account_id, owner_person_id) => ({...structuredClone(history), account_id, owner_person_id});
     async function seededRun(run, account, person) {
       const admin = await open('infra', run, {initialProfile: 'sandbox'});
       const version = (await admin.call('env.snapshot')).version, data = ledgerFor(account, person);
@@ -256,6 +252,47 @@ const T = name => APP + '.' + name;
     const atDeadline = await apply(take('2026-03-05T16:00:00Z')); // Thursday 11:00 local: the point is open, only the deadline blocks it
     check('Collection exactly at the deadline fails', atDeadline.status === 'invalid_event' && /deadline/.test(atDeadline.message) && (await readyParcel()).status === 'at_pickup');
     check('Collection one second before the deadline succeeds', (await apply(take('2026-03-05T15:59:59Z'))).status === 'committed' && (await readyParcel()).status === 'collected');
+
+    // ---- Data catalog: every seed loads through Core, replays identically and resets ----
+    const seedIndex = require('../../fixtures/seeds/index.json');
+    const fullBinding = require('../../fixtures/binding.json');
+    for (const entry of seedIndex.seeds) {
+      const ledger = require('../../fixtures/' + entry.seed), schedule = require('../../fixtures/' + entry.example_schedule);
+      const run = 'seed-' + entry.id.slice(0, 2);
+      const admin = await open('infra', run, {initialProfile: 'sandbox'});
+      const state = async () => { const r = await admin.call('env.snapshot'); return {version: r.version, data: r.snapshot.data, clock: r.snapshot.virtual_now}; };
+      const loaded = await admin.call('env.load_seed', {expected_version: (await state()).version, request_id: run, data: ledger, binding: fullBinding, virtual_now: entry.virtual_now});
+      const baseline = await state();
+      const reader = await open('agent', run);
+      const listed = (await reader.call(T('shipments.list'), {include_closed: true})).items.map(x => x.id).sort();
+      check(entry.id + ': loads through Core for its recipient at the seed clock', loaded.status === 'ready' && loaded.loaded === ledger.shipments.length &&
+        JSON.stringify(baseline.data) === JSON.stringify(ledger) && Date.parse(baseline.clock) === Date.parse(entry.virtual_now) &&
+        JSON.stringify(listed) === JSON.stringify(entry.actors[0].sees));
+      const replay = async tag => {
+        for (const e of schedule) {
+          const applied = await admin.call('env.apply_event', {expected_version: (await state()).version, event: {...e, event_id: e.event_id + tag}});
+          assert.equal(applied.status, 'committed', entry.id + ' ' + e.operation + ': ' + applied.message);
+        }
+        return (await state()).data;
+      };
+      const first = await replay('-a');
+      const reset = await admin.call('env.reset', {expected_version: (await state()).version});
+      const restored = await state();
+      const second = await replay('-b');
+      check(entry.id + ': example schedule replays to the same outcome after reset to the loaded baseline', reset.status === 'ready' &&
+        JSON.stringify(restored.data) === JSON.stringify(ledger) && Date.parse(restored.clock) === Date.parse(entry.virtual_now) &&
+        JSON.stringify(first) === JSON.stringify(second) && JSON.stringify(first) !== JSON.stringify(ledger));
+      // The same ledger for the seed's other actors, in their own runs.
+      for (const actor of entry.actors.slice(1)) {
+        const other = 'seed-' + entry.id.slice(0, 2) + '-' + actor.owner_person_id.split('-')[1];
+        const otherAdmin = await open('infra', other, {initialProfile: 'sandbox'});
+        const otherLoaded = await otherAdmin.call('env.load_seed', {expected_version: (await otherAdmin.call('env.snapshot')).version,
+          data: {...ledger, account_id: actor.account_id, owner_person_id: actor.owner_person_id}, binding: fullBinding, virtual_now: entry.virtual_now});
+        const seen = (await (await open('agent', other)).call(T('shipments.list'), {include_closed: true})).items;
+        check(entry.id + ': ' + actor.role + ' ' + actor.owner_person_id + ' sees exactly ' + (actor.sees.join(', ') || 'nothing'), otherLoaded.status === 'ready' &&
+          JSON.stringify(seen.map(x => x.id).sort()) === JSON.stringify(actor.sees) && seen.every(x => x.access === 'delegate'));
+      }
+    }
 
     report.passed = true;
   } catch (e) {

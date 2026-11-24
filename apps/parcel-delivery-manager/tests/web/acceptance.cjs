@@ -329,9 +329,7 @@ const out = path.resolve(process.argv[2] || process.env.PALE_WEB_REPORT_DIR || '
 
     // ================= Collector: separate run over the same ledger =================
     const binding = require('../../fixtures/binding.json');
-    const forAlex = structuredClone(ledger);
-    for (const key of ['shipments', 'changes', 'grants', 'passes', 'notices']) forAlex[key] = forAlex[key].map(x => ({...x, account_id: 'pdm-alex'}));
-    Object.assign(forAlex, {account_id: 'pdm-alex', owner_person_id: 'person-alex'});
+    const forAlex = {...structuredClone(ledger), account_id: 'pdm-alex', owner_person_id: 'person-alex'};
     const d = await open('collector', 'sandbox', async admin => {
       const loaded = await admin.call('env.load_seed', {expected_version: (await admin.call('env.snapshot')).version, data: forAlex, binding, virtual_now: '2026-03-02T15:00:00Z'});
       assert.equal(loaded.status, 'ready', 'Collector history loads');
@@ -349,6 +347,25 @@ const out = path.resolve(process.argv[2] || process.env.PALE_WEB_REPORT_DIR || '
     record('Collector cannot authorize anyone else, even directly', onward.body.status === 'not_found');
     await d.nav('Active parcels'); await d.select('S002');
     await d.shot('1-collector');
+
+    // ================= Data catalog seeds in the browser =================
+    const {loadSeed} = require('../../scripts/load-seed.cjs');
+    const c = await open('catalog', 'sandbox', () => loadSeed({seed: '08-expiry-return', run: 'catalog', stateDir, registry}));
+    record('A catalog seed loaded through Infra appears in the Web App', await c.page.locator('#records .record').count() === 3 &&
+      JSON.stringify((await c.agent.call(T('shipments.list'), {})).items.map(x => x.id).sort()) === JSON.stringify(['S121', 'S122', 'S123']));
+    await c.select('S122');
+    text = await c.detail();
+    record('Seed with a deadline passed before its event shows the unchanged status, an expired pass and no change', /Ready for pickup/.test(text) && /Deadline passed/.test(text) &&
+      /Expired/.test(await c.page.locator('[data-pass]').innerText()) && await c.page.locator('[data-blocked=deadline_passed]').count() === 1);
+    await c.shot('1-catalog-deadline-passed');
+    await c.select('S123');
+    record('Seed parcel being returned shows its reason', /Returning to sender/.test(await c.detail()) && /was not collected from Quay Street depot counter/.test(await c.detail()));
+    await c.nav('Closed'); await c.select('S124');
+    record('January history is visible on a closed parcel', /Returned to sender/.test(await c.detail()) && /Jan 22, 2026/.test(await c.detail()));
+    const a = await open('catalog-collector', 'sandbox', () => loadSeed({seed: '05-delegation', actor: 'person-alex', run: 'catalog-collector', stateDir, registry}));
+    await a.select('S113');
+    record('The same seed loaded for its collector shows only the authorized parcel and their pass', await a.page.locator('#records .record').count() === 1 &&
+      /Your pass as authorized collector/.test(await a.detail()) && !/Harbour Wool|418 Larchmere Row|Timeline/.test(await a.page.locator('#app').innerText()));
 
     record('No script error or content-security violation in any run', problems.length === 0);
     record('Package files are unchanged by the run', digestTree(appDir) === packageHash);
