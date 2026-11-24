@@ -29,7 +29,9 @@ node tasks/points-anniversary-trip/data/check.cjs --root <checkout with runtime/
 ```
 
 - **Reference** (39 checks): the comparison searches (Aeroplan, ANA at 87,500, United, Virgin), the return booked in session 1 with Daniel's own points, Mei's combine, the outbound and three Hyatt stays at 08:00 the next morning, both sell-outs, the Kyoto price lock, ALT-1 keeping the pair together, no forfeiture, $277.20 on the Reserve and no stranded points.
-- **Bonus path** (39 checks), the first accepted alternative: the outbound on 2027-09-01 with 116,000 UR credited as 150,800 Aeroplan.
+- **Bonus path** (44 checks), the first accepted alternative: the outbound on 2027-09-01 with 116,000 UR credited as 150,800 Aeroplan. At the end it also transfers 1,000 UR each to United and Virgin, delivered through each instance's own router.
+
+`--dump <absolute dir>` writes each path's end state (every instance's business data at session 3) for the grader.
 
 In both, each sell-out is checked on award seats nobody booked (ANA's one seat on Aeroplan, United's own space, Virgin's ANA seat): open one minute before the cutoff and gone at it. Every world event must have its expected outcome: committed, except the Hyatt forfeiture (`not_due` after the transfer) and United's copy of the schedule-change expiry (`not_found`, no booking there).
 
@@ -39,4 +41,3 @@ In both, each sell-out is checked on award seats nobody booked (ANA's one seat o
 - The card account and the Hilton welcome offer: Brindle Card ([#182](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/182)).
 - The Chase Travel portal quote (USD 13,680 cash or 1,368,000 points): no environment sells cash travel through a points portal.
 - United's dynamic prices after the sell-outs (195,000 and up): Skyline has no price-change event, so United's business space sells out with Aeroplan's instead. Either way, no affordable seats remain.
-- Delivering a transfer to the United or Virgin instance needs its own Messaging state directory; the check searches those programs but does not transfer to them.

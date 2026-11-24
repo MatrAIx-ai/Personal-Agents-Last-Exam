@@ -24,6 +24,7 @@ const {deliverable, settleEvent} = require(path.join(root, 'apps/waypoint/src/se
 const data = name => JSON.parse(fs.readFileSync(path.join(__dirname, name), 'utf8'));
 const copy = value => structuredClone(value);
 const binding = data('binding.json');
+const dumpDir = arg('--dump') && path.resolve(arg('--dump'));
 const RESERVE = 'chase-sapphire-reserve', PAX = ['pax-daniel', 'pax-mei'];
 const RETURN = {origin:'HND', dest:'MSP', date:'2027-10-25', cabin:'business', pax:2};
 const OUT = {origin:'MSP', dest:'HND', date:'2027-10-15', cabin:'business', pax:2};
@@ -80,9 +81,10 @@ async function run(variant) {
     await clock(until);
   }
   const outcome = (id, account) => timeline.events.find(e => e.event.event_id === id && e.account_id === account).done;
-  async function router(config) {
+  // A router delivers to the receivers in one state directory; each extra program instance has its own.
+  async function router(config, directory = state) {
     const client = new Client(null, null, null, null, 'task-55-router', {commandArgs:[path.join(root, 'runtime/messaging/service.cjs'),
-      '--config', path.join(__dirname, 'messaging', config), '--publisher', 'waypoint', '--run', 'task-55', '--state-dir', state]});
+      '--config', path.join(__dirname, 'messaging', config), '--publisher', 'waypoint', '--run', 'task-55', '--state-dir', directory]});
     clients.push(client); await client.initialize(); return client;
   }
   async function deliver(agent, infra, bridge) {
@@ -234,6 +236,29 @@ async function run(variant) {
       : e.account_id === 'skyline-united-daniel' && e.event.operation === 'skyline.alternative.expired' ? 'not_found' : 'committed';
     equal('Every world event has its expected outcome', timeline.events.map(e => [e.account_id, e.event.event_id, e.done?.status]),
       timeline.events.map(e => [e.account_id, e.event.event_id, expected(e)]));
+
+    // End state for the grader (--dump <dir>): every instance's business data at session 3.
+    if (dumpDir) {
+      const apps = {};
+      for (const [account, infra] of Object.entries({'waypoint-daniel':waypointInfra, 'waypoint-mei':meiInfra, ...byAccount}))
+        apps[account] = (await infra.call('env.snapshot')).snapshot.data;
+      fs.mkdirSync(dumpDir, {recursive:true});
+      fs.writeFileSync(path.join(dumpDir, variant + '.end-state.json'), JSON.stringify({variant, at:'2027-10-03T11:00:00-05:00', apps}, null, 2) + '\n');
+    }
+
+    // Transfers to the other programs reach their own instances through their own routers.
+    if (variant === 'bonus') {
+      const credit = async (partner, client, directory, account, before) => {
+        await write(waypoint, waypointInfra, 'waypoint.transfer', {partner_id:partner, points:1000});
+        equal('1,000 UR reach ' + partner + ' through Messaging',
+          (await deliver(waypoint, waypointInfra, await router('daniel-config.json', directory))).map(r => [r.status, r.target]),
+          [['committed', {app_id:'skyline', account_id:account}]]);
+        equal(partner + ' balance ' + before + ' → ' + (before + 1000), (await client.call('skyline.balance', {})).balance, before + 1000);
+      };
+      await credit('united', united, unitedState, 'skyline-united-daniel', 12400);
+      await credit('virgin', virgin, virginState, 'skyline-virgin-daniel', 0);
+      equal('UR after the two test transfers: 38,500', (await waypoint.call('waypoint.balance', {})).balance, 38500);
+    }
     return {variant, checks:checks.length};
   } finally {
     await Promise.allSettled(clients.map(client => client.close()));
