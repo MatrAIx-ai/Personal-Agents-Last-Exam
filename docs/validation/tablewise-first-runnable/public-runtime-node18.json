@@ -1,0 +1,210 @@
+{
+  "schema": "pale.app-verification.v1",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "app_id": "tablewise",
+  "app_version": "0.1.0",
+  "package_sha256": "d10a755c9fa202b22af58373322fb8d20d058e5cd152d1b89a5c035e343808c0",
+  "node": "v18.20.8",
+  "verified_at": "2026-11-24T21:27:23.170Z",
+  "checks": [
+    {
+      "name": "Manifest, schemas, seed, references, media and declarations load",
+      "status": "passed"
+    },
+    {
+      "name": "business standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "event-example standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "Agent discovery excludes administrative tools",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for tablewise.workspace.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for tablewise.venues.search",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for tablewise.venues.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for tablewise.venues.document",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for tablewise.availability.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for tablewise.plans.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for tablewise.reservations.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for tablewise.inquiries.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for tablewise.receipts.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for tablewise.notices.list",
+      "status": "passed"
+    },
+    {
+      "name": "Infra exposes the lifecycle interface and host clock operation",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.advance_time",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.apply_event",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.event_status",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.load_seed",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.reset",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.snapshot",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.validate_bundle",
+      "status": "passed"
+    },
+    {
+      "name": "Real MCP business read succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "MCP content and structured result agree",
+      "status": "passed"
+    },
+    {
+      "name": "MCP envelope remains unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Read does not change business data",
+      "status": "passed"
+    },
+    {
+      "name": "Caller cannot override run or role",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads history, relationships and assets",
+      "status": "passed"
+    },
+    {
+      "name": "Loaded historical records match input",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid history is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Rejected history leaves business state unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Declared incoming event commits",
+      "status": "passed"
+    },
+    {
+      "name": "Event changes business data",
+      "status": "passed"
+    },
+    {
+      "name": "Committed event is queryable",
+      "status": "passed"
+    },
+    {
+      "name": "Identical event retry is deduplicated",
+      "status": "passed"
+    },
+    {
+      "name": "Duplicate has no additional state change",
+      "status": "passed"
+    },
+    {
+      "name": "Same event ID with changed content is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Old version cannot reset a changed App",
+      "status": "passed"
+    },
+    {
+      "name": "A separate run retains its own initial data",
+      "status": "passed"
+    },
+    {
+      "name": "Reset returns ready",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded business baseline",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances epoch",
+      "status": "passed"
+    },
+    {
+      "name": "New MCP process reads persisted App state",
+      "status": "passed"
+    },
+    {
+      "name": "Submitted package remains unchanged",
+      "status": "passed"
+    }
+  ],
+  "stages": [
+    {
+      "name": "business",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "TAP version 13\n# Subtest: standalone reads are pure and missing/invalid operations preserve all business state\nok 1 - standalone reads are pure and missing/invalid operations preserve all business state\n  ---\n  duration_ms: 2.89075\n  ...\n# Subtest: standalone confirmation rejects the wrong preview kind without a partial commit\nok 2 - standalone confirmation rejects the wrong preview kind without a partial commit\n  ---\n  duration_ms: 29.963667\n  ...\n# Subtest: supported large integer-cent amounts round each percentage exactly\nok 3 - supported large integer-cent amounts round each percentage exactly\n  ---\n  duration_ms: 0.126667\n  ...\n# Subtest: published arithmetic: two $200 menus total $520, eight $60 menus with $600 minimum total $780\nok 4 - published arithmetic: two $200 menus total $520, eight $60 menus with $600 minimum total $780\n  ---\n  duration_ms: 0.0915\n  ...\n# Subtest: expired holds are derived without changing business records\nok 5 - expired holds are derived without changing business records\n  ---\n  duration_ms: 0.484375\n  ...\n# Subtest: standalone booking is atomic and cancellation credits the deposit once\nok 6 - standalone booking is atomic and cancellation credits the deposit once\n  ---\n  duration_ms: 1.3875\n  ...\n1..6\n# tests 6\n# suites 0\n# pass 6\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 88.155709\n",
+      "errors": ""
+    },
+    {
+      "name": "event-example",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "{\"passed\":true,\"reservation\":\"reservation-102\",\"estimate_cents\":52000,\"deposit_cents\":10000}\n",
+      "errors": ""
+    }
+  ],
+  "passed": true,
+  "remaining": [
+    "App-specific approved workflow coverage",
+    "Human data/media/provenance review",
+    "Production remote authentication and deployment checks when applicable"
+  ]
+}
