@@ -21,8 +21,14 @@ async function write(name,args){
   const result=await call(name,{...args,request_id:retry.id,expected_version:version});retry=null;return result;
 }
 async function run(fn){
-  if(locked)return;locked=true;status.textContent='';
-  try{await fn();}catch(e){status.textContent=e.message;}finally{locked=false;}
+  if(locked)return;
+  locked=true;
+  const shell=document.querySelector('.app-shell');
+  shell.inert=true;
+  shell.setAttribute('aria-busy','true');
+  status.textContent='';
+  try{await fn();}catch(e){status.textContent=e.message;}
+  finally{shell.inert=false;shell.setAttribute('aria-busy','false');locked=false;}
 }
 const button=(label,fn)=>el('button',{type:'button',onclick:()=>run(fn)},label);
 const line=(label,value)=>el('p',{},el('strong',{},label+' '),String(value));

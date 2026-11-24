@@ -14,7 +14,11 @@ async function main(){
     infra=new Client('signaldesk','infra',run,stateDir,'signaldesk-verification',{registry});await infra.initialize();
     browser=await chromium.launch({headless:true,...(process.env.SIGNALDESK_BROWSER?{executablePath:process.env.SIGNALDESK_BROWSER}:{})});
     const page=await browser.newPage();page.setDefaultTimeout(10000);
-    const click=name=>page.getByRole('button',{name,exact:true}).click();
+    const click=async name=>{
+      await page.locator('.app-shell[aria-busy="false"]').waitFor();
+      await page.getByRole('button',{name,exact:true}).click();
+      await page.locator('.app-shell[aria-busy="false"]').waitFor();
+    };
     const visible=text=>page.getByText(text,{exact:true}).first().waitFor();
     const view=async(name)=>{await click(name);await page.getByRole('heading',{name,exact:true}).waitFor();};
     const read=async(name)=>(await host.client.call('signaldesk.'+name,{})).details;
