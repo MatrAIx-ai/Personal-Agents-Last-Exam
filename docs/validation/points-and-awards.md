@@ -49,7 +49,7 @@ From the plan review on #193:
 - **Seat assignments in Skyline**, recorded in the #193 description for task #55: options carry seat maps, `skyline.book` takes seat requests (default seats need not be adjacent), trips list each passenger's seat per segment, `skyline.manage` adds `change_seats`, and accepting a schedule-change alternative keeps the pair together where the seat map allows.
 - **Read helpers the Web Host needs:** `waypoint.transfers.get`, an optional `id` on `skyline.trips` and `harbor.reservations`, `skyline.notices.*` and `harbor.notices.*`.
 - **Event names** are prefixed with the App ID (`skyline.inventory.sold`, `waypoint.transfer.settle`, …). Harbor adds `harbor.expiry.warn` for the expiry-warning notice the proposal lists.
-- **Task-owned formats.** Skyline member numbers and Harbor confirmation numbers in a seed are free-form (Harbor still generates its own for new bookings), so a task can load its own program's numbers; task #55 does.
+- **Task-owned formats.** An optional Harbor `program_name` names the program in notices (task #55 uses World of Hyatt). Skyline member numbers and Harbor confirmation numbers in a seed are free-form (Harbor still generates its own for new bookings), so a task can load its own program's numbers; task #55 does.
 - **Carrier-specific award prices.** A Skyline chart row may name an `operating_carrier`; it then prices any itinerary with a segment that carrier operates, so a partner airline can cost more on the same route (task #55 prices ANA via Chicago at 87,500 against United's 75,000).
 
 ## Not covered yet

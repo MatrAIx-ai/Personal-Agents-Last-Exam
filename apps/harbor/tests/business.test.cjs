@@ -308,6 +308,10 @@ test('expiry warnings are accepted only in the 60 days before expiry and state t
   const n = f.data.notices.at(-1);
   assert.deepEqual([n.kind, n.ref, n.title], ['expiry_warning', {object_type:'account', object_id:'harbor-daniel'}, 'Your Harbor points expire on 2028-02-02']);
   assert.match(n.body, /40,000 Harbor points expire at 2028-02-02T08:30:00-06:00/);
+  // A task can name its own program; notices use that name.
+  const g = fixture(), named = g.data; named.program_name = 'World of Hyatt'; g.load(named);
+  g.event(warn('2027-12-04T08:30:00-06:00'));
+  assert.match(g.data.notices.at(-1).title, /^Your World of Hyatt points expire on 2028-02-02$/);
   f.event(warn('2028-02-02T08:29:59-06:00'));
   unchanged(f, () => f.event(warn('2028-02-02T08:30:00-06:00')), code('not_due'));
 });

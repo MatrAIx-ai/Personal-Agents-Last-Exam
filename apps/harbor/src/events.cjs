@@ -65,8 +65,9 @@ function warn(ctx, data) {
   if (c.ms(ctx.virtual_now) < c.ms(opens) || c.ms(ctx.virtual_now) >= c.ms(at)) {
     c.fail('not_due', 'Expiry warnings are sent from ' + opens + ' until points expire at ' + at + '.');
   }
-  notice(ctx, data, 'expiry_warning', 'Your Harbor points expire on ' + at.slice(0, 10),
-    'Your ' + c.thousands(data.balance) + ' Harbor points expire at ' + at + ' unless the account has activity before then. ' +
+  const program = data.program_name || 'Harbor';
+  notice(ctx, data, 'expiry_warning', 'Your ' + program + ' points expire on ' + at.slice(0, 10),
+    'Your ' + c.thousands(data.balance) + ' ' + program + ' points expire at ' + at + ' unless the account has activity before then. ' +
     'A points or Points + Cash redemption, or points transferred in, counts as activity; a refund or a cash stay does not.',
     {object_type:'account', object_id:data.account_id});
   return data;

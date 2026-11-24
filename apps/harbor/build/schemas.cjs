@@ -99,8 +99,10 @@ const SEED = {$schema:'https://json-schema.org/draft/2020-12/schema', $id:'urn:p
   award_chart:{type:'array', items:CHART_ROW, minItems:1, maxItems:8},
   hotels:{type:'array', items:HOTEL, maxItems:200},
   certificates:{type:'array', items:CERTIFICATE, maxItems:200},
-  reservations:{type:'array', items:RESERVATION, maxItems:1000}
-})};
+  reservations:{type:'array', items:RESERVATION, maxItems:1000},
+  program_name:{...text(1, 80), description:'Optional. The program name used in notices; "Harbor" when absent.'}
+}, ['account_id','owner_person_id','member_number','mail_account_id','balance','ledger','payment_labels','charges','notices',
+  'last_activity_at','inactivity_months','forfeited_at','award_chart','hotels','certificates','reservations'])};
 
 const event = (operation, payload) => object({event_id:ID, at:DT, operation:{const:operation}, payload});
 function events(message) {
