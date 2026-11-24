@@ -30,6 +30,9 @@ D={
  'notice':obj({'id':S,'reservation_id':S,'at':DT,'title':S,'text':T}),
  'history':obj({'id':S,'plan_name':S,'venue_id':S,'date':DAY,'party_size':V,'total_cents':N,'source_ref':S}),
 }
+# Optional additive derived fields keep pre-audit saved histories compatible.
+D['preview']['properties']['deposit_credit_cents']=N
+D['reservation']['properties']['balance_due_cents']=N
 groups={'venues':'venue','slots':'slot','plans':'plan','grants':'grant','holds':'hold','previews':'preview','reservations':'reservation','receipts':'receipt','inquiries':'inquiry','quotes':'quote','refunds':'refund','notices':'notice','history':'history'}
 seed=obj({'account_id':S,'owner_person_id':S,'next_id':V,'overlap_policy':{'enum':['strict_gap','bounded_overlap']},**{k:arr(ref(v)) for k,v in groups.items()}});seed['$defs']=D;seed['$schema']='https://json-schema.org/draft/2020-12/schema';write('schemas/seed.schema.json',seed)
 for n in ['state','resources','bundle','quality','asset-catalog','asset-descriptor','dataset','attachment-transfer']:shutil.copyfile(ROOT/'apps/files/schemas'/f'{n}.schema.json',APP/'schemas'/f'{n}.schema.json')
@@ -40,11 +43,11 @@ def tool(n,desc,p,out,w=False,r=None):
  if w:inp['properties'].update(request_id=S,expected_version=ref('version'));inp['required']+=['request_id','expected_version']
  output=obj({'status':S,'app_id':S,'version':ref('version'),**out},['status','app_id','version',*out]);output['properties']['duplicate']=B
  tools.append(dict(name='tablewise.'+n,description=desc,scope='tablewise.'+n,resource_target='current account',inputSchema=inp,outputSchema=output,read_only=not w))
-tool('workspace.get','Read the visible workspace; no future event queue.',{}, {'workspace':{'$ref':'seed.schema.json'},'now':DT})
+tool('workspace.get','Read released inventory and public opening rules; future inventory stays private.',{}, {'workspace':{'$ref':'seed.schema.json'},'now':DT,'release_rules':arr(obj({'venue_id':S,'date':DAY,'opens_at':DT}))})
 tool('venues.search','Search fictional venue metadata; null means unknown.',{'query':T,'cuisine':T,'max_menu_cents':N},{'venues':arr(ref('venue'))},r=[])
 tool('venues.get','Read published venue details and terms.',{'id':S},{'venue':ref('venue')})
 tool('venues.document','Download original electronic venue menu and terms.',{'id':S},{'file':{'$ref':'attachment-transfer.schema.json'}})
-tool('availability.get','Read released inventory; expired holds consume no seats.',{'venue_id':S,'date':DAY,'party_size':V},{'slots':arr(obj({'slot':ref('slot'),'status':S,'available_seats':N}))},r=['party_size'])
+tool('availability.get','Read released inventory; unreleased records expose only public opening rules.',{'venue_id':S,'date':DAY,'party_size':V},{'slots':arr(obj({'slot':optional(ref('slot')),'status':S,'available_seats':N,'venue_id':S,'date':DAY,'release_at':DT}))},r=['party_size'])
 tool('plans.get','Read outing participants and expected attendance.',{}, {'plan':ref('plan'),'expected_attendance':N})
 tool('plans.update','Edit outing name and intended party size; responses need trusted events.',{'name':S,'party_size':V},{'plan':ref('plan')},True,r=[])
 tool('holds.create','Hold currently available seats for five virtual minutes.',{'slot_id':S,'party_size':V,'grant_id':S},{'hold':ref('hold')},True)
