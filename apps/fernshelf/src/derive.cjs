@@ -5,7 +5,8 @@
 // use these functions, so a change made by time alone needs no App code to run.
 // `visibility` is the single visibility rule behind exposure.get, the warnings and
 // removals.respond; it is also exported for graders (plugin.visibility).
-const {ms} = require('./common.cjs');
+const c = require('./common.cjs');
+const {ms} = c;
 
 const now = ctx => ms(ctx.virtual_now);
 const itemState = (item, t) => (item.state === 'trashed' && ms(item.purge_at) <= t ? 'purged' : item.state);
@@ -35,8 +36,8 @@ function albumShows(album, idx, t) {
   return album.item_ids.filter(id => {
     const item = idx.items.get(id);
     if (item) return itemState(item, t) === 'active';
-    const c = idx.contributions.get(id);
-    return !!c && c.album === album && !c.contribution.removed_at;
+    const k = idx.contributions.get(id);
+    return !!k && k.album === album && !k.contribution.removed_at;
   });
 }
 
@@ -128,7 +129,7 @@ function removalWarnings(data, itemIds) {
       if (seen.has(row.person_id)) continue;
       seen.add(row.person_id);
       out.push({code: 'removal_honored', item_id: id, person_id: row.person_id, removal_id: row.removal_id, honored_at: row.at,
-        message: 'A removal request from ' + row.person_id + ' was honoured for ' + id + '; this write makes it visible again.'});
+        message: c.nameOf(data, row.person_id) + ' asked for ' + id + ' to be taken down and that request was honoured on ' + row.at + '; this write shows it to someone again.'});
     }
   }
   return out;

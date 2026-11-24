@@ -123,7 +123,7 @@ function albumGet(ctx, data, args) {
   const links = data.links.filter(l => l.album_id === a.id).map(l => ({id: l.id, state: d.linkState(l, t), created_at: l.created_at, expires_at: l.expires_at,
     revoked_at: l.revoked_at, revoke_reason: l.revoke_reason, views: data.views.filter(v => v.surface.link_id === l.id).map(v => viewView(data, v))}));
   return {album: {id: a.id, title: a.title, state: d.albumState(a), created_at: a.created_at, created_by: a.created_by, deleted_at: a.deleted_at,
-    entries, hidden_item_ids: a.item_ids.filter(id => idx.items.has(id) && d.itemState(idx.items.get(id), t) !== 'active'),
+    entries, hidden_item_ids: a.item_ids.filter(id => idx.items.has(id) && d.itemState(idx.items.get(id), t) === 'trashed'),
     members: a.members.map(m => memberView(data, m)), contributions: a.contributions.map(k => ({...c.copy(k), state: k.removed_at ? 'removed' : 'present'})),
     links, member_views: data.views.filter(v => v.surface.type === 'album' && v.surface.album_id === a.id).map(v => viewView(data, v))}};
 }
