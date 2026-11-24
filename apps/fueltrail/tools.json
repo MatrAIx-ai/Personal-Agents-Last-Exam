@@ -1,0 +1,1934 @@
+[
+  {
+    "name": "fueltrail.place.list",
+    "description": "List saved synthetic search places.",
+    "read_only": true,
+    "scope": "fueltrail.place.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "places": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "schemas/domain.schema.json#/$defs/id"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "places"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.station.search",
+    "description": "Search synthetic stations with explicit price freshness, distance, vehicle compatibility and deterministic sorting.",
+    "read_only": true,
+    "scope": "fueltrail.station.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "place_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "vehicle_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "grade": {
+          "enum": [
+            "regular",
+            "midgrade",
+            "premium",
+            "diesel",
+            "e85",
+            "unleaded88"
+          ]
+        },
+        "price_type": {
+          "enum": [
+            "cash",
+            "credit"
+          ]
+        },
+        "radius_milli": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 100000
+        },
+        "brands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "open_only": {
+          "type": "boolean"
+        },
+        "amenities": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "restroom",
+              "air",
+              "car_wash",
+              "convenience_store",
+              "accessible",
+              "truck_access"
+            ]
+          }
+        },
+        "freshness_hours": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 168
+        },
+        "sort": {
+          "enum": [
+            "price",
+            "distance",
+            "trip_cost"
+          ]
+        }
+      },
+      "required": [
+        "place_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "place": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        },
+        "vehicle_id": {
+          "anyOf": [
+            {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "grade": {
+          "enum": [
+            "regular",
+            "midgrade",
+            "premium",
+            "diesel",
+            "e85",
+            "unleaded88"
+          ]
+        },
+        "price_type": {
+          "enum": [
+            "cash",
+            "credit"
+          ]
+        },
+        "radius_milli": {
+          "type": "integer"
+        },
+        "freshness_hours": {
+          "type": "integer"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "schemas/domain.schema.json#/$defs/id"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "place",
+        "vehicle_id",
+        "grade",
+        "price_type",
+        "radius_milli",
+        "freshness_hours",
+        "results"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.station.get",
+    "description": "Read station details and recent observations.",
+    "read_only": true,
+    "scope": "fueltrail.station.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "station": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        },
+        "recent_prices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "schemas/domain.schema.json#/$defs/id"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "station",
+        "recent_prices"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.price_alert.list",
+    "description": "List alerts and their in-App notifications, including Mail delivery/reconciliation state.",
+    "read_only": true,
+    "scope": "fueltrail.price_alert.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "include_deleted": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "alerts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "schemas/domain.schema.json#/$defs/id"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "notifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "schemas/domain.schema.json#/$defs/id"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "email_config": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "mail_account_id": {
+              "anyOf": [
+                {
+                  "$ref": "schemas/domain.schema.json#/$defs/id"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "enabled",
+            "mail_account_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "alerts",
+        "notifications",
+        "email_config"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.price_alert.create",
+    "description": "Create an active alert. Current matching prices arm it without sending an immediate notification.",
+    "read_only": false,
+    "scope": "fueltrail.price_alert.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "area_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "radius_milli": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 100000
+        },
+        "grade": {
+          "enum": [
+            "regular",
+            "midgrade",
+            "premium",
+            "diesel",
+            "e85",
+            "unleaded88"
+          ]
+        },
+        "price_type": {
+          "enum": [
+            "cash",
+            "credit"
+          ]
+        },
+        "condition": {
+          "enum": [
+            "below_price",
+            "price_rise"
+          ]
+        },
+        "threshold_mills": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20000
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "area_id",
+        "radius_milli",
+        "grade",
+        "price_type",
+        "condition",
+        "threshold_mills",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "alert": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "alert"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.price_alert.update",
+    "description": "Update and re-arm an alert without sending an immediate notification.",
+    "read_only": false,
+    "scope": "fueltrail.price_alert.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "alert_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "area_id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            },
+            "radius_milli": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 100000
+            },
+            "grade": {
+              "enum": [
+                "regular",
+                "midgrade",
+                "premium",
+                "diesel",
+                "e85",
+                "unleaded88"
+              ]
+            },
+            "price_type": {
+              "enum": [
+                "cash",
+                "credit"
+              ]
+            },
+            "condition": {
+              "enum": [
+                "below_price",
+                "price_rise"
+              ]
+            },
+            "threshold_mills": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20000
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "alert_version",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "alert": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "alert"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.price_alert.pause",
+    "description": "Pause an alert with record-version protection.",
+    "read_only": false,
+    "scope": "fueltrail.price_alert.pause",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "alert_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "alert_version",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "alert": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "alert"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.price_alert.resume",
+    "description": "Resume an alert with record-version protection.",
+    "read_only": false,
+    "scope": "fueltrail.price_alert.resume",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "alert_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "alert_version",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "alert": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "alert"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.price_alert.delete",
+    "description": "Delete an alert with record-version protection.",
+    "read_only": false,
+    "scope": "fueltrail.price_alert.delete",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "alert_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "alert_version",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "alert": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "alert"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.notification.email.prepare",
+    "description": "Prepare a deterministic channel.email message for one price-alert notification. Unknown delivery blocks this operation until reconciliation.",
+    "read_only": false,
+    "scope": "fueltrail.notification.email.prepare",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "router_request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "router_request_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "notification": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        },
+        "message": {
+          "$ref": "schemas/router-message.schema.json"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "notification",
+        "message"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.notification.email.record",
+    "description": "Record delivered, rejected or unknown Mail routing. Unknown requires same-request reconciliation before redelivery.",
+    "read_only": false,
+    "scope": "fueltrail.notification.email.record",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "router_request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "delivery_status": {
+          "enum": [
+            "delivered",
+            "rejected",
+            "unknown"
+          ]
+        },
+        "receipt_id": {
+          "anyOf": [
+            {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reconciled": {
+          "type": "boolean"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "router_request_id",
+        "delivery_status",
+        "receipt_id",
+        "reconciled",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "notification": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "notification"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.vehicle.list",
+    "description": "List complete vehicle profiles and the selected search defaults.",
+    "read_only": true,
+    "scope": "fueltrail.vehicle.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "vehicles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "schemas/domain.schema.json#/$defs/id"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "vehicles"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.vehicle.create",
+    "description": "Create a synthetic vehicle profile.",
+    "read_only": false,
+    "scope": "fueltrail.vehicle.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "year": {
+          "type": "integer",
+          "minimum": 1980,
+          "maximum": 2035
+        },
+        "make": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "fuel_grade": {
+          "enum": [
+            "regular",
+            "midgrade",
+            "premium",
+            "diesel",
+            "e85",
+            "unleaded88"
+          ]
+        },
+        "tank_capacity_thousandths": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 100000
+        },
+        "economy_baseline_milli": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 200000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "preferred_radius_milli": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 100000
+        },
+        "price_type": {
+          "enum": [
+            "cash",
+            "credit"
+          ]
+        },
+        "preferred_brands": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required_amenities": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "restroom",
+              "air",
+              "car_wash",
+              "convenience_store",
+              "accessible",
+              "truck_access"
+            ]
+          }
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "label",
+        "year",
+        "make",
+        "model",
+        "fuel_grade",
+        "tank_capacity_thousandths",
+        "economy_baseline_milli",
+        "preferred_radius_milli",
+        "price_type",
+        "preferred_brands",
+        "required_amenities",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "vehicle": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "vehicle"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.vehicle.update",
+    "description": "Update an active vehicle profile.",
+    "read_only": false,
+    "scope": "fueltrail.vehicle.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "vehicle_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "year": {
+              "type": "integer",
+              "minimum": 1980,
+              "maximum": 2035
+            },
+            "make": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "model": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "fuel_grade": {
+              "enum": [
+                "regular",
+                "midgrade",
+                "premium",
+                "diesel",
+                "e85",
+                "unleaded88"
+              ]
+            },
+            "tank_capacity_thousandths": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 100000
+            },
+            "economy_baseline_milli": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 200000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "preferred_radius_milli": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 100000
+            },
+            "price_type": {
+              "enum": [
+                "cash",
+                "credit"
+              ]
+            },
+            "preferred_brands": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            },
+            "required_amenities": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "restroom",
+                  "air",
+                  "car_wash",
+                  "convenience_store",
+                  "accessible",
+                  "truck_access"
+                ]
+              }
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "vehicle_version",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "vehicle": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "vehicle"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.vehicle.archive",
+    "description": "Archive a vehicle profile.",
+    "read_only": false,
+    "scope": "fueltrail.vehicle.archive",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "vehicle_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "vehicle_version",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "vehicle": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "vehicle"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.vehicle.select",
+    "description": "Select a vehicle profile.",
+    "read_only": false,
+    "scope": "fueltrail.vehicle.select",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "vehicle_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "vehicle_version",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "vehicle": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "vehicle"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.fuel_log.list",
+    "description": "List full fuel-log records including immutable revisions and tombstones.",
+    "read_only": true,
+    "scope": "fueltrail.fuel_log.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "vehicle_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "include_deleted": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "fuel_logs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "schemas/domain.schema.json#/$defs/id"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "fuel_logs"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.fuel_log.preview",
+    "description": "Validate and bind a complete create/update payload for 30 virtual minutes.",
+    "read_only": false,
+    "scope": "fueltrail.fuel_log.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "create",
+            "update"
+          ]
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "log_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "fields": {
+          "$ref": "schemas/domain.schema.json#/$defs/logFields"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "mode",
+        "fields",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "preview": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "preview"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.fuel_log.create",
+    "description": "Create a fuel log from a valid unused preview.",
+    "read_only": false,
+    "scope": "fueltrail.fuel_log.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "preview_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "preview_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "fuel_log": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        },
+        "economy": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "fuel_log",
+        "economy"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.fuel_log.update",
+    "description": "Update a fuel log from a valid unused preview.",
+    "read_only": false,
+    "scope": "fueltrail.fuel_log.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "preview_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "preview_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "fuel_log": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        },
+        "economy": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "fuel_log",
+        "economy"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.fuel_log.delete",
+    "description": "Soft-delete a fuel log while retaining a tombstone revision.",
+    "read_only": false,
+    "scope": "fueltrail.fuel_log.delete",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "log_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "request_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "id",
+        "log_version",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "fuel_log": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "schemas/domain.schema.json#/$defs/id"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": true
+        },
+        "economy": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "fuel_log",
+        "economy"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "fueltrail.fuel_economy.get",
+    "description": "Calculate economy only across consecutive complete fills; partial or missed fills break the chain.",
+    "read_only": true,
+    "scope": "fueltrail.fuel_economy.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "vehicle_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "vehicle_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "fueltrail"
+        },
+        "version": {
+          "$ref": "schemas/domain.schema.json#/$defs/version"
+        },
+        "vehicle_id": {
+          "$ref": "schemas/domain.schema.json#/$defs/id"
+        },
+        "segments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+            "additionalProperties": true
+          }
+        },
+        "average_economy_milli": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "vehicle_id",
+        "segments",
+        "average_economy_milli"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

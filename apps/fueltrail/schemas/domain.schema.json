@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:fueltrail:domain:1",
+  "$defs": {
+    "id": {"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+    "nullableId": {"anyOf":[{"$ref":"#/$defs/id"},{"type":"null"}]},
+    "nullableTime": {"anyOf":[{"type":"string","format":"date-time"},{"type":"null"}]},
+    "version": {"type":"object","properties":{"epoch":{"type":"integer","minimum":1},"revision":{"type":"integer","minimum":0}},"required":["epoch","revision"],"additionalProperties":false},
+    "place": {
+      "type":"object","properties":{"id":{"$ref":"#/$defs/id"},"name":{"type":"string","minLength":1,"maxLength":100},"metro":{"type":"string","minLength":1,"maxLength":100}},
+      "required":["id","name","metro"],"additionalProperties":false
+    },
+    "distance": {
+      "type":"object","properties":{"place_id":{"$ref":"#/$defs/id"},"distance_milli":{"type":"integer","minimum":0,"maximum":100000}},
+      "required":["place_id","distance_milli"],"additionalProperties":false
+    },
+    "station": {
+      "type":"object","properties":{
+        "id":{"$ref":"#/$defs/id"},"name":{"type":"string","minLength":1,"maxLength":120},"brand":{"type":"string","minLength":1,"maxLength":80},"area_id":{"$ref":"#/$defs/id"},"address":{"type":"string","minLength":1,"maxLength":180},
+        "status":{"enum":["open","closed"]},"open_24h":{"type":"boolean"},"amenities":{"type":"array","items":{"enum":["restroom","air","car_wash","convenience_store","accessible","truck_access"]},"uniqueItems":true,"maxItems":6},
+        "grades":{"type":"array","items":{"enum":["regular","midgrade","premium","diesel","e85","unleaded88"]},"uniqueItems":true,"minItems":1,"maxItems":6},"distances":{"type":"array","items":{"$ref":"#/$defs/distance"},"minItems":1,"maxItems":10},"updated_at":{"type":"string","format":"date-time"}
+      },"required":["id","name","brand","area_id","address","status","open_24h","amenities","grades","distances","updated_at"],"additionalProperties":false
+    },
+    "observation": {
+      "type":"object","properties":{"id":{"$ref":"#/$defs/id"},"station_id":{"$ref":"#/$defs/id"},"grade":{"enum":["regular","midgrade","premium","diesel","e85","unleaded88"]},"price_type":{"enum":["cash","credit"]},"price_mills":{"type":"integer","minimum":500,"maximum":20000},"observed_at":{"type":"string","format":"date-time"},"source":{"enum":["fixture","task_event"]}},
+      "required":["id","station_id","grade","price_type","price_mills","observed_at","source"],"additionalProperties":false
+    },
+    "vehicle": {
+      "type":"object","properties":{
+        "id":{"$ref":"#/$defs/id"},"label":{"type":"string","minLength":1,"maxLength":80},"year":{"type":"integer","minimum":1980,"maximum":2035},"make":{"type":"string","minLength":1,"maxLength":60},"model":{"type":"string","minLength":1,"maxLength":60},"fuel_grade":{"enum":["regular","midgrade","premium","diesel","e85","unleaded88"]},
+        "tank_capacity_thousandths":{"type":"integer","minimum":1000,"maximum":100000},"distance_unit":{"const":"mile"},"volume_unit":{"const":"gallon"},"economy_baseline_milli":{"anyOf":[{"type":"integer","minimum":1000,"maximum":200000},{"type":"null"}]},
+        "preferred_radius_milli":{"type":"integer","minimum":100,"maximum":100000},"price_type":{"enum":["cash","credit"]},"preferred_brands":{"type":"array","items":{"type":"string","minLength":1,"maxLength":80},"uniqueItems":true,"maxItems":20},"required_amenities":{"type":"array","items":{"enum":["restroom","air","car_wash","convenience_store","accessible","truck_access"]},"uniqueItems":true,"maxItems":6},
+        "status":{"enum":["active","archived"]},"selected":{"type":"boolean"},"version":{"type":"integer","minimum":1},"created_at":{"type":"string","format":"date-time"},"updated_at":{"type":"string","format":"date-time"}
+      },"required":["id","label","year","make","model","fuel_grade","tank_capacity_thousandths","distance_unit","volume_unit","economy_baseline_milli","preferred_radius_milli","price_type","preferred_brands","required_amenities","status","selected","version","created_at","updated_at"],"additionalProperties":false
+    },
+    "alert": {
+      "type":"object","properties":{
+        "id":{"$ref":"#/$defs/id"},"area_id":{"$ref":"#/$defs/id"},"radius_milli":{"type":"integer","minimum":100,"maximum":100000},"grade":{"enum":["regular","midgrade","premium","diesel","e85","unleaded88"]},"price_type":{"enum":["cash","credit"]},"condition":{"enum":["below_price","price_rise"]},"threshold_mills":{"type":"integer","minimum":1,"maximum":20000},
+        "status":{"enum":["active","paused","deleted"]},"condition_met":{"type":"boolean"},"matched_station_id":{"$ref":"#/$defs/nullableId"},"version":{"type":"integer","minimum":1},"created_at":{"type":"string","format":"date-time"},"updated_at":{"type":"string","format":"date-time"}
+      },"required":["id","area_id","radius_milli","grade","price_type","condition","threshold_mills","status","condition_met","matched_station_id","version","created_at","updated_at"],"additionalProperties":false
+    },
+    "notification": {
+      "type":"object","properties":{
+        "id":{"$ref":"#/$defs/id"},"alert_id":{"$ref":"#/$defs/id"},"station_id":{"$ref":"#/$defs/id"},"observed_price_mills":{"type":"integer","minimum":500,"maximum":20000},"prior_price_mills":{"anyOf":[{"type":"integer","minimum":500,"maximum":20000},{"type":"null"}]},"triggered_at":{"type":"string","format":"date-time"},"title":{"type":"string","minLength":1,"maxLength":200},"body":{"type":"string","minLength":1,"maxLength":2000},
+        "email_status":{"enum":["disabled","not_prepared","pending","delivered","rejected","unknown"]},"email_request_id":{"$ref":"#/$defs/nullableId"},"email_receipt_id":{"$ref":"#/$defs/nullableId"},"email_message":{"anyOf":[{"$ref":"router-message.schema.json"},{"type":"null"}]},"delivery_attempts":{"type":"integer","minimum":0,"maximum":100},"reconciliation_required":{"type":"boolean"}
+      },"required":["id","alert_id","station_id","observed_price_mills","prior_price_mills","triggered_at","title","body","email_status","email_request_id","email_receipt_id","email_message","delivery_attempts","reconciliation_required"],"additionalProperties":false
+    },
+    "logFields": {
+      "type":"object","properties":{"vehicle_id":{"$ref":"#/$defs/id"},"occurred_at":{"type":"string","format":"date-time"},"station_id":{"$ref":"#/$defs/nullableId"},"odometer_milli":{"type":"integer","minimum":0,"maximum":2000000000},"volume_thousandths":{"type":"integer","minimum":1,"maximum":100000},"unit_price_mills":{"type":"integer","minimum":500,"maximum":20000},"total_cost_cents":{"type":"integer","minimum":1,"maximum":1000000},"grade":{"enum":["regular","midgrade","premium","diesel","e85","unleaded88"]},"price_type":{"enum":["cash","credit"]},"fill_status":{"enum":["full","partial","missed"]},"note":{"type":"string","maxLength":500}},
+      "required":["vehicle_id","occurred_at","station_id","odometer_milli","volume_thousandths","unit_price_mills","total_cost_cents","grade","price_type","fill_status","note"],"additionalProperties":false
+    },
+    "logSnapshot": {
+      "type":"object","properties":{"vehicle_id":{"$ref":"#/$defs/id"},"occurred_at":{"type":"string","format":"date-time"},"station_id":{"$ref":"#/$defs/nullableId"},"odometer_milli":{"type":"integer","minimum":0},"volume_thousandths":{"type":"integer","minimum":1},"unit_price_mills":{"type":"integer","minimum":500},"total_cost_cents":{"type":"integer","minimum":1},"grade":{"type":"string"},"price_type":{"type":"string"},"fill_status":{"type":"string"},"note":{"type":"string"}},
+      "required":["vehicle_id","occurred_at","station_id","odometer_milli","volume_thousandths","unit_price_mills","total_cost_cents","grade","price_type","fill_status","note"],"additionalProperties":false
+    },
+    "logRevision": {
+      "type":"object","properties":{"revision_id":{"$ref":"#/$defs/id"},"version":{"type":"integer","minimum":1},"action":{"enum":["created","updated","deleted"]},"at":{"type":"string","format":"date-time"},"snapshot":{"$ref":"#/$defs/logSnapshot"}},
+      "required":["revision_id","version","action","at","snapshot"],"additionalProperties":false
+    },
+    "fuelLog": {
+      "type":"object","properties":{"id":{"$ref":"#/$defs/id"},"vehicle_id":{"$ref":"#/$defs/id"},"occurred_at":{"type":"string","format":"date-time"},"station_id":{"$ref":"#/$defs/nullableId"},"odometer_milli":{"type":"integer","minimum":0,"maximum":2000000000},"volume_thousandths":{"type":"integer","minimum":1,"maximum":100000},"unit_price_mills":{"type":"integer","minimum":500,"maximum":20000},"total_cost_cents":{"type":"integer","minimum":1,"maximum":1000000},"grade":{"enum":["regular","midgrade","premium","diesel","e85","unleaded88"]},"price_type":{"enum":["cash","credit"]},"fill_status":{"enum":["full","partial","missed"]},"note":{"type":"string","maxLength":500},"version":{"type":"integer","minimum":1},"created_at":{"type":"string","format":"date-time"},"updated_at":{"type":"string","format":"date-time"},"deleted_at":{"$ref":"#/$defs/nullableTime"},"revisions":{"type":"array","items":{"$ref":"#/$defs/logRevision"},"minItems":1,"maxItems":100}},
+      "required":["id","vehicle_id","occurred_at","station_id","odometer_milli","volume_thousandths","unit_price_mills","total_cost_cents","grade","price_type","fill_status","note","version","created_at","updated_at","deleted_at","revisions"],"additionalProperties":false
+    },
+    "preview": {
+      "type":"object","properties":{"id":{"$ref":"#/$defs/id"},"mode":{"enum":["create","update"]},"fuel_log_id":{"$ref":"#/$defs/nullableId"},"expected_log_version":{"anyOf":[{"type":"integer","minimum":1},{"type":"null"}]},"fields":{"$ref":"#/$defs/logFields"},"computed_total_cents":{"type":"integer","minimum":1},"expires_at":{"type":"string","format":"date-time"},"created_at":{"type":"string","format":"date-time"},"used_at":{"$ref":"#/$defs/nullableTime"}},
+      "required":["id","mode","fuel_log_id","expected_log_version","fields","computed_total_cents","expires_at","created_at","used_at"],"additionalProperties":false
+    }
+  }
+}
