@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "app_id": "tablewise",
+  "version": "0.1.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "@genglinliu; upstream PR #40"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "dining.inventory_changed",
+    "dining.authority_recorded",
+    "dining.authority_revoked",
+    "dining.participant_replied",
+    "dining.venue_quoted",
+    "dining.terms_published",
+    "dining.refund_recorded",
+    "dining.venue_cancelled"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "Original OpenTable-inspired diner GUI",
+    "real_delivery": false
+  },
+  "limitations": [
+    "M1: search, holds, booking/change/cancel, inquiry, Mail. Waitlists, group quote booking, scoped sharing/contributions and additional scenes remain M2.",
+    "Fictional USD payments; no live restaurant service."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}
