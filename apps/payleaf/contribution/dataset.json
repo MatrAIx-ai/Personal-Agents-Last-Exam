@@ -1,0 +1,44 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "payleaf-minimal",
+  "version": "1.0.0",
+  "description": "Authored synthetic history of one salaried employee at a fictional employer, for reproducible acceptance: 30 pay calendar entries (26 for 2026 and 4 for 2027), 22 pay statements with 150 lines and 44 deposits, 9 setting changes, 4 pay inquiries, 12 leave requests with 70 leave entries, 2 enrollment windows and 2 election sets. A development script replays the authored history from November 2025 to November 2026 once through the App, so the App's own pay run computed every deduction, net pay and deposit. The fixture keeps the 26 newest notifications and the activity rows from the time of the oldest one on. It is not a benchmark task.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Authored synthetic records; no external collection. The employer, people, bank accounts and benefit plans are fictional. Three public pages were read only for the shape of the workflows, and no text, data, form or brand was copied: the page of the Internal Revenue Service on Form W-4 (https://www.irs.gov/forms-pubs/about-form-w-4), its Publication 969 on flexible spending arrangements (https://www.irs.gov/publications/p969) and the page of Nacha on Direct Deposit (https://www.nacha.org/content/direct-deposit).",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/payleaf/dev/build-fixture.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized timestamps and account IDs. Records are pay calendar entries, pay statements, setting changes, pay inquiries, leave requests, enrollment windows and election sets; a statement holds its lines and deposits."
+  ],
+  "expected_counts": {
+    "records": 81,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}
