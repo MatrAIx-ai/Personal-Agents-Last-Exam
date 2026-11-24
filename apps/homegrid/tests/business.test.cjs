@@ -120,6 +120,18 @@ test('W2 derived effective dates are stored on the next write with the time they
   assert.deepEqual(o.history.at(-1), {at: '2027-01-15T00:00:00-05:00', action: 'effective'});
 });
 
+test('W2 a stop preview needs its date; a change exactly 24 h before the window is inside the fee window', () => {
+  const f = fixture();
+  fails(f, () => f.call('homegrid.orders.preview', {type: 'stop', service_id: 'sv-pr-maple-22-water'}), 'invalid_date');
+  journey(f, 'booked');
+  f.advance(T('01-18', '08:00'));
+  assert.equal(f.call('homegrid.appointments.reschedule', {appointment_id: APPT1, date: '2027-01-19', slot: '12-16'}).fee_cents, 2500);
+  const g = fixture();
+  journey(g, 'booked');
+  g.advance(T('01-18', '07:59'));
+  assert.equal(g.call('homegrid.appointments.reschedule', {appointment_id: APPT1, date: '2027-01-19', slot: '12-16'}).fee_cents, 0);
+});
+
 test('W2 deposit once per new premise with 2 late payments in 12 months', () => {
   const f = withSeed(s => { s.customer.late_payments = ['2026-03-01T10:00:00-05:00', '2026-09-01T10:00:00-04:00']; });
   assert.equal(transfer(f).deposit_cents, 15000);
@@ -427,7 +439,8 @@ test('W5 core example: a payment is pending until settled and counts from its cr
   const f = fixture();
   journey(f, 'billed');
   f.advance(T('02-24', '10:00'));
-  assert.deepEqual(f.call('homegrid.payments.make', {amount_cents: 12394, payment_method_id: 'pm-visa'}), {payment_id: 'py-homegrid-sam-2'});
+  const next = 'py-homegrid-sam-' + (f.data.payments.length + 1);
+  assert.deepEqual(f.call('homegrid.payments.make', {amount_cents: 12394, payment_method_id: 'pm-visa'}), {payment_id: next});
   assert.equal(bill(f, 'bl-0131').status, 'past_due');
   f.event(ev(T('02-25', '09:00'), 'payment.settled', {selector: {oldest_pending: true}, outcome: 'settled'}));
   assert.equal(bill(f, 'bl-0131').status, 'paid');
@@ -439,8 +452,9 @@ test('W5 a returned payment does not count and adds $15.00 to the next bill', ()
   journey(f, 'billed');
   f.advance(T('02-10', '10:00'));
   f.call('homegrid.payments.make', {amount_cents: 12394, payment_method_id: 'pm-checking'});
-  f.event(ev(T('02-12', '09:00'), 'payment.settled', {payment_id: 'py-homegrid-sam-2', outcome: 'returned'}));
-  assert.equal(f.call('homegrid.payments.list').payments.find(p => p.payment_id === 'py-homegrid-sam-2').status, 'returned');
+  const id = f.data.payments.at(-1).payment_id;
+  f.event(ev(T('02-12', '09:00'), 'payment.settled', {payment_id: id, outcome: 'returned'}));
+  assert.equal(f.call('homegrid.payments.list').payments.find(p => p.payment_id === id).status, 'returned');
   assert.equal(bill(f, 'bl-0131').status, 'open');
   february(f);
   assert.deepEqual(bill(f, 'bl-0228').lines.filter(l => ['returned_payment', 'late_fee'].includes(l.kind)).map(l => [l.kind, l.amount_cents]),
@@ -718,7 +732,7 @@ test('seed validation rejects inconsistent records', () => {
   bad(s => { s.premises[0].external_ref = {app_id: 'lintel', account_id: 'lintel-sam', object_id: 'ls-1'}; }, 'binding');
 });
 
-test('fixture history recomputes: bills from usage and the catalog, all dated after 2026-01-01', () => {
+test('fixture history recomputes: bills from usage and the catalog, from 2025-01-01 on', () => {
   const packs = ['move-remote-worker', 'boil-water-infant', 'tight-month'];
   for (const seed of [require('../fixtures/minimal.json'), ...packs.map(p => require(`../examples/packs/${p}/seed.json`))]) {
     for (const b of seed.bills) {
@@ -727,12 +741,13 @@ test('fixture history recomputes: bills from usage and the catalog, all dated af
         const type = sid.endsWith('electricity') ? 'electricity' : 'water', t = TARIFFS[type];
         assert.equal(b.lines.find(l => l.kind === type).amount_cents, Math.round(u[t.unit] * t.per_unit_cents) + t.customer_charge_cents);
       }
-      assert.ok(b.period.from >= '2026-01-01');
+      assert.ok(b.period.from >= '2025-01-01');
     }
-    for (const p of seed.payments) assert.ok(p.created_at >= '2026-01-01');
+    for (const p of seed.payments) assert.ok(p.created_at >= '2025-01-01');
+    assert.ok(seed.bills[0].period.from < '2025-02-01', 'history starts in January 2025');
   }
   const tight = require('../examples/packs/tight-month/seed.json');
-  assert.equal(tight.bills.length, 14);
+  assert.equal(tight.bills.length, 26);
   assert.equal(tight.payments.filter(p => p.status === 'returned').length, 2);
   assert.equal(tight.arrangements.length, 1);
 });

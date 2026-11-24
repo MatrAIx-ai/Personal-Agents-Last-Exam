@@ -5,7 +5,9 @@
 const fs = require('node:fs'), path = require('node:path');
 const plugin = require('../plugin.cjs');
 const {TYPES} = require('../src/catalog.cjs');
-const {addDays} = require('../src/time.cjs');
+const {addDays, instantOf, render} = require('../src/time.cjs');
+// A local wall-clock time in a zone, as RFC 3339 with that day's offset.
+const L = (date, hhmm, tz) => render(instantOf(date, hhmm, tz), tz);
 const root = path.resolve(__dirname, '..');
 const SEED = 20270112;
 
@@ -21,7 +23,7 @@ const AREAS = [
   {area_id: 'ar-hollow', name: 'Wexley: Cedar Hollow', time_zone: CHI}
 ];
 // Fictional holiday calendar shared by both towns.
-const HOLIDAYS = ['2026-01-01', '2026-01-19', '2026-02-16', '2026-05-25', '2026-07-03', '2026-09-07', '2026-11-26', '2026-12-25',
+const HOLIDAYS = ['2025-01-01', '2025-01-20', '2025-02-17', '2025-05-26', '2025-07-04', '2025-09-01', '2025-11-27', '2025-12-25', '2026-01-01', '2026-01-19', '2026-02-16', '2026-05-25', '2026-07-03', '2026-09-07', '2026-11-26', '2026-12-25',
   '2027-01-01', '2027-01-18', '2027-02-15', '2027-05-31', '2027-07-05', '2027-09-06', '2027-11-25', '2027-12-24'];
 const TOWN = {'ar-maple': 'Fairmont', 'ar-linden': 'Fairmont', 'ar-riverside': 'Wexley', 'ar-hollow': 'Wexley'};
 const premise = (premise_id, address, area_id, internet_tech, self_install) => ({premise_id, address: `${address}, ${TOWN[area_id]}`, area_id, internet_tech, self_install, external_ref: null});
@@ -97,6 +99,19 @@ const usage = (rand, premiseId, month) => {
   return {[`sv-${premiseId}-electricity`]: {kwh: Math.round((380 + rand() * 180) * winter)}, [`sv-${premiseId}-water`]: {gal: Math.round(2400 + rand() * 1500)}};
 };
 const monthEnd = (y, m) => new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+// Monthly bills from `from` to `to` ([year, month]), each paid before its due date with `method`,
+// or by autopay (settled the day after the due date) when no method is given.
+function monthly(s, rand, premiseId, tz, {from, to, prefix, method = null, firstDay = '01'}) {
+  for (let [y, m] = from; y < to[0] || (y === to[0] && m <= to[1]); [y, m] = m === 12 ? [y + 1, 1] : [y, m + 1]) {
+    const end = monthEnd(y, m), first = y === from[0] && m === from[1] ? firstDay : '01';
+    s.event(L(end, '23:59', tz), 'billing.cycle_closed', {bill_id: `${prefix}-${y % 100}${pad(m)}`, period: {from: `${y}-${pad(m)}-${first}`, to: end}, usage: usage(rand, premiseId, m)});
+    const bill = s.data.bills.at(-1);
+    if (method) {
+      s.tool(L(addDays(bill.due_date, -4), '20:00', tz), 'homegrid.payments.make', {amount_cents: bill.total_cents, payment_method_id: method});
+      s.event(L(addDays(bill.due_date, -2), '09:00', tz), 'payment.settled', {selector: {oldest_pending: true}, outcome: 'settled'});
+    } else s.event(L(addDays(bill.due_date, 1), '09:00', tz), 'payment.settled', {selector: {oldest_pending: true}, outcome: 'settled'});
+  }
+}
 const pad = n => String(n).padStart(2, '0');
 
 // Minimal fixture: Sam before the move in the core examples (Tue Jan 12, 2027, 10:00 EST).
@@ -107,16 +122,18 @@ function minimal() {
   const data = account({account_id: 'homegrid-sam', person: 'person-sam', name: 'Sam Okafor', tz: NY, premises,
     methods: [{payment_method_id: 'pm-visa', label: 'Visa', last4: '4242', fails: false}, {payment_method_id: 'pm-checking', label: 'Checking', last4: '6789', fails: false}]});
   data.services = ['electricity', 'water', 'internet'].map(t => service('pr-maple-22', t, {electricity: 'elec-standard', water: 'water-standard', internet: 'net-fiber-300'}[t],
-    '2026-06-01', '2026-06-01T00:00:00-04:00'));
+    '2025-01-02', '2025-01-02T00:00:00-05:00'));
   data.equipment = [{equipment_id: 'eq-gw-maple', kind: 'gateway', premise_id: 'pr-maple-22', order_id: null, status: 'in_use', return_due: null, return_method: null, returned_at: null}];
   // Linden installation windows on Fri Jan 15 and Sat Jan 16 are full.
   data.capacity = [...['08-12', '12-16', '16-20'].map(slot => ({area_id: 'ar-linden', date: '2027-01-15', slot, capacity: 0})),
     {area_id: 'ar-linden', date: '2027-01-16', slot: '08-12', capacity: 0}];
   data.stock = [{area_id: 'ar-maple', hotspots: 1}, {area_id: 'ar-linden', hotspots: 1}];
   const s = simulate(data, bind);
+  // Two years at Maple: monthly bills from January 2025, paid before their due dates.
+  monthly(s, rand, 'pr-maple-22', NY, {from: [2025, 1], to: [2026, 11], prefix: 'bl-maple', method: 'pm-visa', firstDay: '02'});
   s.event('2026-12-31T23:59:00-05:00', 'billing.cycle_closed', {bill_id: 'bl-1231', period: {from: '2026-12-01', to: '2026-12-31'},
     usage: {'sv-pr-maple-22-electricity': {kwh: 520}, 'sv-pr-maple-22-water': {gal: 3100}}});
-  const total = s.data.bills[0].total_cents;
+  const total = s.data.bills.at(-1).total_cents;
   s.tool('2027-01-06T19:00:00-05:00', 'homegrid.payments.make', {amount_cents: total, payment_method_id: 'pm-visa'});
   s.event('2027-01-08T09:00:00-05:00', 'payment.settled', {selector: {oldest_pending: true}, outcome: 'settled'});
   const out = mail(s.data);
@@ -129,19 +146,14 @@ function moveRemoteWorker(rand, premises) {
   const bind = binding('person-priya', 'Priya Nair', 'homegrid-priya', ['pr-elm-41', 'pr-heron-7']);
   const data = account({account_id: 'homegrid-priya', person: 'person-priya', name: 'Priya Nair', tz: CHI, premises,
     methods: [{payment_method_id: 'pm-amex', label: 'Amex', last4: '1009', fails: false}]});
-  data.services = [service('pr-elm-41', 'electricity', 'elec-standard', '2026-01-04', '2026-01-04T00:00:00-06:00'),
-    service('pr-elm-41', 'water', 'water-standard', '2026-01-04', '2026-01-04T00:00:00-06:00'),
-    service('pr-elm-41', 'internet', 'net-cable-200', '2026-01-08', '2026-01-08T13:20:00-06:00')];
+  data.services = [service('pr-elm-41', 'electricity', 'elec-standard', '2025-01-06', '2025-01-06T00:00:00-06:00'),
+    service('pr-elm-41', 'water', 'water-standard', '2025-01-06', '2025-01-06T00:00:00-06:00'),
+    service('pr-elm-41', 'internet', 'net-cable-200', '2025-01-08', '2025-01-08T13:20:00-06:00')];
   data.equipment = [{equipment_id: 'eq-gw-elm', kind: 'gateway', premise_id: 'pr-elm-41', order_id: null, status: 'in_use', return_due: null, return_method: null, returned_at: null}];
   data.stock = AREAS.map(a => ({area_id: a.area_id, hotspots: 2}));
   data.autopay.payment_method_id = 'pm-amex';
   const s = simulate(data, bind);
-  for (const m of [10, 11, 12, 13]) {
-    const y = m > 12 ? 2027 : 2026, mm = m > 12 ? m - 12 : m, to = monthEnd(y, mm);
-    s.event(`${to}T23:59:00-06:00`, 'billing.cycle_closed', {bill_id: `bl-elm-${y % 100}${pad(mm)}`, period: {from: `${y}-${pad(mm)}-01`, to}, usage: usage(rand, 'pr-elm-41', mm)});
-    const due = s.data.bills.at(-1).due_date;
-    s.event(`${addDays(due, 1)}T09:00:00-06:00`, 'payment.settled', {selector: {oldest_pending: true}, outcome: 'settled'});
-  }
+  monthly(s, rand, 'pr-elm-41', CHI, {from: [2025, 1], to: [2027, 1], prefix: 'bl-elm', firstDay: '06'});
   const preview = s.tool('2027-02-26T11:00:00-06:00', 'homegrid.orders.preview', {type: 'transfer', from_premise_id: 'pr-elm-41', to_premise_id: 'pr-heron-7',
     stop_date: '2027-03-05', start_date: '2027-03-05'});
   s.tool('2027-02-26T11:04:00-06:00', 'homegrid.orders.create', {order_token: preview.order_token});
@@ -168,25 +180,20 @@ function boilWaterInfant(rand, premises) {
   const bind = binding('person-ama', 'Ama Osei', 'homegrid-ama', ['pr-river-12']);
   const data = account({account_id: 'homegrid-ama', person: 'person-ama', name: 'Ama Osei', tz: CHI, premises,
     methods: [{payment_method_id: 'pm-debit', label: 'Debit card', last4: '5310', fails: false}]});
-  data.services = [service('pr-river-12', 'electricity', 'elec-standard', '2026-08-03', '2026-08-03T00:00:00-05:00'),
-    service('pr-river-12', 'water', 'water-standard', '2026-08-03', '2026-08-03T00:00:00-05:00'),
-    service('pr-river-12', 'internet', 'net-cable-200', '2026-08-05', '2026-08-05T11:40:00-05:00')];
+  data.services = [service('pr-river-12', 'electricity', 'elec-standard', '2025-01-06', '2025-01-06T00:00:00-06:00'),
+    service('pr-river-12', 'water', 'water-standard', '2025-01-06', '2025-01-06T00:00:00-06:00'),
+    service('pr-river-12', 'internet', 'net-cable-200', '2025-01-08', '2025-01-08T11:40:00-06:00')];
   data.equipment = [{equipment_id: 'eq-gw-river', kind: 'gateway', premise_id: 'pr-river-12', order_id: null, status: 'in_use', return_due: null, return_method: null, returned_at: null}];
   data.stock = AREAS.map(a => ({area_id: a.area_id, hotspots: 2}));
   const s = simulate(data, bind);
+  monthly(s, rand, 'pr-river-12', CHI, {from: [2025, 1], to: [2026, 8], prefix: 'bl-river', method: 'pm-debit', firstDay: '06'});
   // An earlier advisory, already lifted, so the account has a complete chain on record.
-  s.event('2026-10-14T06:30:00-05:00', 'water.advisory_published', {advisory_id: 'adv-rv1', version: 1, msg_type: 'issue', kind: 'boil_water', areas: ['ar-riverside'],
-    effective_from: '2026-10-14T06:30:00-05:00', instructions: 'Boil tap water for 1 minute before drinking, cooking, making formula or brushing teeth.'});
-  s.event('2026-10-15T17:00:00-05:00', 'water.advisory_published', {advisory_id: 'adv-rv1', version: 2, msg_type: 'lift', kind: 'boil_water',
-    effective_from: '2026-10-14T06:30:00-05:00', instructions: 'Tap water is safe to drink. Run cold taps for 2 minutes first.', references: [{advisory_id: 'adv-rv1', version: 1}]});
-  for (const [y, mm] of [[2026, 12], [2027, 1], [2027, 2], [2027, 3]]) {
-    const to = monthEnd(y, mm);
-    s.event(`${to}T23:59:00-0${mm >= 3 && mm <= 10 ? 5 : 6}:00`, 'billing.cycle_closed', {bill_id: `bl-river-${y % 100}${pad(mm)}`, period: {from: `${y}-${pad(mm)}-01`, to}, usage: usage(rand, 'pr-river-12', mm)});
-    if (mm === 3) break;
-    const bill = s.data.bills.at(-1);
-    s.tool(`${addDays(bill.due_date, -4)}T20:00:00-0${mm >= 2 ? 5 : 6}:00`, 'homegrid.payments.make', {amount_cents: bill.total_cents, payment_method_id: 'pm-debit'});
-    s.event(`${addDays(bill.due_date, -2)}T09:00:00-0${mm >= 2 ? 5 : 6}:00`, 'payment.settled', {selector: {oldest_pending: true}, outcome: 'settled'});
-  }
+  s.event('2026-09-22T06:30:00-05:00', 'water.advisory_published', {advisory_id: 'adv-rv1', version: 1, msg_type: 'issue', kind: 'boil_water', areas: ['ar-riverside'],
+    effective_from: '2026-09-22T06:30:00-05:00', instructions: 'Boil tap water for 1 minute before drinking, cooking, making formula or brushing teeth.'});
+  s.event('2026-09-23T17:00:00-05:00', 'water.advisory_published', {advisory_id: 'adv-rv1', version: 2, msg_type: 'lift', kind: 'boil_water',
+    effective_from: '2026-09-22T06:30:00-05:00', instructions: 'Tap water is safe to drink. Run cold taps for 2 minutes first.', references: [{advisory_id: 'adv-rv1', version: 1}]});
+  monthly(s, rand, 'pr-river-12', CHI, {from: [2026, 9], to: [2027, 2], prefix: 'bl-river', method: 'pm-debit'});
+  s.event(L('2027-03-31', '23:59', CHI), 'billing.cycle_closed', {bill_id: 'bl-river-2703', period: {from: '2027-03-01', to: '2027-03-31'}, usage: usage(rand, 'pr-river-12', 3)});
   const out = mail(s.data);
   // Quiet hours at night; the health bypass was switched off on this account.
   out.preferences.quiet_hours = {start: '21:00', end: '07:00'};
@@ -206,20 +213,18 @@ function boilWaterInfant(rand, premises) {
   return {name: 'boil-water-infant', seed: out, binding: bind, clock: '2027-04-06T18:00:00-05:00', events};
 }
 
-// (c) Household behind on bills: 14 months of bills, two returned payments, one past arrangement, the latest bill past due.
+// (c) Household behind on bills: 26 months of bills (a year on time, then a hard one), two returned payments, one past arrangement, the latest bill past due.
 function tightMonth(rand, premises) {
   const bind = binding('person-dana', 'Dana Whitfield', 'homegrid-dana', ['pr-hollow-30']);
   const data = account({account_id: 'homegrid-dana', person: 'person-dana', name: 'Dana Whitfield', tz: CHI, premises,
     methods: [{payment_method_id: 'pm-checking', label: 'Checking', last4: '2231', fails: false}, {payment_method_id: 'pm-mc', label: 'Mastercard', last4: '8812', fails: false}]});
-  data.services = [service('pr-hollow-30', 'electricity', 'elec-standard', '2026-01-02', '2026-01-02T00:00:00-06:00'),
-    service('pr-hollow-30', 'water', 'water-standard', '2026-01-02', '2026-01-02T00:00:00-06:00'),
-    service('pr-hollow-30', 'internet', 'net-cable-200', '2026-01-02', '2026-01-02T15:00:00-06:00')];
+  data.services = [service('pr-hollow-30', 'electricity', 'elec-standard', '2025-01-02', '2025-01-02T00:00:00-06:00'),
+    service('pr-hollow-30', 'water', 'water-standard', '2025-01-02', '2025-01-02T00:00:00-06:00'),
+    service('pr-hollow-30', 'internet', 'net-cable-200', '2025-01-02', '2025-01-02T15:00:00-06:00')];
   data.equipment = [{equipment_id: 'eq-gw-hollow', kind: 'gateway', premise_id: 'pr-hollow-30', order_id: null, status: 'in_use', return_due: null, return_method: null, returned_at: null}];
   data.stock = AREAS.map(a => ({area_id: a.area_id, hotspots: 2}));
-  data.customer.late_payments = ['2026-01-20T10:00:00-06:00'];
   const s = simulate(data, bind);
-  const off = date => (date >= '2026-03-08' && date < '2026-11-01') || (date >= '2027-03-14') ? '-05:00' : '-06:00';
-  const at = (date, hhmm) => `${date}T${hhmm}:00${off(date)}`;
+  const at = (date, hhmm) => L(date, hhmm, CHI);
   // Actions run in time order; an action may schedule later ones from the state it sees.
   const queue = [];
   let seq = 0;
@@ -228,8 +233,8 @@ function tightMonth(rand, premises) {
     const {payment_id} = s.tool(at(date, '19:30'), 'homegrid.payments.make', {amount_cents: amount(), payment_method_id: method});
     schedule(at(addDays(date, 2), '09:00'), () => s.event(at(addDays(date, 2), '09:00'), 'payment.settled', {payment_id, outcome}));
   });
-  for (let i = 0; i < 14; i++) {
-    const y = 2026 + Math.floor(i / 12), mm = (i % 12) + 1, to = monthEnd(y, mm), id = `bl-dana-${y % 100}${pad(mm)}`, use = usage(rand, 'pr-hollow-30', mm);
+  for (let i = 0; i < 26; i++) {
+    const y = 2025 + Math.floor(i / 12), mm = (i % 12) + 1, to = monthEnd(y, mm), id = `bl-dana-${y % 100}${pad(mm)}`, use = usage(rand, 'pr-hollow-30', mm);
     schedule(at(to, '23:59'), () => {
       s.event(at(to, '23:59'), 'billing.cycle_closed', {bill_id: id, period: {from: `${y}-${pad(mm)}-${i === 0 ? '02' : '01'}`, to}, usage: use});
       const bill = s.data.bills.at(-1), total = () => bill.total_cents;

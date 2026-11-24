@@ -52,7 +52,8 @@ function preview(data, req, now) {
   else if (req.type === 'stop') {
     const s = data.services.find(x => x.service_id === req.service_id);
     if (!s) fail('service_not_active', 'Unknown service.');
-    parts.push(stopPart(data, s, req.date || '', now));
+    if (!req.date) fail('invalid_date', 'A stop needs its last day of service (date).');
+    parts.push(stopPart(data, s, req.date, now));
   } else if (req.type === 'transfer') {
     getPremise(data, req.from_premise_id); getPremise(data, req.to_premise_id);
     if (!req.stop_date) fail('invalid_date', 'A transfer needs a stop date.');

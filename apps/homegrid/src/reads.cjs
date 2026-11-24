@@ -45,7 +45,9 @@ function read(ctx, data, name, args) {
       return out({services: copy(data.services.filter(s => !args.premise_id || s.premise_id === args.premise_id))});
     }
     case 'homegrid.plans.list': return out({plans: plans(data, args.premise_id, args.service_type)});
-    case 'homegrid.orders.list': return out({orders: copy(data.orders.filter(o => (!args.premise_id || o.premise_id === args.premise_id) && (!args.status || o.status === args.status)))});
+    // Each order carries its installation appointments, so booked windows are readable.
+    case 'homegrid.orders.list': return out({orders: data.orders.filter(o => (!args.premise_id || o.premise_id === args.premise_id) && (!args.status || o.status === args.status))
+      .map(o => ({...copy(o), appointments: copy(data.appointments.filter(a => a.order_id === o.order_id))}))});
     case 'homegrid.orders.preview': return out(preview(data, args, now));
     case 'homegrid.appointments.slots': {
       const p = getPremise(data, args.premise_id);

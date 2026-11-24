@@ -33,6 +33,27 @@ cd apps/homegrid && npm run integration
 
 The second covers four delivery cases, all from the proposal: a boil-water notice delivered to Mail during quiet hours, a duplicate republish, an ungranted recipient, and a quiet-hour release after `env.advance_time`.
 
+## Web page
+
+Homegrid has a business web page served by the shared Web Host (`runtime/web/server.cjs`), following the `apps/notes` convention: `contribution/gui.json` declares the `pale.web` extension, `gui/index.html` is the page and `gui/src/app.js` the controller. From the repository root:
+
+```sh
+node runtime/web/server.cjs --app homegrid --registry <registry listing apps/homegrid> --run web-demo --profile sandbox
+```
+
+The page has seven sections:
+- services;
+- moves and installations (orders with their appointment windows);
+- equipment;
+- outages and advisories (with version chains);
+- bills and payments (lines, payments, payment plans);
+- notices;
+- account and settings.
+
+Each section has a list and a detail view. Record actions open forms built from the live tool schemas with the record's IDs filled in: test a connection, book or move a window, change or cancel an order, arrange a return, report an outage, pay a bill, request a plan, mark a notice read, change preferences. Global actions preview and place orders and make payments. Read actions, such as a preview, slots, plans or a full bill, show their result in the detail pane.
+
+All data comes from the Agent MCP tools through the Host. Calendar dates are shown as written, and times in the account's time zone. `npm run gui` (`tests/gui.browser.cjs`, which needs Playwright at the repository root) drives the page in Chromium. It checks every effect in MCP state and writes screenshots to `.artifacts/web/`.
+
 ## Package boundary
 
 Business tests and the example run from this folder with only the package. MCP verification needs the pinned public runtime (runtime 1.6.0, Core API 1.2.0). The package carries a byte-identical copy of Mail's wire schema (`schemas/mail-router-message.schema.json`) for its `messaging.publishes` declaration. Mail 1.3.0 and Messaging are needed only for the integration example, where Mail is a scenario recipient in the run assembly. Mail is not listed in `app.json` dependencies. No external service is used.
@@ -98,18 +119,21 @@ Each pack in `examples/packs/<name>/` has a `seed.json`, `binding.json` and `clo
 
 | Pack | Contents |
 | :--- | :--- |
-| `move-remote-worker` | A remote worker mid-move in Wexley (#9-shaped): a transfer already ordered from a cable premise to a self-install premise, the kit on its way, the old gateway to return, five months of bills on autopay. Events: kit shipped and delivered, activation, a 27-hour outage (a $3.23 credit), the gateway returned, the first bill at the new address |
-| `boil-water-infant` | A family with an infant in Riverside (#115-shaped): quiet hours at night with the health bypass switched off, an earlier lifted advisory, four bills. Events: a boil-water advisory issued at 02:10, widened to a second area, a planned shutoff, then the lift |
-| `tight-month` | A household behind on bills: 14 months of bills and payments, two returned payments, one completed payment plan, the latest bill past due and a late fee on the open one. Events: a settlement for anything the agent pays, and the next cycle |
+| `move-remote-worker` | A remote worker mid-move in Wexley (#9-shaped): a transfer already ordered from a cable premise to a self-install premise, the kit on its way, the old gateway to return, bills on autopay since January 2025. Events: kit shipped and delivered, activation, a 27-hour outage (a $3.23 credit), the gateway returned, the first bill at the new address |
+| `boil-water-infant` | A family with an infant in Riverside (#115-shaped): quiet hours at night with the health bypass switched off, an earlier lifted advisory, bills since January 2025. Events: a boil-water advisory issued at 02:10, widened to a second area, a planned shutoff, then the lift |
+| `tight-month` | A household behind on bills: 26 months of bills and payments (2025 on time, then a hard 2026), two returned payments, one completed payment plan, the latest bill past due and a late fee on the open one. Events: a settlement for anything the agent pays, and the next cycle |
 
 ## Data
 
-`scripts/generate-fixtures.cjs` writes every fixture and pack deterministically from a fixed seed; `npm run check` fails if a regenerated file differs. The account history in each fixture is produced by running Homegrid's own event and write handlers in time order. Every seeded bill, payment, arrangement and notification is therefore one the App itself computes, and the tests recompute each bill's usage lines from the catalog. All towns, addresses, people, tariffs and fees are synthetic, recorded in `contribution/dataset.json`.
+`scripts/generate-fixtures.cjs` writes every fixture and pack deterministically from a fixed seed; `npm run check` fails if a regenerated file differs. The account history in each fixture is produced by running Homegrid's own event and write handlers in time order. Every seeded bill, payment, arrangement and notification is therefore one the App itself computes, and the tests recompute each bill's usage lines from the catalog. Seeded history starts in January 2025, about two years before the core examples, and the task timeline starts in 2026. All towns, addresses, people, tariffs and fees are synthetic, recorded in `contribution/dataset.json`.
 
 ## Implementation notes
 
 Where the approved plan left a detail open, or review asked for a change:
 - **`homegrid.premises.search`** was added at review (lookup by address), so there are 15 reads instead of 14.
+- **Appointments in `orders.list`:** each order carries its installation appointments, so a booked window is readable without a separate tool.
+- **Fee boundary:** a change exactly 24 h before the window starts is inside the fee window. For a Tue 08–12 window, a change at Mon 08:00 costs $25.00, and one at Mon 07:59 is free.
+- **Stop dates:** a stop preview without a `date` returns `invalid_date`.
 - **Technician lead time:** for an existing order, 3 business days count from when the order was placed, not from the booking request. A missed or moved visit can therefore be rebooked for the next free window, and the window must not have started. `appointments.slots` accepts an optional `order_id` for this. A new order counts from now.
 - **Order tokens:** a token is sealed, so an edited token is `invalid_order_token`. `orders.create` recomputes the preview: any change returns `order_token_stale`, including a preview that now fails, such as `no_stock`.
 - **Equipment status:** `ordered → shipped → delivered → in_use → return_due → returned`. `return_due` is derived: when internet stops for a gateway, after the loan's last day for a hotspot. `schedule_return` records the method.
@@ -133,5 +157,5 @@ Where the approved plan left a detail open, or review asked for a change:
 
 - No real customers, utilities, rates, outage maps or meter data; one account per App instance.
 - Gas, solar and net metering, energy-assistance programs and disconnection for non-payment are out of scope.
-- MCP only, no GUI.
+- One business web page (see Web page); no reviewer console.
 - Automatic invocation of the outbound adapter belongs to the planned runner; the example and tests invoke it explicitly.

@@ -131,7 +131,7 @@ const tools = [
   tool('services.list', 'Services with status, plan, activation and last connection test, as of the run\'s virtual time.', true,
     obj({premise_id: id}, []), readOut({services: arr(any, 1000)})),
   tool('plans.list', 'Plans available for a service at a premise.', true, obj({premise_id: id, service_type: service}), readOut({plans: arr(any, 20)})),
-  tool('orders.list', 'Orders with status and history.', true, obj({premise_id: id, status: enumOf(['scheduled', 'effective', 'cancelled'])}, []), readOut({orders: arr(any, 2000)})),
+  tool('orders.list', 'Orders with status, history and their installation appointments.', true, obj({premise_id: id, status: enumOf(['scheduled', 'effective', 'cancelled'])}, []), readOut({orders: arr(any, 2000)})),
   tool('orders.preview', 'Earliest dates, deposit, technician need, gap or overlap warnings and price for a start, stop, transfer or temporary-internet order, with a token for orders.create.', true,
     obj(previewIn, ['type']), readOut({order_token: text(4000), expires_at: time, parts: arr(any, 10), warnings: any, deposit_cents: cents, price_cents: cents})),
   tool('appointments.slots', 'Installation windows with free capacity at a premise; with order_id, the windows that order can use.', true,
