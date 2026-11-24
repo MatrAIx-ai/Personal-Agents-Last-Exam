@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "app_id": "roomline",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged task:visa-bound-conference-trip (task-owned hotel fixture, @RuihongY)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "roomline.rate_switch.expire",
+    "roomline.rate.change",
+    "roomline.availability.sell_out"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "none; reviewers read reservations through the Agent tools or env.snapshot",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Task-owned fixture for one task; it moves onto a hotel booking environment if one is approved.",
+    "One room per booking, one guest, no modification: change a stay by cancelling and booking again.",
+    "Rate-switch offers expire, prices change and nights sell out only when Infra applies their events; the App never schedules itself.",
+    "Payment labels are opaque; charges and refunds are recorded locally, not posted to a card App. No notices are sent to Mail."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}

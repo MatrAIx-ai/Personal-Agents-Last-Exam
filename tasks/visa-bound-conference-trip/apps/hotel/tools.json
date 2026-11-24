@@ -1,0 +1,2603 @@
+[
+  {
+    "name": "roomline.account",
+    "description": "Read the guest profile, the saved payment labels and every charge and refund on this Roomline account.",
+    "read_only": true,
+    "scope": "roomline.account",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "roomline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "guest": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "email": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "name",
+            "email"
+          ],
+          "additionalProperties": false
+        },
+        "currency": {
+          "const": "EUR"
+        },
+        "payment_labels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "minItems": 1,
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "charges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "account_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "reservation_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "charge",
+                  "refund"
+                ]
+              },
+              "amount_cents": {
+                "type": "integer",
+                "minimum": -100000000,
+                "maximum": 100000000,
+                "description": "Euro cents; refunds are negative."
+              },
+              "payment_label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "id",
+              "account_id",
+              "at",
+              "reservation_id",
+              "kind",
+              "amount_cents",
+              "payment_label",
+              "description"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "account_id",
+        "guest",
+        "currency",
+        "payment_labels",
+        "charges"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "roomline.search",
+    "description": "Search hotels in a city for check_in to check_out (local dates at the hotel). Every hotel is listed with both rate plans, Free cancellation and Non-refundable, with nightly price, total, availability and terms. Prices are in euro cents. Reading changes nothing.",
+    "read_only": true,
+    "scope": "roomline.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "check_in": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Local date at the hotel, YYYY-MM-DD."
+        },
+        "check_out": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Local date at the hotel, YYYY-MM-DD."
+        }
+      },
+      "required": [
+        "city",
+        "check_in",
+        "check_out"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "roomline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "city": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "check_in": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Local date at the hotel, YYYY-MM-DD."
+        },
+        "check_out": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Local date at the hotel, YYYY-MM-DD."
+        },
+        "nights": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "currency": {
+          "const": "EUR"
+        },
+        "priced_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "hotels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hotel_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "city": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "neighborhood": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "distance_note": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 200
+              },
+              "room": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "timezone": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "check_in_time": {
+                "type": "string",
+                "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+                "description": "Local wall-clock time HH:MM at the hotel."
+              },
+              "check_out_time": {
+                "type": "string",
+                "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+                "description": "Local wall-clock time HH:MM at the hotel."
+              },
+              "sold_out_nights": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                  "description": "Local date at the hotel, YYYY-MM-DD."
+                },
+                "maxItems": 366,
+                "uniqueItems": true
+              },
+              "plans": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "plan": {
+                      "enum": [
+                        "refundable",
+                        "non_refundable"
+                      ]
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "nightly_cents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "total_cents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "free_cancellation_until": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "terms": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 400
+                    }
+                  },
+                  "required": [
+                    "plan",
+                    "label",
+                    "nightly_cents",
+                    "total_cents",
+                    "available",
+                    "free_cancellation_until",
+                    "terms"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            },
+            "required": [
+              "hotel_id",
+              "name",
+              "city",
+              "neighborhood",
+              "distance_note",
+              "room",
+              "timezone",
+              "check_in_time",
+              "check_out_time",
+              "sold_out_nights",
+              "plans"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "city",
+        "check_in",
+        "check_out",
+        "nights",
+        "currency",
+        "priced_at",
+        "hotels"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "roomline.book",
+    "description": "Book one room at a hotel for check_in to check_out on a rate plan, paid with a saved payment label. Both plans are charged in full at booking. The result gives the reservation status: confirmed, or pending_rate_switch when the hotel asks to move the stay to its non-refundable rate (see roomline.rate_switch.confirm and .decline).",
+    "read_only": false,
+    "scope": "roomline.book",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "hotel_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "check_in": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Local date at the hotel, YYYY-MM-DD."
+        },
+        "check_out": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Local date at the hotel, YYYY-MM-DD."
+        },
+        "plan": {
+          "enum": [
+            "refundable",
+            "non_refundable"
+          ]
+        },
+        "payment_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "hotel_id",
+        "check_in",
+        "check_out",
+        "plan",
+        "payment_label",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "roomline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reservation": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "confirmation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20
+            },
+            "hotel_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "hotel_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "city": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "check_in": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Local date at the hotel, YYYY-MM-DD."
+            },
+            "check_out": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Local date at the hotel, YYYY-MM-DD."
+            },
+            "nights": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            },
+            "plan": {
+              "enum": [
+                "refundable",
+                "non_refundable"
+              ]
+            },
+            "nightly_cents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "total_cents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "paid_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "payment_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "free_cancellation_until": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Full refund if cancelled at or before this instant; null on the non-refundable plan."
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "pending_rate_switch",
+                "cancelled"
+              ]
+            },
+            "rate_switch": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "pending",
+                        "accepted",
+                        "declined",
+                        "expired",
+                        "withdrawn"
+                      ]
+                    },
+                    "proposed_plan": {
+                      "const": "non_refundable"
+                    },
+                    "proposed_nightly_cents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "proposed_total_cents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "high_demand_nights": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                        "description": "Local date at the hotel, YYYY-MM-DD."
+                      },
+                      "maxItems": 366,
+                      "uniqueItems": true,
+                      "minItems": 1
+                    },
+                    "offered_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "resolved_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "proposed_plan",
+                    "proposed_nightly_cents",
+                    "proposed_total_cents",
+                    "high_demand_nights",
+                    "offered_at",
+                    "expires_at",
+                    "resolved_at",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cancellation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "rule": {
+                      "enum": [
+                        "free",
+                        "late",
+                        "non_refundable"
+                      ]
+                    },
+                    "refund_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "fee_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "rule",
+                    "refund_cents",
+                    "fee_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "charge_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 100
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 1000
+            }
+          },
+          "required": [
+            "id",
+            "account_id",
+            "confirmation",
+            "hotel_id",
+            "hotel_name",
+            "city",
+            "check_in",
+            "check_out",
+            "nights",
+            "plan",
+            "nightly_cents",
+            "total_cents",
+            "paid_cents",
+            "payment_label",
+            "free_cancellation_until",
+            "status",
+            "rate_switch",
+            "cancellation",
+            "charge_ids",
+            "created_at",
+            "updated_at",
+            "history"
+          ],
+          "additionalProperties": false
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "reservation",
+        "message"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "roomline.reservations.list",
+    "description": "List reservations, optionally by status and city, ordered by check-in date.",
+    "read_only": true,
+    "scope": "roomline.reservations.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "confirmed",
+            "pending_rate_switch",
+            "cancelled"
+          ]
+        },
+        "city": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "roomline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "account_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "confirmation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20
+              },
+              "hotel_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "hotel_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "city": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "check_in": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Local date at the hotel, YYYY-MM-DD."
+              },
+              "check_out": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Local date at the hotel, YYYY-MM-DD."
+              },
+              "nights": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 30
+              },
+              "plan": {
+                "enum": [
+                  "refundable",
+                  "non_refundable"
+                ]
+              },
+              "nightly_cents": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000000,
+                "description": "Euro cents."
+              },
+              "total_cents": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000000,
+                "description": "Euro cents."
+              },
+              "paid_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000,
+                "description": "Euro cents."
+              },
+              "payment_label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "free_cancellation_until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Full refund if cancelled at or before this instant; null on the non-refundable plan."
+              },
+              "status": {
+                "enum": [
+                  "confirmed",
+                  "pending_rate_switch",
+                  "cancelled"
+                ]
+              },
+              "rate_switch": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "enum": [
+                          "pending",
+                          "accepted",
+                          "declined",
+                          "expired",
+                          "withdrawn"
+                        ]
+                      },
+                      "proposed_plan": {
+                        "const": "non_refundable"
+                      },
+                      "proposed_nightly_cents": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 100000000,
+                        "description": "Euro cents."
+                      },
+                      "proposed_total_cents": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 100000000,
+                        "description": "Euro cents."
+                      },
+                      "high_demand_nights": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                          "description": "Local date at the hotel, YYYY-MM-DD."
+                        },
+                        "maxItems": 366,
+                        "uniqueItems": true,
+                        "minItems": 1
+                      },
+                      "offered_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "expires_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "resolved_at": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "message": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    },
+                    "required": [
+                      "status",
+                      "proposed_plan",
+                      "proposed_nightly_cents",
+                      "proposed_total_cents",
+                      "high_demand_nights",
+                      "offered_at",
+                      "expires_at",
+                      "resolved_at",
+                      "message"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "cancellation": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "rule": {
+                        "enum": [
+                          "free",
+                          "late",
+                          "non_refundable"
+                        ]
+                      },
+                      "refund_cents": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100000000,
+                        "description": "Euro cents."
+                      },
+                      "fee_cents": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100000000,
+                        "description": "Euro cents."
+                      }
+                    },
+                    "required": [
+                      "at",
+                      "rule",
+                      "refund_cents",
+                      "fee_cents"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "charge_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "maxItems": 100
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 1000
+              }
+            },
+            "required": [
+              "id",
+              "account_id",
+              "confirmation",
+              "hotel_id",
+              "hotel_name",
+              "city",
+              "check_in",
+              "check_out",
+              "nights",
+              "plan",
+              "nightly_cents",
+              "total_cents",
+              "paid_cents",
+              "payment_label",
+              "free_cancellation_until",
+              "status",
+              "rate_switch",
+              "cancellation",
+              "charge_ids",
+              "created_at",
+              "updated_at",
+              "history"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "roomline.reservations.get",
+    "description": "Read one reservation, including its plan, price, payments, cancellation terms and any rate-switch offer.",
+    "read_only": true,
+    "scope": "roomline.reservations.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "roomline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "confirmation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20
+            },
+            "hotel_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "hotel_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "city": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "check_in": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Local date at the hotel, YYYY-MM-DD."
+            },
+            "check_out": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Local date at the hotel, YYYY-MM-DD."
+            },
+            "nights": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            },
+            "plan": {
+              "enum": [
+                "refundable",
+                "non_refundable"
+              ]
+            },
+            "nightly_cents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "total_cents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "paid_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "payment_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "free_cancellation_until": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Full refund if cancelled at or before this instant; null on the non-refundable plan."
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "pending_rate_switch",
+                "cancelled"
+              ]
+            },
+            "rate_switch": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "pending",
+                        "accepted",
+                        "declined",
+                        "expired",
+                        "withdrawn"
+                      ]
+                    },
+                    "proposed_plan": {
+                      "const": "non_refundable"
+                    },
+                    "proposed_nightly_cents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "proposed_total_cents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "high_demand_nights": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                        "description": "Local date at the hotel, YYYY-MM-DD."
+                      },
+                      "maxItems": 366,
+                      "uniqueItems": true,
+                      "minItems": 1
+                    },
+                    "offered_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "resolved_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "proposed_plan",
+                    "proposed_nightly_cents",
+                    "proposed_total_cents",
+                    "high_demand_nights",
+                    "offered_at",
+                    "expires_at",
+                    "resolved_at",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cancellation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "rule": {
+                      "enum": [
+                        "free",
+                        "late",
+                        "non_refundable"
+                      ]
+                    },
+                    "refund_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "fee_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "rule",
+                    "refund_cents",
+                    "fee_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "charge_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 100
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 1000
+            }
+          },
+          "required": [
+            "id",
+            "account_id",
+            "confirmation",
+            "hotel_id",
+            "hotel_name",
+            "city",
+            "check_in",
+            "check_out",
+            "nights",
+            "plan",
+            "nightly_cents",
+            "total_cents",
+            "paid_cents",
+            "payment_label",
+            "free_cancellation_until",
+            "status",
+            "rate_switch",
+            "cancellation",
+            "charge_ids",
+            "created_at",
+            "updated_at",
+            "history"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "item"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "roomline.cancel",
+    "description": "Cancel a reservation. Refunds follow the plan at the current time: Free cancellation refunds in full until its deadline and keeps the first night after it; Non-refundable refunds nothing. Cancellation closes at arrival. A pending rate-switch offer is withdrawn.",
+    "read_only": false,
+    "scope": "roomline.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "reservation_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "roomline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "refund_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000,
+          "description": "Euro cents."
+        },
+        "fee_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000,
+          "description": "Euro cents."
+        },
+        "reservation": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "confirmation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20
+            },
+            "hotel_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "hotel_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "city": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "check_in": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Local date at the hotel, YYYY-MM-DD."
+            },
+            "check_out": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Local date at the hotel, YYYY-MM-DD."
+            },
+            "nights": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            },
+            "plan": {
+              "enum": [
+                "refundable",
+                "non_refundable"
+              ]
+            },
+            "nightly_cents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "total_cents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "paid_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "payment_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "free_cancellation_until": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Full refund if cancelled at or before this instant; null on the non-refundable plan."
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "pending_rate_switch",
+                "cancelled"
+              ]
+            },
+            "rate_switch": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "pending",
+                        "accepted",
+                        "declined",
+                        "expired",
+                        "withdrawn"
+                      ]
+                    },
+                    "proposed_plan": {
+                      "const": "non_refundable"
+                    },
+                    "proposed_nightly_cents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "proposed_total_cents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "high_demand_nights": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                        "description": "Local date at the hotel, YYYY-MM-DD."
+                      },
+                      "maxItems": 366,
+                      "uniqueItems": true,
+                      "minItems": 1
+                    },
+                    "offered_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "resolved_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "proposed_plan",
+                    "proposed_nightly_cents",
+                    "proposed_total_cents",
+                    "high_demand_nights",
+                    "offered_at",
+                    "expires_at",
+                    "resolved_at",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cancellation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "rule": {
+                      "enum": [
+                        "free",
+                        "late",
+                        "non_refundable"
+                      ]
+                    },
+                    "refund_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "fee_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "rule",
+                    "refund_cents",
+                    "fee_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "charge_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 100
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 1000
+            }
+          },
+          "required": [
+            "id",
+            "account_id",
+            "confirmation",
+            "hotel_id",
+            "hotel_name",
+            "city",
+            "check_in",
+            "check_out",
+            "nights",
+            "plan",
+            "nightly_cents",
+            "total_cents",
+            "paid_cents",
+            "payment_label",
+            "free_cancellation_until",
+            "status",
+            "rate_switch",
+            "cancellation",
+            "charge_ids",
+            "created_at",
+            "updated_at",
+            "history"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "refund_cents",
+        "fee_cents",
+        "reservation"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "roomline.rate_switch.confirm",
+    "description": "Accept a pending rate-switch offer before it expires. The reservation moves to the Non-refundable rate: the price difference is refunded, and the stay can no longer be refunded.",
+    "read_only": false,
+    "scope": "roomline.rate_switch.confirm",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "reservation_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "roomline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reservation": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "confirmation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20
+            },
+            "hotel_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "hotel_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "city": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "check_in": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Local date at the hotel, YYYY-MM-DD."
+            },
+            "check_out": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Local date at the hotel, YYYY-MM-DD."
+            },
+            "nights": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            },
+            "plan": {
+              "enum": [
+                "refundable",
+                "non_refundable"
+              ]
+            },
+            "nightly_cents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "total_cents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "paid_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "payment_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "free_cancellation_until": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Full refund if cancelled at or before this instant; null on the non-refundable plan."
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "pending_rate_switch",
+                "cancelled"
+              ]
+            },
+            "rate_switch": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "pending",
+                        "accepted",
+                        "declined",
+                        "expired",
+                        "withdrawn"
+                      ]
+                    },
+                    "proposed_plan": {
+                      "const": "non_refundable"
+                    },
+                    "proposed_nightly_cents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "proposed_total_cents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "high_demand_nights": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                        "description": "Local date at the hotel, YYYY-MM-DD."
+                      },
+                      "maxItems": 366,
+                      "uniqueItems": true,
+                      "minItems": 1
+                    },
+                    "offered_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "resolved_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "proposed_plan",
+                    "proposed_nightly_cents",
+                    "proposed_total_cents",
+                    "high_demand_nights",
+                    "offered_at",
+                    "expires_at",
+                    "resolved_at",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cancellation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "rule": {
+                      "enum": [
+                        "free",
+                        "late",
+                        "non_refundable"
+                      ]
+                    },
+                    "refund_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "fee_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "rule",
+                    "refund_cents",
+                    "fee_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "charge_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 100
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 1000
+            }
+          },
+          "required": [
+            "id",
+            "account_id",
+            "confirmation",
+            "hotel_id",
+            "hotel_name",
+            "city",
+            "check_in",
+            "check_out",
+            "nights",
+            "plan",
+            "nightly_cents",
+            "total_cents",
+            "paid_cents",
+            "payment_label",
+            "free_cancellation_until",
+            "status",
+            "rate_switch",
+            "cancellation",
+            "charge_ids",
+            "created_at",
+            "updated_at",
+            "history"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "reservation"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "roomline.rate_switch.decline",
+    "description": "Decline a pending rate-switch offer. The reservation stays confirmed on its Free cancellation rate and nothing more is charged.",
+    "read_only": false,
+    "scope": "roomline.rate_switch.decline",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "reservation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "reservation_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "roomline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reservation": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "account_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "confirmation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20
+            },
+            "hotel_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "hotel_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "city": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "check_in": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Local date at the hotel, YYYY-MM-DD."
+            },
+            "check_out": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Local date at the hotel, YYYY-MM-DD."
+            },
+            "nights": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            },
+            "plan": {
+              "enum": [
+                "refundable",
+                "non_refundable"
+              ]
+            },
+            "nightly_cents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "total_cents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "paid_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000,
+              "description": "Euro cents."
+            },
+            "payment_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "free_cancellation_until": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Full refund if cancelled at or before this instant; null on the non-refundable plan."
+            },
+            "status": {
+              "enum": [
+                "confirmed",
+                "pending_rate_switch",
+                "cancelled"
+              ]
+            },
+            "rate_switch": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "pending",
+                        "accepted",
+                        "declined",
+                        "expired",
+                        "withdrawn"
+                      ]
+                    },
+                    "proposed_plan": {
+                      "const": "non_refundable"
+                    },
+                    "proposed_nightly_cents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "proposed_total_cents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "high_demand_nights": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                        "description": "Local date at the hotel, YYYY-MM-DD."
+                      },
+                      "maxItems": 366,
+                      "uniqueItems": true,
+                      "minItems": 1
+                    },
+                    "offered_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "resolved_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "proposed_plan",
+                    "proposed_nightly_cents",
+                    "proposed_total_cents",
+                    "high_demand_nights",
+                    "offered_at",
+                    "expires_at",
+                    "resolved_at",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cancellation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "rule": {
+                      "enum": [
+                        "free",
+                        "late",
+                        "non_refundable"
+                      ]
+                    },
+                    "refund_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    },
+                    "fee_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000,
+                      "description": "Euro cents."
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "rule",
+                    "refund_cents",
+                    "fee_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "charge_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 100
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 1000
+            }
+          },
+          "required": [
+            "id",
+            "account_id",
+            "confirmation",
+            "hotel_id",
+            "hotel_name",
+            "city",
+            "check_in",
+            "check_out",
+            "nights",
+            "plan",
+            "nightly_cents",
+            "total_cents",
+            "paid_cents",
+            "payment_label",
+            "free_cancellation_until",
+            "status",
+            "rate_switch",
+            "cancellation",
+            "charge_ids",
+            "created_at",
+            "updated_at",
+            "history"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "reservation"
+      ],
+      "additionalProperties": false
+    }
+  }
+]
