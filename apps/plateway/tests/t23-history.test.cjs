@@ -31,10 +31,10 @@ test('History a seeded cancellation must match its refund record and the refund 
 });
 
 test('History an order cannot be changed at a time before its recorded history', () => {
-  const f = fixture({ now: '2026-12-03T11:30:00-05:00' });
+  const f = fixture({ now: '2026-11-17T12:00:00-05:00' });
   assert.equal(f.call('plateway.orders.cancel.preview', { order_id: 'o-11' }).status, 'invalid_state');
   const before = structuredClone(f.data());
-  assert.equal(f.event({ event_id: 'h-1', at: '2026-12-03T11:40:00-05:00', operation: 'order.accepted', payload: { order_id: 'o-11' } }).status, 'invalid_event');
+  assert.equal(f.event({ event_id: 'h-1', at: '2026-11-17T12:10:00-05:00', operation: 'order.accepted', payload: { order_id: 'o-11' } }).status, 'invalid_event');
   assert.deepEqual(f.data(), before);
   assert.equal(f.call('plateway.orders.rate', { order_id: 'o-10', stars: 4 }).status, 'committed');
 });

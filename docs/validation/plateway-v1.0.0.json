@@ -1,25 +1,50 @@
 {
   "schema": "plateway.validation.v1",
-  "checked_on": "2026-11-23",
+  "checked_on": "2026-11-24",
   "app": {
     "app_id": "plateway",
     "version": "1.0.0",
-    "package_sha256": "0ab2550c46b8f95d358cb45c24b3f2154cc44f5db1c3e2460256fcfb77ff4c3d"
+    "package_sha256": "0affa3f72a99af8fbe37ef8065e0b62879eae0b9fcbf4ace151b0247d5d36bb4"
   },
   "runtime_version": "1.6.0",
   "core_api_version": "1.2.0",
   "receiver": "mail 1.3.0",
-  "base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
-  "standalone_copy": "passed (apps/plateway, runtime/, examples/apps/mail, package.json)",
+  "base_commit": "ae889d2cbbfc72242fc5e70b877f3f2a2f029618",
+  "registry": {
+    "file": "apps.registry.json",
+    "entry": {
+      "app_id": "plateway",
+      "version": "1.0.0",
+      "path": "apps/plateway"
+    },
+    "initial_time": "2026-11-18T09:00:00-08:00",
+    "fixture_clock": "2026-11-18T12:00:00-05:00",
+    "shared_test_changed": "runtime/tests/clock.test.cjs: seven → eight Apps"
+  },
+  "fixture": {
+    "records": 94,
+    "orders": 52,
+    "history_orders": 40,
+    "history_range": [
+      "2025-01-01",
+      "2026-07"
+    ],
+    "task_timeline_from": "2026-01-01",
+    "clock": "2026-11-18T12:00:00-05:00",
+    "generator": "dev/generate-history.cjs",
+    "generator_seed": "2025"
+  },
+  "standalone_copy": "passed (apps/plateway, runtime/, examples/apps/mail, package.json): verifier, business tests, fixture and generator checks, MCP and Mail scripts",
   "runs": [
     {
       "node": "v18.20.8",
       "business_tests": {
-        "total": 109,
-        "passed": 109
+        "total": 111,
+        "passed": 111
       },
       "example": "passed",
       "fixture_check": "passed",
+      "history_generator_check": "passed",
       "public_verifier": {
         "passed": true,
         "checks": 50,
@@ -42,16 +67,30 @@
         "passed": true,
         "checks": 38
       },
-      "full_suite": "22/22 stages passed"
+      "browser_acceptance": {
+        "passed": true,
+        "checks": 74,
+        "restricted_checks": 15,
+        "browser": "chromium 141.0.7390.37",
+        "playwright": "1.56.1",
+        "browser_timezone": "Europe/London"
+      },
+      "full_suite": "22/22 stages passed. Report: .artifacts/summary.json",
+      "web_host_tests": {
+        "total": 4,
+        "passed": 4
+      },
+      "shared_browser_job": "passed (mail, calendar, files, messages, notes, tasks, contacts)"
     },
     {
-      "node": "v22.14.0",
+      "node": "v22.23.5",
       "business_tests": {
-        "total": 109,
-        "passed": 109
+        "total": 111,
+        "passed": 111
       },
       "example": "passed",
       "fixture_check": "passed",
+      "history_generator_check": "passed",
       "public_verifier": {
         "passed": true,
         "checks": 50,
@@ -74,16 +113,30 @@
         "passed": true,
         "checks": 38
       },
-      "full_suite": "22/22 stages passed"
+      "browser_acceptance": {
+        "passed": true,
+        "checks": 74,
+        "restricted_checks": 15,
+        "browser": "chromium 141.0.7390.37",
+        "playwright": "1.56.1",
+        "browser_timezone": "Europe/London"
+      },
+      "full_suite": "22/22 stages passed. Report: .artifacts/summary.json",
+      "web_host_tests": {
+        "total": 4,
+        "passed": 4
+      },
+      "shared_browser_job": "passed (mail, calendar, files, messages, notes, tasks, contacts)"
     },
     {
       "node": "v25.8.1",
       "business_tests": {
-        "total": 109,
-        "passed": 109
+        "total": 111,
+        "passed": 111
       },
       "example": "passed",
       "fixture_check": "passed",
+      "history_generator_check": "passed",
       "public_verifier": {
         "passed": true,
         "checks": 50,
@@ -106,7 +159,20 @@
         "passed": true,
         "checks": 38
       },
-      "full_suite": "22/22 stages passed"
+      "browser_acceptance": {
+        "passed": true,
+        "checks": 74,
+        "restricted_checks": 15,
+        "browser": "chromium 141.0.7390.37",
+        "playwright": "1.56.1",
+        "browser_timezone": "Europe/London"
+      },
+      "full_suite": "22/22 stages passed. Report: .artifacts/summary.json",
+      "web_host_tests": {
+        "total": 4,
+        "passed": 4
+      },
+      "shared_browser_job": "passed (mail, calendar, files, messages, notes, tasks, contacts)"
     }
   ],
   "public_verifier_checks": [
@@ -256,9 +322,103 @@
     "No Mail record is created",
     "The notice stays in the Plateway log"
   ],
+  "browser_acceptance_checks": [
+    "The shared Host serves the App-owned Plateway page",
+    "The controller names all 16 business tools",
+    "Business discovery lists the 16 tools and no management operation",
+    "Times are shown in the account time zone (America/New_York), not the browser zone (Europe/London), and an active order shows its expected arrival",
+    "Every order in the account, including the 2025 history, is listed",
+    "Text search shows exactly the restaurants the App returns for \"curry\"",
+    "The cuisine filter narrows the list to Masa Verde",
+    "The list says how many restaurants deliver to the chosen address",
+    "Switching to the Office address lists only the restaurants that deliver there and says so",
+    "A closed restaurant says when it opens, that delivery can be scheduled, and shows its weekly hours",
+    "An open restaurant says when it closes",
+    "Adding without the required option shows the rule and writes nothing",
+    "Add to cart commits the dish with its options, quantity and label",
+    "At exactly 12:00, with the Office address (45-minute estimate), “Schedule for later” suggests the first time the App accepts, not 12:45",
+    "The + button raises the quantity in the App",
+    "The − button lowers it again, and the line buttons are named after the dish",
+    "When the refresh after a change fails, the page still shows the changed quantity from the App’s answer",
+    "Until a refresh succeeds, further changes are refused and nothing is written",
+    "While a line is being edited, the checkout form and Preview total stay on screen",
+    "A 41-character label is refused in the form and nothing is written",
+    "Editing a cart line changes its quantity and label in the App",
+    "Label text is displayed as text and never executed",
+    "Removing the line empties the cart in the App",
+    "Undo puts the removed line back with its options, quantity and label",
+    "The banner alone describes the unconfirmed add; the dish form only points to it",
+    "An add whose response is dropped after the commit reports the lost connection and offers Retry, not success",
+    "While that request is unanswered, a new add waits and nothing is written",
+    "Retry replays the stored receipt: the page says the add had already gone through, and the cart holds one line",
+    "A dish from another restaurant than the cart’s shows the conflict and Clear cart in place of Add as soon as it opens, writing nothing",
+    "Clear cart empties the cart and keeps the dish open with Add available again",
+    "Adding the dish after clearing leaves only that dish",
+    "The cart warns about the small-order fee below $12.00",
+    "The expired card is marked and cannot be chosen",
+    "Preview shows every line subtotal, each fee (including the small-order fee), tax once, tip and the total as the App computes them, with the address and card, and stores nothing",
+    "Editing the tip removes the total on screen at once",
+    "One click on Preview after editing the tip shows the new total",
+    "Changing the address while a preview is pending discards that preview",
+    "Place order creates exactly one order to the previewed address, charged the previewed total",
+    "The cart is empty after the order",
+    "After a reload the page reopens Orders and still shows the new order",
+    "Before Refresh the page still shows the earlier state",
+    "After an Infra acceptance, Refresh shows the order as preparing",
+    "The cancel preview of a preparing order shows the App refund and the amount kept",
+    "Keep order closes the preview and changes nothing",
+    "Cancelling the scheduled order previews a full refund",
+    "Confirming cancels the order with one full refund",
+    "The cancelled order reads in plain words and shows the net charge",
+    "A status message stays on the screen where it happened, and Account marks the expired card",
+    "Choosing “Schedule for later” suggests exactly the first time the App accepts (Office, 45-minute estimate)",
+    "The suggested time previews without an error",
+    "Scheduling shows the restaurant hours for the chosen day",
+    "A scheduled preview shows the App delivery and release times in New York time",
+    "Scheduled checkout creates a scheduled order for Thursday 19:00 New York time",
+    "After an order (with no reload in between), checkout starts again from as soon as possible with no tip",
+    "A declining card shows payment_failed and creates no order",
+    "After a price change and Refresh, the old preview is refused as stale_preview and nothing is placed",
+    "A change the page has not read is refused as stale_version, shown apart from stale_preview, and nothing is placed",
+    "A placement lost before it reached Plateway and retried after another change is reported as not applied, and nothing is placed",
+    "The dropped response came after the commit: the App already holds the new order",
+    "With the following refresh failing too, the page still shows Retry and Dismiss and no longer offers Place",
+    "Retry after Refresh returns the stored receipt (duplicate) and the order exists once, charged once",
+    "Reporting a missing item on the delivered order refunds that line in full",
+    "The timeline and refunds name the dish rather than an internal line ID",
+    "Rating the delivered order stores the stars and the comment",
+    "An open report form closes once its 48-hour window has passed, and the page says when reporting closed",
+    "A reorder interrupted after its first dish keeps the rest waiting behind the banner instead of finishing silently",
+    "Retry finishes the reorder: every dish once, and the order’s Office address is kept for checkout",
+    "After its 48-hour window an order offers no Report control and says when reporting closed, while Rate stays",
+    "With another restaurant’s dishes in the cart, the order shows the conflict and Clear cart instead of Reorder",
+    "After clearing, Reorder puts the same dishes, options, quantities and labels in the cart, opens it and switches checkout to the order’s Home address",
+    "Checking out a closed restaurant as soon as possible explains when it opens and suggests scheduling",
+    "A direct management request from the authenticated business session is refused (403)",
+    "At 390 px every navigation tab is visible and there is no horizontal overflow in Orders, a restaurant with a dish open, Cart and Account",
+    "No JavaScript errors and no console or CSP errors beyond the induced network failures"
+  ],
+  "browser_restricted_policy_checks": [
+    "An add that committed but got a Host error without an App status keeps its request in the banner instead of allowing a fresh add",
+    "After the policy drops orders.rate, Refresh removes the open rating form and the Rate control while the other order actions stay",
+    "Retry resends the original request ID and version unchanged",
+    "That add, retried after the seed was reloaded, is reported as unconfirmed, not as not applied",
+    "A forced orders.rate call is refused (403) and the order stays unrated",
+    "Clear cart interrupted after its first removal waits behind the banner with the rest of the cart still there",
+    "Retry finishes clearing the cart and says so; Add is available again",
+    "Clear cart rereads the cart first: when another client has already made it compatible, nothing is removed and Add is offered",
+    "Retry of a reorder whose lost answer was “sold out” skips that dish, adds the rest and names the skipped dish with its reason",
+    "Clear cart for a reorder whose dishes are all sold out now leaves the cart as it is and says why",
+    "A Clear cart click based on an outdated view removes nothing when another client has replaced the cart, and says so",
+    "Clear cart never removes a dish the page did not show: after another client adds to the same restaurant’s cart, nothing is removed",
+    "Nor a serving it did not show: after another client raises a quantity, nothing is removed",
+    "A sold-out dish is not offered Clear cart, only “Sold out right now”",
+    "No JavaScript errors and no console or CSP errors beyond the induced refusals"
+  ],
   "not_run": [
     "Independent base validator selected by maintainers (PR check base-runtime-compatibility)",
     "Maintainers' human review of realism and provenance",
-    "Trial runs with an Agent"
+    "Trial runs with an Agent",
+    "Browser acceptance in CI: the shared browser job is fixed to the seven personal Apps; run locally with node apps/plateway/tests/web.browser.cjs"
   ]
 }

@@ -61,14 +61,14 @@ async function main() {
       const start = (await s.snap()).snapshot.data;
       const counts = async () => { const d = (await s.snap()).snapshot.data; return [d.orders.find(o => o.id === 'o-12').status, d.orders.find(o => o.id === 'o-12').refunds.length, d.notices.length]; };
       const listed = async () => (await s.read('plateway.orders.list', {})).orders.find(o => o.id === 'o-12').status;
-      await s.advance('2026-12-04T18:16:00-05:00');
+      await s.advance('2026-11-18T18:46:00-05:00');
       equal('T07 one minute after release orders.get shows submitted', (await s.read('plateway.orders.get', { order_id: 'o-12' })).order.status, 'submitted');
       equal('T07 one minute after release orders.list shows submitted', await listed(), 'submitted');
       const fresh = await s.read('plateway.orders.cancel.preview', { order_id: 'o-12' });
       check('T07 a new cancel preview yields a new token', fresh.status === 'ok' && fresh.token !== original.token);
       equal('T07 the original token with a fresh request and the current version is stale', (await s.write('plateway.orders.cancel.confirm', { order_id: 'o-12', token: original.token })).status, 'stale_preview');
       equal('T07 the stored order, refunds and notices are unchanged after release', await counts(), ['scheduled', 0, start.notices.length]);
-      await s.advance('2026-12-04T18:36:00-05:00');
+      await s.advance('2026-11-18T19:06:00-05:00');
       const projected = (await s.read('plateway.orders.get', { order_id: 'o-12' })).order;
       equal('T07 21 minutes after release orders.get shows cancelled, not accepted, with the full refund', [projected.status, projected.cancellation.reason, projected.refunded_cents], ['cancelled', 'not_accepted', projected.charge.amount_cents]);
       equal('T07 21 minutes after release orders.list shows cancelled', await listed(), 'cancelled');
@@ -79,27 +79,27 @@ async function main() {
       const stored = await s.order('o-12');
       const data = (await s.snap()).snapshot.data;
       equal('T07 both transitions persist with one full refund', [stored.status, stored.refunds.map(r => r.amount_cents)], ['cancelled', [stored.charge.amount_cents]]);
-      equal('T07 one cancellation notice dated release + 20 minutes', data.notices.slice(start.notices.length).map(n => [n.kind, n.order_id, n.at]), [['notice.order_cancelled', 'o-12', '2026-12-04T18:35:00-05:00']]);
-      equal('T07 the release is dated at its time', stored.timeline.filter(t => t.note === 'Released to the restaurant').map(t => t.at), ['2026-12-04T18:15:00-05:00']);
+      equal('T07 one cancellation notice dated release + 20 minutes', data.notices.slice(start.notices.length).map(n => [n.kind, n.order_id, n.at]), [['notice.order_cancelled', 'o-12', '2026-11-18T19:05:00-05:00']]);
+      equal('T07 the release is dated at its time', stored.timeline.filter(t => t.note === 'Released to the restaurant').map(t => t.at), ['2026-11-18T18:45:00-05:00']);
     }
     {
       const s = await session('t06');
       await s.write('plateway.cart.add_item', { item_id: 'mi-1', option_ids: ['op-1'], quantity: 1 });
       const preview = await s.read('plateway.checkout.preview', CHECKOUT);
       const placed = await s.write('plateway.orders.place', { ...CHECKOUT, token: preview.token });
-      equal('T06 the acceptance limit is 20 minutes after submission', (await s.order(placed.order_id)).accept_by, '2026-12-04T11:50:00-05:00');
-      equal('T06 an acceptance at exactly the limit commits', (await s.event({ event_id: 't06-accept', at: '2026-12-04T11:50:00-05:00', operation: 'order.accepted', payload: { order_id: placed.order_id } })).status, 'committed');
+      equal('T06 the acceptance limit is 20 minutes after submission', (await s.order(placed.order_id)).accept_by, '2026-11-18T12:20:00-05:00');
+      equal('T06 an acceptance at exactly the limit commits', (await s.event({ event_id: 't06-accept', at: '2026-11-18T12:20:00-05:00', operation: 'order.accepted', payload: { order_id: placed.order_id } })).status, 'committed');
       const stored = await s.order(placed.order_id);
       equal('T06 the timer applies first: cancelled, not accepted, one full refund', [stored.status, stored.cancellation.reason, stored.refunds.map(r => r.amount_cents)], ['cancelled', 'not_accepted', [stored.charge.amount_cents]]);
     }
     {
       const s = await session('t09');
-      const late = await s.event({ event_id: 't09-late', at: '2026-12-04T11:40:00-05:00', operation: 'order.accepted', payload: { order_id: 'o-5' } });
+      const late = await s.event({ event_id: 't09-late', at: '2026-11-18T12:10:00-05:00', operation: 'order.accepted', payload: { order_id: 'o-5' } });
       const after = await s.snap();
-      check('T09 a late acceptance commits at its at', late.status === 'committed' && after.snapshot.virtual_now === '2026-12-04T11:40:00-05:00');
+      check('T09 a late acceptance commits at its at', late.status === 'committed' && after.snapshot.virtual_now === '2026-11-18T12:10:00-05:00');
       equal('T09 the cancelled order stays cancelled', after.snapshot.data.orders.find(o => o.id === 'o-5').status, 'cancelled');
-      const unknown = await s.event({ event_id: 't09-unknown', at: '2026-12-04T11:41:00-05:00', operation: 'order.accepted', payload: { order_id: 'o-404' } });
-      const back = await s.event({ event_id: 't09-back', at: '2026-12-04T11:35:00-05:00', operation: 'order.accepted', payload: { order_id: 'o-11' } });
+      const unknown = await s.event({ event_id: 't09-unknown', at: '2026-11-18T12:11:00-05:00', operation: 'order.accepted', payload: { order_id: 'o-404' } });
+      const back = await s.event({ event_id: 't09-back', at: '2026-11-18T12:05:00-05:00', operation: 'order.accepted', payload: { order_id: 'o-11' } });
       const end = await s.snap();
       equal('T09 unknown-target and back-dated events are invalid_event', [unknown.status, back.status], ['invalid_event', 'invalid_event']);
       equal('T09 data, notices, version and clock are preserved', [end.snapshot.data, end.version, end.snapshot.virtual_now], [after.snapshot.data, after.version, after.snapshot.virtual_now]);
@@ -133,14 +133,14 @@ async function main() {
     {
       const s = await session('t16');
       const start = await s.snap(), seed = start.snapshot;
-      const ev = { event_id: 't16-pause', at: '2026-12-04T11:45:00-05:00', operation: 'restaurant.status_changed', payload: { restaurant_id: 'r-1', status: 'paused', reason: 'Kitchen closed for repairs' } };
+      const ev = { event_id: 't16-pause', at: '2026-11-18T12:15:00-05:00', operation: 'restaurant.status_changed', payload: { restaurant_id: 'r-1', status: 'paused', reason: 'Kitchen closed for repairs' } };
       const eventArgs = { expected_version: start.version, event: ev, bundle: structuredClone(seed.resources.bundle) };
       equal('T16 the event commits', (await s.infra.call('env.apply_event', eventArgs)).status, 'committed');
       const firstEvent = (await s.infra.call('env.event_status', { event_id: ev.event_id })).receipt;
       const { duplicate: eventDuplicate, ...replayedEvent } = await s.infra.call('env.apply_event', eventArgs);
       check('T16 an identical event and bundle under the same event ID are deduplicated', eventDuplicate === true);
       equal('T16 the replayed event receipt equals the original', replayedEvent, firstEvent);
-      equal('T16 changed content under the same event ID conflicts', (await s.infra.call('env.apply_event', { ...eventArgs, expected_version: await s.version(), event: { ...ev, at: '2026-12-04T11:50:00-05:00' } })).status, 'idempotency_conflict');
+      equal('T16 changed content under the same event ID conflicts', (await s.infra.call('env.apply_event', { ...eventArgs, expected_version: await s.version(), event: { ...ev, at: '2026-11-18T12:20:00-05:00' } })).status, 'idempotency_conflict');
       await s.write('plateway.cart.add_item', { item_id: 'mi-2', option_ids: ['op-7', 'op-10'], quantity: 1 });
       const old = await s.version();
       equal('T16 reset is ready', (await s.infra.call('env.reset', { expected_version: old })).status, 'ready');
@@ -157,19 +157,19 @@ async function main() {
     {
       const s = await session('t16-late');
       const fixture = (await s.snap()).snapshot.data;
-      equal('T16 the fixture loads five minutes after the scheduled release', (await s.infra.call('env.load_seed', { expected_version: await s.version(), data: fixture, virtual_now: '2026-12-04T18:20:00-05:00', request_id: 't16-seed-late' })).status, 'ready');
+      equal('T16 the fixture loads five minutes after the scheduled release', (await s.infra.call('env.load_seed', { expected_version: await s.version(), data: fixture, virtual_now: '2026-11-18T18:50:00-05:00', request_id: 't16-seed-late' })).status, 'ready');
       equal('T16 reads show the release', (await s.read('plateway.orders.get', { order_id: 'o-12' })).order.status, 'submitted');
       equal('T16 the stored order is still scheduled', (await s.order('o-12')).status, 'scheduled');
       await s.write('plateway.cart.add_item', { item_id: 'mi-1', option_ids: ['op-1'], quantity: 1 });
       const once = await s.order('o-12');
       await s.write('plateway.cart.add_item', { item_id: 'mi-1', option_ids: ['op-2'], quantity: 1 });
       const twice = await s.order('o-12');
-      equal('T16 at the same virtual time the next cart write persists the release once', [once.status, once.accept_by, once.timeline.filter(t => t.note === 'Released to the restaurant').length, twice.timeline.length], ['submitted', '2026-12-04T18:35:00-05:00', 1, once.timeline.length]);
-      equal('T16 the clock did not move', (await s.snap()).snapshot.virtual_now, '2026-12-04T18:20:00-05:00');
-      await s.advance('2026-12-04T19:30:00-05:00');
+      equal('T16 at the same virtual time the next cart write persists the release once', [once.status, once.accept_by, once.timeline.filter(t => t.note === 'Released to the restaurant').length, twice.timeline.length], ['submitted', '2026-11-18T19:05:00-05:00', 1, once.timeline.length]);
+      equal('T16 the clock did not move', (await s.snap()).snapshot.virtual_now, '2026-11-18T18:50:00-05:00');
+      await s.advance('2026-11-18T20:00:00-05:00');
       equal('T16 reset is ready after the clock moved', (await s.infra.call('env.reset', { expected_version: await s.version() })).status, 'ready');
       const back = (await s.snap()).snapshot;
-      equal('T16 reset restores the loaded seed and the virtual time given at load', [back.data, back.virtual_now], [fixture, '2026-12-04T18:20:00-05:00']);
+      equal('T16 reset restores the loaded seed and the virtual time given at load', [back.data, back.virtual_now], [fixture, '2026-11-18T18:50:00-05:00']);
     }
   } finally {
     await Promise.allSettled(clients.map(c => c.close()));

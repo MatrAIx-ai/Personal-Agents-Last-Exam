@@ -2,15 +2,16 @@
   "schema_version": "pale.dataset.v1",
   "dataset_id": "plateway-minimal",
   "version": "1.0.0",
-  "description": "Synthetic Plateway fixture for one account holder: six invented restaurants, 36 dishes with option groups and allergen declarations, ten past orders, one in-progress order and one scheduled order. For package validation and examples; not an evaluation task.",
+  "description": "Synthetic Plateway fixture for one account holder: six invented restaurants, 36 dishes with option groups and allergen declarations; in the task timeline (2026) ten past orders, one in-progress order and one scheduled order; before it, a generated order history from 2025-01-01. For package validation and examples; not an evaluation task.",
   "record_source_ids": [
-    "authored"
+    "authored",
+    "generated-history"
   ],
   "sources": [
     {
       "source_id": "authored",
       "kind": "synthetic",
-      "description": "Synthetic records authored for this package with AI assistance, checked by dev/check-fixture.cjs and reviewed by the contributor; no external collection and no generator script.",
+      "description": "Synthetic records of the task timeline (2026) authored for this package with AI assistance, checked by dev/check-fixture.cjs and reviewed by the contributor; no external collection.",
       "uri": null,
       "license": "MIT",
       "usage": "permitted",
@@ -22,11 +23,32 @@
         "seed": null,
         "parameters": {}
       }
+    },
+    {
+      "source_id": "generated-history",
+      "kind": "synthetic",
+      "description": "Synthetic order history from 2025-01-01 to 2026-07: 40 orders (receipts, refunds, two rejections by restaurants, two cancellations by the account holder, reported lines and ratings) and their notices, with IDs in a separate h series such as o-h1 and n-h1, outside the runtime counters. Produced deterministically by dev/generate-history.cjs, which replays the package's own tools and events (cart, checkout preview and place, accept, pick up, deliver, reject, cancel, report, rate) with a fixed seed, so every record is one the App itself wrote. Each order goes to Office on weekday lunchtimes and to Home otherwise, from a restaurant that delivers there and is open, at varied times, ASAP, on either of the two cards valid at the time; reports and ratings follow within a few hours of delivery; rating texts, receipt labels and rejection reasons are constants in the script. Checked by dev/check-fixture.cjs, which also regenerates it byte for byte.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "script",
+        "tool": "dev/generate-history.cjs",
+        "tool_version": "1",
+        "seed": "2025",
+        "parameters": {
+          "from": "2025-01",
+          "to": "2026-07",
+          "orders_per_month": "1-3",
+          "seed": "2025"
+        }
+      }
     }
   ],
   "transformations": [],
   "expected_counts": {
-    "records": 54,
+    "records": 94,
     "assets": 0
   },
   "quality_policy": {

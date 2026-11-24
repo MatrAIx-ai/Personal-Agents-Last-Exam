@@ -894,7 +894,7 @@
   },
   {
     "name": "plateway.cart.add_item",
-    "description": "Add a dish to the cart with its option IDs, a quantity of 1 to 10 and an optional label of up to 40 characters (Unicode code points) shown on the receipt (never sent to the restaurant; it changes no dish). The cart holds one restaurant's dishes.",
+    "description": "Add a dish to the cart with its option IDs, a quantity of 1 to 10 and an optional label of up to 40 characters shown on the receipt (never sent to the restaurant; it changes no dish). The 40-character limit counts Unicode code points; the schema's maxLength of 80 counts UTF-16 units so that 40 characters outside the Basic Multilingual Plane fit, and a longer label is refused by the App with invalid_arguments. The cart holds one restaurant's dishes.",
     "scope": "plateway.write",
     "resource_target": "cart",
     "read_only": false,
@@ -1100,7 +1100,7 @@
   },
   {
     "name": "plateway.cart.update_item",
-    "description": "Change a cart line's quantity, options or label.",
+    "description": "Change a cart line's quantity, options or label. The label limit is 40 Unicode code points; the schema's maxLength of 80 counts UTF-16 units, and a longer label is refused by the App with invalid_arguments.",
     "scope": "plateway.write",
     "resource_target": "cart",
     "read_only": false,

@@ -48,12 +48,20 @@ function place(ctx, data, args) {
   return { order_id: order.id, order: view(data, order) };
 }
 
+function newerId(a, b) {
+  const na = /^o-(\d+)$/.exec(a), nb = /^o-(\d+)$/.exec(b);
+  if (na && nb && Number(na[1]) !== Number(nb[1])) return Number(nb[1]) - Number(na[1]);
+  if (na && nb) return a < b ? 1 : a > b ? -1 : 0;
+  if (na || nb) return na ? -1 : 1;
+  return a < b ? 1 : a > b ? -1 : 0;
+}
+
 function list(ctx, data, args) {
   if (args.restaurant_id && !data.restaurants.some(r => r.id === args.restaurant_id)) fail('not_found', 'Restaurant ' + args.restaurant_id + ' does not exist.');
   const inRange = o => (!args.from || ms(o.placed_at) >= ms(args.from)) && (!args.to || ms(o.placed_at) <= ms(args.to));
   const orders = data.orders
     .filter(o => (!args.status || o.status === args.status) && (!args.restaurant_id || o.restaurant_id === args.restaurant_id) && inRange(o))
-    .sort((a, b) => ms(b.placed_at) - ms(a.placed_at) || Number(b.id.slice(2)) - Number(a.id.slice(2)))
+    .sort((a, b) => ms(b.placed_at) - ms(a.placed_at) || newerId(a.id, b.id))
     .map(o => summary(data, o));
   return { orders };
 }

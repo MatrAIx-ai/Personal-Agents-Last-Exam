@@ -6,6 +6,7 @@ const { compile } = require('../tests/schema-validator.cjs');
 const plugin = require('../plugin.cjs');
 const { totals } = require('../src/pricing.cjs');
 const { localParts, ms, toIso, isOpen } = require('../src/time.cjs');
+const { build, authored, HISTORY } = require('./generate-history.cjs');
 
 const ALLERGENS = new Set(['milk', 'egg', 'fish', 'crustacean shellfish', 'tree nuts', 'peanuts', 'wheat', 'soybeans', 'sesame']);
 const BRANDS = /\b(doordash|door dash|uber ?eats|grubhub|postmates|seamless|instacart|deliveroo|just eat|caviar|mcdonald'?s|starbucks|chipotle|domino'?s|pizza hut|subway|kfc|taco bell|panera|wendy'?s|burger king|dunkin|chick-fil-a|shake shack|sweetgreen|five guys|panda express|olive garden|papa john'?s|popeyes|in-n-out|cheesecake factory|p\.?f\.? chang'?s|nando'?s|wagamama|visa|mastercard|master card|american express|amex|discover|jcb|unionpay|diners club|maestro)\b/i;
@@ -21,12 +22,23 @@ function strings(value, out = []) {
   return out;
 }
 
-function check(seed, { clock, binding, scenario, dataset, bytes }) {
+function check(seed, { clock, binding, scenario, dataset, bytes, raw }) {
   const problems = [];
   const expect = (ok, message) => { if (!ok) problems.push(message); };
   const seedValid = compile(require('../schemas/seed.schema.json'), path.join(root, 'schemas'));
   expect(seedValid(seed), 'the seed does not match its schema');
   try { plugin.validateSeed({ app_id: 'plateway', virtual_now: clock.initial_time, binding }, seed); } catch (e) { problems.push('validateSeed: ' + e.message); }
+  const history = seed.orders.filter(o => HISTORY.test(o.id));
+  const closedAtPlacement = seed.orders.filter(o => { const r = seed.restaurants.find(x => x.id === o.restaurant_id); return r && !isOpen(r, ms(o.mode === 'scheduled' ? o.release_at : o.placed_at), seed.time_zone); }).map(o => o.id);
+  expect(closedAtPlacement.length === 0, 'every order was placed (or released) while its restaurant was open' + (closedAtPlacement.length ? ': ' + closedAtPlacement.join(', ') : ''));
+  expect(history.length >= 40, 'at least forty generated history orders');
+  const canonical = JSON.stringify(seed, null, 2) + '\n';
+  expect(JSON.stringify(build(seed).out, null, 2) + '\n' === canonical, 'the generated history matches dev/generate-history.cjs byte for byte');
+  if (raw !== undefined) expect(raw === canonical, 'the fixture file is the canonical serialisation of the seed');
+  expect(seed.notices.every(n => HISTORY.test(n.id) === HISTORY.test(n.order_id)), 'history notices belong to history orders');
+  const live = /\b(?:o|ol|rf|n)-\d+\b/;
+  const historyText = [...history.flatMap(o => o.timeline.map(t => t.note)), ...seed.notices.filter(n => HISTORY.test(n.id)).flatMap(n => [n.title, n.body])];
+  expect(historyText.every(t => !live.test(t)), 'history records name only history IDs');
   const now = ms(clock.initial_time);
   const today = localParts(now, seed.time_zone);
 
@@ -59,11 +71,11 @@ function check(seed, { clock, binding, scenario, dataset, bytes }) {
   const declared = seed.dishes.flatMap(d => [d.allergens, ...d.option_groups.flatMap(g => g.options.map(o => o.allergens))]).flatMap(a => [...a.contains, ...a.may_contain]);
   expect(declared.every(a => ALLERGENS.has(a)), 'only the nine listed allergens');
 
-  const past = seed.orders.filter(o => PAST.has(o.status) && ms(o.placed_at) < now);
-  expect(past.length === 10, 'ten past orders');
+  const past = seed.orders.filter(o => PAST.has(o.status) && ms(o.placed_at) < now && !HISTORY.test(o.id));
+  expect(past.length === 10, 'ten past orders in the task timeline');
   expect(past.every(o => o.lines.length > 0 && o.charge.amount_cents > 0), 'past orders carry receipts');
   expect(past.some(o => o.lines.some(l => l.label)), 'a labelled line');
-  expect(seed.orders.filter(o => o.rating).length === 4, 'four ratings');
+  expect(seed.orders.filter(o => o.rating && !HISTORY.test(o.id)).length === 4, 'four ratings in the task timeline');
   expect(seed.orders.filter(o => o.status === 'scheduled').length === 1, 'one scheduled order');
   expect(past.some(o => o.cancellation && o.cancellation.reason === 'rejected'), 'a rejected order');
   expect(past.some(o => o.lines.some(l => l.report)), 'a reported line');
@@ -78,7 +90,10 @@ function check(seed, { clock, binding, scenario, dataset, bytes }) {
   }
 
   const all = strings(seed);
-  expect(all.filter(s => ISO.test(s)).every(s => localParts(ms(s), seed.time_zone).date >= '2026-01-01'), 'every date on or after 2026-01-01');
+  const dates = all.filter(s => ISO.test(s)).map(s => localParts(ms(s), seed.time_zone).date).sort();
+  expect(dates[0] >= '2025-01-01' && dates[0] < '2025-02-01', 'history starts in January 2025');
+  const timeline = strings(authored(seed)).filter(s => ISO.test(s));
+  expect(timeline.every(s => localParts(ms(s), seed.time_zone).date >= '2026-01-01'), 'every task-timeline date on or after 2026-01-01');
   expect(all.filter(s => ISO.test(s)).every(s => s.slice(-6) === toIso(ms(s), seed.time_zone).slice(-6)), 'every time written with the zone offset in force');
   expect(bytes < MIB, 'fixture under 1 MiB');
   expect(!all.some(s => BRANDS.test(s)), 'no real brands');
@@ -92,7 +107,7 @@ function load() {
     seed: read('fixtures/minimal.json'),
     options: {
       clock: read('fixtures/clock.json'), binding: read('fixtures/binding.json'), scenario: read('examples/scenario.json'),
-      dataset: read('contribution/dataset.json'), bytes: fs.statSync(path.join(root, 'fixtures/minimal.json')).size,
+      dataset: read('contribution/dataset.json'), bytes: fs.statSync(path.join(root, 'fixtures/minimal.json')).size, raw: fs.readFileSync(path.join(root, 'fixtures/minimal.json'), 'utf8'),
     },
   };
 }

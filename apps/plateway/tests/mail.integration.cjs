@@ -101,9 +101,9 @@ async function main(root, opened) {
     const inbox = await loadMail(run);
     const p = await loadPlateway(run, true);
     const placed = await p.order();
-    await p.event('order.accepted', '2026-12-04T11:34:00-05:00', { order_id: placed.order_id });
-    await p.event('order.picked_up', '2026-12-04T11:52:00-05:00', { order_id: placed.order_id });
-    await p.event('order.delivered', '2026-12-04T12:08:00-05:00', { order_id: placed.order_id });
+    await p.event('order.accepted', '2026-11-18T12:04:00-05:00', { order_id: placed.order_id });
+    await p.event('order.picked_up', '2026-11-18T12:22:00-05:00', { order_id: placed.order_id });
+    await p.event('order.delivered', '2026-11-18T12:38:00-05:00', { order_id: placed.order_id });
     const snapshot = await p.snapshot();
     const notices = sender.pending(snapshot);
     equal('Only the run notices are pending, not seeded history', notices.map(n => n.kind), ['notice.order_placed', 'notice.order_accepted', 'notice.order_delivered']);

@@ -6,6 +6,7 @@ const plugin = require('../plugin.cjs');
 const tools = require('../tools.json');
 
 const APP = require('../app.json').app_id;
+const TEST_CLOCK = '2026-12-04T11:30:00-05:00';
 const root = path.resolve(__dirname, '..');
 const seedValid = compile(require('../schemas/seed.schema.json'), path.join(root, 'schemas'));
 const eventValid = compile(require('../schemas/events.schema.json'), path.join(root, 'schemas'));
@@ -17,7 +18,7 @@ function fixture({ seed, now, binding } = {}) {
   let data = structuredClone(seed ?? require('../fixtures/minimal.json'));
   const ctx = {
     app_id: APP, run_id: 'unit', role: 'agent',
-    virtual_now: now ?? require('../fixtures/clock.json').initial_time,
+    virtual_now: now ?? (seed ? TEST_CLOCK : require('../fixtures/clock.json').initial_time),
     binding: structuredClone(binding ?? require('../fixtures/binding.json')),
   };
   let revision = 0, requests = 0;
@@ -71,4 +72,4 @@ function fixture({ seed, now, binding } = {}) {
     },
   };
 }
-module.exports = { fixture };
+module.exports = { fixture, TEST_CLOCK };
