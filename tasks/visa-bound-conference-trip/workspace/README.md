@@ -1,6 +1,6 @@
 # Workspace seeds: visa-bound conference trip (#49)
 
-These are the starting records for Mingyu Zhao's five workspace Apps at the session-1 snapshot, **2027-02-08T20:30:00-06:00**. They also include the mail that arrives later in the scenario. The source of truth is the approved proposal (`proposals/task/visa-bound-conference-trip.md`, commit a3167a3). The texts are ported from the v6.1 pilot (`manual-test/v6.1/session1-prompt.txt`). Where the pilot and the proposal disagree, the proposal wins.
+These are the starting records for Mingyu Zhao's five workspace Apps (plus the Roomline hotel account in the binding) at the session-1 snapshot, **2027-02-08T20:30:00-06:00**. They also include the mail that arrives later in the scenario. The source of truth is the approved proposal (`proposals/task/visa-bound-conference-trip.md`, commit a3167a3). The texts are ported from the v6.1 pilot (`manual-test/v6.1/session1-prompt.txt`). Where the pilot and the proposal disagree, the proposal wins.
 
 Everything here is fictional: the persona, North Plains University (NPU), SCDA, Northline (a U.S. carrier), Aeris (a non-U.S. carrier) and every person. The immigration documents are SPECIMEN text with no passport, visa, SEVIS or account numbers. All addresses use reserved `example.com`, `example.org` or `example.net` domains. Dated history starts in 2026-05.
 
@@ -27,7 +27,7 @@ Next it calls the public runtime: `env.load_seed` with the asset bundle, then `e
 | :--- | :--- |
 | `build.cjs` | Single source for all content, with `--check` for drift. |
 | `validate.cjs` | Validation against a checkout (see above). |
-| `binding.json` | Six people: `person-mingyu`, `person-hartmann`, `person-hao`, `person-jordan`, `person-priya` and `person-lin`. Five accounts owned by `person-mingyu`: `mail-mingyu`, `calendar-mingyu`, `files-mingyu`, `notes-mingyu` and `contacts-mingyu`. `objects` lists every object ID per App. Mail's `event_ref` links resolve through `objects.calendar`. |
+| `binding.json` | Six people: `person-mingyu`, `person-hartmann`, `person-hao`, `person-jordan`, `person-priya` and `person-lin`. Six accounts owned by `person-mingyu`: `mail-mingyu`, `calendar-mingyu`, `files-mingyu`, `notes-mingyu`, `contacts-mingyu` and the Roomline hotel account `roomline-mingyu`. `objects` lists every object ID per App. Mail's `event_ref` links resolve through `objects.calendar`. |
 | `mail.seed.json` | Mail (`examples/apps/mail`), 25 inbox messages (see Mail below). |
 | `mail-timeline.json` | 10 messages that arrive after the snapshot. Each is an `env.apply_event` event with operation `mail.deliver`, plus `kind`, `condition`, `rule` and `placeholders`. |
 | `calendar.seed.json` | Calendar (`examples/apps/calendar`), 61 events from 2027-01-19 to 2027-06-10, in America/Chicago (the SCDA items are in Europe/Paris). |
@@ -97,7 +97,7 @@ These facts belong to other environments or to the scenario script. No App seed 
 
 - **Calendar alerts.** The Calendar seed schema has no alert or reminder field, so Mingyu's own TA alerts cannot be marked; no event here is assistant-created. Alerts and the delivery log come from #191.
 - **Flights (PaleAir #69).** Not here: flight search results, fare brands (BASIC or FLEX), the ON HOLD 3-D Secure booking and its release at 2027-02-09T20:40:00-06:00, the NL 95R change in the booking itself, and the Northline sell-out from 2027-03-13T00:00:00-06:00.
-- **Hotels (task-owned fixture).** Not here: hotel search, refundable and non-refundable rates, and the pending switch to a non-refundable rate.
+- **Hotels.** In the task-owned Roomline App (`../apps/hotel/`), not in these seeds; the binding includes its account `roomline-mingyu`.
 - **Portals (#192).** Not here: the German and French consulate slot lists (German slots before the qual from 2027-03-04, and the first slot after it at 2027-03-31T09:00:00-05:00), consulate booking, the ISSO travel-signature request, ConfDesk registration (SCDA27-R-0388 in the reference) and `letter.request_correction`.
 - **Out of scope.** Rail (Mingyu buys the train himself) and Amazon order history for the session-3 USB-C hub. Only the shipping mail `msg-amazon-hub` exists here.
 - **Scenario script.** Mingyu's session messages, the session-2b payment authority and alert budget, and the user model's responses.

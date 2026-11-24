@@ -80,7 +80,7 @@ Rive Gauche, Pension Isarblick and their prices come from the pilot texts. A rea
 ## Limitations
 
 - One room, one guest per booking. No modification tool: change a stay by cancelling and booking again (the pilot's `hotels.modify` is not provided).
-- In the pilot script the refundable rate for 04-29 was sold out and an unconfirmed request booked nothing. Here, as the task plan describes, the refundable stay is booked and only the switch is pending.
+- As in the pilot, the refundable rate on a high-demand night is sold out: an unconfirmed request books nothing and charges nothing.
 - Offers expire, prices change and nights sell out only when Infra applies their events. A confirm after `expires_at` is refused even if no sweep has run.
 - Payment labels are opaque. Charges and refunds are recorded here, not posted to a card or bank App. Roomline sends no mail or push notices.
 - No GUI. Reviewers read reservations through the Agent tools or `env.snapshot`.

@@ -62,6 +62,9 @@ const PEOPLE = [
 ];
 const OWNER = 'person-mingyu';
 const ACCOUNT = {mail: 'mail-mingyu', calendar: 'calendar-mingyu', files: 'files-mingyu', notes: 'notes-mingyu', contacts: 'contacts-mingyu'};
+// Task-owned Apps: the account is bound here; its seed is the App's own fixture
+// (Roomline: apps/hotel/fixtures/minimal.json, account roomline-mingyu).
+const TASK_ACCOUNTS = [{app_id: 'roomline', account_id: 'roomline-mingyu', owner_person_id: OWNER}];
 const ME = 'mingyu.zhao@npu.example.org';
 const ADDR = {
   hartmann: 'elise.hartmann@npu.example.org',
@@ -690,7 +693,7 @@ function build() {
     notes: notes.notes.map(x => x.id), contacts: contacts.contacts.map(x => x.id)};
   const binding = {
     people: PEOPLE,
-    accounts: Object.entries(ACCOUNT).map(([app_id, account_id]) => ({app_id, account_id, owner_person_id: OWNER})),
+    accounts: [...Object.entries(ACCOUNT).map(([app_id, account_id]) => ({app_id, account_id, owner_person_id: OWNER})), ...TASK_ACCOUNTS],
     objects: objectsOf
   };
   for (const [app, seed] of Object.entries(seeds)) out[app + '.seed.json'] = seed;
