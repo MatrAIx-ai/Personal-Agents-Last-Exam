@@ -1,0 +1,6226 @@
+[
+  {
+    "name": "northlake-portal.account.get",
+    "description": "Read the patient on file, insurance, portal contact details, confirmation settings, any pending interstitial page and a balance summary. Always allowed, even while an interstitial is pending.",
+    "read_only": true,
+    "scope": "northlake-portal.account.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "account": {
+          "type": "object",
+          "properties": {
+            "patient": {
+              "type": "object",
+              "properties": {
+                "patient_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "date_of_birth": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "email": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "phone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                "address": {
+                  "type": "object",
+                  "properties": {
+                    "line1": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "line2": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "city": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "state": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 2
+                    },
+                    "postal_code": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 10
+                    }
+                  },
+                  "required": [
+                    "line1",
+                    "line2",
+                    "city",
+                    "state",
+                    "postal_code"
+                  ],
+                  "additionalProperties": false
+                },
+                "mrn": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                "insurance": {
+                  "type": "object",
+                  "properties": {
+                    "plan_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "plan_name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "payer": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "member_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 60
+                    },
+                    "group_number": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 60
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "effective_from": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                    }
+                  },
+                  "required": [
+                    "plan_id",
+                    "plan_name",
+                    "payer",
+                    "member_id",
+                    "group_number",
+                    "effective_from"
+                  ],
+                  "additionalProperties": false
+                },
+                "card_on_file": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "brand": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 40
+                        },
+                        "last4": {
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 4
+                        }
+                      },
+                      "required": [
+                        "brand",
+                        "last4"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "patient_id",
+                "name",
+                "date_of_birth",
+                "email",
+                "phone",
+                "address",
+                "mrn",
+                "insurance",
+                "card_on_file"
+              ],
+              "additionalProperties": false
+            },
+            "health_system": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "portal_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "phone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                "billing_phone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                "billing_hours": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "cancellation_policy": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                "cancellation_notice_hours": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 168
+                },
+                "late_cancellation_fee_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "past_due_after_days": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 365
+                }
+              },
+              "required": [
+                "name",
+                "portal_name",
+                "phone",
+                "billing_phone",
+                "billing_hours",
+                "cancellation_policy",
+                "cancellation_notice_hours",
+                "late_cancellation_fee_cents",
+                "past_due_after_days"
+              ],
+              "additionalProperties": false
+            },
+            "settings": {
+              "type": "object",
+              "properties": {
+                "require_user_confirmation": {
+                  "type": "boolean"
+                },
+                "preview_ttl_minutes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1440
+                },
+                "timezone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                }
+              },
+              "required": [
+                "require_user_confirmation",
+                "preview_ttl_minutes",
+                "timezone"
+              ],
+              "additionalProperties": false
+            },
+            "interstitial": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "interstitial_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "kind": {
+                      "enum": [
+                        "privacy_notice",
+                        "session_check"
+                      ]
+                    },
+                    "clearable_by": {
+                      "enum": [
+                        "agent",
+                        "user"
+                      ]
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    },
+                    "status": {
+                      "enum": [
+                        "pending",
+                        "cleared"
+                      ]
+                    },
+                    "set_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "cleared_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "cleared_by": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "agent",
+                            "user"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "interstitial_id",
+                    "kind",
+                    "clearable_by",
+                    "text",
+                    "status",
+                    "set_at",
+                    "cleared_at",
+                    "cleared_by"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "summary": {
+              "type": "object",
+              "properties": {
+                "balance_due_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "past_due_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "pending_insurance_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "open_claims": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000
+                },
+                "unread_messages": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000
+                },
+                "upcoming_appointments": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000
+                }
+              },
+              "required": [
+                "balance_due_cents",
+                "past_due_cents",
+                "pending_insurance_cents",
+                "open_claims",
+                "unread_messages",
+                "upcoming_appointments"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "patient",
+            "health_system",
+            "settings",
+            "interstitial",
+            "summary"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "account"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.messages.list",
+    "description": "List message threads grouped by recipient with unread counts and the latest message preview. Closed threads are included unless status is \"open\".",
+    "read_only": true,
+    "scope": "northlake-portal.messages.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "enum": [
+            "clinic",
+            "nurse_line",
+            "billing_office",
+            "all"
+          ]
+        },
+        "status": {
+          "enum": [
+            "open",
+            "closed",
+            "all"
+          ]
+        },
+        "query": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "unread_only": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "threads": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "thread_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "subject": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "recipient": {
+                "type": "object",
+                "properties": {
+                  "category": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "clinic",
+                          "nurse_line",
+                          "billing_office"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "display_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "category",
+                  "display_name"
+                ],
+                "additionalProperties": false
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "closed"
+                ]
+              },
+              "awaiting": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "staff",
+                      "patient"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "closed_reason": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "related": {
+                "type": "object",
+                "properties": {
+                  "claim_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "appointment_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "claim_id",
+                  "appointment_id"
+                ],
+                "additionalProperties": false
+              },
+              "opened_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "message_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "unread_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "last_message_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "last_message_preview": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 200
+              },
+              "last_author": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "role": {
+                        "enum": [
+                          "patient",
+                          "clinic",
+                          "nurse_line",
+                          "billing_office",
+                          "provider",
+                          "system"
+                        ]
+                      },
+                      "display_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      }
+                    },
+                    "required": [
+                      "role",
+                      "display_name"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "thread_id",
+              "subject",
+              "recipient",
+              "status",
+              "awaiting",
+              "closed_reason",
+              "related",
+              "opened_at",
+              "updated_at",
+              "message_count",
+              "unread_count",
+              "last_message_at",
+              "last_message_preview",
+              "last_author"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "threads"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.messages.get",
+    "description": "Read one thread with every message, author, read flag and attachment IDs. Reading does not mark messages read; use messages.flags.",
+    "read_only": true,
+    "scope": "northlake-portal.messages.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "thread": {
+          "type": "object",
+          "properties": {
+            "thread_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "subject": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "recipient": {
+              "type": "object",
+              "properties": {
+                "category": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "clinic",
+                        "nurse_line",
+                        "billing_office"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "display_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "category",
+                "display_name"
+              ],
+              "additionalProperties": false
+            },
+            "status": {
+              "enum": [
+                "open",
+                "closed"
+              ]
+            },
+            "awaiting": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "staff",
+                    "patient"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "closed_reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "related": {
+              "type": "object",
+              "properties": {
+                "claim_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "appointment_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "claim_id",
+                "appointment_id"
+              ],
+              "additionalProperties": false
+            },
+            "opened_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "detail": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 1000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 1000
+            },
+            "messages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "message_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "author": {
+                    "type": "object",
+                    "properties": {
+                      "role": {
+                        "enum": [
+                          "patient",
+                          "clinic",
+                          "nurse_line",
+                          "billing_office",
+                          "provider",
+                          "system"
+                        ]
+                      },
+                      "display_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      }
+                    },
+                    "required": [
+                      "role",
+                      "display_name"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "body": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 20000
+                  },
+                  "read": {
+                    "type": "boolean"
+                  },
+                  "attachments": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "maxItems": 2,
+                    "uniqueItems": true
+                  }
+                },
+                "required": [
+                  "message_id",
+                  "at",
+                  "author",
+                  "body",
+                  "read",
+                  "attachments"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 500
+            }
+          },
+          "required": [
+            "thread_id",
+            "subject",
+            "recipient",
+            "status",
+            "awaiting",
+            "closed_reason",
+            "related",
+            "opened_at",
+            "updated_at",
+            "history",
+            "messages"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "thread"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.messages.export",
+    "description": "Export one thread as UTF-8 plain text: filename, MIME type, base64 bytes and SHA-256, in the shape files.put and mail.attachment.add accept.",
+    "read_only": true,
+    "scope": "northlake-portal.messages.export",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "thread_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "file": {
+          "type": "object",
+          "properties": {
+            "filename": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160,
+              "pattern": "^[^\\\\/\\u0000-\\u001f\\u007f]+$"
+            },
+            "mime_type": {
+              "enum": [
+                "application/pdf",
+                "image/png",
+                "image/jpeg",
+                "text/plain"
+              ]
+            },
+            "base64": {
+              "type": "string",
+              "maxLength": 1398104
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "filename",
+            "mime_type",
+            "base64",
+            "sha256"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "thread_id",
+        "file"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.messages.attachment.get",
+    "description": "Read the bytes of one attachment on one message. id is the message ID; the asset must belong to that message.",
+    "read_only": true,
+    "scope": "northlake-portal.messages.attachment.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "asset_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "asset_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "message_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "thread_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "file": {
+          "type": "object",
+          "properties": {
+            "filename": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160,
+              "pattern": "^[^\\\\/\\u0000-\\u001f\\u007f]+$"
+            },
+            "mime_type": {
+              "enum": [
+                "application/pdf",
+                "image/png",
+                "image/jpeg",
+                "text/plain"
+              ]
+            },
+            "base64": {
+              "type": "string",
+              "maxLength": 1398104
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "filename",
+            "mime_type",
+            "base64",
+            "sha256"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "message_id",
+        "thread_id",
+        "file"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.billing.list",
+    "description": "Read the ledger: claims with billed amount, insurance adjustment, insurance payment, patient responsibility, payments applied and open balance; posted payments; statements; and the balance summary. Amounts are integer cents.",
+    "read_only": true,
+    "scope": "northlake-portal.billing.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "all",
+            "open",
+            "in_adjudication",
+            "paid",
+            "denied",
+            "reprocessing"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "balance_due_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "past_due_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "pending_insurance_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "open_claims": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "unread_messages": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "upcoming_appointments": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "balance_due_cents",
+            "past_due_cents",
+            "pending_insurance_cents",
+            "open_claims",
+            "unread_messages",
+            "upcoming_appointments"
+          ],
+          "additionalProperties": false
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "claim_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "visit",
+                  "lab",
+                  "fee"
+                ]
+              },
+              "service_date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "provider_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "clinic_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "status": {
+                "enum": [
+                  "in_adjudication",
+                  "paid",
+                  "denied",
+                  "reprocessing"
+                ]
+              },
+              "billed_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "insurance_adjustment_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "insurance_paid_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "patient_responsibility_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "reason_code": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "statement_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "posted_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "status": {
+                      "enum": [
+                        "in_adjudication",
+                        "paid",
+                        "denied",
+                        "reprocessing"
+                      ]
+                    },
+                    "detail": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 0,
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 200
+              },
+              "paid_by_patient_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "open_balance_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "flags": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "unstatemented",
+                    "past_due"
+                  ]
+                },
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "claim_id",
+              "kind",
+              "service_date",
+              "provider_id",
+              "clinic_id",
+              "description",
+              "status",
+              "billed_cents",
+              "insurance_adjustment_cents",
+              "insurance_paid_cents",
+              "patient_responsibility_cents",
+              "reason_code",
+              "statement_id",
+              "posted_at",
+              "updated_at",
+              "history",
+              "paid_by_patient_cents",
+              "open_balance_cents",
+              "flags"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        },
+        "payments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "payment_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "kind": {
+                "enum": [
+                  "payment",
+                  "refund"
+                ]
+              },
+              "amount_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "method": {
+                "enum": [
+                  "card",
+                  "bank",
+                  "check",
+                  "portal_card_on_file",
+                  "portal_refund"
+                ]
+              },
+              "last4": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 4,
+                    "maxLength": 4
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "allocations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "claim_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "amount_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    }
+                  },
+                  "required": [
+                    "claim_id",
+                    "amount_cents"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 50
+              },
+              "confirmation_number": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "note": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 300
+              }
+            },
+            "required": [
+              "payment_id",
+              "at",
+              "kind",
+              "amount_cents",
+              "method",
+              "last4",
+              "allocations",
+              "confirmation_number",
+              "note"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        },
+        "statements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "statement_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "period_start": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "period_end": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "generated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "past_due_note": {
+                "type": "boolean"
+              },
+              "claim_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "uniqueItems": true,
+                "maxItems": 200
+              },
+              "payment_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "uniqueItems": true,
+                "maxItems": 200
+              },
+              "balance_due_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "past_due_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              "filename": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              }
+            },
+            "required": [
+              "statement_id",
+              "period_start",
+              "period_end",
+              "generated_at",
+              "past_due_note",
+              "claim_ids",
+              "payment_ids",
+              "balance_due_cents",
+              "past_due_cents",
+              "filename"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "summary",
+        "claims",
+        "payments",
+        "statements"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.billing.get_claim",
+    "description": "Read one claim with its full adjudication history, the payments applied to it and the billing threads that reference it.",
+    "read_only": true,
+    "scope": "northlake-portal.billing.get_claim",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "claim": {
+          "type": "object",
+          "properties": {
+            "claim_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "kind": {
+              "enum": [
+                "visit",
+                "lab",
+                "fee"
+              ]
+            },
+            "service_date": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "provider_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "clinic_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "status": {
+              "enum": [
+                "in_adjudication",
+                "paid",
+                "denied",
+                "reprocessing"
+              ]
+            },
+            "billed_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "insurance_adjustment_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "insurance_paid_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "patient_responsibility_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "reason_code": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "statement_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "posted_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "status": {
+                    "enum": [
+                      "in_adjudication",
+                      "paid",
+                      "denied",
+                      "reprocessing"
+                    ]
+                  },
+                  "detail": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 1000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "status"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 200
+            },
+            "paid_by_patient_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "open_balance_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "flags": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "unstatemented",
+                  "past_due"
+                ]
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "claim_id",
+            "kind",
+            "service_date",
+            "provider_id",
+            "clinic_id",
+            "description",
+            "status",
+            "billed_cents",
+            "insurance_adjustment_cents",
+            "insurance_paid_cents",
+            "patient_responsibility_cents",
+            "reason_code",
+            "statement_id",
+            "posted_at",
+            "updated_at",
+            "history",
+            "paid_by_patient_cents",
+            "open_balance_cents",
+            "flags"
+          ],
+          "additionalProperties": false
+        },
+        "allocations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "payment_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "kind": {
+                "enum": [
+                  "payment",
+                  "refund"
+                ]
+              },
+              "amount_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              }
+            },
+            "required": [
+              "payment_id",
+              "at",
+              "kind",
+              "amount_cents"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        },
+        "thread_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "claim",
+        "allocations",
+        "thread_ids"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.billing.statement",
+    "description": "Read one statement as a text-based PDF: filename, MIME type, base64 bytes and SHA-256. The bytes are deterministic for the same ledger state.",
+    "read_only": true,
+    "scope": "northlake-portal.billing.statement",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "statement": {
+          "type": "object",
+          "properties": {
+            "statement_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "period_start": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "period_end": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "generated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "past_due_note": {
+              "type": "boolean"
+            },
+            "claim_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "uniqueItems": true,
+              "maxItems": 200
+            },
+            "payment_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "uniqueItems": true,
+              "maxItems": 200
+            },
+            "balance_due_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "past_due_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "filename": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            }
+          },
+          "required": [
+            "statement_id",
+            "period_start",
+            "period_end",
+            "generated_at",
+            "past_due_note",
+            "claim_ids",
+            "payment_ids",
+            "balance_due_cents",
+            "past_due_cents",
+            "filename"
+          ],
+          "additionalProperties": false
+        },
+        "file": {
+          "type": "object",
+          "properties": {
+            "filename": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160,
+              "pattern": "^[^\\\\/\\u0000-\\u001f\\u007f]+$"
+            },
+            "mime_type": {
+              "enum": [
+                "application/pdf",
+                "image/png",
+                "image/jpeg",
+                "text/plain"
+              ]
+            },
+            "base64": {
+              "type": "string",
+              "maxLength": 1398104
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "filename",
+            "mime_type",
+            "base64",
+            "sha256"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "statement",
+        "file"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.billing.requests.list",
+    "description": "List refund and fee-waiver requests with their status and decision notes.",
+    "read_only": true,
+    "scope": "northlake-portal.billing.requests.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "all",
+            "submitted",
+            "granted",
+            "declined"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "requests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "request_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "refund",
+                  "fee_waiver"
+                ]
+              },
+              "claim_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "amount_cents": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "status": {
+                "enum": [
+                  "submitted",
+                  "granted",
+                  "declined"
+                ]
+              },
+              "decision_note": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "detail": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 0,
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 1000
+              }
+            },
+            "required": [
+              "request_id",
+              "kind",
+              "claim_id",
+              "amount_cents",
+              "reason",
+              "status",
+              "decision_note",
+              "created_at",
+              "updated_at",
+              "history"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "requests"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.providers.search",
+    "description": "Search the provider directory by specialty, clinic, network status for the insurance on file, rating and whether new patients are accepted. Each result carries the next open slot.",
+    "read_only": true,
+    "scope": "northlake-portal.providers.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "specialty": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 100
+        },
+        "clinic_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "in_network_only": {
+          "type": "boolean"
+        },
+        "accepting_new_patients": {
+          "type": "boolean"
+        },
+        "min_rating": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "visit_type": {
+          "enum": [
+            "new_patient",
+            "follow_up"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "providers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "provider_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "credentials": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "specialty": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "clinic_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "networks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "plan_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "status": {
+                      "enum": [
+                        "in_network",
+                        "out_of_network"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "plan_id",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 20
+              },
+              "rating": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 5
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "review_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "accepting_new_patients": {
+                "type": "boolean"
+              },
+              "languages": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                "maxItems": 10
+              },
+              "bio": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 1000
+              },
+              "clinic": {
+                "type": "object",
+                "properties": {
+                  "clinic_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "address": {
+                    "type": "object",
+                    "properties": {
+                      "line1": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "line2": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "city": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "state": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 2
+                      },
+                      "postal_code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 10
+                      }
+                    },
+                    "required": [
+                      "line1",
+                      "line2",
+                      "city",
+                      "state",
+                      "postal_code"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "phone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "hours": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  "parking_note": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 300
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "clinic_id",
+                  "name",
+                  "address",
+                  "phone",
+                  "hours",
+                  "parking_note"
+                ],
+                "additionalProperties": false
+              },
+              "network_status": {
+                "enum": [
+                  "in_network",
+                  "out_of_network",
+                  "unknown"
+                ]
+              },
+              "rating_label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "next_available": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "slot_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "provider_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "clinic_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "start": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "end": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "visit_types": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "new_patient",
+                            "follow_up"
+                          ]
+                        }
+                      },
+                      "status": {
+                        "enum": [
+                          "open",
+                          "taken",
+                          "booked"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "slot_id",
+                      "provider_id",
+                      "clinic_id",
+                      "start",
+                      "end",
+                      "visit_types",
+                      "status"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "provider_id",
+              "name",
+              "credentials",
+              "specialty",
+              "clinic_id",
+              "networks",
+              "rating",
+              "review_count",
+              "accepting_new_patients",
+              "languages",
+              "bio",
+              "clinic",
+              "network_status",
+              "rating_label",
+              "next_available"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "providers"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.providers.get",
+    "description": "Read one provider with clinic details, network status for the insurance on file and the next open slots.",
+    "read_only": true,
+    "scope": "northlake-portal.providers.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "visit_type": {
+          "enum": [
+            "new_patient",
+            "follow_up"
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "provider": {
+          "type": "object",
+          "properties": {
+            "provider_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "credentials": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "specialty": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "clinic_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "networks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "plan_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "status": {
+                    "enum": [
+                      "in_network",
+                      "out_of_network"
+                    ]
+                  }
+                },
+                "required": [
+                  "plan_id",
+                  "status"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 20
+            },
+            "rating": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 5
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "review_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "accepting_new_patients": {
+              "type": "boolean"
+            },
+            "languages": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "maxItems": 10
+            },
+            "bio": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 1000
+            },
+            "clinic": {
+              "type": "object",
+              "properties": {
+                "clinic_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "address": {
+                  "type": "object",
+                  "properties": {
+                    "line1": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "line2": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "city": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "state": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 2
+                    },
+                    "postal_code": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 10
+                    }
+                  },
+                  "required": [
+                    "line1",
+                    "line2",
+                    "city",
+                    "state",
+                    "postal_code"
+                  ],
+                  "additionalProperties": false
+                },
+                "phone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                "hours": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                },
+                "parking_note": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "clinic_id",
+                "name",
+                "address",
+                "phone",
+                "hours",
+                "parking_note"
+              ],
+              "additionalProperties": false
+            },
+            "network_status": {
+              "enum": [
+                "in_network",
+                "out_of_network",
+                "unknown"
+              ]
+            },
+            "rating_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "next_available": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "slot_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "provider_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "clinic_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "start": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "end": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "visit_types": {
+                      "type": "array",
+                      "items": {
+                        "enum": [
+                          "new_patient",
+                          "follow_up"
+                        ]
+                      }
+                    },
+                    "status": {
+                      "enum": [
+                        "open",
+                        "taken",
+                        "booked"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slot_id",
+                    "provider_id",
+                    "clinic_id",
+                    "start",
+                    "end",
+                    "visit_types",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "provider_id",
+            "name",
+            "credentials",
+            "specialty",
+            "clinic_id",
+            "networks",
+            "rating",
+            "review_count",
+            "accepting_new_patients",
+            "languages",
+            "bio",
+            "clinic",
+            "network_status",
+            "rating_label",
+            "next_available"
+          ],
+          "additionalProperties": false
+        },
+        "next_slots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "provider_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "clinic_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "visit_types": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "new_patient",
+                    "follow_up"
+                  ]
+                }
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "taken",
+                  "booked"
+                ]
+              }
+            },
+            "required": [
+              "slot_id",
+              "provider_id",
+              "clinic_id",
+              "start",
+              "end",
+              "visit_types",
+              "status"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "provider",
+        "next_slots"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.appointments.slots",
+    "description": "List open slots for a provider in a time window, optionally for one visit type. Slots are not held by this call.",
+    "read_only": true,
+    "scope": "northlake-portal.appointments.slots",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "provider_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "visit_type": {
+          "enum": [
+            "new_patient",
+            "follow_up"
+          ]
+        }
+      },
+      "required": [
+        "provider_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "slots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "provider_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "clinic_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "visit_types": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "new_patient",
+                    "follow_up"
+                  ]
+                }
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "taken",
+                  "booked"
+                ]
+              }
+            },
+            "required": [
+              "slot_id",
+              "provider_id",
+              "clinic_id",
+              "start",
+              "end",
+              "visit_types",
+              "status"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "slots"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.appointments.list",
+    "description": "List appointments with provider and clinic details. A booked appointment whose end time has passed is shown as completed.",
+    "read_only": true,
+    "scope": "northlake-portal.appointments.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "all",
+            "upcoming",
+            "past",
+            "booked",
+            "completed",
+            "cancelled",
+            "rescheduled"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "appointments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "appointment_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "provider_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "clinic_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "slot_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "visit_type": {
+                "enum": [
+                  "new_patient",
+                  "follow_up"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 500
+              },
+              "status": {
+                "enum": [
+                  "booked",
+                  "completed",
+                  "cancelled_by_patient",
+                  "cancelled_by_clinic",
+                  "rescheduled"
+                ]
+              },
+              "replaced_by": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "replaces": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "cancellation_reason": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "reminder_sent_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "detail": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 0,
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 1000
+              },
+              "provider_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "specialty": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "clinic_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "clinic_address": {
+                "type": "object",
+                "properties": {
+                  "line1": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "line2": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "city": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "state": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 2
+                  },
+                  "postal_code": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 10
+                  }
+                },
+                "required": [
+                  "line1",
+                  "line2",
+                  "city",
+                  "state",
+                  "postal_code"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "appointment_id",
+              "provider_id",
+              "clinic_id",
+              "slot_id",
+              "start",
+              "end",
+              "visit_type",
+              "reason",
+              "status",
+              "replaced_by",
+              "replaces",
+              "cancellation_reason",
+              "reminder_sent_at",
+              "created_at",
+              "updated_at",
+              "history",
+              "provider_name",
+              "specialty",
+              "clinic_name",
+              "clinic_address"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "appointments"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.appointments.get",
+    "description": "Read one appointment with its history, provider and clinic.",
+    "read_only": true,
+    "scope": "northlake-portal.appointments.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "appointment": {
+          "type": "object",
+          "properties": {
+            "appointment_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "provider_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "clinic_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "slot_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "visit_type": {
+              "enum": [
+                "new_patient",
+                "follow_up"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 500
+            },
+            "status": {
+              "enum": [
+                "booked",
+                "completed",
+                "cancelled_by_patient",
+                "cancelled_by_clinic",
+                "rescheduled"
+              ]
+            },
+            "replaced_by": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "replaces": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cancellation_reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "reminder_sent_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "detail": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 1000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 1000
+            },
+            "provider_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "specialty": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "clinic_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "clinic_address": {
+              "type": "object",
+              "properties": {
+                "line1": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "line2": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "city": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "state": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 2
+                },
+                "postal_code": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 10
+                }
+              },
+              "required": [
+                "line1",
+                "line2",
+                "city",
+                "state",
+                "postal_code"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "appointment_id",
+            "provider_id",
+            "clinic_id",
+            "slot_id",
+            "start",
+            "end",
+            "visit_type",
+            "reason",
+            "status",
+            "replaced_by",
+            "replaces",
+            "cancellation_reason",
+            "reminder_sent_at",
+            "created_at",
+            "updated_at",
+            "history",
+            "provider_name",
+            "specialty",
+            "clinic_name",
+            "clinic_address"
+          ],
+          "additionalProperties": false
+        },
+        "provider": {
+          "type": "object",
+          "properties": {
+            "provider_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "credentials": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "specialty": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "clinic_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "networks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "plan_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "status": {
+                    "enum": [
+                      "in_network",
+                      "out_of_network"
+                    ]
+                  }
+                },
+                "required": [
+                  "plan_id",
+                  "status"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 20
+            },
+            "rating": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 5
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "review_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "accepting_new_patients": {
+              "type": "boolean"
+            },
+            "languages": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "maxItems": 10
+            },
+            "bio": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 1000
+            },
+            "clinic": {
+              "type": "object",
+              "properties": {
+                "clinic_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "address": {
+                  "type": "object",
+                  "properties": {
+                    "line1": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "line2": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "city": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "state": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 2
+                    },
+                    "postal_code": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 10
+                    }
+                  },
+                  "required": [
+                    "line1",
+                    "line2",
+                    "city",
+                    "state",
+                    "postal_code"
+                  ],
+                  "additionalProperties": false
+                },
+                "phone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                "hours": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                },
+                "parking_note": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "clinic_id",
+                "name",
+                "address",
+                "phone",
+                "hours",
+                "parking_note"
+              ],
+              "additionalProperties": false
+            },
+            "network_status": {
+              "enum": [
+                "in_network",
+                "out_of_network",
+                "unknown"
+              ]
+            },
+            "rating_label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "next_available": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "slot_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "provider_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "clinic_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "start": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "end": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "visit_types": {
+                      "type": "array",
+                      "items": {
+                        "enum": [
+                          "new_patient",
+                          "follow_up"
+                        ]
+                      }
+                    },
+                    "status": {
+                      "enum": [
+                        "open",
+                        "taken",
+                        "booked"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slot_id",
+                    "provider_id",
+                    "clinic_id",
+                    "start",
+                    "end",
+                    "visit_types",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "provider_id",
+            "name",
+            "credentials",
+            "specialty",
+            "clinic_id",
+            "networks",
+            "rating",
+            "review_count",
+            "accepting_new_patients",
+            "languages",
+            "bio",
+            "clinic",
+            "network_status",
+            "rating_label",
+            "next_available"
+          ],
+          "additionalProperties": false
+        },
+        "clinic": {
+          "type": "object",
+          "properties": {
+            "clinic_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "address": {
+              "type": "object",
+              "properties": {
+                "line1": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "line2": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "city": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "state": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 2
+                },
+                "postal_code": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 10
+                }
+              },
+              "required": [
+                "line1",
+                "line2",
+                "city",
+                "state",
+                "postal_code"
+              ],
+              "additionalProperties": false
+            },
+            "phone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "hours": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "parking_note": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "clinic_id",
+            "name",
+            "address",
+            "phone",
+            "hours",
+            "parking_note"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "appointment",
+        "provider",
+        "clinic"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.waitlist.list",
+    "description": "List waitlist entries with their status and any open offer.",
+    "read_only": true,
+    "scope": "northlake-portal.waitlist.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "waitlist_entry_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "provider_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "appointment_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "earliest": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "latest": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "status": {
+                "enum": [
+                  "waiting",
+                  "offered",
+                  "booked",
+                  "declined",
+                  "expired",
+                  "left"
+                ]
+              },
+              "offer": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "offer_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "slot_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "offered_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "offer_expires_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "approved": {
+                        "type": "boolean"
+                      },
+                      "identity_verified": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "offer_id",
+                      "slot_id",
+                      "offered_at",
+                      "offer_expires_at",
+                      "approved",
+                      "identity_verified"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "booked_appointment_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "detail": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 0,
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 1000
+              },
+              "provider_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "offer_slot": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "slot_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "provider_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "clinic_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "start": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "end": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "visit_types": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "new_patient",
+                            "follow_up"
+                          ]
+                        }
+                      },
+                      "status": {
+                        "enum": [
+                          "open",
+                          "taken",
+                          "booked"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "slot_id",
+                      "provider_id",
+                      "clinic_id",
+                      "start",
+                      "end",
+                      "visit_types",
+                      "status"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "waitlist_entry_id",
+              "provider_id",
+              "appointment_id",
+              "earliest",
+              "latest",
+              "status",
+              "offer",
+              "booked_appointment_id",
+              "created_at",
+              "updated_at",
+              "history",
+              "provider_name",
+              "offer_slot"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "entries"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.messages.send",
+    "description": "Start a new thread to the clinic, nurse line or billing office with an optional document attachment (PDF, PNG, JPEG or plain text, at most 2 files, 512 KiB each). With require_user_confirmation on, returns approval_required naming a draft ID until a user.confirmed event names it.",
+    "read_only": false,
+    "scope": "northlake-portal.messages.send",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recipient_category": {
+          "enum": [
+            "clinic",
+            "nurse_line",
+            "billing_office"
+          ]
+        },
+        "subject": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "attachments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "filename": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160,
+                "pattern": "^[^\\\\/\\u0000-\\u001f\\u007f]+$"
+              },
+              "mime_type": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "base64": {
+                "type": "string",
+                "maxLength": 1398104
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "filename",
+              "mime_type",
+              "base64",
+              "sha256"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 2,
+          "minItems": 1
+        },
+        "related": {
+          "type": "object",
+          "properties": {
+            "claim_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "appointment_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "claim_id",
+            "appointment_id"
+          ],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "recipient_category",
+        "subject",
+        "body",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "message_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "message_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.messages.reply",
+    "description": "Reply on an open thread (id is the thread ID) with an optional attachment. A closed thread returns thread_closed and changes nothing.",
+    "read_only": false,
+    "scope": "northlake-portal.messages.reply",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "attachments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "filename": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160,
+                "pattern": "^[^\\\\/\\u0000-\\u001f\\u007f]+$"
+              },
+              "mime_type": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "base64": {
+                "type": "string",
+                "maxLength": 1398104
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "filename",
+              "mime_type",
+              "base64",
+              "sha256"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 2,
+          "minItems": 1
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "body",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "message_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "message_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.messages.flags",
+    "description": "Mark one message (id is the message ID) read or unread.",
+    "read_only": false,
+    "scope": "northlake-portal.messages.flags",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "read": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "read"
+          ],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "thread_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "thread_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.billing.pay.preview",
+    "description": "Prepare a payment: amount in cents, optionally limited to named claims. Returns the allocation, balance after payment and an expiry. Errors: exceeds_balance, claim_not_final. Nothing is charged.",
+    "read_only": false,
+    "scope": "northlake-portal.billing.pay.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000000
+        },
+        "claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 50,
+          "uniqueItems": true
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "amount_cents",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "allocations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "claim_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "amount_cents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              }
+            },
+            "required": [
+              "claim_id",
+              "amount_cents"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        },
+        "balance_before_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "balance_after_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approval_required": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "amount_cents",
+        "allocations",
+        "balance_before_cents",
+        "balance_after_cents",
+        "expires_at",
+        "approval_required"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.billing.pay.confirm",
+    "description": "Post the payment prepared by billing.pay.preview (id is the preview ID) to the card on file and return the receipt. Errors: preview_stale when the preview expired or the ledger changed, approval_required while user confirmation is required and not yet given.",
+    "read_only": false,
+    "scope": "northlake-portal.billing.pay.confirm",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "preview_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "confirmation_number": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "balance_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "paid_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "preview_id",
+        "confirmation_number",
+        "amount_cents",
+        "balance_cents",
+        "paid_at"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.billing.question",
+    "description": "Ask the billing office about one charge (id is the claim ID). Opens a billing thread linked to the claim and returns the thread and message IDs.",
+    "read_only": false,
+    "scope": "northlake-portal.billing.question",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "body",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "message_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "message_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.billing.requests.create",
+    "description": "Request a refund or a fee waiver on one claim (id is the claim ID). The request starts as submitted; the billing office decides it later through an event.",
+    "read_only": false,
+    "scope": "northlake-portal.billing.requests.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "kind": {
+          "enum": [
+            "refund",
+            "fee_waiver"
+          ]
+        },
+        "amount_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "reason",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "const": "submitted"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.appointments.preview",
+    "description": "Prepare a booking on an open slot for a provider. Returns the slot, network status and an expiry, and says whether the identity step is still required. Nothing is booked.",
+    "read_only": false,
+    "scope": "northlake-portal.appointments.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "provider_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "slot_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "visit_type": {
+          "enum": [
+            "new_patient",
+            "follow_up"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "provider_id",
+        "slot_id",
+        "visit_type",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "provider_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "slot_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "clinic_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "visit_type": {
+          "enum": [
+            "new_patient",
+            "follow_up"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "network_status": {
+          "enum": [
+            "in_network",
+            "out_of_network",
+            "unknown"
+          ]
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "identity_required": {
+          "type": "boolean"
+        },
+        "approval_required": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "provider_id",
+        "slot_id",
+        "clinic_id",
+        "start",
+        "end",
+        "visit_type",
+        "reason",
+        "network_status",
+        "expires_at",
+        "identity_required",
+        "approval_required"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.appointments.confirm",
+    "description": "Book the appointment prepared by appointments.preview (id is the preview ID). Errors: identity_required until a user.identity_verified event names the preview, slot_unavailable with the nearest alternatives when the slot was taken, preview_stale when the preview expired, approval_required while user confirmation is pending.",
+    "read_only": false,
+    "scope": "northlake-portal.appointments.confirm",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "preview_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "provider_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "clinic_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "outcome": {
+          "const": "booked"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "preview_id",
+        "provider_id",
+        "clinic_id",
+        "start",
+        "end",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.appointments.cancel",
+    "description": "Cancel a booked appointment (id is the appointment ID). Inside the notice window the cancellation policy applies and a fee claim is posted.",
+    "read_only": false,
+    "scope": "northlake-portal.appointments.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "const": "cancelled_by_patient"
+        },
+        "late_cancellation": {
+          "type": "boolean"
+        },
+        "fee_claim_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "outcome",
+        "late_cancellation",
+        "fee_claim_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.appointments.reschedule",
+    "description": "Move a booked appointment (id is the appointment ID) to another open slot with the same provider. The old appointment becomes rescheduled and links to the new one. Error: slot_unavailable.",
+    "read_only": false,
+    "scope": "northlake-portal.appointments.reschedule",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "slot_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "slot_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "replaces": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "provider_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "replaces",
+        "provider_id",
+        "start",
+        "end"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.waitlist.join",
+    "description": "Join the waitlist for an earlier slot with a provider, optionally to move an existing booked appointment, within an earliest and latest time.",
+    "read_only": false,
+    "scope": "northlake-portal.waitlist.join",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "provider_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "earliest": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "latest": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "provider_id",
+        "earliest",
+        "latest",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "const": "waiting"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.waitlist.leave",
+    "description": "Leave the waitlist (id is the waitlist entry ID).",
+    "read_only": false,
+    "scope": "northlake-portal.waitlist.leave",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "const": "left"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.waitlist.accept",
+    "description": "Accept an open waitlist offer (id is the waitlist entry ID) and book its slot. Errors: offer_expired, identity_required for a new visit until user.identity_verified names the offer, approval_required while user confirmation is pending.",
+    "read_only": false,
+    "scope": "northlake-portal.waitlist.accept",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "const": "booked"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "appointment_id",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.waitlist.decline",
+    "description": "Decline an open waitlist offer (id is the waitlist entry ID).",
+    "read_only": false,
+    "scope": "northlake-portal.waitlist.decline",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "const": "declined"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "northlake-portal.interstitial.acknowledge",
+    "description": "Clear a pending interstitial page that the agent may clear (id is the interstitial ID). A user-only interstitial returns user_action_required.",
+    "read_only": false,
+    "scope": "northlake-portal.interstitial.acknowledge",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "northlake-portal"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "outcome": {
+          "const": "cleared"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

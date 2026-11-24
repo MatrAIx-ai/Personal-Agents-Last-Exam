@@ -1,0 +1,1802 @@
+{
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "require_user_confirmation": {
+          "type": "boolean"
+        },
+        "preview_ttl_minutes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1440
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        }
+      },
+      "required": [
+        "require_user_confirmation",
+        "preview_ttl_minutes",
+        "timezone"
+      ],
+      "additionalProperties": false
+    },
+    "health_system": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "portal_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "phone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "billing_phone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "billing_hours": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "cancellation_policy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "cancellation_notice_hours": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 168
+        },
+        "late_cancellation_fee_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "past_due_after_days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 365
+        }
+      },
+      "required": [
+        "name",
+        "portal_name",
+        "phone",
+        "billing_phone",
+        "billing_hours",
+        "cancellation_policy",
+        "cancellation_notice_hours",
+        "late_cancellation_fee_cents",
+        "past_due_after_days"
+      ],
+      "additionalProperties": false
+    },
+    "patient": {
+      "type": "object",
+      "properties": {
+        "patient_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "date_of_birth": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "email": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "phone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "address": {
+          "type": "object",
+          "properties": {
+            "line1": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "line2": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "city": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "state": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 2
+            },
+            "postal_code": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 10
+            }
+          },
+          "required": [
+            "line1",
+            "line2",
+            "city",
+            "state",
+            "postal_code"
+          ],
+          "additionalProperties": false
+        },
+        "mrn": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "insurance": {
+          "type": "object",
+          "properties": {
+            "plan_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "plan_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "payer": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "member_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "group_number": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "effective_from": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          },
+          "required": [
+            "plan_id",
+            "plan_name",
+            "payer",
+            "member_id",
+            "group_number",
+            "effective_from"
+          ],
+          "additionalProperties": false
+        },
+        "card_on_file": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "brand": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                "last4": {
+                  "type": "string",
+                  "minLength": 4,
+                  "maxLength": 4
+                }
+              },
+              "required": [
+                "brand",
+                "last4"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "patient_id",
+        "name",
+        "date_of_birth",
+        "email",
+        "phone",
+        "address",
+        "mrn",
+        "insurance",
+        "card_on_file"
+      ],
+      "additionalProperties": false
+    },
+    "interstitial": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "interstitial_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "kind": {
+              "enum": [
+                "privacy_notice",
+                "session_check"
+              ]
+            },
+            "clearable_by": {
+              "enum": [
+                "agent",
+                "user"
+              ]
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "status": {
+              "enum": [
+                "pending",
+                "cleared"
+              ]
+            },
+            "set_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "cleared_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cleared_by": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "agent",
+                    "user"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "interstitial_id",
+            "kind",
+            "clearable_by",
+            "text",
+            "status",
+            "set_at",
+            "cleared_at",
+            "cleared_by"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "clinics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "clinic_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "address": {
+            "type": "object",
+            "properties": {
+              "line1": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "line2": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "city": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "state": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 2
+              },
+              "postal_code": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10
+              }
+            },
+            "required": [
+              "line1",
+              "line2",
+              "city",
+              "state",
+              "postal_code"
+            ],
+            "additionalProperties": false
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "hours": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "parking_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "clinic_id",
+          "name",
+          "address",
+          "phone",
+          "hours",
+          "parking_note"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "provider_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "credentials": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "specialty": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "clinic_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "networks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "plan_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "status": {
+                  "enum": [
+                    "in_network",
+                    "out_of_network"
+                  ]
+                }
+              },
+              "required": [
+                "plan_id",
+                "status"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 20
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 5
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "review_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "accepting_new_patients": {
+            "type": "boolean"
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "maxItems": 10
+          },
+          "bio": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "provider_id",
+          "name",
+          "credentials",
+          "specialty",
+          "clinic_id",
+          "networks",
+          "rating",
+          "review_count",
+          "accepting_new_patients",
+          "languages",
+          "bio"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "slots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "slot_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "provider_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "clinic_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "visit_types": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "new_patient",
+                "follow_up"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "uniqueItems": true
+          },
+          "status": {
+            "enum": [
+              "open",
+              "taken",
+              "booked"
+            ]
+          }
+        },
+        "required": [
+          "slot_id",
+          "provider_id",
+          "clinic_id",
+          "start",
+          "end",
+          "visit_types",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "appointments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "appointment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "provider_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "clinic_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "slot_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "visit_type": {
+            "enum": [
+              "new_patient",
+              "follow_up"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 500
+          },
+          "status": {
+            "enum": [
+              "booked",
+              "completed",
+              "cancelled_by_patient",
+              "cancelled_by_clinic",
+              "rescheduled"
+            ]
+          },
+          "replaced_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "replaces": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cancellation_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reminder_sent_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "detail": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 0,
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "appointment_id",
+          "provider_id",
+          "clinic_id",
+          "slot_id",
+          "start",
+          "end",
+          "visit_type",
+          "reason",
+          "status",
+          "replaced_by",
+          "replaces",
+          "cancellation_reason",
+          "reminder_sent_at",
+          "created_at",
+          "updated_at",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "waitlist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "waitlist_entry_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "provider_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "appointment_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "earliest": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "latest": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "waiting",
+              "offered",
+              "booked",
+              "declined",
+              "expired",
+              "left"
+            ]
+          },
+          "offer": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "offer_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "slot_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "offered_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "offer_expires_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "approved": {
+                    "type": "boolean"
+                  },
+                  "identity_verified": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "offer_id",
+                  "slot_id",
+                  "offered_at",
+                  "offer_expires_at",
+                  "approved",
+                  "identity_verified"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "booked_appointment_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "detail": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 0,
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "waitlist_entry_id",
+          "provider_id",
+          "appointment_id",
+          "earliest",
+          "latest",
+          "status",
+          "offer",
+          "booked_appointment_id",
+          "created_at",
+          "updated_at",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 50
+    },
+    "threads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "thread_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "recipient": {
+            "type": "object",
+            "properties": {
+              "category": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "clinic",
+                      "nurse_line",
+                      "billing_office"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "category",
+              "display_name"
+            ],
+            "additionalProperties": false
+          },
+          "status": {
+            "enum": [
+              "open",
+              "closed"
+            ]
+          },
+          "awaiting": {
+            "anyOf": [
+              {
+                "enum": [
+                  "staff",
+                  "patient"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "closed_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "related": {
+            "type": "object",
+            "properties": {
+              "claim_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "appointment_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "claim_id",
+              "appointment_id"
+            ],
+            "additionalProperties": false
+          },
+          "opened_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "detail": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 0,
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 1000
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "message_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "author": {
+                  "type": "object",
+                  "properties": {
+                    "role": {
+                      "enum": [
+                        "patient",
+                        "clinic",
+                        "nurse_line",
+                        "billing_office",
+                        "provider",
+                        "system"
+                      ]
+                    },
+                    "display_name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  },
+                  "required": [
+                    "role",
+                    "display_name"
+                  ],
+                  "additionalProperties": false
+                },
+                "body": {
+                  "type": "string",
+                  "minLength": 0,
+                  "maxLength": 20000
+                },
+                "read": {
+                  "type": "boolean"
+                },
+                "attachments": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 2,
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "message_id",
+                "at",
+                "author",
+                "body",
+                "read",
+                "attachments"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 500
+          }
+        },
+        "required": [
+          "thread_id",
+          "subject",
+          "recipient",
+          "status",
+          "awaiting",
+          "closed_reason",
+          "related",
+          "opened_at",
+          "updated_at",
+          "history",
+          "messages"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "visit",
+              "lab",
+              "fee"
+            ]
+          },
+          "service_date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "provider_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "clinic_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "status": {
+            "enum": [
+              "in_adjudication",
+              "paid",
+              "denied",
+              "reprocessing"
+            ]
+          },
+          "billed_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "insurance_adjustment_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "insurance_paid_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "patient_responsibility_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "posted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "status": {
+                  "enum": [
+                    "in_adjudication",
+                    "paid",
+                    "denied",
+                    "reprocessing"
+                  ]
+                },
+                "detail": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 0,
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "at",
+                "action",
+                "status"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 200
+          }
+        },
+        "required": [
+          "claim_id",
+          "kind",
+          "service_date",
+          "provider_id",
+          "clinic_id",
+          "description",
+          "status",
+          "billed_cents",
+          "insurance_adjustment_cents",
+          "insurance_paid_cents",
+          "patient_responsibility_cents",
+          "reason_code",
+          "statement_id",
+          "posted_at",
+          "updated_at",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "payments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "payment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "kind": {
+            "enum": [
+              "payment",
+              "refund"
+            ]
+          },
+          "amount_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "method": {
+            "enum": [
+              "card",
+              "bank",
+              "check",
+              "portal_card_on_file",
+              "portal_refund"
+            ]
+          },
+          "last4": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 4,
+                "maxLength": 4
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "allocations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "claim_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "amount_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              },
+              "required": [
+                "claim_id",
+                "amount_cents"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 50
+          },
+          "confirmation_number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "note": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "payment_id",
+          "at",
+          "kind",
+          "amount_cents",
+          "method",
+          "last4",
+          "allocations",
+          "confirmation_number",
+          "note"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "billing_requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "refund",
+              "fee_waiver"
+            ]
+          },
+          "claim_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "amount_cents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "status": {
+            "enum": [
+              "submitted",
+              "granted",
+              "declined"
+            ]
+          },
+          "decision_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "detail": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 0,
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "at",
+                "action"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "request_id",
+          "kind",
+          "claim_id",
+          "amount_cents",
+          "reason",
+          "status",
+          "decision_note",
+          "created_at",
+          "updated_at",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "statements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "statement_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "period_start": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "period_end": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "past_due_note": {
+            "type": "boolean"
+          },
+          "claim_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "uniqueItems": true,
+            "maxItems": 200
+          },
+          "payment_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "uniqueItems": true,
+            "maxItems": 200
+          },
+          "balance_due_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "past_due_cents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          },
+          "filename": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        },
+        "required": [
+          "statement_id",
+          "period_start",
+          "period_end",
+          "generated_at",
+          "past_due_note",
+          "claim_ids",
+          "payment_ids",
+          "balance_due_cents",
+          "past_due_cents",
+          "filename"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "previews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "preview_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "payment",
+              "appointment"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "approved": {
+            "type": "boolean"
+          },
+          "identity_verified": {
+            "type": "boolean"
+          },
+          "fingerprint": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "payload": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "amount_cents": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000000
+                  },
+                  "allocations": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "claim_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "amount_cents": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 100000000
+                        }
+                      },
+                      "required": [
+                        "claim_id",
+                        "amount_cents"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 50
+                  },
+                  "balance_before_cents": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000000
+                  },
+                  "balance_after_cents": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000000
+                  }
+                },
+                "required": [
+                  "amount_cents",
+                  "allocations",
+                  "balance_before_cents",
+                  "balance_after_cents"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "provider_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "slot_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "clinic_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "start": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "end": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "visit_type": {
+                    "enum": [
+                      "new_patient",
+                      "follow_up"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 500
+                  },
+                  "network_status": {
+                    "enum": [
+                      "in_network",
+                      "out_of_network",
+                      "unknown"
+                    ]
+                  }
+                },
+                "required": [
+                  "provider_id",
+                  "slot_id",
+                  "clinic_id",
+                  "start",
+                  "end",
+                  "visit_type",
+                  "reason",
+                  "network_status"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "required": [
+          "preview_id",
+          "kind",
+          "created_at",
+          "expires_at",
+          "approved",
+          "identity_verified",
+          "fingerprint",
+          "payload"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "target_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "target_id",
+          "at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "settings",
+    "health_system",
+    "patient",
+    "interstitial",
+    "clinics",
+    "providers",
+    "slots",
+    "appointments",
+    "waitlist",
+    "threads",
+    "claims",
+    "payments",
+    "billing_requests",
+    "statements",
+    "previews",
+    "approvals"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:northlake-portal:seed:1"
+}
