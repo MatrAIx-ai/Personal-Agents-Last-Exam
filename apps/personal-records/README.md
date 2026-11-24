@@ -4,14 +4,15 @@
 
 ## Features
 
-- **Zero External Dependencies:** Built natively on Node.js 18+ using built-in `node:sqlite`. Runs out of the box with `node --test` / `npm test` without requiring native compilation or `npm install`.
+- **Zero External Dependencies:** Built natively on Node.js 22.5+ using built-in `node:sqlite`. Runs out of the box with `node --test` / `npm test` without requiring native compilation or `npm install`.
 - **Full-Text Content Search:** SQLite FTS5 index across document metadata, tags, and extracted text.
 - **Immutable Version History:** Content-addressed blob storage partitioned by `account_id` enforcing the 10 MB per-file budget limit.
 - **Reproducible Passage Citations:** Factual claims are bound to exact character spans `[start_offset, end_offset]` anchored to a stable triple: `(document_id, version_number, extraction_revision)`.
 - **Arbitrary Relationship Graph:** Directed document links with configurable semantic types (e.g., `supersedes`, `tax_supporting_document`, `receipt_for`).
 - **Trusted Confirmation Security Boundary:** Strict caller separation between Agent proposals (`records.propose_update`, status `PENDING`) and human User approvals (`records.confirm_update`, status `USER_CONFIRMED`). Agents attempting to approve their own mutations are rejected with `PERMISSION_DENIED`.
 - **Platform Lifecycle Compliance:** Fully adheres to `runtime/core/runtime.cjs:119–126` for deterministic `platform.seed`, baseline `platform.reset`, evaluation `snapshot` dumps, and `idempotency_key` deduplication.
-- **App Lookups & CloudEvent Alerts:** Pinned read adapters for `mail.get`, `mail.attachment.get`, and `files.read`, plus outbound notifications adhering to `urn:pale:email-message:2`.
+- **App Lookups & CloudEvent Alerts:** Pinned read adapters for `mail.get`, `mail.attachment.get`, `files.read`, `contacts.list`, and `calendar.list`, plus outbound notifications adhering to `urn:pale:email-message:2`.
+- **Web Host UI (`gui/`):** Responsive vanilla HTML5/CSS3/JS views served by PALE's Business Web Host (`runtime/web/`).
 
 ---
 
@@ -32,50 +33,55 @@ apps/personal-records/
 │   ├── platform.cjs               # Seed fixtures, deterministic reset, and idempotency
 │   ├── events.cjs                 # Expiry checks, payslip discrepancy detection, and CloudEvents
 │   └── adapters.cjs               # Read-only adapters for Mail, Files, Contacts, and Calendar
+├── gui/
+│   ├── index.html                 # Web Host dashboard (Library, Viewer, Graph, Proposals)
+│   ├── style.css                  # Responsive stylesheet with passage highlight styles
+│   └── app.js                     # Frontend controller with user/agent session gating
 ├── fixtures/
-│   └── truth.json                 # Baseline scenario seed and pre-extracted fallback text
+│   ├── generator.cjs              # Deterministic synthetic dataset generator
+│   ├── truth.json                 # Scenario reference slice (20 active documents <= 1 MiB)
+│   ├── corpus.json                # Full synthetic archive (165 documents across 8 domains)
+│   └── peer-apps.json             # Mock fixtures for Mail, Files, Contacts, and Calendar
 └── tests/
     ├── document-service.test.cjs  # Ingestion, deduplication, optimistic locks, and FTS5
     ├── evidence-service.test.cjs  # Link graphs, citation offsets, and confirmation boundary
     ├── platform.test.cjs          # Seed, mutate, snapshot, reset, and idempotency tests
     ├── events-and-adapters.test.cjs # Expiries, discrepancies, CloudEvents, and Mail/Files reads
-    └── integration.test.cjs       # Full end-to-end tool router integration test
+    ├── adapters.test.cjs          # Peer app contracts, immutability, and entity matching
+    ├── gui.test.cjs               # Web Host GUI DOM completeness and tool bindings
+    ├── dataset.test.cjs           # Corpus scale (165 docs), payload limits, and span checks
+    ├── integration.test.cjs       # Full end-to-end tool router integration test
+    └── task-validation.test.cjs   # Benchmark task simulation (Task #102 & Task #106)
 ```
-
----
-
-## Exposed MCP Tools (`tools.json`)
-
-| Tool | Mode | Caller | Description |
-| :--- | :--- | :--- | :--- |
-| `records.upload_document` | Write | Agent / User | Ingests document bytes. Enforces SHA-256 deduplication and initiates version 1. |
-| `records.import_from_source` | Write | Agent / User | Imports from `mail` or `files` via their public read contracts without mutating source apps. |
-| `records.create_version` | Write | Agent / User | Appends a new document version with optimistic locking (`expected_parent_version`). |
-| `records.get_document` | Read | Agent / User | Retrieves metadata, specific version details, extracted text, and citations. |
-| `records.search` | Read | Agent / User | Full-text FTS5 keyword and metadata search (`category`, `verification_state`, `valid_until`). |
-| `records.link_documents` | Write | Agent / User | Creates directed links (`source_id`, `target_id`, `relationship_type`). |
-| `records.create_evidence_claim` | Write | Agent / User | Binds a claim to verified passage offsets `[start, end]` matching `cited_text`. |
-| `records.propose_update` | Write | Agent | Stages a proposed mutation as `PENDING` without altering underlying business state. |
-| `records.confirm_update` | Write | User only | Approves or rejects a proposal. Rejects agent callers with `PERMISSION_DENIED`. |
 
 ---
 
 ## Verification & Testing
 
-Tests run using Node's built-in test runner without needing any third-party test libraries:
+Tests run using Node's built-in test runner without needing third-party libraries:
 
 ```bash
-# Run all test suites
+# Run all 9 test suites
 npm test
 
-# Run a specific suite
-node --test tests/integration.test.cjs
+# Run task integration validation (Task #102 & Task #106)
+npm run test:tasks
+
+# Regenerate synthetic fixture archives
+npm run generate:fixtures
+```
 ```
 
-All 5 test suites pass with zero warnings:
-1. `document-service.test.cjs`: Validates SHA-256 deduplication, version increments, stale version errors, and FTS5 search queries.
-2. `evidence-service.test.cjs`: Validates passage slice verification, missing link targets, and the agent/user confirmation boundary.
-3. `platform.test.cjs`: Validates deterministic fixture seeding, snapshot capture, full reset back to baseline hash, and idempotency key replays.
-4. `events-and-adapters.test.cjs`: Validates virtual-time expiry thresholds, duplicate suppression, numerical payslip discrepancy detection, CloudEvent formatting, and peer app read adapters.
-5. `integration.test.cjs`: Validates full end-to-end multi-step agent interaction through `PersonalRecordsApp.callTool`.
+---
+
+### Verification
+
+Run the task validation suite:
+
+```bash
+# 1. Run Milestone 5 task validation
+node --test tests/task-validation.test.cjs
+
+# 2. Run the complete test suite across all 5 milestones
+npm test
 ```
