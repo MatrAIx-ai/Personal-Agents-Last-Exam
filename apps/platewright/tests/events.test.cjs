@@ -55,7 +55,8 @@ test('T16 each of the six events applies with one notification and one activity 
   assert.deepEqual(['kind', 'text', 'state'].map(k => d.shopping.lines.at(-1)[k]), ['manual', 'Birthday candles', 'needed']);
   // Notification wording names who did what.
   const n = Object.fromEntries(d.notifications.map(x => [x.event_id, x]));
-  assert.equal(n['ev-pw-101'].title, 'Evan added a constraint for Evan');
+  assert.equal(n['ev-pw-101'].title, 'Evan added a constraint');
+  assert.equal(n['ev-pw-102'].title, 'Ada ended one of their constraints');
   assert.equal(n['ev-pw-101'].body, 'Evan: dislike of Cilantro from 2026-11-09. Note: Told Maya at lunch');
   assert.equal(n['ev-pw-130'].body, 'Maya is coming to 2026-11-13:dinner.');
   assert.equal(n['ev-pw-140'].body, 'Egg 12 each, Coconut milk (canned) 800 ml. Note: Corner market this morning');

@@ -67,6 +67,11 @@ function flags(data, slot) {
     const content = source ? dishContent(data, source, dish.recipe_id) : dishContent(data, slot, dish.recipe_id);
     for (const v of check(content, who, slot.date, opts)) {
       if (v.verdict !== 'ok') perPerson.get(v.kind + ':' + v.id).push({dish: index, recipe_id: dish.recipe_id, verdict: v.verdict, findings: v.findings, omit_lines: v.omit_lines});
+      // A limit that could not be checked (nutrition unknown) is shown, never treated as met.
+      for (const u of v.unchecked) {
+        out.push({type: 'limit_unchecked', dish: index, recipe_id: dish.recipe_id, kind: v.kind, id: v.id, name: v.name,
+          constraint_id: u.constraint_id, nutrient: u.nutrient, missing_for: R.nutritionMissing(data, content)});
+      }
     }
     if (slot.state !== 'planned') continue;
     const r = data.recipes.find(x => x.id === dish.recipe_id);
@@ -203,6 +208,8 @@ function deduct(data, slot) {
       const ing = ingredients.get(line.ingredient_id), need = exact(line.quantity * factor);
       const item = data.pantry.find(p => p.ingredient_id === ing.id);
       if (!item || item.quantity === 0) { short.push({ingredient_id: ing.id, quantity: need, unit: line.unit, reason: 'not_in_pantry'}); continue; }
+      // Stock past its use-by date on the day the slot was cooked is not used.
+      if (item.use_by && item.use_by < slot.date) { short.push({ingredient_id: ing.id, quantity: need, unit: line.unit, reason: 'expired'}); continue; }
       const needIn = u.tryConvert(need, line.unit, item.unit, ing);
       if (needIn === null) { short.push({ingredient_id: ing.id, quantity: need, unit: line.unit, reason: 'no_conversion'}); continue; }
       const take = Math.min(item.quantity, needIn);
@@ -235,7 +242,8 @@ function markTool(ctx, data, args) {
   }
   const portions = recipeDishes.map(d => {
     const p = given.get(d.recipe_id) || {};
-    const made = p.made ?? dishServings(data, slot, d), eaten = p.eaten ?? defaultPortions(data, slot);
+    // Defaults: made = the dish's servings; eaten = the attendees' portions, at most what was made.
+    const made = p.made ?? dishServings(data, slot, d), eaten = p.eaten ?? Math.min(defaultPortions(data, slot), made);
     if (!(made >= 0 && eaten >= 0) || eaten > made) fail('invalid_quantity', `Portions eaten (${eaten}) must be between 0 and portions made (${made}).`);
     return {recipe_id: d.recipe_id, revision: data.recipes.find(r => r.id === d.recipe_id).revision, made, eaten};
   });

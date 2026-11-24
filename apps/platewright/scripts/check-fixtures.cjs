@@ -26,18 +26,21 @@ const TAG_RULES = {
 };
 const EXPECTED = {
   'fixtures/minimal.json': {
-    // Nora's lactose-free diet against optional dairy; Eli's soy allergy against a tortilla that may contain soy.
-    flags: {'2026-11-07:dinner': ['person-nora:ok_if_omitted'], '2026-11-09:dinner': ['person-nora:ok_if_omitted', 'person-eli:may_contain']},
+    // Nora's lactose-free diet against optional dairy; Eli's soy allergy against a tortilla that may contain soy;
+    // Evan's kcal limit cannot be checked on the lentil soup, whose bay leaves have no weight.
+    flags: {'2026-11-07:dinner': ['person-nora:ok_if_omitted'], '2026-11-09:dinner': ['person-nora:ok_if_omitted', 'person-eli:may_contain'],
+      '2026-11-10:dinner': ['limit_unchecked:person-evan']},
     states: {'con-nora-01': 'active', 'con-nora-02': 'scheduled', 'con-evan-01': 'active', 'con-eli-01': 'active', 'con-eli-02': 'ended', 'con-ada-01': 'active', 'con-ada-02': 'expired'}
   },
   'fixtures/reference.json': {
+    // Evan's cap cannot be checked on Tuesday's lentil soup (bay leaves have no weight).
     // History: optional wine in October (Evan's alcohol-free month), tortillas and wraps that may contain soy (Eli),
     // optional jalapeño and chili powder (Ada's no-spice phase). Upcoming: Evan's 700 kcal cap from the 9th,
     // Friday's dinner changed by Evan to a soy-glazed dish (Eli), Saturday's guests Ines (vegetarian) and Maya
     // (strict tree-nut allergy, added after the shopping list), and Sunday's leftovers that Saturday no longer leaves.
     flags: {'2026-10-12:dinner': ['person-evan:ok_if_omitted'], '2026-10-15:dinner': ['person-eli:may_contain'], '2026-10-29:snack': ['person-ada:ok_if_omitted'],
       '2026-10-31:dinner': ['person-ada:disliked'], '2026-11-07:lunch': ['person-eli:may_contain'], '2026-11-09:dinner': ['person-eli:may_contain'],
-      '2026-11-10:lunch': ['person-evan:over_limit'], '2026-11-12:dinner': ['person-evan:over_limit'],
+      '2026-11-10:dinner': ['limit_unchecked:person-evan'], '2026-11-10:lunch': ['person-evan:over_limit'], '2026-11-12:dinner': ['person-evan:over_limit'],
       '2026-11-13:dinner': ['person-evan:over_limit', 'person-eli:unsafe', 'person-ada:disliked'], '2026-11-14:dinner': ['guest-ines:unsuitable', 'guest-maya:unsafe'],
       '2026-11-15:dinner': ['person-evan:over_limit'], '2026-11-15:lunch': ['person-evan:over_limit', 'leftover_short']},
     states: {'con-nora-01': 'expired', 'con-nora-06': 'active', 'con-nora-02': 'scheduled', 'con-nora-03': 'active', 'con-nora-04': 'active', 'con-evan-01': 'scheduled',
@@ -91,7 +94,7 @@ function checkFixture(file) {
     else if (x && typeof x === 'object') for (const [k, v] of Object.entries(x)) walk(v, where + '.' + k);
   })(data, 'seed');
   // The only flags present are the intended ones.
-  const flags = Object.fromEntries(Object.entries(plugin.flagsFromSnapshot(data)).map(([id, list]) => [id, list.map(f => (f.type === 'person' ? f.id + ':' + f.verdict : f.type))]));
+  const flags = Object.fromEntries(Object.entries(plugin.flagsFromSnapshot(data)).map(([id, list]) => [id, list.map(f => (f.type === 'person' ? f.id + ':' + f.verdict : f.type === 'limit_unchecked' ? f.type + ':' + f.id : f.type))]));
   if (JSON.stringify(flags) !== JSON.stringify(expected.flags)) fail('flags ' + JSON.stringify(flags));
   if (expected.stale !== undefined) {
     const stale = require('../src/shopping.cjs').view({virtual_now: now}, data).list.stale;

@@ -170,3 +170,14 @@ test('T04 create, update with revisions, archive and restore without a revision;
   assert.ok(requests.every(r => /^local-\d+$/.test(r)) && new Set(requests).size === requests.length);
   assert.equal(f.data.notifications.length, 0, 'no notification for the account\'s own writes');
 });
+
+test('T02 as written, a small amount in tablespoons or cups moves down to a smaller spoon', () => {
+  const f = fixture();
+  f.call(P + 'recipes.create', {title: 'Dressing for ten', servings: 10, method_tags: ['raw'], steps: ['Whisk.'],
+    lines: [{ingredient_id: 'ing-tamari', quantity: 1, unit: 'tbsp'}, {ingredient_id: 'ing-olive-oil', quantity: 0.5, unit: 'cup'}]});
+  // 0.1 tbsp = 0.3 tsp shows as 0.25 tsp (not 0.25 tbsp); 0.05 cup = 12 ml = 2.4 tsp shows as 2.5 tsp.
+  const one = f.call(P + 'recipes.get', {id: 'rec-dressing-for-ten', servings: 1}).recipe.lines;
+  assert.deepEqual(one.map(l => [l.quantity, l.unit, l.exact]), [[0.25, 'tsp', 0.3], [2.5, 'tsp', 2.4]]);
+  assert.deepEqual(f.call(P + 'recipes.get', {id: 'rec-dressing-for-ten'}).recipe.lines.map(l => [l.quantity, l.unit]), [[1, 'tbsp'], [0.5, 'cup']]);
+  assert.deepEqual(f.call(P + 'recipes.get', {id: 'rec-dressing-for-ten', servings: 3}).recipe.lines.map(l => [l.quantity, l.unit]), [[0.875, 'tsp'], [2.5, 'tbsp']]);
+});

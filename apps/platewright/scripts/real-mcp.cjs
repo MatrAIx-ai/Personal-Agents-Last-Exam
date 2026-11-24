@@ -82,9 +82,9 @@ async function run() {
       check(`${name} refused with ${code}; data and version unchanged; denial audit row`, r.status === code && same(after.snapshot.data, s.snapshot.data) &&
         same(after.version, s.version) && after.snapshot.audit.at(-1).decision === 'deny' && after.snapshot.audit.at(-1).reason === code, r);
     }
-    // A task policy fences off other members' constraints (ids restricts args.id, the member).
-    const policies = JSON.parse(fs.readFileSync(path.join(locate.packageDir, 'fixtures/policies.json'), 'utf8'));
-    policies.sandbox.constraints = {'platewright.members.constraint.set': {ids: ['person-nora']}, 'platewright.members.constraint.remove': {ids: ['person-nora']}};
+    // A task policy (fixtures/policies-fence.json) fences off other members' constraints: Core's `ids`
+    // restricts args.id, which for both constraint tools is the member.
+    const policies = JSON.parse(fs.readFileSync(path.join(locate.packageDir, 'fixtures/policies-fence.json'), 'utf8'));
     s = await snap();
     check('Infra reloads the seed with a narrowed policy', (await infra.call('env.load_seed', {expected_version: s.version, request_id: 'task-seed-policy', data: seed, virtual_now: T0, policies})).status === 'ready');
     s = await snap();
@@ -92,9 +92,26 @@ async function run() {
     check('Changing another member\'s constraint is permission_denied under that policy', fenced.status === 'permission_denied', fenced);
     const own = await agent.call('platewright.members.constraint.set', {id: 'person-nora', constraint: {kind: 'dislike', tag: 'herb', note: 'Not tonight', expires_on: '2026-11-08'}, request_id: 'fence-2', expected_version: s.version});
     check('The account holder\'s own constraint still commits', own.status === 'committed' && own.state === 'active', own);
+    check('The result and the activity row name the constraint; Core\'s audit names the member', own.id === 'con-0001' && own.member_id === 'person-nora' &&
+      (await snap()).snapshot.data.activity.at(-1).object_id === 'con-0001' && (await snap()).snapshot.audit.at(-1).input.id === 'person-nora');
+    s = await snap();
+    const fencedRemove = await agent.call('platewright.members.constraint.remove', {id: 'person-evan', constraint_id: 'con-evan-01', request_id: 'fence-3', expected_version: s.version});
+    check('Ending another member\'s constraint is permission_denied under that policy', fencedRemove.status === 'permission_denied', fencedRemove);
     s = await snap();
     check('Restoring the package policy', (await infra.call('env.load_seed', {expected_version: s.version, request_id: 'task-seed-2', data: seed, virtual_now: T0,
       policies: JSON.parse(fs.readFileSync(path.join(locate.packageDir, 'fixtures/policies.json'), 'utf8'))})).status === 'ready');
+    // Marking cooked with defaults when servings are below the attendees' portions commits (eaten capped at made).
+    s = await snap();
+    const small = await agent.call('platewright.plan.slot.set', {id: '2026-11-08:dinner', dishes: [{recipe_id: 'rec-green-curry', servings: 2}], request_id: 'small-1', expected_version: s.version});
+    const cooked = await agent.call('platewright.plan.slot.mark', {id: '2026-11-08:dinner', status: 'cooked', request_id: 'small-2', expected_version: small.version});
+    check('Default mark with servings below headcount commits with eaten capped at made', cooked.status === 'committed' && cooked.portions[0].made === 2 && cooked.portions[0].eaten === 2, cooked);
+    // A limit that cannot be checked is visible in plan.get; nested results validate against the typed output schema.
+    const tue = (await agent.call('platewright.plan.get', {start: '2026-11-10', end: '2026-11-10'})).slots[0];
+    check('plan.get shows limit_unchecked for Evan on the lentil soup', tue.flags.some(x => x.type === 'limit_unchecked' && x.id === 'person-evan' && x.nutrient === 'kcal'), tue.flags);
+    // A blank guest name is refused by the App, not by Core's validation.
+    s = await snap();
+    const blank = await agent.call('platewright.plan.slot.set', {id: '2026-11-12:dinner', dishes: [{recipe_id: 'rec-shakshuka'}], guests: [{guest_id: 'guest-b', name: '   ', constraints: []}], request_id: 'blank-1', expected_version: s.version});
+    check('A guest name of only spaces is invalid_arguments with data unchanged', blank.status === 'invalid_arguments' && same((await snap()).snapshot.data, s.snapshot.data), blank);
     // Events: applied at their time, queryable, deduplicated; conflicting reuse refused.
     s = await snap();
     const scenario = JSON.parse(fs.readFileSync(path.join(locate.packageDir, 'examples/scenario.json'), 'utf8'));

@@ -149,13 +149,65 @@
                         "dislike"
                       ]
                     },
-                    "state": {
+                    "allergen": {
                       "enum": [
-                        "scheduled",
-                        "active",
-                        "expired",
-                        "ended"
+                        "milk",
+                        "egg",
+                        "fish",
+                        "crustacean_shellfish",
+                        "tree_nut",
+                        "peanut",
+                        "wheat",
+                        "soy",
+                        "sesame"
                       ]
+                    },
+                    "strict": {
+                      "type": "boolean"
+                    },
+                    "ingredient_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "flag": {
+                      "enum": [
+                        "meat",
+                        "poultry",
+                        "fish_or_seafood",
+                        "animal_product",
+                        "gluten",
+                        "lactose",
+                        "pork",
+                        "alcohol"
+                      ]
+                    },
+                    "tag": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40
+                    },
+                    "diet": {
+                      "enum": [
+                        "vegetarian",
+                        "vegan",
+                        "pescatarian",
+                        "gluten_free",
+                        "lactose_free",
+                        "no_pork",
+                        "no_alcohol"
+                      ]
+                    },
+                    "nutrient": {
+                      "enum": [
+                        "kcal",
+                        "protein_g",
+                        "carbs_g",
+                        "fat_g",
+                        "sodium_mg"
+                      ]
+                    },
+                    "max": {
+                      "type": "number"
                     },
                     "effective_from": {
                       "anyOf": [
@@ -178,16 +230,268 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "note": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "set_by": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "ended_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "history": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "actor": {
+                            "enum": [
+                              "seed",
+                              "agent",
+                              "event"
+                            ]
+                          },
+                          "by": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "action": {
+                            "enum": [
+                              "created",
+                              "replaced",
+                              "ended"
+                            ]
+                          },
+                          "note": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 500
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "request_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "event_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "previous": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "kind": {
+                                    "enum": [
+                                      "allergy",
+                                      "medical",
+                                      "diet",
+                                      "limit",
+                                      "dislike"
+                                    ]
+                                  },
+                                  "allergen": {
+                                    "enum": [
+                                      "milk",
+                                      "egg",
+                                      "fish",
+                                      "crustacean_shellfish",
+                                      "tree_nut",
+                                      "peanut",
+                                      "wheat",
+                                      "soy",
+                                      "sesame"
+                                    ]
+                                  },
+                                  "strict": {
+                                    "type": "boolean"
+                                  },
+                                  "ingredient_id": {
+                                    "type": "string",
+                                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                  },
+                                  "flag": {
+                                    "enum": [
+                                      "meat",
+                                      "poultry",
+                                      "fish_or_seafood",
+                                      "animal_product",
+                                      "gluten",
+                                      "lactose",
+                                      "pork",
+                                      "alcohol"
+                                    ]
+                                  },
+                                  "tag": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 40
+                                  },
+                                  "diet": {
+                                    "enum": [
+                                      "vegetarian",
+                                      "vegan",
+                                      "pescatarian",
+                                      "gluten_free",
+                                      "lactose_free",
+                                      "no_pork",
+                                      "no_alcohol"
+                                    ]
+                                  },
+                                  "nutrient": {
+                                    "enum": [
+                                      "kcal",
+                                      "protein_g",
+                                      "carbs_g",
+                                      "fat_g",
+                                      "sodium_mg"
+                                    ]
+                                  },
+                                  "max": {
+                                    "type": "number"
+                                  },
+                                  "effective_from": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "expires_on": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "note": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 500
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "kind",
+                                  "effective_from",
+                                  "expires_on",
+                                  "note"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "at",
+                          "actor",
+                          "by",
+                          "action",
+                          "note",
+                          "request_id",
+                          "event_id",
+                          "previous"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1,
+                      "maxItems": 500
+                    },
+                    "state": {
+                      "enum": [
+                        "scheduled",
+                        "active",
+                        "expired",
+                        "ended"
+                      ]
                     }
                   },
                   "required": [
                     "id",
                     "kind",
-                    "state",
                     "effective_from",
-                    "expires_on"
+                    "expires_on",
+                    "note",
+                    "set_by",
+                    "ended_at",
+                    "history",
+                    "state"
                   ],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 }
               }
             },
@@ -1331,8 +1635,78 @@
             "history": {
               "type": "array",
               "items": {
-                "type": "object"
-              }
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "actor": {
+                    "enum": [
+                      "seed",
+                      "agent",
+                      "event"
+                    ]
+                  },
+                  "by": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "request_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "event_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "action": {
+                    "enum": [
+                      "created",
+                      "revised",
+                      "archived",
+                      "restored"
+                    ]
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "at",
+                  "actor",
+                  "by",
+                  "request_id",
+                  "event_id",
+                  "action",
+                  "revision"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 1000
             },
             "variant": {
               "anyOf": [
@@ -1347,32 +1721,79 @@
                       "type": "integer",
                       "minimum": 1
                     },
+                    "swaps": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "line": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "from_ingredient_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "to_ingredient_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "ratio": {
+                            "type": "number"
+                          },
+                          "rule_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "custom": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "line",
+                          "from_ingredient_id",
+                          "to_ingredient_id",
+                          "ratio",
+                          "rule_id",
+                          "custom"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1
+                    },
+                    "unverified": {
+                      "type": "boolean"
+                    },
+                    "base_title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
                     "base_current_revision": {
                       "type": "integer",
                       "minimum": 1
                     },
                     "stale_base": {
                       "type": "boolean"
-                    },
-                    "swaps": {
-                      "type": "array",
-                      "items": {
-                        "type": "object"
-                      }
-                    },
-                    "unverified": {
-                      "type": "boolean"
                     }
                   },
                   "required": [
                     "base_recipe_id",
                     "base_revision",
-                    "base_current_revision",
-                    "stale_base",
                     "swaps",
-                    "unverified"
+                    "unverified",
+                    "base_title",
+                    "base_current_revision",
+                    "stale_base"
                   ],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 },
                 {
                   "type": "null"
@@ -1380,7 +1801,61 @@
               ]
             },
             "origin": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "actor": {
+                  "enum": [
+                    "seed",
+                    "agent",
+                    "event"
+                  ]
+                },
+                "by": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "request_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "event_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "at",
+                "actor",
+                "by",
+                "request_id",
+                "event_id"
+              ],
+              "additionalProperties": false
             }
           },
           "required": [
@@ -1783,35 +2258,214 @@
                       ]
                     },
                     "reason": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 60
+                      "enum": [
+                        "contains_allergen",
+                        "may_contain_allergen",
+                        "medical_ingredient",
+                        "medical_flag",
+                        "diet_flag",
+                        "over_limit",
+                        "disliked_ingredient",
+                        "disliked_tag"
+                      ]
+                    },
+                    "constraint_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "kind": {
+                      "enum": [
+                        "allergy",
+                        "medical",
+                        "diet",
+                        "limit",
+                        "dislike"
+                      ]
                     },
                     "lines": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "type": "object",
+                        "properties": {
+                          "line": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "ingredient_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "optional": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "line",
+                          "ingredient_id",
+                          "optional"
+                        ],
+                        "additionalProperties": false
                       }
+                    },
+                    "allergen": {
+                      "enum": [
+                        "milk",
+                        "egg",
+                        "fish",
+                        "crustacean_shellfish",
+                        "tree_nut",
+                        "peanut",
+                        "wheat",
+                        "soy",
+                        "sesame"
+                      ]
+                    },
+                    "strict": {
+                      "type": "boolean"
+                    },
+                    "ingredient_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "flag": {
+                      "enum": [
+                        "meat",
+                        "poultry",
+                        "fish_or_seafood",
+                        "animal_product",
+                        "gluten",
+                        "lactose",
+                        "pork",
+                        "alcohol"
+                      ]
+                    },
+                    "diet": {
+                      "enum": [
+                        "vegetarian",
+                        "vegan",
+                        "pescatarian",
+                        "gluten_free",
+                        "lactose_free",
+                        "no_pork",
+                        "no_alcohol"
+                      ]
+                    },
+                    "flags": {
+                      "type": "array",
+                      "items": {
+                        "enum": [
+                          "meat",
+                          "poultry",
+                          "fish_or_seafood",
+                          "animal_product",
+                          "gluten",
+                          "lactose",
+                          "pork",
+                          "alcohol"
+                        ]
+                      }
+                    },
+                    "tag": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40
+                    },
+                    "nutrient": {
+                      "enum": [
+                        "kcal",
+                        "protein_g",
+                        "carbs_g",
+                        "fat_g",
+                        "sodium_mg"
+                      ]
+                    },
+                    "max": {
+                      "type": "number"
+                    },
+                    "value": {
+                      "type": "number"
+                    },
+                    "portion_factor": {
+                      "type": "number"
                     }
                   },
                   "required": [
                     "verdict",
                     "reason",
+                    "constraint_id",
+                    "kind",
                     "lines"
                   ],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 }
               },
               "omit_lines": {
                 "type": "array",
                 "items": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "ingredient_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "optional": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "ingredient_id",
+                    "optional"
+                  ],
+                  "additionalProperties": false
                 }
               },
               "unchecked": {
                 "type": "array",
                 "items": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "constraint_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "nutrient": {
+                      "enum": [
+                        "kcal",
+                        "protein_g",
+                        "carbs_g",
+                        "fat_g",
+                        "sodium_mg"
+                      ]
+                    },
+                    "reason": {
+                      "const": "nutrition_unknown"
+                    }
+                  },
+                  "required": [
+                    "constraint_id",
+                    "nutrient",
+                    "reason"
+                  ],
+                  "additionalProperties": false
                 }
               }
             },
@@ -2886,35 +3540,214 @@
                       ]
                     },
                     "reason": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 60
+                      "enum": [
+                        "contains_allergen",
+                        "may_contain_allergen",
+                        "medical_ingredient",
+                        "medical_flag",
+                        "diet_flag",
+                        "over_limit",
+                        "disliked_ingredient",
+                        "disliked_tag"
+                      ]
+                    },
+                    "constraint_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "kind": {
+                      "enum": [
+                        "allergy",
+                        "medical",
+                        "diet",
+                        "limit",
+                        "dislike"
+                      ]
                     },
                     "lines": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "type": "object",
+                        "properties": {
+                          "line": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "ingredient_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "optional": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "line",
+                          "ingredient_id",
+                          "optional"
+                        ],
+                        "additionalProperties": false
                       }
+                    },
+                    "allergen": {
+                      "enum": [
+                        "milk",
+                        "egg",
+                        "fish",
+                        "crustacean_shellfish",
+                        "tree_nut",
+                        "peanut",
+                        "wheat",
+                        "soy",
+                        "sesame"
+                      ]
+                    },
+                    "strict": {
+                      "type": "boolean"
+                    },
+                    "ingredient_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "flag": {
+                      "enum": [
+                        "meat",
+                        "poultry",
+                        "fish_or_seafood",
+                        "animal_product",
+                        "gluten",
+                        "lactose",
+                        "pork",
+                        "alcohol"
+                      ]
+                    },
+                    "diet": {
+                      "enum": [
+                        "vegetarian",
+                        "vegan",
+                        "pescatarian",
+                        "gluten_free",
+                        "lactose_free",
+                        "no_pork",
+                        "no_alcohol"
+                      ]
+                    },
+                    "flags": {
+                      "type": "array",
+                      "items": {
+                        "enum": [
+                          "meat",
+                          "poultry",
+                          "fish_or_seafood",
+                          "animal_product",
+                          "gluten",
+                          "lactose",
+                          "pork",
+                          "alcohol"
+                        ]
+                      }
+                    },
+                    "tag": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40
+                    },
+                    "nutrient": {
+                      "enum": [
+                        "kcal",
+                        "protein_g",
+                        "carbs_g",
+                        "fat_g",
+                        "sodium_mg"
+                      ]
+                    },
+                    "max": {
+                      "type": "number"
+                    },
+                    "value": {
+                      "type": "number"
+                    },
+                    "portion_factor": {
+                      "type": "number"
                     }
                   },
                   "required": [
                     "verdict",
                     "reason",
+                    "constraint_id",
+                    "kind",
                     "lines"
                   ],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 }
               },
               "omit_lines": {
                 "type": "array",
                 "items": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "ingredient_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "optional": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "ingredient_id",
+                    "optional"
+                  ],
+                  "additionalProperties": false
                 }
               },
               "unchecked": {
                 "type": "array",
                 "items": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "constraint_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "nutrient": {
+                      "enum": [
+                        "kcal",
+                        "protein_g",
+                        "carbs_g",
+                        "fat_g",
+                        "sodium_mg"
+                      ]
+                    },
+                    "reason": {
+                      "const": "nutrition_unknown"
+                    }
+                  },
+                  "required": [
+                    "constraint_id",
+                    "nutrient",
+                    "reason"
+                  ],
+                  "additionalProperties": false
                 }
               }
             },
@@ -2978,35 +3811,214 @@
                       ]
                     },
                     "reason": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 60
+                      "enum": [
+                        "contains_allergen",
+                        "may_contain_allergen",
+                        "medical_ingredient",
+                        "medical_flag",
+                        "diet_flag",
+                        "over_limit",
+                        "disliked_ingredient",
+                        "disliked_tag"
+                      ]
+                    },
+                    "constraint_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "kind": {
+                      "enum": [
+                        "allergy",
+                        "medical",
+                        "diet",
+                        "limit",
+                        "dislike"
+                      ]
                     },
                     "lines": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "type": "object",
+                        "properties": {
+                          "line": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "ingredient_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "optional": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "line",
+                          "ingredient_id",
+                          "optional"
+                        ],
+                        "additionalProperties": false
                       }
+                    },
+                    "allergen": {
+                      "enum": [
+                        "milk",
+                        "egg",
+                        "fish",
+                        "crustacean_shellfish",
+                        "tree_nut",
+                        "peanut",
+                        "wheat",
+                        "soy",
+                        "sesame"
+                      ]
+                    },
+                    "strict": {
+                      "type": "boolean"
+                    },
+                    "ingredient_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "flag": {
+                      "enum": [
+                        "meat",
+                        "poultry",
+                        "fish_or_seafood",
+                        "animal_product",
+                        "gluten",
+                        "lactose",
+                        "pork",
+                        "alcohol"
+                      ]
+                    },
+                    "diet": {
+                      "enum": [
+                        "vegetarian",
+                        "vegan",
+                        "pescatarian",
+                        "gluten_free",
+                        "lactose_free",
+                        "no_pork",
+                        "no_alcohol"
+                      ]
+                    },
+                    "flags": {
+                      "type": "array",
+                      "items": {
+                        "enum": [
+                          "meat",
+                          "poultry",
+                          "fish_or_seafood",
+                          "animal_product",
+                          "gluten",
+                          "lactose",
+                          "pork",
+                          "alcohol"
+                        ]
+                      }
+                    },
+                    "tag": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40
+                    },
+                    "nutrient": {
+                      "enum": [
+                        "kcal",
+                        "protein_g",
+                        "carbs_g",
+                        "fat_g",
+                        "sodium_mg"
+                      ]
+                    },
+                    "max": {
+                      "type": "number"
+                    },
+                    "value": {
+                      "type": "number"
+                    },
+                    "portion_factor": {
+                      "type": "number"
                     }
                   },
                   "required": [
                     "verdict",
                     "reason",
+                    "constraint_id",
+                    "kind",
                     "lines"
                   ],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 }
               },
               "omit_lines": {
                 "type": "array",
                 "items": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "ingredient_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "optional": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "ingredient_id",
+                    "optional"
+                  ],
+                  "additionalProperties": false
                 }
               },
               "unchecked": {
                 "type": "array",
                 "items": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "constraint_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "nutrient": {
+                      "enum": [
+                        "kcal",
+                        "protein_g",
+                        "carbs_g",
+                        "fat_g",
+                        "sodium_mg"
+                      ]
+                    },
+                    "reason": {
+                      "const": "nutrition_unknown"
+                    }
+                  },
+                  "required": [
+                    "constraint_id",
+                    "nutrient",
+                    "reason"
+                  ],
+                  "additionalProperties": false
                 }
               }
             },
@@ -3198,7 +4210,119 @@
               "guests": {
                 "type": "array",
                 "items": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "guest_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "constraints": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "allergy",
+                              "medical",
+                              "diet",
+                              "limit",
+                              "dislike"
+                            ]
+                          },
+                          "allergen": {
+                            "enum": [
+                              "milk",
+                              "egg",
+                              "fish",
+                              "crustacean_shellfish",
+                              "tree_nut",
+                              "peanut",
+                              "wheat",
+                              "soy",
+                              "sesame"
+                            ]
+                          },
+                          "strict": {
+                            "type": "boolean"
+                          },
+                          "ingredient_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "flag": {
+                            "enum": [
+                              "meat",
+                              "poultry",
+                              "fish_or_seafood",
+                              "animal_product",
+                              "gluten",
+                              "lactose",
+                              "pork",
+                              "alcohol"
+                            ]
+                          },
+                          "tag": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 40
+                          },
+                          "diet": {
+                            "enum": [
+                              "vegetarian",
+                              "vegan",
+                              "pescatarian",
+                              "gluten_free",
+                              "lactose_free",
+                              "no_pork",
+                              "no_alcohol"
+                            ]
+                          },
+                          "nutrient": {
+                            "enum": [
+                              "kcal",
+                              "protein_g",
+                              "carbs_g",
+                              "fat_g",
+                              "sodium_mg"
+                            ]
+                          },
+                          "max": {
+                            "type": "number"
+                          },
+                          "note": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 500
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "note"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "maxItems": 20
+                    }
+                  },
+                  "required": [
+                    "guest_id",
+                    "name",
+                    "constraints"
+                  ],
+                  "additionalProperties": false
                 }
               },
               "note": {
@@ -3234,26 +4358,184 @@
                     "recipe_id": {
                       "type": "string",
                       "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "servings": {
+                      "type": "number"
+                    },
+                    "servings_source": {
+                      "enum": [
+                        "default",
+                        "explicit"
+                      ]
+                    },
+                    "leftovers_of": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}:(breakfast|lunch|snack|dinner)$"
+                    },
+                    "portions": {
+                      "type": "number"
                     }
                   },
                   "required": [
                     "dish",
                     "kind",
-                    "recipe_id"
+                    "recipe_id",
+                    "title"
                   ],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 }
               },
               "leftovers": {
                 "type": "array",
                 "items": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "recipe_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "portions_left": {
+                      "type": "number"
+                    },
+                    "taken_by": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "slot_id": {
+                            "type": "string",
+                            "pattern": "^\\d{4}-\\d{2}-\\d{2}:(breakfast|lunch|snack|dinner)$"
+                          },
+                          "portions": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "slot_id",
+                          "portions"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "unclaimed": {
+                      "type": "number"
+                    },
+                    "usable_until": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                    }
+                  },
+                  "required": [
+                    "recipe_id",
+                    "portions_left",
+                    "taken_by",
+                    "unclaimed",
+                    "usable_until"
+                  ],
+                  "additionalProperties": false
                 }
               },
               "cooked": {
                 "anyOf": [
                   {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "portions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "recipe_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            "revision": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "made": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "eaten": {
+                              "type": "number",
+                              "minimum": 0
+                            }
+                          },
+                          "required": [
+                            "recipe_id",
+                            "revision",
+                            "made",
+                            "eaten"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "deducted": {
+                        "type": "boolean"
+                      },
+                      "short": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "ingredient_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            "quantity": {
+                              "type": "number"
+                            },
+                            "unit": {
+                              "enum": [
+                                "g",
+                                "kg",
+                                "oz",
+                                "lb",
+                                "ml",
+                                "l",
+                                "tsp",
+                                "tbsp",
+                                "cup",
+                                "fl_oz",
+                                "each"
+                              ]
+                            },
+                            "reason": {
+                              "enum": [
+                                "not_in_pantry",
+                                "no_conversion",
+                                "not_enough",
+                                "expired"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "ingredient_id",
+                            "quantity",
+                            "unit",
+                            "reason"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "at",
+                      "portions",
+                      "deducted",
+                      "short"
+                    ],
+                    "additionalProperties": false
                   },
                   {
                     "type": "null"
@@ -3271,21 +4553,506 @@
                         "archived_recipe",
                         "stale_base",
                         "leftover_short",
-                        "leftover_expired"
+                        "leftover_expired",
+                        "limit_unchecked"
                       ]
+                    },
+                    "dish": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "recipe_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "kind": {
+                      "enum": [
+                        "member",
+                        "guest"
+                      ]
+                    },
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "verdict": {
+                      "enum": [
+                        "unsafe",
+                        "may_contain",
+                        "unsuitable",
+                        "over_limit",
+                        "disliked",
+                        "ok_if_omitted",
+                        "ok"
+                      ]
+                    },
+                    "dishes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dish": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "recipe_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "verdict": {
+                            "enum": [
+                              "unsafe",
+                              "may_contain",
+                              "unsuitable",
+                              "over_limit",
+                              "disliked",
+                              "ok_if_omitted",
+                              "ok"
+                            ]
+                          },
+                          "findings": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "verdict": {
+                                  "enum": [
+                                    "unsafe",
+                                    "may_contain",
+                                    "unsuitable",
+                                    "over_limit",
+                                    "disliked",
+                                    "ok_if_omitted",
+                                    "ok"
+                                  ]
+                                },
+                                "reason": {
+                                  "enum": [
+                                    "contains_allergen",
+                                    "may_contain_allergen",
+                                    "medical_ingredient",
+                                    "medical_flag",
+                                    "diet_flag",
+                                    "over_limit",
+                                    "disliked_ingredient",
+                                    "disliked_tag"
+                                  ]
+                                },
+                                "constraint_id": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "kind": {
+                                  "enum": [
+                                    "allergy",
+                                    "medical",
+                                    "diet",
+                                    "limit",
+                                    "dislike"
+                                  ]
+                                },
+                                "lines": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "line": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                      },
+                                      "ingredient_id": {
+                                        "type": "string",
+                                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                      },
+                                      "optional": {
+                                        "type": "boolean"
+                                      }
+                                    },
+                                    "required": [
+                                      "line",
+                                      "ingredient_id",
+                                      "optional"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "allergen": {
+                                  "enum": [
+                                    "milk",
+                                    "egg",
+                                    "fish",
+                                    "crustacean_shellfish",
+                                    "tree_nut",
+                                    "peanut",
+                                    "wheat",
+                                    "soy",
+                                    "sesame"
+                                  ]
+                                },
+                                "strict": {
+                                  "type": "boolean"
+                                },
+                                "ingredient_id": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                },
+                                "flag": {
+                                  "enum": [
+                                    "meat",
+                                    "poultry",
+                                    "fish_or_seafood",
+                                    "animal_product",
+                                    "gluten",
+                                    "lactose",
+                                    "pork",
+                                    "alcohol"
+                                  ]
+                                },
+                                "diet": {
+                                  "enum": [
+                                    "vegetarian",
+                                    "vegan",
+                                    "pescatarian",
+                                    "gluten_free",
+                                    "lactose_free",
+                                    "no_pork",
+                                    "no_alcohol"
+                                  ]
+                                },
+                                "flags": {
+                                  "type": "array",
+                                  "items": {
+                                    "enum": [
+                                      "meat",
+                                      "poultry",
+                                      "fish_or_seafood",
+                                      "animal_product",
+                                      "gluten",
+                                      "lactose",
+                                      "pork",
+                                      "alcohol"
+                                    ]
+                                  }
+                                },
+                                "tag": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 40
+                                },
+                                "nutrient": {
+                                  "enum": [
+                                    "kcal",
+                                    "protein_g",
+                                    "carbs_g",
+                                    "fat_g",
+                                    "sodium_mg"
+                                  ]
+                                },
+                                "max": {
+                                  "type": "number"
+                                },
+                                "value": {
+                                  "type": "number"
+                                },
+                                "portion_factor": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "verdict",
+                                "reason",
+                                "constraint_id",
+                                "kind",
+                                "lines"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "omit_lines": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "line": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                "ingredient_id": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                },
+                                "optional": {
+                                  "type": "boolean"
+                                }
+                              },
+                              "required": [
+                                "line",
+                                "ingredient_id",
+                                "optional"
+                              ],
+                              "additionalProperties": false
+                            }
+                          }
+                        },
+                        "required": [
+                          "dish",
+                          "recipe_id",
+                          "verdict",
+                          "findings",
+                          "omit_lines"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "base_recipe_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "base_revision": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "base_current_revision": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "leftovers_of": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}:(breakfast|lunch|snack|dinner)$"
+                    },
+                    "planned": {
+                      "type": "number"
+                    },
+                    "available": {
+                      "type": "number"
+                    },
+                    "age_days": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "leftover_max_days": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "constraint_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "nutrient": {
+                      "enum": [
+                        "kcal",
+                        "protein_g",
+                        "carbs_g",
+                        "fat_g",
+                        "sodium_mg"
+                      ]
+                    },
+                    "missing_for": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "line": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "ingredient_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "unit": {
+                            "enum": [
+                              "g",
+                              "kg",
+                              "oz",
+                              "lb",
+                              "ml",
+                              "l",
+                              "tsp",
+                              "tbsp",
+                              "cup",
+                              "fl_oz",
+                              "each"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "line",
+                          "ingredient_id"
+                        ],
+                        "additionalProperties": false
+                      }
                     }
                   },
                   "required": [
                     "type"
                   ],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 }
               },
               "history": {
                 "type": "array",
                 "items": {
-                  "type": "object"
-                }
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "actor": {
+                      "enum": [
+                        "seed",
+                        "agent",
+                        "event"
+                      ]
+                    },
+                    "by": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "request_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "event_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "action": {
+                      "enum": [
+                        "set",
+                        "replaced",
+                        "cleared",
+                        "cooked",
+                        "skipped",
+                        "guest_added",
+                        "guest_changed",
+                        "guest_removed"
+                      ]
+                    },
+                    "dishes": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "recipe_id": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              },
+                              "servings": {
+                                "anyOf": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "recipe_id",
+                              "servings"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "leftovers_of": {
+                                "type": "string",
+                                "pattern": "^\\d{4}-\\d{2}-\\d{2}:(breakfast|lunch|snack|dinner)$"
+                              },
+                              "recipe_id": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              },
+                              "portions": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "leftovers_of",
+                              "recipe_id",
+                              "portions"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    },
+                    "attendees": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    },
+                    "guest_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "actor",
+                    "by",
+                    "request_id",
+                    "event_id",
+                    "action",
+                    "dishes",
+                    "attendees",
+                    "guest_ids"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 500
               },
               "updated_at": {
                 "type": "string",
@@ -3459,8 +5226,117 @@
               "history": {
                 "type": "array",
                 "items": {
-                  "type": "object"
-                }
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "actor": {
+                      "enum": [
+                        "seed",
+                        "agent",
+                        "event"
+                      ]
+                    },
+                    "by": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "request_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "event_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "action": {
+                      "enum": [
+                        "seed",
+                        "set",
+                        "event",
+                        "cooked"
+                      ]
+                    },
+                    "quantity": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "unit": {
+                      "enum": [
+                        "g",
+                        "kg",
+                        "oz",
+                        "lb",
+                        "ml",
+                        "l",
+                        "tsp",
+                        "tbsp",
+                        "cup",
+                        "fl_oz",
+                        "each"
+                      ]
+                    },
+                    "use_by": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "slot_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^\\d{4}-\\d{2}-\\d{2}:(breakfast|lunch|snack|dinner)$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "actor",
+                    "by",
+                    "request_id",
+                    "event_id",
+                    "action",
+                    "quantity",
+                    "unit",
+                    "use_by",
+                    "slot_id"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 500
               }
             },
             "required": [
@@ -3550,8 +5426,18 @@
                   "type": "string",
                   "format": "date-time"
                 },
-                "stale": {
-                  "type": "boolean"
+                "generation": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "fingerprint": {
+                  "type": "string",
+                  "minLength": 64,
+                  "maxLength": 64
+                },
+                "next_line": {
+                  "type": "integer",
+                  "minimum": 1
                 },
                 "lines": {
                   "type": "array",
@@ -3579,7 +5465,7 @@
                           }
                         ]
                       },
-                      "name": {
+                      "text": {
                         "anyOf": [
                           {
                             "type": "string",
@@ -3624,11 +5510,56 @@
                           }
                         ]
                       },
+                      "exact": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "needed_total": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "from_pantry": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
                       "state": {
                         "enum": [
                           "needed",
                           "ticked",
                           "excluded"
+                        ]
+                      },
+                      "excluded_reason": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 300
+                          },
+                          {
+                            "type": "null"
+                          }
                         ]
                       },
                       "surplus": {
@@ -3640,39 +5571,362 @@
                           "type": "string",
                           "pattern": "^\\d{4}-\\d{2}-\\d{2}:(breakfast|lunch|snack|dinner)$"
                         }
+                      },
+                      "first_needed": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "origin": {
+                        "type": "object",
+                        "properties": {
+                          "at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "actor": {
+                            "enum": [
+                              "seed",
+                              "agent",
+                              "event"
+                            ]
+                          },
+                          "by": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "request_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "event_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "at",
+                          "actor",
+                          "by",
+                          "request_id",
+                          "event_id"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "history": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "actor": {
+                              "enum": [
+                                "seed",
+                                "agent",
+                                "event"
+                              ]
+                            },
+                            "by": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "request_id": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "event_id": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "action": {
+                              "enum": [
+                                "derived",
+                                "added",
+                                "changed",
+                                "ticked",
+                                "unticked",
+                                "excluded",
+                                "included",
+                                "surplus",
+                                "needed_again"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "at",
+                            "actor",
+                            "by",
+                            "request_id",
+                            "event_id",
+                            "action"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "minItems": 1,
+                        "maxItems": 200
+                      },
+                      "name": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
                       "id",
                       "kind",
                       "ingredient_id",
-                      "name",
+                      "text",
                       "quantity",
                       "unit",
+                      "exact",
+                      "needed_total",
+                      "from_pantry",
                       "state",
+                      "excluded_reason",
                       "surplus",
-                      "slots"
+                      "slots",
+                      "first_needed",
+                      "origin",
+                      "history",
+                      "name"
                     ],
-                    "additionalProperties": true
+                    "additionalProperties": false
                   }
                 },
                 "optional_lines": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "ingredient_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "quantity": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "unit": {
+                        "enum": [
+                          "g",
+                          "kg",
+                          "oz",
+                          "lb",
+                          "ml",
+                          "l",
+                          "tsp",
+                          "tbsp",
+                          "cup",
+                          "fl_oz",
+                          "each"
+                        ]
+                      },
+                      "exact": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "slot_id": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}:(breakfast|lunch|snack|dinner)$"
+                      },
+                      "recipe_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    },
+                    "required": [
+                      "ingredient_id",
+                      "name",
+                      "quantity",
+                      "unit",
+                      "exact",
+                      "slot_id",
+                      "recipe_id"
+                    ],
+                    "additionalProperties": false
                   }
                 },
                 "expiring_before_use": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "ingredient_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "quantity": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "unit": {
+                        "enum": [
+                          "g",
+                          "kg",
+                          "oz",
+                          "lb",
+                          "ml",
+                          "l",
+                          "tsp",
+                          "tbsp",
+                          "cup",
+                          "fl_oz",
+                          "each"
+                        ]
+                      },
+                      "use_by": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                      },
+                      "first_needed": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                      }
+                    },
+                    "required": [
+                      "ingredient_id",
+                      "name",
+                      "quantity",
+                      "unit",
+                      "use_by",
+                      "first_needed"
+                    ],
+                    "additionalProperties": false
                   }
                 },
                 "stock_not_counted": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "ingredient_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "quantity": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "unit": {
+                        "enum": [
+                          "g",
+                          "kg",
+                          "oz",
+                          "lb",
+                          "ml",
+                          "l",
+                          "tsp",
+                          "tbsp",
+                          "cup",
+                          "fl_oz",
+                          "each"
+                        ]
+                      },
+                      "needed_unit": {
+                        "enum": [
+                          "g",
+                          "kg",
+                          "oz",
+                          "lb",
+                          "ml",
+                          "l",
+                          "tsp",
+                          "tbsp",
+                          "cup",
+                          "fl_oz",
+                          "each"
+                        ]
+                      },
+                      "reason": {
+                        "const": "no_conversion"
+                      }
+                    },
+                    "required": [
+                      "ingredient_id",
+                      "name",
+                      "quantity",
+                      "unit",
+                      "needed_unit",
+                      "reason"
+                    ],
+                    "additionalProperties": false
                   }
+                },
+                "stale": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -3680,13 +5934,16 @@
                 "start",
                 "end",
                 "generated_at",
-                "stale",
+                "generation",
+                "fingerprint",
+                "next_line",
                 "lines",
                 "optional_lines",
                 "expiring_before_use",
-                "stock_not_counted"
+                "stock_not_counted",
+                "stale"
               ],
-              "additionalProperties": true
+              "additionalProperties": false
             },
             {
               "type": "null"
@@ -4952,14 +7209,360 @@
                   "archived_recipe",
                   "stale_base",
                   "leftover_short",
-                  "leftover_expired"
+                  "leftover_expired",
+                  "limit_unchecked"
                 ]
+              },
+              "dish": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "recipe_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "member",
+                  "guest"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "verdict": {
+                "enum": [
+                  "unsafe",
+                  "may_contain",
+                  "unsuitable",
+                  "over_limit",
+                  "disliked",
+                  "ok_if_omitted",
+                  "ok"
+                ]
+              },
+              "dishes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "dish": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "recipe_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "verdict": {
+                      "enum": [
+                        "unsafe",
+                        "may_contain",
+                        "unsuitable",
+                        "over_limit",
+                        "disliked",
+                        "ok_if_omitted",
+                        "ok"
+                      ]
+                    },
+                    "findings": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "verdict": {
+                            "enum": [
+                              "unsafe",
+                              "may_contain",
+                              "unsuitable",
+                              "over_limit",
+                              "disliked",
+                              "ok_if_omitted",
+                              "ok"
+                            ]
+                          },
+                          "reason": {
+                            "enum": [
+                              "contains_allergen",
+                              "may_contain_allergen",
+                              "medical_ingredient",
+                              "medical_flag",
+                              "diet_flag",
+                              "over_limit",
+                              "disliked_ingredient",
+                              "disliked_tag"
+                            ]
+                          },
+                          "constraint_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "kind": {
+                            "enum": [
+                              "allergy",
+                              "medical",
+                              "diet",
+                              "limit",
+                              "dislike"
+                            ]
+                          },
+                          "lines": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "line": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                "ingredient_id": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                },
+                                "optional": {
+                                  "type": "boolean"
+                                }
+                              },
+                              "required": [
+                                "line",
+                                "ingredient_id",
+                                "optional"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "allergen": {
+                            "enum": [
+                              "milk",
+                              "egg",
+                              "fish",
+                              "crustacean_shellfish",
+                              "tree_nut",
+                              "peanut",
+                              "wheat",
+                              "soy",
+                              "sesame"
+                            ]
+                          },
+                          "strict": {
+                            "type": "boolean"
+                          },
+                          "ingredient_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "flag": {
+                            "enum": [
+                              "meat",
+                              "poultry",
+                              "fish_or_seafood",
+                              "animal_product",
+                              "gluten",
+                              "lactose",
+                              "pork",
+                              "alcohol"
+                            ]
+                          },
+                          "diet": {
+                            "enum": [
+                              "vegetarian",
+                              "vegan",
+                              "pescatarian",
+                              "gluten_free",
+                              "lactose_free",
+                              "no_pork",
+                              "no_alcohol"
+                            ]
+                          },
+                          "flags": {
+                            "type": "array",
+                            "items": {
+                              "enum": [
+                                "meat",
+                                "poultry",
+                                "fish_or_seafood",
+                                "animal_product",
+                                "gluten",
+                                "lactose",
+                                "pork",
+                                "alcohol"
+                              ]
+                            }
+                          },
+                          "tag": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 40
+                          },
+                          "nutrient": {
+                            "enum": [
+                              "kcal",
+                              "protein_g",
+                              "carbs_g",
+                              "fat_g",
+                              "sodium_mg"
+                            ]
+                          },
+                          "max": {
+                            "type": "number"
+                          },
+                          "value": {
+                            "type": "number"
+                          },
+                          "portion_factor": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "verdict",
+                          "reason",
+                          "constraint_id",
+                          "kind",
+                          "lines"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "omit_lines": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "line": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "ingredient_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "optional": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "line",
+                          "ingredient_id",
+                          "optional"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "dish",
+                    "recipe_id",
+                    "verdict",
+                    "findings",
+                    "omit_lines"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "base_recipe_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "base_revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "base_current_revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "leftovers_of": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}:(breakfast|lunch|snack|dinner)$"
+              },
+              "planned": {
+                "type": "number"
+              },
+              "available": {
+                "type": "number"
+              },
+              "age_days": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "leftover_max_days": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "constraint_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nutrient": {
+                "enum": [
+                  "kcal",
+                  "protein_g",
+                  "carbs_g",
+                  "fat_g",
+                  "sodium_mg"
+                ]
+              },
+              "missing_for": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "line": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "ingredient_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "unit": {
+                      "enum": [
+                        "g",
+                        "kg",
+                        "oz",
+                        "lb",
+                        "ml",
+                        "l",
+                        "tsp",
+                        "tbsp",
+                        "cup",
+                        "fl_oz",
+                        "each"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "ingredient_id"
+                  ],
+                  "additionalProperties": false
+                }
               }
             },
             "required": [
               "type"
             ],
-            "additionalProperties": true
+            "additionalProperties": false
           }
         }
       },
@@ -5151,7 +7754,8 @@
                 "enum": [
                   "not_in_pantry",
                   "no_conversion",
-                  "not_enough"
+                  "not_enough",
+                  "expired"
                 ]
               }
             },
@@ -5161,7 +7765,7 @@
               "unit",
               "reason"
             ],
-            "additionalProperties": true
+            "additionalProperties": false
           }
         }
       },

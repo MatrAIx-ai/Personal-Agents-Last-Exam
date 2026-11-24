@@ -80,7 +80,7 @@ test('T11 set, replace and clear slots; default servings; flags per person; a wr
 
 test('T12 cooked and skipped; leftovers available, short, expired and unavailable; cooked slots cannot change; not_yet and past_slot', () => {
   const f = fixture();
-  // Saturday: 8 servings for 2 members and 4 guests (6 portions), so 2 are left while planned.
+  // Saturday: 8 servings for 2 members and 3 guests (5 portions), so 3 are left while planned.
   f.call(P + 'plan.slot.set', {id: SAT, dishes: [{recipe_id: 'rec-green-curry', servings: 8}], attendees: ['person-nora', 'person-eli'], guests: GUESTS.slice(1)});
   let sat = slotOf(f, SAT);
   assert.deepEqual(sat.leftovers, [{recipe_id: 'rec-green-curry', portions_left: 3, taken_by: [], unclaimed: 3, usable_until: '2026-11-17'}],
@@ -155,4 +155,29 @@ test('T12 cooked and skipped; leftovers available, short, expired and unavailabl
   // Flags recomputed from a snapshot match what plan.get shows.
   const fromSnapshot = require('../plugin.cjs').flagsFromSnapshot(f.data);
   assert.deepEqual(fromSnapshot['2026-11-16:lunch'], slotOf(f, '2026-11-16:lunch').flags);
+});
+
+test('T12 marking cooked with defaults when servings are below the attendees\' portions: eaten is capped at portions made', () => {
+  const f = fixture();
+  f.call(P + 'plan.slot.set', {id: '2026-11-08:dinner', dishes: [{recipe_id: 'rec-green-curry', servings: 2}]});
+  const r = f.call(P + 'plan.slot.mark', {id: '2026-11-08:dinner', status: 'cooked'});
+  assert.deepEqual([r.state, r.portions], ['cooked', [{recipe_id: 'rec-green-curry', revision: 1, made: 2, eaten: 2}]]);
+  assert.deepEqual(slotOf(f, '2026-11-08:dinner').leftovers[0].portions_left, 0);
+  // An explicit eaten above made is still refused.
+  f.call(P + 'plan.slot.set', {id: '2026-11-08:lunch', dishes: [{recipe_id: 'rec-shakshuka', servings: 2}]});
+  assert.equal(f.refuse(P + 'plan.slot.mark', {id: '2026-11-08:lunch', status: 'cooked', portions: [{recipe_id: 'rec-shakshuka', eaten: 3}]}), 'invalid_quantity');
+});
+
+test('T11 a limit that cannot be checked shows on the slot as limit_unchecked, never as met', () => {
+  const f = fixture();
+  // Tuesday's lentil soup has bay leaves counted without a weight, so its nutrition is unknown; Evan has a 700 kcal cap.
+  const soup = slotOf(f, '2026-11-10:dinner');
+  assert.equal(person(soup, 'person-evan'), undefined, 'his verdict is not a finding');
+  assert.deepEqual(soup.flags.filter(x => x.type === 'limit_unchecked'), [{type: 'limit_unchecked', dish: 0, recipe_id: 'rec-red-lentil-soup', kind: 'member',
+    id: 'person-evan', name: 'Evan', constraint_id: 'con-evan-01', nutrient: 'kcal', missing_for: [{line: 5, ingredient_id: 'ing-bay-leaf', unit: 'each'}]}]);
+  // A guest's limit on the same dish is shown too; and recipes.check lists it under unchecked.
+  f.call(P + 'plan.slot.set', {id: '2026-11-10:dinner', dishes: [{recipe_id: 'rec-red-lentil-soup'}], attendees: ['person-nora'],
+    guests: [{guest_id: 'guest-ruth', name: 'Ruth', constraints: [{kind: 'limit', nutrient: 'sodium_mg', max: 600}]}]});
+  assert.deepEqual(slotOf(f, '2026-11-10:dinner').flags.map(x => [x.type, x.id, x.nutrient]), [['limit_unchecked', 'guest-ruth', 'sodium_mg']]);
+  assert.deepEqual(require('../plugin.cjs').flagsFromSnapshot(f.data)['2026-11-10:dinner'], slotOf(f, '2026-11-10:dinner').flags);
 });

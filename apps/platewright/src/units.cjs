@@ -48,7 +48,15 @@ const toGrams = (quantity, unit, ing) => tryConvert(quantity, unit, 'g', ing);
 // Unit a quantity is shown in for a unit system; conversions stay inside the line's dimension.
 function displayUnit(quantity, unit, system) {
   const dim = UNITS[unit].dim;
-  if (system === 'recipe' || dim === 'count') return unit;
+  if (dim === 'count') return unit;
+  if (system === 'recipe') {
+    // As written, except that a small amount in cups or tablespoons moves down to a smaller spoon, so
+    // the shown quantity stays close to the exact one (0.1 tbsp shows as 0.25 tsp, not 0.25 tbsp).
+    const ml = quantity * UNITS[unit].size;
+    if (unit === 'cup' && ml < 60) return ml < 15 ? 'tsp' : 'tbsp';
+    if (unit === 'tbsp' && ml < 15) return 'tsp';
+    return unit;
+  }
   if (system === 'metric') return BASE[dim];
   const base = quantity * UNITS[unit].size;
   if (dim === 'mass') return base >= 453.6 ? 'lb' : 'oz';

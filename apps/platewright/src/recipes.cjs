@@ -131,6 +131,9 @@ function scaledLines(data, content, servings, system, overrides = {}) {
   });
 }
 
+// Lines whose grams are unknown (they make nutrition null).
+const nutritionMissing = (data, content) => nutrition(content, ingredientsMap(data)).missing_for;
+
 function nutritionView(data, content) {
   const n = nutrition(content, ingredientsMap(data));
   return {nutrition: shownNutrition(n.exact), nutrition_exact: n.exact, missing_for: n.missing_for, optional_excluded: n.optional_excluded};
@@ -316,5 +319,5 @@ function createVariant(ctx, data, args) {
   return {id: r.id, state: 'active', revision: 1, base_recipe_id: variant.base_recipe_id, base_revision: variant.base_revision, unverified: variant.unverified};
 }
 
-module.exports = {contentOf, contentAt, ingredientsMap, checkServings, normalizeContent, insertRecipe, people,
+module.exports = {nutritionMissing, contentOf, contentAt, ingredientsMap, checkServings, normalizeContent, insertRecipe, people,
   search, ingredientSearch, get, checkRecipe, create, update, substitutions, preview, createVariant};

@@ -68,6 +68,7 @@ function normalizeGuests(data, guests) {
     if (ids.has(g.guest_id)) fail('invalid_arguments', `Guest ${g.guest_id} is listed twice.`);
     ids.add(g.guest_id);
     if (data.members.some(m => m.person_id === g.guest_id)) fail('invalid_arguments', `${g.guest_id} is a household member, not a guest.`);
+    if (!g.name.trim()) fail('invalid_arguments', `Guest ${g.guest_id} needs a name.`);
     return {guest_id: g.guest_id, name: g.name.trim(), constraints: (g.constraints || []).map(x => ({kind: x.kind, ...target(data, x), note: x.note ?? null}))};
   });
 }

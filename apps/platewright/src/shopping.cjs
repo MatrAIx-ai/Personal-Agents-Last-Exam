@@ -26,10 +26,11 @@ function fingerprint(data, start, end) {
 }
 
 // Adds up the exact quantities of every planned recipe dish per ingredient in the unit it is bought in
-// (or the base unit of the line's dimension when that cannot be converted), subtracts usable pantry
-// stock, and rounds up once at the end.
-function derive(data, start, end) {
-  const ingredients = R.ingredientsMap(data), groups = new Map(), optional = [];
+// (or the base unit of the line's dimension when that cannot be converted), takes pantry stock use by
+// use in meal order (a lot only for meals on or before its use-by date, and never once the clock has
+// passed that date), and rounds up once at the end.
+function derive(data, start, end, todayDate) {
+  const ingredients = R.ingredientsMap(data), groups = new Map(), uses = [], optional = [];
   for (const slot of plannedSlots(data, start, end)) {
     for (const dish of slot.dishes.filter(d => !P.isLeftover(d))) {
       const content = P.dishContent(data, slot, dish.recipe_id), factor = P.dishServings(data, slot, dish) / content.servings;
@@ -42,34 +43,39 @@ function derive(data, start, end) {
         let unit = ing.buy_unit, value = u.tryConvert(need, line.unit, unit, ing);
         if (value === null) { unit = u.BASE[u.dimension(line.unit)]; value = u.tryConvert(need, line.unit, unit, ing); }
         const key = ing.id + '|' + unit;
-        const g = groups.get(key) || {ingredient_id: ing.id, unit, total: 0, slots: [], first_needed: slot.date};
+        const g = groups.get(key) || {ingredient_id: ing.id, unit, total: 0, used: 0, slots: [], first_needed: slot.date};
         g.total = exact(g.total + value);
         if (!g.slots.includes(slot.id)) g.slots.push(slot.id);
         groups.set(key, g);
+        uses.push({group: g, date: slot.date, amount: value});
       }
     }
   }
-  const expiring = [], uncounted = [], lines = [];
-  const ordered = [...groups.values()].sort((a, b) => a.first_needed.localeCompare(b.first_needed) || a.ingredient_id.localeCompare(b.ingredient_id) || a.unit.localeCompare(b.unit));
+  const expiring = [], uncounted = [];
   const stock = new Map(data.pantry.filter(p => p.quantity > 0).map(p => [p.ingredient_id, {...p}]));
-  for (const g of ordered) {
-    const ing = ingredients.get(g.ingredient_id), item = stock.get(g.ingredient_id);
-    let used = 0;
-    if (item && item.quantity > 0) {
-      if (item.use_by && item.use_by < g.first_needed) {
-        if (!expiring.some(e => e.ingredient_id === ing.id)) expiring.push({ingredient_id: ing.id, name: ing.name, quantity: item.quantity, unit: item.unit, use_by: item.use_by, first_needed: g.first_needed});
-      } else {
-        const available = u.tryConvert(item.quantity, item.unit, g.unit, ing);
-        if (available === null) uncounted.push({ingredient_id: ing.id, name: ing.name, quantity: item.quantity, unit: item.unit, needed_unit: g.unit, reason: 'no_conversion'});
-        else {
-          used = Math.min(available, g.total);
-          item.quantity = exact(item.quantity - u.tryConvert(used, g.unit, item.unit, ing));
-        }
-      }
+  for (const use of uses) {
+    const g = use.group, ing = ingredients.get(g.ingredient_id), item = stock.get(g.ingredient_id);
+    if (!item || item.quantity <= 1e-9) continue;
+    if (item.use_by && (item.use_by < use.date || item.use_by < todayDate)) {
+      // The rest of this lot expires before this meal: not counted, listed once.
+      if (!expiring.some(e => e.ingredient_id === ing.id)) expiring.push({ingredient_id: ing.id, name: ing.name, quantity: item.quantity, unit: item.unit, use_by: item.use_by, first_needed: use.date});
+      continue;
     }
-    const remaining = exact(g.total - used);
+    const available = u.tryConvert(item.quantity, item.unit, g.unit, ing);
+    if (available === null) {
+      if (!uncounted.some(x => x.ingredient_id === ing.id && x.needed_unit === g.unit)) uncounted.push({ingredient_id: ing.id, name: ing.name, quantity: item.quantity, unit: item.unit, needed_unit: g.unit, reason: 'no_conversion'});
+      continue;
+    }
+    const take = Math.min(available, use.amount);
+    g.used = exact(g.used + take);
+    item.quantity = exact(item.quantity - u.tryConvert(take, g.unit, item.unit, ing));
+  }
+  const lines = [];
+  const ordered = [...groups.values()].sort((a, b) => a.first_needed.localeCompare(b.first_needed) || a.ingredient_id.localeCompare(b.ingredient_id) || a.unit.localeCompare(b.unit));
+  for (const g of ordered) {
+    const ing = ingredients.get(g.ingredient_id), remaining = exact(g.total - g.used);
     if (remaining > 1e-9) lines.push({ingredient_id: ing.id, unit: g.unit, quantity: u.roundUp(remaining, g.unit, ing), exact: remaining,
-      needed_total: g.total, from_pantry: exact(used), slots: g.slots, first_needed: g.first_needed});
+      needed_total: g.total, from_pantry: g.used, slots: g.slots, first_needed: g.first_needed});
   }
   return {lines, optional_lines: optional, expiring_before_use: expiring, stock_not_counted: uncounted};
 }
@@ -86,7 +92,7 @@ function newLineId(list) {
 
 function generate(ctx, data, args) {
   const {start, end} = P.window(ctx, data, args, 28);
-  const who = agentWho(ctx, data, args), d = derive(data, start, end);
+  const who = agentWho(ctx, data, args), d = derive(data, start, end, c.today(ctx, data));
   const list = data.shopping || {id: LIST_ID, start, end, generated_at: who.at, generation: 0, fingerprint: '', next_line: 1, lines: [], optional_lines: [], expiring_before_use: [], stock_not_counted: []};
   const old = list.lines, kept = [], added = [], dropped = [], surplus = [];
   const derivedKey = l => l.ingredient_id + '|' + l.unit;

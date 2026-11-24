@@ -16,10 +16,18 @@ test('T05 each constraint kind, the order of seriousness, strict and may_contain
   // allergy -> unsafe, with the line named.
   const egg = verdictFor(f, 'rec-shakshuka', [{kind: 'allergy', allergen: 'egg'}]);
   assert.deepEqual([egg.verdict, lines(egg), egg.findings[0].reason], ['unsafe', [4], 'contains_allergen']);
-  // may contain: may_contain when not strict, unsafe when strict. The cashews line is optional and does not decide.
+  // may contain: may_contain when not strict, unsafe when strict (tortillas may contain soy).
+  const soy = verdictFor(f, 'rec-black-bean-tacos', [{kind: 'allergy', allergen: 'soy'}]);
+  assert.deepEqual([soy.verdict, lines(soy)], ['may_contain', [3]]);
+  assert.equal(verdictFor(f, 'rec-black-bean-tacos', [{kind: 'allergy', allergen: 'soy', strict: true}]).verdict, 'unsafe');
+  // The verdict is the most serious finding: the optional cashews contain tree nuts, so the curry is unsafe
+  // for a tree-nut allergy even though only the paste is a firm line; the cashews are named in omit_lines.
   const nut = verdictFor(f, 'rec-green-curry', [{kind: 'allergy', allergen: 'tree_nut'}]);
-  assert.equal(nut.verdict, 'may_contain');
+  assert.deepEqual([nut.verdict, nut.omit_lines.map(l => l.ingredient_id)], ['unsafe', ['ing-cashews']]);
   assert.deepEqual(nut.findings.map(x => [x.verdict, x.reason, x.lines.map(l => l.line)]), [['unsafe', 'contains_allergen', [7]], ['may_contain', 'may_contain_allergen', [1]]]);
+  // A firm mild finding does not hide an optional severe one (strict tree-nut allergy and a dislike of banana).
+  const bread = verdictFor(f, 'rec-banana-bread', [{kind: 'allergy', allergen: 'tree_nut', strict: true}, {kind: 'dislike', ingredient_id: 'ing-banana'}]);
+  assert.deepEqual([bread.verdict, bread.omit_lines.map(l => l.ingredient_id), bread.findings.map(x => x.verdict)], ['unsafe', ['ing-walnuts'], ['unsafe', 'disliked']]);
   const strict = verdictFor(f, 'rec-green-curry', [{kind: 'allergy', allergen: 'tree_nut', strict: true}]);
   assert.equal(strict.verdict, 'unsafe');
   assert.deepEqual(strict.findings[1], {verdict: 'unsafe', reason: 'may_contain_allergen', constraint_id: null, kind: 'allergy', lines: [{line: 1, ingredient_id: 'ing-green-curry-paste', optional: false}], allergen: 'tree_nut', strict: true});
@@ -47,21 +55,23 @@ test('T05 each constraint kind, the order of seriousness, strict and may_contain
   const order = [
     [[{kind: 'dislike', tag: 'spicy'}, {kind: 'limit', nutrient: 'kcal', max: 100}], 'over_limit'],
     [[{kind: 'dislike', tag: 'spicy'}, {kind: 'limit', nutrient: 'kcal', max: 100}, {kind: 'diet', diet: 'pescatarian'}, {kind: 'diet', diet: 'vegetarian'}], 'unsuitable'],
-    [[{kind: 'diet', diet: 'vegetarian'}, {kind: 'allergy', allergen: 'tree_nut'}], 'may_contain'],
+    [[{kind: 'diet', diet: 'vegetarian'}, {kind: 'allergy', allergen: 'peanut'}, {kind: 'dislike', tag: 'citrus'}], 'unsuitable'],
     [[{kind: 'diet', diet: 'vegetarian'}, {kind: 'allergy', allergen: 'tree_nut'}, {kind: 'allergy', allergen: 'fish'}], 'unsafe']
   ];
   for (const [cons, expected] of order) {
     const v = verdictFor(f, 'rec-green-curry', cons);
     assert.equal(v.verdict, expected, JSON.stringify(cons));
   }
+  assert.equal(verdictFor(f, 'rec-black-bean-tacos', [{kind: 'allergy', allergen: 'soy'}, {kind: 'diet', diet: 'lactose_free'}, {kind: 'dislike', ingredient_id: 'ing-cilantro'}]).verdict, 'may_contain');
   assert.equal(verdictFor(f, 'rec-green-curry', order[3][0]).findings.length, 4, 'every finding is listed, not only the worst');
   // ok_if_omitted: all causing lines optional -> names them.
   const wine = verdictFor(f, 'rec-mushroom-risotto', [{kind: 'medical', flag: 'alcohol'}]);
   assert.deepEqual([wine.verdict, wine.omit_lines.map(l => l.ingredient_id)], ['ok_if_omitted', ['ing-white-wine']]);
   const both = verdictFor(f, 'rec-black-bean-tacos', [{kind: 'diet', diet: 'lactose_free'}, {kind: 'allergy', allergen: 'milk'}]);
   assert.deepEqual([both.verdict, both.omit_lines.map(l => l.line)], ['ok_if_omitted', [6]]);
-  assert.equal(verdictFor(f, 'rec-black-bean-tacos', [{kind: 'diet', diet: 'lactose_free'}, {kind: 'dislike', ingredient_id: 'ing-cilantro'}]).verdict, 'disliked',
-    'an optional finding does not hide a firm one');
+  const mixed = verdictFor(f, 'rec-black-bean-tacos', [{kind: 'diet', diet: 'lactose_free'}, {kind: 'dislike', ingredient_id: 'ing-cilantro'}]);
+  assert.deepEqual([mixed.verdict, mixed.omit_lines.map(l => l.line)], ['unsuitable', [6]],
+    'with a firm finding present, the most serious finding decides, and the optional sour cream is still named');
   assert.equal(verdictFor(f, 'rec-shakshuka', []).verdict, 'ok', 'a person with no constraints is ok for everything');
   // Constraints a check cannot know are refused before anything is read.
   assert.equal(f.refuse(P + 'recipes.check', {id: 'rec-green-curry', guests: [guest('guest-x', [{kind: 'allergy', allergen: 'coconut'}])]}), 'invalid_constraint');
@@ -184,6 +194,7 @@ test('T08 guests are checked on their slot only; limits use portion factors', ()
   // Guest IDs must not be member IDs, and appear once per slot.
   assert.equal(f.refuse(P + 'plan.slot.set', {id: '2026-11-16:dinner', dishes: [{recipe_id: 'rec-shakshuka'}], guests: [guest('person-eli', [])]}), 'invalid_arguments');
   assert.equal(f.refuse(P + 'plan.slot.set', {id: '2026-11-16:dinner', dishes: [{recipe_id: 'rec-shakshuka'}], guests: [maya, maya]}), 'invalid_arguments');
+  assert.equal(f.refuse(P + 'plan.slot.set', {id: '2026-11-16:dinner', dishes: [{recipe_id: 'rec-shakshuka'}], guests: [{guest_id: 'guest-b', name: '   ', constraints: []}]}), 'invalid_arguments');
   // A guest event changes only that slot; flags and default servings follow at the next read.
   f.event(ev('guest.changed', '2026-11-10T18:00:00-05:00', {id: '2026-11-15:dinner', action: 'set', guest: guest('guest-ruth', [{kind: 'limit', nutrient: 'sodium_mg', max: 600}])}));
   const after = f.call(P + 'plan.get', {start: '2026-11-14', end: '2026-11-15'}).slots;

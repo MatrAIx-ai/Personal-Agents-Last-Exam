@@ -28,17 +28,20 @@ function describe(data, con) {
   return what + from + to;
 }
 
+// "Evan added a constraint" when Evan acts for himself, "Nora added a constraint for Evan" otherwise.
+const aConstraint = (who, m, own) => (who.by === m.person_id ? own : 'a constraint for ' + m.display_name);
+
 const HANDLERS = {
   'member.updated'(data, p, who, today) {
     const m = c.member(data, p.member_id);
     if (p.action === 'set') {
       const con = H.setConstraint(data, p.member_id, p.constraint, who, today);
       const verb = con.history.at(-1).action === 'created' ? 'added' : 'changed';
-      return {object_id: con.id, title: `${nameOf(data, who.by)} ${verb} a constraint for ${m.display_name}`,
+      return {object_id: con.id, title: `${nameOf(data, who.by)} ${verb} ${aConstraint(who, m, verb === 'added' ? 'a constraint' : 'one of their constraints')}`,
         body: `${m.display_name}: ${describe(data, con)}.${con.note ? ' Note: ' + con.note : ''}`};
     }
     const con = H.removeConstraint(data, p.member_id, p.constraint_id, p.note, who, today);
-    return {object_id: con.id, title: `${nameOf(data, who.by)} ended a constraint for ${m.display_name}`,
+    return {object_id: con.id, title: `${nameOf(data, who.by)} ended ${aConstraint(who, m, 'one of their constraints')}`,
       body: `${m.display_name}: ${describe(data, con)} no longer applies.${p.note ? ' Note: ' + p.note : ''}`};
   },
   'recipe.added'(data, p, who) {

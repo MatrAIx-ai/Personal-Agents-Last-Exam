@@ -104,9 +104,10 @@ test('T14 derivation: merge by ingredient and unit, usable stock, stock expiring
   // Onions: 0.5 + 0.5 + 0.5 = 1.5, rounded up once to 2 (not 3), with the three slots.
   const onion = lineFor(list, 'ing-onion');
   assert.deepEqual([onion.quantity, onion.exact, onion.slots], [2, 1.5, ['2026-11-09:dinner', '2026-11-10:dinner', '2026-11-12:dinner']]);
-  // Limes: 0.5 (tacos) + 1 (salsa) + 6 (curry) = 7.5; the lime in the pantry (use-by Monday, first needed Monday) counts.
+  // Limes: 0.5 (tacos, Monday) + 1 (salsa, Friday) + 6 (curry, Saturday) = 7.5. The pantry lime (use-by Monday)
+  // covers Monday's half; the other half expires before Friday, is not counted, and is listed.
   const lime = lineFor(list, 'ing-lime');
-  assert.deepEqual([lime.quantity, lime.exact, lime.from_pantry], [7, 6.5, 1]);
+  assert.deepEqual([lime.quantity, lime.exact, lime.from_pantry], [7, 7, 0.5]);
   // Merged in the unit the ingredient is bought in: tbsp of paste -> g through its density; tbsp of fish sauce -> ml.
   assert.deepEqual(['quantity', 'unit', 'exact'].map(k => lineFor(list, 'ing-green-curry-paste')[k]), [149, 'g', 148.5]);
   assert.deepEqual(['quantity', 'unit'].map(k => lineFor(list, 'ing-fish-sauce')[k]), [90, 'ml']);
@@ -121,7 +122,8 @@ test('T14 derivation: merge by ingredient and unit, usable stock, stock expiring
   for (const id of ['ing-cumin', 'ing-egg', 'ing-black-beans-canned']) assert.equal(lineFor(list, id), undefined, id);
   // Yogurt expiring on the 12th is not counted for the 14th's breakfast, and is listed.
   assert.deepEqual(['quantity', 'from_pantry'].map(k => lineFor(list, 'ing-yogurt-lf')[k]), [225, 0]);
-  assert.deepEqual(list.expiring_before_use, [{ingredient_id: 'ing-yogurt-lf', name: 'Lactose-free plain yogurt', quantity: 500, unit: 'g', use_by: '2026-11-12', first_needed: '2026-11-14'}]);
+  assert.deepEqual(list.expiring_before_use, [{ingredient_id: 'ing-lime', name: 'Lime', quantity: 0.5, unit: 'each', use_by: '2026-11-09', first_needed: '2026-11-13'},
+    {ingredient_id: 'ing-yogurt-lf', name: 'Lactose-free plain yogurt', quantity: 500, unit: 'g', use_by: '2026-11-12', first_needed: '2026-11-14'}]);
   // Optional lines are listed separately, never bought; leftovers add nothing.
   assert.deepEqual(list.optional_lines.map(l => [l.ingredient_id, l.quantity, l.unit, l.slot_id]), [
     ['ing-sour-cream', 50, 'g', '2026-11-09:dinner'], ['ing-feta', 30, 'g', '2026-11-12:dinner'], ['ing-honey', 0.75, 'tbsp', '2026-11-14:breakfast'],
@@ -219,4 +221,43 @@ test('T15 regeneration: stale after each kind of change; manual lines, ticks and
   // Line IDs are never reused.
   const again = f.call(P + 'shopping.item.set', {text: 'Candles', quantity: 1, unit: 'each'});
   assert.ok(Number(again.id.slice(3)) > Math.max(...before.shopping.lines.map(l => Number(l.id.slice(3)))));
+});
+
+test('T14 stock is taken use by use in meal order: a lot counts only for meals on or before its use-by date', () => {
+  // 500 g yogurt, use-by Thursday 2026-11-12; 300 g on Tuesday and 300 g on Saturday.
+  const f = fixture();
+  f.call(P + 'plan.slot.set', {id: '2026-11-10:breakfast', dishes: [{recipe_id: 'rec-yogurt-parfait', servings: 2}], attendees: ['person-nora']});
+  f.call(P + 'plan.slot.set', {id: '2026-11-14:breakfast', dishes: [{recipe_id: 'rec-yogurt-parfait', servings: 2}], attendees: ['person-nora']});
+  f.call(P + 'shopping.generate', {start: '2026-11-10', end: '2026-11-14'});
+  let list = f.call(P + 'shopping.get', {}).list;
+  const y = lineFor(list, 'ing-yogurt-lf');
+  assert.deepEqual([y.quantity, y.needed_total, y.from_pantry, y.slots], [300, 600, 300, ['2026-11-10:breakfast', '2026-11-14:breakfast']]);
+  assert.deepEqual(list.expiring_before_use.find(e => e.ingredient_id === 'ing-yogurt-lf'),
+    {ingredient_id: 'ing-yogurt-lf', name: 'Lactose-free plain yogurt', quantity: 200, unit: 'g', use_by: '2026-11-12', first_needed: '2026-11-14'});
+  // A meal on the use-by date itself still counts the stock.
+  f.call(P + 'plan.slot.set', {id: '2026-11-14:breakfast', dishes: []});
+  f.call(P + 'plan.slot.set', {id: '2026-11-12:breakfast', dishes: [{recipe_id: 'rec-yogurt-parfait', servings: 2}], attendees: ['person-nora']});
+  f.call(P + 'shopping.generate', {start: '2026-11-10', end: '2026-11-14'});
+  list = f.call(P + 'shopping.get', {}).list;
+  assert.deepEqual(['quantity', 'from_pantry'].map(k => lineFor(list, 'ing-yogurt-lf')[k]), [100, 500]);
+  assert.equal(list.expiring_before_use.find(e => e.ingredient_id === 'ing-yogurt-lf'), undefined);
+});
+
+test('T14 stock already past its use-by date is never counted, even for a past slot that was never marked', () => {
+  const f = fixture();
+  f.call(P + 'plan.slot.set', {id: '2026-11-11:breakfast', dishes: [{recipe_id: 'rec-yogurt-parfait', servings: 2}], attendees: ['person-nora']});
+  f.advance('2026-11-13T09:00:00-05:00');
+  f.call(P + 'shopping.generate', {start: '2026-11-11', end: '2026-11-13'});
+  const list = f.call(P + 'shopping.get', {}).list;
+  assert.deepEqual(['quantity', 'from_pantry'].map(k => lineFor(list, 'ing-yogurt-lf')[k]), [300, 0]);
+  assert.deepEqual(list.expiring_before_use.map(e => [e.ingredient_id, e.use_by, e.first_needed]).filter(e => e[0] === 'ing-yogurt-lf'), [['ing-yogurt-lf', '2026-11-12', '2026-11-11']]);
+});
+
+test('T13 deduct_pantry does not take stock whose use-by date is before the cooked date', () => {
+  const f = fixture();
+  f.advance('2026-11-13T18:00:00-05:00');
+  f.call(P + 'plan.slot.set', {id: '2026-11-13:dinner', dishes: [{recipe_id: 'rec-yogurt-parfait', servings: 2}], attendees: ['person-nora']});
+  const r = f.call(P + 'plan.slot.mark', {id: '2026-11-13:dinner', status: 'cooked', deduct_pantry: true});
+  assert.deepEqual(r.short.find(x => x.ingredient_id === 'ing-yogurt-lf'), {ingredient_id: 'ing-yogurt-lf', quantity: 300, unit: 'g', reason: 'expired'});
+  assert.equal(f.data.pantry.find(p => p.ingredient_id === 'ing-yogurt-lf').quantity, 500);
 });

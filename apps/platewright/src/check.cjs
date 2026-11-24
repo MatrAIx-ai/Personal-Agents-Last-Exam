@@ -72,15 +72,13 @@ function check(content, people, date, {ingredients, zone}) {
     const applied = p.kind === 'member' ? p.constraints.filter(c => constraintState(c, date, zone) === 'active') : p.constraints;
     const all = applied.flatMap(c => findings(c, content, ingredients, per, p.portion_factor));
     const unchecked = per ? [] : applied.filter(c => c.kind === 'limit').map(c => ({constraint_id: c.id ?? null, nutrient: c.nutrient, reason: 'nutrition_unknown'}));
-    // A finding caused only by optional lines does not decide the verdict; if nothing else is
-    // found the dish is ok once those lines are left out.
-    const firm = all.filter(f => !f.lines.length || f.lines.some(l => !l.optional));
-    let verdict = worst(firm.map(f => f.verdict)), omit = [];
-    if (verdict === 'ok' && all.length) {
-      verdict = 'ok_if_omitted';
-      const seen = new Set();
-      omit = all.flatMap(f => f.lines).filter(l => !seen.has(l.line) && seen.add(l.line)).sort((a, b) => a.line - b.line);
-    }
+    // The verdict is the most serious finding. Only when every finding is caused by optional lines
+    // alone is it ok_if_omitted. The lines of findings caused only by optional lines are always
+    // listed in omit_lines, so an optional allergen is never hidden behind a milder firm finding.
+    const optionalOnly = all.filter(f => f.lines.length && f.lines.every(l => l.optional));
+    const seen = new Set();
+    const omit = optionalOnly.flatMap(f => f.lines).filter(l => !seen.has(l.line) && seen.add(l.line)).sort((a, b) => a.line - b.line);
+    const verdict = !all.length ? 'ok' : optionalOnly.length === all.length ? 'ok_if_omitted' : worst(all.map(f => f.verdict));
     return {kind: p.kind, id: p.id, name: p.name, verdict, findings: all, omit_lines: omit, unchecked};
   });
 }
