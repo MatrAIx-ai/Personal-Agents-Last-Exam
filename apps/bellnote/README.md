@@ -4,7 +4,7 @@ Bellnote is a resettable school–family portal, seen from one guardian's accoun
 
 - App ID `bellnote`, version 1.0.0, Core API 1.2.0, public runtime 1.6.0. Node.js 18+ built-ins only; nothing to install.
 - Approved scope: [`proposals/environment/bellnote.md`](../../proposals/environment/bellnote.md). Validation, workflow-to-test mapping and the acceptance self-review: [VALIDATION.md](VALIDATION.md).
-- MCP-only first version: no GUI, reviewer console or staff console. Staff, the cafeteria and the other guardian act only through events.
+- A guardian web GUI (`gui/`) served by the repository's shared Web Host, added after plan approval at the maintainers' request (the approved plan said MCP-only); see [Web GUI](#web-gui). There is no staff or reviewer console: staff, the cafeteria and the other guardian act only through events.
 - Everything is fictional: the Merrow Vale Unified School District, Alder Elementary, Kestrel Ridge Middle School, the families and staff. Phone numbers use the 555-01xx range. Workflow shapes were informed by public product pages of ParentSquare and the PowerSchool parent portal; no data, text, branding or icons were taken from them.
 
 ## Workflows
@@ -14,7 +14,7 @@ Bellnote is a resettable school–family portal, seen from one guardian's accoun
 | W1 Attendance and absence reports | `attendance.list`, `absences.list`, `absences.report`, `absences.cancel` | `attendance.marked`, `absence.reviewed` |
 | W2 Forms and permission slips | `forms.list`, `forms.get`, `forms.respond`, `forms.withdraw`, `payments.list` | `form.published`, `form.changed`, `form.answered` |
 | W3 Pickup authorization and dismissal changes | `pickup.get`, `pickup.person_add`, `pickup.person_remove`, `dismissal.set`, `dismissal.cancel` | `pickup.person_reviewed`, `dismissal.recorded` |
-| W4 Lunch account | `lunch.account_get`, `menu.list`, `lunch.topup`, `lunch.settings_update` | `lunch.charged` |
+| W4 Lunch account | `lunch.account_get` (the ID is each child's `lunch_account_id` in `children.list`), `menu.list`, `lunch.topup`, `lunch.settings_update` | `lunch.charged` |
 | Account | `children.list`, `schools.get`, `notifications.list`, `preferences.get`, `preferences.update` | `school.day_changed` |
 
 All 23 tools are `bellnote.<name>` (12 reads, 11 writes). Every write takes Core's `request_id` and `expected_version` (`{epoch, revision}`) and returns the object's `id` with the committed version. The object state in a write result is `state` (Core owns `status: committed`). The target is always the argument `id` (for a new report, change or answer: the child or form it is about, with `child_id` beside it for forms); a window is always `start` / `end` as `YYYY-MM-DD` dates. Errors: `not_found`, `not_permitted`, `not_yours`, `too_late`, `not_school_day`, `conflict`, `invalid_window`, `invalid_time`, `invalid_state`, `closed`, `already_answered`, `missing_answer`, `stale_form`, `payment_declined`, `amount_out_of_range`, `not_authorized_person`, `restricted_person`, `pending_review`, `in_use`, `invalid_arguments`; Core adds `permission_denied`, `stale_version` and `idempotency_conflict`. Any refused event is `invalid_event` with data and clock unchanged.
@@ -38,6 +38,16 @@ All 23 tools are `bellnote.<name>` (12 reads, 11 writes). Every write takes Core
 
 `tools.json`, `schemas/seed.schema.json`, `schemas/events.schema.json` and `schemas/state.schema.json` are generated from `scripts/build-contracts.cjs` (`npm run contracts:check` in this folder detects drift). The other schema files are copies of the public shared contracts kept in sync by the repository's `npm run contracts:check`; `schemas/router-message.schema.json` is a byte-identical copy of Mail 1.3.0's generated wire schema.
 
+## Web GUI
+
+`gui/index.html` and `gui/src/app.js` are a guardian portal with seven views: Home, Attendance, Forms, Pickup & dismissal, Lunch, Notifications and Account. Every Agent write tool has a control in its view; the page reads and writes only through the Agent MCP connection of one run, so rights, visibility and refusals are the App's. `contribution/gui.json` declares the legacy reviewer renderer (`gui/src/view.js`) and the `pale.web` extension (`status: implemented`). Start it from the repository root:
+
+```sh
+node runtime/web/server.cjs --app bellnote --registry apps/bellnote/web.registry.json --run bellnote-web --profile sandbox
+```
+
+`web.registry.json` registers this package alone with its own clock, so nothing outside `apps/bellnote/` is needed. Views, covered workflows and design choices: [gui/README.md](gui/README.md).
+
 ## Optional Mail notices
 
 Bellnote declares one `messaging.publishes` entry (`channel.email`, `urn:pale:email-message:2`, `org.pale.mail.notification.v1`, payload `urn:pale:email-payload:1`) for the existing receive declaration of Mail 1.3.0 in `examples/apps/mail` and receives nothing. The recipient is `{"kind":"person_ref","id":<owner_person_id>}`. `src/publisher.cjs` is an Infra-run sender: Infra gives it Bellnote's Infra connection (to read notifications through `env.snapshot`) and a Messaging publisher connection fixed to this account; it calls `router.publish` and never writes back into Bellnote. A rejected delivery creates no Mail record and leaves Bellnote unchanged; a receipt means Mail stored the message, not that anyone acted on it. Bellnote runs fully without Mail; `dependencies.required_apps` is empty.
@@ -47,10 +57,17 @@ Bellnote declares one `messaging.publishes` entry (`channel.email`, `urn:pale:em
 From this folder (the package alone, no runtime needed):
 
 ```sh
-npm test                      # 41 business tests: T01–T19 (App-side), rules, fixtures, contracts, diagnostics
+npm test                      # 42 business tests: T01–T19 (App-side), rules, fixtures, contracts, diagnostics
 npm run example               # walkthrough: report, two marks, one notification
 npm run contracts:check       # generated tools/schemas match their source
 npm run fixtures:check        # consistency of both fixtures
+```
+
+Web GUI checks (pinned public runtime as below; the browser check also needs Playwright and Chromium installed at the repository root with `npm ci && npx playwright install chromium`):
+
+```sh
+npm run web:smoke             # 14 checks on the real shared Web Host, no browser
+npm run web:browser           # 45 checks clicking the page in Chromium; screenshots in .artifacts/bellnote-web/
 ```
 
 With the pinned public runtime (found automatically in a full checkout, or `--runtime DIR` / `PALE_RUNTIME_ROOT`):
@@ -72,4 +89,4 @@ Run an MCP server pair by hand: `node apps/bellnote/service.cjs --role infra --r
 
 ## Limitations
 
-Out of scope in this version, as approved: school posts and announcements, replies to teachers, sign-up sheets, grades, assignments, timetables, enrolment, bus tracking, after-care billing, meal pre-ordering and free/reduced-price applications, real payments and saved-card management, form attachments, parent group chat, the staff side, the other guardian as a second account, several districts per account, push/SMS and any GUI. Guardian links and restrictions are set only by the seed. There is no outbox or cross-App transaction for Mail notices. Policy values, the school calendar and notification wording are illustrative and await human review.
+Out of scope in this version, as approved: school posts and announcements, replies to teachers, sign-up sheets, grades, assignments, timetables, enrolment, bus tracking, after-care billing, meal pre-ordering and free/reduced-price applications, real payments and saved-card management, form attachments, parent group chat, the staff side, the other guardian as a second account, several districts per account, push/SMS, and any staff or reviewer console. Guardian links and restrictions are set only by the seed. There is no outbox or cross-App transaction for Mail notices. Policy values, the school calendar and notification wording are illustrative and await human review.
