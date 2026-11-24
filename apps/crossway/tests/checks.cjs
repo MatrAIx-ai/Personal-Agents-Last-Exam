@@ -13,9 +13,11 @@ const TRIP = ['pz-kettle', 'pz-northgate', 'pz-quarry', 'pz-stonebridge'];  // e
 const notice = (data, id) => data.notices.find(n => n.id === id);
 const disputeOf = (data, id) => data.disputes.find(d => d.notice_id === id);
 const hasRef = (d, object_id) => d.evidence.some(e => R.sameRef(e, MAIL(object_id)));
+// Paid, by an approved payment receipt that names this notice, on a card the owner holds.
 const paidByOwner = (data, id) => {
   const n = notice(data, id), r = n && data.receipts.find(x => x.id === n.payment_receipt_id);
-  return Boolean(n && n.state === 'paid' && r && data.cards.find(c => c.id === r.card_id).holder_person_id === OWNER);
+  return Boolean(n && n.state === 'paid' && r && r.kind === 'notice_payment' && r.status === 'approved' && r.notice_ids.includes(id) &&
+    data.cards.find(c => c.id === r.card_id).holder_person_id === OWNER);
 };
 const ended = (data, id, date) => {
   const v = data.vehicles.find(x => x.id === id);

@@ -2,22 +2,66 @@
 
 Crossway is a resettable prepaid toll account with synthetic data, built for the approved proposal in [#27](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/27) ([`proposals/environment/crossway.md`](../../proposals/environment/crossway.md)). It belongs to a fictional state toll authority. Its workflows follow the public E-ZPass NY and Tolls by Mail sites; amounts, deadlines and two rules (below) are Crossway's own. Notice fees escalate on the clock, and paying a notice is final and gives up the right to dispute it.
 
-This is the **first version (M1)**: workflows 1-5 through 22 MCP tools, clock-derived deadlines, one seed, reset, business tests and checks (a) and (c). It also ships the host-side publisher that delivers Crossway's notices to Mail through Messaging, which the plan review asked for in the first version. Pages and the other two seeds follow in M2 (see [Remaining work](#remaining-work)).
+This is **milestone M2** (app version 0.2.0). M1 built workflows 1-5 through 22 MCP tools, clock-derived deadlines, one seed, reset, checks (a) and (c), and the host-side publisher that delivers Crossway's notices to Mail through Messaging. M2 adds the nine pages on the shared business Web Host, two more seeds with example schedules, and checks (b), (d), (e) and (f). Check (g), the independent reproduction, is M3 (see [Remaining work](#remaining-work)).
 
 ## Run it
 
-Node.js 18+. No packages to install.
+Node.js 18+. The business tests, the platform checks and the publisher need no packages. The browser check needs Playwright, as the Web Host's own browser test does.
 
 ```sh
-# From this directory: business tests and the example event
+# From this directory: business, seed and mutation tests, and the example event
 npm test
 npm run example
 
 # From the repository root
 node runtime/cli.cjs verify --app apps/crossway --output .artifacts/crossway.json
-node apps/crossway/tests/platform-checks.cjs
-node apps/crossway/examples/publish-to-mail.cjs
+node apps/crossway/tests/platform-checks.cjs      # retries, profiles, clock, (c) reset on every seed
+node apps/crossway/tests/replay-checks.cjs        # (d) replay in two host time zones
+node apps/crossway/tests/hidden-values.cjs        # (e) sentinels in tool outputs
+node apps/crossway/tests/permission-checks.cjs    # (f) every gated write under browse and full
+node apps/crossway/examples/publish-to-mail.cjs   # Messaging to Mail
+
+# Pages in a real browser, including the page half of (e)
+npm ci && npx playwright install chromium
+node apps/crossway/tests/web-checks.cjs
 ```
+
+## Pages
+
+The proposal's nine pages are views of one controller, [`gui/src/app.js`](gui/src/app.js), loaded by [`gui/index.html`](gui/index.html). The shared business Web Host (`runtime/web/server.cjs`) serves only those two files and the shared client and stylesheet, so each page is a view selected from the sidebar (`#account`, `#topup`, and so on). [`contribution/gui.json`](contribution/gui.json) declares them with the optional `pale.web` extension, and `contribution.json` points `gui_ref` at it.
+
+| Page | Shows (tool) | Actions (tool) |
+| :--- | :--- | :--- |
+| Account overview | status, balance, auto-replenish rule and card, cards with expiry and chargeability (`account.get`) | auto-replenish on/off, card, amount, threshold (`account.replenish.set`) |
+| Top up | balance (`account.get`) | preview, then confirm (`account.topup.preview`, `account.topup.confirm`) |
+| Statements | every monthly statement and the balance (`account.statements`) | none |
+| Vehicles and transponders | vehicles with possession intervals and transponders with charged class (`vehicles.list`, `transponders.list`, `policies.get`) | add, end, correct dates or label, assign a transponder (`vehicles.add`, `vehicles.end`, `vehicles.update`, `transponders.assign`) |
+| Toll activity | tolls, filtered by date, plate, plaza and disposition (`tolls.list`) | none |
+| Notices | notices by state, and one notice with its toll, dispute and history (`notices.list`, `notices.get`) | links to payment and dispute |
+| Notice payment | open notices, with **every payable notice preselected** from the `payable` flag `notices.list` returns; the tool itself takes explicit IDs | preview (lines, total, cardholder, "Payment is final and closes the right to dispute."), then confirm (`notices.pay.preview`, `notices.pay.confirm`) |
+| Disputes | every dispute (`notices.list`, `disputes.get`), the rules (`disputes.reasons`) | file one: preview, then submit; withdraw a submitted one (`disputes.preview`, `disputes.confirm`, `disputes.withdraw`) |
+| Policies | rates by plaza and class, fees, deadlines, the time rule and the two Crossway rules (`policies.get`) | none |
+
+- **Same state as the tools.** Every value on a page is a field of a tool result read for that render; amounts are formatted from cents and times are shown as the tools return them (authority time), with no browser time-zone conversion. The page applies no business rule and keeps no business data between renders: navigation, filters, the selected row and an open preview are the only page state. Refresh, or any write, re-reads.
+- **Writes.** A form writes with the version read when the page was rendered, so a page that went stale shows `stale_version` and writes nothing. An unchanged resubmission reuses its request ID, so a retry after a lost response returns the first receipt. A business error (for example `card_expired`, or `in_collections` naming the ineligible notice) is shown on the form with its code, and nothing changes.
+- **Permissions.** Controls are drawn only for tools the run's profile allows: under `browse` the previews are there and the confirms, ends, corrections, auto-replenish and withdrawal are not; under `scenario` only reads are shown.
+- **Icons.** Ten self-made 16x16 PNG icons (CC0) are embedded in `app.js` as base64 by [`scripts/build-icons.cjs`](scripts/build-icons.cjs) from text masks. The Host's content security policy allows images from `'self'` and `blob:` but not `data:`, so the page turns each PNG into a `blob:` URL. SVG is disabled. Crossway's own styles are a constructed stylesheet in `app.js`, on top of the shared stylesheet.
+
+### Start the Web Host
+
+```sh
+# From the repository root: Dani's seed at its clock (2026-11-02 09:00 Eastern)
+node runtime/web/server.cjs --app crossway --registry apps/crossway/web-registry.json --run web-demo --profile sandbox
+
+# In another shell, optionally switch that run to another seed, then press Refresh
+node apps/crossway/scripts/seed-bundle.cjs marisol --load --run web-demo
+node apps/crossway/scripts/seed-bundle.cjs theo --load --run web-demo --profile browse
+```
+
+Open the access link the Host prints. [`web-registry.json`](web-registry.json) registers Crossway alone, with `initial_time` set to Dani's seed clock. It is used instead of the repository's `apps.registry.json`, which has no Crossway entry (see [Differences from the proposal](#differences-from-the-proposal)):
+
+- **How the clock is picked.** Core gives a new run the registry's `initial_time`; `env.load_seed` replaces it with the seed's `virtual_now`, and `env.reset` returns to the loaded one. The Web Host has no clock option and never resets an existing run. With the shared registry's `2026-11-18T09:00:00-08:00`, a new Crossway run would start 16 days after Dani's clock: reads would already show `n-0015` to `n-0018` escalated with late fees and the dispute windows of `n-0014` and `n-0015` closed, which is not the seed's story. With `web-registry.json` a new run starts at the seed clock.
+- **Profiles.** The Host accepts `sandbox` (all 22 tools) or `scenario` (reads only) for a new run. `seed-bundle.cjs --load ... --profile browse|full` switches an existing run to Crossway's own profiles.
 
 ## Workflows
 
@@ -57,6 +101,8 @@ Infra applies these with `env.apply_event`. An event naming an unknown record, o
 
 [`examples/scenario.json`](examples/scenario.json) posts a plate read of the car Dani sold; [`examples/run.cjs`](examples/run.cjs) applies it to the seed and prints the notice it bills to Dani.
 
+Each seed also has an example event schedule in [`examples/schedules/`](examples/schedules/), outside the seed: later tolls (some on the stale vehicle, some on a transponder), a card closing or being declined, and dispute decisions whose decision tables (`grant_if`) grant only a dispute with the right reason and evidence. A decision for a notice the Agent never disputed records `no_target`. Every schedule starts at its seed's clock and applies cleanly to the seed (`tests/seeds.test.cjs`); checks (d) and (e) run them through Core.
+
 ## Notices and Mail
 
 Every committed write or event that creates a notice stores it in the account's `outgoing` records in the same commit: balance low, replenish failed and receipts, suspension, notice issued, escalated or sent to collections, temporary plate expired, statements, top-up and payment receipts, dispute received, decided or withdrawn. Each record holds a full CloudEvents message for Mail 1.3.0's `channel.email` receive contract (`urn:pale:email-message:2`, payload `urn:pale:email-payload:1`, type `org.pale.mail.notification.v1`), validated on every commit against a pinned copy of Mail's wire schema ([`schemas/router-message.schema.json`](schemas/router-message.schema.json)). The outgoing record ID is the CloudEvents `id`. `contribution/contribution.json` declares the publish direction. Crossway does not record delivery.
@@ -71,56 +117,72 @@ This script replaces the acceptance command in the proposal (`npm run app:verify
 
 ## Permissions
 
-`fixtures/policies.json` has four profiles. `scenario` allows only the 10 reads and `sandbox` allows every tool, matching the reference Apps. `browse` leaves out every confirm, `account.replenish.set`, `vehicles.end`, `vehicles.update` and `disputes.withdraw` (15 tools); `full` allows all 22. Crossway keeps no approval state; a task harness picks the profile.
+`fixtures/policies.json` has four profiles. `scenario` allows only the 10 reads and `sandbox` allows every tool, matching the reference Apps. `browse` leaves out every confirm, `account.replenish.set`, `vehicles.end`, `vehicles.update` and `disputes.withdraw` (15 tools); `full` allows all 22. Crossway keeps no approval state; a task harness picks the profile. The pages draw only the controls the profile allows.
 
 ## Data
 
-[`fixtures/minimal.json`](fixtures/minimal.json) is one account, Dani Reyes (`cw-dani`), opened on 2025-01-06, with the clock at 2026-11-02 09:00 Eastern. [`scripts/generate-seed.cjs`](scripts/generate-seed.cjs) builds it deterministically (fixed-seed PRNG) by replaying the history through Crossway's own handlers, then clears the outgoing records and spent previews; a test checks the file equals the generator output. It holds 12 plazas, 5 vehicles, 2 transponders, 3 cards, 174 tolls, 185 ledger rows, 22 monthly statements and 18 notices (11 paid, dismissed or in collections; 7 open). The balance reconciles to the cent with the ledger, and every notice maps to one toll.
+Three seeds, each generated by [`scripts/generate-seed.cjs`](scripts/generate-seed.cjs) from a fixed-seed PRNG by replaying the account's history through Crossway's own handlers, then frozen; a test checks every file equals the generator output. [`fixtures/seeds/index.json`](fixtures/seeds/index.json) lists each seed's data, binding, clock and schedule. `dani` is the manifest seed (`app.json` `fixtures.seed`); load the others with `env.load_seed` and the arguments [`scripts/seed-bundle.cjs`](scripts/seed-bundle.cjs) prints, which include a provenance bundle narrowed to that seed's source in [`contribution/dataset.json`](contribution/dataset.json). `dataset.json` records each seed file's SHA-256, clock and counts; `expected_counts` (192 records: tolls and notices) is the manifest seed's.
 
-The saved state is wrong for Dani in several ways on purpose:
+| Seed | Holder, account | Opened, clock | Vehicles | Tolls, plazas | Notices (open) | Status, balance |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `dani` | Dani Reyes, `cw-dani` | 2025-01-06, 2026-11-02 09:00 | 5 | 174, 12 | 18 (7) | active, $18.75 |
+| `marisol` | Marisol Ortega, `cw-marisol` | 2025-02-03, 2026-03-09 09:00 | 4 | 106, 12 | 10 (6) | suspended, $3.50 |
+| `theo` | Theo Lindqvist, `cw-theo` | 2025-05-12, 2026-06-15 09:00 | 5 | 138, 12 | 8 (4) | active, $24.00 |
 
-- The auto-replenish card is Jordan Albright's Amex, from before they split up; Dani's Mastercard expired in 09/2026.
-- The Honda Fit `HKR4471`, sold on 2026-09-28, is still listed: two notices after the sale (`n-0017`, the Kettle Creek read of 2026-10-11, and `n-0018`) and one before it (`n-0014`).
-- Jordan's Subaru `JRD5530`, handed back on 2026-08-15, is still listed, and Jordan's notice `n-0012` is escalated next to Dani's own Kia notices `n-0013` and `n-0016`.
-- A rental plate notice `n-0015` that SwiftRent already charged to Dani.
-- Transponder `tp-0001` was moved to the Kia but is still assigned to the van, so it charges class 2.
+Each seed has a stale vehicle, a temporary plate, three cards (the holder's valid one, the holder's expired one and another person's), tolls across all 12 plazas and notices in at least five states. What is wrong for the holder, on purpose:
 
-Mail message IDs `m-11133` (notice of transfer) and `m-11140` (rental receipt) are the evidence references; they exist in the Mail seed used by the publisher, not in Crossway. Seeded history starts on or after 2025-01-01 and the task clock on or after 2026-01-01; a test fails on any earlier fixture or example-event date. No real person, plate, card or authority data is used. See [`contribution/dataset.json`](contribution/dataset.json).
+- **Dani.** The auto-replenish card is Jordan Albright's Amex, from before they split up; Dani's Mastercard expired in 09/2026. The Honda Fit `HKR4471`, sold on 2026-09-28, is still listed: two notices after the sale (`n-0017`, the Kettle Creek read of 2026-10-11, and `n-0018`) and one before it (`n-0014`). Jordan's Subaru `JRD5530`, handed back on 2026-08-15, is still listed, and Jordan's notice `n-0012` is escalated next to Dani's own Kia notices `n-0013` and `n-0016`. A rental plate notice `n-0015` that SwiftRent already charged to Dani. Transponder `tp-0001` was moved to the Kia but is still assigned to the van, so it charges class 2.
+- **Marisol.** Her auto-replenish Discover expired in 01/2026; two attempts in February failed and the account has been suspended since 2026-02-19, so a catering-van read on 2026-02-28 became notice `n-0009` at the mail rate. Her son Leo's Malibu `BRT6618`, sold on 2026-01-20 (bill of sale: Mail `m-21107`), is still listed: `n-0005` (escalated, dispute window closes 2026-03-17), `n-0006` (dispute submitted, awaiting the decision in the schedule) and `n-0007` came after the sale; `n-0004`, before it, is in collections. A Harborline loaner `LNR4410` (temporary, to 2026-03-13) drew `n-0008` and `n-0010`. Her sister Ana's Mastercard is on file from a weekend top-up.
+- **Theo.** He traded his Mazda `TLQ1185` in on 2026-04-30 (dealer bill: Mail `m-31042`) with transponder `tp-0003` still inside and the car still listed: the next owner's commute was debited to his balance (13 tolls, $55.25 since May), and two plate reads became notices `n-0006` (escalated) and `n-0007`. Auto-replenish runs on his business partner Sam Okoro's Visa since his own expired in 03/2026. The rental plate `HRB2261` has two non-overlapping possession intervals (2025, ended; 2026-06-10 to 06-20, current). `n-0005` went back to escalated after he withdrew its dispute.
+
+Mail message IDs (`m-11133`, `m-11140`, `m-21107`, `m-30815`, `m-31042`) are evidence references for the Mail seed a task supplies; Crossway never reads Mail. `m-11133` and `m-11140` exist in the Mail seed the publisher example loads. Seeded history starts on or after 2025-01-01 and every task clock and schedule event on or after 2026-01-01; a test fails on any earlier date in any seed, binding, clock or schedule. No real person, plate, card or authority data is used. Each seed passes `validateSeed` and the seed schema, its balance reconciles to the cent with the ledger and every statement, every notice maps to exactly one toll, and a plate's possession intervals do not overlap (`tests/seeds.test.cjs`). A human read-through of the seeds is still to be recorded (`dataset.json` `review.status` is `pending`).
 
 ## Checks
 
-| Check | Where | Status |
+| Check | Where | Result |
 | :--- | :--- | :--- |
-| Business rules and every named error, the time contract, generator reproduction and the date floor | `tests/business.test.cjs` (31 tests) | M1 |
-| (a) Anchor runs over workflows 1, 2, 4 and 5 (sold car, someone else's car, rental double billing, wrong class, road trip): reference and equivalent variants pass every check; do-nothing fails exactly the checks that need a write; each wrong run fails exactly its declared checks | `tests/business.test.cjs` with `tests/checks.cjs` | M1 |
-| (c) Reset: 20 cycles, audit exported before each, restore the loaded state hash with no outgoing notice left, through real Core | `tests/platform-checks.cjs` | M1 |
-| Retries, idempotency conflicts, stale versions and used previews; the `browse` profile refusing all seven gated writes with the hash unchanged; single-jump and stepwise `env.advance_time` giving the same hash | `tests/platform-checks.cjs` (15 checks) | M1 |
-| Messaging to Mail: rejected (missing grant), committed and read back, deduplicated retry | `examples/publish-to-mail.cjs` | M1 |
-| Public verifier (MCP discovery, schemas, history load, event, reset, isolation, restart) | `node runtime/cli.cjs verify` | M1 |
-| (b) Mutation, (d) full replay in two host time zones, (e) hidden values, the rest of (f), (g) independent reproduction | | M2-M3 |
+| Business rules and every named error, the time contract, generator reproduction for all seeds, the date floor for every seed file | `tests/business.test.cjs` (31 tests) | pass |
+| Seed checks: schema and `validateSeed`, ledger and statements to the cent, notice-to-toll mapping, non-overlapping possession intervals, the proposal's account shape, SHA-256 in `dataset.json`, schedule applies | `tests/seeds.test.cjs` (22 tests) | pass |
+| (a) Anchor runs over workflows 1, 2, 4 and 5 (sold car, someone else's car, rental double billing, wrong class, road trip): reference and equivalent variants pass every check; do-nothing fails exactly the checks that need a write; each wrong run fails exactly its declared checks | `tests/business.test.cjs` with `tests/checks.cjs` | pass |
+| (b) 29 single-field mutants of the five reference end states each fail the check they violate; 2 equivalent mutants (a granted instead of submitted dispute; a different replenish amount) keep passing, each with its reason. Three receipt mutants survived the M1 version of the "paid with the owner's card" checks; those checks now require an approved `notice_payment` receipt that names the notice | `tests/mutants.test.cjs` (3 tests) | pass |
+| (c) Reset: 20 cycles per seed, audit exported before each, each restoring the loaded state hash with no outgoing notice left, through real Core | `tests/platform-checks.cjs` | pass |
+| Retries, idempotency conflicts, stale versions and used previews on the reference run; single-jump and stepwise `env.advance_time` giving the same hash; a read after an advance storing nothing | `tests/platform-checks.cjs` (19 checks) | pass |
+| (d) Replay: per seed, its schedule and reference actions twice with the clock moved in several `env.advance_time` steps, then with one jump to each action and to the end; same state hash, outbound notifications and end reads; repeated under `TZ=America/Los_Angeles` and `TZ=Asia/Kolkata` with identical digests | `tests/replay-checks.cjs` (9 runs per zone) | pass |
+| (e) Hidden values: each schedule's pending payloads carry sentinel strings (event IDs, new toll IDs, an extra decision-table entry). Before each event, all ten reads (every notice and dispute too) and every Agent output so far contain no pending sentinel; after it fires, its toll ID shows in `tolls.list`; event IDs and decision tables never show. The same on all nine rendered pages | `tests/hidden-values.cjs`; pages in `tests/web-checks.cjs` | pass |
+| (f) Every gated write on every seed: under `browse`, `permission_denied`, audited, hash unchanged and denied again on retry, while previews, `vehicles.add` and `transponders.assign` commit; under `full`, commit, duplicate retry with the first result, `idempotency_conflict`, `stale_version`, `preview_used` or `invalid_state`, all with the hash unchanged | `tests/permission-checks.cjs` (12 checks) | pass |
+| Pages: every tool named, embedded PNG icons, each page showing the tools' values, writes through the pages (top-up with a lost response, auto-replenish, end possession, assign transponder, dispute, withdraw, pay), business errors and stale versions in place, controls per profile, 390px width, all three seeds | `tests/web-checks.cjs` (Chromium) | pass |
+| Messaging to Mail: rejected (missing grant), committed and read back, deduplicated retry | `examples/publish-to-mail.cjs` | pass |
+| Public verifier (MCP discovery, schemas, history load, event, reset, isolation, restart) | `node runtime/cli.cjs verify` | pass |
+| (g) Independent reproduction by a second person | | M3 |
 
 ## Differences from the proposal
 
 - Acceptance for the Mail connection uses `examples/publish-to-mail.cjs`, as described above, not `app:verify --with`.
 - Error codes added where the proposal named none: `notice_dismissed` (paying a dismissed notice), `plate_already_listed` (same plate, overlapping interval on this account), `invalid_state`, `not_found` and `invalid_arguments`.
 - `account.replenish.set` refuses an expired or declined card with `card_expired` or `card_declined`, and top-up and payment previews check the card as well as their confirms.
-- The seed follows the maintainer's request for about two years of history: 174 tolls over 22 months and 18 notices, instead of 40-80 tolls over 120 days and 4-8 notices. Notice IDs are `n-0001` to `n-0018`; the proposal's example notice `n-0412` is `n-0017` here, with the same plaza, time, plate and amounts.
+- The seeds follow the maintainer's request for longer history: 174, 106 and 138 tolls over 22, 13 and 13 months, with 18, 10 and 8 notices, instead of 40-80 tolls over 120 days and 4-8 notices. Notice IDs start at `n-0001` in each seed; the proposal's example notice `n-0412` is Dani's `n-0017`, with the same plaza, time, plate and amounts.
 - A toll's time is its event's `at`. A plate-only read is charged at the class the plaza saw; a transponder read at the transponder's class.
 - The withdrawal rule counts the days that remained in whole authority days.
 - `vehicles.update` corrects possession dates and the label, not the vehicle class.
+- **No entry in `apps.registry.json`.** Adding Crossway there fails the repository test stage `clock-contract`: `runtime/tests/clock.test.cjs` asserts that the shared registry holds exactly seven Apps (`assert.equal(m.configs.size,7)`), and that file is outside this package. The pages use [`web-registry.json`](web-registry.json) instead, which also starts a new run at the seed clock (see [Start the Web Host](#start-the-web-host)). The entry is one object (`{"app_id": "crossway", "version": "0.2.0", "path": "apps/crossway"}`) and can be added once the shared test counts Apps from the registry.
+- Seeds other than the manifest seed are loaded with a provenance bundle (`scripts/seed-bundle.cjs`). Without one, Core's record-import fallback expects `records()` to count every object, which Crossway's does not (tolls and notices only), and refuses the load.
+- There is no disputes list tool, so the disputes page reads `disputes.get` for each notice that has a dispute.
+- Check (e) carries the sentinels in event IDs, new toll IDs and an extra decision-table entry; a toll's plate or a card's ID cannot carry one without changing what the event does.
 
 ## Remaining work
 
-- Pages (`pale.web`), with icons: M2. `gui_ref` is null until then.
-- Two more seeds from the generator, each with a scenario schedule: M2.
-- Checks (b), (d), (e) and the rest of (f): M2. Check (g), an independent reproduction: M3.
+- Check (g), an independent reproduction by someone who did not build the flows: M3.
+- A human read-through of the three seeds, recorded in `dataset.json` `review`.
+- The `apps.registry.json` entry, once the shared clock test allows an eighth App.
 - The optional module 6 (class corrections, trip estimate) is not built.
 
 ## Maintenance scripts
 
 - `node scripts/build-schemas.cjs` regenerates `tools.json`, `schemas/seed.schema.json`, `schemas/events.schema.json` and the identity fields of `schemas/state.schema.json`; `--check` compares only. Then run `node runtime/sdk/sync.cjs` from the repository root.
-- `node scripts/generate-seed.cjs` regenerates the seed; `--check` compares only.
+- `node scripts/generate-seed.cjs` regenerates the three seeds; `--check` compares only. After a change, update the SHA-256 and counts in `contribution/dataset.json` (`tests/seeds.test.cjs` fails until they match).
+- `node scripts/build-icons.cjs` redraws the page icons from their masks into `gui/src/app.js`; `--check` compares only.
+- `node scripts/seed-bundle.cjs SEED` prints a seed's `env.load_seed` arguments; with `--load --run RUN` it loads the seed into a Web Host run.
 
 ## Dependencies
 
-Public runtime 1.6.0, Core API 1.2.0, contribution revision 0.4.0. `required_apps` is empty: the package runs with only its own files and the runtime. Mail 1.3.0 is an optional publish target; Calendar 1.3.0 is used only through its own Agent tools.
+Public runtime 1.6.0, Core API 1.2.0, contribution revision 0.4.0. The pages use the shared business Web Host and client in `runtime/web/`; the browser check uses the repository's pinned Playwright. `required_apps` is empty: the package runs with only its own files and the runtime. Mail 1.3.0 is an optional publish target; Calendar 1.3.0 is used only through its own Agent tools.

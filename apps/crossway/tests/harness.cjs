@@ -13,10 +13,23 @@ const eventValid = compile(require('../schemas/events.schema.json'), schemaDir);
 const input = new Map(tools.map(t => [t.name, compile(t.inputSchema, path.resolve(__dirname, '..'))]));
 const output = new Map(tools.map(t => [t.name, compile(t.outputSchema, path.resolve(__dirname, '..'))]));
 
-function fixture({logging = true, seed = require('../fixtures/minimal.json'), now = require('../fixtures/clock.json').initial_time} = {}) {
+const root = path.resolve(__dirname, '..');
+const SEEDS = require('../fixtures/seeds/index.json').seeds;
+const load = file => require(path.join(root, file));
+
+// Seed, binding and clock of one indexed seed (dani, marisol or theo).
+function seedFiles(id) {
+  const s = SEEDS.find(x => x.seed_id === id);
+  assert.ok(s, 'Known seed ' + id);
+  return {...s, data: load(s.seed), binding: load(s.binding), now: load(s.clock).initial_time, schedule: load(s.schedule)};
+}
+
+function fixture({logging = true, seed = require('../fixtures/minimal.json'), now = require('../fixtures/clock.json').initial_time,
+  binding = require('../fixtures/binding.json'), id = null} = {}) {
+  if (id) ({data: seed, now, binding} = seedFiles(id));
   let data = structuredClone(seed);
   const logs = [];
-  const ctx = {app_id: app, role: 'agent', virtual_now: now, binding: structuredClone(require('../fixtures/binding.json'))};
+  const ctx = {app_id: app, role: 'agent', virtual_now: now, binding: structuredClone(binding)};
   if (logging) ctx.log = (step, details = {}) => logs.push({step, details: structuredClone(details)});
   function validate(value) {
     assert.ok(seedValid(value), 'Seed schema');
@@ -75,4 +88,4 @@ function fixture({logging = true, seed = require('../fixtures/minimal.json'), no
     },
   };
 }
-module.exports = {fixture};
+module.exports = {fixture, seedFiles, SEEDS};

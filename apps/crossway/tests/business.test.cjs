@@ -3,7 +3,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const plugin = require('../plugin.cjs');
 const C = require('../src/clock.cjs');
-const {fixture} = require('./harness.cjs');
+const {fixture, seedFiles, SEEDS} = require('./harness.cjs');
 const {evaluate, MAIL, SALE_DATE, HANDOVER_DATE, tripCost} = require('./checks.cjs');
 
 const code = c => e => e.code === c;
@@ -484,22 +484,29 @@ test('the road-trip check prices the drive at the tag\'s class', () => {
 
 // ---- Data -------------------------------------------------------------------
 
-test('the fixture is the generator\'s output, and validates', () => {
+test('every seed is the generator\'s output, and validates', () => {
   const {generate} = require('../scripts/generate-seed.cjs');
-  assert.deepEqual(generate(), require('../fixtures/minimal.json'));
+  for (const s of SEEDS) assert.deepEqual(generate(s.seed_id), seedFiles(s.seed_id).data, s.seed_id);
 });
 
-test('fixture history starts on or after 2025-01-01, and the task clock on or after 2026-01-01', () => {
-  const floor = Date.parse('2025-01-01T00:00:00Z');
-  const files = ['../fixtures/minimal.json', '../examples/scenario.json', '../fixtures/clock.json'];
+test('every seed\'s history starts on or after 2025-01-01, and its task clock and schedule on or after 2026-01-01', () => {
+  const floor = Date.parse('2025-01-01T00:00:00Z'), taskFloor = Date.parse('2026-01-01T00:00:00Z');
+  const files = ['examples/scenario.json', 'fixtures/seeds/index.json'];
+  for (const s of SEEDS) files.push(s.seed, s.binding, s.clock, s.schedule);
   for (const file of files) {
-    const text = JSON.stringify(require(file));
+    const text = JSON.stringify(require('../' + file));
     for (const [stamp] of text.matchAll(/\d{4}-\d{2}-\d{2}(T[0-9:.]+(Z|[+-]\d{2}:\d{2}))?/g)) {
       const t = Date.parse(stamp.length === 10 ? stamp + 'T00:00:00Z' : stamp);
       assert.ok(t >= floor, `${file}: date before 2025-01-01: ${stamp}`);
     }
     for (const [, period] of text.matchAll(/"period":"(\d{4}-\d{2})"/g)) assert.ok(period >= '2025-01', period);
   }
-  assert.ok(Date.parse(require('../fixtures/clock.json').initial_time) >= Date.parse('2026-01-01T00:00:00Z'));
-  assert.ok(Date.parse(require('../examples/scenario.json').at) >= Date.parse('2026-01-01T00:00:00Z'));
+  for (const s of SEEDS) {
+    const f = seedFiles(s.seed_id);
+    assert.ok(f.data.opened_on >= '2025-01-01', s.seed_id);
+    assert.ok(Date.parse(f.now) >= taskFloor, s.seed_id + ' clock');
+    assert.equal(f.schedule.clock, f.now, s.seed_id + ' schedule starts at the seed clock');
+    for (const e of f.schedule.events) assert.ok(Date.parse(e.at) >= Math.max(taskFloor, Date.parse(f.now)), `${s.seed_id}: ${e.event_id}`);
+  }
+  assert.ok(Date.parse(require('../examples/scenario.json').at) >= taskFloor);
 });

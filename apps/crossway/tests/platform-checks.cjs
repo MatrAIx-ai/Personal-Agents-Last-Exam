@@ -5,19 +5,13 @@
 // env.advance_time and reset.
 // Run from a full checkout: node apps/crossway/tests/platform-checks.cjs
 const assert = require('node:assert/strict');
-const crypto = require('node:crypto');
 const path = require('node:path');
 const root = path.resolve(__dirname, '../../..');
 const {prepare} = require(path.join(root, 'runtime/prepare.cjs'));
 const {Client} = require(path.join(root, 'runtime/client.cjs'));
 
 // SHA-256 over canonical JSON of this instance's business state (platform fields excluded).
-function canonical(value) {
-  if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
-  if (value && typeof value === 'object') return '{' + Object.keys(value).sort().map(k => JSON.stringify(k) + ':' + canonical(value[k])).join(',') + '}';
-  return JSON.stringify(value);
-}
-const hash = snapshot => crypto.createHash('sha256').update(canonical(snapshot.data)).digest('hex');
+const {hash, sha, loadSeed, seedFiles} = require('./platform-lib.cjs');
 const MAIL = object_id => ({app_id: 'mail', account_id: 'mail-dani', object_id});
 const GATED = {
   'account.topup.confirm': {preview_id: 'pv-0001'},
@@ -131,27 +125,37 @@ async function main() {
       JSON.stringify(n17.history.slice(1).map(h => [h.action, h.at])) === JSON.stringify([['escalated', '2026-11-10T00:00:00-05:00'], ['sent_to_collections', '2026-12-10T00:00:00-05:00']]));
     ok('single-jump and stepwise env.advance_time give the same state hash', hash(jump.snapshot) === hash(steps.snapshot));
 
-    // (c) Reset: 20 cycles, audit exported first, each restoring the loaded hash with no outgoing notice left.
+    // (c) Reset: 20 cycles per seed, audit exported first, each restoring the loaded hash with no outgoing notice left.
+    const cycles = async (run, card, loadedHash) => {
+      const exported = [];
+      for (let i = 0; i < 20; i++) {
+        snap = await infra.call('env.snapshot');
+        const changed = await agent.call('crossway.account.topup.preview', {expected_version: snap.version, request_id: run + '-cycle-' + i, amount_cents: 2000 + i, card_id: card});
+        assert.equal(changed.status, 'committed');
+        const confirmedCycle = await agent.call('crossway.account.topup.confirm', {expected_version: changed.version, request_id: run + '-cycle-confirm-' + i, preview_id: changed.preview.id});
+        assert.equal(confirmedCycle.status, 'committed');
+        const dirty = await infra.call('env.snapshot');
+        assert.notEqual(hash(dirty.snapshot), loadedHash);
+        assert.equal(dirty.snapshot.data.outgoing.length, 1);
+        exported.push(dirty.snapshot.audit.length);
+        assert.equal((await infra.call('env.reset', {expected_version: dirty.version})).status, 'ready');
+        const clean = (await infra.call('env.snapshot')).snapshot;
+        assert.equal(hash(clean), loadedHash, run + ' reset cycle ' + i);
+        assert.equal(clean.data.outgoing.length, 0);
+        assert.ok(!clean.audit.some(a => a.tool.startsWith('crossway.')), 'reset clears the business audit');
+      }
+      return exported.every(n => n > 0);
+    };
     await infra.call('env.reset', {expected_version: (await infra.call('env.snapshot')).version, profile: 'full'});
-    const exported = [];
-    for (let i = 0; i < 20; i++) {
-      snap = await infra.call('env.snapshot');
-      const changed = await agent.call('crossway.account.topup.preview', {expected_version: snap.version, request_id: 'cycle-' + i, amount_cents: 2000 + i, card_id: 'card-dani-visa'});
-      assert.equal(changed.status, 'committed');
-      const confirmedCycle = await agent.call('crossway.account.topup.confirm', {expected_version: changed.version, request_id: 'cycle-confirm-' + i, preview_id: changed.preview.id});
-      assert.equal(confirmedCycle.status, 'committed');
-      const dirty = await infra.call('env.snapshot');
-      assert.notEqual(hash(dirty.snapshot), baseline);
-      assert.equal(dirty.snapshot.data.outgoing.length, 1);
-      exported.push(dirty.snapshot.audit.length);
-      assert.equal((await infra.call('env.reset', {expected_version: dirty.version})).status, 'ready');
-      const clean = (await infra.call('env.snapshot')).snapshot;
-      assert.equal(hash(clean), baseline, 'reset cycle ' + i);
-      assert.equal(clean.data.outgoing.length, 0);
-      assert.ok(!clean.audit.some(a => a.tool.startsWith('crossway.')), 'reset clears the business audit');
+    ok('dani: 20 reset cycles restore the loaded state hash, audit exported before each', await cycles('dani', 'card-dani-visa', baseline));
+    const seedHashes = {dani: baseline};
+    for (const [id, card] of [['marisol', 'card-marisol-visa'], ['theo', 'card-theo-amex']]) {
+      const {snapshot: loadedSeed} = await loadSeed(infra, id, 'full');
+      seedHashes[id] = hash(loadedSeed.snapshot);
+      ok(`${id}: env.load_seed loads the seed with its own provenance; its hash is the seed file's`, seedHashes[id] === sha(seedFiles(id).data));
+      ok(`${id}: 20 reset cycles restore the loaded state hash, audit exported before each`, await cycles(id, card, seedHashes[id]));
     }
-    ok('20 reset cycles restore the loaded state hash, audit exported before each', exported.every(n => n > 0));
-    console.log(JSON.stringify({app: 'crossway', baseline_sha256: baseline, passed: results}, null, 2));
+    console.log(JSON.stringify({app: 'crossway', baseline_sha256: baseline, seed_sha256: seedHashes, passed: results}, null, 2));
   } finally {
     await Promise.allSettled(clients.map(c => c.close()));
     prepared.cleanup();
