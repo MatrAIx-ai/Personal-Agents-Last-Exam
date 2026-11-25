@@ -1,8 +1,8 @@
 'use strict';
-// Cases from the independent review of the first submission: links of a deleted album, confirm on
-// delete, the two scopes (shared vs seen) on an album with only an invited member, departed
-// contributions and purged records in reads, make_cover on the cover, links named through
-// album_match, and wire message IDs that survive a reset.
+// Edge cases: links of a deleted album, confirm on delete, the two scopes (shared vs seen) on an
+// album with only an invited member, departed contributions and purged records in reads,
+// make_cover on the cover, links named through album_match, and wire message IDs that survive a
+// reset.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {fixture, ev} = require('./harness.cjs');

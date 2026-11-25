@@ -23,6 +23,13 @@ test('generated contracts match their source and the manifest declarations', () 
   assert.equal(app.event_types.length, 7);
 });
 
+test('a tool description names the refusals the tool gives (items.read: in_trash, no_file, gone)', () => {
+  const f = fixture(), read = tools.find(t => t.name === 'fernshelf.items.read').description;
+  for (const code of ['in_trash', 'no_file', 'gone']) assert.ok(read.includes(code), code);
+  f.call('fernshelf.items.trash', {ids: ['it-m07']});
+  assert.equal(f.try('fernshelf.items.read', {id: 'it-m07'}).status, 'in_trash');
+});
+
 test('diagnostics are optional: results are identical with and without a log hook', () => {
   const a = fixture({logging: true}), b = fixture({logging: false});
   const args = {ids: ['it-m07']};

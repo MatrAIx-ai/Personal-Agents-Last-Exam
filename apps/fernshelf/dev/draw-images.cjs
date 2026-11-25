@@ -96,13 +96,23 @@ function draw({width = 128, height = 96, scene, caption, seed}) {
   if (scene === 'night') for (let k = 0; k < 30; k++) set(Math.floor(r() * width), Math.floor(r() * horizon), [255, 255, 230]);
   // Light grain, so the stand-in compresses like an image rather than a flat diagram.
   for (let i = 0; i < img.length; i++) img[i] = Math.max(0, Math.min(255, img[i] + Math.floor(r() * 3) - 1));
-  // Stamped caption on a dark band.
-  const text = caption.toUpperCase().replace(/[^A-Z0-9 .,&-]/g, ' ').slice(0, Math.floor((width - 4) / 4));
-  for (let y = height - 9; y < height; y++) for (let x = 0; x < width; x++) set(x, y, [20, 20, 24]);
-  [...text].forEach((ch, k) => {
+  // Stamped caption on a dark band, wrapped at spaces onto up to two lines so no word (or date) is cut.
+  const shown = captionLines(caption, width), band = 3 + shown.length * 7;
+  for (let y = height - band; y < height; y++) for (let x = 0; x < width; x++) set(x, y, [20, 20, 24]);
+  shown.forEach((line, row) => [...line].forEach((ch, k) => {
     const g = GLYPHS[ch] || GLYPHS[' '];
-    for (let gy = 0; gy < 5; gy++) for (let gx = 0; gx < 3; gx++) if (g[gy * 3 + gx] === '1') set(2 + k * 4 + gx, height - 7 + gy, [245, 245, 235]);
-  });
+    for (let gy = 0; gy < 5; gy++) for (let gx = 0; gx < 3; gx++) if (g[gy * 3 + gx] === '1') set(2 + k * 4 + gx, height - band + 2 + row * 7 + gy, [245, 245, 235]);
+  }));
   return {width, height, bytes: encodePNG(width, height, img)};
 }
-module.exports = {draw, encodePNG, KINDS, hash};
+// The stamped caption's lines: words wrapped at spaces to the image width, at most two lines.
+function captionLines(caption, width) {
+  const fit = Math.floor((width - 4) / 4), lines = [];
+  for (const word of caption.toUpperCase().replace(/[^A-Z0-9 .,&-]/g, ' ').split(/\s+/).filter(Boolean)) {
+    const last = lines[lines.length - 1];
+    if (last !== undefined && (last + ' ' + word).length <= fit) lines[lines.length - 1] = last + ' ' + word;
+    else lines.push(word.slice(0, fit));
+  }
+  return lines.slice(0, 2);
+}
+module.exports = {draw, encodePNG, KINDS, hash, captionLines};

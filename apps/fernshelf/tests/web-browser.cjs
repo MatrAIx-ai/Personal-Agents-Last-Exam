@@ -5,7 +5,7 @@
 // root); it is not part of `npm test`. Screenshots and a JSON report go to --out DIR
 // (default <repository>/.artifacts/fernshelf-web).
 //   node tests/web-browser.cjs [--runtime DIR] [--out DIR]
-const assert = require('node:assert/strict'), fs = require('node:fs'), os = require('node:os'), path = require('node:path');
+const assert = require('node:assert/strict'), fs = require('node:fs'), path = require('node:path');
 const locate = require('../scripts/locate.cjs');
 const runtime = locate.runtimeDir(), {start} = require(path.join(runtime, 'web/server.cjs')), {Client} = require(path.join(runtime, 'client.cjs'));
 const {chromium} = require(require.resolve('playwright', {paths: [path.dirname(runtime)]}));
@@ -15,7 +15,7 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
 
 (async () => {
   fs.mkdirSync(out, {recursive: true});
-  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fernshelf-browser-'));
+  const stateDir = fs.mkdtempSync(path.join(out, 'state-'));
   const browser = await chromium.launch({headless: true});
   const report = {schema: 'fernshelf.web-browser.v1', checked_at: new Date().toISOString(), node: process.version, browser: browser.version(), checks: [], screenshots: [], passed: false};
   const check = (name, condition, detail) => { assert.ok(condition, name + (detail !== undefined ? ': ' + JSON.stringify(detail) : '')); report.checks.push(name); console.log('ok - ' + name); };
@@ -49,6 +49,13 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     const shot = async (name, p = page, full = false) => { const file = path.join(out, name + '.png'); await p.screenshot({path: file, fullPage: full}); report.screenshots.push(path.basename(file)); };
     const select = async id => { await page.locator('#records [data-record-id="' + id + '"]').first().click(); await page.locator('.detail[data-selected-id="' + id + '"]').waitFor(); await idle(); };
     const detailButton = name => page.locator('.detail').getByRole('button', {name, exact: true});
+    // What a person reads: no record IDs, no null/undefined, no JSON and no wording meant for the
+    // Agent (argument names, error codes) anywhere in the visible page, open dialogs included.
+    const RAW = /\b(?:it|al|ln|rr|ct|vw|ntf|pl|st|img)-[a-z]*\d[\w-]*|\bundefined\b|\bnull\b|\{"|confirm: true|\b[a-z]+_[a-z_]+\b/;
+    const readable = async (p, where) => {
+      const text = await p.evaluate(() => document.body.innerText), m = RAW.exec(text);
+      check(where + ': only readable text (no IDs, null, JSON or Agent wording)', !m, m && text.slice(Math.max(0, m.index - 80), m.index + 80));
+    };
 
     await page.goto(host.accessUrl); await idle(); await page.locator('#records .fs-tile').first().waitFor();
     await until('first thumbnails', () => page.locator('#records .fs-tile img').count());
@@ -57,7 +64,7 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     const sha = await page.locator('#records .fs-tile img').first().getAttribute('data-sha256');
     const catalog = require('../contribution/assets.catalog.json');
     check('Thumbnail bytes are the catalogued image (items.read)', catalog.assets.some(a => a.integrity.sha256 === sha));
-    await shot('desktop-photos');
+    await shot('desktop-photos'); await readable(page, 'Photos');
 
     // W2: a new album through the schema form, with a lost response retried once.
     let dropped = false;
@@ -69,14 +76,14 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     expectNetworkError = true;
     await page.getByRole('button', {name: 'New album', exact: true}).click();
     await dialog.locator('[data-field=title]').fill('Browser trip'); await submit();
-    await dialog.locator('[role=alert]').filter({hasText: /fetch/i}).waitFor();
+    await dialog.locator('[role=alert]').filter({hasText: /connection was interrupted/i}).waitFor();
     check('A lost response leaves the form open with the error', await dialog.count() === 1);
     await submit(); await dialog.waitFor({state: 'hidden'}); await idle();
     expectNetworkError = false; await page.unroute('**/api/call');
     const albums = (await mcp.call('fernshelf.albums.list')).albums.filter(a => a.title === 'Browser trip');
     check('Retry of the unchanged form commits one album (same request ID)', albums.length === 1, albums.length);
     const trip = albums[0].id;
-    await page.locator('.fs-album-head h2', {hasText: 'Browser trip'}).waitFor();
+    await page.locator('.fs-album-meta[data-album-title="Browser trip"]').waitFor();
     check('After creating, the page opens the new album', true);
 
     // Add items through the picker.
@@ -109,7 +116,7 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     await dialog.getByRole('button', {name: 'Revoke link'}).click(); await dialog.waitFor({state: 'hidden'});
     await until('revoked', async () => (await album(trip)).links.find(l => l.id === link.id).state === 'revoked');
     check('Revoke link: link revoked', true); await idle();
-    await shot('desktop-album');
+    await shot('desktop-album'); await readable(page, 'Album page');
 
     // Photo panel: favourite, caption (hostile text), people, trash and restore.
     await nav('Photos'); await select('it-2611-0931');
@@ -131,7 +138,8 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     await page.locator('.detail').getByRole('button', {name: 'Remove ' + label.name}).click();
     await until('person removed', async () => !(await item('it-2611-0931')).people.includes(label.id));
     check('People: remove a label (items.update remove_people)', true); await idle();
-    await shot('desktop-photo-detail');
+    await page.locator('.detail .fs-history summary').click();
+    await shot('desktop-photo-detail'); await readable(page, 'Photo panel with its history');
 
     // Stack cover on another stack.
     await select('it-2611-0942');
@@ -178,11 +186,11 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     await select(albumScoped.item_ids[0]);
     await page.locator('.detail .fs-exposure .fs-surface').first().waitFor();
     check('Before answering, the photo panel shows where the item is visible (exposure.get)', (await page.locator('.detail .fs-exposure').innerText()).includes('Reunion 2026'));
-    await page.locator('[data-request-id="' + albumScoped.id + '"]').getByRole('button', {name: 'Honor…'}).click();
+    await page.locator('[data-request-id="' + albumScoped.id + '"]').getByRole('button', {name: 'Honour…'}).click();
     await dialog.locator('[data-field=note]').fill('Taken out of the reunion album.'); await submit();
     await page.locator('dialog.fs-dialog[open] h2', {hasText: 'Request honoured'}).waitFor();
     check('Honour shows what was taken down and what was already seen', /Taken down/i.test(await page.locator('dialog.fs-dialog[open]').innerText()));
-    await shot('desktop-request-result');
+    await shot('desktop-request-result'); await readable(page, 'Honour result');
     await page.locator('dialog.fs-dialog[open]').getByRole('button', {name: 'Close'}).click();
     const honored = (await mcp.call('fernshelf.removals.list', {state: 'honored'})).removals.find(r => r.id === albumScoped.id);
     check('Honour: request honoured with the note', honored?.answers.at(-1).note === 'Taken out of the reunion album.'); await idle();
@@ -196,7 +204,7 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     const warned = page.locator('dialog.fs-dialog[open]', {hasText: /Shown again to people who asked for removal/i}); await warned.waitFor();
     check('Re-sharing an honoured item shows the removal_honored warning', (await warned.innerText()).includes(albumScoped.from.display_name.split(' ')[0]) &&
       (await album(trip)).entries.some(e => e.id === albumScoped.item_ids[0]));
-    await shot('desktop-warning');
+    await shot('desktop-warning'); await readable(page, 'Re-share warning');
     await warned.getByRole('button', {name: 'Close'}).click(); await idle();
 
     // W3 on a seeded shared album: role change, saving a contribution, a refused delete.
@@ -214,9 +222,9 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     await page.locator('.fs-album-head').getByRole('button', {name: 'Delete album'}).click();
     await dialog.getByRole('button', {name: 'Delete album'}).click();
     const refusal = dialog.locator('.form-error[data-code=confirm_required]'); await refusal.waitFor();
-    check('A refused delete shows the App code and message and changes nothing',
-      /joined members or an active link/.test(await refusal.innerText()) && (await album('al-reunion-2026')).deleted_at === null);
-    await shot('desktop-refusal');
+    check('A refused delete (confirm_required) says what to do and changes nothing',
+      /still shared\. Tick “Also end access”/.test(await refusal.innerText()) && (await album('al-reunion-2026')).deleted_at === null);
+    await shot('desktop-refusal'); await readable(page, 'Refused delete');
     await dialog.getByRole('button', {name: 'Cancel'}).click();
 
     // A stale form.
@@ -260,7 +268,7 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
       await p.locator('nav button').filter({hasText: view}).first().click(); await p.locator('#app[aria-busy=false]').waitFor();
       await p.waitForTimeout(300);
       check('390 px: ' + view + ' has no horizontal page overflow', await overflow() <= 0, await overflow());
-      await shot('phone-' + view.toLowerCase(), p);
+      await shot('phone-' + view.toLowerCase(), p); await readable(p, '390 px ' + view);
     }
     await p.locator('nav button').filter({hasText: 'Photos'}).first().click(); await p.locator('#app[aria-busy=false]').waitFor();
     const phoneId = await p.locator('#records .fs-tile').nth(3).getAttribute('data-record-id');
@@ -270,9 +278,14 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     await shot('phone-photo-detail', p, true);
     await p.locator('nav button').filter({hasText: 'Albums'}).first().click(); await p.locator('[data-album-id="al-reunion-2026"]').click(); await p.locator('#app[aria-busy=false]').waitFor();
     check('390 px: album page has no horizontal page overflow', await overflow() <= 0);
-    await shot('phone-album', p, true);
+    await shot('phone-album', p, true); await readable(p, '390 px album page');
     await phone.close();
-    for (const view of ['Albums', 'Sharing', 'Storage', 'Activity']) { await nav(view); await page.waitForTimeout(2500); await shot('desktop-' + view.toLowerCase()); }
+    for (const view of ['Albums', 'Sharing', 'Requests', 'Storage', 'Activity', 'Trash']) {
+      await nav(view); await page.waitForTimeout(2500); await shot('desktop-' + view.toLowerCase()); await readable(page, '1280 px ' + view);
+    }
+    // Older notices are folded under "Earlier"; opening it shows them.
+    await nav('Activity'); await page.locator('.fs-earlier summary').click();
+    check('Activity: notices older than 90 days open from "Earlier"', await page.locator('.fs-earlier .notice').count() > 0); await readable(page, 'Activity with earlier notices');
     check('1280 px: no horizontal page overflow', await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
     await context.close();
 
@@ -287,9 +300,9 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     check('Restricted profile: no write controls on the photo view', present.length === 0, present);
     check('Restricted profile: no people editor', await r.locator('.detail select[aria-label="Add a person"]').count() === 0);
     await r.locator('nav button').filter({hasText: 'Requests'}).first().click(); await r.locator('#app[aria-busy=false]').waitFor();
-    check('Restricted profile: requests are readable but cannot be answered', await r.locator('[data-request-id]').count() > 0 && await r.getByRole('button', {name: 'Honor…'}).count() === 0);
+    check('Restricted profile: requests are readable but cannot be answered', await r.locator('[data-request-id]').count() > 0 && await r.getByRole('button', {name: 'Honour…'}).count() === 0);
     await r.locator('nav button').filter({hasText: 'Albums'}).first().click(); await r.locator('[data-album-id="al-reunion-2026"]').click(); await r.locator('#app[aria-busy=false]').waitFor();
-    await r.locator('.fs-album-head h2', {hasText: 'Reunion 2026'}).waitFor(); await r.locator('.fs-sharing .fs-person').first().waitFor();
+    await r.locator('.fs-album-meta[data-album-title="Reunion 2026"]').waitFor(); await r.locator('.fs-sharing .fs-person').first().waitFor();
     check('Restricted profile: album page without Invite, Create link, Revoke or Delete', await r.getByRole('button', {name: /^(Invite|Create link|Revoke|Delete album|Add items|Rename|Change role|Remove)$/}).count() === 0);
     await r.waitForTimeout(1500); await r.screenshot({path: path.join(out, 'restricted-album.png')}); report.screenshots.push('restricted-album.png');
     const denied = await r.evaluate(async () => { const s = await (await fetch('/session')).json(); const res = await fetch('/api/call', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Pale-CSRF': s.csrf}, body: JSON.stringify({name: 'fernshelf.albums.create', arguments: {title: 'x', expected_version: {epoch: 1, revision: 0}, request_id: 'forced-1'}})}); return res.status; });
