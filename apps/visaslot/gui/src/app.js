@@ -39,7 +39,8 @@ Object.assign(config,{
   el('h3',{},'History'),...a.history.map(h=>el('p',{},date(h.at,{year:'numeric'})+' · '+h.action.replace(/_/g,' ')+' · slot '+h.slot_at)),
   textBlock('Use Visa file to see the registered documents and what would be missing if the appointment were held now.')),
  field:name=>{
-  if(name==='consulate_id')return {options:Object.entries(consulateName).map(([value,label])=>({value,label}))};
+  // Free text, so a replacement seed's consulate IDs work too; Competence returns the right one.
+  if(name==='consulate_id')return {placeholder:'Consulate ID from Competence, e.g. de-chicago'};
   if(name==='from'||name==='to')return {placeholder:'YYYY-MM-DD'};
   if(name==='slot_version')return {help:'Each slot listed by Find slots carries its version; a changed slot is refused as stale.'};
   return {};

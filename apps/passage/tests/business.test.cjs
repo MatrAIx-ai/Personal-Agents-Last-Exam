@@ -316,3 +316,12 @@ test('reviewer renderer escapes untrusted content', () => {
   const html = view.render([{id:'test', title:'<img src=x onerror=alert(1)>', body:'<script>bad</script>'}]);
   assert.ok(!html.includes('<img')); assert.ok(!html.includes('<script>')); assert.ok(html.includes('&lt;'));
 });
+
+// Seeds may serialize objects with any key order; only array order carries meaning.
+const reorder = (v, keys) => Array.isArray(v) ? v.map(x => reorder(x, keys)) : v && typeof v === 'object' ? Object.fromEntries(keys(Object.keys(v)).map(k => [k, reorder(v[k], keys)])) : v;
+const KEY_ORDERS = [ks => [...ks].sort(), ks => [...ks].reverse()];
+
+test('a seed is accepted whatever its object key order, including notices and history', () => {
+  const f = fixture(); f.event(SCENARIO);
+  for (const keys of KEY_ORDERS) { const g = fixture(); g.load(reorder(f.data, keys)); assert.deepEqual(g.data, reorder(f.data, keys)); }
+});

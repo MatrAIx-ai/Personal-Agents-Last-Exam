@@ -8,7 +8,9 @@ const o = require('./office.cjs');
 const {message} = require('./notices.cjs');
 
 const bad = text => c.fail('invalid_seed', text);
-const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+// Structural equality: object key order is ignored, array order is kept.
+const canon = v => Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, canon(v[k])])) : v;
+const same = (a, b) => JSON.stringify(canon(a)) === JSON.stringify(canon(b));
 
 function timeline(record) {
   if (c.ms(record.created_at) > c.ms(record.updated_at)) bad(record.id + ' timestamps are reversed.');

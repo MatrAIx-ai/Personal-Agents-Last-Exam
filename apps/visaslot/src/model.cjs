@@ -7,7 +7,9 @@ const r = require('./rules.cjs');
 
 const bad = message => c.fail('invalid_seed', message);
 const unique = (values, label) => { if (new Set(values).size !== values.length) bad('Duplicate ' + label + '.'); };
-const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+// Structural equality: object key order is ignored, array order is kept.
+const canon = v => Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, canon(v[k])])) : v;
+const same = (a, b) => JSON.stringify(canon(a)) === JSON.stringify(canon(b));
 
 function consulates(data) {
   unique(data.consulates.map(x => x.id), 'consulate ID');

@@ -45,7 +45,9 @@ function deadline(ctx, data, event) {
 // Shared check of a business-day event: the payload must carry the desk's own computation
 // (counting date, rule, counted days, skipped holidays and due date), and the event is applied on
 // or after the due date in the business calendar. The letter is dated by the event's own time.
-const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+// Structural equality: object key order is ignored, array order is kept.
+const canon = v => Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, canon(v[k])])) : v;
+const same = (a, b) => JSON.stringify(canon(a)) === JSON.stringify(canon(b));
 function checkBusinessDays(data, event, {days, from, label}) {
   const p = event.payload, expected = k.computation(data, from, days), on = k.businessDate(data, event.at);
   const wrong = ['counted_from', 'business_days', 'counted_days', 'skipped_holidays', 'due_on'].filter(key => !same(p[key], expected[key]));

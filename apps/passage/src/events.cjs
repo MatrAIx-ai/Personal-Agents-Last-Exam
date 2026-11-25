@@ -6,7 +6,9 @@ const c = require('./common.cjs');
 const o = require('./office.cjs');
 const {notice} = require('./notices.cjs');
 
-const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+// Structural equality: object key order is ignored, array order is kept.
+const canon = v => Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, canon(v[k])])) : v;
+const same = (a, b) => JSON.stringify(canon(a)) === JSON.stringify(canon(b));
 
 function processed(ctx, data, event) {
   const p = event.payload, r = c.find(data.requests, p.request_id, 'Request');
