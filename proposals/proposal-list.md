@@ -8,7 +8,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**195 open non-draft proposals · 0 awaiting initial review · 8 drafts.**
+**195 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
@@ -25,10 +25,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🏗️ Environment Track
 
-**110 proposals.**
+**111 proposals.**
 
 | Submitted (UTC) | PR / app or website | Primary domain | Scope and app connections | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-25 19:59:57 | [#254](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/254) · Turnrow is a fictional fan-to-fan ticket resale marketplace used by one person who both sells and buys; it never sells…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/254/files) | Media &amp; entertainment<br>Also: Shopping &amp; groceries | Turnrow is a fan-to-fan ticket resale marketplace that never sells primary tickets. No other proposal resells tickets with delivery deadlines and penalties, post-show payouts or guarantee claims. The person sells seats they already hold… | Draft | Awaiting review |  | [byshail](https://github.com/byshail) |  |
 | 2026-11-25 19:55:58 | [#253](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/253) · Kitewatch, an independently branded synthetic user-generated video platform seen from one viewer's account, with a…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/253/files) | Media &amp; entertainment<br>Also: Social &amp; communities | Kitewatch is the viewer's side of a user-generated video platform, which no existing proposal covers: channel subscriptions with notice levels, a watch history the person can pause and prune, a home feed built by a written rule that gives… | Draft | Awaiting review |  | [byshail](https://github.com/byshail) |  |
 | 2026-11-25 07:39:47 | [#250](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/250) · PawStay, an independently branded synthetic overnight pet-boarding service. Public workflow references: Rover's pet…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/250/files) | Health &amp; care | A resettable browser App and MCP business interface for overnight dog boarding in one fictional city. One household has two dog profiles and can choose among six providers. The App separates a confirmed reservation, the exact care… | Design review | Review requested<br>@Jasonya |  | [QYechang](https://github.com/QYechang) |  |
 | 2026-11-25 06:05:43 | [#247](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/247) · GateReturn is a synthetic lost property service for one fictional airport and one airline. SFO's public guidance…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/247/files) | Travel &amp; commuting | Build a resettable App where a traveler can report a lost personal item, respond to a desk's request for proof, and arrange its return after ownership is verified. The airport desk handles terminal losses. The airline desk handles items… | Design review | Review requested<br>@Chenngzz |  | [JunbinLu2000](https://github.com/JunbinLu2000) |  |
