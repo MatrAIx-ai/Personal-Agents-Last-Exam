@@ -195,66 +195,30 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
     seenCalls.add(key);
     calls.push(call);
   }
-  const deniedQueues = new Map();
-  for (const item of agent_executions) {
-    if (['ok', 'committed', 'ready'].includes(item.status)) continue;
-    const tool = item.tool || item.name || '';
-    const key = tool + '\n' + (item.request_id || '');
-    if (!deniedQueues.has(key)) deniedQueues.set(key, []);
-    deniedQueues.get(key).push(item);
-  }
   const usedExecutions = new Set();
-  function named(item) {
-    return Boolean(item && (item.connection_id || item.client_name));
-  }
-  function identityConflict(row, item) {
-    if (!named(row) || !named(item)) return false;
-    if (row.connection_id && item.connection_id && row.client_name && item.client_name) {
-      return row.connection_id !== item.connection_id || row.client_name !== item.client_name;
-    }
-    if (row.connection_id && item.connection_id && row.connection_id !== item.connection_id) return true;
-    if (row.client_name && item.client_name && row.client_name !== item.client_name) return true;
-    return false;
-  }
-  function identityAgrees(row, item) {
-    if (named(row) !== named(item)) return false;
-    return !identityConflict(row, item);
-  }
   function partyKey(item) {
     if (item.connection_id && item.client_name) return item.connection_id + '\n' + item.client_name;
     if (item.connection_id) return item.connection_id;
     if (item.client_name) return item.client_name;
     return '';
   }
-  function takeDenied(row) {
-    const tool = row.tool || '';
-    const requestId = row.input && row.input.request_id ? String(row.input.request_id) : '';
-    const queue = deniedQueues.get(tool + '\n' + requestId);
-    if (!queue || !queue.length) return null;
-    const index = queue.findIndex(item => requestId ? !identityConflict(row, item) : identityAgrees(row, item));
-    if (index < 0) return null;
-    const [item] = queue.splice(index, 1);
-    usedExecutions.add(item);
-    return item;
-  }
   for (const row of audit) {
     const requestId = row.input ? row.input.request_id || null : null;
     const candidate = row.decision === 'allow' && row.actor === 'agent' ? receiptCall(state, requestId) : null;
     const stored = candidate && candidate.tool === row.tool ? candidate : null;
-    const execution = stored ? null : (row.decision === 'deny' ? takeDenied(row) : null);
     const denied = row.decision === 'deny';
-    const args = denied ? (execution && execution.args) : (stored ? stored.args : null);
+    const args = denied ? null : (stored ? stored.args : null);
     const linked = !denied && row.actor === 'agent'
       ? history.find(entry => entry.request_id && entry.request_id === requestId && entry.tool === row.tool && (!entry.device_id || !args || !args.device_id || args.device_id === entry.device_id))
       : null;
     pushCall({
       seq: row.seq,
       tool: row.tool || null,
-      target: denied ? (execution ? argTarget(execution.args) : null) : (argTarget(args) || callTarget(linked, row, null)),
-      command: denied ? (execution && execution.args && execution.args.command || null) : ((args && args.command) || callCommand(linked, row, null)),
-      arguments: denied ? (execution ? allowArguments(execution.args) : {}) : allowArguments(args),
+      target: denied ? null : (argTarget(args) || callTarget(linked, row, null)),
+      command: denied ? null : ((args && args.command) || callCommand(linked, row, null)),
+      arguments: denied ? {} : allowArguments(args),
       reason: linked && linked.reason ? linked.reason : null,
-      outcome: (execution && execution.status) || (row.result && row.result.status) || row.reason || row.decision,
+      outcome: (row.result && row.result.status) || row.reason || row.decision,
       actor: row.actor || null,
       caller_role: row.actor || null,
       virtual_time: row.virtual_time || null,
@@ -264,13 +228,67 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
       client_name: row.client_name || null
     });
   }
-  for (const [key, queue] of deniedQueues) {
-    if (!queue.length) continue;
-    const split = key.indexOf('\n');
-    const tool = key.slice(0, split);
-    const requestId = key.slice(split + 1);
-    const rows = audit.filter(row => row.decision === 'deny' && (row.tool || '') === tool && String((row.input && row.input.request_id) || '') === requestId);
-    if (rows.length) for (const item of queue) usedExecutions.add(item);
+  function denialCode(call) {
+    if (!call || call.decision !== 'deny' || !call.outcome || call.outcome === 'deny') return '';
+    return call.outcome;
+  }
+  function denyCompatible(row, item) {
+    if ((row.tool || '') !== (item.tool || item.name || '')) return false;
+    if (String(row.request_id || '') !== String(item.request_id || '')) return false;
+    const code = denialCode(row);
+    if (code && item.status && code !== item.status) return false;
+    if (row.connection_id && item.connection_id && row.connection_id !== item.connection_id) return false;
+    if (row.client_name && item.client_name && row.client_name !== item.client_name) return false;
+    const rowNamed = Boolean(row.connection_id || row.client_name);
+    const itemNamed = Boolean(item.connection_id || item.client_name);
+    if (!row.request_id && !item.request_id && rowNamed !== itemNamed) return false;
+    return true;
+  }
+  function fillDenied(call, item) {
+    if (!call.target) call.target = callTarget(null, null, item);
+    if (!call.command) call.command = callCommand(null, null, item);
+    if (!Object.keys(call.arguments || {}).length) call.arguments = allowArguments(item.args);
+    usedExecutions.add(item);
+  }
+  let pendingRows = calls.filter(call => call.seq != null && call.decision === 'deny');
+  let pendingExecs = agent_executions.filter(item => !['ok', 'committed', 'ready'].includes(item.status));
+  let moved = true;
+  while (moved) {
+    moved = false;
+    for (const item of pendingExecs) {
+      const rows = pendingRows.filter(row => denyCompatible(row, item));
+      if (rows.length !== 1) continue;
+      const execs = pendingExecs.filter(other => denyCompatible(rows[0], other));
+      if (execs.length !== 1) continue;
+      fillDenied(rows[0], item);
+      pendingRows = pendingRows.filter(row => row !== rows[0]);
+      pendingExecs = pendingExecs.filter(other => other !== item);
+      moved = true;
+      break;
+    }
+  }
+  const remain = new Map();
+  function remainAdd(key, kind, value) {
+    if (!remain.has(key)) remain.set(key, {rows: [], execs: []});
+    remain.get(key)[kind].push(value);
+  }
+  function remainKey(item, isRow) {
+    const tool = isRow ? (item.tool || '') : (item.tool || item.name || '');
+    if (item.request_id) return tool + '\n' + item.request_id;
+    return tool + '\n' + partyKey(item);
+  }
+  for (const row of pendingRows) remainAdd(remainKey(row, true), 'rows', row);
+  for (const item of pendingExecs) remainAdd(remainKey(item, false), 'execs', item);
+  for (const bucket of remain.values()) {
+    const rows = bucket.rows;
+    const execs = bucket.execs.filter(item => rows.some(row => denyCompatible(row, item)));
+    const matchedRows = rows.filter(row => execs.some(item => denyCompatible(row, item)));
+    const complete = matchedRows.length === rows.length && execs.length === bucket.execs.length && matchedRows.length === execs.length && matchedRows.every(row => execs.every(item => denyCompatible(row, item)));
+    if (complete && matchedRows.length) {
+      execs.forEach((item, index) => fillDenied(matchedRows[index], item));
+    } else if (matchedRows.length) {
+      for (const item of execs) usedExecutions.add(item);
+    }
   }
   const openGroups = new Map();
   for (const call of calls) {

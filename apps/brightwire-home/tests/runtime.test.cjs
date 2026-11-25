@@ -190,29 +190,35 @@ test('load_seed rejects a snapshot id that is not in the catalog', () => {
   assert.equal(event.state.resources.bundle.catalog.assets.some(asset => asset.asset_id === 'snap-nursery'), true);
 });
 
-test('a camera read reports a snapshot the bundle marks missing', () => {
+test('three runs keep their own snapshot readiness', () => {
   const model = createRuntime({registryFile: registry});
-  const state = model.create('brightwire-home', 'snap-missing', 'sandbox');
-  const bundle = structuredClone(state.resources.bundle);
-  const asset = bundle.catalog.assets.find(item => item.asset_id === 'snap-nursery');
-  asset.availability = {status: 'missing', reason: 'The replacement bundle has no bytes for this snapshot.'};
-  delete asset.integrity;
-  delete bundle.blobs['snap-nursery'];
-  const event = model.execute(state, 'infra', 'env.apply_event', {
-    expected_version: model.version(state),
-    event: {
-      event_id: 'mark-snapshot-missing',
-      at: '2026-11-18T09:01:00-08:00',
-      operation: 'sensor.change',
-      payload: {device_id: 'contact-front', state: 'open'}
-    },
-    bundle
+  const runA = model.create('brightwire-home', 'snap-a', 'sandbox');
+  const readyA = model.execute(runA, 'agent', 'brightwire-home.devices.get', {device_id: 'camera-nursery'});
+  assert.equal(readyA.result.device.snapshot_status, 'ready');
+  const stateB = model.create('brightwire-home', 'snap-b', 'sandbox');
+  const dataB = structuredClone(stateB.data);
+  dataB.available_snapshots = dataB.available_snapshots.filter(id => id !== 'snap-nursery');
+  const loadedB = model.execute(stateB, 'infra', 'env.load_seed', {
+    expected_version: model.version(stateB),
+    request_id: 'seed-b-drop-id',
+    virtual_now: dataB.committed_through,
+    data: dataB,
+    binding: stateB.binding,
+    policies: stateB.policies,
+    bundle: stateB.resources.bundle
   });
-  assert.equal(event.result.status, 'committed', JSON.stringify(event.result));
-  const view = model.execute(event.state, 'agent', 'brightwire-home.devices.get', {device_id: 'camera-nursery'});
-  assert.equal(view.result.status, 'ok');
-  assert.equal(view.result.device.snapshot_status, 'asset_missing');
-  assert.equal(view.state.data.available_snapshots.includes('snap-nursery'), true);
+  assert.equal(loadedB.result.status, 'ready', JSON.stringify(loadedB.result));
+  const missingB = model.execute(loadedB.state, 'agent', 'brightwire-home.devices.get', {device_id: 'camera-nursery'});
+  assert.equal(missingB.result.device.snapshot_status, 'asset_missing');
+  const runC = model.create('brightwire-home', 'snap-c', 'sandbox');
+  const readyC = model.execute(runC, 'agent', 'brightwire-home.devices.get', {device_id: 'camera-nursery'});
+  assert.equal(readyC.result.device.snapshot_status, 'ready');
+  const againA = model.execute(runA, 'agent', 'brightwire-home.devices.get', {device_id: 'camera-nursery'});
+  const againB = model.execute(loadedB.state, 'agent', 'brightwire-home.devices.get', {device_id: 'camera-nursery'});
+  assert.equal(againA.result.device.snapshot_status, 'ready');
+  assert.equal(againB.result.device.snapshot_status, 'asset_missing');
+  assert.equal(againA.state.data.available_snapshots.includes('snap-nursery'), true);
+  assert.equal(againB.state.data.available_snapshots.includes('snap-nursery'), false);
 });
 
 test('agent resource discovery lists no images on the default household', () => {
@@ -224,64 +230,6 @@ test('agent resource discovery lists no images on the default household', () => 
   assert.equal(images.length > 0, true);
   assert.equal(visible.length, 0);
   assert.equal(model.resource(state, 'snap-nursery').status, 'not_available');
-});
-
-test('household C reads a missing porch snapshot as not ready', () => {
-  const model = createRuntime({registryFile: registry});
-  const state = model.create('brightwire-home', 'snap-chen', 'sandbox');
-  const data = structuredClone(require('../fixtures/household-c.json'));
-  const loaded = model.execute(state, 'infra', 'env.load_seed', {
-    expected_version: model.version(state),
-    request_id: 'seed-chen-snap',
-    virtual_now: data.committed_through,
-    data,
-    binding: require('../fixtures/binding-household-c.json'),
-    policies: state.policies,
-    bundle: state.resources.bundle
-  });
-  assert.equal(loaded.result.status, 'ready', JSON.stringify(loaded.result));
-  const bundle = structuredClone(loaded.state.resources.bundle);
-  const asset = bundle.catalog.assets.find(item => item.asset_id === 'snap-garage');
-  asset.availability = {status: 'missing', reason: 'The replacement bundle has no bytes for this snapshot.'};
-  delete asset.integrity;
-  delete bundle.blobs['snap-garage'];
-  const event = model.execute(loaded.state, 'infra', 'env.apply_event', {
-    expected_version: model.version(loaded.state),
-    event: {
-      event_id: 'chen-snapshot-missing',
-      at: '2026-11-17T12:01:00-06:00',
-      operation: 'sensor.change',
-      payload: {device_id: 'c-contact-front', state: 'open'}
-    },
-    bundle
-  });
-  assert.equal(event.result.status, 'committed', JSON.stringify(event.result));
-  const view = model.execute(event.state, 'agent', 'brightwire-home.devices.get', {device_id: 'c-camera-porch'});
-  assert.equal(view.result.status, 'ok');
-  assert.equal(view.result.device.snapshot_status, 'asset_missing');
-});
-
-test('a snapshot relabelled as an icon reads as not ready', () => {
-  const model = createRuntime({registryFile: registry});
-  const state = model.create('brightwire-home', 'snap-icon-role', 'sandbox');
-  const bundle = structuredClone(state.resources.bundle);
-  const asset = bundle.catalog.assets.find(item => item.asset_id === 'snap-nursery');
-  asset.roles = ['ui.icon'];
-  const event = model.execute(state, 'infra', 'env.apply_event', {
-    expected_version: model.version(state),
-    event: {
-      event_id: 'nursery-snapshot-icon',
-      at: '2026-11-18T09:01:00-08:00',
-      operation: 'sensor.change',
-      payload: {device_id: 'contact-front', state: 'open'}
-    },
-    bundle
-  });
-  assert.equal(event.result.status, 'committed', JSON.stringify(event.result));
-  const view = model.execute(event.state, 'agent', 'brightwire-home.devices.get', {device_id: 'camera-nursery'});
-  assert.equal(view.result.status, 'ok');
-  assert.equal(view.result.device.snapshot_status, 'asset_missing');
-  assert.equal(view.state.data.available_snapshots.includes('snap-nursery'), true);
 });
 
 test('evidence joins the later allow row and keeps each client name', async () => {

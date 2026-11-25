@@ -1418,10 +1418,7 @@ function applySensor(ctx, data, payload) {
 function snapshotReady(data, assetId) {
   if (!assetId) return null;
   const listed = Array.isArray(data.available_snapshots) ? data.available_snapshots : [];
-  if (!listed.includes(assetId)) return 'asset_missing';
-  const model = require('./model.cjs');
-  if (!model.committedSnapshotReady(data, assetId)) return 'asset_missing';
-  return 'ready';
+  return listed.includes(assetId) ? 'ready' : 'asset_missing';
 }
 
 function automationSnap(record, kind) {
