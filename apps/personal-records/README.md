@@ -4,7 +4,8 @@
 
 ## Features
 
-- **Zero External Dependencies:** Built natively on Node.js 22.5+ using built-in `node:sqlite`. Runs out of the box with `node --test` / `npm test` without requiring native compilation or `npm install`.
+- **Native Runtime Architecture:** Built on Node.js 22.5+ using built-in `node:sqlite` (with FTS5) and native `node:test`. Requires zero native C++ compilation or Python build tools (`node-gyp`).
+- **Lightweight Extraction with Deterministic Fallbacks:** Digital PDFs are parsed via lightweight local parsing (`pdf-parse`) paired with deterministic fixture text in `truth.json` for 100% reproducible CI runs.
 - **Full-Text Content Search:** SQLite FTS5 index across document metadata, tags, and extracted text.
 - **Immutable Version History:** Content-addressed blob storage partitioned by `account_id` enforcing the 10 MB per-file budget limit.
 - **Reproducible Passage Citations:** Factual claims are bound to exact character spans `[start_offset, end_offset]` anchored to a stable triple: `(document_id, version_number, extraction_revision)`.
@@ -20,7 +21,7 @@
 
 ```text
 apps/personal-records/
-├── package.json                   # Zero external dependencies; runs via native node --test
+├── package.json                   # Pinned package definition (Node >= 22.5.0)
 ├── tools.json                     # Canonical MCP tool contracts and parameter schemas
 ├── README.md                      # Package documentation
 ├── src/
@@ -37,6 +38,9 @@ apps/personal-records/
 │   ├── index.html                 # Web Host dashboard (Library, Viewer, Graph, Proposals)
 │   ├── style.css                  # Responsive stylesheet with passage highlight styles
 │   └── app.js                     # Frontend controller with user/agent session gating
+├── scripts/
+│   ├── run-gui.cjs                # Standalone Web Host HTTP runner with live fixture seeding
+│   └── test-local-file.cjs        # Developer CLI to test file uploads and extraction
 ├── fixtures/
 │   ├── generator.cjs              # Deterministic synthetic dataset generator
 │   ├── truth.json                 # Scenario reference slice (20 active documents <= 1 MiB)
@@ -51,6 +55,7 @@ apps/personal-records/
     ├── gui.test.cjs               # Web Host GUI DOM completeness and tool bindings
     ├── dataset.test.cjs           # Corpus scale (165 docs), payload limits, and span checks
     ├── integration.test.cjs       # Full end-to-end tool router integration test
+    ├── real-documents.test.cjs    # Binary PDF/PNG preservation and extraction tests
     └── task-validation.test.cjs   # Benchmark task simulation (Task #102 & Task #106)
 ```
 
@@ -58,30 +63,25 @@ apps/personal-records/
 
 ## Verification & Testing
 
-Tests run using Node's built-in test runner without needing third-party libraries:
+Tests run using Node's native test runner (`node:test`):
 
 ```bash
-# Run all 9 test suites
+# Run all test suites
 npm test
 
-# Run task integration validation (Task #102 & Task #106)
+# Run benchmark task trajectories (Task #102 & Task #106)
 npm run test:tasks
 
 # Regenerate synthetic fixture archives
 npm run generate:fixtures
 ```
-```
 
----
-
-### Verification
-
-Run the task validation suite:
+### Local Preview (Web UI & Uploads)
 
 ```bash
-# 1. Run Milestone 5 task validation
-node --test tests/task-validation.test.cjs
+# 1. Start the Business Web Host locally at http://localhost:3000
+node scripts/run-gui.cjs
 
-# 2. Run the complete test suite across all 5 milestones
-npm test
+# 2. Test uploading a real local file into the demo account
+node scripts/test-local-file.cjs /path/to/document.pdf
 ```
