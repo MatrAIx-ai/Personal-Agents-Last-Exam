@@ -8,12 +8,12 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**192 open non-draft proposals · 0 awaiting initial review · 7 drafts.**
+**193 open non-draft proposals · 0 awaiting initial review · 7 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
 | Environment | [skyve2012](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Askyve2012) | 6 |
-| Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 4 |
+| Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 5 |
 | Environment | [Chenngzz](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AChenngzz) | 3 |
 | Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 1 |
 | Task | [Yeechin-is-here](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AYeechin-is-here) | 16 |
@@ -25,10 +25,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🏗️ Environment Track
 
-**108 proposals.**
+**109 proposals.**
 
 | Submitted (UTC) | PR / app or website | Primary domain | Scope and app connections | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-25 07:39:47 | [#250](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/250) · PawStay, an independently branded synthetic overnight pet-boarding service. Public workflow references: Rover's pet…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/250/files) | Health &amp; care | A resettable browser App and MCP business interface for overnight dog boarding in one fictional city. One household has two dog profiles and can choose among six providers. The App separates a confirmed reservation, the exact care… | Design review | Review requested<br>@Jasonya |  | [QYechang](https://github.com/QYechang) |  |
 | 2026-11-25 06:05:43 | [#247](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/247) · GateReturn is a synthetic lost property service for one fictional airport and one airline. SFO's public guidance…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/247/files) | Travel &amp; commuting | Build a resettable App where a traveler can report a lost personal item, respond to a desk's request for proof, and arrange its return after ownership is verified. The airport desk handles terminal losses. The airline desk handles items… | Design review | Review requested<br>@Chenngzz |  | [JunbinLu2000](https://github.com/JunbinLu2000) |  |
 | 2026-11-25 04:40:28 | [#245](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/245) · Auto Repair Shop Portal, an independently presented customer portal of one fictional independent repair and collision…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/245/files) | Travel &amp; commuting<br>Also: Money &amp; insurance | A resettable customer portal of one repair and collision shop, seen from one customer's account. The shop may not start a repair line until the customer has authorized that exact line, every estimate has an expiry, and authorizing a line… | Design review | Review requested<br>@Chenngzz |  | [pockyitachi](https://github.com/pockyitachi) |  |
 | 2026-11-25 02:34:03 | [#243](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/243) · Tarnloop, an independently branded synthetic training log seen from one athlete's account (activities that a watch…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/243/files) | Fitness &amp; wellbeing<br>Also: Social &amp; communities | Tarnloop is a resettable training log for one athlete. Its defining rule is that an activity is a record of where a person was, when, with whom and how their body performed, and that it arrives without the person acting: the watch uploads… | Design review | Review requested<br>@Jasonya |  | [smsnobin77](https://github.com/smsnobin77) |  |
