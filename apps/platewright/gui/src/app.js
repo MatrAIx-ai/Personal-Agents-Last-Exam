@@ -195,7 +195,8 @@ function schemaProblem(s,v,key=''){
  if(s.type==='string'){
   if(typeof v!=='string')return name+' must be text.';
   if(s.minLength&&v.length<s.minLength)return name+' cannot be empty.';
-  if(s.maxLength!=null&&v.length>s.maxLength)return name+' can be at most '+s.maxLength+' characters.';
+  // The length is counted as the schema counts it (UTF-16 units), so an emoji can count as two or more.
+  if(s.maxLength!=null&&v.length>s.maxLength)return name+' can be at most '+s.maxLength+' characters'+([...v].length<v.length?' (an emoji or some other symbols count as two or more)':'')+'.';
   if(s.pattern&&!new RegExp(s.pattern).test(v))return name+' is not in the expected form.';
  }
  if(s.type==='number'||s.type==='integer'){
@@ -248,7 +249,8 @@ const confirmDialog=(title,tool,args,note,after)=>formDialog({title,tool,note,bu
 const SLOT_ACTIONS={set:'Planned',replaced:'Changed',cleared:'Cleared',cooked:'Cooked',skipped:'Skipped',guest_added:'Guest added',guest_changed:'Guest changed',guest_removed:'Guest removed'};
 function slotRowText(s,r){
  const dishes=r.dishes?.length?r.dishes.map(d=>d.leftovers_of?'leftovers of '+recipeTitle(d.recipe_id):recipeTitle(d.recipe_id)).join(', '):'Nothing planned';
- const guest=id=>s.guests.find(g=>g.guest_id===id)?.name||cap(String(id).replace(/^guest-/,'').replace(/-/g,' '));
+ // A guest no longer on the meal is named from the ID; a numbered ID made by this page carries no name.
+ const guest=id=>s.guests.find(g=>g.guest_id===id)?.name||(/^guest-\d+$/.test(id)?'a guest no longer at this meal':cap(String(id).replace(/^guest-/,'').replace(/-/g,' ')));
  return dishes+(r.guest_ids?.length?' · guests: '+r.guest_ids.map(guest).join(', '):'');
 }
 function slotSummary(s){
@@ -295,7 +297,7 @@ function slotDetail(ui){
  return el('article',{class:'pw-slot-detail'},el('span',{class:'kicker'},dayLabel(s.date,{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · '+cap(s.meal)),
   el('h2',{},slotSummary(s)),el('div',{class:'tags'},tag(cap(s.state)),tag(cap(s.phase))),actions,
   s.flags.length?el('section',{},el('h3',{},'What the check found'),s.flags.map(f=>el('div',{class:'metadata-line'},el('span',{},flagText(f)),el('strong',{},f.type==='person'?f.dishes.flatMap(d=>d.findings.map(x=>findingText(x,l=>ingredientName(l.ingredient_id)+(l.optional?' (optional)':'')))).join('; '):'')))):s.dishes.length?el('p',{class:'muted'},'Right for everyone at the table on this day.'):null,
-  el('h3',{},'Dishes'),s.dishes.map(d=>metadata(d.kind==='leftovers'?'Leftovers':'Recipe',d.title+(d.kind==='leftovers'?' · '+plural(d.portions,'portion')+' from '+slotLabel(d.leftovers_of):' · '+plural(d.servings,'serving')+(d.servings_source==='explicit'?' (set for this meal)':' (for who is eating)')))),
+  s.dishes.length?el('h3',{},'Dishes'):null,s.dishes.map(d=>metadata(d.kind==='leftovers'?'Leftovers':'Recipe',d.title+(d.kind==='leftovers'?' · '+plural(d.portions,'portion')+' from '+slotLabel(d.leftovers_of):' · '+plural(d.servings,'serving')+(d.servings_source==='explicit'?' (set for this meal)':' (for who is eating)')))),
   metadata('At the table',people(s).join(', ')),s.guests.map(g=>metadata(g.name,g.constraints.length?g.constraints.map(constraintText).join('; '):'No needs given')),
   s.note?metadata('Note',s.note):null,
   s.cooked?metadata('Cooked',time(s.cooked.at)+' · '+s.cooked.portions.map(p=>p.made+' made, '+p.eaten+' eaten').join('; ')+(s.cooked.deducted?' · taken from the pantry':'')):null,
@@ -329,7 +331,11 @@ async function slotEditor(slot){
  dishes.append(button('+ Add a dish',()=>addDish()));
  for(const d of slot.dishes?.length?slot.dishes:[{}])addDish(d.recipe_id||d.leftovers_of?d:(slot.recipe_id?{recipe_id:slot.recipe_id}:null));
  const attendees=checks(members.map(m=>[m.person_id,m.display_name]),slot.attendees||members.map(m=>m.person_id));
+ // A guest keeps the ID the App returned; a new guest gets the next free guest-<n> of this meal, so two
+ // guests never share an ID whatever their names are.
+ const guestIds=new Set((slot.guests||[]).map(g=>g.guest_id)),freshGuestId=()=>{let n=1;while(guestIds.has('guest-'+n))n++;guestIds.add('guest-'+n);return 'guest-'+n;};
  const guests=el('div',{class:'pw-subform'}),addGuest=g=>{
+  const guestId=g?.guest_id||freshGuestId();
   const name=textInput(g?.name||'',{'aria-label':'Guest name',placeholder:'Name'}),needs=[...(g?.constraints||[])];
   const chips=el('div',{}),draw=()=>chips.replaceChildren(...needs.map((c,i)=>el('span',{class:'pw-chip'},constraintText(c),button('✕',()=>{needs.splice(i,1);draw();},{'aria-label':'Remove need'}))));
   const kind=select([['','Add a need…'],['allergy','Allergy'],['diet','Diet'],['dislike','Dislike'],['limit','Limit per meal']],'',{'aria-label':'Guest need'});
@@ -344,7 +350,7 @@ async function slotEditor(slot){
   const row=el('div',{class:'pw-subform','data-guest':''},el('div',{class:'pw-inline'},el('label',{},'Guest',name),button('Remove guest',()=>row.remove())),chips,
    el('div',{class:'pw-inline'},kind,value,button('Add need',()=>{if(read){needs.push(read());kind.value='';kind.dispatchEvent(new Event('change'));draw();}})));
   draw();
-  row.read=()=>{const n=name.value.trim();if(!n)throw Error('Give each guest a name.');return {guest_id:g?.guest_id||'guest-'+n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''),name:n,constraints:needs};};
+  row.read=()=>{const n=name.value.trim();if(!n)throw Error('Give each guest a name.');return {guest_id:guestId,name:n,constraints:needs};};
   guests.insertBefore(row,guests.lastChild);
  };
  guests.append(button('+ Add a guest',()=>addGuest()));
@@ -372,7 +378,9 @@ function markDialog(s,status){
    ...(rows.length?{portions:rows.map(r=>({recipe_id:r.d.recipe_id,...(r.made.value!==''?{made:Number(r.made.value)}:{}),...(r.eaten.value!==''?{eaten:Number(r.eaten.value)}:{})}))}:{})},
   after:async r=>{if(!r.short?.length)return;await ensureIngredientNames(r.short);
    const why={not_in_pantry:'not in the pantry',no_conversion:'stored in a unit that cannot be converted',not_enough:'not enough',expired:'past its use-by date'};
-   UI.error(Error('Cooked. Short in the pantry: '+r.short.map(x=>ingredientName(x.ingredient_id)+' '+qty(x.quantity,x.unit)+' ('+(why[x.reason]||words(x.reason))+')').join(', ')));}});
+   // A success with a note, so it goes in the status line without the error styling.
+   const status=document.getElementById('status');if(!status)return;delete status.dataset.error;
+   status.textContent='Cooked. Short in the pantry: '+r.short.map(x=>ingredientName(x.ingredient_id)+' '+qty(x.quantity,x.unit)+' ('+(why[x.reason]||words(x.reason))+')').join(', ');}});
 }
 
 // ---- Recipes -----------------------------------------------------------------------------------------

@@ -93,6 +93,46 @@ async function main() {
     check('Hostile text is shown as text, never as markup', await page.locator('.pw-slot-detail').innerText().then(t => t.includes(HOSTILE)) && await page.locator('#app img').count() === 0 && !(await page.evaluate(() => window.__pwned)));
     await shot('03-planned-with-guest-1280');
 
+    // W4: guests with any name the schema accepts. The page gives each new guest an ID of its own, so
+    // names in any script, a 120-character name, emoji, punctuation alone and two guests with one name
+    // all commit; an existing guest keeps the ID the App returned when the meal is changed again.
+    const LONG = ('Bartholomew Featherstonehaugh ').repeat(5).slice(0, 119) + 'z';
+    const NAMES = ['李雷', '韩梅梅', LONG, 'Zoë 🎉🍰', '?!…', 'Sam', 'Sam'];
+    await page.click('button[aria-label^="Plan a meal on Wednesday"]');
+    const many = dialog(P + 'plan.slot.set'); await many.waitFor(WAIT);
+    await many.locator('select').nth(0).selectOption('lunch');
+    await many.locator('select[aria-label="Recipe"]').first().selectOption('rec-banana-pancakes');
+    for (const name of NAMES) {
+      await many.locator('button:has-text("+ Add a guest")').click();
+      await many.locator('input[aria-label="Guest name"]').last().fill(name);
+    }
+    await submit(P + 'plan.slot.set'); await closed(P + 'plan.slot.set'); await idle();
+    const lunch = async () => (await mcp.call(P + 'plan.get', {start: '2026-11-11', end: '2026-11-11'})).slots.find(s => s.id === '2026-11-11:lunch');
+    slot = await lunch();
+    const ids = slot ? slot.guests.map(g => g.guest_id) : [];
+    check('Guests named in any script, at 120 characters, with emoji, punctuation alone or one name twice all commit, each with an ID of its own (MCP read)',
+      slot && slot.state === 'planned' && JSON.stringify(slot.guests.map(g => g.name)) === JSON.stringify(NAMES) && new Set(ids).size === NAMES.length, slot && slot.guests);
+    await page.click('.pw-actions button:has-text("Change meal")');
+    const again = dialog(P + 'plan.slot.set'); await again.waitFor(WAIT);
+    await again.locator('button:has-text("+ Add a guest")').click();
+    await again.locator('input[aria-label="Guest name"]').last().fill('Sam');
+    await submit(P + 'plan.slot.set'); await closed(P + 'plan.slot.set'); await idle();
+    slot = await lunch();
+    const ids2 = slot.guests.map(g => g.guest_id);
+    check('Changing the meal keeps each guest\'s ID and gives the new guest a fresh one (MCP read)',
+      ids2.length === NAMES.length + 1 && JSON.stringify(ids2.slice(0, NAMES.length)) === JSON.stringify(ids) && !ids.includes(ids2.at(-1)) && slot.guests.at(-1).name === 'Sam', ids2);
+    await readable('A meal with guests named in several scripts');
+    await shot('03b-guests-any-name-1280');
+    // A name longer than the schema allows is stopped in the form with a message that counts as the schema does.
+    await page.click('.pw-actions button:has-text("Change meal")');
+    const long = dialog(P + 'plan.slot.set'); await long.waitFor(WAIT);
+    await long.locator('input[aria-label="Guest name"]').first().fill('🎉'.repeat(61));
+    await submit(P + 'plan.slot.set');
+    await page.waitForFunction(() => document.querySelector('dialog[data-operation="platewright.plan.slot.set"] .form-error')?.textContent, null, WAIT);
+    const said = await long.locator('.form-error').textContent();
+    check('A guest name over the limit is refused in the form with a true message, and nothing is written', /at most 120 characters \(an emoji/.test(said) && JSON.stringify((await lunch()).guests.map(g => g.guest_id)) === JSON.stringify(ids2), said);
+    await long.locator('button:has-text("Cancel")').click(); await closed(P + 'plan.slot.set');
+
     // W4: mark Monday's dinner skipped.
     await page.click('[data-slot-id="2026-11-09:dinner"]'); await idle();
     await page.click('.pw-actions button:has-text("Mark skipped")');
@@ -243,6 +283,19 @@ async function main() {
     await page.click('button[aria-label="Next week"]'); await idle();
     check('After reload the planned breakfast and the skipped dinner are still there',
       await page.locator('[data-slot-id="2026-11-10:breakfast"]').count() === 1 && (await page.getAttribute('[data-slot-id="2026-11-09:dinner"]', 'class')).includes('skipped'));
+
+    // Mark today's dinner cooked, taking from the pantry: what was short is a note, not an error.
+    await page.click('button:has-text("This week")'); await idle();
+    await page.click('[data-slot-id="2026-11-08:dinner"]'); await idle();
+    await page.click('.pw-actions button:has-text("Mark cooked")');
+    const mark = dialog(P + 'plan.slot.mark'); await mark.waitFor(WAIT);
+    await mark.locator('label.pw-checks input[type=checkbox]').check();
+    await submit(P + 'plan.slot.mark'); await closed(P + 'plan.slot.mark'); await idle();
+    await page.waitForFunction(() => document.querySelector('#status')?.textContent.startsWith('Cooked.'), null, WAIT);
+    const note = await page.evaluate(() => ({text: document.querySelector('#status').textContent, error: document.querySelector('#status').dataset.error || null}));
+    const dinner = (await mcp.call(P + 'plan.get', {start: '2026-11-08', end: '2026-11-08'})).slots.find(s => s.id === '2026-11-08:dinner');
+    check('Marking a meal cooked with a pantry shortfall shows the shortfall without the error styling (MCP read)',
+      note.error === null && note.text.includes('Short in the pantry') && dinner.state === 'cooked' && dinner.cooked.deducted, note);
 
     // Layout at phone and desktop widths: no horizontal page overflow.
     for (const [w, h, name] of [[390, 844, 'phone'], [1280, 900, 'desktop']]) {
