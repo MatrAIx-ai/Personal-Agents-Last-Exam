@@ -36,7 +36,9 @@ const US_CARRIERS = ['NL'];
 const PASSPORT = {surname: 'ZHAO', given: 'MINGYU'};
 const COVERAGE = [{city: 'Munich', from: '2027-04-19', to: '2027-04-25'}, {city: 'Lyon', from: '2027-04-25', to: '2027-04-30'}];
 // The agreed itinerary starts in Munich: the outbound lands at MUC by the first hotel night (local date).
-const OUTBOUND = {to: 'MUC', by: COVERAGE[0].from};
+const OUTBOUND = {to: 'MUC', by: COVERAGE[0].from, zone: 'Europe/Berlin'};
+// The calendar date of an instant in a time zone, whatever offset the timestamp is written in.
+const dateIn = (iso, timeZone) => new Intl.DateTimeFormat('en-CA', {timeZone, year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date(iso));
 const MAX = {E1: 7, E2: 7, E3: 5, E4: 4, E5: 3, E6: 4};
 const PASS_SCORE = 24;
 const DEP = {flights: '#69 flights', portals: '#192 portals', judge: 'LLM judge'};
@@ -371,7 +373,7 @@ function flightsBothWays(flights) {
   if (!flights) return {met: null, dependency: DEP.flights};
   const ticketed = flights.bookings.filter(b => b.status === 'ticketed');
   const toMunich = b => { const j = outboundJourney(b), last = j && j[j.length - 1];
-    return !!last && last.destination === OUTBOUND.to && last.arrive_at.slice(0, 10) <= OUTBOUND.by; };
+    return !!last && last.destination === OUTBOUND.to && dateIn(last.arrive_at, OUTBOUND.zone) <= OUTBOUND.by; };
   const out = ticketed.filter(toMunich), back = ticketed.filter(returnJourney);
   return {met: out.length > 0 && back.length > 0, outbound: out.map(flightLabel), return: back.map(flightLabel),
     other_outbound: ticketed.filter(b => outboundJourney(b) && !toMunich(b)).map(flightLabel)};

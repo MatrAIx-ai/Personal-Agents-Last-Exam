@@ -294,3 +294,11 @@ test('the full pass needs the outbound into Munich by 2027-04-19, not the first 
   assert.ok(out.full_pass_detail.failed.includes('flights not ticketed both ways'));
   assert.deepEqual(out.full_pass_detail.flights_both_ways.other_outbound, ['H7TQ2M [NL 402] ticketed']);
 });
+
+test('the Munich arrival cutoff is judged on Munich local time, however the timestamp is written', () => {
+  const late = at => { const {run} = referenceRun(); const [, , munich] = run.flights.bookings;
+    munich.segments[munich.segments.length - 1].arrive_at = at; return grade(run).full_pass; };
+  assert.equal(late('2027-04-19T22:40:00Z'), false); // 00:40 on 2027-04-20 in Munich
+  assert.equal(late('2027-04-20T00:40:00+02:00'), false);
+  assert.equal(late('2027-04-19T21:40:00Z'), true); // 23:40 on 2027-04-19 in Munich
+});
