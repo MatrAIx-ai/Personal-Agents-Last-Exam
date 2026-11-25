@@ -77,11 +77,12 @@ The page and the MCP tools are two entrances to the same handlers and the same l
 - **Time conflicts.** A change may not introduce a conflict that is not already in the timetable; existing unrelated conflicts do not block it. A section-time change by the university can create a conflict: it stays in the schedule, attributed to the event that created it, and no enrollment is dropped. Later changes that keep the overlap do not replace that cause; an overlap the seed already contained has none (`caused_by: null`). If both sections were moved at the same instant, the change of the first section listed in the conflict is named.
 - **The clock is not readable, so time-dependent facts are stated.** An Agent cannot ask for the current time. `course.get` says whether registration is open, `record.get` says whether an enrollment can still be given up, and `waitlist.list` says whether an offer has expired. Each is computed when read and never stored.
 - **Every rule that can refuse a write can be looked up first.** The facts behind each rule error are in the plain reads (seats, valid bundles, prerequisites, credits, meeting times, windows, open offers); `change.preview` applies them to one proposed change.
-- **Policy is visible data.** `enrollment_policy` in the seed, returned by `record.get`, states the queue order, offer window and expiry boundary the App implements.
+- **Policy is visible data.** `enrollment_policy` in the seed, returned by `record.get`, is a versioned record of the rules the App implements: queue order, offer window, expiry boundary, pending swaps, conflicts, and who may see and change what (`access`). Every rule field admits only the implemented value, so a seed cannot state a policy the App does not follow; the offer window is the one setting a seed chooses.
+- **Access.** `access.records: own_account_only`: every read and write concerns the bound student's own enrollments, waitlist entries, offers, notices and receipts; a row of anyone else is `not_found`. `other_students: section_totals_only`: other students appear only in the seat totals of sections. `academic_record: read_only` and `rule_exceptions: none`: no operation edits completed courses or the credit limit, and none waives a rule. `management: infra_only`: seeds, events, the clock, reset and snapshots belong to the Infra connection. A run's permission profile can only narrow the tools further.
 
 ## Operations, errors and permissions
 
-`scenario` and `sandbox` are the two permission profiles in `fixtures/policies.json`; a Task can supply its own. Management operations (`env.*`) exist only on the Infra connection.
+`scenario` and `sandbox` are the two permission profiles in `fixtures/policies.json`; a Task can supply its own. Management operations (`env.*`) exist only on the Infra connection. The same permissions model is readable by the Agent as `enrollment_policy.access` in `record.get`.
 
 | Operation | Effect | `scenario` | `sandbox` | Rule errors it can return |
 | :--- | :--- | :--- | :--- | :--- |
@@ -124,7 +125,7 @@ Every event ends by re-checking the queues, so a freed seat is offered within th
 - Before advancing the clock to T, apply the due events in time order, including an `offers.expire` event at every offer deadline up to T. At a deadline, apply the expiry before any Agent action at the same instant. Assign stable event IDs: an identical retry returns Core's original receipt (`duplicate: true`) and produces no second notice.
 - If an expiry is not applied, the App still refuses to accept or decline the offer (`offer_expired`) and reads report `expired: true`, but the seats stay held until the event arrives. This is a defensive guard, not a substitute for the event. In that state the student can still leave the waitlist entry or withdraw the original of a pending swap; either closes the overdue offer as `cancelled` and releases its seats, and the late `offers.expire` then finds nothing to do for it.
 
-**Events.** An event's `at` may not precede the App clock, and applying it sets the clock to `at`. Each `env.apply_event` needs the current `expected_version`. `occupancy.change` cannot act for the bound student.
+**Events.** An event's `at` may not precede the App clock, and applying it sets the clock to `at`. Each `env.apply_event` needs the current `expected_version`. `occupancy.change` cannot act for the bound student. An `event_id` is any string of 1 to 100 characters (a longer one is `invalid_arguments`); the App stores it in notices and section history exactly as given, so the form of an ID never decides whether an event applies.
 
 **Accounts and profiles.** `fixtures/binding.json` declares four student accounts. They are interchangeable seed accounts: one is loaded per App instance, they are not four students online at once. A seed names its `account_id`; one the binding does not declare is refused. `env.load_seed` does not select a permission profile; the active profile is chosen when the instance is created (`--initial-profile`, or `--profile` for the Web Host).
 
@@ -151,7 +152,7 @@ Every event ends by re-checking the queues, so a freed seat is offered within th
 
 They are written by `dev/generate-fixtures.cjs` (version and seed recorded in `index.json`): a hand-written starting ledger per scenario, background occupancy from a fixed-seed generator, and a short history applied through the App's own handlers, so the offers, notices and receipts in a seed are what the App itself produces. The generator checks every seed against the schema and the ledger invariants (linked sections, bundles, capacities, credits, references), checks prerequisites, dates and the fixed UTC offset, and requires the seed to be settled: nothing in the queue could be offered a seat at the scenario's clock.
 
-Missing data: a seed is rejected at load when a required field is absent or when a record points at a course, section, enrollment, waitlist entry or offer that does not exist (this includes the pointers inside notices and receipts), so the running App never meets incomplete records. Event IDs recorded in notices and section history belong to Core and are not resolved. The only optional rule fields are a course's `registration_window` (the term window applies when absent) and a lab's `linked_lecture_ids` (any lecture of the course when absent). A tool call naming an unknown ID returns `not_found`.
+Missing data: a seed is rejected at load when a required field is absent or when a record points at a course, section, enrollment, waitlist entry or offer that does not exist (this includes the pointers inside notices and receipts), so the running App never meets incomplete records. Event IDs recorded in notices and section history, like the request IDs in receipts, belong to Core: they are kept exactly as the call carried them (1 to 100 characters, any form) and are not resolved. The only optional rule fields are a course's `registration_window` (the term window applies when absent) and a lab's `linked_lecture_ids` (any lecture of the course when absent). A tool call naming an unknown ID returns `not_found`.
 
 Queue order: waitlist entries are served in `seq` order, and a seed whose `seq` order contradicts the `joined_at` times is rejected. Records dated after the clock a seed is loaded with do not make the load fail; they make the App read-only until the clock reaches them ("For Task runners"). A competitor's entry carries `blocked_reason` when the scenario wants it ineligible; competitors' academic records are not part of the ledger.
 
@@ -161,11 +162,11 @@ Queue order: waitlist entries are served in `seq` order, and a seed whose `seq` 
 
 | Workflow | App-only tests | Real MCP and Web Host |
 | :--- | :--- | :--- |
-| 1. Inspect courses and eligibility | `business.test.cjs` (catalog), `suite-reads.cjs`, `suite-visibility.cjs` | "preview, then confirm"; "Agent and Infra see different operations" |
+| 1. Inspect courses and eligibility | `business.test.cjs` (catalog), `suite-reads.cjs`, `suite-visibility.cjs` (including "the access rules the policy record states are the ones the App enforces") | "preview, then confirm"; "Agent and Infra see different operations" |
 | 2. Enroll or withdraw | `business.test.cjs` (enroll, rejections, windows, credits), `suite-changes.cjs` | "one read and one write through MCP"; "preview, then confirm" |
 | 3. Join and manage a waitlist, offers | `suite-waitlist.cjs`, `suite-events.cjs` | "an Infra event frees a seat"; "race for the last seat"; "the clock reaches an offer deadline" |
 | 4. Swap without losing the place | `suite-changes.cjs` (immediate), `suite-waitlist.cjs` (pending) | "preview, then confirm"; "a scenario seed loads for another account" |
-| Events and time | `suite-events.cjs` | the three above; "refused events keep the App's status over MCP" |
+| Events and time | `suite-events.cjs` (including "an event ID is Core's") | the three above; "refused events keep the App's status over MCP"; "an event ID is stored as Core received it" |
 | Seeds, reset, reload | `business.test.cjs` (invariants, IDs), `suite-scenarios.cjs` | "live data reloads as a seed"; "the scenario profile is read-only, and separate runs do not share state"; "a seed loaded with a clock behind its own records" |
 | Boundaries of all of the above | `suite-boundaries.cjs`: "meetings that only touch do not conflict"; "a single remaining seat is a seat"; "a conflict is attributed to the change that created it"; "nothing is changed while the clock is behind the ledger's own records"; "competitors meet the same edges"; "offers that fall due together expire in the order they were made"; "a seed that is not settled is settled by the first commit"; "several conflicts are listed in one order"; "an offer that outlives the close of registration"; "a pending swap that gives up another course for one the student already holds" | the two named in the rows above |
 | Web views | none in v1 (browser checks are M4) | "the business Web Host serves the three views on the same ledger" (HTTP level) |
@@ -174,7 +175,7 @@ Where the validation items named in the proposal are tested:
 
 | Item | Test |
 | :--- | :--- |
-| Access to another account or run | `suite-waitlist.cjs` "another occupant's entries and offers"; `suite-visibility.cjs` "no result names a competitor"; integration "separate runs do not share state" |
+| Access to another account or run | `suite-waitlist.cjs` "another occupant's entries and offers"; `suite-visibility.cjs` "no result names a competitor" and "the access rules the policy record states"; integration "separate runs do not share state" |
 | An expired offer; confirmation exactly at expiry, before and after `offers.expire` | `suite-events.cjs` "from the expiry instant an offer can be neither accepted nor declined" and "past its deadline an offer is not answered" |
 | Advance without expiry processing | integration "the clock reaches an offer deadline before the expiry event" |
 | A stale preview | integration "preview, then confirm" |

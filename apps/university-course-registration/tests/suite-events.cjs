@@ -347,6 +347,34 @@ test('past its deadline an offer is not answered, but leaving the queue or givin
   assert.deepEqual(answer('off-6'), answer('no-such-row'));
 });
 
+test('an event ID is Core\'s: it is stored as given, and its form never decides whether the event applies', () => {
+  const [withdraws, reschedules] = EXAMPLE_EVENTS;
+  for (const id of ['evt 7', 'evt/7#retry', '\u00e9vt-0007', ' ', '__proto__', 'x'.repeat(100)]) {
+    // An event that tells the student something records its ID in the notice.
+    const f = fixture();
+    f.event({...withdraws, event_id: id});
+    assert.deepEqual([f.data.offers.length, f.data.notices.at(-1).kind, f.data.notices.at(-1).refs.event_id], [1, 'offer_issued', id], JSON.stringify(id));
+    assert.equal(f.call('activity.list').notices.at(-1).refs.event_id, id);
+    // One that changes a section records it in the section's history, where a conflict's cause is read from.
+    const g = fixture();
+    g.event({...reschedules, event_id: id});
+    assert.equal(section(g.data, 'sec-math221-lec1').history[0].event_id, id);
+    assert.equal(g.call('schedule.get').conflicts[0].caused_by.event_id, id);
+    // One that has nothing to do applies just the same.
+    const h = fixture();
+    h.event(event(id, '2027-01-11T09:30:00-05:00', 'offers.expire'));
+    assert.deepEqual([h.now, h.version.revision], ['2027-01-11T09:30:00-05:00', 1]);
+    // The records that quote the ID are valid seed data: the ledger reloads as it is.
+    for (const live of [f, g]) assert.deepEqual(fixture({data: live.data, now: live.now}).data, live.data);
+  }
+  // The envelope's own bound is the only one: 1 to 100 characters.
+  for (const id of ['', 'x'.repeat(101)]) {
+    const f = fixture(), before = f.data;
+    assert.throws(() => f.event({...withdraws, event_id: id}), /Event schema/);
+    assert.deepEqual([f.data, f.version.revision], [before, 0]);
+  }
+});
+
 test('a write that frees a seat offers it within the same commit', () => {
   // The student gives up her CS240 lab seat; the competitor waiting for that lab is offered it.
   const f = fixture({data: holdingCs240(d => {

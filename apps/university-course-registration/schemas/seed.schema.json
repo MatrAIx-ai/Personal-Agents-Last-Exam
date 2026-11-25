@@ -172,6 +172,34 @@
             "rule"
           ],
           "additionalProperties": false
+        },
+        "access": {
+          "type": "object",
+          "properties": {
+            "records": {
+              "const": "own_account_only"
+            },
+            "other_students": {
+              "const": "section_totals_only"
+            },
+            "academic_record": {
+              "const": "read_only"
+            },
+            "rule_exceptions": {
+              "const": "none"
+            },
+            "management": {
+              "const": "infra_only"
+            }
+          },
+          "required": [
+            "records",
+            "other_students",
+            "academic_record",
+            "rule_exceptions",
+            "management"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -181,7 +209,8 @@
         "queue",
         "expiry",
         "swaps",
-        "conflicts"
+        "conflicts",
+        "access"
       ],
       "additionalProperties": false
     },
@@ -490,8 +519,7 @@
                 "event_id": {
                   "type": "string",
                   "minLength": 1,
-                  "maxLength": 100,
-                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  "maxLength": 100
                 }
               },
               "required": [
@@ -830,8 +858,7 @@
               "event_id": {
                 "type": "string",
                 "minLength": 1,
-                "maxLength": 100,
-                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                "maxLength": 100
               },
               "course_id": {
                 "type": "string",

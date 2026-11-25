@@ -490,6 +490,35 @@ test('refused events keep the App\'s status over MCP and change nothing; the opt
   keep('event-contract-before-reset', {versions, snapshot: (await snapshot(infra)).snapshot});
 });
 
+test('an event ID is stored as Core received it, whatever characters it has', async () => {
+  const infra = await connect('infra', 'eventid', 'sandbox'), agent = await connect('agent', 'eventid');
+  const odd = 'evt 0007/retry#1 \u00e9';
+  const start = await snapshot(infra);
+  const applied = await infra.call('env.apply_event', {event: {...EVT_0007, event_id: odd}, expected_version: start.version});
+  assert.equal(applied.status, 'committed');
+  assert.deepEqual((await agent.call(tool('activity.list'), {})).notices.map(n => [n.kind, n.refs.event_id]), [['offer_issued', odd]]);
+  const receipt = (await infra.call('env.event_status', {event_id: odd})).receipt;
+  assert.deepEqual([receipt.status, receipt.event_id], ['committed', odd]);
+  assert.equal((await infra.call('env.apply_event', {event: {...EVT_0007, event_id: odd}, expected_version: start.version})).duplicate, true);
+  // A section change under such an ID is attributed to it.
+  const moved = await apply(infra, EVENT('evt 0012 moved', '2027-01-12T08:00:00-05:00', 'section.reschedule',
+    {section_id: 'sec-math221-lec1', meetings: [{days: ['TUE', 'THU'], start: '14:30', end: '15:50'}]}));
+  assert.equal(moved.status, 'committed');
+  assert.equal((await agent.call(tool('schedule.get'), {})).conflicts[0].caused_by.event_id, 'evt 0012 moved');
+  // The ledger that quotes these IDs reloads as a seed.
+  const live = await snapshot(infra);
+  assert.equal((await infra.call('env.load_seed', {data: live.snapshot.data, binding: live.snapshot.binding, policies: live.snapshot.policies,
+    virtual_now: live.snapshot.virtual_now, expected_version: live.version, request_id: 'eid-reload'})).status, 'ready');
+  // The only bound is the envelope's 100 characters; a longer ID is refused before anything is applied.
+  const reloaded = await snapshot(infra);
+  const long = await infra.request('tools/call', {name: 'env.apply_event', arguments: {event: EVENT('x'.repeat(101), '2027-01-12T09:00:00-05:00', 'offers.expire'),
+    expected_version: reloaded.version}});
+  assert.equal(long.result.isError, true);
+  assert.deepEqual([long.result.structuredContent.status, long.result.structuredContent.applied], ['invalid_arguments', false]);
+  assert.deepEqual((await snapshot(infra)).snapshot.data, live.snapshot.data);
+  keep('event-id-before-reset', {versions, snapshot: reloaded.snapshot});
+});
+
 test('a scenario seed loads for another account and a reset returns to it', async () => {
   const infra = await connect('infra', 'scenario', 'sandbox'), agent = await connect('agent', 'scenario');
   const index = require('../fixtures/scenarios/index.json'), entry = index.scenarios.find(s => s.id === 'swaps');

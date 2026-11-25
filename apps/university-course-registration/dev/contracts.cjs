@@ -42,7 +42,11 @@ const meetings = () => arr(meeting(), {maxItems: 10});
 const timeWindow = () => obj({opens_at: dateTime(), closes_at: dateTime()});
 const bundle = () => arr(id(), {minItems: 1, maxItems: 2, uniqueItems: true});
 const sectionKind = () => any('lecture', 'lab');
+// Request and event identifiers are chosen by the caller and tracked by Core. The App
+// stores them exactly as given and puts no pattern on them, so a record that
+// quotes one is valid whenever the call that carried it was.
 const requestId = () => ({type: 'string', minLength: 1, maxLength: 100});
+const eventId = requestId;
 
 // Every write operation the App will offer; receipts name one of these.
 const WRITE_ACTIONS = ['enrollment.enroll', 'enrollment.withdraw', 'enrollment.swap',
@@ -75,7 +79,17 @@ const enrollmentPolicy = () => obj({
     max_pending_per_enrollment: one(1),
     original: one('kept_until_replacement_commits')
   }),
-  conflicts: obj({rule: one('no_new_conflicts')})
+  conflicts: obj({rule: one('no_new_conflicts')}),
+  // Who may see and change what. The first four are enforced by this App on every
+  // call; the last is Core's separation of the Agent and Infra connections. A run's
+  // permission profile can only narrow the tools further.
+  access: obj({
+    records: one('own_account_only'),
+    other_students: one('section_totals_only'),
+    academic_record: one('read_only'),
+    rule_exceptions: one('none'),
+    management: one('infra_only')
+  })
 });
 const completedCourse = () => obj({code: courseCode(), title: text(), credits: int(0, 30), term: text(40), grade: text(10)});
 const notice = () => obj({
@@ -85,7 +99,7 @@ const notice = () => obj({
   kind: any('offer_issued', 'offer_expired', 'section_rescheduled', 'swap_cancelled'),
   text: text(500),
   refs: obj({
-    event_id: id(), course_id: id(), section_id: id(), enrollment_id: id(), entry_id: id(), offer_id: id(),
+    event_id: eventId(), course_id: id(), section_id: id(), enrollment_id: id(), entry_id: id(), offer_id: id(),
     from_version: int(1), to_version: int(1), expires_at: dateTime()
   }, ['event_id', 'course_id', 'section_id', 'enrollment_id', 'entry_id', 'offer_id', 'from_version', 'to_version', 'expires_at'])
 });
@@ -123,7 +137,7 @@ function seedSchema() {
     linked_lecture_ids: arr(id(), {minItems: 1, maxItems: 20, uniqueItems: true}),
     meetings: meetings(),
     version: int(1),
-    history: arr(obj({version: int(1), meetings: meetings(), replaced_at: dateTime(), event_id: id()}), {maxItems: 200})
+    history: arr(obj({version: int(1), meetings: meetings(), replaced_at: dateTime(), event_id: eventId()}), {maxItems: 200})
   }, ['linked_lecture_ids']);
   const enrollment = obj({
     id: id(),
@@ -190,7 +204,7 @@ function seedSchema() {
 // ---- incoming Infra events ---------------------------------------------------
 function eventsSchema() {
   const envelope = (operation, payload) => obj({
-    event_id: requestId(),
+    event_id: eventId(),
     at: dateTime(),
     operation: one(APP + '.' + operation),
     payload
@@ -335,7 +349,8 @@ function tools() {
     tool('record.get', true,
       'Read the signed-in student\'s academic record and the rules that apply: completed courses, enrolled credits and '
       + 'the credit limit, the term\'s registration window, the withdrawal deadline and whether an enrollment can still '
-      + 'be given up now, and the enrollment policy (queue order, offer window, expiry boundary, swap and conflict rules). '
+      + 'be given up now, and the versioned enrollment policy (queue order, offer window, expiry boundary, swap and conflict '
+      + 'rules, and the access rules: own records only, other students as section totals only, no rule exceptions). '
       + 'The record cannot be changed through this App. Read only.',
       readInput(),
       result({
@@ -366,7 +381,7 @@ function tools() {
         conflicts: arr(obj({
           section_ids: arr(id(), {minItems: 2, maxItems: 2}),
           caused_by: note(nullable(obj({
-            event_id: id(), section_id: id(), replaced_at: dateTime(), from_version: int(1), to_version: int(1)
+            event_id: eventId(), section_id: id(), replaced_at: dateTime(), from_version: int(1), to_version: int(1)
           })), 'The meeting-time change that produced this overlap, or null when the overlap does not come from such a change.')
         })),
         pending_swaps: arr(obj({

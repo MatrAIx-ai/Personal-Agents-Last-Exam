@@ -192,6 +192,53 @@ test('no result names a competitor or shows a ledger row that is not the student
 // The runtime's MCP audit summary reads these top-level result fields with
 // meanings that belong to other Apps (a mail message, a calendar event, a
 // busy list), and records a top-level id as the object the call acted on.
+test('the access rules the policy record states are the ones the App enforces', () => {
+  const f = fixture(), access = f.call('record.get').enrollment_policy.access;
+  assert.deepEqual(Object.keys(access), ['records', 'other_students', 'academic_record', 'rule_exceptions', 'management']);
+  const tools = read('tools.json'), writes = tools.filter(t => !t.read_only);
+
+  // records: own_account_only. A competitor's rows exist in the ledger but not for the student, whichever operation names them.
+  assert.equal(access.records, 'own_account_only');
+  assert.ok(f.data.enrollments.some(e => e.id === 'enr-synthetic-017-cs240') && f.data.waitlist_entries.some(e => e.id === 'wl-synthetic-021-cs240'));
+  for (const [tool, args] of [['enrollment.withdraw', {id: 'enr-synthetic-017-cs240'}],
+    ['enrollment.swap', {id: 'enr-synthetic-017-cs240', section_ids: ['sec-cs240-lec1', 'sec-cs240-lab2']}],
+    ['waitlist.leave', {id: 'wl-synthetic-021-cs240'}],
+    ['waitlist.join', {section_ids: ['sec-phys150-lec1', 'sec-phys150-lab1'], swap_from_enrollment_id: 'enr-synthetic-017-cs240'}]]) {
+    rejected(f, () => f.call(tool, args), 'not_found', /does not exist in this account/);
+  }
+  assert.deepEqual(f.call('change.preview', {action: 'withdraw', id: 'enr-synthetic-017-cs240'}).failures.map(x => x.code), ['not_found']);
+
+  // other_students: section_totals_only. The competitors are counted in the seats and named nowhere.
+  assert.equal(access.other_students, 'section_totals_only');
+  const reads = [f.call('catalog.search'), f.call('course.get', {id: 'crs-cs240'}), f.call('record.get'), f.call('schedule.get'), f.call('waitlist.list'), f.call('activity.list')];
+  assert.equal(/synthetic-/.test(JSON.stringify(reads)), false);
+  const lab = reads[1].course.sections.find(s => s.id === 'sec-cs240-lab1');
+  assert.deepEqual([lab.enrolled, lab.available], [12, 0], 'their seats are in the totals');
+
+  // academic_record: read_only, rule_exceptions: none. No write takes anything but its own business arguments, so there is
+  // nothing to send that edits the record or waives a rule, and a write that a rule refuses stays refused.
+  assert.deepEqual([access.academic_record, access.rule_exceptions], ['read_only', 'none']);
+  assert.deepEqual(writes.map(t => t.name.slice(APP.length + 1)),
+    ['enrollment.enroll', 'enrollment.withdraw', 'enrollment.swap', 'waitlist.join', 'waitlist.leave', 'offer.accept', 'offer.decline']);
+  const before = f.data;
+  for (const extra of [{override: true}, {force: true}, {credit_limit: 30}, {completed_courses: ['CS101']}, {occupant_ref: 'synthetic-017'}, {student_id: 'stu-tomas'}]) {
+    for (const tool of writes) {
+      assert.throws(() => f.call(tool.name.slice(APP.length + 1), {...(tool.inputSchema.properties.section_ids ? {section_ids: ['sec-cs310-lec1']} : {id: 'enr-noor-math221'}), ...extra}),
+        /Input schema/, tool.name + ' ' + JSON.stringify(extra));
+    }
+  }
+  rejected(f, () => f.call('enrollment.enroll', {section_ids: ['sec-cs310-lec1']}), 'prerequisite_missing');
+  f.call('enrollment.enroll', HIST105);
+  f.call('enrollment.withdraw', STAT210);
+  assert.deepEqual([f.data.student, f.data.enrollment_policy, f.data.courses, f.data.term], [before.student, before.enrollment_policy, before.courses, before.term],
+    'committed writes leave the record, the policy and the catalog as they were');
+
+  // management: infra_only. The App declares business tools only; that the Agent connection cannot reach
+  // seeds, events, the clock, reset or snapshots is asserted on the real runtime in runtime.integration.cjs.
+  assert.equal(access.management, 'infra_only');
+  assert.ok(tools.every(t => t.name.startsWith(APP + '.')));
+});
+
 test('results keep clear of the fields the runtime\'s audit summary interprets', () => {
   const tools = read('tools.json');
   for (const t of tools) {

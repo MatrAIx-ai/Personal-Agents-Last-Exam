@@ -385,6 +385,8 @@ test('data that the seed schema itself forbids is refused before any rule runs',
   broken(d => { d.enrollments[0].status = 'maybe'; });
   broken(d => { d.enrollments[0].enrolled_at = '2026-12-02 10:15'; });
   broken(d => { d.enrollment_policy.queue.order = 'lottery'; });
+  broken(d => { d.enrollment_policy.access.records = 'any_account'; });
+  broken(d => { delete d.enrollment_policy.access; });
   broken(d => { d.unexpected = true; });
   broken(d => { delete d.counters; });
 });

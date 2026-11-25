@@ -62,6 +62,9 @@ test('the academic record and the applicable rules are readable and cannot be ed
   assert.deepEqual(record.enrollment_policy, data.enrollment_policy);
   assert.deepEqual([record.enrollment_policy.version, record.enrollment_policy.offer_window_minutes, record.enrollment_policy.queue.order,
     record.enrollment_policy.expiry.boundary], ['2027W-1', 1440, 'join_sequence', 'invalid_at_or_after_expires_at']);
+  // So is the permissions model.
+  assert.deepEqual(record.enrollment_policy.access, {records: 'own_account_only', other_students: 'section_totals_only', academic_record: 'read_only',
+    rule_exceptions: 'none', management: 'infra_only'});
   assert.throws(() => f.call('record.get', {student_id: 'stu-tomas'}), /Input schema/);
   // No operation writes the record: every write tool acts on enrollments, waitlists or offers.
   const writes = read('tools.json').filter(t => !t.read_only).map(t => t.name.split('.').slice(1, 2)[0]);

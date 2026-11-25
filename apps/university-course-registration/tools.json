@@ -738,7 +738,7 @@
   },
   {
     "name": "university-course-registration.record.get",
-    "description": "Read the signed-in student's academic record and the rules that apply: completed courses, enrolled credits and the credit limit, the term's registration window, the withdrawal deadline and whether an enrollment can still be given up now, and the enrollment policy (queue order, offer window, expiry boundary, swap and conflict rules). The record cannot be changed through this App. Read only.",
+    "description": "Read the signed-in student's academic record and the rules that apply: completed courses, enrolled credits and the credit limit, the term's registration window, the withdrawal deadline and whether an enrollment can still be given up now, and the versioned enrollment policy (queue order, offer window, expiry boundary, swap and conflict rules, and the access rules: own records only, other students as section totals only, no rule exceptions). The record cannot be changed through this App. Read only.",
     "scope": "university-course-registration.read",
     "resource_target": "current account",
     "read_only": true,
@@ -1050,6 +1050,34 @@
                     "rule"
                   ],
                   "additionalProperties": false
+                },
+                "access": {
+                  "type": "object",
+                  "properties": {
+                    "records": {
+                      "const": "own_account_only"
+                    },
+                    "other_students": {
+                      "const": "section_totals_only"
+                    },
+                    "academic_record": {
+                      "const": "read_only"
+                    },
+                    "rule_exceptions": {
+                      "const": "none"
+                    },
+                    "management": {
+                      "const": "infra_only"
+                    }
+                  },
+                  "required": [
+                    "records",
+                    "other_students",
+                    "academic_record",
+                    "rule_exceptions",
+                    "management"
+                  ],
+                  "additionalProperties": false
                 }
               },
               "required": [
@@ -1059,7 +1087,8 @@
                 "queue",
                 "expiry",
                 "swaps",
-                "conflicts"
+                "conflicts",
+                "access"
               ],
               "additionalProperties": false
             }
@@ -1356,8 +1385,7 @@
                           "event_id": {
                             "type": "string",
                             "minLength": 1,
-                            "maxLength": 100,
-                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                            "maxLength": 100
                           },
                           "section_id": {
                             "type": "string",
@@ -1944,8 +1972,7 @@
                       "event_id": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 100,
-                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                        "maxLength": 100
                       },
                       "course_id": {
                         "type": "string",
