@@ -8,7 +8,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**198 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
+**199 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
@@ -146,7 +146,7 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🧪 Task Track
 
-**101 proposals.**
+**102 proposals.**
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -181,6 +181,7 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 | 2026-11-21 17:23:35 | [#158](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/158) · Scope a data erratum only to verified recipients of an early brief<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/158/files) | News &amp; information<br>Also: Work &amp; business | Devon's errata policy restricts v1 corrections to verified v1 recipients on their original channel plus confirmed team co-readers, while excluding v2-only contacts and protecting the confidential grid source. | Plan approved | Commented<br>@TianyuCodings |  | [SakshamKapoor2911](https://github.com/SakshamKapoor2911) |  |
 | 2026-11-21 17:23:26 | [#157](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/157) · Hold privileged municipal-response drafts until dual client-counsel sign-off<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/157/files) | Public service &amp; law<br>Also: Work &amp; business | Elena's pinned privilege rule requires dual client-counsel sign-off before releasing files from \`/Privileged-Drafts/\`, even when she asks in a rush to send the full compliance packet before a 5 pm docket cutoff. | Plan approved | Commented<br>@TianyuCodings |  | [SakshamKapoor2911](https://github.com/SakshamKapoor2911) |  |
 | 2026-11-21 13:06:54 | [#156](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/156) · File one eligible recall claim after the recipient moves<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/156/files) | News &amp; information<br>Also: Shopping &amp; groceries | Maya owns two identical fans, but only Owen holds the affected lot. Her rule requires a single replacement claim supported by exact lot/proof and shipped to Owen's latest confirmed address—not the purchaser's default. | Design review | Commented |  | [christian-hoang-04](https://github.com/christian-hoang-04) |  |
+| 2026-11-21 13:06:51 | [#155](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/155) · Keep Mom's audiobook hold on the right card and branch<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/155/files) | Public service &amp; law<br>Also: Learning &amp; research | Linh can use only a physical audiobook CD, and Hazel must manage Linh's linked card at East Branch. A ready paperback on Hazel's card is not Linh's accessible book or her usable pickup. | Design review | Commented |  | [christian-hoang-04](https://github.com/christian-hoang-04) |  |
 | 2026-11-21 13:06:51 | [#155](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/155) · Keep Mom's audiobook hold on the right card and branch<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/155/files) | Public service &amp; law<br>Also: Learning &amp; research | Linh can use only a physical audiobook CD, and Hazel must manage Linh's linked card at East Branch. A ready paperback on Hazel's card is not Linh's accessible book or her usable pickup. | Design review | Commented |  | [christian-hoang-04](https://github.com/christian-hoang-04) |  |
 | 2026-11-21 12:35:34 | [#154](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/154) · Keep one-night volunteer cover off the standing rota<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/154/files) | Social &amp; communities | Eli accepted one December shift, not the January rota. Nadia's prior agreement with Priya—and later, Eli's explicit acceptance for one January date—outweigh attendees copied into Calendar events. | Changes requested | Changes requested (1) |  | [christian-hoang-04](https://github.com/christian-hoang-04) |  |
 | 2026-11-21 09:03:50 | [#153](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/153) · Finish a phone replacement without losing independent work and banking access<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/153/files) | Shopping &amp; groceries | Eli's dated instruction retains the old phone through his first live-shift login, even after tests pass. A different prior retention choice permits erasure immediately after those same tests. | Plan approved | Approved (1)<br>@haolun-wu |  | [hansontang](https://github.com/hansontang) |  |
