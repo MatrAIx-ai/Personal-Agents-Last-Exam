@@ -89,7 +89,7 @@ Measured in Chromium 141 against the shared Host on a fresh `sandbox` run of the
 | Create a link (form opened to idle) | 2.9–3.9 s | 2.9–3.0 s | 10 |
 | Refresh button | 2.4–2.9 s | 2.4 s | 8 |
 
-Under more load these grow in proportion to the per-call time. No single call came near the Host's request timeout or the runtime client's 6 s limit: the slowest single read measured was 0.33 s. The browser test (`npm run test:browser`, 145 checks) takes 3.5–4.5 minutes at load average 1–3.
+Under more load these grow in proportion to the per-call time. No single call came near the Host's request timeout or the runtime client's 6 s limit: the slowest single read measured was 0.33 s. The browser test (`npm run test:browser`, 145 checks) takes 3–4 minutes at load average 1–3.
 
 ## Checks
 

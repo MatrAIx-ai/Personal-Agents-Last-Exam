@@ -24,7 +24,7 @@ Checked on 25 November 2026 (America/Los_Angeles) against base `main` commit `a4
 | Shared contracts | `npm run contracts:check` (repository) | passed |
 | Repository suite | `npm test` | 22/22 stages passed |
 | Web page on the shared Host | `cd apps/fernshelf && npm run test:web` (`tests/web-smoke.cjs`, no npm dependency) | 14 tests (2 top-level, 12 subtests), 14 passed |
-| Web page in a browser | `cd apps/fernshelf && npm run test:browser -- --out DIR` (needs `npm ci && npx playwright install chromium` at the root) | 145 checks passed, no JavaScript errors, 21 screenshots (see "Web page" below); 3.5–4.5 minutes at load average 1–3 |
+| Web page in a browser | `cd apps/fernshelf && npm run test:browser -- --out DIR` (needs `npm ci && npx playwright install chromium` at the root) | 145 checks passed, no JavaScript errors, 21 screenshots (see "Web page" below); 3–4 minutes at load average 1–3 |
 | Repository Web Host tests | `npm run test:web` | 4/4 passed |
 | Node 18 and Node 22 | every command in this table on v18.20.8 and on v22.23.1 | all passed on both (counts as above on each) |
 | Isolated package | a copy of `apps/fernshelf` alone: `npm test`, `npm run example`; then `scripts/real-mcp.cjs --runtime DIR` and `scripts/mail-flow.cjs --runtime DIR --mail DIR` | 44/44; example passed; 60/60; 25/25. Without `--runtime` the scripts stop with a message naming the option |
