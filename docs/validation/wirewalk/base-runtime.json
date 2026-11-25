@@ -1,0 +1,194 @@
+{
+  "schema": "pale.app-verification.v1",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "app_id": "wirewalk",
+  "app_version": "1.0.0",
+  "package_sha256": "86d3b53e8fd1e42d24d3b3b18e7b0f66ca59a15e267785bb1bfe34e235584754",
+  "node": "v22.23.2",
+  "verified_at": "2026-11-25T18:26:32.471Z",
+  "checks": [
+    {
+      "name": "Manifest, schemas, seed, references, media and declarations load",
+      "status": "passed"
+    },
+    {
+      "name": "business standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "event-example standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "Agent discovery excludes administrative tools",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for wirewalk.feed.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for wirewalk.search",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for wirewalk.post.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for wirewalk.thread.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for wirewalk.account.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for wirewalk.bookmarks.list",
+      "status": "passed"
+    },
+    {
+      "name": "Infra exposes the lifecycle interface and host clock operation",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.advance_time",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.apply_event",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.event_status",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.load_seed",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.reset",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.snapshot",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.validate_bundle",
+      "status": "passed"
+    },
+    {
+      "name": "Real MCP business read succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "MCP content and structured result agree",
+      "status": "passed"
+    },
+    {
+      "name": "MCP envelope remains unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Read does not change business data",
+      "status": "passed"
+    },
+    {
+      "name": "Caller cannot override run or role",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads history, relationships and assets",
+      "status": "passed"
+    },
+    {
+      "name": "Loaded historical records match input",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid history is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Rejected history leaves business state unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Declared incoming event commits",
+      "status": "passed"
+    },
+    {
+      "name": "Event changes business data",
+      "status": "passed"
+    },
+    {
+      "name": "Committed event is queryable",
+      "status": "passed"
+    },
+    {
+      "name": "Identical event retry is deduplicated",
+      "status": "passed"
+    },
+    {
+      "name": "Duplicate has no additional state change",
+      "status": "passed"
+    },
+    {
+      "name": "Same event ID with changed content is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Old version cannot reset a changed App",
+      "status": "passed"
+    },
+    {
+      "name": "A separate run retains its own initial data",
+      "status": "passed"
+    },
+    {
+      "name": "Reset returns ready",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded business baseline",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances epoch",
+      "status": "passed"
+    },
+    {
+      "name": "New MCP process reads persisted App state",
+      "status": "passed"
+    },
+    {
+      "name": "Submitted package remains unchanged",
+      "status": "passed"
+    }
+  ],
+  "stages": [
+    {
+      "name": "business",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "TAP version 13\n# Subtest: reads are side-effect free\nok 1 - reads are side-effect free\n  ---\n  duration_ms: 9.2375\n  type: 'test'\n  ...\n# Subtest: the feed is newest first with post ID breaking ties, and each row carries its relationship and stable link\nok 2 - the feed is newest first with post ID breaking ties, and each row carries its relationship and stable link\n  ---\n  duration_ms: 2.236709\n  type: 'test'\n  ...\n# Subtest: an unknown post and a post that is not public yet get the same unavailable response\nok 3 - an unknown post and a post that is not public yet get the same unavailable response\n  ---\n  duration_ms: 2.678833\n  type: 'test'\n  ...\n# Subtest: post.publish adds the operator reply from the event time onward; the approved example applies verbatim\nok 4 - post.publish adds the operator reply from the event time onward; the approved example applies verbatim\n  ---\n  duration_ms: 2.848584\n  type: 'test'\n  ...\n# Subtest: post.publish checks authors and referenced posts before committing; failures change nothing\nok 5 - post.publish checks authors and referenced posts before committing; failures change nothing\n  ---\n  duration_ms: 4.329167\n  type: 'test'\n  ...\n# Subtest: from a search hit, follow a quote to its source and read the later replies\nok 6 - from a search hit, follow a quote to its source and read the later replies\n  ---\n  duration_ms: 2.89225\n  type: 'test'\n  ...\n# Subtest: the cropped photo and its alt text agree, and every image reference resolves to a catalogued file\nok 7 - the cropped photo and its alt text agree, and every image reference resolves to a catalogued file\n  ---\n  duration_ms: 11.79875\n  type: 'test'\n  ...\n# Subtest: a cursor stays on its original result set when another post arrives at the same timestamp; a fresh search sees it\nok 8 - a cursor stays on its original result set when another post arrives at the same timestamp; a fresh search sees it\n  ---\n  duration_ms: 3.380166\n  type: 'test'\n  ...\n# Subtest: a same-timestamp arrival that sorts inside the remaining pages is still kept out of the traversal\nok 9 - a same-timestamp arrival that sorts inside the remaining pages is still kept out of the traversal\n  ---\n  duration_ms: 2.451625\n  type: 'test'\n  ...\n# Subtest: a cursor is pinned to its own first page: a forged count or a differently refilled feed is refused\nok 10 - a cursor is pinned to its own first page: a forged count or a differently refilled feed is refused\n  ---\n  duration_ms: 2.130916\n  type: 'test'\n  ...\n# Subtest: a cursor also keeps out seeded posts that become public after the first page\nok 11 - a cursor also keeps out seeded posts that become public after the first page\n  ---\n  duration_ms: 2.1005\n  type: 'test'\n  ...\n# Subtest: search: word starts, accents and case ignored, alt text and link cards searchable, reposts only in filter-only searches\nok 12 - search: word starts, accents and case ignored, alt text and link cards searchable, reposts only in filter-only searches\n  ---\n  duration_ms: 4.956875\n  type: 'test'\n  ...\n# Subtest: bookmarks: add once, remove, retry-safe results, latest write first\nok 13 - bookmarks: add once, remove, retry-safe results, latest write first\n  ---\n  duration_ms: 2.390125\n  type: 'test'\n  ...\n# Subtest: two reader instances share the public history but keep bookmarks separate\nok 14 - two reader instances share the public history but keep bookmarks separate\n  ---\n  duration_ms: 3.881208\n  type: 'test'\n  ...\n# Subtest: train storyline: unofficial claims first, then the operator names the direction\nok 15 - train storyline: unofficial claims first, then the operator names the direction\n  ---\n  duration_ms: 1.355541\n  type: 'test'\n  ...\n# Subtest: wildfire storyline: the 2 pm baseline, a recirculated bulletin, the upgrade, the repeat and the post after the cutoff\nok 16 - wildfire storyline: the 2 pm baseline, a recirculated bulletin, the upgrade, the repeat and the post after the cutoff\n  ---\n  duration_ms: 3.616833\n  type: 'test'\n  ...\n# Subtest: markets storyline: two bookmarked analysts, one figure, a dozen reposts of one source\nok 17 - markets storyline: two bookmarked analysts, one figure, a dozen reposts of one source\n  ---\n  duration_ms: 4.048833\n  type: 'test'\n  ...\n# Subtest: account inspection counts only public posts\nok 18 - account inspection counts only public posts\n  ---\n  duration_ms: 1.30275\n  type: 'test'\n  ...\n# Subtest: seed validation rejects inconsistent histories and bookmarks\nok 19 - seed validation rejects inconsistent histories and bookmarks\n  ---\n  duration_ms: 1.489\n  type: 'test'\n  ...\n# Subtest: a seed loads under an earlier run clock; its posts simply stay hidden until the clock reaches them\nok 20 - a seed loads under an earlier run clock; its posts simply stay hidden until the clock reaches them\n  ---\n  duration_ms: 1.474958\n  type: 'test'\n  ...\n# Subtest: diagnostics carry IDs only and cannot change business results\nok 21 - diagnostics carry IDs only and cannot change business results\n  ---\n  duration_ms: 2.106333\n  type: 'test'\n  ...\n# Subtest: task data ships a dataset and catalog whose counts and owner match its seed\nok 22 - task data ships a dataset and catalog whose counts and owner match its seed\n  ---\n  duration_ms: 0.332417\n  type: 'test'\n  ...\n1..22\n# tests 22\n# suites 0\n# pass 22\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 152.956916\n",
+      "errors": ""
+    },
+    {
+      "name": "event-example",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "{\n  \"app\": \"wirewalk\",\n  \"clock\": \"2026-10-10T21:12:00-07:00\",\n  \"conversation\": {\n    \"before\": [\n      \"p12 tessa-lu: @green-line-ops Is the last Green Line train canceled tonight? Eastbound, westbound or both?\"\n    ],\n    \"after\": [\n      \"p12 tessa-lu: @green-line-ops Is the last Green Line train canceled tonight? Eastbound, westbound or both?\",\n      \"p19 green-line-ops: Only the 11:40 pm eastbound is canceled. Last eastbound is 10:55 pm. Westbound service is on schedule.\"\n    ]\n  },\n  \"bookmark_result\": {\n    \"post_id\": \"p19\",\n    \"bookmarked\": true,\n    \"changed\": true\n  },\n  \"bookmarks\": [\n    \"p19\",\n    \"p01\"\n  ]\n}\n",
+      "errors": ""
+    }
+  ],
+  "passed": true,
+  "remaining": [
+    "App-specific approved workflow coverage",
+    "Human data/media/provenance review",
+    "Production remote authentication and deployment checks when applicable"
+  ]
+}
