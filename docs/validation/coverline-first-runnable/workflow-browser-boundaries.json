@@ -1,0 +1,5659 @@
+{
+  "schema": "coverline.workflow-trace.v1",
+  "scenario": "browser-boundaries",
+  "app_id": "coverline",
+  "app_version": "0.1.0",
+  "app_sha256": "9922aa328c2d63b623d7a44ad29b0d0594e0ffdec47fc443ed7fb13386af092b",
+  "runtime_version": "1.6.0",
+  "web_host_sha256": "c27a1b0c90d911cb85cdc2036432dd86e4f267bceec582c4c1f1ec44af434e65",
+  "node": "v22.22.0",
+  "data": "Fresh synthetic fixture runs only; file bytes recorded by SHA-256 and separate exported artifacts.",
+  "passed": true,
+  "initial_states": {
+    "coverline-infra": {
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "virtual_now": "2026-11-24T09:00:00-08:00",
+      "business_sha256": "abaf31a2edb146da3adee91d7c99652f6ed4db6036c77a4797fd4253b8bc7f2d",
+      "counts": {
+        "sources": 3,
+        "profiles": 1,
+        "coverages": 1,
+        "providers": 2,
+        "grants": 2,
+        "previews": 2,
+        "applications": 2,
+        "disclosures": 2,
+        "requests": 1,
+        "quotes": 2,
+        "documents": 4,
+        "comparisons": 0,
+        "notices": 5
+      },
+      "profile_revision": 1,
+      "coverage_revision": 1,
+      "application_statuses": [
+        {
+          "id": "application-101",
+          "revision": 1,
+          "status": "needs_info"
+        },
+        {
+          "id": "application-109",
+          "revision": 1,
+          "status": "quoted"
+        }
+      ],
+      "questions": [
+        {
+          "id": "question-mileage",
+          "status": "open",
+          "application_revision": 1
+        }
+      ],
+      "quote_versions": [
+        {
+          "id": "quote-application-101-r1-v1",
+          "application_revision": 1,
+          "profile_revision": 1
+        },
+        {
+          "id": "quote-application-109-r1-v1",
+          "application_revision": 1,
+          "profile_revision": 1
+        }
+      ],
+      "business_data": {
+        "account_id": "coverline-maya",
+        "owner_person_id": "person-maya",
+        "jurisdiction": "CL-DEMO",
+        "next_id": 115,
+        "sources": [
+          {
+            "id": "user-intake",
+            "at": "2026-11-23T08:00:00-08:00",
+            "title": "Trusted synthetic owner intake and declarations",
+            "facts": {
+              "drivers": [
+                {
+                  "person_id": "person-maya",
+                  "name": "Maya Chen",
+                  "years_licensed": 14,
+                  "accidents": 0,
+                  "violations": 0,
+                  "excluded": false
+                }
+              ],
+              "vehicle": {
+                "year": 2021,
+                "make": "Honda",
+                "model": "Civic",
+                "vin": "SYNTHETIC00000001"
+              },
+              "annual_mileage": 12000,
+              "garaging": {
+                "city": "Los Angeles",
+                "state": "CA-DEMO",
+                "zip": "90026"
+              },
+              "vehicle_use": "commute",
+              "ownership": "owned",
+              "current_policy": {
+                "ends_on": "2026-12-01",
+                "continuous_months": 36,
+                "lapse_days": 0,
+                "lender_requirements": []
+              },
+              "monitoring_consent": false
+            }
+          },
+          {
+            "id": "odometer-note",
+            "at": "2026-11-24T08:00:00-08:00",
+            "title": "Owner-provided corrected mileage estimate",
+            "facts": {
+              "annual_mileage": 15000
+            }
+          },
+          {
+            "id": "coverage-brief",
+            "at": "2026-11-23T08:00:00-08:00",
+            "title": "User requested coverage",
+            "facts": {}
+          }
+        ],
+        "profiles": [
+          {
+            "id": "profile-v1",
+            "revision": 1,
+            "at": "2026-11-23T08:00:00-08:00",
+            "source_ref": "user-intake",
+            "fields": {
+              "drivers": {
+                "value": [
+                  {
+                    "person_id": "person-maya",
+                    "name": "Maya Chen",
+                    "years_licensed": 14,
+                    "accidents": 0,
+                    "violations": 0,
+                    "excluded": false
+                  }
+                ],
+                "status": "confirmed",
+                "source_ref": "user-intake",
+                "observed_at": "2026-11-23T08:00:00-08:00"
+              },
+              "vehicle": {
+                "value": {
+                  "year": 2021,
+                  "make": "Honda",
+                  "model": "Civic",
+                  "vin": "SYNTHETIC00000001"
+                },
+                "status": "confirmed",
+                "source_ref": "user-intake",
+                "observed_at": "2026-11-23T08:00:00-08:00"
+              },
+              "annual_mileage": {
+                "value": 12000,
+                "status": "confirmed",
+                "source_ref": "user-intake",
+                "observed_at": "2026-11-23T08:00:00-08:00"
+              },
+              "garaging": {
+                "value": {
+                  "city": "Los Angeles",
+                  "state": "CA-DEMO",
+                  "zip": "90026"
+                },
+                "status": "confirmed",
+                "source_ref": "user-intake",
+                "observed_at": "2026-11-23T08:00:00-08:00"
+              },
+              "vehicle_use": {
+                "value": "commute",
+                "status": "confirmed",
+                "source_ref": "user-intake",
+                "observed_at": "2026-11-23T08:00:00-08:00"
+              },
+              "ownership": {
+                "value": "owned",
+                "status": "confirmed",
+                "source_ref": "user-intake",
+                "observed_at": "2026-11-23T08:00:00-08:00"
+              },
+              "current_policy": {
+                "value": {
+                  "ends_on": "2026-12-01",
+                  "continuous_months": 36,
+                  "lapse_days": 0,
+                  "lender_requirements": []
+                },
+                "status": "confirmed",
+                "source_ref": "user-intake",
+                "observed_at": "2026-11-23T08:00:00-08:00"
+              },
+              "monitoring_consent": {
+                "value": false,
+                "status": "confirmed",
+                "source_ref": "user-intake",
+                "observed_at": "2026-11-23T08:00:00-08:00"
+              }
+            }
+          }
+        ],
+        "coverages": [
+          {
+            "id": "coverage-v1",
+            "revision": 1,
+            "at": "2026-11-23T08:00:00-08:00",
+            "starts_on": "2026-12-01",
+            "term_months": 6,
+            "source_ref": "coverage-brief",
+            "terms": {
+              "bi_per_person_cents": {
+                "status": "requested",
+                "value": 10000000
+              },
+              "bi_per_accident_cents": {
+                "status": "requested",
+                "value": 30000000
+              },
+              "property_damage_cents": {
+                "status": "requested",
+                "value": 10000000
+              },
+              "collision_deductible_cents": {
+                "status": "requested",
+                "value": 50000
+              },
+              "comprehensive_deductible_cents": {
+                "status": "requested",
+                "value": 50000
+              },
+              "um_per_person_cents": {
+                "status": "requested",
+                "value": 10000000
+              },
+              "um_per_accident_cents": {
+                "status": "requested",
+                "value": 30000000
+              },
+              "medical_payments_cents": {
+                "status": "requested",
+                "value": 500000
+              },
+              "rental_daily_cents": {
+                "status": "requested",
+                "value": 5000
+              },
+              "rental_total_cents": {
+                "status": "requested",
+                "value": 150000
+              },
+              "rental_days": {
+                "status": "requested",
+                "value": 30
+              },
+              "roadside_limit_cents": {
+                "status": "requested",
+                "value": 10000
+              },
+              "gap": {
+                "status": "requested",
+                "value": false
+              },
+              "pip": {
+                "status": "not_applicable",
+                "value": null
+              }
+            }
+          }
+        ],
+        "providers": [
+          {
+            "id": "insurer-a",
+            "name": "Harbor Mutual",
+            "legal_entity": "Harbor Mutual Demo Insurance Company",
+            "description": "Fictional local provider; published deterministic six-month pricing rules.",
+            "rules": [
+              {
+                "revision": 1,
+                "published_at": "2026-11-01T09:00:00-08:00",
+                "effective_at": "2026-11-01T09:00:00-08:00",
+                "required_fields": [
+                  "drivers",
+                  "vehicle",
+                  "annual_mileage",
+                  "garaging",
+                  "vehicle_use",
+                  "ownership",
+                  "current_policy",
+                  "coverage"
+                ],
+                "base_premium_cents": 65000,
+                "low_mileage_threshold": 12000,
+                "low_mileage_discount_cents": 5000,
+                "installment_fee_cents": 500,
+                "rental_available": true,
+                "collision_deductible_cents": null,
+                "ask_mileage": true
+              }
+            ]
+          },
+          {
+            "id": "insurer-b",
+            "name": "Juniper Auto",
+            "legal_entity": "Juniper Auto Demo Insurance Company",
+            "description": "Fictional local provider; published deterministic six-month pricing rules.",
+            "rules": [
+              {
+                "revision": 1,
+                "published_at": "2026-11-01T09:00:00-08:00",
+                "effective_at": "2026-11-01T09:00:00-08:00",
+                "required_fields": [
+                  "drivers",
+                  "vehicle",
+                  "annual_mileage",
+                  "garaging",
+                  "vehicle_use",
+                  "ownership",
+                  "current_policy",
+                  "coverage"
+                ],
+                "base_premium_cents": 68000,
+                "low_mileage_threshold": 12000,
+                "low_mileage_discount_cents": 2000,
+                "installment_fee_cents": 0,
+                "rental_available": false,
+                "collision_deductible_cents": 100000,
+                "ask_mileage": false
+              }
+            ]
+          }
+        ],
+        "grants": [
+          {
+            "id": "grant-a",
+            "provider_id": "insurer-a",
+            "profile_revision": 1,
+            "fields": [
+              "drivers",
+              "vehicle",
+              "annual_mileage",
+              "garaging",
+              "vehicle_use",
+              "ownership",
+              "current_policy",
+              "coverage"
+            ],
+            "purpose": "quote",
+            "expires_at": "2026-12-01T00:00:00-08:00",
+            "revoked": false,
+            "source_ref": "trusted-user-decision-a"
+          },
+          {
+            "id": "grant-b",
+            "provider_id": "insurer-b",
+            "profile_revision": 1,
+            "fields": [
+              "drivers",
+              "vehicle",
+              "annual_mileage",
+              "garaging",
+              "vehicle_use",
+              "ownership",
+              "current_policy",
+              "coverage"
+            ],
+            "purpose": "quote",
+            "expires_at": "2026-12-01T00:00:00-08:00",
+            "revoked": false,
+            "source_ref": "trusted-user-decision-b"
+          }
+        ],
+        "previews": [
+          {
+            "id": "preview-100",
+            "kind": "application",
+            "provider_id": "insurer-a",
+            "profile_revision": 1,
+            "coverage_revision": 1,
+            "rule_revision": 1,
+            "grant_id": "grant-a",
+            "application_id": null,
+            "application_revision": 0,
+            "request_id": null,
+            "payload": {
+              "annual_mileage": 12000,
+              "coverage": {
+                "starts_on": "2026-12-01",
+                "term_months": 6,
+                "terms": {
+                  "bi_per_person_cents": {
+                    "status": "requested",
+                    "value": 10000000
+                  },
+                  "bi_per_accident_cents": {
+                    "status": "requested",
+                    "value": 30000000
+                  },
+                  "property_damage_cents": {
+                    "status": "requested",
+                    "value": 10000000
+                  },
+                  "collision_deductible_cents": {
+                    "status": "requested",
+                    "value": 50000
+                  },
+                  "comprehensive_deductible_cents": {
+                    "status": "requested",
+                    "value": 50000
+                  },
+                  "um_per_person_cents": {
+                    "status": "requested",
+                    "value": 10000000
+                  },
+                  "um_per_accident_cents": {
+                    "status": "requested",
+                    "value": 30000000
+                  },
+                  "medical_payments_cents": {
+                    "status": "requested",
+                    "value": 500000
+                  },
+                  "rental_daily_cents": {
+                    "status": "requested",
+                    "value": 5000
+                  },
+                  "rental_total_cents": {
+                    "status": "requested",
+                    "value": 150000
+                  },
+                  "rental_days": {
+                    "status": "requested",
+                    "value": 30
+                  },
+                  "roadside_limit_cents": {
+                    "status": "requested",
+                    "value": 10000
+                  },
+                  "gap": {
+                    "status": "requested",
+                    "value": false
+                  },
+                  "pip": {
+                    "status": "not_applicable",
+                    "value": null
+                  }
+                }
+              },
+              "current_policy": {
+                "ends_on": "2026-12-01",
+                "continuous_months": 36,
+                "lapse_days": 0,
+                "lender_requirements": []
+              },
+              "drivers": [
+                {
+                  "person_id": "person-maya",
+                  "name": "Maya Chen",
+                  "years_licensed": 14,
+                  "accidents": 0,
+                  "violations": 0,
+                  "excluded": false
+                }
+              ],
+              "garaging": {
+                "city": "Los Angeles",
+                "state": "CA-DEMO",
+                "zip": "90026"
+              },
+              "ownership": "owned",
+              "vehicle": {
+                "year": 2021,
+                "make": "Honda",
+                "model": "Civic",
+                "vin": "SYNTHETIC00000001"
+              },
+              "vehicle_use": "commute"
+            },
+            "expires_at": "2026-11-24T17:05:00.000Z"
+          },
+          {
+            "id": "preview-108",
+            "kind": "application",
+            "provider_id": "insurer-b",
+            "profile_revision": 1,
+            "coverage_revision": 1,
+            "rule_revision": 1,
+            "grant_id": "grant-b",
+            "application_id": null,
+            "application_revision": 0,
+            "request_id": null,
+            "payload": {
+              "annual_mileage": 12000,
+              "coverage": {
+                "starts_on": "2026-12-01",
+                "term_months": 6,
+                "terms": {
+                  "bi_per_person_cents": {
+                    "status": "requested",
+                    "value": 10000000
+                  },
+                  "bi_per_accident_cents": {
+                    "status": "requested",
+                    "value": 30000000
+                  },
+                  "property_damage_cents": {
+                    "status": "requested",
+                    "value": 10000000
+                  },
+                  "collision_deductible_cents": {
+                    "status": "requested",
+                    "value": 50000
+                  },
+                  "comprehensive_deductible_cents": {
+                    "status": "requested",
+                    "value": 50000
+                  },
+                  "um_per_person_cents": {
+                    "status": "requested",
+                    "value": 10000000
+                  },
+                  "um_per_accident_cents": {
+                    "status": "requested",
+                    "value": 30000000
+                  },
+                  "medical_payments_cents": {
+                    "status": "requested",
+                    "value": 500000
+                  },
+                  "rental_daily_cents": {
+                    "status": "requested",
+                    "value": 5000
+                  },
+                  "rental_total_cents": {
+                    "status": "requested",
+                    "value": 150000
+                  },
+                  "rental_days": {
+                    "status": "requested",
+                    "value": 30
+                  },
+                  "roadside_limit_cents": {
+                    "status": "requested",
+                    "value": 10000
+                  },
+                  "gap": {
+                    "status": "requested",
+                    "value": false
+                  },
+                  "pip": {
+                    "status": "not_applicable",
+                    "value": null
+                  }
+                }
+              },
+              "current_policy": {
+                "ends_on": "2026-12-01",
+                "continuous_months": 36,
+                "lapse_days": 0,
+                "lender_requirements": []
+              },
+              "drivers": [
+                {
+                  "person_id": "person-maya",
+                  "name": "Maya Chen",
+                  "years_licensed": 14,
+                  "accidents": 0,
+                  "violations": 0,
+                  "excluded": false
+                }
+              ],
+              "garaging": {
+                "city": "Los Angeles",
+                "state": "CA-DEMO",
+                "zip": "90026"
+              },
+              "ownership": "owned",
+              "vehicle": {
+                "year": 2021,
+                "make": "Honda",
+                "model": "Civic",
+                "vin": "SYNTHETIC00000001"
+              },
+              "vehicle_use": "commute"
+            },
+            "expires_at": "2026-11-24T17:05:00.000Z"
+          }
+        ],
+        "applications": [
+          {
+            "id": "application-101",
+            "provider_id": "insurer-a",
+            "revision": 1,
+            "status": "needs_info",
+            "versions": [
+              {
+                "revision": 1,
+                "profile_revision": 1,
+                "coverage_revision": 1,
+                "rule_revision": 1,
+                "disclosure_id": "disclosure-102",
+                "queue_id": "queue-application-101-r1",
+                "submitted_at": "2026-11-24T09:00:00-08:00"
+              }
+            ],
+            "withdrawn_at": null
+          },
+          {
+            "id": "application-109",
+            "provider_id": "insurer-b",
+            "revision": 1,
+            "status": "quoted",
+            "versions": [
+              {
+                "revision": 1,
+                "profile_revision": 1,
+                "coverage_revision": 1,
+                "rule_revision": 1,
+                "disclosure_id": "disclosure-110",
+                "queue_id": "queue-application-109-r1",
+                "submitted_at": "2026-11-24T09:00:00-08:00"
+              }
+            ],
+            "withdrawn_at": null
+          }
+        ],
+        "disclosures": [
+          {
+            "id": "disclosure-102",
+            "application_id": "application-101",
+            "application_revision": 1,
+            "provider_id": "insurer-a",
+            "profile_revision": 1,
+            "coverage_revision": 1,
+            "grant_id": "grant-a",
+            "purpose": "quote",
+            "kind": "application",
+            "request_id": null,
+            "payload": {
+              "annual_mileage": 12000,
+              "coverage": {
+                "starts_on": "2026-12-01",
+                "term_months": 6,
+                "terms": {
+                  "bi_per_person_cents": {
+                    "status": "requested",
+                    "value": 10000000
+                  },
+                  "bi_per_accident_cents": {
+                    "status": "requested",
+                    "value": 30000000
+                  },
+                  "property_damage_cents": {
+                    "status": "requested",
+                    "value": 10000000
+                  },
+                  "collision_deductible_cents": {
+                    "status": "requested",
+                    "value": 50000
+                  },
+                  "comprehensive_deductible_cents": {
+                    "status": "requested",
+                    "value": 50000
+                  },
+                  "um_per_person_cents": {
+                    "status": "requested",
+                    "value": 10000000
+                  },
+                  "um_per_accident_cents": {
+                    "status": "requested",
+                    "value": 30000000
+                  },
+                  "medical_payments_cents": {
+                    "status": "requested",
+                    "value": 500000
+                  },
+                  "rental_daily_cents": {
+                    "status": "requested",
+                    "value": 5000
+                  },
+                  "rental_total_cents": {
+                    "status": "requested",
+                    "value": 150000
+                  },
+                  "rental_days": {
+                    "status": "requested",
+                    "value": 30
+                  },
+                  "roadside_limit_cents": {
+                    "status": "requested",
+                    "value": 10000
+                  },
+                  "gap": {
+                    "status": "requested",
+                    "value": false
+                  },
+                  "pip": {
+                    "status": "not_applicable",
+                    "value": null
+                  }
+                }
+              },
+              "current_policy": {
+                "ends_on": "2026-12-01",
+                "continuous_months": 36,
+                "lapse_days": 0,
+                "lender_requirements": []
+              },
+              "drivers": [
+                {
+                  "person_id": "person-maya",
+                  "name": "Maya Chen",
+                  "years_licensed": 14,
+                  "accidents": 0,
+                  "violations": 0,
+                  "excluded": false
+                }
+              ],
+              "garaging": {
+                "city": "Los Angeles",
+                "state": "CA-DEMO",
+                "zip": "90026"
+              },
+              "ownership": "owned",
+              "vehicle": {
+                "year": 2021,
+                "make": "Honda",
+                "model": "Civic",
+                "vin": "SYNTHETIC00000001"
+              },
+              "vehicle_use": "commute"
+            },
+            "at": "2026-11-24T09:00:00-08:00"
+          },
+          {
+            "id": "disclosure-110",
+            "application_id": "application-109",
+            "application_revision": 1,
+            "provider_id": "insurer-b",
+            "profile_revision": 1,
+            "coverage_revision": 1,
+            "grant_id": "grant-b",
+            "purpose": "quote",
+            "kind": "application",
+            "request_id": null,
+            "payload": {
+              "annual_mileage": 12000,
+              "coverage": {
+                "starts_on": "2026-12-01",
+                "term_months": 6,
+                "terms": {
+                  "bi_per_person_cents": {
+                    "status": "requested",
+                    "value": 10000000
+                  },
+                  "bi_per_accident_cents": {
+                    "status": "requested",
+                    "value": 30000000
+                  },
+                  "property_damage_cents": {
+                    "status": "requested",
+                    "value": 10000000
+                  },
+                  "collision_deductible_cents": {
+                    "status": "requested",
+                    "value": 50000
+                  },
+                  "comprehensive_deductible_cents": {
+                    "status": "requested",
+                    "value": 50000
+                  },
+                  "um_per_person_cents": {
+                    "status": "requested",
+                    "value": 10000000
+                  },
+                  "um_per_accident_cents": {
+                    "status": "requested",
+                    "value": 30000000
+                  },
+                  "medical_payments_cents": {
+                    "status": "requested",
+                    "value": 500000
+                  },
+                  "rental_daily_cents": {
+                    "status": "requested",
+                    "value": 5000
+                  },
+                  "rental_total_cents": {
+                    "status": "requested",
+                    "value": 150000
+                  },
+                  "rental_days": {
+                    "status": "requested",
+                    "value": 30
+                  },
+                  "roadside_limit_cents": {
+                    "status": "requested",
+                    "value": 10000
+                  },
+                  "gap": {
+                    "status": "requested",
+                    "value": false
+                  },
+                  "pip": {
+                    "status": "not_applicable",
+                    "value": null
+                  }
+                }
+              },
+              "current_policy": {
+                "ends_on": "2026-12-01",
+                "continuous_months": 36,
+                "lapse_days": 0,
+                "lender_requirements": []
+              },
+              "drivers": [
+                {
+                  "person_id": "person-maya",
+                  "name": "Maya Chen",
+                  "years_licensed": 14,
+                  "accidents": 0,
+                  "violations": 0,
+                  "excluded": false
+                }
+              ],
+              "garaging": {
+                "city": "Los Angeles",
+                "state": "CA-DEMO",
+                "zip": "90026"
+              },
+              "ownership": "owned",
+              "vehicle": {
+                "year": 2021,
+                "make": "Honda",
+                "model": "Civic",
+                "vin": "SYNTHETIC00000001"
+              },
+              "vehicle_use": "commute"
+            },
+            "at": "2026-11-24T09:00:00-08:00"
+          }
+        ],
+        "requests": [
+          {
+            "id": "question-mileage",
+            "provider_id": "insurer-a",
+            "application_id": "application-101",
+            "application_revision": 1,
+            "fields": [
+              "annual_mileage"
+            ],
+            "question": "Please confirm the annual mileage from the supplied owner intake.",
+            "reply_by": "2026-11-25T17:00:00-08:00",
+            "status": "open",
+            "disclosure_id": null,
+            "source_ref": "harbor-question-1"
+          }
+        ],
+        "quotes": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "provider_id": "insurer-a",
+            "application_id": "application-101",
+            "application_revision": 1,
+            "profile_revision": 1,
+            "coverage_revision": 1,
+            "quote_id": "quote-application-101-r1",
+            "quote_revision": 1,
+            "issued_at": "2026-11-24T09:00:00-08:00",
+            "expires_at": "2026-12-01T17:00:00.000Z",
+            "source_ref": "insurer-a-reply-application-101-r1-v1",
+            "terms": {
+              "starts_on": "2026-12-01",
+              "term_months": 6,
+              "terms": {
+                "bi_per_person_cents": {
+                  "status": "offered",
+                  "value": 10000000
+                },
+                "bi_per_accident_cents": {
+                  "status": "offered",
+                  "value": 30000000
+                },
+                "property_damage_cents": {
+                  "status": "offered",
+                  "value": 10000000
+                },
+                "collision_deductible_cents": {
+                  "status": "offered",
+                  "value": 50000
+                },
+                "comprehensive_deductible_cents": {
+                  "status": "offered",
+                  "value": 50000
+                },
+                "um_per_person_cents": {
+                  "status": "offered",
+                  "value": 10000000
+                },
+                "um_per_accident_cents": {
+                  "status": "offered",
+                  "value": 30000000
+                },
+                "medical_payments_cents": {
+                  "status": "offered",
+                  "value": 500000
+                },
+                "rental_daily_cents": {
+                  "status": "offered",
+                  "value": 5000
+                },
+                "rental_total_cents": {
+                  "status": "offered",
+                  "value": 150000
+                },
+                "rental_days": {
+                  "status": "offered",
+                  "value": 30
+                },
+                "roadside_limit_cents": {
+                  "status": "offered",
+                  "value": 10000
+                },
+                "gap": {
+                  "status": "offered",
+                  "value": false
+                },
+                "pip": {
+                  "status": "not_applicable",
+                  "value": null
+                }
+              },
+              "stage": "conditional",
+              "premium_cents": 60000,
+              "fees_cents": 3000,
+              "taxes_cents": 0,
+              "total_cents": 63000,
+              "installments_cents": [
+                10500,
+                10500,
+                10500,
+                10500,
+                10500,
+                10500
+              ],
+              "discounts": [
+                {
+                  "name": "Low annual mileage",
+                  "amount_cents": 5000,
+                  "status": "conditional",
+                  "condition": "Annual mileage at most 12000; no driving-data enrollment.",
+                  "source_ref": "insurer-a-rules-r1"
+                }
+              ],
+              "conditions": [
+                "Personal/commute use only; business use excluded.",
+                "No policy is purchased or bound. Synthetic provider rules."
+              ]
+            },
+            "document_id": "document-105",
+            "terms_document_id": "document-106",
+            "document_sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "provider_id": "insurer-b",
+            "application_id": "application-109",
+            "application_revision": 1,
+            "profile_revision": 1,
+            "coverage_revision": 1,
+            "quote_id": "quote-application-109-r1",
+            "quote_revision": 1,
+            "issued_at": "2026-11-24T09:00:00-08:00",
+            "expires_at": "2026-12-01T17:00:00.000Z",
+            "source_ref": "insurer-b-reply-application-109-r1-v1",
+            "terms": {
+              "starts_on": "2026-12-01",
+              "term_months": 6,
+              "terms": {
+                "bi_per_person_cents": {
+                  "status": "offered",
+                  "value": 10000000
+                },
+                "bi_per_accident_cents": {
+                  "status": "offered",
+                  "value": 30000000
+                },
+                "property_damage_cents": {
+                  "status": "offered",
+                  "value": 10000000
+                },
+                "collision_deductible_cents": {
+                  "status": "offered",
+                  "value": 100000
+                },
+                "comprehensive_deductible_cents": {
+                  "status": "offered",
+                  "value": 50000
+                },
+                "um_per_person_cents": {
+                  "status": "offered",
+                  "value": 10000000
+                },
+                "um_per_accident_cents": {
+                  "status": "offered",
+                  "value": 30000000
+                },
+                "medical_payments_cents": {
+                  "status": "offered",
+                  "value": 500000
+                },
+                "rental_daily_cents": {
+                  "status": "not_offered",
+                  "value": null
+                },
+                "rental_total_cents": {
+                  "status": "not_offered",
+                  "value": null
+                },
+                "rental_days": {
+                  "status": "not_offered",
+                  "value": null
+                },
+                "roadside_limit_cents": {
+                  "status": "offered",
+                  "value": 10000
+                },
+                "gap": {
+                  "status": "offered",
+                  "value": false
+                },
+                "pip": {
+                  "status": "not_applicable",
+                  "value": null
+                }
+              },
+              "stage": "written",
+              "premium_cents": 66000,
+              "fees_cents": 0,
+              "taxes_cents": 0,
+              "total_cents": 66000,
+              "installments_cents": [
+                11000,
+                11000,
+                11000,
+                11000,
+                11000,
+                11000
+              ],
+              "discounts": [
+                {
+                  "name": "Low annual mileage",
+                  "amount_cents": 2000,
+                  "status": "applied",
+                  "condition": "Annual mileage at most 12000; no driving-data enrollment.",
+                  "source_ref": "insurer-b-rules-r1"
+                }
+              ],
+              "conditions": [
+                "Personal/commute use only; business use excluded.",
+                "No policy is purchased or bound. Synthetic provider rules."
+              ]
+            },
+            "document_id": "document-112",
+            "terms_document_id": "document-113",
+            "document_sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          }
+        ],
+        "documents": [
+          {
+            "id": "document-105",
+            "kind": "quote_pdf",
+            "owner_id": "quote-application-101-r1-v1",
+            "source_ref": "insurer-a-reply-application-101-r1-v1",
+            "at": "2026-11-24T09:00:00-08:00",
+            "asset_id": "original-document-105",
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9",
+            "mime_type": "application/pdf",
+            "bytes": 2638
+          },
+          {
+            "id": "document-106",
+            "kind": "quote_terms",
+            "owner_id": "quote-application-101-r1-v1",
+            "source_ref": "insurer-a-reply-application-101-r1-v1",
+            "at": "2026-11-24T09:00:00-08:00",
+            "asset_id": "original-document-106",
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa",
+            "mime_type": "application/json",
+            "bytes": 2350
+          },
+          {
+            "id": "document-112",
+            "kind": "quote_pdf",
+            "owner_id": "quote-application-109-r1-v1",
+            "source_ref": "insurer-b-reply-application-109-r1-v1",
+            "at": "2026-11-24T09:00:00-08:00",
+            "asset_id": "original-document-112",
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f",
+            "mime_type": "application/pdf",
+            "bytes": 2649
+          },
+          {
+            "id": "document-113",
+            "kind": "quote_terms",
+            "owner_id": "quote-application-109-r1-v1",
+            "source_ref": "insurer-b-reply-application-109-r1-v1",
+            "at": "2026-11-24T09:00:00-08:00",
+            "asset_id": "original-document-113",
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269",
+            "mime_type": "application/json",
+            "bytes": 2352
+          }
+        ],
+        "comparisons": [],
+        "notices": [
+          {
+            "id": "notice-103",
+            "object_id": "application-101",
+            "at": "2026-11-24T09:00:00-08:00",
+            "title": "Application application-101 submitted",
+            "text": "insurer-a received application-101 revision 1. Submission is pending a provider response."
+          },
+          {
+            "id": "notice-104",
+            "object_id": "application-101",
+            "at": "2026-11-24T09:00:00-08:00",
+            "title": "Question for application-101",
+            "text": "Please confirm the annual mileage from the supplied owner intake. Reply by 2026-11-25T17:00:00-08:00. Request question-mileage."
+          },
+          {
+            "id": "notice-107",
+            "object_id": "quote-application-101-r1-v1",
+            "at": "2026-11-24T09:00:00-08:00",
+            "title": "Quote quote-application-101-r1 revision 1 ready",
+            "text": "Quote quote-application-101-r1 revision 1: insurer-a replied to application-101 revision 1 using profile 1 and coverage 1. Expires 2026-12-01T17:00:00.000Z. Read the original written terms."
+          },
+          {
+            "id": "notice-111",
+            "object_id": "application-109",
+            "at": "2026-11-24T09:00:00-08:00",
+            "title": "Application application-109 submitted",
+            "text": "insurer-b received application-109 revision 1. Submission is pending a provider response."
+          },
+          {
+            "id": "notice-114",
+            "object_id": "quote-application-109-r1-v1",
+            "at": "2026-11-24T09:00:00-08:00",
+            "title": "Quote quote-application-109-r1 revision 1 ready",
+            "text": "Quote quote-application-109-r1 revision 1: insurer-b replied to application-109 revision 1 using profile 1 and coverage 1. Expires 2026-12-01T17:00:00.000Z. Read the original written terms."
+          }
+        ]
+      }
+    }
+  },
+  "steps": [
+    {
+      "step": 1,
+      "description": "Direct management HTTP requests refused",
+      "expected": {
+        "all_statuses": 403,
+        "business_unchanged": true
+      },
+      "actual": [
+        {
+          "tool": "env.snapshot",
+          "status": 403,
+          "result": {
+            "error": "Business operation not permitted"
+          }
+        },
+        {
+          "tool": "env.reset",
+          "status": 403,
+          "result": {
+            "error": "Business operation not permitted"
+          }
+        },
+        {
+          "tool": "env.apply_event",
+          "status": 403,
+          "result": {
+            "error": "Business operation not permitted"
+          }
+        },
+        {
+          "tool": "env.load_seed",
+          "status": 403,
+          "result": {
+            "error": "Business operation not permitted"
+          }
+        }
+      ],
+      "through_call": 3
+    },
+    {
+      "step": 2,
+      "description": "Stale browser submission stays visible and creates no application",
+      "expected": {
+        "applications": 2,
+        "dialog_open": true
+      },
+      "actual": {
+        "applications": 2,
+        "error": "The observed version is stale; read the current state before retrying."
+      },
+      "through_call": 9
+    },
+    {
+      "step": 3,
+      "description": "Fresh browser application persists with the exact approved disclosure",
+      "expected": {
+        "applications": 3,
+        "status": "pending",
+        "annual_mileage": 12000
+      },
+      "actual": {
+        "application_id": "application-116",
+        "disclosure_id": "disclosure-117",
+        "version": {
+          "epoch": 2,
+          "revision": 3
+        },
+        "status": "pending"
+      },
+      "through_call": 22
+    },
+    {
+      "step": 4,
+      "description": "Answering one of two questions leaves the other open",
+      "expected": {
+        "status": "needs_info",
+        "new_quotes": 0
+      },
+      "actual": {
+        "status": "needs_info",
+        "new_quotes": 0,
+        "remaining_reply_controls": 1
+      },
+      "through_call": 34
+    },
+    {
+      "step": 5,
+      "description": "The final sourced answer permits the next written quote",
+      "expected": {
+        "new_quotes": 1,
+        "stage": "written"
+      },
+      "actual": {
+        "quote_id": "quote-application-101-r1-v2",
+        "stage": "written"
+      },
+      "through_call": 43
+    },
+    {
+      "step": 6,
+      "description": "Withdrawal removes the stale answer control from browser and MCP",
+      "expected": {
+        "reply_controls": 0,
+        "question_status": "withdrawn"
+      },
+      "actual": {
+        "reply_controls": 0,
+        "question_status": "withdrawn"
+      },
+      "through_call": 49
+    },
+    {
+      "step": 7,
+      "description": "Untrusted saved text renders literally",
+      "expected": {
+        "inserted_images": 0,
+        "executed_script": false
+      },
+      "actual": {
+        "text": "<img src=x onerror=\"globalThis.injected=true\">",
+        "inserted_images": 0,
+        "executed_script": false
+      },
+      "through_call": 52
+    },
+    {
+      "step": 8,
+      "description": "Browser coverage edit appends the requested revision without changing original quotes",
+      "expected": {
+        "coverage_revision": 2,
+        "collision_deductible_cents": 100000
+      },
+      "actual": {
+        "coverage_revision": 2,
+        "collision_deductible_cents": 100000,
+        "original_quote_total": 63000
+      },
+      "through_call": 57
+    }
+  ],
+  "calls": [
+    {
+      "sequence": 1,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 1,
+          "revision": 0
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "abaf31a2edb146da3adee91d7c99652f6ed4db6036c77a4797fd4253b8bc7f2d",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 2,
+          "disclosures": 2,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 5
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 2,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 1,
+          "revision": 0
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "94cf095fc12159d193ba462fc793df21730576d71c270ee6e508e38836f85f8e",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 2,
+          "disclosures": 2,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 5
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 3,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 1,
+          "revision": 0
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "abaf31a2edb146da3adee91d7c99652f6ed4db6036c77a4797fd4253b8bc7f2d",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 2,
+          "disclosures": 2,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 5
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 4,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 1,
+          "revision": 0
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "94cf095fc12159d193ba462fc793df21730576d71c270ee6e508e38836f85f8e",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 2,
+          "disclosures": 2,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 5
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 5,
+      "actor": "browser-agent",
+      "tool": "coverline.disclosures.preview",
+      "arguments": {
+        "provider_id": "insurer-b",
+        "grant_id": "grant-b",
+        "expected_version": {
+          "epoch": 1,
+          "revision": 0
+        },
+        "request_id": "web-b5c6311e-21e8-4995-be6f-29eafad9214b"
+      },
+      "result": {
+        "preview": {
+          "id": "preview-108",
+          "kind": "application",
+          "provider_id": "insurer-b",
+          "profile_revision": 1,
+          "coverage_revision": 1,
+          "rule_revision": 1,
+          "grant_id": "grant-b",
+          "application_id": null,
+          "application_revision": 0,
+          "request_id": null,
+          "payload": {
+            "annual_mileage": 12000,
+            "coverage": {
+              "starts_on": "2026-12-01",
+              "term_months": 6,
+              "terms": {
+                "bi_per_person_cents": {
+                  "status": "requested",
+                  "value": 10000000
+                },
+                "bi_per_accident_cents": {
+                  "status": "requested",
+                  "value": 30000000
+                },
+                "property_damage_cents": {
+                  "status": "requested",
+                  "value": 10000000
+                },
+                "collision_deductible_cents": {
+                  "status": "requested",
+                  "value": 50000
+                },
+                "comprehensive_deductible_cents": {
+                  "status": "requested",
+                  "value": 50000
+                },
+                "um_per_person_cents": {
+                  "status": "requested",
+                  "value": 10000000
+                },
+                "um_per_accident_cents": {
+                  "status": "requested",
+                  "value": 30000000
+                },
+                "medical_payments_cents": {
+                  "status": "requested",
+                  "value": 500000
+                },
+                "rental_daily_cents": {
+                  "status": "requested",
+                  "value": 5000
+                },
+                "rental_total_cents": {
+                  "status": "requested",
+                  "value": 150000
+                },
+                "rental_days": {
+                  "status": "requested",
+                  "value": 30
+                },
+                "roadside_limit_cents": {
+                  "status": "requested",
+                  "value": 10000
+                },
+                "gap": {
+                  "status": "requested",
+                  "value": false
+                },
+                "pip": {
+                  "status": "not_applicable",
+                  "value": null
+                }
+              }
+            },
+            "current_policy": {
+              "ends_on": "2026-12-01",
+              "continuous_months": 36,
+              "lapse_days": 0,
+              "lender_requirements": []
+            },
+            "drivers": [
+              {
+                "person_id": "person-maya",
+                "name": "Maya Chen",
+                "years_licensed": 14,
+                "accidents": 0,
+                "violations": 0,
+                "excluded": false
+              }
+            ],
+            "garaging": {
+              "city": "Los Angeles",
+              "state": "CA-DEMO",
+              "zip": "90026"
+            },
+            "ownership": "owned",
+            "vehicle": {
+              "year": 2021,
+              "make": "Honda",
+              "model": "Civic",
+              "vin": "SYNTHETIC00000001"
+            },
+            "vehicle_use": "commute"
+          },
+          "expires_at": "2026-11-24T17:05:00.000Z"
+        },
+        "status": "committed",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        }
+      }
+    },
+    {
+      "sequence": 6,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "abaf31a2edb146da3adee91d7c99652f6ed4db6036c77a4797fd4253b8bc7f2d",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 2,
+          "disclosures": 2,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 5
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 7,
+      "actor": "browser-agent",
+      "tool": "coverline.profile.update",
+      "arguments": {
+        "request_id": "stale-preview-correction",
+        "expected_version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "source_ref": "odometer-note",
+        "fields": {
+          "annual_mileage": {
+            "value": 15000,
+            "status": "confirmed",
+            "source_ref": "odometer-note",
+            "observed_at": "2026-11-23T08:00:00-08:00"
+          }
+        }
+      },
+      "result": {
+        "profile": {
+          "id": "profile-115",
+          "revision": 2,
+          "at": "2026-11-24T09:00:00-08:00",
+          "fields": {
+            "drivers": {
+              "value": [
+                {
+                  "person_id": "person-maya",
+                  "name": "Maya Chen",
+                  "years_licensed": 14,
+                  "accidents": 0,
+                  "violations": 0,
+                  "excluded": false
+                }
+              ],
+              "status": "confirmed",
+              "source_ref": "user-intake",
+              "observed_at": "2026-11-23T08:00:00-08:00"
+            },
+            "vehicle": {
+              "value": {
+                "year": 2021,
+                "make": "Honda",
+                "model": "Civic",
+                "vin": "SYNTHETIC00000001"
+              },
+              "status": "confirmed",
+              "source_ref": "user-intake",
+              "observed_at": "2026-11-23T08:00:00-08:00"
+            },
+            "annual_mileage": {
+              "value": 15000,
+              "status": "confirmed",
+              "source_ref": "odometer-note",
+              "observed_at": "2026-11-23T08:00:00-08:00"
+            },
+            "garaging": {
+              "value": {
+                "city": "Los Angeles",
+                "state": "CA-DEMO",
+                "zip": "90026"
+              },
+              "status": "confirmed",
+              "source_ref": "user-intake",
+              "observed_at": "2026-11-23T08:00:00-08:00"
+            },
+            "vehicle_use": {
+              "value": "commute",
+              "status": "confirmed",
+              "source_ref": "user-intake",
+              "observed_at": "2026-11-23T08:00:00-08:00"
+            },
+            "ownership": {
+              "value": "owned",
+              "status": "confirmed",
+              "source_ref": "user-intake",
+              "observed_at": "2026-11-23T08:00:00-08:00"
+            },
+            "current_policy": {
+              "value": {
+                "ends_on": "2026-12-01",
+                "continuous_months": 36,
+                "lapse_days": 0,
+                "lender_requirements": []
+              },
+              "status": "confirmed",
+              "source_ref": "user-intake",
+              "observed_at": "2026-11-23T08:00:00-08:00"
+            },
+            "monitoring_consent": {
+              "value": false,
+              "status": "confirmed",
+              "source_ref": "user-intake",
+              "observed_at": "2026-11-23T08:00:00-08:00"
+            }
+          },
+          "source_ref": "odometer-note"
+        },
+        "status": "committed",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 1,
+          "revision": 2
+        }
+      }
+    },
+    {
+      "sequence": 8,
+      "actor": "browser-agent",
+      "tool": "coverline.applications.submit",
+      "arguments": {
+        "preview_id": "preview-108",
+        "expected_version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "request_id": "web-5fecb6a2-f93d-4947-b188-a61c11aabb6d"
+      },
+      "result": {
+        "status": "stale_version",
+        "message": "The observed version is stale; read the current state before retrying.",
+        "applied": false,
+        "version": {
+          "epoch": 1,
+          "revision": 2
+        },
+        "current_version": {
+          "epoch": 1,
+          "revision": 2
+        }
+      }
+    },
+    {
+      "sequence": 9,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 1,
+          "revision": 2
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "a5cbb948ce7f31bf69ccc49536f1e7363aefacf4235e79380718d559f6e569dc",
+        "counts": {
+          "sources": 3,
+          "profiles": 2,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 2,
+          "disclosures": 2,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 5
+        },
+        "profile_revision": 2,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 10,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 1,
+          "revision": 2
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "a5cbb948ce7f31bf69ccc49536f1e7363aefacf4235e79380718d559f6e569dc",
+        "counts": {
+          "sources": 3,
+          "profiles": 2,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 2,
+          "disclosures": 2,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 5
+        },
+        "profile_revision": 2,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 11,
+      "actor": "coverline-infra",
+      "tool": "env.reset",
+      "arguments": {
+        "expected_version": {
+          "epoch": 1,
+          "revision": 2
+        }
+      },
+      "result": {
+        "status": "ready",
+        "reset_scope": "coverline",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 2,
+          "revision": 0
+        }
+      }
+    },
+    {
+      "sequence": 12,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 2,
+          "revision": 0
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "94cf095fc12159d193ba462fc793df21730576d71c270ee6e508e38836f85f8e",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 2,
+          "disclosures": 2,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 5
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 13,
+      "actor": "browser-agent",
+      "tool": "coverline.applications.withdraw",
+      "arguments": {
+        "id": "application-109",
+        "expected_version": {
+          "epoch": 2,
+          "revision": 0
+        },
+        "request_id": "web-61016050-00ad-4de7-b2a5-4828d7395b74"
+      },
+      "result": {
+        "application": {
+          "id": "application-109",
+          "provider_id": "insurer-b",
+          "revision": 1,
+          "status": "withdrawn",
+          "versions": [
+            {
+              "revision": 1,
+              "profile_revision": 1,
+              "coverage_revision": 1,
+              "rule_revision": 1,
+              "disclosure_id": "disclosure-110",
+              "queue_id": "queue-application-109-r1",
+              "submitted_at": "2026-11-24T09:00:00-08:00"
+            }
+          ],
+          "withdrawn_at": "2026-11-24T09:00:00-08:00"
+        },
+        "status": "committed",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 2,
+          "revision": 1
+        }
+      }
+    },
+    {
+      "sequence": 14,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 2,
+          "revision": 1
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "59a980ede1fcef11639e844de877c978213ed16616e8337a36081602b66313cf",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 2,
+          "disclosures": 2,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 6
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "withdrawn"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 15,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 2,
+          "revision": 1
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "59a980ede1fcef11639e844de877c978213ed16616e8337a36081602b66313cf",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 2,
+          "disclosures": 2,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 6
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "withdrawn"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 16,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 2,
+          "revision": 1
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "59a980ede1fcef11639e844de877c978213ed16616e8337a36081602b66313cf",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 2,
+          "disclosures": 2,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 6
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "withdrawn"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 17,
+      "actor": "browser-agent",
+      "tool": "coverline.disclosures.preview",
+      "arguments": {
+        "provider_id": "insurer-b",
+        "grant_id": "grant-b",
+        "expected_version": {
+          "epoch": 2,
+          "revision": 1
+        },
+        "request_id": "web-c99d1081-6fa6-48a8-8dea-a2d2011be2c4"
+      },
+      "result": {
+        "preview": {
+          "id": "preview-108",
+          "kind": "application",
+          "provider_id": "insurer-b",
+          "profile_revision": 1,
+          "coverage_revision": 1,
+          "rule_revision": 1,
+          "grant_id": "grant-b",
+          "application_id": null,
+          "application_revision": 0,
+          "request_id": null,
+          "payload": {
+            "annual_mileage": 12000,
+            "coverage": {
+              "starts_on": "2026-12-01",
+              "term_months": 6,
+              "terms": {
+                "bi_per_person_cents": {
+                  "status": "requested",
+                  "value": 10000000
+                },
+                "bi_per_accident_cents": {
+                  "status": "requested",
+                  "value": 30000000
+                },
+                "property_damage_cents": {
+                  "status": "requested",
+                  "value": 10000000
+                },
+                "collision_deductible_cents": {
+                  "status": "requested",
+                  "value": 50000
+                },
+                "comprehensive_deductible_cents": {
+                  "status": "requested",
+                  "value": 50000
+                },
+                "um_per_person_cents": {
+                  "status": "requested",
+                  "value": 10000000
+                },
+                "um_per_accident_cents": {
+                  "status": "requested",
+                  "value": 30000000
+                },
+                "medical_payments_cents": {
+                  "status": "requested",
+                  "value": 500000
+                },
+                "rental_daily_cents": {
+                  "status": "requested",
+                  "value": 5000
+                },
+                "rental_total_cents": {
+                  "status": "requested",
+                  "value": 150000
+                },
+                "rental_days": {
+                  "status": "requested",
+                  "value": 30
+                },
+                "roadside_limit_cents": {
+                  "status": "requested",
+                  "value": 10000
+                },
+                "gap": {
+                  "status": "requested",
+                  "value": false
+                },
+                "pip": {
+                  "status": "not_applicable",
+                  "value": null
+                }
+              }
+            },
+            "current_policy": {
+              "ends_on": "2026-12-01",
+              "continuous_months": 36,
+              "lapse_days": 0,
+              "lender_requirements": []
+            },
+            "drivers": [
+              {
+                "person_id": "person-maya",
+                "name": "Maya Chen",
+                "years_licensed": 14,
+                "accidents": 0,
+                "violations": 0,
+                "excluded": false
+              }
+            ],
+            "garaging": {
+              "city": "Los Angeles",
+              "state": "CA-DEMO",
+              "zip": "90026"
+            },
+            "ownership": "owned",
+            "vehicle": {
+              "year": 2021,
+              "make": "Honda",
+              "model": "Civic",
+              "vin": "SYNTHETIC00000001"
+            },
+            "vehicle_use": "commute"
+          },
+          "expires_at": "2026-11-24T17:05:00.000Z"
+        },
+        "status": "committed",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 2,
+          "revision": 2
+        }
+      }
+    },
+    {
+      "sequence": 18,
+      "actor": "browser-agent",
+      "tool": "coverline.applications.submit",
+      "arguments": {
+        "preview_id": "preview-108",
+        "expected_version": {
+          "epoch": 2,
+          "revision": 2
+        },
+        "request_id": "web-6df4c042-1a8e-4351-9108-8f9f51a55c02"
+      },
+      "result": {
+        "application": {
+          "id": "application-116",
+          "provider_id": "insurer-b",
+          "revision": 1,
+          "status": "pending",
+          "versions": [
+            {
+              "revision": 1,
+              "profile_revision": 1,
+              "coverage_revision": 1,
+              "rule_revision": 1,
+              "disclosure_id": "disclosure-117",
+              "queue_id": "queue-application-116-r1",
+              "submitted_at": "2026-11-24T09:00:00-08:00"
+            }
+          ],
+          "withdrawn_at": null
+        },
+        "disclosure": {
+          "id": "disclosure-117",
+          "application_id": "application-116",
+          "application_revision": 1,
+          "provider_id": "insurer-b",
+          "profile_revision": 1,
+          "coverage_revision": 1,
+          "grant_id": "grant-b",
+          "purpose": "quote",
+          "kind": "application",
+          "request_id": null,
+          "payload": {
+            "annual_mileage": 12000,
+            "coverage": {
+              "starts_on": "2026-12-01",
+              "term_months": 6,
+              "terms": {
+                "bi_per_person_cents": {
+                  "status": "requested",
+                  "value": 10000000
+                },
+                "bi_per_accident_cents": {
+                  "status": "requested",
+                  "value": 30000000
+                },
+                "property_damage_cents": {
+                  "status": "requested",
+                  "value": 10000000
+                },
+                "collision_deductible_cents": {
+                  "status": "requested",
+                  "value": 50000
+                },
+                "comprehensive_deductible_cents": {
+                  "status": "requested",
+                  "value": 50000
+                },
+                "um_per_person_cents": {
+                  "status": "requested",
+                  "value": 10000000
+                },
+                "um_per_accident_cents": {
+                  "status": "requested",
+                  "value": 30000000
+                },
+                "medical_payments_cents": {
+                  "status": "requested",
+                  "value": 500000
+                },
+                "rental_daily_cents": {
+                  "status": "requested",
+                  "value": 5000
+                },
+                "rental_total_cents": {
+                  "status": "requested",
+                  "value": 150000
+                },
+                "rental_days": {
+                  "status": "requested",
+                  "value": 30
+                },
+                "roadside_limit_cents": {
+                  "status": "requested",
+                  "value": 10000
+                },
+                "gap": {
+                  "status": "requested",
+                  "value": false
+                },
+                "pip": {
+                  "status": "not_applicable",
+                  "value": null
+                }
+              }
+            },
+            "current_policy": {
+              "ends_on": "2026-12-01",
+              "continuous_months": 36,
+              "lapse_days": 0,
+              "lender_requirements": []
+            },
+            "drivers": [
+              {
+                "person_id": "person-maya",
+                "name": "Maya Chen",
+                "years_licensed": 14,
+                "accidents": 0,
+                "violations": 0,
+                "excluded": false
+              }
+            ],
+            "garaging": {
+              "city": "Los Angeles",
+              "state": "CA-DEMO",
+              "zip": "90026"
+            },
+            "ownership": "owned",
+            "vehicle": {
+              "year": 2021,
+              "make": "Honda",
+              "model": "Civic",
+              "vin": "SYNTHETIC00000001"
+            },
+            "vehicle_use": "commute"
+          },
+          "at": "2026-11-24T09:00:00-08:00"
+        },
+        "status": "committed",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 2,
+          "revision": 3
+        }
+      }
+    },
+    {
+      "sequence": 19,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 2,
+          "revision": 3
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "095594ac8dbd3672b493daeb16770b950a9e6e81ab69cc7b059837aad1e993c8",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 3,
+          "disclosures": 3,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 7
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "withdrawn"
+          },
+          {
+            "id": "application-116",
+            "revision": 1,
+            "status": "pending"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 20,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 2,
+          "revision": 3
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "84981d35ac20d496d62d0160c6b7300cba6b20029129b9d6e57826b7347fa774",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 3,
+          "disclosures": 3,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 7
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "withdrawn"
+          },
+          {
+            "id": "application-116",
+            "revision": 1,
+            "status": "pending"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 21,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 2,
+          "revision": 3
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "095594ac8dbd3672b493daeb16770b950a9e6e81ab69cc7b059837aad1e993c8",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 3,
+          "disclosures": 3,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 7
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "withdrawn"
+          },
+          {
+            "id": "application-116",
+            "revision": 1,
+            "status": "pending"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 22,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 2,
+          "revision": 3
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "095594ac8dbd3672b493daeb16770b950a9e6e81ab69cc7b059837aad1e993c8",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 3,
+          "disclosures": 3,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 7
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "withdrawn"
+          },
+          {
+            "id": "application-116",
+            "revision": 1,
+            "status": "pending"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 23,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 2,
+          "revision": 3
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "84981d35ac20d496d62d0160c6b7300cba6b20029129b9d6e57826b7347fa774",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 3,
+          "disclosures": 3,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 7
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "withdrawn"
+          },
+          {
+            "id": "application-116",
+            "revision": 1,
+            "status": "pending"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 24,
+      "actor": "coverline-infra",
+      "tool": "env.reset",
+      "arguments": {
+        "expected_version": {
+          "epoch": 2,
+          "revision": 3
+        }
+      },
+      "result": {
+        "status": "ready",
+        "reset_scope": "coverline",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 3,
+          "revision": 0
+        }
+      }
+    },
+    {
+      "sequence": 25,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 0
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "abaf31a2edb146da3adee91d7c99652f6ed4db6036c77a4797fd4253b8bc7f2d",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 2,
+          "disclosures": 2,
+          "requests": 1,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 5
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26,
+      "actor": "coverline-infra",
+      "tool": "env.apply_event",
+      "arguments": {
+        "expected_version": {
+          "epoch": 3,
+          "revision": 0
+        },
+        "event": {
+          "event_id": "second-question",
+          "at": "2026-11-24T09:00:00-08:00",
+          "operation": "auto.information_requested",
+          "payload": {
+            "provider_id": "insurer-a",
+            "application_id": "application-101",
+            "application_revision": 1,
+            "request_id": "second-question",
+            "fields": [
+              "garaging"
+            ],
+            "question": "Confirm the sourced garaging address.",
+            "reply_by": "2026-11-25T17:00:00-08:00",
+            "source_ref": "provider-second-question"
+          }
+        }
+      },
+      "result": {
+        "status": "committed",
+        "event_id": "second-question",
+        "trace": {
+          "run_id": "boundaries",
+          "app_id": "coverline",
+          "event_id": "second-question",
+          "cloud_event": null,
+          "received_at": "2026-11-25T04:41:33.274Z",
+          "virtual_received_at": "2026-11-24T09:00:00-08:00",
+          "applied_at": "2026-11-24T09:00:00-08:00",
+          "processed_at": "2026-11-25T04:41:33.278Z"
+        },
+        "app_id": "coverline",
+        "version": {
+          "epoch": 3,
+          "revision": 1
+        }
+      }
+    },
+    {
+      "sequence": 27,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 1
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "0aafc81f259c0521d67653f133b6fa01968ae73e3630e562e3eb7e901e5f6034",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 2,
+          "disclosures": 2,
+          "requests": 2,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 6
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 28,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 1
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "0aafc81f259c0521d67653f133b6fa01968ae73e3630e562e3eb7e901e5f6034",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 2,
+          "applications": 2,
+          "disclosures": 2,
+          "requests": 2,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 6
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "open",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 29,
+      "actor": "browser-agent",
+      "tool": "coverline.disclosures.preview",
+      "arguments": {
+        "provider_id": "insurer-a",
+        "grant_id": "grant-a",
+        "application_id": "application-101",
+        "information_request_id": "question-mileage",
+        "expected_version": {
+          "epoch": 3,
+          "revision": 1
+        },
+        "request_id": "web-3d837bee-f903-4602-ac95-50b45978b932"
+      },
+      "result": {
+        "preview": {
+          "id": "preview-116",
+          "kind": "reply",
+          "provider_id": "insurer-a",
+          "profile_revision": 1,
+          "coverage_revision": 1,
+          "rule_revision": 1,
+          "grant_id": "grant-a",
+          "application_id": "application-101",
+          "application_revision": 1,
+          "request_id": "question-mileage",
+          "payload": {
+            "annual_mileage": 12000
+          },
+          "expires_at": "2026-11-24T17:05:00.000Z"
+        },
+        "status": "committed",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 3,
+          "revision": 2
+        }
+      }
+    },
+    {
+      "sequence": 30,
+      "actor": "browser-agent",
+      "tool": "coverline.requests.reply",
+      "arguments": {
+        "id": "question-mileage",
+        "preview_id": "preview-116",
+        "expected_version": {
+          "epoch": 3,
+          "revision": 2
+        },
+        "request_id": "web-7fda3c9c-1f11-43fd-a5e2-e15d4142df7a"
+      },
+      "result": {
+        "request": {
+          "id": "question-mileage",
+          "provider_id": "insurer-a",
+          "application_id": "application-101",
+          "application_revision": 1,
+          "fields": [
+            "annual_mileage"
+          ],
+          "question": "Please confirm the annual mileage from the supplied owner intake.",
+          "reply_by": "2026-11-25T17:00:00-08:00",
+          "status": "answered",
+          "disclosure_id": "disclosure-117",
+          "source_ref": "harbor-question-1"
+        },
+        "disclosure": {
+          "id": "disclosure-117",
+          "application_id": "application-101",
+          "application_revision": 1,
+          "provider_id": "insurer-a",
+          "profile_revision": 1,
+          "coverage_revision": 1,
+          "grant_id": "grant-a",
+          "purpose": "quote",
+          "kind": "reply",
+          "request_id": "question-mileage",
+          "payload": {
+            "annual_mileage": 12000
+          },
+          "at": "2026-11-24T09:00:00-08:00"
+        },
+        "status": "committed",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 3,
+          "revision": 3
+        }
+      }
+    },
+    {
+      "sequence": 31,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 3
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "9a6308ee9a58a14c6915cbc2fef66ee2837b382e124e6314bc51d6365b42e3dc",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 3,
+          "applications": 2,
+          "disclosures": 3,
+          "requests": 2,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 6
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 32,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 3
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "3b4adb0af9da435c4480cf6460e1c247d5b50576da62c9f45980559321ca7437",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 3,
+          "applications": 2,
+          "disclosures": 3,
+          "requests": 2,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 6
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 33,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 3
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "3b4adb0af9da435c4480cf6460e1c247d5b50576da62c9f45980559321ca7437",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 3,
+          "applications": 2,
+          "disclosures": 3,
+          "requests": 2,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 6
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 34,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 3
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "3b4adb0af9da435c4480cf6460e1c247d5b50576da62c9f45980559321ca7437",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 3,
+          "applications": 2,
+          "disclosures": 3,
+          "requests": 2,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 6
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 35,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 3
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "9a6308ee9a58a14c6915cbc2fef66ee2837b382e124e6314bc51d6365b42e3dc",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 3,
+          "applications": 2,
+          "disclosures": 3,
+          "requests": 2,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 6
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 36,
+      "actor": "browser-agent",
+      "tool": "coverline.disclosures.preview",
+      "arguments": {
+        "provider_id": "insurer-a",
+        "grant_id": "grant-a",
+        "application_id": "application-101",
+        "information_request_id": "second-question",
+        "expected_version": {
+          "epoch": 3,
+          "revision": 3
+        },
+        "request_id": "web-42af5964-69fd-4f70-8cd2-27a5919de9aa"
+      },
+      "result": {
+        "preview": {
+          "id": "preview-118",
+          "kind": "reply",
+          "provider_id": "insurer-a",
+          "profile_revision": 1,
+          "coverage_revision": 1,
+          "rule_revision": 1,
+          "grant_id": "grant-a",
+          "application_id": "application-101",
+          "application_revision": 1,
+          "request_id": "second-question",
+          "payload": {
+            "garaging": {
+              "city": "Los Angeles",
+              "state": "CA-DEMO",
+              "zip": "90026"
+            }
+          },
+          "expires_at": "2026-11-24T17:05:00.000Z"
+        },
+        "status": "committed",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 3,
+          "revision": 4
+        }
+      }
+    },
+    {
+      "sequence": 37,
+      "actor": "browser-agent",
+      "tool": "coverline.requests.reply",
+      "arguments": {
+        "id": "second-question",
+        "preview_id": "preview-118",
+        "expected_version": {
+          "epoch": 3,
+          "revision": 4
+        },
+        "request_id": "web-9713f707-3c19-4bbe-bad8-678a2a5c2941"
+      },
+      "result": {
+        "request": {
+          "id": "second-question",
+          "provider_id": "insurer-a",
+          "application_id": "application-101",
+          "application_revision": 1,
+          "fields": [
+            "garaging"
+          ],
+          "question": "Confirm the sourced garaging address.",
+          "reply_by": "2026-11-25T17:00:00-08:00",
+          "status": "answered",
+          "disclosure_id": "disclosure-119",
+          "source_ref": "provider-second-question"
+        },
+        "disclosure": {
+          "id": "disclosure-119",
+          "application_id": "application-101",
+          "application_revision": 1,
+          "provider_id": "insurer-a",
+          "profile_revision": 1,
+          "coverage_revision": 1,
+          "grant_id": "grant-a",
+          "purpose": "quote",
+          "kind": "reply",
+          "request_id": "second-question",
+          "payload": {
+            "garaging": {
+              "city": "Los Angeles",
+              "state": "CA-DEMO",
+              "zip": "90026"
+            }
+          },
+          "at": "2026-11-24T09:00:00-08:00"
+        },
+        "status": "committed",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 3,
+          "revision": 5
+        }
+      }
+    },
+    {
+      "sequence": 38,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 5
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "1ac5cea61f8c0e3c85bdb3bbd1b43b7253077efaec3943d603e2f35d66e0f5b2",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 4,
+          "applications": 2,
+          "disclosures": 4,
+          "requests": 2,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 6
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "pending"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "answered",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 39,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 5
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "eb23ab074b5788f1be5a0eb69fdfb4f0a8a212b7dcae71523705ab1b40d3cf42",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 4,
+          "applications": 2,
+          "disclosures": 4,
+          "requests": 2,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 6
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "pending"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "answered",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 40,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 5
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "eb23ab074b5788f1be5a0eb69fdfb4f0a8a212b7dcae71523705ab1b40d3cf42",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 4,
+          "applications": 2,
+          "disclosures": 4,
+          "requests": 2,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 6
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "pending"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "answered",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 41,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 5
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "eb23ab074b5788f1be5a0eb69fdfb4f0a8a212b7dcae71523705ab1b40d3cf42",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 4,
+          "applications": 2,
+          "disclosures": 4,
+          "requests": 2,
+          "quotes": 2,
+          "documents": 4,
+          "comparisons": 0,
+          "notices": 6
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "pending"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "answered",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 42,
+      "actor": "coverline-infra",
+      "tool": "env.apply_event",
+      "arguments": {
+        "expected_version": {
+          "epoch": 3,
+          "revision": 5
+        },
+        "event": {
+          "event_id": "offer-application-101-r1-v2",
+          "at": "2026-11-24T09:00:00-08:00",
+          "operation": "auto.quote_delivered",
+          "payload": {
+            "provider_id": "insurer-a",
+            "application_id": "application-101",
+            "application_revision": 1,
+            "profile_revision": 1,
+            "coverage_revision": 1,
+            "quote_id": "quote-application-101-r1",
+            "quote_revision": 2,
+            "issued_at": "2026-11-24T09:00:00-08:00",
+            "expires_at": "2026-12-01T17:00:00.000Z",
+            "terms": {
+              "starts_on": "2026-12-01",
+              "term_months": 6,
+              "terms": {
+                "bi_per_person_cents": {
+                  "status": "offered",
+                  "value": 10000000
+                },
+                "bi_per_accident_cents": {
+                  "status": "offered",
+                  "value": 30000000
+                },
+                "property_damage_cents": {
+                  "status": "offered",
+                  "value": 10000000
+                },
+                "collision_deductible_cents": {
+                  "status": "offered",
+                  "value": 50000
+                },
+                "comprehensive_deductible_cents": {
+                  "status": "offered",
+                  "value": 50000
+                },
+                "um_per_person_cents": {
+                  "status": "offered",
+                  "value": 10000000
+                },
+                "um_per_accident_cents": {
+                  "status": "offered",
+                  "value": 30000000
+                },
+                "medical_payments_cents": {
+                  "status": "offered",
+                  "value": 500000
+                },
+                "rental_daily_cents": {
+                  "status": "offered",
+                  "value": 5000
+                },
+                "rental_total_cents": {
+                  "status": "offered",
+                  "value": 150000
+                },
+                "rental_days": {
+                  "status": "offered",
+                  "value": 30
+                },
+                "roadside_limit_cents": {
+                  "status": "offered",
+                  "value": 10000
+                },
+                "gap": {
+                  "status": "offered",
+                  "value": false
+                },
+                "pip": {
+                  "status": "not_applicable",
+                  "value": null
+                }
+              },
+              "stage": "written",
+              "premium_cents": 60000,
+              "fees_cents": 3000,
+              "taxes_cents": 0,
+              "total_cents": 63000,
+              "installments_cents": [
+                10500,
+                10500,
+                10500,
+                10500,
+                10500,
+                10500
+              ],
+              "discounts": [
+                {
+                  "name": "Low annual mileage",
+                  "amount_cents": 5000,
+                  "status": "applied",
+                  "condition": "Annual mileage at most 12000; no driving-data enrollment.",
+                  "source_ref": "insurer-a-rules-r1"
+                }
+              ],
+              "conditions": [
+                "Personal/commute use only; business use excluded.",
+                "No policy is purchased or bound. Synthetic provider rules."
+              ]
+            },
+            "source_ref": "insurer-a-reply-application-101-r1-v2",
+            "file": {
+              "filename": "quote-application-101-r1-v2.pdf",
+              "mime_type": "application/pdf",
+              "base64_omitted": true,
+              "decoded_bytes": 2630,
+              "sha256": "0a791c869cdaaa3f5c59a3033dc1756849684aefa92880bcfb6dccdf65de17cc"
+            }
+          }
+        }
+      },
+      "result": {
+        "status": "committed",
+        "event_id": "offer-application-101-r1-v2",
+        "trace": {
+          "run_id": "boundaries",
+          "app_id": "coverline",
+          "event_id": "offer-application-101-r1-v2",
+          "cloud_event": null,
+          "received_at": "2026-11-25T04:41:33.844Z",
+          "virtual_received_at": "2026-11-24T09:00:00-08:00",
+          "applied_at": "2026-11-24T09:00:00-08:00",
+          "processed_at": "2026-11-25T04:41:33.849Z"
+        },
+        "app_id": "coverline",
+        "version": {
+          "epoch": 3,
+          "revision": 6
+        }
+      }
+    },
+    {
+      "sequence": 43,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 6
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "8952fa9bf4415967ee537bf0174c83c59e555e39be059c8d82b5c8e249a55e03",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 4,
+          "applications": 2,
+          "disclosures": 4,
+          "requests": 2,
+          "quotes": 3,
+          "documents": 6,
+          "comparisons": 0,
+          "notices": 7
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "quoted"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "answered",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-101-r1-v2",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          },
+          {
+            "id": "att-33373d50db5475daa5ecf33352a10a4093b26b61",
+            "bytes": 2630,
+            "sha256": "0a791c869cdaaa3f5c59a3033dc1756849684aefa92880bcfb6dccdf65de17cc"
+          },
+          {
+            "id": "att-b636bb9ba81617bdde4aca5a96a4aed2cebf9cd2",
+            "bytes": 2342,
+            "sha256": "29ba8f6ac91053670a8ee83e318ebd9f614ea2158ab42bb94340070bdcf94550"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 44,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 6
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "8952fa9bf4415967ee537bf0174c83c59e555e39be059c8d82b5c8e249a55e03",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 4,
+          "applications": 2,
+          "disclosures": 4,
+          "requests": 2,
+          "quotes": 3,
+          "documents": 6,
+          "comparisons": 0,
+          "notices": 7
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "quoted"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "answered",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-101-r1-v2",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          },
+          {
+            "id": "att-33373d50db5475daa5ecf33352a10a4093b26b61",
+            "bytes": 2630,
+            "sha256": "0a791c869cdaaa3f5c59a3033dc1756849684aefa92880bcfb6dccdf65de17cc"
+          },
+          {
+            "id": "att-b636bb9ba81617bdde4aca5a96a4aed2cebf9cd2",
+            "bytes": 2342,
+            "sha256": "29ba8f6ac91053670a8ee83e318ebd9f614ea2158ab42bb94340070bdcf94550"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 45,
+      "actor": "coverline-infra",
+      "tool": "env.apply_event",
+      "arguments": {
+        "expected_version": {
+          "epoch": 3,
+          "revision": 6
+        },
+        "event": {
+          "event_id": "withdraw-question",
+          "at": "2026-11-24T09:00:00-08:00",
+          "operation": "auto.information_requested",
+          "payload": {
+            "provider_id": "insurer-a",
+            "application_id": "application-101",
+            "application_revision": 1,
+            "request_id": "withdraw-question",
+            "fields": [
+              "garaging"
+            ],
+            "question": "Confirm before continuing.",
+            "reply_by": "2026-11-25T17:00:00-08:00",
+            "source_ref": "provider-withdraw-question"
+          }
+        }
+      },
+      "result": {
+        "status": "committed",
+        "event_id": "withdraw-question",
+        "trace": {
+          "run_id": "boundaries",
+          "app_id": "coverline",
+          "event_id": "withdraw-question",
+          "cloud_event": null,
+          "received_at": "2026-11-25T04:41:33.894Z",
+          "virtual_received_at": "2026-11-24T09:00:00-08:00",
+          "applied_at": "2026-11-24T09:00:00-08:00",
+          "processed_at": "2026-11-25T04:41:33.898Z"
+        },
+        "app_id": "coverline",
+        "version": {
+          "epoch": 3,
+          "revision": 7
+        }
+      }
+    },
+    {
+      "sequence": 46,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 7
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "5d548c8e74ef7a92a3a073236d1f76461ee3f170f22c29891d5149bbc072260d",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 4,
+          "applications": 2,
+          "disclosures": 4,
+          "requests": 3,
+          "quotes": 3,
+          "documents": 6,
+          "comparisons": 0,
+          "notices": 8
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "needs_info"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "withdraw-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-101-r1-v2",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 47,
+      "actor": "browser-agent",
+      "tool": "coverline.applications.withdraw",
+      "arguments": {
+        "id": "application-101",
+        "expected_version": {
+          "epoch": 3,
+          "revision": 7
+        },
+        "request_id": "web-d23ebf1a-9064-4314-87f5-4ab50b5aeb25"
+      },
+      "result": {
+        "application": {
+          "id": "application-101",
+          "provider_id": "insurer-a",
+          "revision": 1,
+          "status": "withdrawn",
+          "versions": [
+            {
+              "revision": 1,
+              "profile_revision": 1,
+              "coverage_revision": 1,
+              "rule_revision": 1,
+              "disclosure_id": "disclosure-102",
+              "queue_id": "queue-application-101-r1",
+              "submitted_at": "2026-11-24T09:00:00-08:00"
+            }
+          ],
+          "withdrawn_at": "2026-11-24T09:00:00-08:00"
+        },
+        "status": "committed",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 3,
+          "revision": 8
+        }
+      }
+    },
+    {
+      "sequence": 48,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 8
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "2795f272e55a27e3e458dded037837e752a75b1b1cbf7deed705df4387238f05",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 4,
+          "applications": 2,
+          "disclosures": 4,
+          "requests": 3,
+          "quotes": 3,
+          "documents": 6,
+          "comparisons": 0,
+          "notices": 9
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "withdrawn"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "withdraw-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-101-r1-v2",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 49,
+      "actor": "browser-agent",
+      "tool": "coverline.requests.list",
+      "arguments": {},
+      "result": {
+        "requests": [
+          {
+            "id": "question-mileage",
+            "provider_id": "insurer-a",
+            "application_id": "application-101",
+            "application_revision": 1,
+            "fields": [
+              "annual_mileage"
+            ],
+            "question": "Please confirm the annual mileage from the supplied owner intake.",
+            "reply_by": "2026-11-25T17:00:00-08:00",
+            "status": "answered",
+            "disclosure_id": "disclosure-117",
+            "source_ref": "harbor-question-1",
+            "display_status": "answered"
+          },
+          {
+            "id": "second-question",
+            "provider_id": "insurer-a",
+            "application_id": "application-101",
+            "application_revision": 1,
+            "fields": [
+              "garaging"
+            ],
+            "question": "Confirm the sourced garaging address.",
+            "reply_by": "2026-11-25T17:00:00-08:00",
+            "status": "answered",
+            "disclosure_id": "disclosure-119",
+            "source_ref": "provider-second-question",
+            "display_status": "answered"
+          },
+          {
+            "id": "withdraw-question",
+            "provider_id": "insurer-a",
+            "application_id": "application-101",
+            "application_revision": 1,
+            "fields": [
+              "garaging"
+            ],
+            "question": "Confirm before continuing.",
+            "reply_by": "2026-11-25T17:00:00-08:00",
+            "status": "open",
+            "disclosure_id": null,
+            "source_ref": "provider-withdraw-question",
+            "display_status": "withdrawn"
+          }
+        ],
+        "status": "ok",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 3,
+          "revision": 8
+        }
+      }
+    },
+    {
+      "sequence": 50,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 8
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "2795f272e55a27e3e458dded037837e752a75b1b1cbf7deed705df4387238f05",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 4,
+          "applications": 2,
+          "disclosures": 4,
+          "requests": 3,
+          "quotes": 3,
+          "documents": 6,
+          "comparisons": 0,
+          "notices": 9
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "withdrawn"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "withdraw-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-101-r1-v2",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 51,
+      "actor": "browser-agent",
+      "tool": "coverline.comparisons.create",
+      "arguments": {
+        "name": "<img src=x onerror=\"globalThis.injected=true\">",
+        "quote_ids": [
+          "quote-application-109-r1-v1"
+        ],
+        "notes": [],
+        "expected_version": {
+          "epoch": 3,
+          "revision": 8
+        },
+        "request_id": "web-881c891f-6ded-428d-a883-2c0b3d0b6c88"
+      },
+      "result": {
+        "comparison": {
+          "id": "comparison-125",
+          "name": "<img src=x onerror=\"globalThis.injected=true\">",
+          "versions": [
+            {
+              "revision": 1,
+              "at": "2026-11-24T09:00:00-08:00",
+              "quote_ids": [
+                "quote-application-109-r1-v1"
+              ],
+              "notes": [],
+              "statuses": [
+                {
+                  "quote_id": "quote-application-109-r1-v1",
+                  "status": "written"
+                }
+              ]
+            }
+          ]
+        },
+        "status": "committed",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 3,
+          "revision": 9
+        }
+      }
+    },
+    {
+      "sequence": 52,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 9
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "3a15f3ca96fcd4a92b12380f2a979e254f33b2097b5c5e6a1d653c21f602d07d",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 4,
+          "applications": 2,
+          "disclosures": 4,
+          "requests": 3,
+          "quotes": 3,
+          "documents": 6,
+          "comparisons": 1,
+          "notices": 9
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "withdrawn"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "withdraw-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-101-r1-v2",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 53,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 9
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "3a15f3ca96fcd4a92b12380f2a979e254f33b2097b5c5e6a1d653c21f602d07d",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 1,
+          "providers": 2,
+          "grants": 2,
+          "previews": 4,
+          "applications": 2,
+          "disclosures": 4,
+          "requests": 3,
+          "quotes": 3,
+          "documents": 6,
+          "comparisons": 1,
+          "notices": 9
+        },
+        "profile_revision": 1,
+        "coverage_revision": 1,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "withdrawn"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "withdraw-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-101-r1-v2",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 54,
+      "actor": "browser-agent",
+      "tool": "coverline.coverage.update",
+      "arguments": {
+        "starts_on": "2026-12-01",
+        "term_months": 6,
+        "terms": {
+          "bi_per_person_cents": {
+            "status": "requested",
+            "value": 10000000
+          },
+          "bi_per_accident_cents": {
+            "status": "requested",
+            "value": 30000000
+          },
+          "property_damage_cents": {
+            "status": "requested",
+            "value": 10000000
+          },
+          "collision_deductible_cents": {
+            "status": "requested",
+            "value": 100000
+          },
+          "comprehensive_deductible_cents": {
+            "status": "requested",
+            "value": 50000
+          },
+          "um_per_person_cents": {
+            "status": "requested",
+            "value": 10000000
+          },
+          "um_per_accident_cents": {
+            "status": "requested",
+            "value": 30000000
+          },
+          "medical_payments_cents": {
+            "status": "requested",
+            "value": 500000
+          },
+          "rental_daily_cents": {
+            "status": "requested",
+            "value": 5000
+          },
+          "rental_total_cents": {
+            "status": "requested",
+            "value": 150000
+          },
+          "rental_days": {
+            "status": "requested",
+            "value": 30
+          },
+          "roadside_limit_cents": {
+            "status": "requested",
+            "value": 10000
+          },
+          "gap": {
+            "status": "requested",
+            "value": false
+          },
+          "pip": {
+            "status": "not_applicable",
+            "value": null
+          }
+        },
+        "source_ref": "coverage-brief",
+        "expected_version": {
+          "epoch": 3,
+          "revision": 9
+        },
+        "request_id": "web-8dde769d-c0c1-44c8-9ed8-69885593fc4c"
+      },
+      "result": {
+        "coverage": {
+          "id": "coverage-126",
+          "revision": 2,
+          "at": "2026-11-24T09:00:00-08:00",
+          "source_ref": "coverage-brief",
+          "starts_on": "2026-12-01",
+          "term_months": 6,
+          "terms": {
+            "bi_per_person_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "bi_per_accident_cents": {
+              "status": "requested",
+              "value": 30000000
+            },
+            "property_damage_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "collision_deductible_cents": {
+              "status": "requested",
+              "value": 100000
+            },
+            "comprehensive_deductible_cents": {
+              "status": "requested",
+              "value": 50000
+            },
+            "um_per_person_cents": {
+              "status": "requested",
+              "value": 10000000
+            },
+            "um_per_accident_cents": {
+              "status": "requested",
+              "value": 30000000
+            },
+            "medical_payments_cents": {
+              "status": "requested",
+              "value": 500000
+            },
+            "rental_daily_cents": {
+              "status": "requested",
+              "value": 5000
+            },
+            "rental_total_cents": {
+              "status": "requested",
+              "value": 150000
+            },
+            "rental_days": {
+              "status": "requested",
+              "value": 30
+            },
+            "roadside_limit_cents": {
+              "status": "requested",
+              "value": 10000
+            },
+            "gap": {
+              "status": "requested",
+              "value": false
+            },
+            "pip": {
+              "status": "not_applicable",
+              "value": null
+            }
+          }
+        },
+        "status": "committed",
+        "app_id": "coverline",
+        "version": {
+          "epoch": 3,
+          "revision": 10
+        }
+      }
+    },
+    {
+      "sequence": 55,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 10
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "9f4ee0b479dc384ff150a07e7ff1811236f5e5cab6c641d0b2e4932f975af622",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 2,
+          "providers": 2,
+          "grants": 2,
+          "previews": 4,
+          "applications": 2,
+          "disclosures": 4,
+          "requests": 3,
+          "quotes": 3,
+          "documents": 6,
+          "comparisons": 1,
+          "notices": 9
+        },
+        "profile_revision": 1,
+        "coverage_revision": 2,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "withdrawn"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "withdraw-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-101-r1-v2",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 56,
+      "actor": "coverline-infra",
+      "tool": "env.snapshot",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 10
+        },
+        "virtual_now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "8e23dbf0a03a04b75da684e6131d6ea74d702e40a432f64d7b246502027f72b9",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 2,
+          "providers": 2,
+          "grants": 2,
+          "previews": 4,
+          "applications": 2,
+          "disclosures": 4,
+          "requests": 3,
+          "quotes": 3,
+          "documents": 6,
+          "comparisons": 1,
+          "notices": 9
+        },
+        "profile_revision": 1,
+        "coverage_revision": 2,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "withdrawn"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "withdraw-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-101-r1-v2",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ],
+        "assets": [
+          {
+            "id": "original-document-105",
+            "bytes": 2638,
+            "sha256": "a432400bac8af97da1e84c56bd656808e716f3f67273cf31ba5200fe805701c9"
+          },
+          {
+            "id": "original-document-106",
+            "bytes": 2350,
+            "sha256": "4798da557f5eeb676525833cde069180341882eb552ee79e7f1c25139cc7d8aa"
+          },
+          {
+            "id": "original-document-112",
+            "bytes": 2649,
+            "sha256": "d556d5963a023503b7f6759e31527f4af85b29039ed78ae922ecce1a227d851f"
+          },
+          {
+            "id": "original-document-113",
+            "bytes": 2352,
+            "sha256": "dd5ab47ed24605fd41018e67dc87226b25778baca316144c1a737f0b745cc269"
+          },
+          {
+            "id": "att-33373d50db5475daa5ecf33352a10a4093b26b61",
+            "bytes": 2630,
+            "sha256": "0a791c869cdaaa3f5c59a3033dc1756849684aefa92880bcfb6dccdf65de17cc"
+          },
+          {
+            "id": "att-b636bb9ba81617bdde4aca5a96a4aed2cebf9cd2",
+            "bytes": 2342,
+            "sha256": "29ba8f6ac91053670a8ee83e318ebd9f614ea2158ab42bb94340070bdcf94550"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 57,
+      "actor": "browser-agent",
+      "tool": "coverline.workspace.get",
+      "arguments": {},
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 3,
+          "revision": 10
+        },
+        "now": "2026-11-24T09:00:00-08:00",
+        "business_sha256": "9f4ee0b479dc384ff150a07e7ff1811236f5e5cab6c641d0b2e4932f975af622",
+        "counts": {
+          "sources": 3,
+          "profiles": 1,
+          "coverages": 2,
+          "providers": 2,
+          "grants": 2,
+          "previews": 4,
+          "applications": 2,
+          "disclosures": 4,
+          "requests": 3,
+          "quotes": 3,
+          "documents": 6,
+          "comparisons": 1,
+          "notices": 9
+        },
+        "profile_revision": 1,
+        "coverage_revision": 2,
+        "application_statuses": [
+          {
+            "id": "application-101",
+            "revision": 1,
+            "status": "withdrawn"
+          },
+          {
+            "id": "application-109",
+            "revision": 1,
+            "status": "quoted"
+          }
+        ],
+        "questions": [
+          {
+            "id": "question-mileage",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "second-question",
+            "status": "answered",
+            "application_revision": 1
+          },
+          {
+            "id": "withdraw-question",
+            "status": "open",
+            "application_revision": 1
+          }
+        ],
+        "quote_versions": [
+          {
+            "id": "quote-application-101-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-109-r1-v1",
+            "application_revision": 1,
+            "profile_revision": 1
+          },
+          {
+            "id": "quote-application-101-r1-v2",
+            "application_revision": 1,
+            "profile_revision": 1
+          }
+        ]
+      }
+    }
+  ]
+}
