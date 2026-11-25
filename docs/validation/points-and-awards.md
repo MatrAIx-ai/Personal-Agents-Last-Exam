@@ -9,11 +9,11 @@ Public runtime 1.6.0, Core API 1.2.0, Mail 1.3.0 (reference App, receiver of not
 | Command | Result |
 | --- | --- |
 | `node --test apps/waypoint/tests/business.test.cjs` | 18/18 tests pass |
-| `node --test apps/skyline/tests/business.test.cjs` | 31/31 tests pass |
+| `node --test apps/skyline/tests/business.test.cjs` | 32/32 tests pass |
 | `node --test apps/harbor/tests/business.test.cjs` | 27/27 tests pass |
 | `node apps/<id>/examples/run.cjs` for each | Runs: combine and transfers settled (Waypoint); credit, award ticketed with seats, schedule change (Skyline); credit, certificate and points stays (Harbor) |
 | `node runtime/cli.cjs verify --app apps/<id> --output .artifacts/<id>.json` | `passed: true`: Waypoint 40 checks, Skyline 39, Harbor 39 |
-| `npm run example:points-trip` | `passed: true`, 44 checks over real MCP, Messaging and Mail |
+| `npm run example:points-trip` | `passed: true`, 45 checks over real MCP, Messaging and Mail |
 | `node apps/<id>/build/schemas.cjs --check`, `node runtime/sdk/sync.cjs --check`, `node runtime/build-contracts.cjs --check` | No drift. The loyalty-credit payload and wire schemas are byte-identical in the three packages; Skyline's and Harbor's `email-message.schema.json` equal Mail's `router-message.schema.json`. |
 | `npm test` | 22/22 stages pass (no existing App or runtime file is changed) |
 | `npm run test:web` | 4/4 pass |
@@ -26,7 +26,7 @@ The Web Host pages were exercised by hand with `registry.points.json`: Waypoint 
 | --- | --- |
 | Three packages under `apps/` with tools, ledgers and state machines, receive and publish declarations, Infra event handlers and small GUIs | `apps/waypoint`, `apps/skyline`, `apps/harbor`: `tools.json` (8, 7 and 7 Agent tools), `src/`, `contribution/contribution.json`, `gui/`; verifier reports |
 | Waypoint: transfer increment and irreversibility, bonus windows at their boundaries, pooling only by the sender, delayed settlement | Waypoint tests: increment/minimum/balance, no cancel tool and a refund only through a recorded rejection, bonus start inclusive/end exclusive and per partner, ratio and bonus rounding, 24-hour release keeping the offset, combine with no source-member argument |
-| Skyline: inventory sold between search and book, insufficient points, fees charged to the chosen label, a schedule change with the free alternative before and after its deadline | Skyline tests: stale option after `inventory.sold` and after another booking, connection limits at 60/360 minutes, retime at 59/60 minutes, accept at the deadline refused, `alternative.expired` one minute early → `not_due`, cancel refunds with the fee kept or refunded |
+| Skyline: inventory sold between search and book, insufficient points, fees charged to the chosen label, a schedule change with the free alternative before and after its deadline | Skyline tests: stale option after `inventory.sold` and after another booking, connection limits at 60/360 minutes, retime at 59/60 minutes, accept at the deadline refused, `alternative.expired` one minute early → `not_due`, cancel refunds with the fee kept or refunded, saver seats pushed out by two protected bookings come back the same in either cancellation order |
 | Harbor: a certificate above its cap or after its expiry, category-change price lock, inactivity expiry with activity resetting it | Harbor tests: each certificate rule, the price lock at the exact `effective_at`, month-end clamping, the expiry boundary, transfer in and redemption reset the clock and a refund does not, the 60-day warning window |
 | Example seed: 2 household members; a 2-week partner schedule on 3 routes; 6 hotels across 4 categories; one certificate; one transfer-bonus window | `apps/*/fixtures/minimal.json`: Daniel and Mei Cho; 51 flights 2027-10-12 to 10-26 on ORD→HND, HND→SFO and SFO→ORD; 6 Harbor hotels in Categories 2, 3, 4 and 6; certificate `cert-c4-2027`; Skyline +30% from 2027-09-01 to 09-16. All history dated 2026 or later. Reset restores each exactly (verifier). |
 | `loyalty-credit` contract and the Waypoint → Skyline and Waypoint → Harbor flow; Mail notices | `channel.loyalty-credit`, `urn:pale:loyalty-credit-message:1` / `urn:pale:loyalty-credit:1`, receive operations `skyline.receive`, `harbor.receive`, `waypoint.receive`; Mail notices on `urn:pale:email-message:2` |

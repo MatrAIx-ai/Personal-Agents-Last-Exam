@@ -147,13 +147,25 @@ function acceptAlternative(ctx, data, b, args) {
 }
 
 // Frees this booking's seats on one segment and gives back the saver inventory it held there:
-// its own saver seats, and any saver seats its non-saver seats had pushed out.
+// its own saver seats, then saver seats that protected seats had pushed out of this flight and cabin.
+// A reduction is owed by the cabin, not by the booking that happened to trigger the clamp, so the
+// freed seats repay outstanding reductions up to the new free seats (saver never exceeds free):
+// this booking's records first, then other bookings' in booking order. A record paid in full is
+// removed. The result does not depend on which protected booking is released first.
 function releaseSegment(data, b, id) {
   const map = inv.flight(data, id).cabins[b.cabin];
   for (const s of b.seats.filter(s => s.flight_id === id)) inv.release(map, s.seat);
   if (b.saver_flight_ids.includes(id)) map.saver_seats += b.passenger_ids.length;
-  for (const r of b.saver_reductions.filter(r => r.flight_id === id)) map.saver_seats += r.seats;
   b.saver_flight_ids = b.saver_flight_ids.filter(x => x !== id);
+  for (const o of [b, ...data.bookings.filter(o => o !== b && o.cabin === b.cabin)]) {
+    const r = o.saver_reductions.find(r => r.flight_id === id);
+    const back = r ? Math.min(r.seats, inv.freeSeats(map).length - map.saver_seats) : 0;
+    if (back <= 0) continue;
+    map.saver_seats += back;
+    r.seats -= back;
+    if (!r.seats) o.saver_reductions = o.saver_reductions.filter(x => x !== r);
+  }
+  // Released seats always cover this booking's own reduction; drop any remainder so it never outlives the seats.
   b.saver_reductions = b.saver_reductions.filter(r => r.flight_id !== id);
 }
 

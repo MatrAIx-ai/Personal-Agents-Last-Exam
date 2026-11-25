@@ -1,6 +1,6 @@
 # Points trip: Waypoint → Skyline / Harbor → Mail
 
-From the repository root, run `npm run example:points-trip` (or `node examples/workflows/points-trip/run.cjs`). It uses temporary state and real public MCP processes for Waypoint, Skyline, Harbor and Mail plus Messaging, with no model API, installed packages or private host. It prints a report of 44 named checks and cleans up after itself. `registry.points.json` assembles the four Apps.
+From the repository root, run `npm run example:points-trip` (or `node examples/workflows/points-trip/run.cjs`). It uses temporary state and real public MCP processes for Waypoint, Skyline, Harbor and Mail plus Messaging, with no model API, installed packages or private host. It prints a report of 45 named checks and cleans up after itself. `registry.points.json` assembles the four Apps.
 
 The run follows the approved example in proposal [#193](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/193):
 

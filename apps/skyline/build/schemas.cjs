@@ -67,7 +67,7 @@ const BOOKING_FIELDS = {
   passenger_ids:{...list(ID, 9, {uniqueItems:true}), minItems:1}, segments:{...list(ID, 4, {uniqueItems:true}), minItems:1},
   saver_flight_ids:{...list(ID, 4, {uniqueItems:true}), description:'Segments on which this booking holds saver inventory.'},
   saver_reductions:{...list(object({flight_id:ID, seats:{type:'integer', minimum:1, maximum:9}}), 4),
-    description:'Saver seats that this booking\'s non-saver seats (a free schedule-change alternative) pushed out of a flight\'s saver inventory; given back when those seats are released.'},
+    description:'Saver seats that this booking\'s non-saver seats (a free schedule-change alternative) pushed out of a flight\'s saver inventory. Owed by the flight and cabin: any seat release there gives saver seats back up to the free seats, paying the releasing booking\'s records first, then other bookings\' in booking order.'},
   seats:list(SEAT_ASSIGNMENT, 36), points:POINTS, partner_fee_cents:CENTS, taxes_cents:CENTS, payment_label:LABEL,
   charge_ids:list(ID, 10, {uniqueItems:true}), change:CHANGE, created_at:DT, updated_at:DT, history:HISTORY
 };

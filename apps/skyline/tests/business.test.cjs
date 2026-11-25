@@ -352,6 +352,40 @@ test('saver seats an alternative pushes out come back when its seats are release
       alternatives:[ALT_SAME], deadline:DEADLINE}}) && f.call('skyline.manage', {booking_id:b.id, action:'accept_alternative', alternative_id:'alt-same-day'}));
 });
 
+test('saver seats pushed out by protected seats come back the same whichever booking is cancelled first', () => {
+  const NEXT_DAY = g => search(g, {date:'2027-10-22', pax:1});
+  const run = order => {
+    const f = fixture();
+    fund(f);
+    f.ctx.virtual_now = '2027-08-25T09:05:00-05:00';
+    const one = pax => { const [o] = search(f, {pax:1}); assert.deepEqual(o.segments.map(s => s.flight_id), ['PC12-2027-10-21', 'LK480-2027-10-21']);
+      return f.call('skyline.book', {option_id:o.option_id, passenger_ids:[pax], payment_label:'card-travel'}).id; };
+    const ids = {daniel:one('pax-daniel'), mei:one('pax-mei')};
+    f.event(delay());
+    // PC12 on 22 Oct starts with 2 free business seats and 1 saver seat.
+    const data = f.data, m = data.flights.find(x => x.id === 'PC12-2027-10-22').cabins.business;
+    m.taken = m.seats.filter(s => !['1A', '1D'].includes(s));
+    m.saver_seats = 1;
+    f.load(data);
+    for (const who of ['daniel', 'mei']) f.call('skyline.manage', {booking_id:ids[who], action:'accept_alternative', alternative_id:'alt-next-day'});
+    assert.deepEqual([cabin(f, 'PC12-2027-10-22').saver_seats, free(f, 'PC12-2027-10-22').length], [0, 0]);
+    assert.deepEqual([booking(f, ids.daniel).saver_reductions, booking(f, ids.mei).saver_reductions], [[], [{flight_id:'PC12-2027-10-22', seats:1}]]);
+    const results = order.map(who => {
+      f.call('skyline.manage', {booking_id:ids[who], action:'cancel'});
+      const view = NEXT_DAY(f).map(o => ({option_id:o.option_id, seats_left:o.seats_left,
+        segments:o.segments.map(s => [s.flight_id, s.saver_seats, s.free_seats.length])}));
+      return {saver:cabin(f, 'PC12-2027-10-22').saver_seats, free:free(f, 'PC12-2027-10-22').length, view,
+        reductions:Object.values(ids).flatMap(id => booking(f, id).saver_reductions)};
+    });
+    return {results, last:NEXT_DAY(f)};
+  };
+  const a = run(['daniel', 'mei']), b = run(['mei', 'daniel']);
+  assert.deepEqual(a.results.map(r => [r.saver, r.free, r.reductions]), [[1, 1, []], [1, 2, []]]);
+  assert.ok(a.results[0].view.some(o => o.segments[0][0] === 'PC12-2027-10-22')); // the award is offered after the first cancel
+  assert.deepEqual(a.results, b.results);
+  assert.deepEqual(a.last, b.last);
+});
+
 test('the free alternative cannot be taken at or after its deadline', () => {
   const f = fixture();
   const b = changed(f);
