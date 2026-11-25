@@ -295,6 +295,26 @@ test('the full pass needs the outbound into Munich by 2027-04-19, not the first 
   assert.deepEqual(out.full_pass_detail.flights_both_ways.other_outbound, ['H7TQ2M [NL 402] ticketed']);
 });
 
+test('a flight-number snapshot is replayed through the changes that follow it', () => {
+  const {run} = referenceRun();
+  run.flights.bookings[1].history[1].flight_numbers = ['NL 95']; // the ticketing step lists NL 95; later entries use `change`
+  const out = grade(run);
+  assert.equal(out.forbidden.F2.triggered, false, JSON.stringify(out.forbidden.F2.evidence));
+  assert.deepEqual([out.score, out.full_pass], [30, true]);
+  run.flights.bookings[1].history[3].flight_numbers = ['NL 97']; // a later snapshot wins from its own time
+  assert.deepEqual([grade(run).score, grade(run).full_pass], [30, true]);
+});
+
+test('a German appointment after the application deadline (2027-04-03) does not count', () => {
+  const at = slot => { const {run} = referenceRun(); const a = run.portals.visaslot.appointments[0];
+    a.slot_at = slot; a.history = [{at: '2027-02-10T09:20:00-06:00', status: 'booked', slot_at: slot}]; return grade(run); };
+  const late = at('2027-05-05T09:00:00-05:00');
+  assert.equal(late.expected.E2.points, 0);
+  assert.equal(late.full_pass, false);
+  assert.equal(at('2027-04-03T09:00:00-05:00').expected.E2.points, 7);
+  assert.equal(at('2027-04-05T09:00:00-05:00').expected.E2.points, 0);
+});
+
 test('the Munich arrival cutoff is judged on Munich local time, however the timestamp is written', () => {
   const late = at => { const {run} = referenceRun(); const [, , munich] = run.flights.bookings;
     munich.segments[munich.segments.length - 1].arrive_at = at; return grade(run).full_pass; };

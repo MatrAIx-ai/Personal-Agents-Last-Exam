@@ -25,6 +25,8 @@ const T = {
   CORRECTION_BY: '2027-03-12T23:59:00-06:00',
   I20_LAPSE: '2027-03-09T00:00:00-06:00',
   NO_CONSULATE_BEFORE: '2027-03-19T00:00:00-05:00',
+  // German guidance: apply no later than 15 calendar days before the trip (departure 2027-04-18), so by 2027-04-03.
+  APPLY_BY_END: '2027-04-04T00:00:00-05:00',
   E2_READ_AT: '2027-03-30T23:59:00-05:00',
   APPOINTMENT_AT: '2027-03-31T09:00:00-05:00',
   TALK_END: '2027-04-29T17:30:00+02:00',
@@ -112,18 +114,23 @@ function outboundJourney(b) {
   return s[j].destination === HOME ? null : s.slice(0, j + 1);
 }
 // Flight numbers a booking held at an instant. A history entry may list `flight_numbers` after its
-// step; otherwise the current segments are walked back through each later change ('NL 95 -> NL 95R'),
-// so a claim about a flight the booking held then, and later left, still finds the booking.
+// step: the latest such snapshot at or before the instant is replayed forward through the changes
+// ('NL 95 -> NL 97') that follow it up to the instant. Without one, the current segments are walked
+// back through each later change, so a claim about a flight the booking held then, and later left,
+// still finds the booking.
 function flightNumbersAt(b, at) {
   const nums = segsOf(b).map(s => s.flight_number);
   if (at == null) return nums;
   const hist = b.history || [];
-  if (hist.some(h => Array.isArray(h.flight_numbers))) {
-    const known = hist.filter(h => Array.isArray(h.flight_numbers) && ms(h.at) <= ms(at));
-    return known.length ? known[known.length - 1].flight_numbers : [];
-  }
   const list = x => x.split(',').map(t => t.trim()).filter(Boolean);
-  return [...hist].reverse().filter(h => ms(h.at) > ms(at) && /->/.test(h.change || '')).reduce((cur, h) => {
+  const isChange = h => /->/.test(h.change || '');
+  let snap = -1;
+  hist.forEach((h, i) => { if (Array.isArray(h.flight_numbers) && ms(h.at) <= ms(at)) snap = i; });
+  if (snap >= 0) return hist.slice(snap + 1).filter(h => ms(h.at) <= ms(at) && isChange(h)).reduce((cur, h) => {
+    const [from, to] = h.change.split('->').map(list);
+    return [...cur.filter(n => !from.includes(n)), ...to];
+  }, hist[snap].flight_numbers);
+  return [...hist].reverse().filter(h => ms(h.at) > ms(at) && isChange(h)).reduce((cur, h) => {
     const [from, to] = h.change.split('->').map(list);
     return [...cur.filter(n => !to.includes(n)), ...from];
   }, nums);
@@ -282,7 +289,7 @@ function e2(ctx) {
   const read = T.E2_READ_AT;
   const apps = (p.visaslot && p.visaslot.appointments) || [];
   const early = apps.filter(keptBeforeQual);
-  const german = apps.filter(a => countryOf(a) === 'DE' && statusAt(a, read) === 'booked' && ms(a.slot_at) >= ms(T.NO_CONSULATE_BEFORE));
+  const german = apps.filter(a => countryOf(a) === 'DE' && statusAt(a, read) === 'booked' && ms(a.slot_at) >= ms(T.NO_CONSULATE_BEFORE) && ms(a.slot_at) < ms(T.APPLY_BY_END));
   const appointmentOk = german.length > 0 && early.length === 0;
   const sigs = ((p.passage && p.passage.signatures) || []).filter(s => (!s.issued_at || ms(s.issued_at) <= ms(read)) && s.valid_until >= T.RETURN_DATE);
   const signatureOk = sigs.length > 0;
@@ -295,7 +302,7 @@ function e2(ctx) {
   const ok = appointmentOk && signatureOk && letterOk;
   return scoredE('E2', ok ? MAX.E2 : 0, {
     read_at: read,
-    appointment: {ok: appointmentOk, german_after_qual: german.map(a => a.id + ' ' + a.slot_at), kept_before_2027_03_19: early.map(a => a.id)},
+    appointment: {ok: appointmentOk, german_in_window: german.map(a => a.id + ' ' + a.slot_at), kept_before_2027_03_19: early.map(a => a.id)},
     travel_signature: {ok: signatureOk, valid_through_return: sigs.map(s => s.id + ' until ' + s.valid_until)},
     letter: {ok: letterOk, correct_letters_in_hand: good.map(l => l.id + ' ' + l.issued_at), first_letter_misspelled: misspelledFirst,
       confdesk_correction_requests_by_deadline: requests.map(r => r.id + ' ' + r.at)}
