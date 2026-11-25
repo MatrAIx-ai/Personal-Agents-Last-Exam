@@ -13,6 +13,20 @@ const state = {
   links: []
 };
 
+// Notification helper
+function showToast(message, type = 'info') {
+  let toast = document.getElementById('toast-notification');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast-notification';
+    toast.className = 'toast-banner';
+    document.body.appendChild(toast);
+  }
+  toast.innerText = message;
+  toast.className = `toast-banner active ${type}`;
+  setTimeout(() => { toast.classList.remove('active'); }, 3000);
+}
+
 // Fallback fetch helper
 async function fetchSnapshot() {
   if (window.recordsApp && typeof window.recordsApp.snapshot === 'function') {
@@ -151,6 +165,8 @@ window.inspectDocument = async function (documentId) {
     claims.forEach((c) => {
       const card = document.createElement('div');
       card.className = 'claim-card';
+      card.style.cursor = 'pointer';
+      card.setAttribute('onclick', `focusPassage(${c.start_offset})`);
       card.innerHTML = `
         <p class="claim-header">Offsets [${c.start_offset}, ${c.end_offset}] • ${c.verification_state}</p>
         <p><strong>Claim:</strong> ${escapeHtml(c.claim_text)}</p>
@@ -176,7 +192,7 @@ function renderHighlightedPassages(rawText, claims) {
       html += escapeHtml(rawText.slice(cursor, c.start_offset));
     }
     const cited = rawText.slice(c.start_offset, c.end_offset);
-    html += `<mark class="passage-highlight" title="${escapeHtml(c.claim_text)}">${escapeHtml(cited)}</mark>`;
+    html += `<mark class="passage-highlight" data-start="${c.start_offset}" title="${escapeHtml(c.claim_text)}">${escapeHtml(cited)}</mark>`;
     cursor = c.end_offset;
   }
 
@@ -186,6 +202,15 @@ function renderHighlightedPassages(rawText, claims) {
 
   return html;
 }
+
+window.focusPassage = function(claimId, startOffset) {
+  const mark = document.querySelector(`mark[data-start="${startOffset}"]`);
+  if (mark) {
+    mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    mark.classList.add('pulse');
+    setTimeout(() => mark.classList.remove('pulse'), 1500);
+  }
+};
 
 // Proposals Review Panel
 async function loadProposals() {
@@ -235,12 +260,12 @@ window.confirmProposal = async function (proposalId, decision) {
     });
 
     if (res && res.status) {
-      alert(`Proposal ${proposalId} resolved with status: ${res.status}`);
+      showToast(`Proposal ${proposalId} resolved with status: ${res.status}`);
       loadProposals();
       loadLibrary();
     }
   } catch (err) {
-    alert(`Confirmation failed: ${err.message || 'Permission Denied'}`);
+    showToast(`Confirmation failed: ${err.message || 'Permission Denied'}`);
   }
 };
 
@@ -262,9 +287,9 @@ async function loadGraph() {
     card.className = 'link-card';
     card.innerHTML = `
       <div class="link-edge">
-        <span>${l.source_id}</span>
+        <button class="btn-link" onclick="inspectDocument('${l.source_id}')">${l.source_id}</button>
         <span class="link-type">${escapeHtml(l.relationship_type)}</span>
-        <span>&rarr; ${l.target_id}</span>
+        <button class="btn-link" onclick="inspectDocument('${l.target_id}')">${l.target_id}</button>
       </div>
       <p style="font-size: 0.8rem; color: var(--text-muted);">Link ID: ${l.link_id}</p>
     `;
