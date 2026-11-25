@@ -8,7 +8,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**196 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
+**196 open non-draft proposals · 0 awaiting initial review · 10 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
@@ -146,10 +146,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🧪 Task Track
 
-**99 proposals.**
+**100 proposals.**
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-25 20:41:44 | [#256](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/256) · Save an undelivered gift without spoiling the surprise<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/256/files) | Shopping &amp; groceries<br>Also: Social &amp; communities | Meera asked not to hear about December packages she didn't order. When a gift to her fails delivery, the agent must save it by rescheduling for when she's home, without saying what it is or who sent it. | Draft | Awaiting review |  | [dhvani1403](https://github.com/dhvani1403) |  |
 | 2026-11-25 08:34:40 | [#252](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/252) · Follow up on a repair hold without interrupting class<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/252/files) | Home &amp; utilities | Lina has delegated one noon follow-up if her repair is still unconfirmed. A binding reply ends that authority, even if a newer automated reminder says pending. She need not be interrupted to decide again. | Design review | Review requested<br>@Yeechin-is-here |  | [YurunChen](https://github.com/YurunChen) |  |
 | 2026-11-25 08:08:10 | [#251](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/251) · Rotate family call times based on who actually accommodated<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/251/files) | Social &amp; communities | Emma’s family takes turns based on who actually accommodated. A booked slot, a failed connection or a private check-in does not spend a turn, so the calendar alone can give the wrong next time. | Changes requested | Changes requested (1) |  | [YurunChen](https://github.com/YurunChen) |  |
 | 2026-11-25 06:55:24 | [#249](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/249) · Apply Lin's crunch-season health rule before booking more evening work<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/249/files) | Fitness &amp; wellbeing<br>Also: Work &amp; business | Lin's own crunch-season rule, written after a 2025 flu, turns watch data into booking limits. The agent must apply it only when its numbers are met, and keep required meetings, personal requests and privacy intact. | Draft | Awaiting review |  | [AmyTao](https://github.com/AmyTao) |  |
