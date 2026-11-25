@@ -1,0 +1,6336 @@
+[
+  {
+    "name": "tidepool.catalog.search",
+    "description": "Search the music and podcast catalog by words in titles, artist, album, show and publisher names (case- and accent-insensitive; each query word must match the start of a word). Optional item_type narrows to track, album, artist, show or episode. Removed items are left out. For a member with the explicit filter on, explicit items are marked filtered and a filtered track's clean version (same title and artist) is included. Returns up to limit (default 20) results; total counts every match.",
+    "read_only": true,
+    "scope": "tidepool.catalog.search",
+    "resource_target": "bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "item_type": {
+          "enum": [
+            "track",
+            "album",
+            "artist",
+            "show",
+            "episode"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "item_type": {
+                    "const": "track"
+                  },
+                  "track_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "artist_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "artist_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "album_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "album_title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "duration_s": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "explicit": {
+                    "type": "boolean"
+                  },
+                  "clean_version_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "filtered": {
+                    "type": "boolean"
+                  },
+                  "availability": {
+                    "enum": [
+                      "available",
+                      "removed"
+                    ]
+                  },
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "item_type",
+                  "track_id",
+                  "title",
+                  "artist_id",
+                  "artist_name",
+                  "album_id",
+                  "album_title",
+                  "duration_s",
+                  "explicit",
+                  "clean_version_id",
+                  "filtered",
+                  "availability",
+                  "bytes"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "item_type": {
+                    "const": "album"
+                  },
+                  "album_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "artist_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "artist_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "released": {
+                    "type": "string"
+                  },
+                  "track_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "duration_s": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "explicit_tracks": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "availability": {
+                    "enum": [
+                      "available",
+                      "removed"
+                    ]
+                  }
+                },
+                "required": [
+                  "item_type",
+                  "album_id",
+                  "title",
+                  "artist_id",
+                  "artist_name",
+                  "released",
+                  "track_count",
+                  "duration_s",
+                  "bytes",
+                  "explicit_tracks",
+                  "availability"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "item_type": {
+                    "const": "artist"
+                  },
+                  "artist_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "album_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "item_type",
+                  "artist_id",
+                  "name",
+                  "album_count"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "item_type": {
+                    "const": "show"
+                  },
+                  "show_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "publisher": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "explicit": {
+                    "type": "boolean"
+                  },
+                  "availability": {
+                    "enum": [
+                      "available",
+                      "removed"
+                    ]
+                  },
+                  "episode_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "latest_episode_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "following": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "item_type",
+                  "show_id",
+                  "title",
+                  "publisher",
+                  "explicit",
+                  "availability",
+                  "episode_count",
+                  "latest_episode_id",
+                  "following"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "item_type": {
+                    "const": "episode"
+                  },
+                  "episode_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "show_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "show_title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "number": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "published_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "duration_s": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "explicit": {
+                    "type": "boolean"
+                  },
+                  "filtered": {
+                    "type": "boolean"
+                  },
+                  "availability": {
+                    "enum": [
+                      "available",
+                      "removed"
+                    ]
+                  },
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "progress": {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "enum": [
+                          "unplayed",
+                          "in_progress",
+                          "played"
+                        ]
+                      },
+                      "position_s": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 86400
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "position_s"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "item_type",
+                  "episode_id",
+                  "show_id",
+                  "show_title",
+                  "number",
+                  "title",
+                  "published_at",
+                  "duration_s",
+                  "explicit",
+                  "filtered",
+                  "availability",
+                  "bytes",
+                  "progress"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "total",
+        "results"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.catalog.get_item",
+    "description": "Read one catalog item by ID: a track, album (with its tracks), artist (with albums), show or episode (chapters, notes, end-of-content marker, and the signed-in member's progress). Removed items stay readable with availability \"removed\". Unknown IDs return not_found.",
+    "read_only": true,
+    "scope": "tidepool.catalog.get_item",
+    "resource_target": "bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "item_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "item": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "item_type": {
+                  "const": "track"
+                },
+                "track_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "artist_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "artist_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "album_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "album_title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "duration_s": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "explicit": {
+                  "type": "boolean"
+                },
+                "clean_version_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "filtered": {
+                  "type": "boolean"
+                },
+                "availability": {
+                  "enum": [
+                    "available",
+                    "removed"
+                  ]
+                },
+                "bytes": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "plays": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "item_type",
+                "track_id",
+                "title",
+                "artist_id",
+                "artist_name",
+                "album_id",
+                "album_title",
+                "duration_s",
+                "explicit",
+                "clean_version_id",
+                "filtered",
+                "availability",
+                "bytes",
+                "plays"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "item_type": {
+                  "const": "album"
+                },
+                "album_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "artist_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "artist_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "released": {
+                  "type": "string"
+                },
+                "track_count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "duration_s": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "bytes": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "explicit_tracks": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "availability": {
+                  "enum": [
+                    "available",
+                    "removed"
+                  ]
+                },
+                "tracks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "item_type": {
+                        "const": "track"
+                      },
+                      "track_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "artist_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "artist_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "album_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "album_title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "duration_s": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "explicit": {
+                        "type": "boolean"
+                      },
+                      "clean_version_id": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "filtered": {
+                        "type": "boolean"
+                      },
+                      "availability": {
+                        "enum": [
+                          "available",
+                          "removed"
+                        ]
+                      },
+                      "bytes": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "item_type",
+                      "track_id",
+                      "title",
+                      "artist_id",
+                      "artist_name",
+                      "album_id",
+                      "album_title",
+                      "duration_s",
+                      "explicit",
+                      "clean_version_id",
+                      "filtered",
+                      "availability",
+                      "bytes"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 100
+                },
+                "saved": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "item_type",
+                "album_id",
+                "title",
+                "artist_id",
+                "artist_name",
+                "released",
+                "track_count",
+                "duration_s",
+                "bytes",
+                "explicit_tracks",
+                "availability",
+                "tracks",
+                "saved"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "item_type": {
+                  "const": "artist"
+                },
+                "artist_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "album_count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "bio": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                "albums": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "item_type": {
+                        "const": "album"
+                      },
+                      "album_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "artist_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "artist_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "released": {
+                        "type": "string"
+                      },
+                      "track_count": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "duration_s": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "bytes": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "explicit_tracks": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "availability": {
+                        "enum": [
+                          "available",
+                          "removed"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "item_type",
+                      "album_id",
+                      "title",
+                      "artist_id",
+                      "artist_name",
+                      "released",
+                      "track_count",
+                      "duration_s",
+                      "bytes",
+                      "explicit_tracks",
+                      "availability"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 100
+                }
+              },
+              "required": [
+                "item_type",
+                "artist_id",
+                "name",
+                "album_count",
+                "bio",
+                "albums"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "item_type": {
+                  "const": "show"
+                },
+                "show_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "publisher": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "explicit": {
+                  "type": "boolean"
+                },
+                "availability": {
+                  "enum": [
+                    "available",
+                    "removed"
+                  ]
+                },
+                "episode_count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "latest_episode_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "following": {
+                  "type": "boolean"
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                }
+              },
+              "required": [
+                "item_type",
+                "show_id",
+                "title",
+                "publisher",
+                "explicit",
+                "availability",
+                "episode_count",
+                "latest_episode_id",
+                "following",
+                "description"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "item_type": {
+                  "const": "episode"
+                },
+                "episode_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "show_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "show_title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "number": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "published_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "duration_s": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "explicit": {
+                  "type": "boolean"
+                },
+                "filtered": {
+                  "type": "boolean"
+                },
+                "availability": {
+                  "enum": [
+                    "available",
+                    "removed"
+                  ]
+                },
+                "bytes": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "progress": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "enum": [
+                        "unplayed",
+                        "in_progress",
+                        "played"
+                      ]
+                    },
+                    "position_s": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 86400
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "position_s"
+                  ],
+                  "additionalProperties": false
+                },
+                "end_of_content_s": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "chapters": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "start_s": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 86400
+                      }
+                    },
+                    "required": [
+                      "title",
+                      "start_s"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 40
+                },
+                "notes": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "played_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "item_type",
+                "episode_id",
+                "show_id",
+                "show_title",
+                "number",
+                "title",
+                "published_at",
+                "duration_s",
+                "explicit",
+                "filtered",
+                "availability",
+                "bytes",
+                "progress",
+                "end_of_content_s",
+                "chapters",
+                "notes",
+                "played_at"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "item"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.shows.get_episodes",
+    "description": "List a show's episodes, newest first (default limit 30), with the signed-in member's progress on each.",
+    "read_only": true,
+    "scope": "tidepool.shows.get_episodes",
+    "resource_target": "bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "show_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "required": [
+        "show_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "show": {
+          "type": "object",
+          "properties": {
+            "item_type": {
+              "const": "show"
+            },
+            "show_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "publisher": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "explicit": {
+              "type": "boolean"
+            },
+            "availability": {
+              "enum": [
+                "available",
+                "removed"
+              ]
+            },
+            "episode_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "latest_episode_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "following": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "item_type",
+            "show_id",
+            "title",
+            "publisher",
+            "explicit",
+            "availability",
+            "episode_count",
+            "latest_episode_id",
+            "following"
+          ],
+          "additionalProperties": false
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "episodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item_type": {
+                "const": "episode"
+              },
+              "episode_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "show_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "show_title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "number": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "published_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "duration_s": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "explicit": {
+                "type": "boolean"
+              },
+              "filtered": {
+                "type": "boolean"
+              },
+              "availability": {
+                "enum": [
+                  "available",
+                  "removed"
+                ]
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "progress": {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "unplayed",
+                      "in_progress",
+                      "played"
+                    ]
+                  },
+                  "position_s": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 86400
+                  }
+                },
+                "required": [
+                  "state",
+                  "position_s"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "item_type",
+              "episode_id",
+              "show_id",
+              "show_title",
+              "number",
+              "title",
+              "published_at",
+              "duration_s",
+              "explicit",
+              "filtered",
+              "availability",
+              "bytes",
+              "progress"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "show",
+        "total",
+        "episodes"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.family.get",
+    "description": "Read the family account: members (download counts are shown for your own row, and for every member when you are the plan manager, with what removing each member would end), open invitations, member slots, the plan in effect now, any scheduled plan change, and billing derived from the current virtual time (current period, the current and next invoice, and payment-due state with its 7-day grace period).",
+    "read_only": true,
+    "scope": "tidepool.family.get",
+    "resource_target": "bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "family": {
+          "type": "object",
+          "properties": {
+            "family_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          "required": [
+            "family_id",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "you": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "manager_member_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "plan": {
+          "type": "object",
+          "properties": {
+            "plan_id": {
+              "enum": [
+                "individual",
+                "duo",
+                "family"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "max_members": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "monthly_price_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000000
+            },
+            "scheduled_change": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "plan_id": {
+                      "enum": [
+                        "individual",
+                        "duo",
+                        "family"
+                      ]
+                    },
+                    "effective_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "plan_id",
+                    "effective_at"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "plan_id",
+            "name",
+            "max_members",
+            "monthly_price_cents",
+            "scheduled_change"
+          ],
+          "additionalProperties": false
+        },
+        "billing": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "active",
+                "payment_due"
+              ]
+            },
+            "currency": {
+              "const": "USD"
+            },
+            "period_start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "period_end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "current_invoice": {
+              "type": "object",
+              "properties": {
+                "invoice_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "period_start": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "period_end": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "plan_id": {
+                  "enum": [
+                    "individual",
+                    "duo",
+                    "family"
+                  ]
+                },
+                "amount_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10000000
+                },
+                "lines": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "plan",
+                          "upgrade_proration"
+                        ]
+                      },
+                      "plan_id": {
+                        "enum": [
+                          "individual",
+                          "duo",
+                          "family"
+                        ]
+                      },
+                      "amount_cents": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 10000000
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "plan_id",
+                      "amount_cents"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 50
+                },
+                "status": {
+                  "enum": [
+                    "paid",
+                    "declined",
+                    "pending",
+                    "upcoming"
+                  ]
+                }
+              },
+              "required": [
+                "invoice_id",
+                "period_start",
+                "period_end",
+                "plan_id",
+                "amount_cents",
+                "lines",
+                "status"
+              ],
+              "additionalProperties": false
+            },
+            "next_invoice": {
+              "type": "object",
+              "properties": {
+                "invoice_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "period_start": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "period_end": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "plan_id": {
+                  "enum": [
+                    "individual",
+                    "duo",
+                    "family"
+                  ]
+                },
+                "amount_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10000000
+                },
+                "lines": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "plan",
+                          "upgrade_proration"
+                        ]
+                      },
+                      "plan_id": {
+                        "enum": [
+                          "individual",
+                          "duo",
+                          "family"
+                        ]
+                      },
+                      "amount_cents": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 10000000
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "plan_id",
+                      "amount_cents"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 50
+                },
+                "status": {
+                  "enum": [
+                    "paid",
+                    "declined",
+                    "pending",
+                    "upcoming"
+                  ]
+                }
+              },
+              "required": [
+                "invoice_id",
+                "period_start",
+                "period_end",
+                "plan_id",
+                "amount_cents",
+                "lines",
+                "status"
+              ],
+              "additionalProperties": false
+            },
+            "payment_due": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "invoice_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "amount_cents": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 10000000
+                    },
+                    "declined_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "grace_ends_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "grace_expired": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "invoice_id",
+                    "amount_cents",
+                    "declined_at",
+                    "grace_ends_at",
+                    "grace_expired"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "status",
+            "currency",
+            "period_start",
+            "period_end",
+            "current_invoice",
+            "next_invoice",
+            "payment_due"
+          ],
+          "additionalProperties": false
+        },
+        "slots": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "active_members": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "open_invitations": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "available": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit_after_scheduled_change": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "limit",
+            "active_members",
+            "open_invitations",
+            "available",
+            "limit_after_scheduled_change"
+          ],
+          "additionalProperties": false
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "member_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "person_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "role": {
+                "enum": [
+                  "manager",
+                  "member"
+                ]
+              },
+              "age_group": {
+                "enum": [
+                  "adult",
+                  "teen",
+                  "child"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "active",
+                  "removed"
+                ]
+              },
+              "explicit_filter": {
+                "type": "boolean"
+              },
+              "joined_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "is_you": {
+                "type": "boolean"
+              },
+              "downloads": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "queued": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "downloaded": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "needs_check": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "bytes": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1000000000000
+                      }
+                    },
+                    "required": [
+                      "queued",
+                      "downloaded",
+                      "needs_check",
+                      "bytes"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "if_removed": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "downloads_removed": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "bytes_freed": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1000000000000
+                      },
+                      "collaborations_ended": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "playlist_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "maxItems": 500
+                      },
+                      "owned_playlists_hidden": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "owned_playlist_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "maxItems": 500
+                      }
+                    },
+                    "required": [
+                      "downloads_removed",
+                      "bytes_freed",
+                      "collaborations_ended",
+                      "playlist_ids",
+                      "owned_playlists_hidden",
+                      "owned_playlist_ids"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "member_id",
+              "person_id",
+              "display_name",
+              "role",
+              "age_group",
+              "status",
+              "explicit_filter",
+              "joined_at",
+              "is_you",
+              "downloads",
+              "if_removed"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        },
+        "invitations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "invitation_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "person_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "accepted",
+                  "declined"
+                ]
+              },
+              "invited_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "responded_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "explicit_filter": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "invitation_id",
+              "person_id",
+              "display_name",
+              "status",
+              "invited_at",
+              "responded_at",
+              "explicit_filter"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "family",
+        "you",
+        "manager_member_id",
+        "plan",
+        "billing",
+        "slots",
+        "members",
+        "invitations"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.members.list",
+    "description": "List family members (role, age group, status, explicit filter) and invitations. is_you marks the signed-in member, whose member_id is the id for member-scoped tools.",
+    "read_only": true,
+    "scope": "tidepool.members.list",
+    "resource_target": "bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "member_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "person_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "role": {
+                "enum": [
+                  "manager",
+                  "member"
+                ]
+              },
+              "age_group": {
+                "enum": [
+                  "adult",
+                  "teen",
+                  "child"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "active",
+                  "removed"
+                ]
+              },
+              "explicit_filter": {
+                "type": "boolean"
+              },
+              "joined_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "is_you": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "member_id",
+              "person_id",
+              "display_name",
+              "role",
+              "age_group",
+              "status",
+              "explicit_filter",
+              "joined_at",
+              "is_you"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        },
+        "invitations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "invitation_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "person_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "accepted",
+                  "declined"
+                ]
+              },
+              "invited_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "responded_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "explicit_filter": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "invitation_id",
+              "person_id",
+              "display_name",
+              "status",
+              "invited_at",
+              "responded_at",
+              "explicit_filter"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "members",
+        "invitations"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.devices.list",
+    "description": "List the devices signed in to a member's account, with Tidepool storage cap, used and free bytes, auto-download, and the 30-day offline check (last check-in and when downloads turn to needs_check). id must be the signed-in member; another member returns forbidden.",
+    "read_only": true,
+    "scope": "tidepool.devices.list",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "devices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "device_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "kind": {
+                "enum": [
+                  "phone",
+                  "earbuds",
+                  "smart_speaker",
+                  "car",
+                  "tablet",
+                  "computer"
+                ]
+              },
+              "storage_cap_bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "used_bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "free_bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "offline_capable": {
+                "type": "boolean"
+              },
+              "auto_download": {
+                "type": "boolean"
+              },
+              "last_checkin_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "offline_check_due_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "offline_check_overdue": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "device_id",
+              "name",
+              "kind",
+              "storage_cap_bytes",
+              "used_bytes",
+              "free_bytes",
+              "offline_capable",
+              "auto_download",
+              "last_checkin_at",
+              "offline_check_due_at",
+              "offline_check_overdue"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "devices"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.history.list",
+    "description": "List a member's listening sessions, newest first (default limit 50): device, item, start reason, speed, start and end positions, and any unverified speaker_hint. Sessions on a shared device appear under the account signed in on that device. id must be the signed-in member; another member returns forbidden.",
+    "read_only": true,
+    "scope": "tidepool.history.list",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "device_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "item_type": {
+          "enum": [
+            "track",
+            "episode"
+          ]
+        },
+        "since": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "session_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "device_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "device_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "item_type": {
+                "enum": [
+                  "track",
+                  "episode"
+                ]
+              },
+              "item_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "context_title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "started_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "ended_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "start_reason": {
+                "enum": [
+                  "user",
+                  "autoplay",
+                  "queue",
+                  "voice"
+                ]
+              },
+              "speed": {
+                "type": "number",
+                "minimum": 0.5,
+                "maximum": 3
+              },
+              "start_position_s": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 86400
+              },
+              "end_position_s": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 86400
+              },
+              "end_reason": {
+                "enum": [
+                  "completed",
+                  "paused",
+                  "stopped",
+                  "skipped",
+                  "interrupted"
+                ]
+              },
+              "speaker_hint": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "session_id",
+              "device_id",
+              "device_name",
+              "item_type",
+              "item_id",
+              "title",
+              "context_title",
+              "started_at",
+              "ended_at",
+              "start_reason",
+              "speed",
+              "start_position_s",
+              "end_position_s",
+              "end_reason",
+              "speaker_hint"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "total",
+        "sessions"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.progress.get",
+    "description": "Read a member's episode progress (unplayed, in_progress with position, or played). Give episode_ids for specific episodes, show_id for one show, or neither for every episode with recorded progress (most recently updated first). Agent changes show set_by \"agent\" and the value they replaced. id must be the signed-in member; another member returns forbidden.",
+    "read_only": true,
+    "scope": "tidepool.progress.get",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "episode_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "show_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "progress": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "episode_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "show_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "duration_s": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "state": {
+                "enum": [
+                  "unplayed",
+                  "in_progress",
+                  "played"
+                ]
+              },
+              "position_s": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 86400
+              },
+              "played_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "updated_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "set_by": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "session",
+                      "agent"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "replaced": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "enum": [
+                          "unplayed",
+                          "in_progress",
+                          "played"
+                        ]
+                      },
+                      "position_s": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 86400
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "position_s"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "episode_id",
+              "show_id",
+              "title",
+              "duration_s",
+              "state",
+              "position_s",
+              "played_at",
+              "updated_at",
+              "set_by",
+              "replaced"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 5000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "progress"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.follows.list",
+    "description": "List the shows a member follows with per-show auto-download (newest n episodes) and auto-delete (days after played) settings. id must be the signed-in member; another member returns forbidden.",
+    "read_only": true,
+    "scope": "tidepool.follows.list",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "follows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "show_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "followed_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "auto_download_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "auto_delete_days": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 90
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "latest_episode_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unplayed_count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "show_id",
+              "title",
+              "followed_at",
+              "auto_download_count",
+              "auto_delete_days",
+              "latest_episode_id",
+              "unplayed_count"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 1000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "follows"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.upnext.get",
+    "description": "Read a member's Up Next queue in order, with its list_version, each episode's progress and remaining time, download status per device, and the total remaining time at 1x speed. Remaining time is from the saved position for an in-progress episode, and the full duration for any other entry (a played episode plays again from the start). id must be the signed-in member; another member returns forbidden.",
+    "read_only": true,
+    "scope": "tidepool.upnext.get",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "list_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "updated_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "total_remaining_s": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "position": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "episode_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "show_title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "duration_s": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "state": {
+                "enum": [
+                  "unplayed",
+                  "in_progress",
+                  "played"
+                ]
+              },
+              "position_s": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 86400
+              },
+              "remaining_s": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "availability": {
+                "enum": [
+                  "available",
+                  "removed"
+                ]
+              },
+              "downloads": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "device_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "download_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "status": {
+                      "enum": [
+                        "queued",
+                        "downloaded",
+                        "needs_check",
+                        "removed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "device_id",
+                    "download_id",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 50
+              }
+            },
+            "required": [
+              "position",
+              "episode_id",
+              "show_title",
+              "title",
+              "duration_s",
+              "state",
+              "position_s",
+              "remaining_s",
+              "availability",
+              "downloads"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "list_version",
+        "updated_at",
+        "total_remaining_s",
+        "entries"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.downloads.list",
+    "description": "List a member's downloads with status derived from the current virtual time: queued until its completion time, then downloaded; needs_check once the device is more than 30 days past its last check-in or a declined payment is past its grace period; removed when cancelled, removed, or auto-deleted. Removed downloads are left out unless include_removed is true. Also returns storage per device. id must be the signed-in member; another member returns forbidden.",
+    "read_only": true,
+    "scope": "tidepool.downloads.list",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "device_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "status": {
+          "enum": [
+            "queued",
+            "downloaded",
+            "needs_check",
+            "removed"
+          ]
+        },
+        "include_removed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "downloads": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "download_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "device_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "item_type": {
+                "enum": [
+                  "track",
+                  "album",
+                  "episode"
+                ]
+              },
+              "item_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "context_title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "source": {
+                "enum": [
+                  "manual",
+                  "auto"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "queued",
+                  "downloaded",
+                  "needs_check",
+                  "removed"
+                ]
+              },
+              "status_reasons": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "offline_check_overdue",
+                    "payment_grace_expired",
+                    "removed_by_agent",
+                    "cancelled",
+                    "auto_delete",
+                    "auto_download_limit",
+                    "item_removed",
+                    "member_removed"
+                  ]
+                },
+                "maxItems": 4
+              },
+              "requested_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "completes_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "auto_delete_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "removed_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "played": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "download_id",
+              "device_id",
+              "item_type",
+              "item_id",
+              "title",
+              "context_title",
+              "bytes",
+              "source",
+              "status",
+              "status_reasons",
+              "requested_at",
+              "completes_at",
+              "auto_delete_at",
+              "removed_at",
+              "played"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 5000
+        },
+        "devices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "device_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "storage_cap_bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "used_bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "free_bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000000000
+              }
+            },
+            "required": [
+              "device_id",
+              "storage_cap_bytes",
+              "used_bytes",
+              "free_bytes"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "downloads",
+        "devices"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.library.list",
+    "description": "List a member's saved tracks and albums, most recently saved first. id must be the signed-in member; another member returns forbidden.",
+    "read_only": true,
+    "scope": "tidepool.library.list",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "item_type": {
+          "enum": [
+            "track",
+            "album"
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item_type": {
+                "enum": [
+                  "track",
+                  "album"
+                ]
+              },
+              "item_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "artist_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "saved_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "availability": {
+                "enum": [
+                  "available",
+                  "removed"
+                ]
+              },
+              "explicit": {
+                "type": "boolean"
+              },
+              "filtered": {
+                "type": "boolean"
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "item_type",
+              "item_id",
+              "title",
+              "artist_name",
+              "saved_at",
+              "availability",
+              "explicit",
+              "filtered",
+              "bytes"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 5000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.playlists.list",
+    "description": "List the playlists a member can see: their own, and other active members' shared or collaborative playlists. your_role says whether the member owns, collaborates on or only views each one. id must be the signed-in member; another member returns forbidden.",
+    "read_only": true,
+    "scope": "tidepool.playlists.list",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "playlists": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "playlist_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "description": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 300
+              },
+              "owner_member_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "owner_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "visibility": {
+                "enum": [
+                  "private",
+                  "shared",
+                  "collaborative"
+                ]
+              },
+              "your_role": {
+                "enum": [
+                  "owner",
+                  "collaborator",
+                  "viewer"
+                ]
+              },
+              "collaborators": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "maxItems": 6
+              },
+              "track_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "track_version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "playlist_id",
+              "name",
+              "description",
+              "owner_member_id",
+              "owner_name",
+              "visibility",
+              "your_role",
+              "collaborators",
+              "track_count",
+              "track_version",
+              "updated_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "playlists"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.playlists.get",
+    "description": "Read one playlist the member can see, with every track entry, who added it and when. A track that is explicit while the member's explicit filter is on stays in the playlist and is marked skipped_for_you. id must be the signed-in member; another member returns forbidden.",
+    "read_only": true,
+    "scope": "tidepool.playlists.get",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "playlist_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "playlist_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "playlist": {
+          "type": "object",
+          "properties": {
+            "playlist_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "description": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 300
+            },
+            "owner_member_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "owner_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "visibility": {
+              "enum": [
+                "private",
+                "shared",
+                "collaborative"
+              ]
+            },
+            "your_role": {
+              "enum": [
+                "owner",
+                "collaborator",
+                "viewer"
+              ]
+            },
+            "collaborators": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 6
+            },
+            "track_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "track_version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "tracks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "position": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "track_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "artist_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "duration_s": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "explicit": {
+                    "type": "boolean"
+                  },
+                  "clean_version_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "availability": {
+                    "enum": [
+                      "available",
+                      "removed"
+                    ]
+                  },
+                  "added_by": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "added_by_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "added_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "skipped_for_you": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "position",
+                  "track_id",
+                  "title",
+                  "artist_name",
+                  "duration_s",
+                  "explicit",
+                  "clean_version_id",
+                  "availability",
+                  "added_by",
+                  "added_by_name",
+                  "added_at",
+                  "skipped_for_you"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 500
+            }
+          },
+          "required": [
+            "playlist_id",
+            "name",
+            "description",
+            "owner_member_id",
+            "owner_name",
+            "visibility",
+            "your_role",
+            "collaborators",
+            "track_count",
+            "track_version",
+            "updated_at",
+            "created_at",
+            "tracks"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "playlist"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.notifications.list",
+    "description": "List a member's in-app notices, newest first (default limit 50): new episodes of followed shows, edits by others to their collaborative playlists, and declined payments (manager). id must be the signed-in member; another member returns forbidden.",
+    "read_only": true,
+    "scope": "tidepool.notifications.list",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "notifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "notice_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "episode_published",
+                  "playlist_edited",
+                  "payment_declined"
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "object_type": {
+                "enum": [
+                  "episode",
+                  "playlist",
+                  "invoice"
+                ]
+              },
+              "object_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "event_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "required": [
+              "notice_id",
+              "kind",
+              "created_at",
+              "text",
+              "object_type",
+              "object_id",
+              "event_id"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "notifications"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.plan.preview_change",
+    "description": "Quote a plan change without applying it, computed by the same rules plan.confirm_change applies at the current virtual time: whether it is an upgrade (applies at once; the prorated price difference for the rest of the current period is added to the next invoice), a downgrade (scheduled for the end of the current period, refused if active members plus open invitations exceed the new limit) or none (the plan in effect, which revokes any scheduled change), whether it is allowed (blocked_by explains why not), and the resulting next invoice.",
+    "read_only": true,
+    "scope": "tidepool.plan.preview_change",
+    "resource_target": "bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "plan_id": {
+          "enum": [
+            "individual",
+            "duo",
+            "family"
+          ]
+        }
+      },
+      "required": [
+        "plan_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "quote": {
+          "type": "object",
+          "properties": {
+            "from_plan_id": {
+              "enum": [
+                "individual",
+                "duo",
+                "family"
+              ]
+            },
+            "to_plan_id": {
+              "enum": [
+                "individual",
+                "duo",
+                "family"
+              ]
+            },
+            "change": {
+              "enum": [
+                "upgrade",
+                "downgrade",
+                "none"
+              ]
+            },
+            "allowed": {
+              "type": "boolean"
+            },
+            "blocked_by": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "too_many_members",
+                    "payment_due",
+                    "same_plan",
+                    "already_scheduled"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "effective_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "proration_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000000
+            },
+            "members_counted": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "new_limit": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "replaces_scheduled_change": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "plan_id": {
+                      "enum": [
+                        "individual",
+                        "duo",
+                        "family"
+                      ]
+                    },
+                    "effective_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "plan_id",
+                    "effective_at"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "next_invoice": {
+              "type": "object",
+              "properties": {
+                "invoice_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "period_start": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "period_end": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "plan_id": {
+                  "enum": [
+                    "individual",
+                    "duo",
+                    "family"
+                  ]
+                },
+                "amount_cents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10000000
+                },
+                "lines": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "plan",
+                          "upgrade_proration"
+                        ]
+                      },
+                      "plan_id": {
+                        "enum": [
+                          "individual",
+                          "duo",
+                          "family"
+                        ]
+                      },
+                      "amount_cents": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 10000000
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "plan_id",
+                      "amount_cents"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 50
+                },
+                "status": {
+                  "enum": [
+                    "paid",
+                    "declined",
+                    "pending",
+                    "upcoming"
+                  ]
+                }
+              },
+              "required": [
+                "invoice_id",
+                "period_start",
+                "period_end",
+                "plan_id",
+                "amount_cents",
+                "lines",
+                "status"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "from_plan_id",
+            "to_plan_id",
+            "change",
+            "allowed",
+            "blocked_by",
+            "effective_at",
+            "proration_cents",
+            "members_counted",
+            "new_limit",
+            "replaces_scheduled_change",
+            "next_invoice"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "quote"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.progress.set",
+    "description": "Set a member's progress on one episode: state unplayed, in_progress (position_s required, 1 to the episode duration) or played. Records set_by \"agent\" with the value it replaced and adds no listening session. A position beyond the duration returns invalid_position. id must be the signed-in member; another member returns forbidden.",
+    "read_only": false,
+    "scope": "tidepool.progress.set",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "episode_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "enum": [
+            "unplayed",
+            "in_progress",
+            "played"
+          ]
+        },
+        "position_s": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 86400
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "episode_id",
+        "state",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "member_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "episode_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "enum": [
+            "unplayed",
+            "in_progress",
+            "played"
+          ]
+        },
+        "position_s": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 86400
+        },
+        "set_by": {
+          "const": "agent"
+        },
+        "replaced": {
+          "type": "object",
+          "properties": {
+            "state": {
+              "enum": [
+                "unplayed",
+                "in_progress",
+                "played"
+              ]
+            },
+            "position_s": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 86400
+            }
+          },
+          "required": [
+            "state",
+            "position_s"
+          ],
+          "additionalProperties": false
+        },
+        "auto_delete_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "member_id",
+        "episode_id",
+        "state",
+        "position_s",
+        "set_by",
+        "replaced",
+        "auto_delete_at"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.follows.add",
+    "description": "Follow a show for a member, optionally with auto-download of the newest n episodes (0 = off, default 0) and auto-delete of played episodes after d days (default off). Auto-delete also applies to downloads of episodes already played, counted from when each was played or downloaded, whichever is later. Following a show already followed changes nothing; settings that differ from the existing follow return invalid_arguments (use follows.update_settings). id must be the signed-in member; another member returns forbidden.",
+    "read_only": false,
+    "scope": "tidepool.follows.add",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "show_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "auto_download_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "auto_delete_days": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 90
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "show_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "member_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "show_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "following": {
+          "const": true
+        },
+        "changed": {
+          "type": "boolean"
+        },
+        "downloads_scheduled_for_auto_delete": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "member_id",
+        "show_id",
+        "following",
+        "changed",
+        "downloads_scheduled_for_auto_delete"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.follows.remove",
+    "description": "Unfollow a show for a member. The show's downloads are kept (and no longer auto-deleted) unless removed with downloads.remove. id must be the signed-in member; another member returns forbidden.",
+    "read_only": false,
+    "scope": "tidepool.follows.remove",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "show_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "show_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "member_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "show_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "following": {
+          "const": false
+        },
+        "downloads_kept": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "member_id",
+        "show_id",
+        "following",
+        "downloads_kept"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.follows.update_settings",
+    "description": "Change a followed show's settings. patch may set auto_download_count (0-10) and auto_delete_days (1-90, or null for off). A new auto-delete window applies to already-played downloads of the show, counted from when each was played or downloaded, whichever is later; a window that has already passed removes them now. id must be the signed-in member; another member returns forbidden.",
+    "read_only": false,
+    "scope": "tidepool.follows.update_settings",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "show_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "auto_download_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "auto_delete_days": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 90
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "show_id",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "member_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "show_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "auto_download_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "auto_delete_days": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 90
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "replaced": {
+          "type": "object",
+          "properties": {
+            "auto_download_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "auto_delete_days": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 90
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "auto_download_count",
+            "auto_delete_days"
+          ],
+          "additionalProperties": false
+        },
+        "downloads_scheduled_for_auto_delete": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "member_id",
+        "show_id",
+        "auto_download_count",
+        "auto_delete_days",
+        "replaced",
+        "downloads_scheduled_for_auto_delete"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.upnext.set",
+    "description": "Replace a member's whole Up Next queue with episode_ids in order (an empty list clears it). expected_list_version must equal the list_version from upnext.get; otherwise the App returns list_version_mismatch (separate from Core's expected_version check). Returns the new list_version. Removed episodes return unavailable. id must be the signed-in member; another member returns forbidden.",
+    "read_only": false,
+    "scope": "tidepool.upnext.set",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "episode_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 100,
+          "uniqueItems": true
+        },
+        "expected_list_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "episode_ids",
+        "expected_list_version",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "member_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "list_version": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "episode_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 100
+        },
+        "replaced": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "member_id",
+        "list_version",
+        "episode_ids",
+        "replaced"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.downloads.add",
+    "description": "Download a track, album or episode to one of the member's devices. The item's bytes are reserved at once and the download completes one simulated minute later (status queued until completes_at). Exceeding the device's free Tidepool storage returns storage_full and changes nothing; a removed item returns unavailable; a device without offline storage returns unavailable; a payment past its grace period returns payment_due. An item already on the device returns the existing download with changed false. id must be the signed-in member; another member returns forbidden.",
+    "read_only": false,
+    "scope": "tidepool.downloads.add",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "device_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "item_type": {
+          "enum": [
+            "track",
+            "album",
+            "episode"
+          ]
+        },
+        "item_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "device_id",
+        "item_type",
+        "item_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "member_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "download_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "device_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "item_type": {
+          "enum": [
+            "track",
+            "album",
+            "episode"
+          ]
+        },
+        "item_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "download_status": {
+          "enum": [
+            "queued",
+            "downloaded",
+            "needs_check",
+            "removed"
+          ]
+        },
+        "completes_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "free_bytes_after": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000000
+        },
+        "changed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "member_id",
+        "download_id",
+        "device_id",
+        "item_type",
+        "item_id",
+        "bytes",
+        "download_status",
+        "completes_at",
+        "free_bytes_after",
+        "changed"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.downloads.remove",
+    "description": "Remove one of the member's downloads, or cancel it if still queued, releasing its reserved bytes. Returns the bytes freed. id must be the signed-in member; another member returns forbidden.",
+    "read_only": false,
+    "scope": "tidepool.downloads.remove",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "download_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "download_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "member_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "download_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "previous_status": {
+          "enum": [
+            "queued",
+            "downloaded",
+            "needs_check",
+            "removed"
+          ]
+        },
+        "bytes_freed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000000
+        },
+        "free_bytes_after": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "member_id",
+        "download_id",
+        "previous_status",
+        "bytes_freed",
+        "free_bytes_after"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.library.save",
+    "description": "Save a track or album to a member's library. Saving an item already saved changes nothing; a removed item returns unavailable. id must be the signed-in member; another member returns forbidden.",
+    "read_only": false,
+    "scope": "tidepool.library.save",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "item_type": {
+          "enum": [
+            "track",
+            "album"
+          ]
+        },
+        "item_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "item_type",
+        "item_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "member_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "item_type": {
+          "enum": [
+            "track",
+            "album"
+          ]
+        },
+        "item_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "saved": {
+          "const": true
+        },
+        "changed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "member_id",
+        "item_type",
+        "item_id",
+        "saved",
+        "changed"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.library.unsave",
+    "description": "Remove a saved track or album from a member's library. Fails with not_found if it is not saved. id must be the signed-in member; another member returns forbidden.",
+    "read_only": false,
+    "scope": "tidepool.library.unsave",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "item_type": {
+          "enum": [
+            "track",
+            "album"
+          ]
+        },
+        "item_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "item_type",
+        "item_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "member_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "item_type": {
+          "enum": [
+            "track",
+            "album"
+          ]
+        },
+        "item_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "saved": {
+          "const": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "member_id",
+        "item_type",
+        "item_id",
+        "saved"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.playlists.create",
+    "description": "Create a playlist owned by the member, with a name, visibility (private, shared or collaborative), optional collaborators (other active members; they can add, remove and reorder tracks while the playlist is collaborative) and optional starting tracks in order. Removed tracks return unavailable. id must be the signed-in member; another member returns forbidden.",
+    "read_only": false,
+    "scope": "tidepool.playlists.create",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "visibility": {
+          "enum": [
+            "private",
+            "shared",
+            "collaborative"
+          ]
+        },
+        "collaborators": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 6,
+          "uniqueItems": true
+        },
+        "track_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 500,
+          "uniqueItems": true
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "visibility",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "playlist_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "owner_member_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "visibility": {
+          "enum": [
+            "private",
+            "shared",
+            "collaborative"
+          ]
+        },
+        "collaborators": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 6
+        },
+        "track_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "track_version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "playlist_id",
+        "owner_member_id",
+        "name",
+        "visibility",
+        "collaborators",
+        "track_count",
+        "track_version"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.playlists.update_tracks",
+    "description": "Edit a playlist's tracks as the member (its owner, or a collaborator while it is collaborative). operations apply in order: add (track_id, optional 1-based position; past the end appends), remove (track_id) and move (track_id to position). Added tracks record the member as their author. Optional expected_track_version must equal the playlist's track_version (list_version_mismatch otherwise). A track already in the playlist returns invalid_arguments. Returns the new track_version. id must be the signed-in member; another member returns forbidden.",
+    "read_only": false,
+    "scope": "tidepool.playlists.update_tracks",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "playlist_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "op": {
+                "enum": [
+                  "add",
+                  "remove",
+                  "move"
+                ]
+              },
+              "track_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "position": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 500
+              }
+            },
+            "required": [
+              "op",
+              "track_id"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50,
+          "minItems": 1
+        },
+        "expected_track_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "playlist_id",
+        "operations",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "playlist_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "track_version": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "track_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "track_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "playlist_id",
+        "track_version",
+        "track_count",
+        "track_ids"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.playlists.update_settings",
+    "description": "Change a playlist's settings as its owner. patch may set name, description, visibility and collaborators (the full new list). A collaborator or viewer returns forbidden. Removing a collaborator keeps the tracks they added. id must be the signed-in member; another member returns forbidden.",
+    "read_only": false,
+    "scope": "tidepool.playlists.update_settings",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "playlist_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "description": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 300
+            },
+            "visibility": {
+              "enum": [
+                "private",
+                "shared",
+                "collaborative"
+              ]
+            },
+            "collaborators": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 6,
+              "uniqueItems": true
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "playlist_id",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "playlist_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "visibility": {
+          "enum": [
+            "private",
+            "shared",
+            "collaborative"
+          ]
+        },
+        "collaborators": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 6
+        },
+        "replaced": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "playlist_id",
+        "name",
+        "visibility",
+        "collaborators",
+        "replaced"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.members.invite",
+    "description": "Plan manager only: invite a person to the family. id is the invitee's person_id from the run binding. An open invitation holds a member slot (counted against the smaller plan while a downgrade is scheduled), so accepting it never exceeds the limit. Errors: already_member, already_invited, too_many_members, forbidden.",
+    "read_only": false,
+    "scope": "tidepool.members.invite",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "person_id of the person to invite"
+        },
+        "explicit_filter": {
+          "type": "boolean"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "invitation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "person_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "invitation_status": {
+          "const": "open"
+        },
+        "slots": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "active_members": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "open_invitations": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "available": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit_after_scheduled_change": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "limit",
+            "active_members",
+            "open_invitations",
+            "available",
+            "limit_after_scheduled_change"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "invitation_id",
+        "person_id",
+        "invitation_status",
+        "slots"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.members.remove",
+    "description": "Plan manager only: remove a member (id) from the family. Their downloads are removed, their edit access to other members' collaborative playlists ends (tracks they added stay), and their own shared and collaborative playlists leave the family view. Returns the same counts family.get showed under if_removed. The manager cannot remove themself (forbidden).",
+    "read_only": false,
+    "scope": "tidepool.members.remove",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "member_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "member_status": {
+          "const": "removed"
+        },
+        "downloads_removed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bytes_freed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000000
+        },
+        "collaborations_ended": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "playlist_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 500
+        },
+        "owned_playlists_hidden": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "owned_playlist_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "member_id",
+        "member_status",
+        "downloads_removed",
+        "bytes_freed",
+        "collaborations_ended",
+        "playlist_ids",
+        "owned_playlists_hidden",
+        "owned_playlist_ids"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.filters.update",
+    "description": "Plan manager only: change a member's explicit-content filter. id is the member whose filter changes; patch.explicit_filter is the new value. Returns the replaced value. Any other caller returns forbidden.",
+    "read_only": false,
+    "scope": "tidepool.filters.update",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the family member this call affects (see family.get or members.list; is_you marks the signed-in member)."
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "explicit_filter": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "explicit_filter"
+          ],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "member_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "explicit_filter": {
+          "type": "boolean"
+        },
+        "replaced": {
+          "type": "object",
+          "properties": {
+            "explicit_filter": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "explicit_filter"
+          ],
+          "additionalProperties": false
+        },
+        "changed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "member_id",
+        "explicit_filter",
+        "replaced",
+        "changed"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.plan.confirm_change",
+    "description": "Plan manager only (id is the manager's own member_id; any other member returns forbidden): change the family plan, using the same rules as plan.preview_change. An upgrade applies at once and adds its prorated difference to the next invoice (refused with payment_due while a payment is due); a downgrade is scheduled for the end of the current period and is refused with too_many_members if active members plus open invitations exceed the new limit. Choosing the plan already in effect keeps it: a scheduled change is revoked (revoked_change), and with none scheduled the call returns invalid_arguments, as does repeating a downgrade already scheduled.",
+    "read_only": false,
+    "scope": "tidepool.plan.confirm_change",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the plan manager making the change (the signed-in member)."
+        },
+        "plan_id": {
+          "enum": [
+            "individual",
+            "duo",
+            "family"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "plan_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "change": {
+          "enum": [
+            "upgrade",
+            "downgrade",
+            "none"
+          ]
+        },
+        "plan_id": {
+          "enum": [
+            "individual",
+            "duo",
+            "family"
+          ]
+        },
+        "effective_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "proration_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        },
+        "scheduled_change": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "plan_id": {
+                  "enum": [
+                    "individual",
+                    "duo",
+                    "family"
+                  ]
+                },
+                "effective_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "plan_id",
+                "effective_at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revoked_change": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "plan_id": {
+                  "enum": [
+                    "individual",
+                    "duo",
+                    "family"
+                  ]
+                },
+                "effective_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "plan_id",
+                "effective_at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "next_invoice": {
+          "type": "object",
+          "properties": {
+            "invoice_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "period_start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "period_end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "plan_id": {
+              "enum": [
+                "individual",
+                "duo",
+                "family"
+              ]
+            },
+            "amount_cents": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000000
+            },
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "plan",
+                      "upgrade_proration"
+                    ]
+                  },
+                  "plan_id": {
+                    "enum": [
+                      "individual",
+                      "duo",
+                      "family"
+                    ]
+                  },
+                  "amount_cents": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000
+                  }
+                },
+                "required": [
+                  "kind",
+                  "plan_id",
+                  "amount_cents"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 50
+            },
+            "status": {
+              "enum": [
+                "paid",
+                "declined",
+                "pending",
+                "upcoming"
+              ]
+            }
+          },
+          "required": [
+            "invoice_id",
+            "period_start",
+            "period_end",
+            "plan_id",
+            "amount_cents",
+            "lines",
+            "status"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "change",
+        "plan_id",
+        "effective_at",
+        "proration_cents",
+        "scheduled_change",
+        "revoked_change",
+        "next_invoice"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tidepool.plan.revoke_change",
+    "description": "Plan manager only (id is the manager's own member_id; any other member returns forbidden): cancel the scheduled plan change before it takes effect. Returns no_pending_change if none is scheduled.",
+    "read_only": false,
+    "scope": "tidepool.plan.revoke_change",
+    "resource_target": "member named by id in the bound family account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "member_id of the plan manager making the change (the signed-in member)."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tidepool"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "revoked": {
+          "type": "object",
+          "properties": {
+            "plan_id": {
+              "enum": [
+                "individual",
+                "duo",
+                "family"
+              ]
+            },
+            "effective_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "plan_id",
+            "effective_at"
+          ],
+          "additionalProperties": false
+        },
+        "plan_id": {
+          "enum": [
+            "individual",
+            "duo",
+            "family"
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "revoked",
+        "plan_id"
+      ],
+      "additionalProperties": false
+    }
+  }
+]
