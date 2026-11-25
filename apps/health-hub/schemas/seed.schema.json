@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["account_id", "owner_person_id", "daily_summaries", "workouts", "goals", "routine_templates"],
+  "properties": {
+    "account_id": { "type": "string" },
+    "owner_person_id": { "type": "string" },
+    "daily_summaries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["date", "status"],
+        "properties": {
+          "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+          "status": { "type": "string", "enum": ["valid", "no_data"] },
+          "reason": { "type": "string", "enum": ["device_not_worn", "sync_failed"] },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "sleep": {
+                "type": "object",
+                "properties": {
+                  "duration_minutes": { "type": "number" },
+                  "deep_sleep_minutes": { "type": "number" },
+                  "rem_sleep_minutes": { "type": "number" },
+                  "sleep_score": { "type": "number" }
+                }
+              },
+              "recovery": {
+                "type": "object",
+                "properties": {
+                  "resting_hr": { "type": "number" },
+                  "hrv_rmssd": { "type": "number" },
+                  "recovery_score": { "type": "number" }
+                }
+              },
+              "day_strain": { "type": "number" },
+              "body_weight_kg": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "workouts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["workout_id", "activity_type", "status"],
+        "properties": {
+          "workout_id": { "type": "string" },
+          "activity_type": { "type": "string" },
+          "status": { "type": "string", "enum": ["planned", "completed", "skipped", "cancelled"] },
+          "scheduled_at": { "type": "string" },
+          "duration_minutes": { "type": "number" },
+          "perceived_exertion": { "type": "number" },
+          "avg_hr": { "type": "number" }
+        }
+      }
+    },
+    "goals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["goal_id", "title", "metric_type", "target_value", "status"],
+        "properties": {
+          "goal_id": { "type": "string" },
+          "title": { "type": "string" },
+          "metric_type": { "type": "string" },
+          "target_value": { "type": "number" },
+          "status": { "type": "string", "enum": ["active", "achieved", "missed", "abandoned"] },
+          "due_date": { "type": "string" }
+        }
+      }
+    },
+    "routine_templates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["routine_id", "title", "status", "blocks"],
+        "properties": {
+          "routine_id": { "type": "string" },
+          "title": { "type": "string" },
+          "status": { "type": "string", "enum": ["draft", "active", "archived"] },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["block_id", "name", "start_offset_minutes", "duration_minutes"],
+              "properties": {
+                "block_id": { "type": "string" },
+                "name": { "type": "string" },
+                "start_offset_minutes": { "type": "number" },
+                "duration_minutes": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "notifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["notification_id", "created_at", "type", "message"],
+        "properties": {
+          "notification_id": { "type": "string" },
+          "created_at": { "type": "string" },
+          "type": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  }
+}

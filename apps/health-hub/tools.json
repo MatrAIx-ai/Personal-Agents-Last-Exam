@@ -1,0 +1,185 @@
+[
+  {
+    "name": "health-hub.get_daily_summary",
+    "description": "Retrieve wearable daily sleep, strain, and recovery metrics for a specific date (YYYY-MM-DD).",
+    "read_only": true,
+    "input_schema": {
+      "type": "object",
+      "required": ["date"],
+      "properties": {
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.list_metrics",
+    "description": "List time-series metrics (sleep, rhr, hrv, strain, body_weight) across a date window.",
+    "read_only": true,
+    "input_schema": {
+      "type": "object",
+      "required": ["metric_type", "start_date", "end_date"],
+      "properties": {
+        "metric_type": { "type": "string", "enum": ["sleep", "recovery", "strain", "body_weight"] },
+        "start_date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "end_date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.list_workouts",
+    "description": "List workouts within a date range with optional status filter.",
+    "read_only": true,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "start_date": { "type": "string" },
+        "end_date": { "type": "string" },
+        "status": { "type": "string", "enum": ["planned", "completed", "skipped", "cancelled"] }
+      }
+    }
+  },
+  {
+    "name": "health-hub.plan_workout",
+    "description": "Schedule a new workout in 'planned' status.",
+    "read_only": false,
+    "input_schema": {
+      "type": "object",
+      "required": ["activity_type", "scheduled_at", "duration_minutes", "expected_version", "request_id"],
+      "properties": {
+        "activity_type": { "type": "string" },
+        "scheduled_at": { "type": "string" },
+        "duration_minutes": { "type": "number", "minimum": 1 },
+        "expected_version": { "type": "object" },
+        "request_id": { "type": "string" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.log_workout",
+    "description": "Log an already completed workout directly.",
+    "read_only": false,
+    "input_schema": {
+      "type": "object",
+      "required": ["activity_type", "duration_minutes", "perceived_exertion", "expected_version", "request_id"],
+      "properties": {
+        "activity_type": { "type": "string" },
+        "duration_minutes": { "type": "number", "minimum": 1 },
+        "perceived_exertion": { "type": "number", "minimum": 1, "maximum": 10 },
+        "avg_hr": { "type": "number" },
+        "expected_version": { "type": "object" },
+        "request_id": { "type": "string" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.update_workout",
+    "description": "Update a workout status or its recorded metrics.",
+    "read_only": false,
+    "input_schema": {
+      "type": "object",
+      "required": ["workout_id", "expected_version", "request_id"],
+      "properties": {
+        "workout_id": { "type": "string" },
+        "status": { "type": "string", "enum": ["planned", "completed", "skipped", "cancelled"] },
+        "duration_minutes": { "type": "number" },
+        "perceived_exertion": { "type": "number" },
+        "avg_hr": { "type": "number" },
+        "expected_version": { "type": "object" },
+        "request_id": { "type": "string" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.list_goals",
+    "description": "List all active or past wellness and habit goals.",
+    "read_only": true,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "enum": ["active", "achieved", "missed", "abandoned"] }
+      }
+    }
+  },
+  {
+    "name": "health-hub.create_goal",
+    "description": "Create a new wellness target or habit goal.",
+    "read_only": false,
+    "input_schema": {
+      "type": "object",
+      "required": ["title", "metric_type", "target_value", "expected_version", "request_id"],
+      "properties": {
+        "title": { "type": "string" },
+        "metric_type": { "type": "string" },
+        "target_value": { "type": "number", "minimum": 0 },
+        "due_date": { "type": "string" },
+        "expected_version": { "type": "object" },
+        "request_id": { "type": "string" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.update_goal",
+    "description": "Update goal status or target values.",
+    "read_only": false,
+    "input_schema": {
+      "type": "object",
+      "required": ["goal_id", "expected_version", "request_id"],
+      "properties": {
+        "goal_id": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "achieved", "missed", "abandoned"] },
+        "target_value": { "type": "number" },
+        "expected_version": { "type": "object" },
+        "request_id": { "type": "string" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.list_routine_templates",
+    "description": "List reusable daily or weekly routine templates.",
+    "read_only": true,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "enum": ["draft", "active", "archived"] }
+      }
+    }
+  },
+  {
+    "name": "health-hub.create_routine_template",
+    "description": "Create a new routine template in 'draft' status.",
+    "read_only": false,
+    "input_schema": {
+      "type": "object",
+      "required": ["title", "blocks", "expected_version", "request_id"],
+      "properties": {
+        "title": { "type": "string" },
+        "blocks": { "type": "array" },
+        "expected_version": { "type": "object" },
+        "request_id": { "type": "string" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.update_routine_template",
+    "description": "Update template component blocks or transition status (draft -> active -> archived).",
+    "read_only": false,
+    "input_schema": {
+      "type": "object",
+      "required": ["routine_id", "expected_version", "request_id"],
+      "properties": {
+        "routine_id": { "type": "string" },
+        "title": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "active", "archived"] },
+        "blocks": { "type": "array" },
+        "expected_version": { "type": "object" },
+        "request_id": { "type": "string" }
+      }
+    }
+  },
+  {
+    "name": "health-hub.list_notifications",
+    "description": "Retrieve notifications generated from wearable syncs and committed life events.",
+    "read_only": true,
+    "input_schema": { "type": "object", "properties": {} }
+  }
+]
