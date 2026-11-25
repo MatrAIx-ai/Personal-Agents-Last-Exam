@@ -1,0 +1,44 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "dayline-morning",
+  "version": "1.0.0",
+  "description": "Hand-authored synthetic news editions, story groups, front pages and two reader histories for a fictional Wednesday morning (Oct. 14, 2026). English and Spanish text. Not a benchmark task.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Original fictional text authored for this package by @byshail. All outlets, people, places, teams and events are invented; no external articles were collected, translated or adapted.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.1.0",
+        "seed": null,
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Reprinted editions copy their source edition text verbatim; the alternate-history seed is the minimal seed plus examples/scenario.json with a different reading history."
+  ],
+  "expected_counts": {
+    "records": 25,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, Spanish text, variation and reuse permissions."
+  }
+}

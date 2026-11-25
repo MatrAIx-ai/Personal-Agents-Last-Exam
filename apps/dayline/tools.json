@@ -1,0 +1,1404 @@
+[
+  {
+    "name": "dayline.outlets.list",
+    "description": "List the publishers and desks whose editions Dayline carries, with their kind, language and home geography.",
+    "read_only": true,
+    "scope": "dayline.outlets.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "dayline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "outlets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "outlet_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "kind": {
+                "enum": [
+                  "wire",
+                  "local",
+                  "regional",
+                  "state",
+                  "national",
+                  "international"
+                ]
+              },
+              "language": {
+                "type": "string",
+                "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+              },
+              "geography": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 1000
+              }
+            },
+            "required": [
+              "outlet_id",
+              "name",
+              "kind",
+              "language",
+              "geography",
+              "description"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "outlets"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "dayline.front_pages.list",
+    "description": "List the regional and section front pages Dayline's editors maintain.",
+    "read_only": true,
+    "scope": "dayline.front_pages.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "dayline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "front_pages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "front_page_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "kind": {
+                "enum": [
+                  "region",
+                  "section"
+                ]
+              },
+              "entry_count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "front_page_id",
+              "title",
+              "kind",
+              "entry_count"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "front_pages"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "dayline.front_page.get",
+    "description": "Read one front page in editorial order (position 1 is the lead; all entries unless limit is given). Entries show headline, outlet, byline, story group and whether this reader has read or saved each edition. Does not mark anything read.",
+    "read_only": true,
+    "scope": "dayline.front_page.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "front_page_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "required": [
+        "front_page_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "dayline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "front_page": {
+          "type": "object",
+          "properties": {
+            "front_page_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "kind": {
+              "enum": [
+                "region",
+                "section"
+              ]
+            }
+          },
+          "required": [
+            "front_page_id",
+            "title",
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "position": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "edition_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "story_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "outlet_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "outlet_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "section": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "geography": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "language": {
+                "type": "string",
+                "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+              },
+              "headline": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "byline": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "published_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "read": {
+                "type": "boolean"
+              },
+              "saved": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "position",
+              "edition_id",
+              "story_id",
+              "outlet_id",
+              "outlet_name",
+              "section",
+              "geography",
+              "language",
+              "headline",
+              "byline",
+              "published_at",
+              "read",
+              "saved"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "front_page",
+        "entries"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "dayline.search",
+    "description": "Search published editions by words in the headline, text, byline, credits, outlet or story title (case- and accent-insensitive; every query word must match the start of a word, so \"air\" finds \"airport\" but not \"repair\"), with optional exact-match filters and an inclusive published_after/published_before window. Returns up to limit (default 20) editions, newest publication first; total counts every match. Does not mark anything read.",
+    "read_only": true,
+    "scope": "dayline.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "outlet_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "section": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "geography": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "language": {
+          "type": "string",
+          "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+        },
+        "story_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "published_after": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "published_before": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "dayline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "editions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "edition_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "story_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "outlet_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "outlet_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "section": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "geography": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "language": {
+                "type": "string",
+                "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+              },
+              "headline": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "byline": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "published_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "read": {
+                "type": "boolean"
+              },
+              "saved": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "edition_id",
+              "story_id",
+              "outlet_id",
+              "outlet_name",
+              "section",
+              "geography",
+              "language",
+              "headline",
+              "byline",
+              "published_at",
+              "read",
+              "saved"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "total",
+        "editions"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "dayline.story.get",
+    "description": "Open an editor-assigned story group: every published edition filed under it, oldest publication first. The group is a navigation aid; use each edition's text and credits to see who reported what.",
+    "read_only": true,
+    "scope": "dayline.story.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "story_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "story_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "dayline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "story": {
+          "type": "object",
+          "properties": {
+            "story_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "story_id",
+            "title"
+          ],
+          "additionalProperties": false
+        },
+        "editions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "edition_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "story_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "outlet_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "outlet_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "section": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "geography": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "language": {
+                "type": "string",
+                "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+              },
+              "headline": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "byline": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "published_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "read": {
+                "type": "boolean"
+              },
+              "saved": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "edition_id",
+              "story_id",
+              "outlet_id",
+              "outlet_name",
+              "section",
+              "geography",
+              "language",
+              "headline",
+              "byline",
+              "published_at",
+              "read",
+              "saved"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "story",
+        "editions"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "dayline.edition.get",
+    "description": "Read one edition in full: text, byline, publisher-disclosed credits, publication time and this reader's read/saved status. Reading on the reader's behalf does not add it to their reading history.",
+    "read_only": true,
+    "scope": "dayline.edition.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "edition_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "edition_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "dayline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "edition": {
+          "type": "object",
+          "properties": {
+            "edition_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "story_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "outlet_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "outlet_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "section": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "geography": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "language": {
+              "type": "string",
+              "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+            },
+            "headline": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "byline": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "published_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "read": {
+              "type": "boolean"
+            },
+            "saved": {
+              "type": "boolean"
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000
+            },
+            "credits": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "edition_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "credit": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "edition_id",
+                  "credit"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 20
+            },
+            "added_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "read_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "saved_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "edition_id",
+            "story_id",
+            "outlet_id",
+            "outlet_name",
+            "section",
+            "geography",
+            "language",
+            "headline",
+            "byline",
+            "published_at",
+            "read",
+            "saved",
+            "text",
+            "credits",
+            "added_at",
+            "read_at",
+            "saved_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "edition"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "dayline.history.list",
+    "description": "List this reader's private reading history, most recent first (default limit 50).",
+    "read_only": true,
+    "scope": "dayline.history.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "dayline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "read_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "edition": {
+                "type": "object",
+                "properties": {
+                  "edition_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "story_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "outlet_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "outlet_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "section": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "geography": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "language": {
+                    "type": "string",
+                    "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+                  },
+                  "headline": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  "byline": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "published_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "read": {
+                    "type": "boolean"
+                  },
+                  "saved": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "edition_id",
+                  "story_id",
+                  "outlet_id",
+                  "outlet_name",
+                  "section",
+                  "geography",
+                  "language",
+                  "headline",
+                  "byline",
+                  "published_at",
+                  "read",
+                  "saved"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "read_at",
+              "edition"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 5000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "entries"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "dayline.saved.list",
+    "description": "List the editions on this reader's private reading list, most recently saved first.",
+    "read_only": true,
+    "scope": "dayline.saved.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "dayline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "saved_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "edition": {
+                "type": "object",
+                "properties": {
+                  "edition_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "story_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "outlet_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "outlet_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "section": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "geography": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "language": {
+                    "type": "string",
+                    "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+                  },
+                  "headline": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  "byline": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "published_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "read": {
+                    "type": "boolean"
+                  },
+                  "saved": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "edition_id",
+                  "story_id",
+                  "outlet_id",
+                  "outlet_name",
+                  "section",
+                  "geography",
+                  "language",
+                  "headline",
+                  "byline",
+                  "published_at",
+                  "read",
+                  "saved"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "saved_at",
+              "edition"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 1000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "entries"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "dayline.history.mark_read",
+    "description": "Record in the reader's private history that they have read an edition. Marking an edition that is already in the history changes nothing.",
+    "read_only": false,
+    "scope": "dayline.history.mark_read",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "edition_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "edition_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "dayline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "edition_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "read": {
+          "const": true
+        },
+        "changed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "edition_id",
+        "read",
+        "changed"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "dayline.saved.add",
+    "description": "Save an edition to the reader's private reading list. Returns only the edition ID and save status (never the headline). Saving an edition that is already saved leaves one entry.",
+    "read_only": false,
+    "scope": "dayline.saved.add",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "edition_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "edition_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "dayline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "edition_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "saved": {
+          "const": true
+        },
+        "changed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "edition_id",
+        "saved",
+        "changed"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "dayline.saved.remove",
+    "description": "Remove an edition from the reader's private reading list. Fails if the edition is not on the list.",
+    "read_only": false,
+    "scope": "dayline.saved.remove",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "edition_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "edition_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "dayline"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "edition_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "saved": {
+          "const": false
+        },
+        "changed": {
+          "const": true
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "edition_id",
+        "saved",
+        "changed"
+      ],
+      "additionalProperties": false
+    }
+  }
+]
