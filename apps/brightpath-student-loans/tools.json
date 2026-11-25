@@ -1,0 +1,1462 @@
+[
+  {
+    "name": "brightpath-student-loans.loan.portfolio.list",
+    "description": "List the borrower loan portfolio, masked identifiers, balances, servicers, statuses, payments, and aggregate totals without changing state.",
+    "read_only": true,
+    "scope": "loan.portfolio.list",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.loan.get",
+    "description": "Read one authorized loan with its current servicer and complete preserved history.",
+    "read_only": true,
+    "scope": "loan.get",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.repayment.plan.compare",
+    "description": "Pure read-only comparison of every fictional repayment plan for explicit loans and borrower facts. It never saves an estimate or changes a loan.",
+    "read_only": true,
+    "scope": "repayment.plan.compare",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "loan_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true
+        },
+        "annual_income_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "family_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "filing_status": {
+          "enum": [
+            "single",
+            "married_joint",
+            "married_separate",
+            "head_of_household"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.repayment.estimate.save",
+    "description": "Persist one immutable eligible estimate from an explicit input snapshot and selected plan.",
+    "read_only": false,
+    "scope": "repayment.estimate.save",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "loan_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true
+        },
+        "annual_income_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "family_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "filing_status": {
+          "enum": [
+            "single",
+            "married_joint",
+            "married_separate",
+            "head_of_household"
+          ]
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "plan_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.repayment.application.list",
+    "description": "List applications and document metadata, optionally filtered by lifecycle status.",
+    "read_only": true,
+    "scope": "repayment.application.list",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "draft",
+            "submitted",
+            "processing",
+            "approved",
+            "denied",
+            "needs_information",
+            "withdrawn"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.repayment.application.get",
+    "description": "Read one application, saved estimate, document metadata, submission snapshot, receipt, and history.",
+    "read_only": true,
+    "scope": "repayment.application.get",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.repayment.application.create",
+    "description": "Create a draft from an immutable saved estimate and borrower-controlled consent/attestations.",
+    "read_only": false,
+    "scope": "repayment.application.create",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "estimate_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "application_type": {
+          "enum": [
+            "repayment_plan",
+            "annual_recertification"
+          ]
+        },
+        "attestations": {
+          "type": "object",
+          "properties": {
+            "information_accurate": {
+              "type": "boolean"
+            },
+            "electronic_signature": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "information_accurate",
+            "electronic_signature"
+          ],
+          "additionalProperties": false
+        },
+        "consent_status": {
+          "enum": [
+            "granted",
+            "declined",
+            "expired"
+          ]
+        },
+        "income_snapshot_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "estimate_id",
+        "application_type",
+        "attestations",
+        "consent_status",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.repayment.application.update",
+    "description": "Edit allowed borrower-controlled fields on a draft or needs-information application using its observed record version.",
+    "read_only": false,
+    "scope": "repayment.application.update",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "application_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "estimate_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "attestations": {
+              "type": "object",
+              "properties": {
+                "information_accurate": {
+                  "type": "boolean"
+                },
+                "electronic_signature": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "information_accurate",
+                "electronic_signature"
+              ],
+              "additionalProperties": false
+            },
+            "consent_status": {
+              "enum": [
+                "granted",
+                "declined",
+                "expired"
+              ]
+            },
+            "income_snapshot_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "id",
+        "application_version",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.repayment.application.submit",
+    "description": "Submit an eligible draft or needs-information application only after explicit plan confirmation; preserves receipt and submitted snapshot.",
+    "read_only": false,
+    "scope": "repayment.application.submit",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "application_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "confirm_selected_plan": {
+          "const": true
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "id",
+        "application_version",
+        "confirm_selected_plan",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.repayment.application.withdraw",
+    "description": "Withdraw a nonterminal application with an explicit reason; approved, denied, and withdrawn records are guarded.",
+    "read_only": false,
+    "scope": "repayment.application.withdraw",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "application_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "id",
+        "application_version",
+        "reason",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.repayment.document.add",
+    "description": "Add synthetic income-document metadata only. No bytes are accepted; exact deadline is inclusive and late submissions fail.",
+    "read_only": false,
+    "scope": "repayment.document.add",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "application_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "application_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "filename": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "document_type": {
+          "enum": [
+            "pay_stub",
+            "tax_return",
+            "income_statement",
+            "other"
+          ]
+        },
+        "tax_period": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 20
+        },
+        "checksum_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "application_id",
+        "application_version",
+        "filename",
+        "document_type",
+        "tax_period",
+        "checksum_sha256",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.loan.notices.list",
+    "description": "List actionable in-App notices without changing read or acknowledgement state.",
+    "read_only": true,
+    "scope": "loan.notices.list",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "include_acknowledged": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.loan.notice.get",
+    "description": "Read one in-App notice and its separate optional Mail delivery state.",
+    "read_only": true,
+    "scope": "loan.notice.get",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.loan.notice.acknowledge",
+    "description": "Acknowledge one visible notice using its observed record version.",
+    "read_only": false,
+    "scope": "loan.notice.acknowledge",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "notice_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "id",
+        "notice_version",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.loan.history.list",
+    "description": "Read preserved loan, application, payment, and transfer history, optionally filtered by source object.",
+    "read_only": true,
+    "scope": "loan.history.list",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "loan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "application_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.notice.email.prepare",
+    "description": "Prepare a receiver-owned Mail 1.3.0 CloudEvent for one in-App notice. This is a separate local commit.",
+    "read_only": false,
+    "scope": "notice.email.prepare",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "notice_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "router_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "id",
+        "notice_version",
+        "router_request_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "brightpath-student-loans.notice.email.record",
+    "description": "Record delivered, rejected, or unknown routing acknowledgement without rolling back Brightpath business state.",
+    "read_only": false,
+    "scope": "notice.email.record",
+    "resource_target": "current borrower account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "notice_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "router_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "delivery_status": {
+          "enum": [
+            "delivered",
+            "rejected",
+            "unknown"
+          ]
+        },
+        "receipt_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reconciled": {
+          "type": "boolean"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "id",
+        "notice_version",
+        "router_request_id",
+        "delivery_status",
+        "receipt_id",
+        "reconciled",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed"
+          ]
+        },
+        "app_id": {
+          "const": "brightpath-student-loans"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version"
+      ],
+      "additionalProperties": true
+    }
+  }
+]

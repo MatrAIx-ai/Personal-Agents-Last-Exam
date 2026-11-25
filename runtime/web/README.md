@@ -1,6 +1,6 @@
 # Public business Web Host
 
-Seven Apps provide their own business pages/controllers in `gui/`: Mail, Calendar, Files, Messages, Notes, Tasks and Contacts. This shared Host serves those files and connects the page to a fixed **Agent** MCP process for one App/run. It contains no App-specific operation logic and exposes no management connection to the browser.
+Eight registered Apps provide their own business pages/controllers in `gui/`: Mail, Calendar, Files, Messages, Notes, Tasks, Contacts and Brightpath Student Loans. This shared Host serves those files and connects the page to a fixed **Agent** MCP process for one App/run. It contains no App-specific operation logic and exposes no management connection to the browser.
 
 ## Start an App
 
@@ -9,10 +9,10 @@ Node 18+ is sufficient to run the Host; no npm install is needed:
 ```sh
 node runtime/web/server.cjs --app mail --run web-demo --profile sandbox
 node runtime/web/server.cjs --app calendar --run web-demo --profile sandbox
-# Other --app values: files, messages, notes, tasks, contacts
+# Other --app values: files, messages, notes, tasks, contacts, brightpath-student-loans
 ```
 
-Open the access link printed by each process. A port is selected automatically; `--port 8780` is optional. `--state-dir` and `--registry` select the same state and package assembly as ordinary MCP clients. The provided `apps.registry.json` includes all seven Apps. Each App still has separate state and can run independently.
+Open the access link printed by each process. A port is selected automatically; `--port 8780` is optional. `--state-dir` and `--registry` select the same state and package assembly as ordinary MCP clients. The provided `apps.registry.json` includes all eight Apps. Each App still has separate state and can run independently.
 
 Only a **new** instance is initialized with the CLI-selected synthetic profile. `sandbox` enables declared business writes; use a fresh run with `--profile scenario` for restricted Task-like permissions. Starting a Host for existing state never resets that state or changes its policy. To load a real Task or inject a scenario, use the separate Infra MCP interface. There is no browser API for those operations.
 
@@ -53,7 +53,7 @@ npm run test:web:browser
 The fixed Playwright dependency is only for browser tests; stdio and App-local tests still need no npm install. CI pins Ubuntu 24.04 and Node 22, installs Chromium and runs the same commands.
 
 - Host tests: session/origin/CSRF, role forgery, direct management requests, hidden paths, version/retry, interrupted and concurrent startup, restart and restricted profile.
-- Browser tests: real create/edit controls on every App, MCP state inspection, reload, scenario refresh, business denials/conflicts, original-byte upload/download, text escaping, responsive layout and JavaScript errors.
+- Browser tests: the shared reference suite covers the original seven Apps; Brightpath adds `apps/brightpath-student-loans/tests/web-browser.cjs` for its five product views, MCP state inspection, reload, event refresh, business conflicts, text escaping, responsive layout and JavaScript errors.
 - Screenshots and a machine-readable report are written to `.artifacts/web/`. A browser test is not a model-agent evaluation.
 
 ## App-specific product views

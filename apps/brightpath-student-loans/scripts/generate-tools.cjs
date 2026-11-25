@@ -1,0 +1,33 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'..'),APP='brightpath-student-loans';
+const id={type:'string',pattern:'^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$'},date={type:'string',minLength:10,maxLength:10},time={type:'string',format:'date-time'},money={type:'integer',minimum:0,maximum:1000000000},integer={type:'integer'},bool={type:'boolean'};
+const version={type:'object',properties:{epoch:{type:'integer',minimum:1},revision:{type:'integer',minimum:0}},required:['epoch','revision'],additionalProperties:false};
+const attest={type:'object',properties:{information_accurate:bool,electronic_signature:bool},required:['information_accurate','electronic_signature'],additionalProperties:false};
+const compare={loan_ids:{type:'array',items:id,minItems:1,maxItems:100,uniqueItems:true},annual_income_cents:money,family_size:{type:'integer',minimum:1,maximum:20},filing_status:{enum:['single','married_joint','married_separate','head_of_household']}};
+const output={type:'object',properties:{status:{enum:['ok','committed']},app_id:{const:APP},version},required:['status','app_id','version'],additionalProperties:true};
+function input(properties={},required=[]){return {type:'object',properties,required,additionalProperties:false};}
+function write(properties,required){return input({...properties,expected_version:version,request_id:{type:'string',minLength:1,maxLength:120,pattern:'\\S'}},[...required,'expected_version','request_id']);}
+function row(name,description,read_only,inputSchema){return {name:APP+'.'+name,description,read_only,scope:name,resource_target:'current borrower account',inputSchema,outputSchema:output};}
+function generate(){return [
+  row('loan.portfolio.list','List the borrower loan portfolio, masked identifiers, balances, servicers, statuses, payments, and aggregate totals without changing state.',true,input()),
+  row('loan.get','Read one authorized loan with its current servicer and complete preserved history.',true,input({id},['id'])),
+  row('repayment.plan.compare','Pure read-only comparison of every fictional repayment plan for explicit loans and borrower facts. It never saves an estimate or changes a loan.',true,input(compare)),
+  row('repayment.estimate.save','Persist one immutable eligible estimate from an explicit input snapshot and selected plan.',false,write({...compare,plan_id:id},['plan_id'])),
+  row('repayment.application.list','List applications and document metadata, optionally filtered by lifecycle status.',true,input({status:{enum:['draft','submitted','processing','approved','denied','needs_information','withdrawn']}})),
+  row('repayment.application.get','Read one application, saved estimate, document metadata, submission snapshot, receipt, and history.',true,input({id},['id'])),
+  row('repayment.application.create','Create a draft from an immutable saved estimate and borrower-controlled consent/attestations.',false,write({estimate_id:id,application_type:{enum:['repayment_plan','annual_recertification']},attestations:attest,consent_status:{enum:['granted','declined','expired']},income_snapshot_id:{anyOf:[id,{type:'null'}]}},['estimate_id','application_type','attestations','consent_status'])),
+  row('repayment.application.update','Edit allowed borrower-controlled fields on a draft or needs-information application using its observed record version.',false,write({id,application_version:{type:'integer',minimum:1},patch:{type:'object',properties:{estimate_id:id,attestations:attest,consent_status:{enum:['granted','declined','expired']},income_snapshot_id:{anyOf:[id,{type:'null'}]}},additionalProperties:false}},['id','application_version','patch'])),
+  row('repayment.application.submit','Submit an eligible draft or needs-information application only after explicit plan confirmation; preserves receipt and submitted snapshot.',false,write({id,application_version:{type:'integer',minimum:1},confirm_selected_plan:{const:true}},['id','application_version','confirm_selected_plan'])),
+  row('repayment.application.withdraw','Withdraw a nonterminal application with an explicit reason; approved, denied, and withdrawn records are guarded.',false,write({id,application_version:{type:'integer',minimum:1},reason:{type:'string',minLength:1,maxLength:300}},['id','application_version','reason'])),
+  row('repayment.document.add','Add synthetic income-document metadata only. No bytes are accepted; exact deadline is inclusive and late submissions fail.',false,write({application_id:id,application_version:{type:'integer',minimum:1},filename:{type:'string',minLength:1,maxLength:160},document_type:{enum:['pay_stub','tax_return','income_statement','other']},tax_period:{type:'string',minLength:4,maxLength:20},checksum_sha256:{type:'string',pattern:'^[a-f0-9]{64}$'}},['application_id','application_version','filename','document_type','tax_period','checksum_sha256'])),
+  row('loan.notices.list','List actionable in-App notices without changing read or acknowledgement state.',true,input({include_acknowledged:bool})),
+  row('loan.notice.get','Read one in-App notice and its separate optional Mail delivery state.',true,input({id},['id'])),
+  row('loan.notice.acknowledge','Acknowledge one visible notice using its observed record version.',false,write({id,notice_version:{type:'integer',minimum:1}},['id','notice_version'])),
+  row('loan.history.list','Read preserved loan, application, payment, and transfer history, optionally filtered by source object.',true,input({loan_id:id,application_id:id})),
+  row('notice.email.prepare','Prepare a receiver-owned Mail 1.3.0 CloudEvent for one in-App notice. This is a separate local commit.',false,write({id,notice_version:{type:'integer',minimum:1},router_request_id:id},['id','notice_version','router_request_id'])),
+  row('notice.email.record','Record delivered, rejected, or unknown routing acknowledgement without rolling back Brightpath business state.',false,write({id,notice_version:{type:'integer',minimum:1},router_request_id:id,delivery_status:{enum:['delivered','rejected','unknown']},receipt_id:{anyOf:[id,{type:'null'}]},reconciled:bool},['id','notice_version','router_request_id','delivery_status','receipt_id','reconciled']))
+];}
+function text(){return JSON.stringify(generate(),null,2)+'\n';}
+function run({check=false}={}){const file=path.join(root,'tools.json'),expected=text();if(check){if(!fs.existsSync(file)||fs.readFileSync(file,'utf8')!==expected)throw Error('Generated tools.json drift');}else fs.writeFileSync(file,expected);}
+module.exports={generate,text,run};if(require.main===module){run({check:process.argv.includes('--check')});console.log('Brightpath tools.json '+(process.argv.includes('--check')?'matches':'generated')+'.');}
