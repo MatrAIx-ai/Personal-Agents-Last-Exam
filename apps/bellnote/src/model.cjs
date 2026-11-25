@@ -9,6 +9,18 @@ const bad = message => c.fail('invalid_seed', message);
 const TIME_KEYS = new Set(['at', 'created_at', 'paid_at', 'refunded_at', 'marked_at', 'submitted_at', 'reviewed_at', 'answered_at',
   'due_at', 'published_at', 'changed_at', 'recorded_at', 'time']);
 
+// Core calls validateSeed several times per call, so the common case (every timestamp has an offset)
+// is checked without building paths; the path walk runs only to name the first bad timestamp.
+function timesOk(value) {
+  if (Array.isArray(value)) return value.every(timesOk);
+  if (!value || typeof value !== 'object') return true;
+  for (const k in value) {
+    const v = value[k];
+    if (TIME_KEYS.has(k) && typeof v === 'string' && !c.time.hasOffset(v)) return false;
+    if (k !== 'wire' && !timesOk(v)) return false;
+  }
+  return true;
+}
 function walkTimes(value, path) {
   if (Array.isArray(value)) { value.forEach((v, i) => walkTimes(v, path + '[' + i + ']')); return; }
   if (!value || typeof value !== 'object') return;
@@ -27,7 +39,7 @@ function validateSeed(ctx, data) {
   const people = ctx.binding.people.some(p => p.person_id === data.owner_person_id);
   const acct = ctx.binding.accounts.some(a => a.app_id === ctx.app_id && a.account_id === data.account_id && a.owner_person_id === data.owner_person_id);
   if (!people || !acct) bad('The account and its owner must be declared in the trusted binding.');
-  walkTimes(data, 'data');
+  if (!timesOk(data)) walkTimes(data, 'data');
   const d = data.district;
   if (!c.time.validZone(d.time_zone)) bad('Unknown time zone ' + d.time_zone + '.');
   const checkPolicy = (pol, partial) => {

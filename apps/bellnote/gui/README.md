@@ -34,29 +34,31 @@ Not in the GUI: nothing among the Agent tools. Staff, cafeteria and other-guardi
 
 ## Reads and timing
 
-Core reads and validates the whole account state on every call, so each Bellnote call through the Host costs about 0.3 s (about 0.1 s for the Host's tool check plus about 0.2 s for the call; Core handles one call at a time, so sending reads together saves little). The page therefore makes only the reads a view shows, and keeps nothing read for one view when it shows another:
+Core reads and validates the whole account state on every call, so each Bellnote call through the Host costs about 0.12–0.18 s (the Host checks the tool with a `tools/list`, then sends the call; most of the time is Core's schema check of the account, see [VALIDATION.md](../VALIDATION.md#seeded-history-from-2025-01-01-maintainers-request-after-approval)). Core handles one call at a time, so sending reads together saves little. The page therefore makes only the reads a view shows, and keeps nothing read for one view when it shows another:
 
 - Moving between views, every write and Refresh go through the Host's refresh: the tool list, `children.list` with the account version, then the view's reads, including the school (`schools.get`, which also gives the district's "today", the coming days and their cut-offs) and, where the view uses them, the account preferences. Values a form is prefilled from therefore never predate the version the form sends, and a time move, a calendar change or another client's change shows on the next view.
 - Choosing another child, or another form in Forms, stays in the view and re-reads only that choice (the view's reads for that child; one `forms.get` for a form), without the tool list and `children.list`. Those reads are newer than the version a later write sends, so a change made in between can only make the write stale.
 
-Measured in headless Chromium against the reference fixture, three page loads per Node version (requests per action include the Host's `/api/tools`; time from click to a settled page; Node 22.23.1 / 18.20.8, load average 1.5–4.2):
+Measured in headless Chromium against the reference fixture, three page loads per Node version (requests per action include the Host's `/api/tools`; time from click to a settled page, for a write from Save to the refreshed page; Node 22.23.1 / 18.20.8, load average 2.9–3.7 on 20 hardware threads):
 
 | Action | Requests | Time |
 | --- | --- | --- |
-| First load (Home) | 11 | 3.0–3.2 / 3.2–3.7 s |
-| Attendance | 5 | 1.2–1.4 / 1.4–1.6 s |
-| Forms | 6 | 1.5–1.7 / 1.7–2.0 s |
-| Pickup & dismissal | 4 | 0.9–1.0 / 1.1–1.2 s |
-| Lunch | 6 | 1.5–1.8 / 1.7–1.9 s |
-| Notifications | 4 | 1.0 / 1.1–1.3 s |
-| Account | 5 | 1.3–1.4 / 1.5–1.7 s |
-| Home (again) | 11 | 2.9–3.1 / 3.3–3.7 s |
-| Another child (Attendance) | 3 | 0.8–0.9 / 0.9–1.1 s |
-| Another form | 1 | 0.3 / 0.3–0.4 s |
-| Another child (Lunch) | 4 | 1.1–1.2 / 1.3–1.6 s |
-| Refresh or reload (Lunch) | 6 | 1.5–1.7 / 1.9–2.0 s |
+| First load (Home) | 11 | 1.14–1.33 / 1.17–1.28 s |
+| Attendance | 5 | 0.49–0.62 / 0.49–0.56 s |
+| Forms | 6 | 0.62–0.78 / 0.59–0.71 s |
+| Pickup & dismissal | 4 | 0.38–0.41 / 0.39–0.42 s |
+| Lunch | 6 | 0.59–0.87 / 0.57–0.69 s |
+| Notifications | 4 | 0.39–0.41 / 0.40–0.41 s |
+| Account | 5 | 0.49–0.54 / 0.50–0.52 s |
+| Home (again) | 11 | 1.12–1.32 / 1.19–1.20 s |
+| Another child (Attendance) | 3 | 0.35–0.49 / 0.35–0.39 s |
+| Another form | 1 | 0.14–0.18 / 0.12–0.15 s |
+| Another child (Lunch) | 4 | 0.45–0.67 / 0.45–0.50 s |
+| Refresh or reload (Lunch) | 6 | 0.54–1.09 / 0.60–0.67 s |
+| Save alerts and limits (Lunch) | 7 | 0.74–0.92 / 0.82–0.89 s |
+| Save preferences (Account) | 6 | 0.63–0.92 / 0.64–0.68 s |
 
-Home is the slowest view because it shows every child's balance and way home (one `lunch.account_get` per child and one `pickup.get` per custodial child).
+Home is the slowest view because it shows every child's balance and way home (one `lunch.account_get` per child and one `pickup.get` per custodial child); there is no tool that reads these for several children at once. A write costs the write itself plus the Host's refresh (tool list, `children.list`, then the view's reads).
 
 ## Implementation notes
 

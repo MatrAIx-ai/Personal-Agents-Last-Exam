@@ -191,9 +191,16 @@ tasksState.properties.package_version = {const: app.version};
 tasksState.properties.core_api_version = {const: app.core_api_version};
 tasksState.properties.app_id = {const: app.app_id};
 
+// The published seed schema is self-contained too: Core validates the whole seed several times per
+// call, and its validator resolves a file reference (`seed.schema.json#/$defs/...`) on the file system
+// each time it meets one, once per record. With the definitions inlined the meaning is the same and
+// no reference is left to resolve. `seed` above stays the source; tests/schema-equivalence.test.cjs
+// compares the two.
+const seedPublished = (({$defs, ...rest}) => inline(rest))(seed);
+
 const outputs = {
   'tools.json': tools,
-  'schemas/seed.schema.json': seed,
+  'schemas/seed.schema.json': seedPublished,
   'schemas/events.schema.json': events,
   'schemas/state.schema.json': tasksState
 };
@@ -206,7 +213,7 @@ function build({check = false} = {}) {
   }
   return drift;
 }
-module.exports = {build, operations, tools};
+module.exports = {build, operations, tools, seed, seedPublished};
 if (require.main === module) {
   const check = process.argv.includes('--check'), drift = build({check});
   if (drift.length) { console.error('Generated contract drift: ' + drift.join(', ')); process.exitCode = 1; }

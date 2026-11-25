@@ -46,7 +46,7 @@ What the generated history respects: school-day records fall only on school days
 
 **Reads with two years of rows.** Windowed reads keep their defaults (`attendance.list` and `lunch.account_get` the last 14 days, `notifications.list` 30, `payments.list` 60, `pickup.get` and `schools.get` the next 14, `menu.list` the next 6; at most 120 days), so a read without a window returns the current period. Two reads have no window in the approved plan and now list the earlier years too: `absences.list` (20 reports, 14.7 KB) and `forms.list` (28 forms, 25.1 KB). Reports and forms of earlier years read as they ended (reviewed, cancelled, closed); a report day before the current term is not `moot`. The GUI shows the current school year by default and folds earlier reports and closed forms under "Earlier school years".
 
-`tools.json`, `schemas/seed.schema.json`, `schemas/events.schema.json` and `schemas/state.schema.json` are generated from `scripts/build-contracts.cjs` (`npm run contracts:check` in this folder detects drift). The other schema files are copies of the public shared contracts kept in sync by the repository's `npm run contracts:check`; `schemas/router-message.schema.json` is a byte-identical copy of Mail 1.3.0's generated wire schema.
+`tools.json`, `schemas/seed.schema.json`, `schemas/events.schema.json` and `schemas/state.schema.json` are generated from `scripts/build-contracts.cjs` (`npm run contracts:check` in this folder detects drift). The record definitions are written once in the builder as `$defs`; the published seed schema has them inlined, because Core validates the whole seed several times per call and resolves a file reference (`seed.schema.json#/$defs/...`) on the file system for every record it checks. `tests/schema-equivalence.test.cjs` checks that the published schema equals the `$defs` form with its references resolved and that Core's validator gives the same answer for both on the fixtures and on 1,560 mutated copies of them. The other schema files are copies of the public shared contracts kept in sync by the repository's `npm run contracts:check`; `schemas/router-message.schema.json` is a byte-identical copy of Mail 1.3.0's generated wire schema.
 
 ## Web GUI
 
@@ -58,6 +58,8 @@ node runtime/web/server.cjs --app bellnote --registry apps/bellnote/web.registry
 
 `web.registry.json` registers this package alone with its own clock, so nothing outside `apps/bellnote/` is needed. Views, covered workflows, design choices and per-view timings: [gui/README.md](gui/README.md).
 
+**Time per call.** Core reads and validates the whole account state on every call. With the reference fixture a read over stdio MCP takes about 69–77 ms on Node 22.23.1 and 84–101 ms on Node 18.20.8 (load average 2.6–3.5 on 20 hardware threads); through the web Host a call takes about 0.12–0.18 s and a view 0.38–1.33 s (Home, with every child's balance and way home, is the slowest). Most of a call is Core's schema check of the seed, which runs six times per call; the rest is Core's copies of the state, its duplicate-record check and the state file write. Breakdown in [VALIDATION.md](VALIDATION.md#seeded-history-from-2025-01-01-maintainers-request-after-approval), per-view reads and times in [gui/README.md](gui/README.md#reads-and-timing).
+
 ## Optional Mail notices
 
 Bellnote declares one `messaging.publishes` entry (`channel.email`, `urn:pale:email-message:2`, `org.pale.mail.notification.v1`, payload `urn:pale:email-payload:1`) for the existing receive declaration of Mail 1.3.0 in `examples/apps/mail` and receives nothing. The recipient is `{"kind":"person_ref","id":<owner_person_id>}`. `src/publisher.cjs` is an Infra-run sender: Infra gives it Bellnote's Infra connection (to read notifications through `env.snapshot`) and a Messaging publisher connection fixed to this account; it calls `router.publish` and never writes back into Bellnote. A rejected delivery creates no Mail record and leaves Bellnote unchanged; a receipt means Mail stored the message, not that anyone acted on it. Bellnote runs fully without Mail; `dependencies.required_apps` is empty.
@@ -67,7 +69,7 @@ Bellnote declares one `messaging.publishes` entry (`channel.email`, `urn:pale:em
 From this folder (the package alone, no runtime needed):
 
 ```sh
-npm test                      # 49 business tests: T01–T19 (App-side), rules, wording, fixtures and history, contracts, diagnostics
+npm test                      # 52 business tests: T01–T19 (App-side), rules, wording, fixtures and history, contracts, seed schema equivalence, diagnostics
 npm run example               # walkthrough: report, two marks, one notification
 npm run contracts:check       # generated tools/schemas match their source
 npm run fixtures:check        # consistency of both fixtures, generated history, size, builder match
