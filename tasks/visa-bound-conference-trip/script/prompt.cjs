@@ -11,12 +11,13 @@ const SYSTEM_PROMPT = [
   'Times are US Central (Minneapolis) unless stated otherwise.'
 ].join('\n\n');
 
-const WEEKDAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-// "[Monday 2027-02-08, 20:30]\n\nMingyu: ..." — the wall clock of the timestamp's own offset.
+// "[Monday 2027-02-08, 20:30]\n\nMingyu: ..." — the instant's wall clock in US Central (America/Chicago),
+// whatever offset the timestamp is written in, since the system prompt says times are US Central.
+const CENTRAL = new Intl.DateTimeFormat('en-US', {timeZone: 'America/Chicago', weekday: 'long', year: 'numeric', month: '2-digit',
+  day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'});
 function stamp(at) {
-  const offset = at.slice(19), sign = offset[0] === '-' ? -1 : 1;
-  const wall = new Date(Date.parse(at) + sign * (Number(offset.slice(1, 3)) * 60 + Number(offset.slice(4, 6))) * 60000);
-  return '[' + WEEKDAY[wall.getUTCDay()] + ' ' + at.slice(0, 10) + ', ' + at.slice(11, 16) + ']';
+  const p = Object.fromEntries(CENTRAL.formatToParts(new Date(at)).map(x => [x.type, x.value]));
+  return '[' + p.weekday + ' ' + p.year + '-' + p.month + '-' + p.day + ', ' + p.hour + ':' + p.minute + ']';
 }
 const userTurn = (at, text) => stamp(at) + '\n\nMingyu: ' + text;
 

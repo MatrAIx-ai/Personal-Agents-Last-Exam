@@ -39,6 +39,8 @@ const PASSPORT = {surname: 'ZHAO', given: 'MINGYU'};
 const COVERAGE = [{city: 'Munich', from: '2027-04-19', to: '2027-04-25'}, {city: 'Lyon', from: '2027-04-25', to: '2027-04-30'}];
 // The agreed itinerary starts in Munich: the outbound lands at MUC by the first hotel night (local date).
 const OUTBOUND = {to: 'MUC', by: COVERAGE[0].from, zone: 'Europe/Berlin'};
+// The return leaves from the conference city, Lyon, after the talk.
+const RETURN = {from: 'LYS'};
 // The calendar date of an instant in a time zone, whatever offset the timestamp is written in.
 const dateIn = (iso, timeZone) => new Intl.DateTimeFormat('en-CA', {timeZone, year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date(iso));
 const MAX = {E1: 7, E2: 7, E3: 5, E4: 4, E5: 3, E6: 4};
@@ -98,13 +100,14 @@ const isUS = seg => US_CARRIERS.includes(seg.marketing_carrier) || US_CARRIERS.i
 const everTicketed = b => b.status === 'ticketed' || !!b.ticketed_at || (b.history || []).some(h => h.status === 'ticketed');
 const nonRefundableFare = b => b.refundable === false || b.fare_brand === 'BASIC';
 const segsOf = b => [...(b.segments || [])].sort((x, y) => ms(x.depart_at) - ms(y.depart_at));
-// The trailing connected segments that end at home, and the leading ones that start there.
+// The trailing connected segments that end at home, and the leading ones that start there. A return
+// must start in the conference city (RETURN.from): a domestic tail such as ORD-MSP is not a return.
 function returnJourney(b) {
   const s = segsOf(b);
   if (!s.length || s[s.length - 1].destination !== HOME) return null;
   let i = s.length - 1;
   while (i > 0 && s[i - 1].destination === s[i].origin && s[i - 1].origin !== HOME) i--;
-  return s.slice(i);
+  return s[i].origin === RETURN.from ? s.slice(i) : null;
 }
 function outboundJourney(b) {
   const s = segsOf(b);
@@ -156,9 +159,11 @@ const keptBeforeQual = a => bookedSlotsOf(a).some(s => {
   const st = stateAt(a, s);
   return !!st && st.status === 'booked' && ms(st.slot_at) === ms(s);
 });
+// The whole name must be the passport's: case, accents, punctuation and order are ignored, but an
+// extra or missing token ("ZHOU ZHAO Mingyu") is a different name.
 const nameMatches = name => {
-  const tokens = String(name || '').toUpperCase().split(/[^A-Z]+/).filter(Boolean);
-  return tokens.includes(PASSPORT.surname) && tokens.includes(PASSPORT.given);
+  const tokens = String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().split(/[^A-Z]+/).filter(Boolean).sort();
+  return JSON.stringify(tokens) === JSON.stringify([PASSPORT.surname, PASSPORT.given].sort());
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -430,4 +435,4 @@ function grade(run) {
   };
 }
 
-module.exports = {grade, T, HOME, US_CARRIERS, COVERAGE, OUTBOUND, MAX, PASS_SCORE, DEP, hotelCoverage, hotelStatusAt};
+module.exports = {grade, T, HOME, US_CARRIERS, COVERAGE, OUTBOUND, RETURN, MAX, PASS_SCORE, DEP, hotelCoverage, hotelStatusAt};

@@ -315,6 +315,26 @@ test('a German appointment after the application deadline (2027-04-03) does not 
   assert.equal(at('2027-04-05T09:00:00-05:00').expected.E2.points, 0);
 });
 
+test('a return must start in Lyon: a domestic ORD-MSP tail alone is not one', () => {
+  const {run} = referenceRun();
+  run.flights.bookings[1].segments = [seg('NL 2190', 'ORD', 'MSP', '2027-04-30T19:30:00-05:00', '2027-04-30T21:00:00-05:00')];
+  const out = grade(run);
+  assert.equal(out.expected.E1.points, 0);
+  assert.equal(out.full_pass, false);
+  const {run: via} = referenceRun(); // Lyon via Chicago is a complete return
+  via.flights.bookings[1].segments = [seg('NL 97', 'LYS', 'ORD', '2027-04-30T06:30:00+02:00', '2027-04-30T17:00:00-05:00'),
+    seg('NL 2190', 'ORD', 'MSP', '2027-04-30T19:30:00-05:00', '2027-04-30T21:00:00-05:00')];
+  assert.equal(grade(via).expected.E1.points, 7);
+});
+
+test('the corrected letter must carry the passport name exactly, in any order or case', () => {
+  const e2 = name => { const {run} = referenceRun(); run.portals.confdesk.letters[1].name_on_letter = name; return grade(run).expected.E2.points; };
+  assert.equal(e2('ZHOU ZHAO Mingyu'), 0);
+  assert.equal(e2('ZHAO Ming Yu'), 0);
+  assert.equal(e2('Mingyu Zhao'), 7);
+  assert.equal(e2('ZHAO, MINGYU'), 7);
+});
+
 test('the Munich arrival cutoff is judged on Munich local time, however the timestamp is written', () => {
   const late = at => { const {run} = referenceRun(); const [, , munich] = run.flights.bookings;
     munich.segments[munich.segments.length - 1].arrive_at = at; return grade(run).full_pass; };
