@@ -66,7 +66,7 @@ const SOURCES={camera:['Camera','Camera'],screenshot:['Screenshot','Screenshots'
 const STATES={pending:'Pending',honored:'Honoured',declined:'Declined',withdrawn:'Withdrawn',active:'Active',expired:'Expired',revoked:'Revoked',
  invited:'Invited',joined:'Joined',left:'Left',removed:'Removed',trashed:'In the trash',purged:'Deleted for good',viewer:'Viewer',contributor:'Contributor'};
 const stateName=k=>STATES[k]||human(k);
-const HISTORY={imported:'Imported into the library',added:'Backed up from the phone',added_waiting:'Arrived; waiting to back up',backed_up:'Backed up',
+const HISTORY={added:'Backed up from the phone',added_waiting:'Arrived; waiting to back up',backed_up:'Backed up',
  updated:'Edited',trashed:'Moved to the trash',restored:'Restored from the trash',purged:'Deleted for good',removal_honored:'Taken down after a removal request',
  saved_from_share:'Saved from a shared album'};
 const FIELDS={caption:'caption',favorite:'favourite',archived:'archive',taken_at:'capture time',people:'people',cover:'stack cover',albums_cleared:'albums'};
@@ -95,11 +95,17 @@ async function read(name,args){for(let i=0;;i++){try{return await ui.call(name,a
 // ---------- versions ----------
 // Core keeps one version for the whole library, and every read answers with it. `seen` is the
 // version at which every list the current view shows was read: the view is read as one batch, and
-// the batch is read again until all its answers carry the same version. Buttons and confirmations
-// send `seen`; a form reads the record it shows when it opens and sends that read's version. So a
-// write never pairs values read at one version with a newer version, and if anything committed
+// the batch is read again until all its answers carry the same version. Every write sends the
+// version of the read that produced what the person was looking at when they decided:
+// - a form reads the record it shows when it opens and sends that read's version;
+// - a confirmation, chooser or other dialog drawn from the view keeps `seen` as it was when the
+//   dialog opened, and sends that;
+// - a plain button sends `seen` as it was when the button was drawn.
+// So a write never pairs values read at one version with a newer version, and if anything committed
 // since, Core refuses it (stale_version) and the page says so. A later read that answers with a
-// newer version than `seen` means the view is out of date, and the page reads the whole view again.
+// newer version than `seen` means the view is out of date, and the page reads the whole view again,
+// also behind an open dialog: the view then shows the change, while the dialog still sends the
+// version it was drawn at, so its write is refused rather than applied to state it did not show.
 let seen=null,loadingView=false,writing=false,staleTimer=null,picked=null;
 const same=(a,b)=>!!a&&!!b&&a.epoch===b.epoch&&a.revision===b.revision;
 const newer=(v,than)=>!!v&&!!than&&(v.epoch>than.epoch||(v.epoch===than.epoch&&v.revision>than.revision));
@@ -175,7 +181,7 @@ async function openForm({title,submit,tool,load,fields,args,intro}){
  const d=dialog(title,body,{confirm:submit,run:async()=>{
   const values={};
   for(const [k,n] of Object.entries(inputs))values[k]=n.type==='datetime-local'?(n.value?new Date(n.value).toISOString():''):n.value;
-  await write(tool,args(values,got),{version:got.version,wait:false});
+  await write(tool,args(values,got),{version:got.version,form:true,wait:false});
  }});
  d.querySelector('[data-field]')?.focus();
  return d;
@@ -251,14 +257,15 @@ function dialog(title,body,{confirm,danger=false,run}={}){
  d.addEventListener('close',()=>d.remove());document.body.append(d);d.showModal();
  return d;
 }
-// A write sends the version of the view (or of the form's own read) and reuses its request ID if the
-// same change is retried after a failure, so a write whose answer was lost commits once. After a
-// write the whole view is read again; a dialog closes as soon as its write commits (wait: false)
-// while that read goes on behind it.
+// A write sends the version its caller captured (see "versions" above; there is no default) and
+// reuses its request ID if the same change is retried after a failure, so a write whose answer was
+// lost commits once. While the view is being read again, only forms (which carry their own read)
+// write; a control drawn from the view is refused as stale. After a write the whole view is read
+// again; a dialog closes as soon as its write commits (wait: false) while that read goes on behind it.
 const pendingWrites=new Map();
-async function write(name,args,{version=seen,keepId=ui.selected?.id,wait=true}={}){
+async function write(name,args,{version,form=false,keepId=ui.selected?.id,wait=true}={}){
  if(writing)throw Error('Another change is still being saved.');
- if(!version)throw Object.assign(Error('stale'),{code:'stale_version'});
+ if(!version||(loadingView&&!form))throw Object.assign(Error('stale'),{code:'stale_version'});
  const payload={...structuredClone(args),expected_version:structuredClone(version)},key=name+JSON.stringify(payload);
  if(!pendingWrites.has(key))pendingWrites.set(key,'web-'+crypto.randomUUID());
  payload.request_id=pendingWrites.get(key);
@@ -279,8 +286,8 @@ function report(name,args,result){
  if(name===T.respond&&args.decision==='honor'){
   parts.push(el('h3',{},'Taken down'),el('ul',{class:'fs-list'},result.cleared.length?result.cleared.map(c=>el('li',{},labelFor(c.item_id)+' — removed from '+plural(c.album_ids.length,'album')+(c.link_ids.length?' and '+plural(c.link_ids.length,'link'):''))):el('li',{},'Nothing was shared, so nothing had to be removed.')));
   if(result.not_removable.length)parts.push(el('h3',{},'Not yours to remove'),el('ul',{class:'fs-list'},result.not_removable.map(id=>el('li',{},contributionLabel(id)+': only the member who added it can take it down.'))));
-  const seen=result.already_seen.filter(s=>s.views.length||s.saves.length);
-  if(seen.length)parts.push(el('h3',{},'Already seen — cannot be called back'),el('ul',{class:'fs-list'},seen.map(s=>el('li',{},labelFor(s.item_id)+': '+plural(s.views.length,'view')+', '+plural(s.saves.length,'save')+' by '+[...new Set([...s.views,...s.saves].map(v=>v.viewer?.display_name||'someone with the link'))].join(', ')))));
+  const viewed=result.already_seen.filter(s=>s.views.length||s.saves.length);
+  if(viewed.length)parts.push(el('h3',{},'Already seen — cannot be called back'),el('ul',{class:'fs-list'},viewed.map(s=>el('li',{},labelFor(s.item_id)+': '+plural(s.views.length,'view')+', '+plural(s.saves.length,'save')+' by '+[...new Set([...s.views,...s.saves].map(v=>v.viewer?.display_name||'someone with the link'))].join(', ')))));
  }
  if(name===T.purge&&result.freed_bytes!=null)parts.push(el('p',{},size(result.freed_bytes)+' freed.'));
  if(parts.length)dialog(name===T.respond?'Request honoured':'Saved — please note',parts);
@@ -294,17 +301,17 @@ function contributionLabel(id){
 const albumTitle=id=>A.albums?.find(a=>a.id===id)?.title||A.details?.[id]?.title||'an album that was later deleted';
 
 function chooseAlbum(ids){
- const albums=A.albums.filter(a=>!a.deleted_at);
+ const version=seen,albums=A.albums.filter(a=>!a.deleted_at);
  const list=el('div',{class:'fs-choices'});
  const d=dialog('Add '+plural(ids.length,'item')+' to an album',[list]);
  for(const a of albums)list.append(el('button',{type:'button',class:'fs-choice',onclick:async()=>{
-  try{await write(T.edit,{id:a.id,add_ids:ids});d.close();leavePicking();}
+  try{await write(T.edit,{id:a.id,add_ids:ids},{version});d.close();leavePicking();}
   catch(e){d.querySelector('.form-error').textContent=say(e);d.querySelector('.form-error').dataset.code=e.code||'request_failed';}
  }},el('strong',{},a.title),el('small',{},plural(a.item_count,'item')+' · '+(a.state==='shared'?'Shared':'Private'))));
  if(!albums.length)list.append(el('p',{class:'muted'},'No albums yet. Create one first.'));
 }
 function pickItems(album){
- const inAlbum=new Set(A.details[album.id]?.entries.map(e=>e.id));
+ const version=seen,inAlbum=new Set(A.details[album.id]?.entries.map(e=>e.id));
  const pool=ui.records.filter(r=>r.state==='active'&&!inAlbum.has(r.id));
  const picked=new Set(),grid=el('div',{class:'fs-grid compact'}),count=el('small',{},'0 selected');
  const filter=el('input',{type:'search',placeholder:'Filter by caption, place or date','aria-label':'Filter photos'});
@@ -313,7 +320,7 @@ function pickItems(album){
    const b=el('button',{type:'button',class:'fs-tile'+(picked.has(r.id)?' chosen':''),'data-pick-id':r.id,'aria-label':titleOf(r),title:titleOf(r),onclick:()=>{picked.has(r.id)?picked.delete(r.id):picked.add(r.id);b.classList.toggle('chosen');count.textContent=picked.size+' selected';}},media(r),el('span',{class:'fs-check','aria-hidden':'true'},'✓'));
    grid.append(b);}};
  filter.addEventListener('input',draw);draw();
- dialog('Add to “'+album.title+'”',[filter,count,grid],{confirm:'Add to album',run:async()=>{if(!picked.size)throw Error('Choose at least one item.');await write(T.edit,{id:album.id,add_ids:[...picked]},{wait:false});}})
+ dialog('Add to “'+album.title+'”',[filter,count,grid],{confirm:'Add to album',run:async()=>{if(!picked.size)throw Error('Choose at least one item.');await write(T.edit,{id:album.id,add_ids:[...picked]},{version,wait:false});}})
   .classList.add('wide');
 }
 
@@ -322,22 +329,23 @@ const bulkBar=el('div',{class:'fs-bulk'});
 function leavePicking(){picking=false;chosen.clear();ui.navigate(ui.section).catch(fail);}
 function updateBulk(){
  bulkBar.replaceChildren();
- const ids=[...chosen],trash=ui.section==='trash';
+ const ids=[...chosen],trash=ui.section==='trash',version=seen;
  if(!picking){bulkBar.append(button('Select',()=>{picking=true;chosen.clear();return ui.navigate(ui.section);}));return;}
  bulkBar.append(el('strong',{},ids.length+' selected'));
  if(trash){
-  if(can(T.restore))bulkBar.append(button('Restore',()=>ids.length&&write(T.restore,{ids}).then(leavePicking)));
+  if(can(T.restore))bulkBar.append(button('Restore',()=>ids.length&&write(T.restore,{ids},{version}).then(leavePicking)));
   if(can(T.purge))bulkBar.append(button('Delete forever',()=>ids.length&&confirmPurge(ids),'danger'));
  }else{
   if(can(T.edit))bulkBar.append(button('Add to album',()=>ids.length&&chooseAlbum(ids)));
-  if(can(T.trash))bulkBar.append(button('Move to trash',()=>ids.length&&write(T.trash,{ids}).then(leavePicking)));
+  if(can(T.trash))bulkBar.append(button('Move to trash',()=>ids.length&&write(T.trash,{ids},{version}).then(leavePicking)));
  }
  bulkBar.append(button('Cancel',leavePicking,'quiet'));
 }
 const bulkWrites=()=>ui.section==='trash'?can(T.restore)||can(T.purge):can(T.edit)||can(T.trash);
 function confirmPurge(ids){
+ const version=seen;
  dialog('Delete forever?',[el('p',{},plural(ids.length,'item')+' will be deleted for good and their space freed. This cannot be undone.')],
-  {confirm:'Delete forever',danger:true,run:async()=>{picking=false;chosen.clear();await write(T.purge,{ids,confirm:true},{wait:false});}});
+  {confirm:'Delete forever',danger:true,run:async()=>{picking=false;chosen.clear();await write(T.purge,{ids,confirm:true},{version,wait:false});}});
 }
 
 // ---------- list pane views ----------
@@ -396,13 +404,13 @@ function memberRow(album,m){
   el('div',{},el('strong',{},m.display_name||personName(m.person_id)),el('small',{},stateName(m.role)+' · '+stateName(m.status)+(m.status==='joined'?' '+day(m.joined_at):m.status==='invited'?' '+day(m.invited_at):m.ended_at?' '+day(m.ended_at):''))),
   active&&can(T.member)?el('span',{class:'fs-row-actions'},
    button('Change role',()=>changeRole(album.id,m.person_id),'quiet'),
-   button('Remove',()=>dialog('Remove '+(m.display_name||m.person_id)+'?',[el('p',{},'They will stop seeing “'+album.title+'”. Anything they contributed leaves the album. Views and saves they already made stay recorded.')],
-    {confirm:'Remove member',danger:true,run:()=>write(T.member,{id:album.id,person_id:m.person_id,remove:true},{wait:false})}),'quiet danger')):null);
+   button('Remove',()=>{const version=seen;dialog('Remove '+(m.display_name||m.person_id)+'?',[el('p',{},'They will stop seeing “'+album.title+'”. Anything they contributed leaves the album. Views and saves they already made stay recorded.')],
+    {confirm:'Remove member',danger:true,run:()=>write(T.member,{id:album.id,person_id:m.person_id,remove:true},{version,wait:false})});},'quiet danger')):null);
 }
 function linkRow(l){
  return el('li',{class:'fs-person'},el('span',{class:'avatar small fs-link-icon','aria-hidden':'true'},'↗'),
   el('div',{},el('strong',{},'Link · '+stateName(l.state)),el('small',{},'Created '+day(l.created_at)+(l.expires_at?' · expires '+when(l.expires_at):' · no expiry')+(l.revoked_at?' · revoked '+day(l.revoked_at):'')+' · '+plural(l.views.length,'view')+', '+plural(l.views.reduce((n,v)=>n+v.saved_item_ids.length,0),'save'))),
-  l.state==='active'&&can(T.revoke)?el('span',{class:'fs-row-actions'},button('Revoke',()=>dialog('Revoke this link?',[el('p',{},'Nobody will be able to open the album with this link any more. Views and saves already recorded stay recorded.')],{confirm:'Revoke link',danger:true,run:()=>write(T.revoke,{id:l.id},{wait:false})}),'quiet danger')):null);
+  l.state==='active'&&can(T.revoke)?el('span',{class:'fs-row-actions'},button('Revoke',()=>{const version=seen;dialog('Revoke this link?',[el('p',{},'Nobody will be able to open the album with this link any more. Views and saves already recorded stay recorded.')],{confirm:'Revoke link',danger:true,run:()=>write(T.revoke,{id:l.id},{version,wait:false})});},'quiet danger')):null);
 }
 function albumView(id){
  const a=A.details[id];if(!a)return el('div',{class:'empty'},el('h3',{},'Album not found'));
@@ -431,13 +439,14 @@ function albumView(id){
   sharing,a.entries.length?g:el('div',{class:'empty'},el('h3',{},'This album is empty'),el('p',{},can(T.edit)?'Use “Add items” to fill it.':'')),hidden);
 }
 function deleteAlbum(a,summary){
- const seen=a.members.some(m=>m.status==='joined')||a.links.some(l=>l.state==='active');
+ const version=seen,exposed=a.members.some(m=>m.status==='joined')||a.links.some(l=>l.state==='active');
  const box=el('input',{type:'checkbox',id:'fs-confirm-delete'});
  dialog('Delete “'+a.title+'”?',[el('p',{},'The album goes away; its items stay in your library.'),
-  seen?el('label',{class:'fs-check-line'},box,el('span',{},'Also end access for '+plural(a.members.filter(m=>m.status==='joined').length,'joined member')+' and '+plural(summary?.active_links.length||0,'active link')+'.')):null],
+  exposed?el('label',{class:'fs-check-line'},box,el('span',{},'Also end access for '+plural(a.members.filter(m=>m.status==='joined').length,'joined member')+' and '+plural(summary?.active_links.length||0,'active link')+'.')):null],
   {confirm:'Delete album',danger:true,run:async()=>{
-   try{await write(T.remove,{id:a.id,...(box.checked?{confirm:true}:{})});}
-   catch(e){if(e.code==='confirm_required')e.say='“'+a.title+'” is still shared. Tick “Also end access” to delete it and end that access, or cancel.';throw e;}
+   try{await write(T.remove,{id:a.id,...(box.checked?{confirm:true}:{})},{version});}
+   // Only point at what this dialog offers: the box if it is drawn, otherwise opening it again.
+   catch(e){if(e.code==='confirm_required')e.say=exposed?'“'+a.title+'” is still shared. Tick “Also end access” to delete it and end that access, or cancel.':'“'+a.title+'” is now shared with someone. Cancel, then choose Delete album again to see who would lose access.';throw e;}
    await ui.navigate('albums');}});
 }
 function contribution(a,c){
@@ -445,7 +454,7 @@ function contribution(a,c){
  const body=[media({...c,has_file:false},{large:true}),
   row('From',personName(c.person_id)),row('Caption',c.caption||'—'),row('Taken',when(c.taken_at)),row('Place',placeOf(c)),
   row('People',(c.people||[]).map(labelName).join(', ')||'—'),row('Size',size(c.declared_bytes)),row('Added',when(c.added_at)),area];
- const d=dialog('Shared by '+personName(c.person_id),body,can(T.save)?{confirm:'Save to my library',run:()=>write(T.save,{id:a.id,item_id:c.id},{wait:false})}:{});
+ const version=seen,d=dialog('Shared by '+personName(c.person_id),body,can(T.save)?{confirm:'Save to my library',run:()=>write(T.save,{id:a.id,item_id:c.id},{version,wait:false})}:{});
  if(can(T.exposure))look(T.exposure,{id:c.id}).then(x=>{if(d.isConnected)area.replaceChildren(exposureView(x));}).catch(e=>area.replaceChildren(el('p',{class:'muted'},say(e))));
  else area.remove();
 }
@@ -538,27 +547,27 @@ function exposureView(x){
  return out;
 }
 function peopleEditor(item){
- const wrap=el('div',{class:'tags fs-people-tags'});
- for(const id of item.people)wrap.append(el('span',{class:'tag'},labelName(id),item.state==='active'&&can(T.update)?el('button',{type:'button',class:'fs-x','aria-label':'Remove '+labelName(id),onclick:()=>write(T.update,{id:item.id,patch:{remove_people:[id]}},{keepId:item.id}).catch(fail)},'×'):null));
+ const version=seen,wrap=el('div',{class:'tags fs-people-tags'});
+ for(const id of item.people)wrap.append(el('span',{class:'tag'},labelName(id),item.state==='active'&&can(T.update)?el('button',{type:'button',class:'fs-x','aria-label':'Remove '+labelName(id),onclick:()=>write(T.update,{id:item.id,patch:{remove_people:[id]}},{version,keepId:item.id}).catch(fail)},'×'):null));
  if(!item.people.length)wrap.append(el('span',{class:'muted'},'No people labelled'));
  if(item.state==='active'&&can(T.update)){
   const add=el('select',{'aria-label':'Add a person'},el('option',{value:''},'+ Add person'));
   for(const l of (A.labels||[]).filter(l=>!item.people.includes(l.id)))add.append(el('option',{value:l.id},l.name));
-  add.addEventListener('change',()=>{if(add.value)write(T.update,{id:item.id,patch:{add_people:[add.value]}},{keepId:item.id}).catch(fail);});
+  add.addEventListener('change',()=>{if(add.value)write(T.update,{id:item.id,patch:{add_people:[add.value]}},{version,keepId:item.id}).catch(fail);});
   wrap.append(add);
  }
  return wrap;
 }
 function photoView(item){
- const active=item.state==='active',bar=el('div',{class:'fs-toolbar'});
+ const active=item.state==='active',bar=el('div',{class:'fs-toolbar'}),version=seen;
  if(active&&can(T.update)){
-  bar.append(button(item.favorite?'♥ Favourite':'♡ Favourite',()=>write(T.update,{id:item.id,patch:{favorite:!item.favorite}},{keepId:item.id}),item.favorite?'on':''));
+  bar.append(button(item.favorite?'♥ Favourite':'♡ Favourite',()=>write(T.update,{id:item.id,patch:{favorite:!item.favorite}},{version,keepId:item.id}),item.favorite?'on':''));
   bar.append(button('Edit details',()=>editDetails(item.id)));
  }
  if(active&&can(T.edit))bar.append(button('Add to album',()=>chooseAlbum([item.id])));
- if(active&&can(T.update))bar.append(button(item.archived?'Unarchive':'Archive',()=>write(T.update,{id:item.id,patch:{archived:!item.archived}},{keepId:item.id})));
- if(active&&can(T.trash))bar.append(button('Move to trash',()=>write(T.trash,{ids:[item.id]}),'danger quiet'));
- if(item.state==='trashed'&&can(T.restore))bar.append(button('Restore',()=>write(T.restore,{ids:[item.id]},{keepId:item.id}),'primary'));
+ if(active&&can(T.update))bar.append(button(item.archived?'Unarchive':'Archive',()=>write(T.update,{id:item.id,patch:{archived:!item.archived}},{version,keepId:item.id})));
+ if(active&&can(T.trash))bar.append(button('Move to trash',()=>write(T.trash,{ids:[item.id]},{version}),'danger quiet'));
+ if(item.state==='trashed'&&can(T.restore))bar.append(button('Restore',()=>write(T.restore,{ids:[item.id]},{version,keepId:item.id}),'primary'));
  if(item.state==='trashed'&&can(T.purge))bar.append(button('Delete forever',()=>confirmPurge([item.id]),'danger'));
  const art=el('article',{class:'fs-photo'},bar,media(item,{large:true}),
   el('h2',{},item.caption||el('span',{class:'muted'},'No caption')),
@@ -575,7 +584,7 @@ function photoView(item){
   // Versions are told apart by their number, exact capture time (bursts are a second apart) and size.
   item.stack.versions.forEach((v,k)=>list.append(el('li',{class:v.id===item.id?'current':''},
    el('span',{},'Version '+(k+1)+(v.id===item.id?' (this one)':'')+' · '+seconds(v.taken_at)+' · '+size(v.declared_bytes)+(v.state==='trashed'?' · in the trash':'')),v.is_cover?badge('Cover','shared'):null,
-   !v.is_cover&&v.state==='active'&&can(T.update)?button('Make cover',()=>write(T.update,{id:v.id,patch:{make_cover:true}},{keepId:item.id}),'quiet'):null,
+   !v.is_cover&&v.state==='active'&&can(T.update)?button('Make cover',()=>write(T.update,{id:v.id,patch:{make_cover:true}},{version,keepId:item.id}),'quiet'):null,
    v.id!==item.id?button('Open',()=>{picked=v.id;return ui.select(v.id);},'quiet'):null)));
   art.append(el('section',{},el('h3',{},({edit:'Edited versions',burst:'Burst',duplicate:'Near-duplicates'}[item.stack.kind]||human(item.stack.kind))+' · '+plural(item.stack.versions.length,'version')),list));
  }
@@ -586,9 +595,9 @@ function photoView(item){
  const tools=el('div',{class:'fs-toolbar'});
  if(here&&inHere.includes(item.id)&&can(T.edit)){
   const i=inHere.indexOf(item.id);
-  if(i>0)tools.append(button('Move earlier',()=>write(T.edit,{id:here.id,order:[...inHere.slice(0,i-1),item.id,inHere[i-1]]},{keepId:item.id}),'quiet'));
-  if(i<inHere.length-1)tools.append(button('Move later',()=>write(T.edit,{id:here.id,order:[...inHere.slice(0,i),inHere[i+1],item.id]},{keepId:item.id}),'quiet'));
-  tools.append(button('Remove from “'+here.title+'”',()=>write(T.edit,{id:here.id,remove_ids:[item.id]}),'quiet danger'));
+  if(i>0)tools.append(button('Move earlier',()=>write(T.edit,{id:here.id,order:[...inHere.slice(0,i-1),item.id,inHere[i-1]]},{version,keepId:item.id}),'quiet'));
+  if(i<inHere.length-1)tools.append(button('Move later',()=>write(T.edit,{id:here.id,order:[...inHere.slice(0,i),inHere[i+1],item.id]},{version,keepId:item.id}),'quiet'));
+  tools.append(button('Remove from “'+here.title+'”',()=>write(T.edit,{id:here.id,remove_ids:[item.id]},{version}),'quiet danger'));
  }
  art.append(el('section',{},el('h3',{},'Albums'),item.albums.length?albums:el('p',{class:'muted'},'Not in any album.'),tools));
  if(can(T.exposure)){

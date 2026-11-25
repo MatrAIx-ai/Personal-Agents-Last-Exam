@@ -357,6 +357,109 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     check('1280 px: no horizontal page overflow', await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
     await context.close();
 
+    // Dialogs on a fresh run. A confirmation or chooser sends the version of the view it was drawn
+    // from. When a later read shows that something changed elsewhere, the page reads the view again
+    // behind the open dialog; confirming then shows the conflict and changes nothing.
+    const drun = 'browser-dialogs', dh = await start({app: 'fernshelf', registry, run: drun, stateDir, profile: 'sandbox'}); hosts.push(dh);
+    const dm = patient(await open('agent', drun)), di = patient(await open('infra', drun));
+    const dalbum = async id => (await dm.call('fernshelf.albums.get', {id})).album, dversion = async () => (await di.call('env.snapshot')).version;
+    const dc = await browser.newContext({viewport: {width: 1280, height: 900}}), q = await dc.newPage(); q.setDefaultTimeout(45000);
+    q.on('pageerror', e => errors.push('dialogs pageerror: ' + e.message));
+    q.on('console', m => { if (m.type() === 'error' && !/status of 400/.test(m.text())) errors.push('dialogs console: ' + m.text()); });
+    const sent = []; q.on('request', r => { if (r.url().endsWith('/api/call')) sent.push(r.postDataJSON()); });
+    // A held read: the next "who can see this" read waits in the browser until released, so it is
+    // answered after the change made elsewhere.
+    let hold = null;
+    await q.route('**/api/call', async route => { if (hold && !hold.taken && route.request().postDataJSON().name === 'fernshelf.exposure.get') { hold.taken = true; await hold.released; } await route.continue(); });
+    const holdNext = () => { let release; hold = {taken: false, released: new Promise(r => { release = r; })}; hold.release = release; return hold; };
+    const qIdle = () => q.locator('#app[aria-busy=false]').waitFor(), qDialog = q.locator('dialog[open]');
+    const qNav = async label => { await q.locator('nav button').filter({hasText: label}).first().click(); await qIdle(); };
+    const qAlbum = async title => { await qNav('Albums'); await q.locator('.fs-album-card').filter({hasText: title}).click(); await qIdle(); };
+    // Open a photo with its exposure read held, then the dialog.
+    const holdingPhoto = async id => { const h = holdNext(); await q.locator('#records [data-record-id="' + id + '"]').first().click(); await q.locator('.detail[data-selected-id="' + id + '"]').waitFor(); await until('held read', () => h.taken); return h; };
+    // Release the held read and wait until the page has read its whole view again behind the dialog.
+    const behind = async (h, what, shows) => {
+      const n = sent.length; h.release();
+      await until('view read again behind the dialog', () => sent.slice(n).some(b => b.name === 'fernshelf.account.get')); await qIdle();
+      await until(what, shows);
+      check(what + ' while the dialog stays open', await qDialog.count() === 1);
+    };
+    const staleOnConfirm = async (what, unchanged) => {
+      await qDialog.locator('.form-error[data-code=stale_version]').waitFor();
+      check(what + ': confirming shows the conflict and nothing is written', await unchanged());
+      await qDialog.getByRole('button', {name: /^(Cancel|Close)$/}).click(); await qDialog.waitFor({state: 'hidden'}); await qIdle();
+    };
+    // Delete album, drawn for an album nobody sees; a link and a joined member are added elsewhere.
+    // Nothing is held: at phone width the album's lower images load only when the list scrolls, so
+    // scrolling it behind the dialog makes the page's own image reads answer with the newer version.
+    await q.setViewportSize({width: 390, height: 500});
+    await q.goto(dh.accessUrl); await qIdle(); await q.locator('#records .fs-tile').first().waitFor();
+    const quiet = async () => { for (let n = -1; n !== sent.length;) { n = sent.length; await q.waitForTimeout(1200); } await qIdle(); };
+    await qAlbum('Pip'); await quiet();
+    await q.locator('.fs-album-head').getByRole('button', {name: 'Delete album'}).click();
+    check('Delete album on an album nobody sees asks for no extra confirmation', await qDialog.locator('input[type=checkbox]').count() === 0);
+    let dv = (await dm.call('fernshelf.links.create', {id: 'al-pip', expected_version: await dversion(), request_id: 'dialog-g-link'})).version;
+    dv = (await dm.call('fernshelf.albums.members.invite', {id: 'al-pip', person_id: 'person-kofi', role: 'viewer', expected_version: dv, request_id: 'dialog-g-invite'})).version;
+    assert.equal((await di.call('env.apply_event', {expected_version: await dversion(), event: {event_id: 'ev-web-g', at: '2026-11-20T09:30:00-08:00', operation: 'fernshelf.member.changed', payload: {album_id: 'al-pip', person_id: 'person-kofi', change: 'join'}}})).status, 'committed');
+    await q.evaluate(() => { document.querySelector('#records').scrollTop = 1e5; });
+    await until('Pip read again behind the dialog', async () => /Kofi Darrow[\s\S]*Joined/.test(await q.locator('.fs-sharing').innerText()));
+    check('Delete album: the album page behind the dialog was read again and lists the member who joined elsewhere', await qDialog.count() === 1);
+    await qDialog.getByRole('button', {name: 'Delete album'}).click();
+    await staleOnConfirm('Delete album drawn before a link and a member were added elsewhere', async () => { const a = await dalbum('al-pip'); return a.deleted_at === null && a.links.some(l => l.state === 'active') && a.members.some(m => m.person_id === 'person-kofi' && m.status === 'joined'); });
+    await q.setViewportSize({width: 1280, height: 900});
+
+    // Delete album with the box ticked; Kofi is invited and joins elsewhere, then a held read is answered.
+    await qAlbum('Winter visit');
+    let h = await holdingPhoto((await dalbum('al-winter-visit')).entries[1].id);
+    await q.locator('.fs-album-head').getByRole('button', {name: 'Delete album'}).click();
+    check('Delete album is drawn with no joined member', /0 joined members and 1 active link/.test(await qDialog.innerText()));
+    await qDialog.locator('input[type=checkbox]').check();
+    assert.equal((await dm.call('fernshelf.albums.members.invite', {id: 'al-winter-visit', person_id: 'person-kofi', role: 'viewer', expected_version: await dversion(), request_id: 'dialog-b-invite'})).status, 'committed');
+    assert.equal((await di.call('env.apply_event', {expected_version: await dversion(), event: {event_id: 'ev-web-b', at: '2026-11-20T09:31:00-08:00', operation: 'fernshelf.member.changed', payload: {album_id: 'al-winter-visit', person_id: 'person-kofi', change: 'join'}}})).status, 'committed');
+    await behind(h, 'Delete album: the album page behind the dialog lists Kofi as joined', async () => /Kofi Darrow[\s\S]*Joined/.test(await q.locator('.fs-sharing').innerText()));
+    await qDialog.getByRole('button', {name: 'Delete album'}).click();
+    await staleOnConfirm('Delete album drawn before a member joined elsewhere', async () => { const a = await dalbum('al-winter-visit'); return a.deleted_at === null && a.links.some(l => l.state === 'active') && a.members.some(m => m.person_id === 'person-kofi' && m.status === 'joined'); });
+
+    // Remove member, drawn before Kofi's role changes elsewhere.
+    await qAlbum('Reunion 2026');
+    h = await holdingPhoto((await dalbum('al-reunion-2026')).entries[0].id);
+    await q.locator('.fs-sharing .fs-person', {hasText: 'Kofi Darrow'}).getByRole('button', {name: 'Remove'}).click();
+    assert.equal((await dm.call('fernshelf.albums.members.update', {id: 'al-reunion-2026', person_id: 'person-kofi', role: 'contributor', expected_version: await dversion(), request_id: 'dialog-remove-role'})).status, 'committed');
+    await behind(h, 'Remove member: the album page behind the dialog shows the new role', async () => (await q.locator('.fs-sharing .fs-person', {hasText: 'Kofi Darrow'}).first().innerText()).includes('Contributor'));
+    await qDialog.getByRole('button', {name: 'Remove member'}).click();
+    await staleOnConfirm('Remove member drawn before a change elsewhere', async () => (await dalbum('al-reunion-2026')).members.some(m => m.person_id === 'person-kofi' && m.status === 'joined'));
+
+    // Revoke, drawn before the album is renamed elsewhere.
+    h = await holdingPhoto((await dalbum('al-reunion-2026')).entries[0].id);
+    await q.locator('.fs-sharing').getByRole('button', {name: 'Revoke', exact: true}).click();
+    assert.equal((await dm.call('fernshelf.albums.update', {id: 'al-reunion-2026', title: 'Reunion 2026 (renamed elsewhere)', expected_version: await dversion(), request_id: 'dialog-revoke-rename'})).status, 'committed');
+    await behind(h, 'Revoke: the album page behind the dialog shows the new title', async () => await q.locator('.fs-album-meta[data-album-title="Reunion 2026 (renamed elsewhere)"]').count() === 1);
+    await qDialog.getByRole('button', {name: 'Revoke link'}).click();
+    await staleOnConfirm('Revoke drawn before a change elsewhere', async () => (await dalbum('al-reunion-2026')).links.some(l => l.id === 'ln-0012' && l.state === 'active'));
+
+    // Add to album (the chooser), drawn before the chosen album changes elsewhere.
+    await qNav('Photos');
+    const bestIds = new Set((await dalbum('al-best-2026')).entries.map(e => e.id));
+    const loose = (await q.locator('#records .fs-tile').evaluateAll(n => n.map(x => x.dataset.recordId))).find(id => !bestIds.has(id));
+    h = await holdingPhoto(loose);
+    await q.locator('.detail').getByRole('button', {name: 'Add to album', exact: true}).click();
+    assert.equal((await dm.call('fernshelf.albums.update', {id: 'al-best-2026', title: 'Best of 2026 (renamed elsewhere)', expected_version: await dversion(), request_id: 'dialog-choose-rename'})).status, 'committed');
+    await behind(h, 'Add to album: the view behind the chooser was read again', async () => true);
+    await qDialog.getByRole('button', {name: /Best of 2026/}).click();
+    await staleOnConfirm('Add to album drawn before the album changed elsewhere', async () => !(await dalbum('al-best-2026')).entries.some(e => e.id === loose));
+
+    // Delete forever, drawn before the item is restored elsewhere.
+    await qNav('Trash');
+    const binned = await q.locator('#records .fs-tile').first().getAttribute('data-record-id');
+    h = await holdingPhoto(binned);
+    await q.locator('.detail').getByRole('button', {name: 'Delete forever', exact: true}).click();
+    assert.equal((await dm.call('fernshelf.items.restore', {ids: [binned], expected_version: await dversion(), request_id: 'dialog-purge-restore'})).status, 'committed');
+    await behind(h, 'Delete forever: the trash behind the dialog no longer lists the restored item', async () => await q.locator('#records [data-record-id="' + binned + '"]').count() === 0);
+    await qDialog.getByRole('button', {name: 'Delete forever'}).click();
+    await staleOnConfirm('Delete forever drawn before the item was restored elsewhere', async () => (await dm.call('fernshelf.items.get', {id: binned})).item.state === 'active');
+    await readable(q, 'Dialogs after conflicts');
+    await dc.close();
+
     // Restricted profile on a fresh run: no write controls, reads and images still work.
     const restricted = await start({app: 'fernshelf', registry, run: 'browser-restricted', stateDir, profile: 'scenario'}); hosts.push(restricted);
     const rc = await browser.newContext({viewport: {width: 1280, height: 900}}), r = await rc.newPage(); r.setDefaultTimeout(45000);
