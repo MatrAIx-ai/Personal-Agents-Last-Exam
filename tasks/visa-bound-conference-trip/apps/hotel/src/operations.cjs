@@ -72,6 +72,9 @@ function pendingSwitch(data, id) {
 function confirmSwitch(ctx, data, args) {
   const r = pendingSwitch(data, args.reservation_id), offer = r.rate_switch;
   if (c.ms(ctx.virtual_now) > c.ms(offer.expires_at)) c.fail('offer_expired', 'The rate-switch offer expired at ' + offer.expires_at + '.');
+  // Nothing is booked yet, so confirming is the booking: a night sold out since the offer blocks it, as in book().
+  const hotel = c.find(data.hotels, r.hotel_id, 'Hotel'), soldOut = rates.nightsIn(hotel.sold_out_nights, r.check_in, r.nights);
+  if (soldOut.length) c.fail('sold_out', hotel.name + ' is sold out on ' + soldOut.join(', ') + '.');
   const difference = offer.proposed_total_cents - r.paid_cents;
   r.plan = 'non_refundable';
   r.nightly_cents = offer.proposed_nightly_cents;

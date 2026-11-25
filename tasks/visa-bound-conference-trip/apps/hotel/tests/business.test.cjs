@@ -212,3 +212,15 @@ test('optional diagnostics cannot change business results and carry no free text
   const broken = fixture(); broken.ctx.log = () => { throw Error('logger offline'); };
   assert.deepEqual(run(broken).data, off.data);
 });
+
+test('a night sold out after the offer blocks confirmation, which changes nothing', () => {
+  const f = fixture();
+  at(f, '2027-02-10T09:20:00-06:00');
+  const {id} = lyonTrap(f);
+  f.event({event_id:'evt-sell-0429', at:'2027-02-10T09:25:00-06:00', operation:'roomline.availability.sell_out',
+    payload:{hotel_id:'hotel-rive-gauche', nights:['2027-04-27']}});
+  at(f, '2027-02-10T09:30:00-06:00');
+  unchanged(f, () => f.call('roomline.rate_switch.confirm', {reservation_id:id}), code('sold_out'));
+  assert.equal(get(f, id).status, 'pending_rate_switch');
+  assert.deepEqual(f.call('roomline.account', {}).charges, []);
+});

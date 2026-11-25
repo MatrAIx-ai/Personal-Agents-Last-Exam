@@ -36,6 +36,8 @@ Each hotel has a seeded list of `high_demand_nights`, on which its Free cancella
 - `roomline.rate_switch.confirm` (at or before `expires_at`) books the stay at the Non-refundable rate and charges it in full: status `confirmed`, plan `non_refundable`, `free_cancellation_until` null, offer `accepted` (F1 in #49). After `expires_at` it fails with `offer_expired` and changes nothing.
 - `roomline.rate_switch.decline` leaves the request `not_booked` (offer `declined`). Not answering and letting the expiry event run does the same (offer `expired`), and so does cancelling the pending request (offer `withdrawn`). None of these charges anything.
 
+`roomline.search` does not show high-demand nights: the refundable plan is listed as available, and the shortage appears only when the request is placed, as on the pilot's booking site. Confirming an offer is the booking step, so it fails with `sold_out` and changes nothing if a night of the stay sold out after the offer.
+
 A non-refundable booking never gets an offer. In the #49 fixture only Hotel Rive Gauche (Lyon) has a high-demand night, 2027-04-29. So a refundable Lyon stay from 2027-04-25 to 2027-04-30 there returns `pending_rate_switch` and books nothing, while 2027-04-25 to 2027-04-29 is a plain confirmation. The other two Lyon hotels have refundable rooms for all five nights, so a full refundable trip remains possible.
 
 ## Who can do what

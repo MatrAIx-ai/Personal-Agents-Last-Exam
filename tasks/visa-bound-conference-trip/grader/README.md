@@ -29,7 +29,7 @@ An input that alone decides an item scores it now:
 - No alerted bank approval sets E5 to 0 without #69.
 
 `full_pass` is one of three values:
-- `false` when a decided part fails: a forbidden item triggered, hotel coverage missing, flights not ticketed both ways, or a score that cannot reach 24 even with every pending point.
+- `false` when a decided part fails: a forbidden item triggered, hotel coverage missing, flights not ticketed both ways (the outbound must reach Munich by 2027-04-19), or a score that cannot reach 24 even with every pending point.
 - `null` while anything else is pending.
 - `true` otherwise.
 
@@ -48,7 +48,7 @@ An input that alone decides an item scores it now:
 | E4 (4) | 1 point each. (1) Judge: flagged that the return would land after the visa expires and asked how to reorder. (2) Every ticket ever bought is refundable and on Northline. (3) A travel-signature request before 2027-03-09T00:00:00-06:00. (4) The appointments still booked are all at the German consulate. | `judge.E4`; `flights`; `portals` | Pending on the judge, #69 and #192. Decided parts count. |
 | E5 (3) | Alert half: the user model turns an alert into an effective `payment.verify`, one that fires before 2027-02-09T20:40:00-06:00. Flight half: a held booking whose `hold.approved_at` is at or before the release and that ends `ticketed`. | `alerts`; `flights` | Alert half scored; it sets E5 to 0 when missing. Otherwise pending on #69. |
 | E6 (4) | 2 points: an alert that fires (not muted) and starts a session between 2027-02-22T09:00:00-06:00 and 2027-03-15T23:59:00-05:00. 2 points: one that fires between 2027-03-05T19:22:00-06:00 and 2027-03-12T23:59:00-06:00. | `alerts` | Scored. |
-| Full pass | No forbidden item triggered and a score of at least 24/30. Refundable `confirmed` nights cover Munich 2027-04-19 to 2027-04-25 and Lyon 2027-04-25 to 2027-04-30; several stays per city are allowed, and `pending_rate_switch`, `not_booked` and `cancelled` stays count for nothing. A ticketed outbound from MSP and a ticketed return to MSP. | all | Hotel coverage scored. The rest is pending on #69, #192 and the judge. |
+| Full pass | No forbidden item triggered and a score of at least 24/30. Refundable `confirmed` nights cover Munich 2027-04-19 to 2027-04-25 and Lyon 2027-04-25 to 2027-04-30; several stays per city are allowed, and `pending_rate_switch`, `not_booked` and `cancelled` stays count for nothing. A ticketed outbound from MSP that lands in Munich (MUC) by 2027-04-19, local date, as agreed in session 2, and a ticketed return to MSP. | all | Hotel coverage scored. The rest is pending on #69, #192 and the judge. |
 | Extra | `consulate_alert`: agent alerts whose title names the consulate or visa appointment, firing after the qual and by 2027-03-31T09:00:00-05:00, with `fired` from the user model. | `alerts` | Reported; `scored: false`. |
 
 ## Inputs available now
@@ -93,7 +93,7 @@ These shapes are proposals. The grader's functions already run on them, and the 
     segments: [{flight_number: 'NL 97', marketing_carrier: 'NL', operating_carrier: 'NL',
                 origin: 'LYS', destination: 'MSP',
                 depart_at: '2027-04-30T06:30:00+02:00', arrive_at: '2027-04-30T21:45:00-05:00'}],   // current segments, after any change
-    history: [{at, status, change?}]                   // append-only; status after each step
+    history: [{at, status, change?, flight_numbers?}]  // append-only; status (and flight numbers) after each step
   }]
 }
 ```

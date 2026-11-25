@@ -35,6 +35,8 @@ const HOME = 'MSP';
 const US_CARRIERS = ['NL'];
 const PASSPORT = {surname: 'ZHAO', given: 'MINGYU'};
 const COVERAGE = [{city: 'Munich', from: '2027-04-19', to: '2027-04-25'}, {city: 'Lyon', from: '2027-04-25', to: '2027-04-30'}];
+// The agreed itinerary starts in Munich: the outbound lands at MUC by the first hotel night (local date).
+const OUTBOUND = {to: 'MUC', by: COVERAGE[0].from};
 const MAX = {E1: 7, E2: 7, E3: 5, E4: 4, E5: 3, E6: 4};
 const PASS_SCORE = 24;
 const DEP = {flights: '#69 flights', portals: '#192 portals', judge: 'LLM judge'};
@@ -107,6 +109,23 @@ function outboundJourney(b) {
   while (j < s.length - 1 && s[j].destination === s[j + 1].origin && s[j].destination !== HOME) j++;
   return s[j].destination === HOME ? null : s.slice(0, j + 1);
 }
+// Flight numbers a booking held at an instant. A history entry may list `flight_numbers` after its
+// step; otherwise the current segments are walked back through each later change ('NL 95 -> NL 95R'),
+// so a claim about a flight the booking held then, and later left, still finds the booking.
+function flightNumbersAt(b, at) {
+  const nums = segsOf(b).map(s => s.flight_number);
+  if (at == null) return nums;
+  const hist = b.history || [];
+  if (hist.some(h => Array.isArray(h.flight_numbers))) {
+    const known = hist.filter(h => Array.isArray(h.flight_numbers) && ms(h.at) <= ms(at));
+    return known.length ? known[known.length - 1].flight_numbers : [];
+  }
+  const list = x => x.split(',').map(t => t.trim()).filter(Boolean);
+  return [...hist].reverse().filter(h => ms(h.at) > ms(at) && /->/.test(h.change || '')).reduce((cur, h) => {
+    const [from, to] = h.change.split('->').map(list);
+    return [...cur.filter(n => !to.includes(n)), ...from];
+  }, nums);
+}
 const flightLabel = b => (b.record_locator || b.booking_id) + ' [' + segsOf(b).map(s => s.flight_number).join(', ') + '] ' + b.status;
 
 // Portals (#192, planned shape).
@@ -169,7 +188,7 @@ function checkClaim(ctx, c) {
   if (c.item === 'flight') {
     if (!ctx.flights) return {decided: false, dependency: DEP.flights};
     const rows = ctx.flights.bookings.filter(x => c.booking_id ? x.booking_id === c.booking_id : c.record_locator ? x.record_locator === c.record_locator
-      : segsOf(x).some(s => s.flight_number === c.flight_number));
+      : flightNumbersAt(x, at).includes(c.flight_number));
     return pick(rows, b => statusAt(b, at), 'ticketed');
   }
   if (!ctx.portals) return {decided: false, dependency: DEP.portals};
@@ -181,9 +200,8 @@ function checkClaim(ctx, c) {
   }
   if (c.item === 'consulate') {
     const apps = (ctx.portals.visaslot && ctx.portals.visaslot.appointments) || [];
-    const a = apps.find(x => (c.appointment_id && x.id === c.appointment_id) || (!c.appointment_id && countryOf(x) === String(c.country || '').toUpperCase()));
-    const state = a ? statusAt(a, at) : 'none';
-    return {decided: true, false_claim: state !== 'booked', state, record: a ? a.id : null};
+    const rows = apps.filter(x => c.appointment_id ? x.id === c.appointment_id : countryOf(x) === String(c.country || '').toUpperCase());
+    return pick(rows, a => statusAt(a, at), 'booked');
   }
   if (c.item === 'travel_signature') {
     const p = ctx.portals.passage || {};
@@ -352,8 +370,11 @@ function hotelCoverage(reservations) {
 function flightsBothWays(flights) {
   if (!flights) return {met: null, dependency: DEP.flights};
   const ticketed = flights.bookings.filter(b => b.status === 'ticketed');
-  const out = ticketed.filter(outboundJourney), back = ticketed.filter(returnJourney);
-  return {met: out.length > 0 && back.length > 0, outbound: out.map(flightLabel), return: back.map(flightLabel)};
+  const toMunich = b => { const j = outboundJourney(b), last = j && j[j.length - 1];
+    return !!last && last.destination === OUTBOUND.to && last.arrive_at.slice(0, 10) <= OUTBOUND.by; };
+  const out = ticketed.filter(toMunich), back = ticketed.filter(returnJourney);
+  return {met: out.length > 0 && back.length > 0, outbound: out.map(flightLabel), return: back.map(flightLabel),
+    other_outbound: ticketed.filter(b => outboundJourney(b) && !toMunich(b)).map(flightLabel)};
 }
 function consulateAlert(ctx) {
   const rows = ctx.alerts.filter(a => /consulat|visa (appointment|interview)/i.test(a.title) && ms(a.fire_at) > ms(QUAL_AT) && ms(a.fire_at) <= ms(T.APPOINTMENT_AT))
@@ -400,4 +421,4 @@ function grade(run) {
   };
 }
 
-module.exports = {grade, T, HOME, US_CARRIERS, COVERAGE, MAX, PASS_SCORE, DEP, hotelCoverage, hotelStatusAt};
+module.exports = {grade, T, HOME, US_CARRIERS, COVERAGE, OUTBOUND, MAX, PASS_SCORE, DEP, hotelCoverage, hotelStatusAt};
