@@ -254,7 +254,6 @@ New:      NL 95R, Friday, April 30, 2027, Lyon (LYS) 16:20 - Minneapolis (MSP) S
 
 If the new schedule does not work for you, you can switch at no cost in Manage Trip to one of these alternatives until Friday, March 12, 2027, 23:59 US Central:
 - NL 97, Friday, April 30, 2027, Lyon (LYS) 06:30 - Minneapolis (MSP) 21:45, 1 stop
-- NL 91, Thursday, April 29, 2027, Lyon (LYS) 19:10 - Minneapolis (MSP) 23:58, 1 stop
 - AE 3391, Friday, April 30, 2027, Lyon (LYS) 11:00 - Minneapolis (MSP) 14:20, 1 stop, operated and marketed by our partner Aeris
 
 After that date, changes follow your fare rules and are subject to availability. If you take no action, you will travel on the new schedule.

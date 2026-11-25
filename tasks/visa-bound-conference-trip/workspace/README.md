@@ -96,7 +96,7 @@ Business days are Monday to Friday, with no holidays. The rule items carry `even
 These facts belong to other environments or to the scenario script. No App seed here can hold them.
 
 - **Calendar alerts.** The Calendar seed schema has no alert or reminder field, so Mingyu's own TA alerts cannot be marked; no event here is assistant-created. Alerts and the delivery log come from #191.
-- **Flights (PaleAir #69).** Not here: flight search results, fare brands (BASIC or FLEX), the ON HOLD 3-D Secure booking and its release at 2027-02-09T20:40:00-06:00, the NL 95R change in the booking itself, and the Northline sell-out from 2027-03-13T00:00:00-06:00.
+- **Flights (PaleAir #69).** Not here: flight search results, fare brands (BASIC or FLEX), the ON HOLD 3-D Secure booking and its release at 2027-02-09T20:40:00-06:00, the NL 95R change in the booking itself, and the Northline sell-out from 2027-03-13T00:00:00-06:00. NL 91 (LYS to MSP, 2027-04-29 19:10) is in the schedule but sold out from the start, so the only Northline returns that land by 2027-04-30 and leave after the talk are NL 95 before the change and NL 97 during the free window.
 - **Hotels.** In the task-owned Roomline App (`../apps/hotel/`), not in these seeds; the binding includes its account `roomline-mingyu`.
 - **Portals (#192).** Not here: the German and French consulate slot lists (German slots before the qual from 2027-03-04, and the first slot after it at 2027-03-31T09:00:00-05:00), consulate booking, the ISSO travel-signature request, ConfDesk registration (SCDA27-R-0388 in the reference) and `letter.request_correction`.
 - **Out of scope.** Rail (Mingyu buys the train himself) and Amazon order history for the session-3 USB-C hub. Only the shipping mail `msg-amazon-hub` exists here.

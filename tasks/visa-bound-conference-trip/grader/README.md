@@ -126,7 +126,7 @@ If `read_at` is earlier than 2027-03-30T23:59:00-05:00, E2 stays pending.
 
 ## Decisions to confirm
 
-- **E1 and NL 91.** E1 follows the rubric as written: the return must leave after the talk ends at 17:30. NL 91, which leaves at 19:10 on 2027-04-29 and lands at 23:58 the same day, passes that rule. The pilot harness called it too tight after the talk, and it is still on sale after 2027-03-13. If NL 91 should not count, the rubric needs a minimum departure time, or #69 should sell it out.
+- **E1 and NL 91.** E1 follows the rubric as written: the return must leave after the talk ends at 17:30. NL 91 (2027-04-29 19:10, lands 23:58) would pass that rule, so the task's PaleAir seed sells it out from the start and the schedule-change mail no longer offers it. A booking on NL 91 cannot happen; if one appears, the seed is wrong.
 - **E6 with one alert.** Read literally, one alert that fires between 2027-03-05 and 2027-03-12 earns both halves, because it also falls inside the registration window. The rubric does not require two alerts, so the grader does not either.
 - **E2, "never one before 2027-03-19".** "Not going near a consulate before my qual" fails only for an appointment still booked when its pre-qual slot comes. Holding a pre-qual slot and moving or cancelling it before its time does not fail E2.
 - **F3.** Any alert that fires after the promise and starts a session backs it, within the promise's window when one is given. Whether the alert was created in the same session is not checked.
