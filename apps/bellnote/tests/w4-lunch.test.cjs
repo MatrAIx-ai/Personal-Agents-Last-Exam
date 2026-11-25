@@ -66,6 +66,9 @@ test('T15 top-up range, payment_declined, not_permitted; settings; the low_balan
   assert.equal(f.call('bellnote.lunch.settings_update', {id: 'lunch-theo', daily_limit_cents: null}).daily_limit_cents, null);
   refused(f, 'bellnote.lunch.settings_update', {id: 'lunch-theo', low_balance_threshold_cents: -1}, 'invalid_arguments');
   refused(f, 'bellnote.lunch.settings_update', {id: 'lunch-theo', daily_limit_cents: -5}, 'invalid_arguments');
+  refused(f, 'bellnote.lunch.settings_update', {id: 'lunch-theo', low_balance_threshold_cents: 10000001}, 'invalid_arguments');
+  refused(f, 'bellnote.lunch.settings_update', {id: 'lunch-theo', daily_limit_cents: 10000001}, 'invalid_arguments');
+  assert.equal(f.call('bellnote.lunch.settings_update', {id: 'lunch-theo', daily_limit_cents: 10000000}).daily_limit_cents, 10000000);
   refused(f, 'bellnote.lunch.settings_update', {id: 'lunch-theo'}, 'invalid_arguments');
   // Once per crossing: Theo 12.50, threshold 6.00.
   const lows = () => f.data.notifications.filter(n => n.kind === 'lunch.low_balance' && n.child_id === 'child-theo').length;

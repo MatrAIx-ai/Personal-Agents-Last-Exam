@@ -66,6 +66,7 @@ function topup(ctx, data, args) {
   c.activity(ctx, data, {actor: 'agent', action: 'lunch.topup', child_id: acct.child_id, object_id: acct.id, request_id: args.request_id});
   return {id: acct.id, transaction_id: tx.id, payment: c.copy(payment), balance_cents: acct.balance_cents};
 }
+const MAX_CENTS = 10000000;
 function settings(ctx, data, args) {
   const acct = c.find(data.lunch_accounts, args.id, 'Lunch account');
   c.requireRight(data, acct.child_id, 'can_pay');
@@ -73,6 +74,9 @@ function settings(ctx, data, args) {
   if (!has('low_balance_threshold_cents') && !has('daily_limit_cents')) c.fail('invalid_arguments', 'Give a threshold, a daily limit or both.');
   if (has('low_balance_threshold_cents') && args.low_balance_threshold_cents < 0) c.fail('invalid_arguments', 'The threshold cannot be negative.');
   if (has('daily_limit_cents') && args.daily_limit_cents !== null && args.daily_limit_cents < 0) c.fail('invalid_arguments', 'The daily limit cannot be negative.');
+  // The stored amounts stop at MAX_CENTS, like every amount in the seed.
+  if (has('low_balance_threshold_cents') && args.low_balance_threshold_cents > MAX_CENTS) c.fail('invalid_arguments', 'The threshold can be at most ' + money(MAX_CENTS) + '.');
+  if (has('daily_limit_cents') && args.daily_limit_cents !== null && args.daily_limit_cents > MAX_CENTS) c.fail('invalid_arguments', 'The daily limit can be at most ' + money(MAX_CENTS) + '.');
   if (has('low_balance_threshold_cents')) acct.low_balance_threshold_cents = args.low_balance_threshold_cents;
   if (has('daily_limit_cents')) acct.daily_limit_cents = args.daily_limit_cents;
   // A guardian who sets the threshold already knows where the balance stands: the next notice

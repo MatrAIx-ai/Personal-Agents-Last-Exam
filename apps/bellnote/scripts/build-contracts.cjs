@@ -180,7 +180,7 @@ tool('dismissal.cancel', false, 'Cancel an active dismissal change (id), yours o
   W(), {id: ID, state: {const: 'cancelled'}, default_dismissal: str(20)}, [], 'dismissal_change');
 tool('lunch.topup', false, 'Top up lunch account id by amount_cents from payment_method_id (or the default). Needs your can_pay right for the child. The amount must be inside the top-up range of the child\'s school (schools.get policy). A top-up is final in the portal.',
   W({amount_cents: {type: 'integer', minimum: 1, maximum: 10000000}, payment_method_id: ID}), {id: ID, transaction_id: ID, payment: inline(defs.payment), balance_cents: INT}, ['payment_method_id'], 'lunch_account');
-tool('lunch.settings_update', false, 'Set the low-balance threshold and/or the daily spending limit (null clears it) of lunch account id. Needs your can_pay right for the child.',
+tool('lunch.settings_update', false, 'Set the low-balance threshold and/or the daily spending limit (null clears it) of lunch account id, each from 0 to 10000000 cents. Needs your can_pay right for the child.',
   W({low_balance_threshold_cents: INT, daily_limit_cents: nul(INT)}), {id: ID, low_balance_threshold_cents: CENTS, daily_limit_cents: nul(CENTS)}, ['low_balance_threshold_cents', 'daily_limit_cents'], 'lunch_account');
 tool('preferences.update', false, 'Turn email notices on or off and set the default payment method.',
   {email_notices: BOOL, default_payment_method_id: nul(ID)}, {id: ID, preferences: inline(defs.preferences)}, ['email_notices', 'default_payment_method_id']);
