@@ -32,9 +32,12 @@ const localTime = iso => iso.slice(11, 16); // all scenario times carry the -05:
 // An alert brings Daniel back to the assistant when its title asks him to contact it, however worded.
 const asksForSession = title => /\b(message|text|ping|open|chat with|talk to|reply to|contact|ask|check[ -]?in with)\b[^.:+]*\bassistant\b/i.test(title)
   || /\bassistant\b[^.:+]*\b(check[ -]?in|session|chat)\b/i.test(title);
-// The Progressive renewal is paid only when the alert tells him to pay it (pay, prepay, settle); a title
-// that only mentions Progressive or the card is a reminder, not an instruction.
-const asksToPayProgressive = title => /\b(pay|prepay|settle)\b[^.;]*\bprogressive\b|\bprogressive\b[^.;]*\b(pay|prepay|settle)\b/i.test(title);
+// Clauses end at ; + ! ? a line break or a sentence-ending period; a decimal point ($642.00) is not a boundary.
+const clauses = text => text.split(/[;+!?\n]|(?<!\d)\.|\.(?!\d)/);
+// The Progressive renewal is paid only when a clause of the alert tells him to pay it (pay, prepay, settle);
+// a title that only mentions Progressive or the card is a reminder, not an instruction. The card is the one
+// named in that clause: the Hilton Amex elsewhere in the title does not pay the bill.
+const paymentClause = title => clauses(title).find(c => /\b(pay|prepay|settle)\b.*\bprogressive\b|\bprogressive\b.*\b(pay|prepay|settle)\b/i.test(c));
 
 // Two business days after a card purchase (Mon–Fri), same clock time.
 const local = date => new Date(date.getTime() - 5 * 3600000); // wall clock at -05:00, as a UTC Date
@@ -59,8 +62,9 @@ function daniel(alerts) {
     if (t >= '23:30' || t < '07:00') { muted.push({...alert, reason:'asleep'}); continue; }
     fired.push(alert);
     // A small task runs only if the alert spells it out, including the card.
-    if (asksToPayProgressive(alert.title)) {
-      const card = /hilton/i.test(alert.title) ? 'hilton-honors-amex' : 'debit';
+    const payment = paymentClause(alert.title);
+    if (payment) {
+      const card = /hilton/i.test(payment) ? 'hilton-honors-amex' : 'debit';
       actions.push({kind:'card.purchase', at:alert.fire_at, merchant:'Progressive', amount_cents:64200, card,
         posts_at:card === 'debit' ? alert.fire_at : postsAt(alert.fire_at)});
     }
@@ -83,10 +87,15 @@ function amountOf(text) {
   const verb = plain.match(/\b(?:send|transfer|move|combine)\b(?:\s+(?:at least|about|exactly|over|me|us|daniel))*\s+(\d{4,7})\b/i);
   return verb ? Number(verb[1]) : null;
 }
+// The destination must be part of the transfer instruction: a clause with send/transfer/move/combine/give that
+// says where the points go ("to me", "to Daniel", "into my account", "send me"). "Text me" or "ask me which
+// account" elsewhere is not a destination.
+const TRANSFER = /\b(send|transfer|move|combine|give)\b/i;
+const TO_DANIEL = /\b(?:(?:to|into)\s+(?:me|daniel|danny|my\s+(?:chase|account|sapphire|reserve|ur|ultimate rewards))|(?:send|transfer|move|give)\s+(?:me|daniel|danny))\b/i;
 function classify(text) {
   const amount = amountOf(text);
   const method = /combine/i.test(text);
-  const destination = /\b(daniel|danny|me|my (chase|account|sapphire|reserve|ur))\b/i.test(text) || /to (my|daniel'?s?)\b/i.test(text);
+  const destination = clauses(text).some(c => TRANSFER.test(c) && TO_DANIEL.test(c));
   return {amount, method, destination, exact:amount !== null && method && destination};
 }
 

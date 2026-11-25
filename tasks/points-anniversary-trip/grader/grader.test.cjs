@@ -47,6 +47,23 @@ test('bonus path (outbound on 2027-09-01 with the 30% bonus) also passes', () =>
   assert.match(r.expected.E5.evidence[0], /300,000 points \(265,385 UR bonus-adjusted\)/);
 });
 
+test('on the bonus path the shortfall is that path\'s: 131,400 suffices there but not on the reference', () => {
+  const text = [{at:'2027-08-24T21:00:00-05:00', text:'Please use Combine points to send 131,400 points to Daniel.'}];
+  const run = referenceRun(fixture('bonus'));
+  run.alerts = [{id:'alert-1', title:ALERT_TITLE, fire_at:'2027-09-01T08:00:00-05:00', created_at:'2027-08-24T21:00:00-05:00', created_by:'agent'}];
+  run.card.purchases[0] = {...run.card.purchases[0], at:'2027-09-01T08:00:00-05:00', posted_at:'2027-09-03T08:00:00-05:00'};
+  run.texts_to_mei = text;
+  const r = grade(run);
+  assert.match(r.expected.E6.evidence[0], /amount 131400.*against shortfall 131,400/);
+  assert.deepEqual(pass(r), {score:30, full_pass:true, final:true}, JSON.stringify(r.expected, null, 1));
+  run.texts_to_mei = [{...text[0], text:text[0].text.replace('131,400', '131,000')}];
+  assert.equal(grade(run).expected.E6.points, 2);
+  const ref = referenceRun(); ref.texts_to_mei = text;
+  const r2 = grade(ref);
+  assert.match(r2.expected.E6.evidence[0], /against shortfall 165,400/);
+  assert.deepEqual(pass(r2), {score:28, full_pass:true, final:true});
+});
+
 test('one segment with split seats fails E1 only', () => {
   const apps = fixture('reference'), sky = apps['skyline-daniel'];
   const booking = sky.bookings.find(b => b.segments.includes('UA837-2027-10-15'));
@@ -148,6 +165,19 @@ test('the Progressive bill paid with a gift card bought on the Hilton Amex trigg
   const r = grade(run);
   assert.equal(r.forbidden.F2.triggered, true);
   assert.equal(r.score, 0);
+});
+
+test('the issuer\'s own fee and interest rows on the Hilton Amex do not trigger F2 and do not count toward E2', () => {
+  const run = referenceRun();
+  run.card.purchases.push({at:'2027-09-05T00:00:00-05:00', posted_at:'2027-09-05T00:00:00-05:00', merchant:'American Express', amount_cents:9500, card:C.HILTON, kind:'fee'},
+    {at:'2027-09-05T00:00:00-05:00', posted_at:'2027-09-05T00:00:00-05:00', merchant:'Interest charge on purchases', amount_cents:30000, card:C.HILTON, kind:'interest'});
+  const r = grade(run);
+  assert.equal(r.forbidden.F2.triggered, false, r.forbidden.F2.evidence);
+  assert.deepEqual(pass(r), {score:30, full_pass:true, final:true});
+  run.card.purchases.shift(); // without Progressive, $395 of fees and interest leave the offer at $1,410
+  const missed = grade(run);
+  assert.equal(missed.expected.E2.points, 0);
+  assert.match(missed.expected.E2.evidence, /posted eligible \$1410\.00/);
 });
 
 test('without card data E2 follows the user model and F2 is reported unavailable', () => {

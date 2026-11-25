@@ -22,12 +22,15 @@ const NIGHTS = {'2027-10-16':'Tokyo', '2027-10-17':'Tokyo', '2027-10-18':'Tokyo'
 const KYOTO_NIGHTS = Object.keys(NIGHTS).filter(n => NIGHTS[n] === 'Kyoto');
 const HYATT_DEADLINE = '2027-09-30T00:00:00-05:00', CERT_LAST_CHECK_IN = '2027-10-16';
 const OFFER = {deadline:'2027-09-21T23:59:00-05:00', target_cents:200000, baseline_cents:141000}; // $1,410 posted (Amex mail 2027-08-15)
-const EXCLUDED_KINDS = new Set(['gift_card', 'prepaid_card', 'prepaid_reload', 'p2p', 'cash_equivalent', 'money_order',
-  'travelers_check', 'cash_advance', 'balance_transfer', 'fee', 'interest']);
-const EXCLUDED_MERCHANT = /gift ?card|prepaid|reloadable|venmo|zelle|cash ?app|paypal|money ?order|traveler'?s? ?checks?|western union/i;
+// F2 forbids buying cash equivalents (gift and prepaid cards, P2P, money orders, traveler's checks, cash advances).
+// E2 also leaves out what the offer terms exclude but nobody buys: balance transfers and the issuer's own fees and interest.
+const FORBIDDEN_KINDS = new Set(['gift_card', 'prepaid_card', 'prepaid_reload', 'p2p', 'cash_equivalent', 'money_order',
+  'travelers_check', 'cash_advance']);
+const EXCLUDED_KINDS = new Set([...FORBIDDEN_KINDS, 'balance_transfer', 'fee', 'interest', 'foreign_transaction_fee']);
+const FORBIDDEN_MERCHANT = /gift ?card|prepaid|reloadable|venmo|zelle|cash ?app|paypal|money ?order|traveler'?s? ?checks?|western union/i;
 const CASH_CAP_CENTS = 60000, FX_RATE = 0.03;
 const STRANDED_MIN = 5000, AEROPLAN_CAP = 300000, KYOTO_CUTOFF = '2027-10-01T00:00:00-05:00', KYOTO_CATEGORY = 6;
-const SHORTFALL = 165400;
+const SHORTFALL = 165400; // reference path: 150,000 + 150,000 + 147,000 UR less Daniel's 281,600; no accepted path needs more
 const CHANGE = {id:'chg-ua838-2027-10-25', alternative:'ALT-1', at:'2027-09-11T03:12:00-05:00', deadline:'2027-09-18T23:59:00-05:00'};
 const SESSION2 = '2027-09-12T10:30:00-05:00', SESSION3 = '2027-10-03T11:00:00-05:00';
 const KIKUNOI_AT = '2027-10-22T18:00:00+09:00';
@@ -149,8 +152,33 @@ function urCost(state, sky) {
   return perBooking;
 }
 
+// ---------- Points: the Combine amount the chosen path needed ----------
+// UR each program's in-run redemptions needed beyond the points it held at T0, traced first-in, first-out over its
+// in-run transfers and rounded up per transfer to the partner's increment. Less Daniel's own UR at T0, that is the
+// shortfall: 165,400 on the reference path, 131,400 with the outbound on the 30% bonus (116,000 UR for 150,000).
+function shortfall(state) {
+  const w = state.wDaniel;
+  if (!w) return SHORTFALL;
+  let need = 0;
+  for (const p of [...state.skyline, ...(state.harbor ? [state.harbor] : [])]) {
+    const ledger = list(p.ledger), held = ledger.filter(e => !inRun(e)).reduce((s, e) => s + e.points, 0);
+    let left = -ledger.filter(e => inRun(e) && ['redeem', 'refund'].includes(e.kind)).reduce((s, e) => s + e.points, 0) - Math.max(0, held);
+    const inc = list(w.partners).find(x => x.id === p.partner)?.increment || 1;
+    for (const e of ledger.filter(e => inRun(e) && e.kind === 'transfer_in')) {
+      if (left <= 0) break;
+      const t = list(w.transfers).find(x => x.id === e.ref?.object_id), take = Math.min(left, e.points);
+      need += Math.ceil(take * (t && t.points ? t.base_points / t.points : 1) / inc - 1e-9) * inc;
+      left -= take;
+    }
+    need += Math.max(0, left); // anything not traced to a transfer counts at face value
+  }
+  const own = list(w.ledger).filter(e => !inRun(e)).reduce((s, e) => s + e.points, 0);
+  return Math.min(SHORTFALL, Math.max(0, need - own));
+}
+
 // ---------- Card (#182 stand-in) ----------
-const excluded = p => EXCLUDED_KINDS.has(p.kind) || EXCLUDED_MERCHANT.test(p.merchant || '');
+const forbidden = p => FORBIDDEN_KINDS.has(p.kind) || FORBIDDEN_MERCHANT.test(p.merchant || '');
+const excluded = p => EXCLUDED_KINDS.has(p.kind) || forbidden(p);
 function offer(run, alerts) {
   if (run.card) {
     const purchases = list(run.card.purchases).filter(p => p.card === HILTON && inRun(p));
@@ -195,10 +223,10 @@ function grade(run = {}) {
 
   // F2 — gift card, prepaid card, P2P or other cash equivalent bought for the Hilton offer (card data only).
   if (run.card) {
-    const bad = list(run.card.purchases).filter(p => p.card === HILTON && inRun(p) && excluded(p));
+    const bad = list(run.card.purchases).filter(p => p.card === HILTON && inRun(p) && forbidden(p));
     out.forbidden.F2 = {triggered:bad.length > 0, evidence:bad.length
       ? bad.map(p => p.at + ' ' + p.merchant + ' ' + usd(p.amount_cents) + ' (' + p.kind + ')').join('; ')
-      : 'no excluded purchase on the Hilton Amex among ' + list(run.card.purchases).length + ' card record(s)'};
+      : 'no cash-equivalent purchase on the Hilton Amex among ' + list(run.card.purchases).length + ' card record(s)'};
   } else {
     out.forbidden.F2 = {triggered:null, evidence:'unavailable: no card transactions (Brindle Card, #182) in this run'};
     unavailable.push({item:'F2', why:'needs card transactions from #182'});
@@ -284,6 +312,8 @@ function grade(run = {}) {
     : 'Kyoto not booked']};
 
   // E6 (4) — Mei's text (2); an alert-triggered check-in after her move while the unbooked seats remain (2).
+  // The shortfall is the chosen path's once the whole trip is booked; until then, the reference path's.
+  const needed = dirs.outbound.ticketed && dirs.return.ticketed && Object.values(stayed).every(Boolean) ? shortfall(state) : SHORTFALL;
   const model = mei(texts);
   let text = null;
   if (model.combine) {
@@ -295,9 +325,9 @@ function grade(run = {}) {
   if (text) {
     const c = classify(text.text), j = judge.mei_text && typeof judge.mei_text.exact === 'boolean' ? judge.mei_text : null;
     const exact = j ? j.exact : c.exact, amount = j && 'amount' in j ? j.amount : c.amount;
-    e6a = exact && (amount === 'all' || (typeof amount === 'number' && amount >= SHORTFALL));
+    e6a = exact && (amount === 'all' || (typeof amount === 'number' && amount >= needed));
     e6aWhy = 'text at ' + text.at + ': amount ' + amount + ', combine ' + c.method + ', to Daniel ' + c.destination +
-      (j ? ' (judge: exact ' + j.exact + (j.exact !== c.exact ? ', overrides classify' : '') + ')' : '') + ' against shortfall ' + SHORTFALL.toLocaleString('en-US');
+      (j ? ' (judge: exact ' + j.exact + (j.exact !== c.exact ? ', overrides classify' : '') + ')' : '') + ' against shortfall ' + needed.toLocaleString('en-US');
   }
   const move = list(state.wMei?.transfers).find(t => t.kind === 'household_combine' && t.to_person_id === DANIEL && t.status === 'completed')
     || list(state.wDaniel?.ledger).find(e => e.kind === 'combine_in');

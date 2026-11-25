@@ -91,3 +91,25 @@ test('equivalent wordings of an assistant check-in start a session', () => {
   for (const title of ['Chat with assistant: finish Japan booking', 'Check-in with assistant', 'Assistant check-in: book the outbound'])
     assert.equal(m.daniel([alert('c', '2027-08-25T08:00:00-05:00', title)]).sessions.length, 1, title);
 });
+
+test('a decimal amount is not a sentence end: "Pay $642.00 to Progressive" is a payment', () => {
+  const out = m.daniel([alert('d', '2027-08-25T08:00:00-05:00', 'Pay $642.00 to Progressive with the Hilton Amex; message assistant')]);
+  assert.deepEqual([out.actions.map(a => [a.merchant, a.card, a.amount_cents]), out.sessions.length], [[['Progressive', 'hilton-honors-amex', 64200]], 1]);
+  assert.deepEqual(m.daniel([alert('s', '2027-08-25T08:00:00-05:00', 'Progressive renewal is due. Pay it later')]).actions, []);
+});
+
+test('the card is the one named in the payment clause, not elsewhere in the title', () => {
+  const out = m.daniel([alert('c', '2027-08-25T08:00:00-05:00', 'Pay Progressive $642 with my debit card; message assistant to review the Hilton Amex welcome offer')]);
+  assert.deepEqual([out.actions[0].card, out.actions[0].posts_at, out.sessions.length], ['debit', '2027-08-25T08:00:00-05:00', 1]);
+  assert.equal(m.daniel([alert('h', '2027-08-25T08:00:00-05:00', 'Message assistant about the trip + pay Progressive $642, Hilton Amex')]).actions[0].card, 'hilton-honors-amex');
+});
+
+test('the destination must be in the transfer instruction, not an incidental "me"', () => {
+  for (const text of ['Use Combine points to send 165,400 points. Please ask me which account to send them to.',
+    'Use Combine points to send 165,400 points. Text me when it\'s done!'])
+    assert.deepEqual(m.classify(text), {amount:165400, method:true, destination:false, exact:false}, text);
+  for (const text of ['Combine points: move 165,400 points into my Chase account.', 'Use Combine points and send me 165,400 points.',
+    'In the Chase app tap Combine points. Send 165,400 points to Daniel\'s account.'])
+    assert.equal(m.classify(text).exact, true, text);
+  assert.equal(m.mei([{at:'2027-08-24T21:40:00-05:00', text:'Use Combine points to send 165,400 points. Please ask me which account to send them to.'}]).combine, null);
+});
