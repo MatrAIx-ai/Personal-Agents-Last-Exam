@@ -24,6 +24,7 @@ function list(ctx, data, args) {
 function check(data, entry) {
   const ing = c.ingredient(data, entry.ingredient_id);
   if (!(entry.quantity >= 0) || !Number.isFinite(entry.quantity)) fail('invalid_quantity', `The quantity of ${ing.name} cannot be negative.`);
+  if (entry.quantity > c.LIMITS.quantity) fail('invalid_quantity', `The quantity of ${ing.name} can be at most 1,000,000.`);
   if (!u.measurable(ing, entry.unit)) fail('invalid_quantity', `${ing.name} cannot be measured in ${entry.unit}.`);
   if (entry.use_by !== undefined && entry.use_by !== null && !c.isDate(entry.use_by)) fail('invalid_arguments', `${entry.use_by} is not a calendar date.`);
   return ing;

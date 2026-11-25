@@ -24,6 +24,7 @@ function checkServings(servings) {
 function checkLine(data, line) {
   const ing = c.ingredient(data, line.ingredient_id);
   if (!(line.quantity > 0) || !Number.isFinite(line.quantity)) fail('invalid_quantity', `The quantity of ${ing.name} must be positive.`);
+  if (line.quantity < c.LIMITS.line_min || line.quantity > c.LIMITS.quantity) fail('invalid_quantity', `The quantity of ${ing.name} must be between 0.001 and 1,000,000.`);
   if (!u.measurable(ing, line.unit)) fail('invalid_quantity', `${ing.name} cannot be measured in ${line.unit}.`);
   return ing;
 }
@@ -283,6 +284,7 @@ function buildVariant(data, args) {
     } else if (s.to_ingredient_id) {
       to = c.ingredient(data, s.to_ingredient_id); ratio = s.ratio ?? 1;
       if (!(ratio > 0)) fail('invalid_quantity', 'A swap ratio must be positive.');
+      if (ratio < c.LIMITS.ratio_min || ratio > c.LIMITS.ratio_max) fail('invalid_quantity', 'A swap ratio must be between 0.01 and 100.');
     } else fail('invalid_arguments', 'A swap needs a rule_id or a to_ingredient_id.');
     if (to.id === from.id) fail('invalid_arguments', 'A swap must change the ingredient.');
     for (const i of indexes) {
@@ -290,7 +292,11 @@ function buildVariant(data, args) {
       used.add(i);
       const line = content.lines[i];
       if (!u.measurable(to, line.unit)) fail('invalid_quantity', `${to.name} cannot be measured in ${line.unit}, the unit of line ${i}.`);
-      content.lines[i] = {...line, ingredient_id: to.id, quantity: exact(line.quantity * ratio)};
+      const quantity = exact(line.quantity * ratio);
+      if (quantity < c.LIMITS.line_min || quantity > c.LIMITS.quantity) {
+        fail('invalid_quantity', `The swap makes ${c.quantityText(quantity, line.unit)} of ${to.name}; a line quantity must be between 0.001 and 1,000,000.`);
+      }
+      content.lines[i] = {...line, ingredient_id: to.id, quantity};
       swaps.push({line: i, from_ingredient_id: from.id, to_ingredient_id: to.id, ratio, rule_id: rule ? rule.id : null, custom: !rule});
     }
   }

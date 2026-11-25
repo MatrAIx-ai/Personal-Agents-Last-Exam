@@ -78,14 +78,15 @@ function describe(data, con) {
   return what + from + to;
 }
 // Guests carry a name and constraints of the same five kinds, without dates.
+// The checks are on guest_id, so their messages repeat the ID that was sent next to the guests' names.
 function normalizeGuests(data, guests) {
-  const ids = new Set();
+  const ids = new Map();
   return guests.map(g => {
     if (!g.name.trim()) fail('invalid_arguments', 'Every guest needs a name.');
-    if (ids.has(g.guest_id)) fail('invalid_arguments', `${g.name.trim()} is listed twice as a guest.`);
-    ids.add(g.guest_id);
+    if (ids.has(g.guest_id)) fail('invalid_arguments', `Two guests, ${ids.get(g.guest_id)} and ${g.name.trim()}, have the same guest ID ${g.guest_id}; give each guest an ID of their own.`);
+    ids.set(g.guest_id, g.name.trim());
     const member = data.members.find(m => m.person_id === g.guest_id);
-    if (member) fail('invalid_arguments', `${member.display_name} is a household member, not a guest.`);
+    if (member) fail('invalid_arguments', `The guest ${g.name.trim()} has the guest ID ${g.guest_id}, which is household member ${member.display_name}'s; list members as attendees, and give a guest an ID of their own.`);
     return {guest_id: g.guest_id, name: g.name.trim(), constraints: (g.constraints || []).map(x => ({kind: x.kind, ...target(data, x), note: x.note ?? null}))};
   });
 }

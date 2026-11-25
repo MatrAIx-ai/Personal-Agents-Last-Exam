@@ -2859,7 +2859,7 @@
   },
   {
     "name": "platewright.recipes.variant.preview",
-    "description": "Preview a recipe with swaps (by rule_id, or a custom to_ingredient_id with a ratio): returns exactly the content recipes.variant.create would save, its nutrition, and the check before and after the swaps. Writes nothing.",
+    "description": "Preview a recipe with swaps (by rule_id, or a custom to_ingredient_id with a ratio from 0.01 to 100; each swapped quantity must stay between 0.001 and 1,000,000): returns exactly the content recipes.variant.create would save, its nutrition, and the check before and after the swaps. Writes nothing.",
     "read_only": true,
     "scope": "platewright.recipes.variant.preview",
     "resource_target": "current household",
@@ -6096,7 +6096,7 @@
   },
   {
     "name": "platewright.recipes.create",
-    "description": "Save a new recipe at revision 1 (servings 1 to 200; every quantity positive and in a unit its ingredient is measured in).",
+    "description": "Save a new recipe at revision 1 (servings 1 to 200; every quantity between 0.001 and 1,000,000 and in a unit its ingredient is measured in).",
     "read_only": false,
     "scope": "platewright.recipes.create",
     "resource_target": "current household",
@@ -6303,7 +6303,7 @@
   },
   {
     "name": "platewright.recipes.update",
-    "description": "Edit a recipe through patch, which adds a revision; patch.archived archives (true) or restores (false) it without a new revision. An archived recipe can only be restored; a variant can only be archived or restored.",
+    "description": "Edit a recipe through patch, which adds a revision; patch.archived archives (true) or restores (false) it without a new revision. Servings and quantities follow recipes.create. An archived recipe can only be restored; a variant can only be archived or restored.",
     "read_only": false,
     "scope": "platewright.recipes.update",
     "resource_target": "current household",
@@ -6526,7 +6526,7 @@
   },
   {
     "name": "platewright.recipes.variant.create",
-    "description": "Save a recipe with swaps as a new variant recipe that records its base, the base revision and the swaps; a custom swap marks it unverified. Saves exactly what recipes.variant.preview shows.",
+    "description": "Save a recipe with swaps as a new variant recipe that records its base, the base revision and the swaps; a custom swap marks it unverified. Saves exactly what recipes.variant.preview shows, with the same ratio and quantity bounds.",
     "read_only": false,
     "scope": "platewright.recipes.variant.create",
     "resource_target": "current household",
@@ -6973,7 +6973,7 @@
   },
   {
     "name": "platewright.plan.slot.set",
-    "description": "Set a slot (id = date:meal) with dishes (a recipe at servings, default from the attendees' portion factors plus one per guest, or portions of leftovers from an earlier slot), attendees (default all members) and guests with their constraints; it replaces the slot. No dishes clears it. A dish that is wrong for someone is planned and flagged, not refused.",
+    "description": "Set a slot (id = date:meal) with dishes (a recipe at servings, default from the attendees' portion factors plus one per guest, or portions of leftovers, at most 200, from an earlier slot), attendees (default all members) and guests with their constraints; it replaces the slot. No dishes clears it. A dish that is wrong for someone is planned and flagged, not refused.",
     "read_only": false,
     "scope": "platewright.plan.slot.set",
     "resource_target": "current household plan",
@@ -7580,7 +7580,7 @@
   },
   {
     "name": "platewright.plan.slot.mark",
-    "description": "Mark a planned slot cooked (not before its date; records portions made and eaten per recipe, default its servings and its attendees' portions; deduct_pantry takes the exact quantities from the pantry, never below zero, and returns what was short) or skipped.",
+    "description": "Mark a planned slot cooked (not before its date; records portions made (at most 200) and eaten per recipe, default its servings and its attendees' portions; deduct_pantry takes the exact quantities from the pantry, never below zero, and returns what was short) or skipped.",
     "read_only": false,
     "scope": "platewright.plan.slot.mark",
     "resource_target": "current household plan",
@@ -7784,7 +7784,7 @@
   },
   {
     "name": "platewright.pantry.set",
-    "description": "Set the pantry quantity of an ingredient (id = ingredient_id) in a unit it is measured in, and optionally its use-by date (null: none). Quantity 0 marks it used up.",
+    "description": "Set the pantry quantity of an ingredient (id = ingredient_id) in a unit it is measured in, and optionally its use-by date (null: none). Quantity 0 marks it used up; at most 1,000,000.",
     "read_only": false,
     "scope": "platewright.pantry.set",
     "resource_target": "current household",
@@ -8104,7 +8104,7 @@
   },
   {
     "name": "platewright.shopping.item.set",
-    "description": "Without id: add a manual line (ingredient_id or text, quantity, unit). With id: change a manual line, tick or untick a line, or exclude a derived line with a reason (or include it again).",
+    "description": "Without id: add a manual line (ingredient_id or text, quantity up to 1,000,000, unit). With id: change a manual line, tick or untick a line, or exclude a derived line with a reason (or include it again).",
     "read_only": false,
     "scope": "platewright.shopping.item.set",
     "resource_target": "current household",

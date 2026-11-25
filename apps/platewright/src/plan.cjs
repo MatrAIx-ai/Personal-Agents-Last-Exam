@@ -158,6 +158,7 @@ function normalizeDishes(data, slotId, slotPos, dishes) {
       recipeId = cooked[0].recipe_id;
     } else if (!cooked.some(x => x.recipe_id === recipeId)) fail('leftover_unavailable', `The ${c.slotText(d.leftovers_of)} did not plan ${recipeName(data, recipeId)}.`);
     if (!(d.portions > 0) || !Number.isFinite(d.portions)) fail('invalid_quantity', 'Leftover portions must be positive.');
+    if (d.portions > c.LIMITS.portions) fail('invalid_quantity', 'Leftover portions can be at most 200.');
     return {leftovers_of: source.id, recipe_id: recipeId, portions: d.portions};
   });
 }
@@ -247,6 +248,7 @@ function markTool(ctx, data, args) {
     const p = given.get(d.recipe_id) || {};
     // Defaults: made = the dish's servings; eaten = the attendees' portions, at most what was made.
     const made = p.made ?? dishServings(data, slot, d), eaten = p.eaten ?? Math.min(defaultPortions(data, slot), made);
+    if (made > c.LIMITS.portions) fail('invalid_quantity', `Portions made (${made}) can be at most 200.`);
     if (!(made >= 0 && eaten >= 0) || eaten > made) fail('invalid_quantity', `Portions eaten (${eaten}) must be between 0 and portions made (${made}).`);
     return {recipe_id: d.recipe_id, revision: data.recipes.find(r => r.id === d.recipe_id).revision, made, eaten};
   });

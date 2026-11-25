@@ -22,6 +22,12 @@ const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'frida
 const EVENT_KINDS = ['member.updated', 'recipe.added', 'plan.changed', 'guest.changed', 'pantry.changed', 'shopping.changed'];
 
 const ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$/;
+// Bounds on numbers the plan leaves open, wide enough for any kitchen and small enough that scaling
+// (up to 200 servings, a ratio up to 100, a pound in grams) stays finite and no positive line rounds to zero:
+// a quantity (recipe line, pantry item, shopping line) at most 1,000,000 in its unit, a recipe line at
+// least 0.001, a swap ratio from 0.01 to 100, and portions (leftovers, made, eaten) at most 200, the
+// plan's largest number of servings.
+const LIMITS = {quantity: 1000000, line_min: 0.001, ratio_min: 0.01, ratio_max: 100, portions: 200};
 
 function fail(code, message) {
   throw Object.assign(new Error(message), {code});
@@ -125,7 +131,7 @@ function slug(text) {
 }
 
 module.exports = {
-  ALLERGENS, FLAGS, DIETS, NUTRIENTS, KINDS, METHODS, MEALS, WEEKDAYS, EVENT_KINDS, ID_PATTERN,
+  ALLERGENS, FLAGS, DIETS, NUTRIENTS, KINDS, METHODS, MEALS, WEEKDAYS, EVENT_KINDS, ID_PATTERN, LIMITS,
   fail, copy, isDate, addDays, daysBetween, weekday, validTimeZone, localDate, today, exact, ceilHalf,
   byId, ingredient, recipe, member, nextId, slug, dateText, slotText, words, quantityText, amountText, plural
 };

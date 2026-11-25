@@ -2,9 +2,11 @@
 // Refusals a person can meet in the web interface, which only offers records that exist: each is
 // provoked on the reference household, returns its code, and its message names meals, dates,
 // recipes, ingredients, people, constraints and shopping lines in words (scripts/check-fixtures.cjs
-// unreadable(): no record IDs, slot IDs, ISO dates or vocabulary keys). Refusals about an ID that
-// matches no record repeat the ID that was sent, since there is no name to give; the page cannot
-// send one.
+// unreadable(): no record IDs, slot IDs, ISO dates or vocabulary keys). A refusal about a guest ID
+// the caller sent (two guests with one ID, a guest with a member's ID) repeats that ID next to the
+// guests' names, since the ID is what the caller has to change; such a case names the ID it expects,
+// and the rest of its message is held to the same rule. The page gives each guest an ID of its own,
+// so it cannot send these.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {fixture} = require('./harness.cjs');
@@ -20,8 +22,8 @@ const CASES = [
   ['plan.slot.set', {id: '2026-11-14:lunch', dishes: [{leftovers_of: '2026-11-14:dinner', portions: 2}]}, 'leftover_unavailable'],
   ['plan.slot.set', {id: '2026-11-16:lunch', dishes: [{leftovers_of: '2026-11-09:breakfast', portions: 2}]}, 'leftover_unavailable'],
   ['plan.slot.set', {id: '2026-11-11:lunch', dishes: [{leftovers_of: '2026-11-09:dinner', recipe_id: 'rec-dal', portions: 1}]}, 'leftover_unavailable'],
-  ['plan.slot.set', {id: '2026-11-16:dinner', dishes: [{recipe_id: 'rec-dal'}], guests: [{guest_id: 'guest-sam', name: 'Sam'}, {guest_id: 'guest-sam', name: 'Sam'}]}, 'invalid_arguments'],
-  ['plan.slot.set', {id: '2026-11-16:dinner', dishes: [{recipe_id: 'rec-dal'}], guests: [{guest_id: 'person-eli', name: 'Eli'}]}, 'invalid_arguments'],
+  ['plan.slot.set', {id: '2026-11-16:dinner', dishes: [{recipe_id: 'rec-dal'}], guests: [{guest_id: 'guest-sam', name: 'Sam'}, {guest_id: 'guest-sam', name: 'Sam'}]}, 'invalid_arguments', 'guest-sam'],
+  ['plan.slot.set', {id: '2026-11-16:dinner', dishes: [{recipe_id: 'rec-dal'}], guests: [{guest_id: 'person-eli', name: 'Eli'}]}, 'invalid_arguments', 'person-eli'],
   ['plan.slot.set', {id: '2026-11-16:dinner', dishes: [{recipe_id: 'rec-dal'}], attendees: ['person-eli', 'person-eli']}, 'invalid_arguments'],
   ['plan.slot.set', {id: '2026-11-16:dinner', dishes: [{recipe_id: 'rec-dal', servings: 0}]}, 'invalid_servings'],
   ['plan.slot.mark', {id: '2026-11-14:dinner', status: 'cooked'}, 'not_yet'],
@@ -84,17 +86,30 @@ test('refusals a person can meet return their code and name things in words', ()
   const lineId = key => key === 'removed' ? removed : key.startsWith('manual:')
     ? lines.find(l => l.kind === 'manual' && (l.ingredient_id || l.text) === key.slice(7)).id : lines.find(l => l.kind === 'derived' && l.ingredient_id === key).id;
   const seen = [], wrong = [];
-  for (const [op, args, code] of CASES) {
+  for (const [op, args, code, id] of CASES) {
     const full = args.line ? (({line, ...rest}) => ({id: lineId(line), ...rest}))(args) : args;
     let got = null;
     try { f.call(P + op, full); } catch (e) { got = e; }
     const where = `${op} ${JSON.stringify(args)}`;
     if (!got) wrong.push(`${where} was not refused`);
     else if (got.code !== code) wrong.push(`${where}: ${got.code} instead of ${code}: ${got.message}`);
-    else if (unreadable(got.message)) wrong.push(`${where} ${unreadable(got.message)}`);
+    else if (id && !got.message.includes(id)) wrong.push(`${where} does not name ${id}: ${got.message}`);
+    else if (unreadable(got.message.split(id || '\0').join('that ID'))) wrong.push(`${where} ${unreadable(got.message)}`);
     seen.push(code);
     if (process.env.SHOW_MESSAGES && got) console.log(got.code, got.message);
   }
   assert.deepEqual(wrong, []);
   assert.ok(new Set(seen).size >= 14, [...new Set(seen)].join(' '));
+});
+
+// Two guests sent with one guest ID: the check is on the ID, so the message names the ID and both
+// guests who share it, not a guest as if listed twice.
+test('two guests with one guest ID are refused with the ID and both names', () => {
+  const f = fixture({seed: require('../fixtures/reference.json'), logging: false});
+  const args = {id: '2026-11-09:lunch', dishes: [{recipe_id: 'rec-dal'}], guests: [{guest_id: 'g1', name: 'A'}, {guest_id: 'g1', name: 'B'}]};
+  assert.equal(f.refuse(P + 'plan.slot.set', args), 'invalid_arguments');
+  assert.equal(f.message(P + 'plan.slot.set', args), 'Two guests, A and B, have the same guest ID g1; give each guest an ID of their own.');
+  // Two different guests who happen to share a name are fine with IDs of their own.
+  const ok = f.call(P + 'plan.slot.set', {...args, guests: [{guest_id: 'g1', name: 'Sam'}, {guest_id: 'g2', name: 'Sam'}]});
+  assert.equal(ok.state, 'planned');
 });

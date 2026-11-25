@@ -143,6 +143,7 @@ function manualFields(data, input, current = null) {
   if (typeof merged.text === 'string') merged.text = merged.text.trim() || null;
   if (!merged.ingredient_id && !merged.text) fail('invalid_arguments', 'A manual line needs an ingredient_id or a text.');
   if (merged.quantity !== null && (!(merged.quantity > 0) || !Number.isFinite(merged.quantity))) fail('invalid_quantity', 'A line quantity must be positive.');
+  if (merged.quantity !== null && merged.quantity > c.LIMITS.quantity) fail('invalid_quantity', 'A line quantity can be at most 1,000,000.');
   if (merged.ingredient_id) {
     const ing = c.ingredient(data, merged.ingredient_id);
     if (merged.quantity !== null && merged.unit === null) fail('invalid_quantity', `Give the unit of the ${ing.name} quantity.`);
@@ -165,7 +166,7 @@ const lineLabel = (data, l) => `${l.ingredient_id ? (data.ingredients.find(i => 
 // needed <-> ticked for any line; needed <-> excluded for derived lines only.
 function tick(data, line, ticked, who) {
   if (line.state === 'excluded') fail('invalid_state', `${lineLabel(data, line)} is not being bought; put it back on the list before ticking it.`);
-  if ((line.state === 'ticked') === ticked) fail('invalid_state', `${lineLabel(data, line)} is already ${line.state}.`);
+  if ((line.state === 'ticked') === ticked) fail('invalid_state', `${lineLabel(data, line)} ${ticked ? 'is already ticked' : 'is not ticked'}.`);
   line.state = ticked ? 'ticked' : 'needed';
   line.history.push(lineRow(who, ticked ? 'ticked' : 'unticked'));
 }
@@ -187,7 +188,7 @@ function itemSet(ctx, data, args) {
     if (itemKeys.length) fail('derived_line', `${lineLabel(data, line)} comes from the plan and changes only when the list is generated again; exclude it or add a manual line.`);
     if (args.excluded !== undefined) {
       if (line.state === 'ticked') fail('invalid_state', `${lineLabel(data, line)} is ticked; untick it before excluding it.`);
-      if ((line.state === 'excluded') === args.excluded) fail('invalid_state', `${lineLabel(data, line)} is already ${line.state}.`);
+      if ((line.state === 'excluded') === args.excluded) fail('invalid_state', `${lineLabel(data, line)} ${args.excluded ? 'is already excluded' : 'is not excluded'}.`);
       if (args.excluded && !(args.reason && args.reason.trim())) fail('invalid_arguments', 'Excluding a derived line needs a reason.');
       line.state = args.excluded ? 'excluded' : 'needed';
       line.excluded_reason = args.excluded ? args.reason.trim() : null;
@@ -198,7 +199,7 @@ function itemSet(ctx, data, args) {
   if (args.excluded !== undefined) fail('invalid_state', `${lineLabel(data, {...line, kind: 'derived'})} was added by hand; remove it instead of excluding it.`);
   const fields = itemKeys.length ? manualFields(data, args, line) : null;
   if (args.ticked !== undefined) {
-    if (line.state === 'ticked' === args.ticked) fail('invalid_state', `${lineLabel(data, line)} is already ${line.state}.`);
+    if (line.state === 'ticked' === args.ticked) fail('invalid_state', `${lineLabel(data, line)} ${args.ticked ? 'is already ticked' : 'is not ticked'}.`);
   }
   if (fields) { Object.assign(line, fields); line.history.push(lineRow(who, 'changed')); }
   if (args.ticked !== undefined) tick(data, line, args.ticked, who);

@@ -1,10 +1,13 @@
 'use strict';
-// Every one of the 22 tools answers every schema-valid input with a result or a coded refusal, never
-// with a thrown error that Core would report as internal_error. The inputs are built from each tool's
-// own inputSchema: a value is only sent when the schema accepts it, and the table of values covers
-// what a schema cannot rule out (impossible calendar dates, unknown and wrong-kind IDs, empty and
-// blank strings, zero, negative, fractional and huge numbers, empty and duplicate lists) as well as
-// optional fields given alone, without the fields they usually come with.
+// Every one of the 22 tools answers every schema-valid input in the table below either with a result
+// that passes the harness's checks (the tool's output schema, the seed schema and validateSeed on the
+// data a write commits) or with a refusal carrying one of the App's documented error codes. Anything
+// else fails the test: a thrown error without a code (Core's internal_error), a harness assertion
+// (Core's invalid_plugin_result) or any other code. The inputs are built from each tool's own
+// inputSchema: a value is only sent when the schema accepts it, and the table of values covers what a
+// schema cannot rule out (impossible calendar dates, unknown and wrong-kind IDs, empty and blank
+// strings, zero, negative, fractional, tiny and huge numbers up to 1e300, empty and duplicate lists)
+// as well as optional fields given alone, without the fields they usually come with.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
@@ -18,7 +21,7 @@ const SLOTS = ['2026-11-10:dinner', '2026-11-07:dinner', '2026-11-01:dinner', '2
 const IDS = ['rec-red-lentil-soup', 'rec-shakshuka', 'rec-missing', 'person-nora', 'person-eli', 'person-missing', 'ing-egg', 'ing-butter', 'ing-missing',
   'con-eli-01', 'con-eli-02', 'con-ada-02', 'con-nora-02', 'con-missing', 'rule-flour-gf', 'rule-missing', 'sl-0001', 'guest-sam', '2026-11-10:dinner', 'x'];
 const TEXTS = ['Tuesday soup', ' ', 'x', 'bake', 'tree_nut', 'soy', 'vegetarian', 'gluten_free', 'mushroom', 'sodium_mg', 'kcal', 'gluten', '<b>&amp;</b>'];
-const NUMBERS = [2, 0, -1, 0.5, 1e9, 200, 201, 1];
+const NUMBERS = [2, 0, -1, 0.5, 1e9, 200, 201, 1, 1e300, 1e-7, 1000001];
 // The value a field starts from, so that the other fields are varied around a call that can succeed.
 const FIRST = {
   'members.constraint.set.id': 'person-eli', 'members.constraint.remove.id': 'person-eli', 'members.constraint.remove.constraint_id': 'con-eli-01',
@@ -27,6 +30,12 @@ const FIRST = {
   'recipes.create.lines.unit': 'each', 'recipes.update.patch.lines.ingredient_id': 'ing-egg', 'recipes.update.patch.lines.unit': 'each',
   'recipes.variant.preview.swaps.ingredient_id': 'ing-egg', 'recipes.variant.create.swaps.ingredient_id': 'ing-egg', 'plan.slot.set.attendees': 'person-nora'
 };
+
+// The App's error codes (README "Tools") and invalid_arguments, which the App also returns.
+const CODES = new Set(['not_found', 'unknown_ingredient', 'unknown_member', 'unknown_rule', 'invalid_quantity', 'invalid_servings',
+  'invalid_constraint', 'invalid_window', 'invalid_state', 'no_conversion', 'not_in_recipe', 'rule_not_applicable', 'conflict',
+  'past_slot', 'not_yet', 'leftover_unavailable', 'derived_line', 'no_list', 'invalid_arguments']);
+const problem = e => (CODES.has(e.code) ? null : `${e.code || 'no code'}: ${e.message}`);
 
 const matches = (s, v) => {
   if (s.pattern && !new RegExp(s.pattern).test(v)) return false;
@@ -71,7 +80,7 @@ function objects(s, key, cap) {
   return out;
 }
 
-test('all 22 tools answer schema-valid input with a result or a coded refusal, never an internal error', () => {
+test('all 22 tools answer schema-valid input with a valid result or a documented refusal', () => {
   assert.equal(tools.length, 22);
   const failures = [];
   let sent = 0;
@@ -86,10 +95,55 @@ test('all 22 tools answer schema-valid input with a result or a coded refusal, n
       // A fresh household for every call, so each input meets the same records.
       const f = fixture({logging: false});
       try { f.call(tool.name, args); } catch (e) {
-        if (typeof e.code !== 'string' || e.code === 'internal_error') failures.push(`${op} ${JSON.stringify(args).slice(0, 200)}: ${e.message}`);
+        if (problem(e)) failures.push(`${op} ${JSON.stringify(args).slice(0, 200)}: ${problem(e)}`);
       }
     }
   }
   assert.ok(sent > 1000, `only ${sent} inputs were sent`);
   assert.deepEqual(failures, []);
+});
+
+// Numbers at the ends of their range on records of the reference household, where the generic table
+// above may not reach a recipe line or a cooked meal: huge and tiny swap ratios and quantities, at the
+// largest servings, each followed by the reads that scale them.
+test('extreme numbers on the reference household give a valid result or a documented refusal', () => {
+  const seed = require('../fixtures/reference.json');
+  const swap = ratio => ({id: 'rec-green-curry', swaps: [{ingredient_id: 'ing-fish-sauce', to_ingredient_id: 'ing-tamari', ratio}]});
+  const line = quantity => ({title: 'Big pot', servings: 1, method_tags: ['simmer'], steps: ['Cook.'], tags: [],
+    lines: [{ingredient_id: 'ing-butter', quantity, unit: 'lb'}]});
+  const CALLS = [];
+  for (const n of [1e300, 1e200, 1e20, 1e7, 1e6, 100, 0.01, 1e-7, 1e-300]) {
+    CALLS.push([['recipes.variant.preview', swap(n)]], [['recipes.variant.create', swap(n)], ['recipes.get', {id: '$', servings: 200, unit_system: 'metric'}]]);
+    CALLS.push([['recipes.create', line(n)], ['recipes.get', {id: '$', servings: 200}], ['plan.slot.set', {id: '2026-11-16:dinner', dishes: [{recipe_id: '$', servings: 200}]}],
+      ['shopping.generate', {start: '2026-11-16', end: '2026-11-16'}], ['recipes.check', {id: '$', members: ['person-nora']}]]);
+    CALLS.push([['pantry.set', {id: 'ing-butter', quantity: n, unit: 'lb'}], ['shopping.generate', {start: '2026-11-09', end: '2026-11-15'}], ['pantry.list', {}]]);
+    CALLS.push([['shopping.item.set', {ingredient_id: 'ing-butter', quantity: n, unit: 'lb'}], ['shopping.get', {}]]);
+    CALLS.push([['plan.slot.set', {id: '2026-11-16:dinner', dishes: [{leftovers_of: '2026-11-08:dinner', portions: n}]}], ['plan.get', {start: '2026-11-16', end: '2026-11-16'}]]);
+    CALLS.push([['plan.slot.mark', {id: '2026-11-08:dinner', status: 'cooked', portions: [{recipe_id: 'rec-chicken-noodle-soup', made: n, eaten: Math.min(n, 1)}]}],
+      ['plan.slot.set', {id: '2026-11-16:dinner', dishes: [{leftovers_of: '2026-11-08:dinner', portions: 2}]}], ['plan.get', {start: '2026-11-08', end: '2026-11-16'}]]);
+    CALLS.push([['members.constraint.set', {id: 'person-eli', constraint: {kind: 'limit', nutrient: 'kcal', max: n, note: 'x'}}], ['recipes.check', {id: 'rec-green-curry', members: ['person-eli']}]]);
+  }
+  const failures = [];
+  for (const steps of CALLS) {
+    const f = fixture({seed, logging: false});
+    let id = null;
+    for (const [name, args] of steps) {
+      const full = JSON.parse(JSON.stringify(args).replace(/"\$"/g, JSON.stringify(id)));
+      try { const out = f.call('platewright.' + name, full); if (out.id && !id) id = out.id; } catch (e) {
+        // Every call here is meant to pass the input schema; a refusal by the schema is a mistake in the table.
+        const bad = problem(e) || (/^Input schema/.test(e.message) ? e.message : null);
+        if (bad) failures.push(`${name} ${JSON.stringify(args).slice(0, 200)}: ${bad}`);
+        break;
+      }
+    }
+  }
+  assert.deepEqual(failures, []);
+  // The bounds themselves: a ratio of 1e300 used to overflow the scaled quantities to Infinity.
+  const f = fixture({seed, logging: false});
+  assert.equal(f.refuse('platewright.recipes.variant.preview', swap(1e300)), 'invalid_quantity');
+  assert.equal(f.refuse('platewright.recipes.variant.create', swap(1e300)), 'invalid_quantity');
+  assert.equal(f.refuse('platewright.recipes.variant.create', swap(1e-7)), 'invalid_quantity');
+  assert.equal(f.refuse('platewright.pantry.set', {id: 'ing-butter', quantity: 1000001, unit: 'g'}), 'invalid_quantity');
+  assert.equal(f.call('platewright.recipes.variant.create', swap(100)).state, 'active');
+  assert.equal(f.call('platewright.pantry.set', {id: 'ing-butter', quantity: 1000000, unit: 'g'}).quantity, 1000000);
 });
