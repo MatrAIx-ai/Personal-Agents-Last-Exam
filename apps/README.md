@@ -4,6 +4,14 @@ Add new complete App packages under `<app-id>/` after proposal scope review. Ref
 
 Read [App contribution](../docs/app-contribution.md), [integration with other Apps](../docs/app-integrations.md) and [implementation review](../docs/review/app-implementation.md). Use the public runtime for local integration verification. Keep production configuration and generated state out of the package.
 
+The public registry currently contains eight runnable Apps: the five shared personal Apps below, reference Mail and Calendar, and Ledgerleaf.
+
+## Environment Apps
+
+| App | Package | Main workflow |
+| --- | --- | --- |
+| Ledgerleaf Shared Expenses | [ledgerleaf-shared-expenses/](ledgerleaf-shared-expenses/) | Versioned group expenses, flexible splits, balances and external settlement evidence |
+
 ## Shared personal-App packages
 
 | App | Package | Main workflow |

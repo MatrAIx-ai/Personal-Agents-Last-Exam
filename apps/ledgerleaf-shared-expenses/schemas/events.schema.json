@@ -1,0 +1,600 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:ledgerleaf-shared-expenses:events:1",
+  "type": "object",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "group.member_joined"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "group_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "actor_member_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "member_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "role": {
+              "enum": [
+                "admin",
+                "member"
+              ]
+            },
+            "expected_group_version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "group_id",
+            "actor_member_id",
+            "member_id",
+            "role",
+            "expected_group_version"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "group.member_left"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "group_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "actor_member_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "member_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "expected_group_version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "group_id",
+            "actor_member_id",
+            "member_id",
+            "expected_group_version"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "expense.created_by_member"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "group_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "actor_member_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "expected_group_version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "expense_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "expense": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "date": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                },
+                "category": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50
+                },
+                "notes": {
+                  "type": "string",
+                  "maxLength": 5000
+                },
+                "amount_minor": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "currency": {
+                  "enum": [
+                    "USD",
+                    "CAD",
+                    "EUR",
+                    "GBP"
+                  ]
+                },
+                "payers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "member_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "amount_minor": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "member_id",
+                      "amount_minor"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                },
+                "split": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "enum": [
+                        "equal",
+                        "exact",
+                        "percentage",
+                        "shares"
+                      ]
+                    },
+                    "member_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
+                    },
+                    "allocations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "member_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          },
+                          "amount_minor": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "basis_points": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 10000
+                          },
+                          "shares": {
+                            "type": "integer",
+                            "minimum": 1
+                          }
+                        },
+                        "required": [
+                          "member_id"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "description",
+                "date",
+                "category",
+                "amount_minor",
+                "currency",
+                "payers",
+                "split"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "group_id",
+            "actor_member_id",
+            "expected_group_version",
+            "expense_id",
+            "expense"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "expense.updated_by_member"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "actor_member_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "expense_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "expected_expense_version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "expense": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "date": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                },
+                "category": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50
+                },
+                "notes": {
+                  "type": "string",
+                  "maxLength": 5000
+                },
+                "amount_minor": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "currency": {
+                  "enum": [
+                    "USD",
+                    "CAD",
+                    "EUR",
+                    "GBP"
+                  ]
+                },
+                "payers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "member_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "amount_minor": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "member_id",
+                      "amount_minor"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                },
+                "split": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "enum": [
+                        "equal",
+                        "exact",
+                        "percentage",
+                        "shares"
+                      ]
+                    },
+                    "member_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      },
+                      "minItems": 1,
+                      "uniqueItems": true
+                    },
+                    "allocations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "member_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          },
+                          "amount_minor": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "basis_points": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 10000
+                          },
+                          "shares": {
+                            "type": "integer",
+                            "minimum": 1
+                          }
+                        },
+                        "required": [
+                          "member_id"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "description",
+                "date",
+                "category",
+                "amount_minor",
+                "currency",
+                "payers",
+                "split"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "actor_member_id",
+            "expense_id",
+            "expected_expense_version",
+            "expense"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "expense.deleted_by_member"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "actor_member_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "expense_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "expected_expense_version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "actor_member_id",
+            "expense_id",
+            "expected_expense_version"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "settlement.recorded_by_member"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "group_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "actor_member_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "expected_group_version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "settlement_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+            },
+            "settlement": {
+              "type": "object",
+              "properties": {
+                "group_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                },
+                "from_member_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                },
+                "to_member_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                },
+                "amount_minor": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "method": {
+                  "enum": [
+                    "cash",
+                    "bank",
+                    "payment_app",
+                    "other"
+                  ]
+                },
+                "note": {
+                  "type": "string",
+                  "maxLength": 500
+                }
+              },
+              "required": [
+                "group_id",
+                "from_member_id",
+                "to_member_id",
+                "amount_minor",
+                "method"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "group_id",
+            "actor_member_id",
+            "expected_group_version",
+            "settlement_id",
+            "settlement"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}
