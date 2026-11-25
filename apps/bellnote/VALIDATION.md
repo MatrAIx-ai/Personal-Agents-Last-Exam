@@ -18,7 +18,7 @@ The web GUI was added after plan approval at the maintainers' request; the appro
 | Package real MCP | `node apps/bellnote/scripts/real-mcp.cjs` | 54 checks passed (Node 22 and 18) |
 | Bellnote → Mail | `node apps/bellnote/scripts/mail-flow.cjs` | 17 checks passed (Mail 1.3.0, real router and receiver; Node 22 and 18) |
 | Web smoke (real shared Host, no browser) | `cd apps/bellnote && npm run web:smoke` | 14 tests, 14 passed (Node 22 and 18) |
-| Web browser (Chromium) | `cd apps/bellnote && npm run web:browser` | 48 checks passed (Node 22 and 18), 17 screenshots and `report.json` |
+| Web browser (Chromium) | `cd apps/bellnote && npm run web:browser` | 49 checks passed (Node 22 and 18), 17 screenshots and `report.json` |
 | Public verifier | `npm run app:verify -- --app apps/bellnote --output .artifacts/bellnote.json` | passed: 46 checks; `business` and `event-example` stages passed from an isolated package copy (Node 22 and 18) |
 | CI selection | `node runtime/ci/select-apps.cjs . a4bce02` | `{"full":false,"ids":["bellnote"]}` |
 | CI submission validator | `node runtime/ci/verify-submissions.cjs . .artifacts/submissions a4bce02` | `bellnote: PASS` (Node 22 and 18) |

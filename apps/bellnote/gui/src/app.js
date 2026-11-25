@@ -363,7 +363,7 @@ function attendanceView(ui){
  const sorted=[...a.reports].sort((x,y)=>Date.parse(y.submitted_at)-Date.parse(x.submitted_at)),reports=sorted.filter(r=>!past(r)),earlier=sorted.filter(past);
  const reportRow=r=>{
   const open=r.state==='submitted'&&r.days.some(d=>d.state==='reported'&&!d.cutoff_passed),dd=d=>d<since?day(d,{year:'numeric',month:'short',day:'numeric'}):day(d);
-  return el('div',{class:'bn-item','data-report-id':r.id},el('div',{},el('strong',{},REPORT[r.kind]+' · '+r.dates.map(dd).join(', ')+(r.time_local?' at '+clock(r.time_local):'')),
+  return el('div',{class:'bn-item','data-report-id':r.id},el('div',{},el('strong',{},REPORT[r.kind]+' · '+(r.dates.length?r.dates:r.cancelled_dates).map(dd).join(', ')+(r.time_local?' at '+clock(r.time_local):'')),
    el('small',{},'Sent by '+personName(a,r.submitted_by)+' · '+when(r.submitted_at))),
    el('div',{class:'bn-buttons'},badge(words(r.state),REPORT_STATE[r.state]),open&&ui.has('bellnote.absences.cancel')&&can(k,'custodial')?button('Cancel report',()=>confirmWrite(ui,{title:'Cancel this report?',
     lead:REPORT[r.kind]+' for '+k.display_name+' on '+r.dates.map(d=>day(d)).join(', ')+'. Days already past their cut-off stay reported.',tool:'bellnote.absences.cancel',args:{id:r.id},submit:'Cancel report'})):null),

@@ -79,7 +79,7 @@ Web GUI checks (pinned public runtime as below; the browser check also needs Pla
 
 ```sh
 npm run web:smoke             # 14 checks on the real shared Web Host, no browser
-npm run web:browser           # 48 checks clicking the page in Chromium; screenshots in .artifacts/bellnote-web/
+npm run web:browser           # 49 checks clicking the page in Chromium; screenshots in .artifacts/bellnote-web/
 ```
 
 With the pinned public runtime (found automatically in a full checkout, or `--runtime DIR` / `PALE_RUNTIME_ROOT`):

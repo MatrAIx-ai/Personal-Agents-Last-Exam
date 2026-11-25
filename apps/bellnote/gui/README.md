@@ -70,7 +70,7 @@ Home stays the slowest view because it shows every child's balance and way home 
 ```sh
 cd apps/bellnote
 npm run web:smoke     # real Host, session/CSRF, refused routes, reads, writes confirmed over MCP, conflicts, retries, scenario profile
-npm run web:browser   # 48 checks; Playwright + Chromium from the repository root (npm ci && npx playwright install chromium)
+npm run web:browser   # 49 checks; Playwright + Chromium from the repository root (npm ci && npx playwright install chromium)
 ```
 
 `web:browser` writes screenshots and `report.json` to `.artifacts/bellnote-web/` (or `--out DIR`).

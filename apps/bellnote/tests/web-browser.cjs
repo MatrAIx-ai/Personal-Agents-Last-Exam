@@ -72,6 +72,7 @@ async function run() {
     await p.click(row + ' button:has-text("Cancel report")');
     await submitDialog(p); await closed(p);
     check('W1 cancel through the confirmation commits; MCP reads cancelled', (await mcp.call('bellnote.absences.list', {id: report.id})).reports[0].state === 'cancelled');
+    check('A fully cancelled report still names its day', (await p.textContent(row + ' strong')).includes('Wed, Nov 18'));
     await shot(p, 'desktop-attendance');
 
     // W2: sign the changed form again; withdraw another answer.
