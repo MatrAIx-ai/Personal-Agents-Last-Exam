@@ -50,8 +50,11 @@ function validateSeed(ctx, data) {
     trusted.add(key);
   }
 
+  const tracking = new Set();
   for (const s of data.shipments) {
     const label = 'Parcel ' + s.id;
+    if (tracking.has(s.tracking_number)) fail('invalid_seed', label + ' repeats a tracking number.');
+    tracking.add(s.tracking_number);
     person(s.recipient_person_id, label + ' recipient');
     find('policies', s.policy_id, label);
     ordered(s, label);
@@ -90,6 +93,12 @@ function validateSeed(ctx, data) {
     ordered(c, 'Change ' + c.id);
     if (c.base_plan_revision > s.plan.revision) fail('invalid_seed', 'Change ' + c.id + ' is based on a future plan revision.');
     if ((c.status === 'pending') === Boolean(c.decided_at)) fail('invalid_seed', 'Change ' + c.id + ' decision time must match its status.');
+    if (c.status === 'pending') {
+      // A request the carrier could never apply is not a coherent pending request.
+      if (c.base_plan_revision !== s.plan.revision) fail('invalid_seed', 'Pending change ' + c.id + ' is based on a superseded plan.');
+      if (c.target.mode === 'pickup') find('pickup_points', c.target.point_id, 'Pending change ' + c.id);
+      else if (find('addresses', c.target.address_id, 'Pending change ' + c.id).person_id !== s.recipient_person_id) fail('invalid_seed', 'Pending change ' + c.id + ' targets another person\'s address.');
+    }
   }
 
   for (const g of data.grants) {

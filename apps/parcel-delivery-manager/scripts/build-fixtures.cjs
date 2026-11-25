@@ -49,7 +49,7 @@ const point = (id, name, kind, address_text, opening, flags = {}) => ({id, name,
   accessible: true, accepts_redirects: true, status_note: null, updated_at: '2026-01-05T14:00:00Z', ...flags});
 const POINTS = [
   point('P01', 'Larchmere Pharmacy counter', 'counter', '402 Larchmere Row, Harlow Bay', hours('09:00', '21:00')),
-  point('P02', 'Foundry Lane parcel locker', 'locker', '80 Foundry Lane, Harlow Bay', hours('00:00', '23:59'), {accessible: false, status_note: 'Upper lockers only; no step-free access.'}),
+  point('P02', 'Foundry Lane parcel locker', 'locker', '80 Foundry Lane, Harlow Bay', hours('00:00', '24:00'), {accessible: false, status_note: 'Upper lockers only; no step-free access.'}),
   point('P03', 'Quay Street depot counter', 'counter', '30 Quay Street, Harlow Bay', hours('08:00', '18:00', [1, 2, 3, 4, 5, 6])),
   point('P04', 'Wexcombe Market service desk', 'counter', '2 Wexcombe Market, Harlow Bay', [...hours('10:00', '19:00', [1, 2, 3, 4, 5]), ...hours('10:00', '16:00', [6])]),
   point('P05', 'Tide Street step-free lockers', 'locker', '200 Tide Street, Harlow Bay', hours('06:00', '23:00')),

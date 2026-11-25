@@ -19,13 +19,14 @@ const MESSAGES = {
   already_authorized: 'That person already holds a current authorization for this parcel. Replace or revoke it instead.',
   unknown_grant: 'The authorization to replace does not exist for this parcel.',
   grant_not_active: 'That authorization has already ended.',
-  stale_confirmation: 'The parcel changed after the preview, or the confirmation does not match this request. Preview again.'
+  stale_confirmation: 'The parcel changed after the preview, or the confirmation does not match this request. Preview again.',
+  invalid_time: 'The run clock is earlier than this parcel\'s last update, so nothing can be requested.'
 };
 
 // Whether anyone can be authorized for this parcel now, and until when at the latest.
 function gate(ctx, data, s) {
   const policy = c.policyOf(data, s);
-  const reason = TERMINAL.includes(s.status) ? 'parcel_closed' : s.status === 'returning' ? 'return_started' : !policy.allow_delegation ? 'not_permitted'
+  const reason = TERMINAL.includes(s.status) ? 'parcel_closed' : s.status === 'returning' ? 'return_started' : now(ctx) < ms(s.updated_at) ? 'invalid_time' : !policy.allow_delegation ? 'not_permitted'
     : s.status !== 'at_pickup' ? 'not_ready' : now(ctx) >= ms(s.pickup.deadline) ? 'deadline_passed' : null;
   return {reason, latest: reason ? null : Math.min(ms(s.pickup.deadline), now(ctx) + policy.max_grant_hours * HOUR)};
 }

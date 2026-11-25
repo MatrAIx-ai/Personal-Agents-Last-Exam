@@ -634,7 +634,7 @@
                           },
                           "closes": {
                             "type": "string",
-                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                            "pattern": "^(([01]\\d|2[0-3]):[0-5]\\d|24:00)$"
                           }
                         },
                         "required": [
@@ -1323,7 +1323,7 @@
   },
   {
     "name": "parcel-delivery-manager.points.list",
-    "description": "Search the pickup-point directory with hours, accessibility and current status. Read-only.",
+    "description": "Search the pickup-point directory with hours, accessibility and current status. open_only keeps points the carrier has not closed; open_now on each point says whether it is within its opening hours at the current time. Read-only.",
     "read_only": true,
     "scope": "parcel-delivery-manager.points.list",
     "resource_target": "current account",
@@ -1418,7 +1418,7 @@
                     },
                     "closes": {
                       "type": "string",
-                      "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                      "pattern": "^(([01]\\d|2[0-3]):[0-5]\\d|24:00)$"
                     }
                   },
                   "required": [

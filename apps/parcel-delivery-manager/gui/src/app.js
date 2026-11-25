@@ -24,7 +24,8 @@ const WHY = {
   change_pending: 'Another request is waiting for the carrier.', out_for_delivery: 'The parcel is out for delivery.',
   cutoff_passed: 'The change cutoff has passed.', deadline_passed: 'The deadline has passed.',
   not_applicable: 'Does not apply to the current delivery plan.', not_permitted: 'Not permitted for this parcel.',
-  not_ready: 'The parcel is not waiting at a pickup point.'
+  not_ready: 'The parcel is not waiting at a pickup point.', no_available_date: 'No date can be chosen for this parcel.',
+  no_eligible_destination: 'There is nowhere eligible to choose.', invalid_time: 'The run clock is earlier than this parcel\'s history.'
 };
 const DEADLINE = {pickup: 'Collect by', failure_action: 'Choose a new option by', hold_end: 'Hold ends'};
 const GRANT = {active: 'Current', revoked: 'Revoked', replaced: 'Replaced', expired: 'Expired', invalidated: 'Ended', consumed: 'Used for collection'};
@@ -62,7 +63,7 @@ function hoursText(point) {
     for (const d of sorted) { const run = runs.at(-1); if (run && d === run[1] + 1) run[1] = d; else runs.push([d, d]); }
     return runs.map(([a, b]) => (a === b ? DAYS[a] : DAYS[a] + '–' + DAYS[b])).join(', ');
   };
-  return [...groups].map(([time, list]) => days(list) + ' ' + time).join('; ') + ' (' + point.time_zone + ')';
+  return [...groups].map(([time, list]) => days(list) + ' ' + (time === '00:00–24:00' ? 'open 24 hours' : time)).join('; ') + ' (' + point.time_zone + ')';
 }
 
 // ---------- dialogs: every write is reviewed before it is sent ----------

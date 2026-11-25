@@ -52,7 +52,9 @@ const address = obj({
   line1: text(200), line2: nullable(text(200)), city: text(100), region: text(100),
   postal_code: text(20), country: text(2), verified: bool, delivery_restricted: bool
 });
-const hours = obj({weekday: int(0, 6), opens: clock, closes: clock});
+// `closes` may be 24:00, the end of the day, so a point can be open around the clock or past midnight (as two entries).
+const closing = {type: 'string', pattern: '^(([01]\\d|2[0-3]):[0-5]\\d|24:00)$'};
+const hours = obj({weekday: int(0, 6), opens: clock, closes: closing});
 const point = obj({
   id, name: text(120), kind: oneOf(['counter', 'locker']), address_text: text(300),
   time_zone: text(64), hours: list(hours, 21), status: oneOf(['open', 'closed']),
@@ -174,7 +176,7 @@ const tools = [
   tool('addresses.list', 'List this person\'s own saved delivery addresses with their label and whether each is verified or restricted for delivery. Address IDs returned by options.get refer to these. Read-only.', true,
     obj({}, []), {items: list(obj({id, label: text(80), recipient_name: text(120), line1: text(200), line2: nullable(text(200)), city: text(100), region: text(100),
       postal_code: text(20), country: text(2), verified: bool, delivery_restricted: bool}), 200)}),
-  tool('points.list', 'Search the pickup-point directory with hours, accessibility and current status. Read-only.', true,
+  tool('points.list', 'Search the pickup-point directory with hours, accessibility and current status. open_only keeps points the carrier has not closed; open_now on each point says whether it is within its opening hours at the current time. Read-only.', true,
     obj({query: text(200, 0), accessible_only: bool, open_only: bool}, []), {items: list(pointView, 100)}),
   tool('change.preview', 'Check a proposed delivery change for the parcel with this ID against its current plan and policy, without changing anything. kind selects the change: reschedule (delivery_date), address (address_id, optional delivery_date), hold (hold_until), redirect (point_id) or home_delivery (address_id, optional delivery_date). Returns the effect and a confirmation value that change.submit requires; the confirmation becomes stale when the parcel changes. Read-only.', true,
     obj(changeFields, ['id', 'kind']), {preview}),

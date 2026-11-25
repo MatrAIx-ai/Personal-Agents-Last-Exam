@@ -35,7 +35,10 @@ const MESSAGES = {
   point_not_eligible: 'That pickup point cannot accept this parcel.',
   point_closed: 'That pickup point is currently closed.',
   stale_confirmation: 'The parcel changed after the preview, or the confirmation does not match this request. Preview again.',
-  too_late: 'The carrier has already decided this change, or it was already withdrawn.'
+  too_late: 'The carrier has already decided this change, or it was already withdrawn.',
+  no_available_date: 'The delivery policy leaves no date to choose.',
+  no_eligible_destination: 'There is no eligible destination to choose.',
+  invalid_time: 'The run clock is earlier than this parcel\'s last update, so nothing can be requested.'
 };
 
 // The instant after which the recipient can no longer act on the parcel, or null.
@@ -49,6 +52,8 @@ function cutoffAt(data, s) {
 function gate(ctx, data, s) {
   if (TERMINAL.includes(s.status)) return 'parcel_closed';
   if (s.status === 'returning') return 'return_started';
+  // A run whose clock precedes the loaded history cannot record anything; say so at preview time too.
+  if (now(ctx) < ms(s.updated_at)) return 'invalid_time';
   if (s.pending_change_id) return 'change_pending';
   if (s.status === 'out_for_delivery') return 'out_for_delivery';
   // Once a hold has ended by the clock, its release is due and the plan is about to change.
@@ -134,15 +139,19 @@ function evaluate(ctx, data, s, input) {
 
 function options(ctx, data, s) {
   const w = windows(ctx, data, s), cutoff = cutoffAt(data, s), delegation = gr.gate(ctx, data, s);
-  const kind = name => { const reason = kindGate(ctx, data, s, name); return {allowed: !reason, reason}; };
-  const reschedule = kind('reschedule'), address = kind('address'), hold = kind('hold'), redirect = kind('redirect'), home = kind('home_delivery');
+  // A kind is offered only if something can actually be chosen for it.
+  const kind = (name, available, unavailable) => { const reason = kindGate(ctx, data, s, name) ?? (available() ? null : unavailable); return {allowed: !reason, reason}; };
+  const otherAddresses = eligibleAddresses(data, s, {excludeCurrent: true}), anyAddresses = eligibleAddresses(data, s, {excludeCurrent: false}), points = eligiblePoints(data, s);
+  const reschedule = kind('reschedule', () => w.earliestReschedule <= w.latestDelivery, 'no_available_date'), hold = kind('hold', () => w.earliest <= w.latestHold, 'no_available_date');
+  const address = kind('address', () => otherAddresses.length > 0, 'no_eligible_destination'), redirect = kind('redirect', () => points.length > 0, 'no_eligible_destination');
+  const home = kind('home_delivery', () => anyAddresses.length > 0, 'no_eligible_destination');
   return {
     shipment_id: s.id, plan_revision: s.plan.revision, cutoff_at: cutoff === null ? null : c.iso(cutoff),
     reschedule: {...reschedule, earliest_date: reschedule.allowed ? w.earliestReschedule : null, latest_date: reschedule.allowed ? w.latestDelivery : null},
-    address: {...address, address_ids: address.allowed ? eligibleAddresses(data, s, {excludeCurrent: true}) : []},
+    address: {...address, address_ids: address.allowed ? otherAddresses : []},
     hold: {...hold, latest_date: hold.allowed ? w.latestHold : null},
-    redirect: {...redirect, point_ids: redirect.allowed ? eligiblePoints(data, s) : []},
-    home_delivery: {...home, address_ids: home.allowed ? eligibleAddresses(data, s, {excludeCurrent: false}) : []},
+    redirect: {...redirect, point_ids: redirect.allowed ? points : []},
+    home_delivery: {...home, address_ids: home.allowed ? anyAddresses : []},
     delegation: {allowed: !delegation.reason, reason: delegation.reason, latest_expires_at: delegation.latest === null ? null : c.iso(delegation.latest)}
   };
 }

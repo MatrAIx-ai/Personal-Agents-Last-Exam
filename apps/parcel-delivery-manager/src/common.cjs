@@ -22,7 +22,11 @@ function byId(list, id, label) {
 const shipmentOf = (data, id) => byId(data.shipments, id, 'Parcel');
 const pointOf = (data, id) => byId(data.pickup_points, id, 'Pickup point');
 const policyOf = (data, shipment) => byId(data.policies, shipment.policy_id, 'Policy profile');
-const personName = (ctx, personId) => ctx.binding.people.find(p => p.person_id === personId)?.name ?? null;
+// Names come from the Task's binding, which neither requires nor bounds them.
+function personName(ctx, personId) {
+  const name = ctx.binding.people.find(p => p.person_id === personId)?.name;
+  return typeof name === 'string' && name.trim() ? name.trim().slice(0, 120) : null;
+}
 
 // A grant authorizes its collector only while it is active and unexpired, for the
 // parcel's current pickup epoch and point. Status alone is not enough: time can pass
