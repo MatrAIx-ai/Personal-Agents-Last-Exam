@@ -1,0 +1,157 @@
+{
+  "task": "blind-review-packet",
+  "package_version": "0.1.0",
+  "harbor": "0.27.0",
+  "adapter": "packet-controller 0.1.0",
+  "pale_core": "1.6.0",
+  "node": "22.23.2",
+  "network": "no-network",
+  "cpu": 1,
+  "memory_mb": 768,
+  "phase_timeout_sec": 900,
+  "controls": [
+    {
+      "run_id": "b967fc9a-7d83-4300-b62e-3584c96bc0d7",
+      "kind": "reference",
+      "case": "primary-reference",
+      "history": "primary",
+      "agent": {
+        "name": "oracle",
+        "version": "1.0.0",
+        "model_info": null
+      },
+      "hint": false,
+      "harbor_task_digest": "sha256:47571b974a4d95ec709df48b2dbb334f807b9f123b3df3fb7438fb8d4afdc4db",
+      "initial_fixture_sha256": "51ddc0aafccec3c9fb9eb8d8150605c28bda6116a89f564b06d905a582ac5901",
+      "started_at": "2026-11-25T17:33:27.376193Z",
+      "finished_at": "2026-11-25T17:33:47.967124Z",
+      "simulated_start": "2026-11-20T10:05:00-05:00",
+      "simulated_end": "2026-11-20T12:00:00-05:00",
+      "sessions": [
+        "morning",
+        "after-meeting"
+      ],
+      "seed": "deterministic App snapshot",
+      "model_tokens": 0,
+      "model_cost_usd": 0,
+      "points": 100,
+      "full_pass": true,
+      "trace": "runs/primary-reference/trace.json.gz",
+      "uncompressed_trace_sha256": "3ef3b7216c77b95e9d02d5f3331f3996e21d3d840a275f71f6baa4157619f239",
+      "score": "runs/primary-reference/score.json",
+      "steps": [
+        {
+          "name": "morning",
+          "rewards": {
+            "checkpoint_recorded": 1
+          }
+        },
+        {
+          "name": "after-meeting",
+          "rewards": {
+            "rubric_score": 1,
+            "full_pass": 1
+          }
+        }
+      ]
+    },
+    {
+      "run_id": "e2c9dd0a-a57f-4309-825d-fec3378e9d27",
+      "kind": "reference",
+      "case": "alternate-reference",
+      "history": "alternate",
+      "agent": {
+        "name": "oracle",
+        "version": "1.0.0",
+        "model_info": null
+      },
+      "hint": false,
+      "harbor_task_digest": "sha256:c35715967ca89c30d442f9c93c1b80dc9c6c5b2e2577b90c7ad175c9e02721b7",
+      "initial_fixture_sha256": "248f60c88c5e3edf3b33412901fcd03bb512da09559fd56f7f29884d973e68b9",
+      "started_at": "2026-11-25T17:33:27.235055Z",
+      "finished_at": "2026-11-25T17:33:48.196908Z",
+      "simulated_start": "2026-11-20T10:05:00-05:00",
+      "simulated_end": "2026-11-20T12:00:00-05:00",
+      "sessions": [
+        "morning",
+        "after-meeting"
+      ],
+      "seed": "deterministic App snapshot",
+      "model_tokens": 0,
+      "model_cost_usd": 0,
+      "points": 100,
+      "full_pass": true,
+      "trace": "runs/alternate-reference/trace.json.gz",
+      "uncompressed_trace_sha256": "f6b76d8bd3d2463a57b4d8fff6f4d2ee04d809e9a930a67b57e20e18ec43e4a2",
+      "score": "runs/alternate-reference/score.json",
+      "steps": [
+        {
+          "name": "morning",
+          "rewards": {
+            "checkpoint_recorded": 1
+          }
+        },
+        {
+          "name": "after-meeting",
+          "rewards": {
+            "rubric_score": 1,
+            "full_pass": 1
+          }
+        }
+      ]
+    },
+    {
+      "run_id": "db89ca1f-5f4f-49a7-99e0-8ce20fffcb01",
+      "kind": "no-action control",
+      "case": "primary-nop",
+      "history": "primary",
+      "agent": {
+        "name": "nop",
+        "version": "1.0.0",
+        "model_info": null
+      },
+      "hint": false,
+      "harbor_task_digest": "sha256:47571b974a4d95ec709df48b2dbb334f807b9f123b3df3fb7438fb8d4afdc4db",
+      "initial_fixture_sha256": "51ddc0aafccec3c9fb9eb8d8150605c28bda6116a89f564b06d905a582ac5901",
+      "started_at": "2026-11-25T17:34:36.078337Z",
+      "finished_at": "2026-11-25T17:34:54.421205Z",
+      "simulated_start": "2026-11-20T10:05:00-05:00",
+      "simulated_end": "2026-11-20T12:00:00-05:00",
+      "sessions": [
+        "morning",
+        "after-meeting"
+      ],
+      "seed": "deterministic App snapshot",
+      "model_tokens": 0,
+      "model_cost_usd": 0,
+      "points": 0,
+      "full_pass": false,
+      "trace": "runs/primary-nop/trace.json.gz",
+      "uncompressed_trace_sha256": "65d3837a4d2e1db4de6c4a58245059e4a805f3047757ed32824e42925653931d",
+      "score": "runs/primary-nop/score.json",
+      "steps": [
+        {
+          "name": "morning",
+          "rewards": {
+            "checkpoint_recorded": 1
+          }
+        },
+        {
+          "name": "after-meeting",
+          "rewards": {
+            "rubric_score": 0,
+            "full_pass": 0
+          }
+        }
+      ]
+    }
+  ],
+  "grader_checks": "grader-validation.json",
+  "analysis": "failure-analysis.md",
+  "designated_model_runs": {
+    "pilot": 0,
+    "unhinted": 0,
+    "hinted": 0,
+    "qualification": "pending"
+  }
+}

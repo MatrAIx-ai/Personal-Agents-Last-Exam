@@ -1,0 +1,124 @@
+{
+  "format": "lifepack",
+  "format_version": "1.0",
+  "package_id": "blind-review-packet",
+  "package_version": "0.1.0",
+  "tasks": [
+    {
+      "id": "blind-review-packet",
+      "path": "tasks/blind-review-packet",
+      "proposal_url": "https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/175",
+      "primary_domain": "Learning & research",
+      "secondary_domains": [],
+      "dependencies": [
+        "harbor",
+        "litellm",
+        "node",
+        "core",
+        "mail",
+        "notes",
+        "packet-controller",
+        "packet-chat"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "harbor",
+      "kind": "harness",
+      "version": "0.27.0",
+      "source": "https://pypi.org/project/harbor/0.27.0/"
+    },
+    {
+      "id": "litellm",
+      "kind": "model-client",
+      "version": "1.111.0",
+      "source": "https://pypi.org/project/litellm/1.111.0/"
+    },
+    {
+      "id": "node",
+      "kind": "container-image",
+      "version": "22.23.2",
+      "source": "docker.io/library/node@sha256:48e4b67d85f87bd551df43704e24d252f56cc5f8e9718841aace50f19948f0f9"
+    },
+    {
+      "id": "core",
+      "kind": "runtime",
+      "version": "1.6.0",
+      "revision": "7a05aa958c824143ab9eee1aa21c2dfacd8be31a",
+      "source": "https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/tree/7a05aa958c824143ab9eee1aa21c2dfacd8be31a/runtime"
+    },
+    {
+      "id": "mail",
+      "kind": "app",
+      "version": "1.3.0",
+      "revision": "7a05aa958c824143ab9eee1aa21c2dfacd8be31a",
+      "source": "https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/tree/7a05aa958c824143ab9eee1aa21c2dfacd8be31a/examples/apps/mail"
+    },
+    {
+      "id": "notes",
+      "kind": "app",
+      "version": "1.0.0",
+      "revision": "7a05aa958c824143ab9eee1aa21c2dfacd8be31a",
+      "source": "https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/tree/7a05aa958c824143ab9eee1aa21c2dfacd8be31a/apps/notes"
+    },
+    {
+      "id": "packet-controller",
+      "kind": "session-adapter",
+      "version": "0.1.0",
+      "source": "tasks/blind-review-packet/environment/adapter"
+    },
+    {
+      "id": "packet-chat",
+      "kind": "agent-adapter",
+      "version": "0.1.0",
+      "source": "tools/packet_agent.py"
+    }
+  ],
+  "files": {
+    "README.md": "5e79f8a712f8e64657ba2960d6a73c8789438881eda24eed0b9fc229b22f2dfc",
+    "demo/blind-review-packet/evidence/failure-analysis.md": "4c1a2b8b5165168977e3f4046348db375da17ca68b7e76401a704b02bf78a824",
+    "demo/blind-review-packet/evidence/grader-validation.json": "365a23003415cc6fc8bdfe12dfe8d596ea90ee7f19a7369f9ec33d9b0a8a4730",
+    "demo/blind-review-packet/evidence/manifest.json": "c4951ac6ae1dfcd0be00b0dd201a3b78f0a1451ad1df425a7ece60c0f861044c",
+    "demo/blind-review-packet/evidence/runs/alternate-reference/score.json": "977fef2dea267a64d7340b78315d133d073b6370b957335d735575ffe8d92523",
+    "demo/blind-review-packet/evidence/runs/alternate-reference/trace.json.gz": "fd363e66c6dc349e63ce79558e42e25556d8c9ba3420b6be4fff8e4c913e27f7",
+    "demo/blind-review-packet/evidence/runs/primary-nop/score.json": "421565d1fd21686e0e65ac4d3e528929b3a41e90c4f528381471e699843a4b04",
+    "demo/blind-review-packet/evidence/runs/primary-nop/trace.json.gz": "ade80d79e46ad6f310d58b16fc1f9a773743704a709e9d115d27e873093860ce",
+    "demo/blind-review-packet/evidence/runs/primary-reference/score.json": "977fef2dea267a64d7340b78315d133d073b6370b957335d735575ffe8d92523",
+    "demo/blind-review-packet/evidence/runs/primary-reference/trace.json.gz": "ba8d9a49d0be9d2fb2313ab36aa2f9cf2485775ae09f835014025ea53902a095",
+    "tasks/blind-review-packet/context/permissions.yaml": "47c4135b0a3c54bcfbe3c6884027efe2fbc553bc1fe8730f7dfd987904c73345",
+    "tasks/blind-review-packet/context/timeline.yaml": "4a640e3deaef71fbdeaafaf7157648f4264acd25a3a89c5e453d98df1819e12d",
+    "tasks/blind-review-packet/context/user/goals.json": "8cc36e9f61544fdd76dc65df03e18ef8f976ce82f75e71668d468a565842bcdd",
+    "tasks/blind-review-packet/context/user/history.json": "ab47bf3871cb339c23bd5e0a97f581dcb1482ce28021f538a0c154b5fba23ec9",
+    "tasks/blind-review-packet/context/user/persona.json": "0d947aa66e56cba3177c0113d3239a891761f1a6c93340edc38363f295671b42",
+    "tasks/blind-review-packet/context/user/script.json": "69b3d97dc7a3f862324abe5df5ac8d3cd306d2777f4b06bbeb11f263e9e81c44",
+    "tasks/blind-review-packet/environment/Dockerfile": "bbb6829440ceb78c786794f3b529944ecc97390536373c2c203959656adba8ea",
+    "tasks/blind-review-packet/environment/Dockerfile.dockerignore": "c73809abfb4583eae84d510b5e1d97cf90eb5631bfd96c28bd47a344cbd2fe1f",
+    "tasks/blind-review-packet/environment/adapter/scenario.cjs": "54c1c9e306e0beb39cd15f76c1c3eecd98961e9a52456d3729c86ee475fe6b64",
+    "tasks/blind-review-packet/environment/adapter/server.cjs": "bad62366255b6b7b674daa1f96e7bcd69f01a9c92beb323330fb2bf67ed90bf3",
+    "tasks/blind-review-packet/environment/docker-compose.yaml": "619a12a63029345d04fb2866e52088f99639af495b5f42d867def6aec74ab669",
+    "tasks/blind-review-packet/environment/packet.cjs": "4c4d5919b939a9d7a92945e2492c4ae1d2e2ba618867996550ed3a85773db77b",
+    "tasks/blind-review-packet/environment/workspace/mail/seed.json": "97555e9c327c3958919f3f86d5c3866850b7940b0bc5399700e7b82165443b1e",
+    "tasks/blind-review-packet/environment/workspace/meta.json": "7a7ef1e797f92c3a00ac619086c65ffe783d84354e488735b5216ecf3de1bdf3",
+    "tasks/blind-review-packet/environment/workspace/notes/seed.json": "8bdf0d572f98c87a70001bd8b80d55449646e80d94c620ec478bf364f5070739",
+    "tasks/blind-review-packet/instruction.md": "c4a5fc13e88a46a2611959a2d75d648b00d00788b5e4b615ff1dced085ff6dab",
+    "tasks/blind-review-packet/solution/reference.cjs": "30fabb21c4e831ff19981abac1ae28bd05d5860959ac466c08ac5a97eedb0e20",
+    "tasks/blind-review-packet/solution/solve.sh": "a461f52bcb44572973f203b140908f9824f1f640cd033f480142aeafb7a05a57",
+    "tasks/blind-review-packet/steps/after-meeting/instruction.md": "a1867c9a0d8b14d51f77fa1184d5a502717a63b448c30cbbf9e253554648debb",
+    "tasks/blind-review-packet/steps/morning/instruction.md": "566aa0578b87dca260282e7c8c5114307c39b1d579afa766882b0ceb06e411fa",
+    "tasks/blind-review-packet/steps/morning/tests/test.sh": "9de1055ae457aa86a64ae6fc2c4eeeae4389e89a8fde317b5857d4e1565094aa",
+    "tasks/blind-review-packet/task.toml": "88006203a3004e59e54c651fc8d9aabe59550a0440e3007af1fe77d168116c6e",
+    "tasks/blind-review-packet/tests/grade.cjs": "4de9fd7b079feb4ad0497e9f64c1a2c238d4d9f8355c736811c7f4c5aa074f49",
+    "tasks/blind-review-packet/tests/hints.md": "cfb7b2a882e984e4ad926eb0740f957d7fac61e43fd4cf87a2e0b3cc7345326e",
+    "tasks/blind-review-packet/tests/rubrics.yaml": "d2e716433ecb5e3f0a22decb2ac9c77ae53399789abf91bc9d318677e96c807e",
+    "tasks/blind-review-packet/tests/test.sh": "ec62d708a570bf5f20b869ab522d20e82b4a871fba3a9836e89f47d6e7d82744",
+    "tasks/blind-review-packet/tests/verify.cjs": "adf71f6ee2328cc097ec45f2f0755d6efb6d86aed13c3801714de58633d719a5",
+    "tools/manifest.py": "51ab171054ff01ddf70b2f5e69837ac232fe9adbcb98196722d87bfb2694c6d3",
+    "tools/packet_agent.py": "aabff4ea19f211786668cebac8b12b7cca1a6e7446a98e8b6dc16b8197170255",
+    "tools/prepare.cjs": "abd0890998677fb43b3705cb990bbdf2067b65ef849bc2389ce0458f1f657c97",
+    "tools/record_controls.py": "f6c042d19a53a167a672ef4ac958c92ffc767df1fb42971228def880bc85e19f",
+    "tools/study.py": "b66282d17a14e550997248d068892a5dc46cc144575d011efb93d35a73688b0c",
+    "tools/test_study.py": "4790f20cfafc670cb2991a9fdd45870d369bdeca039aa08282b1b09a1d587a09",
+    "tools/validate.cjs": "a5108cfe2421ed89831ce288a20e8df7be55b5ad929dd78013970b1b0b1f378e"
+  }
+}
