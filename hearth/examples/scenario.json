@@ -1,0 +1,44 @@
+{
+  "scenario_name": "hearth_breakdown_and_relocation_scenario",
+  "timeline_start": "2026-01-10T09:00:00Z",
+  "steps": [
+    {
+      "step": 1,
+      "type": "tool_call",
+      "tool": "hearth.get_resident_profile",
+      "params": {
+        "person_id": "person_nassim_01"
+      },
+      "expected_outcome": "Agent retrieves heirloom furniture restrictions."
+    },
+    {
+      "step": 2,
+      "type": "event_injection",
+      "event": {
+        "event_id": "evt_scen_breakdown_01",
+        "at": "2026-01-11T14:00:00Z",
+        "operation": "hearth.appliance_breakdown",
+        "payload": {
+          "item_id": "item_refrigerator_01",
+          "fault_type": "compressor_failure",
+          "severity": "critical",
+          "reported_by_person_id": "person_partner_02"
+        }
+      },
+      "expected_outcome": "Appliance condition changes to broken and new maintenance issue is created."
+    },
+    {
+      "step": 3,
+      "type": "tool_call",
+      "tool": "hearth.schedule_maintenance",
+      "params": {
+        "issue_id": "iss_evt_scen_breakdown_01",
+        "scheduled_date": "2026-01-13",
+        "service_contact_id": "contact_plumber_01",
+        "expected_version": { "epoch": 1, "revision": 2 },
+        "request_id": "scen_req_sched_01"
+      },
+      "expected_outcome": "Issue transitions to scheduled."
+    }
+  ]
+}

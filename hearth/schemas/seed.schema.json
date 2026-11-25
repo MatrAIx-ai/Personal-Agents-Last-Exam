@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:hearth:seed:1",
+  "title": "HearthSeed",
+  "type": "object",
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "version",
+    "property",
+    "budget",
+    "rooms",
+    "residents",
+    "inventory",
+    "purchases",
+    "maintenance_issues"
+  ],
+  "properties": {
+    "account_id": { "type": "string" },
+    "owner_person_id": { "type": "string" },
+    "version": {
+      "type": "object",
+      "required": ["epoch", "revision"],
+      "properties": {
+        "epoch": { "type": "integer", "minimum": 1 },
+        "revision": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "property": {
+      "type": "object",
+      "required": ["address", "floor_plan_image", "total_area_sqm"],
+      "properties": {
+        "address": { "type": "string" },
+        "floor_plan_image": { "type": "string" },
+        "total_area_sqm": { "type": "number", "minimum": 1 }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "required": ["total_cap", "spent", "reserved"],
+      "properties": {
+        "total_cap": { "type": "number", "minimum": 0 },
+        "spent": { "type": "number", "minimum": 0 },
+        "reserved": { "type": "number", "minimum": 0 }
+      }
+    },
+    "rooms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "dimensions_cm", "is_storage"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "dimensions_cm": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "is_storage": { "type": "boolean" }
+        }
+      }
+    },
+    "residents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["person_id", "role", "rules"],
+        "properties": {
+          "person_id": { "type": "string" },
+          "role": { "type": "string" },
+          "rules": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "inventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "category", "room_id", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "category": { "type": "string", "enum": ["furniture", "appliance", "decor"] },
+          "room_id": { "type": "string" },
+          "status": { "type": "string", "enum": ["active", "stored", "disposed"] },
+          "dimensions_cm": {
+            "type": "array",
+            "items": { "type": "integer" }
+          },
+          "coordinates": {
+            "type": ["array", "null"],
+            "items": { "type": "integer" }
+          },
+          "is_heirloom": { "type": "boolean" },
+          "condition": { "type": "string", "enum": ["operational", "degraded", "broken"] },
+          "warranty_expires_at": { "type": "string" },
+          "created_at": { "type": "string" }
+        }
+      }
+    },
+    "purchases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "item_name", "category", "target_room_id", "cost_usd", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "item_name": { "type": "string" },
+          "category": { "type": "string" },
+          "target_room_id": { "type": "string" },
+          "cost_usd": { "type": "number" },
+          "status": { "type": "string", "enum": ["pending_approval", "approved", "denied", "expired", "cancelled"] },
+          "created_at": { "type": "string" },
+          "expires_at": { "type": "string" },
+          "decided_by": { "type": "string" }
+        }
+      }
+    },
+    "maintenance_issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "appliance_id", "description", "severity", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "appliance_id": { "type": "string" },
+          "description": { "type": "string" },
+          "severity": { "type": "string", "enum": ["minor", "critical"] },
+          "status": { "type": "string", "enum": ["reported", "scheduled", "resolved", "cancelled"] },
+          "scheduled_date": { "type": "string" },
+          "service_contact_id": { "type": "string" },
+          "resolution_notes": { "type": "string" },
+          "repair_cost_usd": { "type": "number" },
+          "created_at": { "type": "string" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
