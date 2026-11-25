@@ -66,7 +66,26 @@ All 13 Agent writes are reachable from the page. Not in the page, by design:
 
 ## Performance
 
-Core reads and validates the run's state for every MCP call, which takes about 0.25 s with the 420-item reference library on the machine used for validation, and the Agent process answers one call at a time. A refresh is six to eight calls (two pages of items, the trash, account, albums, requests, plus what the open view needs), so a write followed by its refresh takes a few seconds. Thumbnails load as they scroll into view, two at a time. Typing in the search box refreshes after a pause rather than on every key.
+The cause is Core's per-call cost: Core reads and validates the run's whole state on every MCP call, and the Agent process answers one call at a time. With the reference library and its two years of history (about 465 KB of state), a call took 0.27–0.32 s, measured on the real runtime (median of five calls per tool, Linux, 20 cores, load average about 4; Node 22 at the low end, Node 18 at the high end). The Host also lists the tools before each call. The page therefore keeps its calls few:
+
+- independent reads (later pages of items, the trash, account, albums, requests, the open album) are sent together;
+- the refresh after one of the page's own writes skips what that write cannot have changed (see above);
+- image bytes are read once per page load and reused; the photo panel's image goes ahead of queued thumbnails, and thumbnails load two at a time as they scroll into view;
+- album covers are chosen once per page load and kept until a write changes that album;
+- the search box refreshes after a pause in typing.
+
+Measured in Chromium against the shared Host on a fresh `sandbox` run of the reference library (same machine and load; Node 18 / Node 22):
+
+| Action | Time until the page is idle | Calls |
+| --- | --- | --- |
+| First load (grid shown, idle) | 5.2 s / 4.2 s; first thumbnail 6.0 s / 4.2 s | 9, then thumbnails |
+| Open a photo with a file | image 1.9 s / 1.3 s; "who can see this" 3.7 s / 2.6 s | 4 |
+| Edit a caption (form closes after 0.9 s) | 3.8 s / 3.3 s | 6 after the write |
+| Create an album (opens it) | 4.4 s / 3.9 s | 7 |
+| Create a link | 4.2 s / 3.7 s | 6 |
+| Refresh button (reads everything) | 4.4 s / 3.9 s | 7 |
+
+Before these measures (same machine, Node 18, with the fixture as it was before the 2025 history was added) the page took 4.8 s for the caption edit, 6.5 s to create an album and 3.7 s to show the panel image, because every refresh read the account and every list again and re-read every visible image. No single call comes near the Host's request timeout. The browser test (`npm run test:browser`) takes about 4 minutes.
 
 ## Checks
 
