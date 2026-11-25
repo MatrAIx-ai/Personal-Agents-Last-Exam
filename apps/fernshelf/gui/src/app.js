@@ -175,7 +175,7 @@ async function openForm({title,submit,tool,load,fields,args,intro}){
  const d=dialog(title,body,{confirm:submit,run:async()=>{
   const values={};
   for(const [k,n] of Object.entries(inputs))values[k]=n.type==='datetime-local'?(n.value?new Date(n.value).toISOString():''):n.value;
-  await write(tool,args(values,got),{version:got.version});
+  await write(tool,args(values,got),{version:got.version,wait:false});
  }});
  d.querySelector('[data-field]')?.focus();
  return d;
@@ -253,9 +253,10 @@ function dialog(title,body,{confirm,danger=false,run}={}){
 }
 // A write sends the version of the view (or of the form's own read) and reuses its request ID if the
 // same change is retried after a failure, so a write whose answer was lost commits once. After a
-// write the whole view is read again.
+// write the whole view is read again; a dialog closes as soon as its write commits (wait: false)
+// while that read goes on behind it.
 const pendingWrites=new Map();
-async function write(name,args,{version=seen,keepId=ui.selected?.id}={}){
+async function write(name,args,{version=seen,keepId=ui.selected?.id,wait=true}={}){
  if(writing)throw Error('Another change is still being saved.');
  if(!version)throw Object.assign(Error('stale'),{code:'stale_version'});
  const payload={...structuredClone(args),expected_version:structuredClone(version)},key=name+JSON.stringify(payload);
@@ -267,8 +268,8 @@ async function write(name,args,{version=seen,keepId=ui.selected?.id}={}){
  try{result=await ui.call(name,payload);pendingWrites.delete(key);}
  catch(e){app.setAttribute('aria-busy','false');throw e;}
  finally{writing=false;}
- await ui.refresh(keepId);
- report(name,args,result);
+ const after=ui.refresh(keepId).then(()=>report(name,args,result));
+ if(wait)await after;else after.catch(fail);
  return result;
 }
 function report(name,args,result){
@@ -312,7 +313,7 @@ function pickItems(album){
    const b=el('button',{type:'button',class:'fs-tile'+(picked.has(r.id)?' chosen':''),'data-pick-id':r.id,'aria-label':titleOf(r),title:titleOf(r),onclick:()=>{picked.has(r.id)?picked.delete(r.id):picked.add(r.id);b.classList.toggle('chosen');count.textContent=picked.size+' selected';}},media(r),el('span',{class:'fs-check','aria-hidden':'true'},'✓'));
    grid.append(b);}};
  filter.addEventListener('input',draw);draw();
- dialog('Add to “'+album.title+'”',[filter,count,grid],{confirm:'Add to album',run:async()=>{if(!picked.size)throw Error('Choose at least one item.');await write(T.edit,{id:album.id,add_ids:[...picked]});}})
+ dialog('Add to “'+album.title+'”',[filter,count,grid],{confirm:'Add to album',run:async()=>{if(!picked.size)throw Error('Choose at least one item.');await write(T.edit,{id:album.id,add_ids:[...picked]},{wait:false});}})
   .classList.add('wide');
 }
 
@@ -336,7 +337,7 @@ function updateBulk(){
 const bulkWrites=()=>ui.section==='trash'?can(T.restore)||can(T.purge):can(T.edit)||can(T.trash);
 function confirmPurge(ids){
  dialog('Delete forever?',[el('p',{},plural(ids.length,'item')+' will be deleted for good and their space freed. This cannot be undone.')],
-  {confirm:'Delete forever',danger:true,run:async()=>{await write(T.purge,{ids,confirm:true});picking=false;chosen.clear();}});
+  {confirm:'Delete forever',danger:true,run:async()=>{picking=false;chosen.clear();await write(T.purge,{ids,confirm:true},{wait:false});}});
 }
 
 // ---------- list pane views ----------
@@ -396,12 +397,12 @@ function memberRow(album,m){
   active&&can(T.member)?el('span',{class:'fs-row-actions'},
    button('Change role',()=>changeRole(album.id,m.person_id),'quiet'),
    button('Remove',()=>dialog('Remove '+(m.display_name||m.person_id)+'?',[el('p',{},'They will stop seeing “'+album.title+'”. Anything they contributed leaves the album. Views and saves they already made stay recorded.')],
-    {confirm:'Remove member',danger:true,run:()=>write(T.member,{id:album.id,person_id:m.person_id,remove:true})}),'quiet danger')):null);
+    {confirm:'Remove member',danger:true,run:()=>write(T.member,{id:album.id,person_id:m.person_id,remove:true},{wait:false})}),'quiet danger')):null);
 }
 function linkRow(l){
  return el('li',{class:'fs-person'},el('span',{class:'avatar small fs-link-icon','aria-hidden':'true'},'↗'),
   el('div',{},el('strong',{},'Link · '+stateName(l.state)),el('small',{},'Created '+day(l.created_at)+(l.expires_at?' · expires '+when(l.expires_at):' · no expiry')+(l.revoked_at?' · revoked '+day(l.revoked_at):'')+' · '+plural(l.views.length,'view')+', '+plural(l.views.reduce((n,v)=>n+v.saved_item_ids.length,0),'save'))),
-  l.state==='active'&&can(T.revoke)?el('span',{class:'fs-row-actions'},button('Revoke',()=>dialog('Revoke this link?',[el('p',{},'Nobody will be able to open the album with this link any more. Views and saves already recorded stay recorded.')],{confirm:'Revoke link',danger:true,run:()=>write(T.revoke,{id:l.id})}),'quiet danger')):null);
+  l.state==='active'&&can(T.revoke)?el('span',{class:'fs-row-actions'},button('Revoke',()=>dialog('Revoke this link?',[el('p',{},'Nobody will be able to open the album with this link any more. Views and saves already recorded stay recorded.')],{confirm:'Revoke link',danger:true,run:()=>write(T.revoke,{id:l.id},{wait:false})}),'quiet danger')):null);
 }
 function albumView(id){
  const a=A.details[id];if(!a)return el('div',{class:'empty'},el('h3',{},'Album not found'));
@@ -444,7 +445,7 @@ function contribution(a,c){
  const body=[media({...c,has_file:false},{large:true}),
   row('From',personName(c.person_id)),row('Caption',c.caption||'—'),row('Taken',when(c.taken_at)),row('Place',placeOf(c)),
   row('People',(c.people||[]).map(labelName).join(', ')||'—'),row('Size',size(c.declared_bytes)),row('Added',when(c.added_at)),area];
- const d=dialog('Shared by '+personName(c.person_id),body,can(T.save)?{confirm:'Save to my library',run:()=>write(T.save,{id:a.id,item_id:c.id})}:{});
+ const d=dialog('Shared by '+personName(c.person_id),body,can(T.save)?{confirm:'Save to my library',run:()=>write(T.save,{id:a.id,item_id:c.id},{wait:false})}:{});
  if(can(T.exposure))look(T.exposure,{id:c.id}).then(x=>{if(d.isConnected)area.replaceChildren(exposureView(x));}).catch(e=>area.replaceChildren(el('p',{class:'muted'},say(e))));
  else area.remove();
 }
