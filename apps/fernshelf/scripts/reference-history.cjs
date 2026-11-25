@@ -84,7 +84,6 @@ function extend(B) {
   const lastFor = it => (it.trashed_at ? ms(it.trashed_at) : clock) - 3600000;
   const updates = [];
   for (const it of items) {
-    if (it.history[0].action === 'imported' && R2() < 0.5) continue;
     const fields = [];
     if (it.caption !== null && it.source === 'camera' && R2() < 0.55) fields.push(['caption', null, it.caption]);
     if (it.favorite) fields.push(['favorite', false, true]);
@@ -138,7 +137,7 @@ function extend(B) {
     items.push(it); itemOf.set(id, it);
     purged.push({item: it, byHand});
   }
-  for (const it of items) it.history.sort((a, b) => ms(a.at) - ms(b.at));
+  for (const it of items) { it.history.sort((a, b) => ms(a.at) - ms(b.at)); it.removal_history.sort((a, b) => ms(a.at) - ms(b.at)); }
 
   // ---- when each item entered each album ------------------------------------------------------
   // The latest moment an item can have entered an album: before any view of that album shows it,

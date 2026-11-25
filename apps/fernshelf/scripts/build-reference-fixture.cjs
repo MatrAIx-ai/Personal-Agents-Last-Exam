@@ -70,7 +70,7 @@ function addItem(o) {
 // Photos taken before the account was opened were backed up in the phone's first sync on opening
 // day, one a second; later ones between one and ninety minutes after they were taken.
 const addedFor = taken => {
-  if (before(taken, OPENED)) { const at = plus(OPENED, 600 + importSeq++); return {added_at: at, importedAt: at}; }
+  if (before(taken, OPENED)) { const at = plus(OPENED, 600 + importSeq++); return {added_at: at}; }
   if (before(taken, BEFORE_HISTORY)) return {added_at: plus(taken, between2(60, 5400))};
   return {added_at: plus(taken, between(60, 5400))};
 };

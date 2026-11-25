@@ -69,7 +69,7 @@ function history(data, t, p) {
   const trashSpans = new Map();
   for (const i of data.items) {
     const h = i.history, spans = [];
-    if (!h.length || h[0].at !== i.added_at || !['imported', 'added', 'added_waiting', 'saved_from_share'].includes(h[0].action)) p(i.id + ': history does not start with its arrival at added_at');
+    if (!h.length || h[0].at !== i.added_at || !['added', 'added_waiting', 'saved_from_share'].includes(h[0].action)) p(i.id + ': history does not start with its arrival at added_at');
     let state = 'active', since = null, lastPurge = null;
     for (let k = 0; k < h.length; k++) {
       const r = h[k];
@@ -88,6 +88,8 @@ function history(data, t, p) {
     if (stored === 'trashed' && state !== 'trashed') p(i.id + ': in the trash but its history ends ' + state);
     if (stored === 'purged' && (lastPurge ? lastPurge !== i.purged_at || ms(i.purged_at) >= ms(i.purge_at) : i.purged_at !== i.purge_at)) p(i.id + ': purged_at matches neither a purge row nor the end of its retention');
     for (const r of i.removal_history) if (!h.some(x => x.action === 'removal_honored' && x.at === r.at)) p(i.id + ': removal_history row without its history row');
+    // The App appends removal_history rows as requests are honoured, so they are in time order.
+    if (i.removal_history.some((r, k) => k && ms(r.at) < ms(i.removal_history[k - 1].at))) p(i.id + ': removal_history is not in time order');
   }
   const inTrash = (id, at) => (trashSpans.get(id) || []).some(([a, b]) => at >= a && at < b);
   // Members, contributions, links.
