@@ -843,7 +843,7 @@ function ruth() {
   const smoke = blank({device_id: 'smoke-mom-hall', room_id: 'hallway', type: 'smoke', name: 'Hall smoke sensor', sensor: 'clear'});
   const temperature = blank({device_id: 'temp-mom-living', room_id: 'living', type: 'temperature', name: 'Living temperature', sensor: 'reading', sensor_value: 21});
   data.devices = [light, hall, thermo, lock, contact, motion, leak, smoke, temperature];
-  data.available_snapshots = ['nursery', 'living', 'hallway', 'kitchen', 'garage', 'entry'].map(name => 'snap-ruth-' + name);
+  data.available_snapshots = ['snap-nursery', 'snap-living', 'snap-hallway', 'snap-kitchen', 'snap-garage', 'snap-entry'];
   fortnight(data, light, HISTORY_START, {year: 2026, month: 9, day: 18}, 'person-ruth');
   dailyLight(data, light, {year: 2026, month: 9, day: 18}, 60, 'off', 'person-ruth', stamp(2026, 11, 17, 8, 0));
   data.routines = [{
@@ -905,7 +905,7 @@ function chen() {
     if (type === 'switch') { item.power = 'off'; item.rated_watts = type === 'switch' && deviceId.endsWith('porch') ? 60 : 800; }
     if (type === 'lock') { item.lock = 'locked'; item.auto_relock_minutes = 10; }
     if (type === 'garage') item.garage = 'closed';
-    if (type === 'camera') { item.privacy = 'privacy_off'; item.snapshot_asset_id = deviceId.endsWith('porch') ? 'snap-chen-garage' : 'snap-chen-hallway'; }
+    if (type === 'camera') { item.privacy = 'privacy_off'; item.snapshot_asset_id = deviceId.endsWith('porch') ? 'snap-garage' : 'snap-hallway'; }
     if (type === 'speaker') item.volume = 10;
     if (type === 'contact') item.sensor = 'closed';
     if (type === 'motion') item.sensor = 'clear';
@@ -960,7 +960,7 @@ function chen() {
     const next = shift(monday.year, monday.month, monday.day, 28);
     monday = next;
   }
-  data.available_snapshots = ['nursery', 'living', 'hallway', 'kitchen', 'garage', 'entry'].map(name => 'snap-chen-' + name);
+  data.available_snapshots = ['snap-nursery', 'snap-living', 'snap-hallway', 'snap-kitchen', 'snap-garage', 'snap-entry'];
   return data;
 }
 
@@ -1085,27 +1085,21 @@ function images() {
     ['nursery', 'NUR', 'Nursery', 0xE7C7C7], ['living', 'LIV', 'Living', 0xC9D4E4], ['hallway', 'HAL', 'Hallway', 0xD5D8DC],
     ['kitchen', 'KIT', 'Kitchen', 0xE6D3B3], ['garage', 'GAR', 'Garage', 0xD5DCCB], ['entry', 'ENT', 'Entry', 0xE4D0C4]
   ];
-  const households = [
-    ['', 'bw-household-morales', 0],
-    ['ruth-', 'bw-household-ruth', 0x1A2744],
-    ['chen-', 'bw-household-chen', 0x4A2C1A]
-  ];
-  for (const [prefix, accountId, salt] of households) {
-    for (const [name, label, title, color] of shots) {
-      const file = path.join(root, 'assets/snapshots', prefix + name + '.jpg');
-      fs.mkdirSync(path.dirname(file), {recursive: true});
-      fs.writeFileSync(file, snapshotImage(label, color, salt));
-      made.push({
-        asset_id: 'snap-' + prefix + name,
-        role: 'ui.snapshot',
-        file,
-        mime: 'image/jpeg',
-        width: 320,
-        height: 176,
-        alt: title + ' camera snapshot',
-        account_id: accountId
-      });
-    }
+  for (const [name, label, title, color] of shots) {
+    const file = path.join(root, 'assets/snapshots', name + '.jpg');
+    fs.mkdirSync(path.dirname(file), {recursive: true});
+    fs.writeFileSync(file, snapshotImage(label, color));
+    made.push({
+      asset_id: 'snap-' + name,
+      role: 'ui.snapshot',
+      file,
+      mime: 'image/jpeg',
+      width: 320,
+      height: 176,
+      alt: title + ' camera snapshot',
+      subjects: [{app_id: 'brightwire-home', account_id: 'bw-household-morales', object_type: 'household', object_id: 'bw-household-morales'}],
+      access: {audience: ['agent', 'reviewer'], rule: 'parent_object'}
+    });
   }
   return made;
 }
@@ -1123,14 +1117,14 @@ function catalog(made) {
         asset_id: item.asset_id,
         scope: {level: 'package', app_id: 'brightwire-home'},
         roles: [item.role],
-        subjects: item.account_id ? [{app_id: 'brightwire-home', account_id: item.account_id, object_type: 'household', object_id: item.account_id}] : [],
+        subjects: item.subjects || (item.account_id ? [{app_id: 'brightwire-home', account_id: item.account_id, object_type: 'household', object_id: item.account_id}] : []),
         mime_type: item.mime,
         availability: {status: 'ready'},
         storage: {adapter: 'storage.file', path: path.relative(root, item.file).split(path.sep).join('/'), packaging: 'bundled'},
         integrity: {bytes: bytes.length, sha256: crypto.createHash('sha256').update(bytes).digest('hex')},
         provenance: {dataset_id: 'brightwire-home-fixtures', source_ids: ['authored']},
         publication: 'public',
-        access: {audience: ['reviewer'], rule: 'app_surface'},
+        access: item.access || {audience: ['reviewer'], rule: 'app_surface'},
         presentation: {alt_text: item.alt, caption: item.alt},
         media: {image: {width: item.width, height: item.height, animated: false}},
         extensions: []

@@ -21,7 +21,7 @@ test('committed snapshots match the asset catalog and omit an encoder version', 
   const listed = catalog.assets.filter(asset => /^snap-[a-z]+$/.test(asset.asset_id));
   assert.equal(listed.length, shots.length);
   const owned = catalog.assets.filter(asset => asset.roles.includes('ui.snapshot'));
-  assert.equal(owned.length, shots.length * 3);
+  assert.equal(owned.length, shots.length);
   for (const asset of owned) {
     const file = path.join(root, asset.storage.path);
     const bytes = fs.readFileSync(file);

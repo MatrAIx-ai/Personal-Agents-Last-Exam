@@ -179,7 +179,14 @@ function objects(data) {
 }
 
 function assetReferences(data) {
-  return (data.available_snapshots || []).map(asset_id => ({
+  const owned = new Set();
+  for (const asset of packageCatalog.assets || []) {
+    const subject = Array.isArray(asset.subjects) ? asset.subjects[0] : null;
+    if (subject && subject.object_type === 'household' && subject.account_id === data.account_id && subject.object_id === data.account_id) {
+      owned.add(asset.asset_id);
+    }
+  }
+  return (data.available_snapshots || []).filter(asset_id => owned.has(asset_id)).map(asset_id => ({
     asset_id,
     object_type: 'household',
     object_id: data.account_id

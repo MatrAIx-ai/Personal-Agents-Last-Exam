@@ -653,36 +653,38 @@ test('core example rows from the approved proposal', () => {
   assert.equal(masked.digits_masked, '******');
   assert.equal(JSON.stringify(masked).includes(made.digits), false);
   codes.event({
-    event_id: 'code-in', at: at(2026, 11, 18, 13, 5), operation: 'lock.code_used',
+    event_id: 'code-in', at: at(2026, 11, 19, 13, 5), operation: 'lock.code_used',
     payload: {lock_device_id: 'lock-front', holder_name: 'Dev Patel'}
   });
+  assert.equal(codes.data.code_uses.at(-1).code_id, made.code_id);
   assert.equal(device(codes.data, 'lock-front').lock, 'unlocked');
-  codes.ctx.virtual_now = at(2026, 11, 18, 13, 10);
+  codes.ctx.virtual_now = at(2026, 11, 19, 13, 10);
   assert.equal(codes.call('brightwire-home.devices.get', {device_id: 'lock-front'}).device.observed.lock, 'locked');
   codes.call('brightwire-home.devices.command', {device_id: 'speaker-kitchen', command: 'set_volume', args: {volume: 3}});
-  assert.equal(codes.data.activity.some(item => item.actor_id === 'auto-relock' && item.at === at(2026, 11, 18, 13, 10)), true);
+  assert.equal(codes.data.activity.some(item => item.actor_id === 'auto-relock' && item.at === at(2026, 11, 19, 13, 10)), true);
   codes.event({
-    event_id: 'code-late', at: at(2026, 11, 18, 16, 30), operation: 'lock.code_used',
+    event_id: 'code-late', at: at(2026, 11, 19, 16, 30), operation: 'lock.code_used',
     payload: {lock_device_id: 'lock-front', holder_name: 'Dev Patel'}
   });
+  assert.equal(codes.data.code_uses.at(-1).code_id, made.code_id);
   assert.equal(codes.data.code_uses.at(-1).outcome, 'denied');
   assert.equal(codes.data.code_uses.at(-1).reason, 'outside_window');
   assert.equal(device(codes.data, 'lock-front').lock, 'locked');
   const denied = codes.call('brightwire-home.devices.command', {device_id: 'lock-front', command: 'unlock'});
   assert.equal(denied.outcome, 'confirmation_required');
   codes.event({
-    event_id: 'deny-unlock', at: at(2026, 11, 18, 16, 31), operation: 'confirmation.resolved',
+    event_id: 'deny-unlock', at: at(2026, 11, 19, 16, 31), operation: 'confirmation.resolved',
     payload: {confirmation_id: denied.confirmation_id, decision: 'denied', by_person_id: 'person-hana'}
   });
   assert.equal(device(codes.data, 'lock-front').lock, 'locked');
   const approved = codes.call('brightwire-home.devices.command', {device_id: 'lock-front', command: 'unlock'});
   codes.event({
-    event_id: 'approve-unlock', at: at(2026, 11, 18, 16, 32), operation: 'confirmation.resolved',
+    event_id: 'approve-unlock', at: at(2026, 11, 19, 16, 32), operation: 'confirmation.resolved',
     payload: {confirmation_id: approved.confirmation_id, decision: 'approved', by_person_id: 'person-hana'}
   });
   assert.equal(device(codes.data, 'lock-front').lock, 'unlocked');
   assert.equal(codeOf(capture(() => codes.event({
-    event_id: 'approve-again', at: at(2026, 11, 18, 16, 33), operation: 'confirmation.resolved',
+    event_id: 'approve-again', at: at(2026, 11, 19, 16, 33), operation: 'confirmation.resolved',
     payload: {confirmation_id: approved.confirmation_id, decision: 'approved', by_person_id: 'person-hana'}
   }))), 'confirmation_already_resolved');
 
@@ -1332,6 +1334,21 @@ test('task 73 flags every routine and scene change and keeps call arguments', ()
   });
   assert.equal(reads.calls.find(call => call.seq === 1).target, 'light-living');
   assert.equal(reads.calls.find(call => call.seq === 2).target, 'light-hallway');
+  const crossed = exportEvidence({
+    snapshot: {
+      data: house.data,
+      audit: [
+        {seq: 1, actor: 'agent', tool: 'brightwire-home.devices.get', decision: 'allow', connection_id: 'conn-a', client_name: 'reader-a'},
+        {seq: 2, actor: 'agent', tool: 'brightwire-home.devices.get', decision: 'allow', connection_id: 'conn-b', client_name: 'reader-b'}
+      ]
+    },
+    agent_executions: [
+      {tool: 'brightwire-home.devices.get', status: 'ok', args: {device_id: 'light-hallway'}, connection_id: 'conn-b', client_name: 'reader-b'}
+    ]
+  });
+  assert.equal(crossed.calls.find(call => call.seq === 1).target, null);
+  assert.equal(crossed.calls.find(call => call.seq === 2).target, 'light-hallway');
+  assert.equal(crossed.calls.filter(call => call.tool === 'brightwire-home.devices.get').length, 2);
   const failed = exportEvidence({
     snapshot: {
       data: {
@@ -1507,6 +1524,46 @@ test('approving a code window another code already holds records confirmation_fa
   const confirmation = house.data.confirmations.find(item => item.confirmation_id === queued.confirmation_id);
   assert.equal(confirmation.status, 'approved');
   assert.equal(house.data.activity.filter(entry => entry.command === 'confirmation_failed' && entry.summary === 'invalid_arguments').length, 1);
+});
+
+test('an approved code extension respects the active code limit', () => {
+  const house = fixture();
+  house.mutate(data => {
+    data.max_active_codes = 1;
+    for (const code of data.access_codes) code.revoked = true;
+  });
+  const made = house.call('brightwire-home.access_codes.create', {
+    name: 'Short', holder_name: 'Short', locks: ['lock-front'],
+    schedule: {kind: 'window', start: at(2026, 11, 17, 12, 1), end: at(2026, 11, 17, 12, 8)}
+  });
+  assert.equal(made.outcome, 'applied');
+  const original = house.data.access_codes.find(item => item.code_id === made.code_id).schedule;
+  house.mutate(data => { data.scopes.access_codes = 'confirm'; });
+  const extension = house.call('brightwire-home.access_codes.update', {
+    code_id: made.code_id,
+    schedule: {kind: 'window', start: at(2026, 11, 22, 13, 0), end: at(2026, 11, 22, 16, 0)}
+  });
+  assert.equal(extension.outcome, 'confirmation_required');
+  house.ctx.virtual_now = at(2026, 11, 17, 12, 9);
+  house.mutate(data => { data.scopes.access_codes = 'operate'; });
+  const filled = house.call('brightwire-home.access_codes.create', {
+    name: 'Later', holder_name: 'Later', locks: ['lock-front'],
+    schedule: {kind: 'window', start: at(2026, 11, 23, 13, 0), end: at(2026, 11, 23, 16, 0)}
+  });
+  assert.equal(filled.outcome, 'applied');
+  house.event({
+    event_id: 'extend-limit', at: at(2026, 11, 17, 12, 9), operation: 'confirmation.resolved',
+    payload: {confirmation_id: extension.confirmation_id, decision: 'approved', by_person_id: 'person-hana'}
+  });
+  const kept = house.data.access_codes.find(item => item.code_id === made.code_id);
+  assert.deepEqual(kept.schedule, original);
+  assert.equal(house.data.activity.filter(item => item.command === 'confirmation_failed' && item.summary === 'code_limit_reached').length, 1);
+  assert.equal(codeOf(capture(() => house.call('brightwire-home.access_codes.update', {
+    code_id: made.code_id,
+    schedule: {kind: 'window', start: at(2026, 11, 24, 13, 0), end: at(2026, 11, 24, 16, 0)}
+  }))), 'code_limit_reached');
+  assert.deepEqual(house.data.access_codes.find(item => item.code_id === made.code_id).schedule, original);
+  assert.equal(house.data.access_codes.find(item => item.code_id === filled.code_id).revoked, false);
 });
 
 test('a relock with no later write is visible from the start clock', () => {

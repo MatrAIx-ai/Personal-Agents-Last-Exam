@@ -1018,6 +1018,17 @@ function activeCodeCount(data, nowMs) {
   return data.access_codes.filter(code => codeStatus(code, nowMs, data.utc_offset, data) !== 'revoked' && codeStatus(code, nowMs, data.utc_offset, data) !== 'expired').length;
 }
 
+function projectedCodeCount(data, nowMs, codeId, schedule) {
+  return data.access_codes.filter(code => {
+    if (code.revoked) return false;
+    const view = code.code_id === codeId
+      ? {...code, schedule, approval: 'approved', pending_confirmation_id: null}
+      : code;
+    const status = codeStatus(view, nowMs, data.utc_offset, data);
+    return status === 'active' || status === 'scheduled';
+  }).length;
+}
+
 function rangesOverlap(left, right) {
   return Date.parse(left.start) < Date.parse(right.end) && Date.parse(right.start) < Date.parse(left.end);
 }
@@ -1174,7 +1185,7 @@ function applyStored(ctx, data, confirmation) {
     if (!code || code.revoked) fail('invalid_arguments', 'That code cannot be updated.');
     const nowMs = Date.parse(ctx.virtual_now);
     assertCodeSchedule(data, {...stored.schedule, locks: code.locks}, nowMs, code.code_id);
-    if (activeCodeCount(data, nowMs) > data.max_active_codes) fail('code_limit_reached', 'The household is at its access code limit.');
+    if (projectedCodeCount(data, nowMs, code.code_id, stored.schedule) > data.max_active_codes) fail('code_limit_reached', 'The household is at its access code limit.');
     code.schedule = stored.schedule;
   } else if (stored.kind === 'code_revoke') {
     const code = data.access_codes.find(item => item.code_id === stored.code_id);
@@ -1404,10 +1415,19 @@ function applySensor(ctx, data, payload) {
   considerDeviceTriggers(ctx, data, device, {at: stamp(ctx), event_id: ctx.event_id, actor_kind: 'manual', actor_id: 'sensor'}, 0);
 }
 
-function snapshotReady(data, assetId) {
+function snapshotReady(ctx, data, assetId) {
   if (!assetId) return null;
   const listed = Array.isArray(data.available_snapshots) ? data.available_snapshots : [];
-  return listed.includes(assetId) ? 'ready' : 'asset_missing';
+  if (!listed.includes(assetId)) return 'asset_missing';
+  if (!ctx || !ctx.assets || typeof ctx.assets.read !== 'function') return 'ready';
+  try {
+    ctx.assets.read(assetId);
+    return 'ready';
+  } catch (error) {
+    if (error && error.code === 'unavailable') return 'asset_missing';
+    if (error && error.code === 'not_available') return 'ready';
+    throw error;
+  }
 }
 
 function automationSnap(record, kind) {
@@ -1452,7 +1472,7 @@ function reads(ctx, data, name, args) {
   if (name === 'devices.get') {
     const device = requireDevice(data, args.device_id);
     const view = presentDevice(data, device, nowMs);
-    view.snapshot_status = snapshotReady(data, device.snapshot_asset_id);
+    view.snapshot_status = snapshotReady(ctx, data, device.snapshot_asset_id);
     return {device: view};
   }
   if (name === 'devices.history') {
@@ -1718,7 +1738,9 @@ function writes(ctx, data, name, args) {
     if (scope === 'none' || scope === 'view') fail('scope_insufficient', 'The assistant cannot change access codes.');
     if (name === 'access_codes.update') {
       const schedule = copy(args.schedule);
-      assertCodeSchedule(data, {...schedule, locks: code.locks}, Date.parse(ctx.virtual_now), code.code_id);
+      const nowMs = Date.parse(ctx.virtual_now);
+      assertCodeSchedule(data, {...schedule, locks: code.locks}, nowMs, code.code_id);
+      if (projectedCodeCount(data, nowMs, code.code_id, schedule) > data.max_active_codes) fail('code_limit_reached', 'The household is at its access code limit.');
       if (scope === 'confirm') {
         const confirmation = openConfirmation(ctx, data, {
           target: {kind: 'device', id: code.locks[0]},

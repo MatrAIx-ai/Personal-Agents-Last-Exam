@@ -245,7 +245,17 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
     const decision = ['ok', 'committed', 'ready'].includes(item.status) ? 'allow' : 'deny';
     if (decision === 'allow' && item.request_id && calls.some(call => call.seq != null && call.decision === 'allow' && call.request_id && call.request_id === item.request_id && call.tool === tool)) return;
     if (decision === 'allow' && !item.request_id) {
-      const open = calls.find(call => call.seq != null && call.decision === 'allow' && call.tool === tool && !call.request_id && !pairedReads.has(call.seq));
+      const openRows = calls.filter(call => call.seq != null && call.decision === 'allow' && call.tool === tool && !call.request_id && !pairedReads.has(call.seq));
+      let open = null;
+      if (item.connection_id || item.client_name) {
+        const named = openRows.filter(call => {
+          const connection = item.connection_id && call.connection_id && item.connection_id === call.connection_id;
+          const client = item.client_name && call.client_name && item.client_name === call.client_name;
+          if (item.connection_id && item.client_name && call.connection_id && call.client_name) return connection && client;
+          return Boolean(connection || client);
+        });
+        if (named.length === 1) open = named[0];
+      } else if (openRows.length) open = openRows[0];
       if (open) {
         pairedReads.add(open.seq);
         if (!open.target) open.target = callTarget(null, null, item);

@@ -14,11 +14,13 @@ export const config = {
     'brightwire-home.modes.set',
     'brightwire-home.confirmations.cancel',
     'brightwire-home.access_codes.create',
-    'brightwire-home.camera.share.start'
+    'brightwire-home.camera.share.start',
+    'brightwire-home.camera.share.stop'
   ]
 };
 
 const root = document.querySelector('#app');
+const writes = new Map();
 let csrf = '';
 let version = null;
 let devices = [];
@@ -28,6 +30,7 @@ let confirmations = [];
 let selected = null;
 let section = 'rooms';
 let busy = false;
+let receipt = null;
 
 function observedText(device) {
   const observed = device.observed || {};
@@ -47,10 +50,49 @@ function observedText(device) {
 
 function showStatus(message, error) {
   const status = document.querySelector('#status');
+  if (!status) return;
   status.textContent = message;
   if (error) status.dataset.error = 'true';
   else delete status.dataset.error;
   status.dataset.outcome = message;
+}
+
+function actionRows(result) {
+  if (!Array.isArray(result.results)) return [];
+  return result.results.map(item => {
+    const bad = Boolean(item.outcome && item.outcome !== 'applied');
+    const text = [item.device_id || item.mode || 'action', item.command, item.outcome, item.confirmation_id].filter(Boolean).join(' ');
+    return {text, outcome: item.outcome || '', bad, device_id: item.device_id || ''};
+  });
+}
+
+function describe(result) {
+  const rows = actionRows(result);
+  if (rows.length) return [result.outcome || 'Saved'].concat(rows.map(row => row.text)).join('\n');
+  if (result.outcome === 'confirmation_required') {
+    const id = result.confirmation_id ? ' ' + result.confirmation_id : '';
+    const digits = result.digits ? '. Digits ' + result.digits : '';
+    return 'confirmation_required' + id + digits;
+  }
+  if (result.digits) return 'Code created. Digits ' + result.digits;
+  return result.outcome || 'Saved';
+}
+
+function receiptError(result) {
+  if (Array.isArray(result.results) && result.results.some(item => item.outcome && item.outcome !== 'applied')) return true;
+  return Boolean(result.outcome && result.outcome !== 'applied' && result.outcome !== 'partial');
+}
+
+function showReceipt() {
+  if (!receipt) return;
+  showStatus(receipt.message, receipt.error);
+  const box = document.querySelector('#results');
+  if (!box) return;
+  box.replaceChildren(...receipt.rows.map(row => el('p', {
+    'data-result': row.device_id || 'action',
+    'data-outcome': row.outcome,
+    ...(row.bad ? {'data-error': 'true'} : {})
+  }, row.text)));
 }
 
 async function request(url, method, value) {
@@ -72,27 +114,59 @@ async function call(name, args) {
   return result;
 }
 
+function writeKey(name, args) {
+  return name + '\n' + JSON.stringify(args);
+}
+
 async function write(name, args) {
   if (busy) throw Error('An operation is already in progress.');
   busy = true;
+  document.body.dataset.busy = 'true';
+  const key = writeKey(name, args);
+  let pending = writes.get(key);
   try {
-    const payload = {...args, expected_version: structuredClone(version), request_id: 'web-' + crypto.randomUUID()};
-    const result = await call(name, payload);
+    if (pending && pending.done) {
+      try {
+        await refresh(selected && selected.device_id);
+      } catch (error) {
+        showStatus(pending.message + ' The list could not be refreshed.', pending.error);
+        throw error;
+      }
+      showReceipt();
+      writes.delete(key);
+      return pending.result;
+    }
+    if (!pending) {
+      pending = {
+        request_id: 'web-' + crypto.randomUUID(),
+        version: structuredClone(version),
+        done: false
+      };
+      writes.set(key, pending);
+    }
+    const result = await call(name, {...args, expected_version: pending.version, request_id: pending.request_id});
     version = result.version || version;
-    const held = result.outcome && result.outcome !== 'applied' && result.outcome !== 'partial';
-    const message = result.digits
-      ? 'Code created. Digits ' + result.digits
-      : held
-        ? result.outcome + (result.confirmation_id ? ' ' + result.confirmation_id : '')
-        : (result.outcome || 'Saved');
-    await refresh(selected && selected.device_id);
-    showStatus(message, Boolean(held));
+    pending.done = true;
+    pending.result = result;
+    pending.message = describe(result);
+    pending.error = receiptError(result);
+    receipt = {message: pending.message, error: pending.error, rows: actionRows(result)};
+    showReceipt();
+    try {
+      await refresh(selected && selected.device_id);
+    } catch (error) {
+      showStatus(pending.message + ' The list could not be refreshed.', pending.error);
+      throw error;
+    }
+    showReceipt();
+    writes.delete(key);
     return result;
   } catch (error) {
-    showStatus(error.message, true);
+    if (!pending || !pending.done) showStatus(error.message, true);
     throw error;
   } finally {
     busy = false;
+    delete document.body.dataset.busy;
   }
 }
 
@@ -141,6 +215,12 @@ function deviceButtons(device) {
     row.push(button('Share camera', () => write('brightwire-home.camera.share.start', {
       device_id: id, recipient: recipient.value, duration_minutes: Number(minutes.value)
     }), {'data-action': 'share-camera'}));
+    for (const session of (device.sessions || []).filter(item => item.status === 'active')) {
+      row.push(button('Stop share', () => write('brightwire-home.camera.share.stop', {session_id: session.session_id}), {
+        'data-action': 'stop-share',
+        'data-session-id': session.session_id
+      }));
+    }
   }
   return row;
 }
@@ -212,11 +292,13 @@ function sideList() {
 }
 
 function extraPanel() {
-  if (section !== 'home') return null;
   const holder = el('input', {type: 'text', value: 'Guest', 'data-field': 'holder', 'aria-label': 'Code holder'});
   const start = el('input', {type: 'text', value: '2026-11-20T08:00:00-06:00', 'data-field': 'window-start', 'aria-label': 'Window start'});
   const end = el('input', {type: 'text', value: '2026-11-20T18:00:00-06:00', 'data-field': 'window-end', 'aria-label': 'Window end'});
-  return el('section', {},
+  const locks = devices.filter(device => device.type === 'lock');
+  const lock = el('select', {'data-field': 'lock', 'aria-label': 'Lock'});
+  for (const item of locks) lock.append(el('option', {value: item.device_id}, item.name));
+  return el('section', {'data-panel': 'home'},
     el('h3', {}, 'Home mode'),
     el('div', {class: 'actions'},
       button('Home', () => write('brightwire-home.modes.set', {mode: 'home'}), {'data-mode': 'home'}),
@@ -226,12 +308,13 @@ function extraPanel() {
     el('h3', {}, 'Guest code'),
     el('div', {class: 'fields'},
       el('label', {class: 'field'}, 'Holder', holder),
+      el('label', {class: 'field'}, 'Lock', lock),
       el('label', {class: 'field'}, 'Starts', start),
       el('label', {class: 'field'}, 'Ends', end),
       button('Create guest code', () => write('brightwire-home.access_codes.create', {
         name: holder.value,
         holder_name: holder.value,
-        locks: ['lock-front'],
+        locks: [lock.value],
         schedule: {kind: 'window', start: start.value, end: end.value}
       }), {'data-action': 'create-code', class: 'primary'})
     )
@@ -252,8 +335,9 @@ function render() {
     nav.append(el('button', {type: 'button', 'aria-current': section === id ? 'page' : false, 'data-section': id, onclick: () => { section = id; render(); }}, label));
   }
   const detailPane = el('section', {class: 'detail', 'aria-label': 'Selected device'});
-  if (selected && section !== 'scenes' && section !== 'routines' && section !== 'confirmations') detailPane.append(detail(selected));
-  else detailPane.append(extraPanel() || el('div', {class: 'empty'}, el('p', {}, 'Choose a device, scene, or routine.')));
+  if (section === 'home') detailPane.append(extraPanel());
+  else if (selected && section !== 'scenes' && section !== 'routines' && section !== 'confirmations') detailPane.append(detail(selected));
+  else detailPane.append(el('div', {class: 'empty'}, el('p', {}, 'Choose a device, scene, or routine.')));
   root.replaceChildren(el('div', {class: 'app-shell'},
     el('aside', {class: 'sidebar'},
       el('div', {class: 'brand'}, el('span', {class: 'brand-mark', 'aria-hidden': 'true'}, 'B'), el('h1', {}, 'Brightwire')),
@@ -262,10 +346,12 @@ function render() {
     el('main', {class: 'app-main'},
       el('header', {class: 'toolbar'}, el('h2', {class: 'section-title'}, 'Household'), button('Refresh', () => refresh(selected && selected.device_id), {'data-action': 'refresh'})),
       el('p', {role: 'status', 'aria-live': 'polite', id: 'status'}, 'Ready'),
+      el('div', {id: 'results'}),
       el('div', {class: 'workspace'}, el('section', {class: 'collection'}, sideList()), detailPane)
     )
   ));
   document.body.dataset.app = config.id;
+  showReceipt();
 }
 
 async function refresh(preferredId) {
