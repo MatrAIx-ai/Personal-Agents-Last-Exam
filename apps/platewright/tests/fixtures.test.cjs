@@ -46,3 +46,46 @@ test('two years of history: reads default to a week or a page, and past slots re
   const household = f.call(P + 'household.get', {date: '2025-02-10'}).members.find(m => m.person_id === 'person-nora');
   assert.equal(household.constraints.find(c => c.id === 'con-nora-h1').state, 'active');
 });
+
+test('the fixture check replays each slot\'s history and refuses histories the App could not have written', () => {
+  const {recordProblems} = require('../scripts/check-fixtures.cjs');
+  const problems = data => { const out = []; recordProblems(data, m => out.push(m)); return out; };
+  const slot = (data, id) => data.plan.find(s => s.id === id);
+  const dropFirst = id => d => { slot(d, id).history.shift(); };
+  const BROKEN = {
+    reference: [
+      // The planning row of a generated meal that was later cleared, replaced or given a guest is kept.
+      ['cleared by the account, plan dropped', dropFirst('2025-01-18:breakfast')],
+      ['cleared by a member, plan dropped', dropFirst('2025-02-04:dinner')],
+      ['replaced by a member, plan dropped', dropFirst('2025-01-08:dinner')],
+      ['guest added, plan dropped', dropFirst('2025-01-04:dinner')],
+      // A hand-written meal keeps its planning row even when it was cooked as planned.
+      ['hand-written meal, plan dropped', dropFirst('2026-10-12:dinner')],
+      ['cooked other dishes than planned', d => { slot(d, '2026-10-12:dinner').history[1].dishes = [{recipe_id: 'rec-dal', servings: null}]; }],
+      ['cooked with other people than planned', d => { slot(d, '2025-01-08:dinner').history.at(-1).attendees = ['person-nora']; }],
+      ['cleared after it was cooked', d => { const s = slot(d, '2026-10-12:dinner'); s.history.push({...s.history.at(-1), action: 'cleared', dishes: []}); }],
+      ['cooked twice', d => { const s = slot(d, '2025-01-01:dinner'); s.history.push({...s.history[0]}); }],
+      ['state differs from the history', d => { slot(d, '2025-01-21:dinner').state = 'cleared'; }],
+      ['slot differs from its last row', d => { slot(d, '2025-01-18:breakfast').attendees = ['person-nora']; }],
+      ['cooked before its date', d => { const s = slot(d, '2026-10-12:dinner'); s.history[1].at = s.cooked.at = s.updated_at = '2026-10-11T19:00:00-04:00'; }],
+      ['planned after its date', d => { slot(d, '2025-01-18:breakfast').history[0].at = '2025-01-19T08:00:00-05:00'; }],
+      ['a guest row that adds nobody', d => { const h = slot(d, '2025-01-04:dinner').history[1]; h.guest_ids = []; }],
+      ['an event row without its event', d => { slot(d, '2025-02-04:dinner').history[1].event_id = 'ev-pw-h9999'; }],
+      ['set twice without replacing', d => { const s = slot(d, '2026-10-21:dinner'); s.history.splice(1, 0, {...s.history[0]}); }]
+    ],
+    minimal: [
+      ['cleared, plan dropped', dropFirst('2026-11-05:lunch')],
+      ['skipped, plan dropped', dropFirst('2026-11-01:dinner')],
+      ['cooked, plan dropped', dropFirst('2026-11-07:dinner')]
+    ]
+  };
+  for (const [name, cases] of Object.entries(BROKEN)) {
+    const good = require(`../fixtures/${name}.json`);
+    assert.deepEqual(problems(structuredClone(good)), [], name);
+    for (const [label, breakIt] of cases) {
+      const copy = structuredClone(good);
+      breakIt(copy);
+      assert.notDeepEqual(problems(copy), [], `${name}: ${label} was not refused`);
+    }
+  }
+});

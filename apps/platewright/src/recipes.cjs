@@ -10,7 +10,7 @@ const contentOf = r => copy(Object.fromEntries(CONTENT_KEYS.map(k => [k, r[k]]))
 function contentAt(r, revision) {
   if (!revision || revision === r.revision) return contentOf(r);
   const row = r.revisions.find(x => x.revision === revision);
-  if (!row) fail('not_found', `Recipe ${r.id} has no revision ${revision}.`);
+  if (!row) fail('not_found', `${r.title} has no revision ${revision}.`);
   return copy(row.content);
 }
 const ingredientsMap = data => c.byId(data.ingredients);
@@ -118,7 +118,7 @@ function ingredientSearch(ctx, data, args) {
 function scaledLines(data, content, servings, system, overrides = {}) {
   const ingredients = ingredientsMap(data);
   for (const id of Object.keys(overrides)) {
-    if (!content.lines.some(l => l.ingredient_id === id)) fail('not_in_recipe', `${id} is not in this recipe.`);
+    if (!content.lines.some(l => l.ingredient_id === id)) fail('not_in_recipe', `${(ingredients.get(id) || {name: id}).name} is not in this recipe.`);
   }
   const factor = servings / content.servings;
   return content.lines.map((line, index) => {
@@ -266,7 +266,7 @@ function substitutions(ctx, data, args) {
 // Resolves swaps against a base recipe and returns the variant content and record; writes nothing.
 function buildVariant(data, args) {
   const base = c.recipe(data, args.id);
-  if (base.variant) fail('invalid_state', `${base.id} is itself a variant; start from its base recipe ${base.variant.base_recipe_id}.`);
+  if (base.variant) fail('invalid_state', `${base.title} is itself a variant; start from its base recipe, ${c.recipe(data, base.variant.base_recipe_id).title}.`);
   if (base.archived) fail('invalid_state', 'Restore the archived recipe before making a variant of it.');
   const content = contentOf(base), used = new Set(), swaps = [];
   for (const s of args.swaps) {
@@ -276,9 +276,9 @@ function buildVariant(data, args) {
     let to, ratio, rule = null;
     if (s.rule_id) {
       rule = data.substitution_rules.find(x => x.id === s.rule_id);
-      if (!rule || rule.from_ingredient_id !== from.id) fail('unknown_rule', `There is no rule ${s.rule_id} that replaces ${from.name}.`);
+      if (!rule || rule.from_ingredient_id !== from.id) fail('unknown_rule', `No substitution rule with that ID replaces ${from.name}.`);
       const status = ruleStatus(rule, base.method_tags);
-      if (!status.applicable) fail('rule_not_applicable', `Rule ${rule.id}: ${status.reason}`);
+      if (!status.applicable) fail('rule_not_applicable', `${c.ingredient(data, rule.to_ingredient_id).name} for ${from.name}: ${status.reason}`);
       to = c.ingredient(data, rule.to_ingredient_id); ratio = rule.ratio;
     } else if (s.to_ingredient_id) {
       to = c.ingredient(data, s.to_ingredient_id); ratio = s.ratio ?? 1;

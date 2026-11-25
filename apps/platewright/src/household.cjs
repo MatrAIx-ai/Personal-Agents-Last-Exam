@@ -61,14 +61,31 @@ function dates(from, to) {
   if (from !== null && to !== null && to < from) fail('invalid_window', `The end date (${c.dateText(to)}) is before the start date (${c.dateText(from)}).`);
 }
 
+// A constraint in words, as notifications and messages name it: "strict allergy to tree nut",
+// "dislike of mushroom from Sun 1 Feb 2026".
+const AMOUNT = {kcal: 'kcal', protein_g: 'g protein', carbs_g: 'g carbohydrate', fat_g: 'g fat', sodium_mg: 'mg sodium'};
+const DIET_WORDS = {gluten_free: 'gluten-free', lactose_free: 'lactose-free'};
+function describe(data, con) {
+  const what = {
+    allergy: () => `${con.strict ? 'strict ' : ''}allergy to ${c.words(con.allergen)}`,
+    medical: () => `medical restriction on ${con.ingredient_id ? data.ingredients.find(i => i.id === con.ingredient_id).name.toLowerCase() : c.words(con.flag)}`,
+    diet: () => `${DIET_WORDS[con.diet] || c.words(con.diet)} diet`,
+    limit: () => `limit of ${con.max} ${AMOUNT[con.nutrient]} per meal`,
+    dislike: () => `dislike of ${con.ingredient_id ? data.ingredients.find(i => i.id === con.ingredient_id).name.toLowerCase() : c.words(con.tag)}`
+  }[con.kind]();
+  const from = con.effective_from ? ` from ${c.dateText(con.effective_from)}` : '';
+  const to = con.expires_on ? ` until ${c.dateText(con.expires_on)}` : '';
+  return what + from + to;
+}
 // Guests carry a name and constraints of the same five kinds, without dates.
 function normalizeGuests(data, guests) {
   const ids = new Set();
   return guests.map(g => {
-    if (ids.has(g.guest_id)) fail('invalid_arguments', `Guest ${g.guest_id} is listed twice.`);
+    if (!g.name.trim()) fail('invalid_arguments', 'Every guest needs a name.');
+    if (ids.has(g.guest_id)) fail('invalid_arguments', `${g.name.trim()} is listed twice as a guest.`);
     ids.add(g.guest_id);
-    if (data.members.some(m => m.person_id === g.guest_id)) fail('invalid_arguments', `${g.guest_id} is a household member, not a guest.`);
-    if (!g.name.trim()) fail('invalid_arguments', `Guest ${g.guest_id} needs a name.`);
+    const member = data.members.find(m => m.person_id === g.guest_id);
+    if (member) fail('invalid_arguments', `${member.display_name} is a household member, not a guest.`);
     return {guest_id: g.guest_id, name: g.name.trim(), constraints: (g.constraints || []).map(x => ({kind: x.kind, ...target(data, x), note: x.note ?? null}))};
   });
 }
@@ -97,8 +114,8 @@ const allConstraintIds = data => data.members.flatMap(m => m.constraints.map(x =
 function setConstraint(data, memberId, input, who, todayDate) {
   const m = c.member(data, memberId);
   const existing = input.id ? m.constraints.find(x => x.id === input.id) : null;
-  if (input.id && !existing && findOwner(data, input.id)) fail('not_found', `Constraint ${input.id} belongs to another member.`);
-  if (existing && existing.ended_at) fail('invalid_state', `Constraint ${existing.id} has ended; add a new constraint instead.`);
+  if (input.id && !existing && findOwner(data, input.id)) fail('not_found', `That constraint belongs to ${findOwner(data, input.id).display_name}, not ${m.display_name}.`);
+  if (existing && existing.ended_at) fail('invalid_state', `${m.display_name}'s ${describe(data, existing)} has ended; add a new constraint instead.`);
   const what = target(data, input);
   const from = input.effective_from !== undefined ? input.effective_from : existing ? existing.effective_from : todayDate;
   const to = input.expires_on !== undefined ? input.expires_on : existing ? existing.expires_on : null;
@@ -127,8 +144,8 @@ function removeConstraint(data, memberId, constraintId, note, who, todayDate) {
   const con = m.constraints.find(x => x.id === constraintId);
   if (!con) fail('not_found', `${m.display_name} has no constraint ${constraintId}.`);
   const st = constraintState(con, todayDate, data.household.time_zone);
-  if (st === 'ended' || con.ended_at) fail('invalid_state', `Constraint ${con.id} has already ended.`);
-  if (st === 'expired') fail('invalid_state', `Constraint ${con.id} already expired on ${con.expires_on}.`);
+  if (st === 'ended' || con.ended_at) fail('invalid_state', `${m.display_name}'s ${describe(data, con)} has already ended.`);
+  if (st === 'expired') fail('invalid_state', `${m.display_name}'s ${describe(data, con)} has already expired.`);
   con.ended_at = who.at;
   con.history.push({at: who.at, actor: who.actor, by: who.by, action: 'ended', note: note ?? null, request_id: who.request_id, event_id: who.event_id, previous: null});
   return con;
@@ -145,4 +162,4 @@ function removeTool(ctx, data, args) {
   return {id: con.id, member_id: args.id, state: 'ended', ended_at: con.ended_at};
 }
 
-module.exports = {target, normalizeGuests, get, setConstraint, removeConstraint, setTool, removeTool};
+module.exports = {describe, target, normalizeGuests, get, setConstraint, removeConstraint, setTool, removeTool};

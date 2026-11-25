@@ -344,12 +344,15 @@ function reference() {
     const r = data.recipes.find(x => x.id === p.recipe_id);
     p.revision = r.revisions.filter(x => Date.parse(x.at) <= Date.parse(s.cooked.at)).length;
   }
-  // Meals before the hand-written weeks keep a short history: the account's planning row is dropped
-  // when a later row records how the meal ended, since that row repeats the same dishes and people.
-  // Changes made by other members stay. This keeps the reference seed under 1 MB as compact JSON.
+  // Meals before the hand-written weeks keep a shorter history: the account's planning row is dropped
+  // when the row right after it carries the same dishes, people and guests (the meal was then cooked
+  // or skipped as planned), since that row repeats everything it says except the time of planning. A
+  // planning row stays whenever what follows changes something: a meal cleared, replaced by another
+  // member, or with a guest added keeps the plan it started from. Changes by other members always stay.
+  const same = (a, b) => JSON.stringify([a.dishes, a.attendees, a.guest_ids]) === JSON.stringify([b.dishes, b.attendees, b.guest_ids]);
   for (const s of data.plan) {
     if (s.date > History.LAST) continue;
-    s.history = s.history.filter((row, i) => !(row.actor === 'agent' && row.action === 'set' && i < s.history.length - 1));
+    s.history = s.history.filter((row, i) => !(row.actor === 'agent' && row.action === 'set' && i < s.history.length - 1 && same(row, s.history[i + 1])));
   }
   // Generated notifications take their own ID series, so the hand-written ones keep ntf-0001 to ntf-0014.
   let own = 0, gen = 0;

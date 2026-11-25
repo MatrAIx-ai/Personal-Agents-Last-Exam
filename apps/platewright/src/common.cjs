@@ -74,6 +74,22 @@ function slotText(id) {
 }
 const words = value => String(value).replace(/_/g, ' ');
 const quantityText = (quantity, unit) => (unit === 'each' || !unit ? `${quantity}` : `${quantity} ${words(unit)}`);
+// An amount of an ingredient as a person says it: "800 ml coconut milk (canned)", "12 eggs", "1 lime".
+// Counted items take the plural of the name's last word before any comma or bracket.
+const PLURALS = {leaf: 'leaves', potato: 'potatoes', tomato: 'tomatoes', mango: 'mangoes', bacon: 'bacon slices'};
+function plural(name) {
+  const m = /^(.*?)([^\s,(]+)((?:,|\s\().*)?$/.exec(name);
+  if (!m) return name;
+  const [, before, word, after = ''] = m, w = word.toLowerCase();
+  const many = PLURALS[w] ? word.slice(0, 1) + PLURALS[w].slice(1) : /s$/.test(w) ? word : /(ch|sh|x|z)$/.test(w) ? word + 'es'
+    : /[^aeiou]y$/.test(w) ? word.slice(0, -1) + 'ies' : word + 's';
+  return before + many + after;
+}
+const lowerFirst = name => (/^[A-Z][a-z]/.test(name) ? name[0].toLowerCase() + name.slice(1) : name);
+function amountText(name, quantity, unit) {
+  if (unit === 'each') return `${quantity} ${quantity === 1 ? lowerFirst(name) : plural(lowerFirst(name))}`;
+  return `${quantity} ${words(unit)} ${lowerFirst(name)}`;
+}
 
 // ---- Small numeric helpers ----------------------------------------------------------------------
 // Trims floating-point noise from exact values (1049.9999999 -> 1050) without rounding real fractions.
@@ -111,5 +127,5 @@ function slug(text) {
 module.exports = {
   ALLERGENS, FLAGS, DIETS, NUTRIENTS, KINDS, METHODS, MEALS, WEEKDAYS, EVENT_KINDS, ID_PATTERN,
   fail, copy, isDate, addDays, daysBetween, weekday, validTimeZone, localDate, today, exact, ceilHalf,
-  byId, ingredient, recipe, member, nextId, slug, dateText, slotText, words, quantityText
+  byId, ingredient, recipe, member, nextId, slug, dateText, slotText, words, quantityText, amountText, plural
 };

@@ -17,20 +17,7 @@ const ingName = (data, id) => data.ingredients.find(i => i.id === id).name;
 
 // Notification text is read by people (in the App's activity) as well as by the Agent, so it names
 // things the way a person would: ingredient names, "dinner on Sat 14 Nov 2026", no record IDs.
-const AMOUNT = {kcal: 'kcal', protein_g: 'g protein', carbs_g: 'g carbohydrate', fat_g: 'g fat', sodium_mg: 'mg sodium'};
-const DIET_WORDS = {gluten_free: 'gluten-free', lactose_free: 'lactose-free'};
-function describe(data, con) {
-  const what = {
-    allergy: () => `${con.strict ? 'strict ' : ''}allergy to ${c.words(con.allergen)}`,
-    medical: () => `medical restriction on ${con.ingredient_id ? ingName(data, con.ingredient_id).toLowerCase() : c.words(con.flag)}`,
-    diet: () => `${DIET_WORDS[con.diet] || c.words(con.diet)} diet`,
-    limit: () => `limit of ${con.max} ${AMOUNT[con.nutrient]} per meal`,
-    dislike: () => `dislike of ${con.ingredient_id ? ingName(data, con.ingredient_id).toLowerCase() : c.words(con.tag)}`
-  }[con.kind]();
-  const from = con.effective_from ? ` from ${c.dateText(con.effective_from)}` : '';
-  const to = con.expires_on ? ` until ${c.dateText(con.expires_on)}` : '';
-  return what + from + to;
-}
+const describe = H.describe;
 const meal = slot => c.slotText(slot.id);
 
 // "Evan added a constraint" when Evan acts for himself, "Nora added a constraint for Evan" otherwise.
@@ -88,26 +75,27 @@ const HANDLERS = {
   'pantry.changed'(data, p, who) {
     const seen = new Set();
     for (const item of p.items) {
-      if (seen.has(item.ingredient_id)) fail('invalid_arguments', `${item.ingredient_id} is listed twice.`);
+      if (seen.has(item.ingredient_id)) fail('invalid_arguments', `${ingName(data, item.ingredient_id)} is listed twice.`);
       seen.add(item.ingredient_id);
       Pantry.check(data, item);
     }
     for (const item of p.items) Pantry.apply(data, item, who, 'event');
-    const text = p.items.map(i => `${ingName(data, i.ingredient_id)} ${c.quantityText(i.quantity, i.unit)}`).join(', ');
+    const text = p.items.map(i => c.amountText(ingName(data, i.ingredient_id), i.quantity, i.unit)).join(', ');
     return {object_id: 'pantry', title: `${nameOf(data, who.by)} updated the pantry`, body: `${text}.${p.note ? ' Note: ' + p.note : ''}`};
   },
   'shopping.changed'(data, p, who) {
     const list = S.needList(data);
     if (p.action === 'tick') {
       const line = list.lines.find(l => l.id === p.line_id);
-      if (!line) fail('not_found', `There is no line ${p.line_id} on the list.`);
+      if (!line) fail('not_found', 'That line is not on the list.');
       S.tick(data, line, true, who);
       return {object_id: line.id, title: `${nameOf(data, who.by)} ticked a shopping line`,
         body: `${line.ingredient_id ? ingName(data, line.ingredient_id) : line.text} is bought.`};
     }
     const line = S.addManual(data, {ingredient_id: p.ingredient_id, text: p.text, quantity: p.quantity, unit: p.unit}, who);
     return {object_id: line.id, title: `${nameOf(data, who.by)} added a shopping line`,
-      body: `${line.text || ingName(data, line.ingredient_id)}${line.quantity !== null ? ' ' + c.quantityText(line.quantity, line.unit) : ''}.`};
+      body: `${line.quantity === null ? line.text || ingName(data, line.ingredient_id)
+        : line.text ? `${line.text} (${c.quantityText(line.quantity, line.unit)})` : c.amountText(ingName(data, line.ingredient_id), line.quantity, line.unit)}.`};
   }
 };
 

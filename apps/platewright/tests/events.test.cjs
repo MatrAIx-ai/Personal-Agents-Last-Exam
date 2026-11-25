@@ -60,7 +60,8 @@ test('T16 each of the six events applies with one notification and one activity 
   assert.equal(n['ev-pw-102'].title, 'Ada ended one of their constraints');
   assert.equal(n['ev-pw-101'].body, 'Evan: dislike of cilantro from Mon 9 Nov 2026. Note: Told Maya at lunch');
   assert.equal(n['ev-pw-130'].body, 'Maya is coming to dinner on Fri 13 Nov 2026.');
-  assert.equal(n['ev-pw-140'].body, 'Egg 12, Coconut milk (canned) 800 ml. Note: Corner market this morning');
+  assert.equal(n['ev-pw-140'].body, '12 eggs, 800 ml coconut milk (canned). Note: Corner market this morning');
+  assert.equal(n['ev-pw-151'].body, 'Birthday candles (1).');
   assert.equal(n['ev-pw-131'].title, 'Guest update for dinner on Fri 13 Nov 2026');
   // People read the same text in the App's activity: no record IDs, slot IDs, ISO dates or vocabulary keys.
   assert.deepEqual(d.notifications.flatMap(x => [x.title, x.body]).map(unreadable).filter(Boolean), []);

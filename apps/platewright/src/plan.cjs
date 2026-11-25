@@ -16,6 +16,8 @@ const order = s => s.date + ':' + c.MEALS.indexOf(s.meal);
 const before = (a, b) => order(a) < order(b);
 const slotOf = (data, id) => data.plan.find(s => s.id === id);
 const isLeftover = dish => dish.leftovers_of !== undefined;
+// A recipe as a message names it: its title, or the ID given when no recipe has it.
+const recipeName = (data, id) => (data.recipes.find(r => r.id === id) || {title: id}).title;
 
 // Default servings: the portion factors of the attendees plus one per guest, rounded up to a half.
 function defaultPortions(data, slot) {
@@ -122,8 +124,9 @@ function window(ctx, data, args, maxDays) {
     const back = (c.WEEKDAYS.indexOf(c.weekday(t)) - c.WEEKDAYS.indexOf(data.household.week_start) + 7) % 7;
     start = c.addDays(t, -back);
   }
+  // Each date is checked before it is used, so a malformed start without an end is refused, not computed on.
+  for (const d of [start, end]) if (d !== undefined && !c.isDate(d)) fail('invalid_arguments', `${d} is not a calendar date.`);
   if (!end) end = c.addDays(start, 6);
-  for (const d of [start, end]) if (!c.isDate(d)) fail('invalid_arguments', `${d} is not a calendar date.`);
   if (end < start) fail('invalid_window', `The window ends on ${c.dateText(end)}, before it starts on ${c.dateText(start)}.`);
   if (c.daysBetween(start, end) + 1 > maxDays) fail('invalid_window', `A window can cover at most ${maxDays} days.`);
   return {start, end};
@@ -153,7 +156,7 @@ function normalizeDishes(data, slotId, slotPos, dishes) {
     if (recipeId === undefined) {
       if (cooked.length > 1) fail('leftover_unavailable', `The ${c.slotText(d.leftovers_of)} has several dishes; name the recipe_id of the leftovers.`);
       recipeId = cooked[0].recipe_id;
-    } else if (!cooked.some(x => x.recipe_id === recipeId)) fail('leftover_unavailable', `The ${c.slotText(d.leftovers_of)} did not plan recipe ${recipeId}.`);
+    } else if (!cooked.some(x => x.recipe_id === recipeId)) fail('leftover_unavailable', `The ${c.slotText(d.leftovers_of)} did not plan ${recipeName(data, recipeId)}.`);
     if (!(d.portions > 0) || !Number.isFinite(d.portions)) fail('invalid_quantity', 'Leftover portions must be positive.');
     return {leftovers_of: source.id, recipe_id: recipeId, portions: d.portions};
   });
@@ -236,8 +239,8 @@ function markTool(ctx, data, args) {
   const recipeDishes = slot.dishes.filter(d => !isLeftover(d));
   const given = new Map();
   for (const p of args.portions || []) {
-    if (!recipeDishes.some(d => d.recipe_id === p.recipe_id)) fail('invalid_arguments', `Recipe ${p.recipe_id} is not a dish cooked at the ${c.slotText(slot.id)}.`);
-    if (given.has(p.recipe_id)) fail('invalid_arguments', `${p.recipe_id} is listed twice.`);
+    if (!recipeDishes.some(d => d.recipe_id === p.recipe_id)) fail('invalid_arguments', `${recipeName(data, p.recipe_id)} is not a dish of the ${c.slotText(slot.id)}.`);
+    if (given.has(p.recipe_id)) fail('invalid_arguments', `${recipeName(data, p.recipe_id)} is listed twice.`);
     given.set(p.recipe_id, p);
   }
   const portions = recipeDishes.map(d => {
