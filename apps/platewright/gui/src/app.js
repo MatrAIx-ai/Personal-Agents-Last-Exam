@@ -134,9 +134,9 @@ const textInput=(value,attrs={})=>el('input',{type:'text',value:value??'',...att
 function checks(options,chosen){const box=el('div',{class:'pw-checks'});for(const [v,l] of options)box.append(el('label',{},el('input',{type:'checkbox',value:v,checked:chosen.includes(v)}),l));box.values=()=>[...box.querySelectorAll('input:checked')].map(i=>i.value);return box;}
 // History rows name what happened; a few actions read better in other words.
 const ACTION_WORDS={event:'Changed',derived:'Added from the plan',needed_again:'Needed again',revised:'Edited'};
-function history(rows,describe,limit=12){
+function history(rows,describe,limit=12,labels={}){
  const list=el('ol',{class:'pw-history',reversed:true});const shown=[...rows].reverse();
- const fill=n=>{list.replaceChildren(...shown.slice(0,n).map(r=>el('li',{},el('strong',{},ACTION_WORDS[r.action]||cap(r.action)),' · '+time(r.at)+(r.by?' · '+memberName(r.by)+(r.actor==='event'?' (their change)':''):r.actor==='event'?' · another household member':''),describe?.(r)?el('small',{},describe(r)):null)));};
+ const fill=n=>{list.replaceChildren(...shown.slice(0,n).map(r=>el('li',{},el('strong',{},labels[r.action]||ACTION_WORDS[r.action]||cap(r.action)),' · '+time(r.at)+(r.by?' · '+memberName(r.by)+(r.actor==='event'?' (their change)':''):r.actor==='event'?' · another household member':''),describe?.(r)?el('small',{},describe(r)):null)));};
  fill(limit);
  const more=shown.length>limit?button('Show all '+shown.length,()=>{fill(shown.length);more.remove();}):null;
  return el('div',{},list,more);
@@ -179,6 +179,45 @@ function findingText(f,lineName){
  return (text?text():words(f.reason))+(names&&f.reason!=='over_limit'?': '+names:'');
 }
 
+// What a form would send that its tool's input schema refuses, named for a person (Core would only
+// answer that the arguments do not match the schema). Every form runs it before sending; it returns
+// null when the arguments fit. The App itself still checks every rule after this.
+const FIELD_WORDS={title:'The title',method_tags:'Method',tags:'Each tag',steps:'Each step',note:'The note',reason:'The reason',text:'The item text',
+ name:'Each guest name',lines:'Ingredients',servings:'Servings',quantity:'The quantity',portions:'Portions',made:'Portions made',eaten:'Portions eaten',
+ max:'The maximum',tag:'The tag',active_minutes:'Active minutes',total_minutes:'Total minutes',dishes:'Dishes',guests:'Guests',attendees:'Who is eating',constraints:'Needs'};
+const AT_LEAST={method_tags:'Tick at least one method.',steps:'Add at least one step.',lines:'Add at least one ingredient.',swaps:'Choose at least one swap.'};
+const fieldWords=key=>FIELD_WORDS[key]||cap(words(key||'a value'));
+function schemaProblem(s,v,key=''){
+ if(!s||typeof s!=='object')return null;
+ if(s.anyOf)return s.anyOf.some(x=>!schemaProblem(x,v,key))?null:schemaProblem(s.anyOf.find(x=>x.type!=='null')||s.anyOf[0],v,key);
+ const name=fieldWords(key);
+ if(s.enum&&!s.enum.includes(v))return name+' has a value the App does not offer.';
+ if(s.type==='string'){
+  if(typeof v!=='string')return name+' must be text.';
+  if(s.minLength&&v.length<s.minLength)return name+' cannot be empty.';
+  if(s.maxLength!=null&&v.length>s.maxLength)return name+' can be at most '+s.maxLength+' characters.';
+  if(s.pattern&&!new RegExp(s.pattern).test(v))return name+' is not in the expected form.';
+ }
+ if(s.type==='number'||s.type==='integer'){
+  if(typeof v!=='number'||!Number.isFinite(v))return name+' must be a number.';
+  if(s.type==='integer'&&!Number.isInteger(v))return name+' must be a whole number.';
+  if(s.minimum!=null&&v<s.minimum)return name+' must be at least '+s.minimum+'.';
+  if(s.maximum!=null&&v>s.maximum)return name+' can be at most '+s.maximum+'.';
+ }
+ if(s.type==='array'){
+  if(!Array.isArray(v))return name+' must be a list.';
+  if(s.minItems&&v.length<s.minItems)return AT_LEAST[key]||name+' needs at least '+s.minItems+'.';
+  if(s.maxItems!=null&&v.length>s.maxItems)return name+': at most '+s.maxItems+'.';
+  if(s.uniqueItems&&new Set(v.map(x=>JSON.stringify(x))).size!==v.length)return key==='tags'?'The same tag is given twice.':name+': the same entry is given twice.';
+  for(const x of v){const p=schemaProblem(s.items,x,key);if(p)return p;}
+ }
+ if(s.type==='object'&&v&&typeof v==='object'){
+  for(const k of s.required||[])if(v[k]===undefined&&!['expected_version','request_id'].includes(k))return fieldWords(k)+' is missing.';
+  for(const [k,x] of Object.entries(v))if(s.properties&&s.properties[k]){const p=schemaProblem(s.properties[k],x,k);if(p)return p;}
+ }
+ return null;
+}
+
 // A modal form for one write. The page keeps no business data of its own: the write goes through the
 // shared client's perform(), which sends the version this page last read (the form is modal, so
 // that is the version seen when it opened) and reuses the request ID when an unchanged form is
@@ -193,7 +232,8 @@ function formDialog({title,tool,fields=[],build,submitLabel,note,after,danger}){
   el('div',{class:'form-actions'},el('button',{type:'button',onclick:()=>d.close()},'Cancel'),submit));
  form.addEventListener('submit',async event=>{
   event.preventDefault();error.textContent='';delete error.dataset.code;submit.disabled=true;
-  try{const args=await build();const result=await UI.perform(tool,args);d.close();await after?.(result);}
+  try{const args=await build();const problem=schemaProblem(schemas.get(tool),args);if(problem)throw Object.assign(Error(problem),{code:'form_check'});
+   const result=await UI.perform(tool,args);d.close();await after?.(result);}
   catch(e){error.textContent=e.message;error.dataset.code=e.code||'request_failed';}
   finally{submit.disabled=false;}
  });
@@ -203,6 +243,14 @@ function formDialog({title,tool,fields=[],build,submitLabel,note,after,danger}){
 const confirmDialog=(title,tool,args,note,after)=>formDialog({title,tool,note,build:()=>args,after,submitLabel:title});
 
 // ---- Meal plan --------------------------------------------------------------------------------------
+// A slot's history row in words: what was planned at that point and who the guests were, so a
+// cleared, changed or guest row can be read against the rows before it.
+const SLOT_ACTIONS={set:'Planned',replaced:'Changed',cleared:'Cleared',cooked:'Cooked',skipped:'Skipped',guest_added:'Guest added',guest_changed:'Guest changed',guest_removed:'Guest removed'};
+function slotRowText(s,r){
+ const dishes=r.dishes?.length?r.dishes.map(d=>d.leftovers_of?'leftovers of '+recipeTitle(d.recipe_id):recipeTitle(d.recipe_id)).join(', '):'Nothing planned';
+ const guest=id=>s.guests.find(g=>g.guest_id===id)?.name||cap(String(id).replace(/^guest-/,'').replace(/-/g,' '));
+ return dishes+(r.guest_ids?.length?' · guests: '+r.guest_ids.map(guest).join(', '):'');
+}
 function slotSummary(s){
  if(!s.dishes.length)return 'Cleared';
  return s.dishes.map(d=>d.kind==='leftovers'?'Leftovers: '+d.title:d.title).join(' + ');
@@ -246,13 +294,13 @@ function slotDetail(ui){
  if(s.state==='planned'&&future&&has(TOOLS.slotSet))actions.append(button('Clear',()=>confirmDialog('Clear this meal',TOOLS.slotSet,{id:s.id,dishes:[]},'The meal stays in the plan\'s history as cleared.')));
  return el('article',{class:'pw-slot-detail'},el('span',{class:'kicker'},dayLabel(s.date,{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · '+cap(s.meal)),
   el('h2',{},slotSummary(s)),el('div',{class:'tags'},tag(cap(s.state)),tag(cap(s.phase))),actions,
-  s.flags.length?el('section',{},el('h3',{},'What the check found'),s.flags.map(f=>el('div',{class:'metadata-line'},el('span',{},flagText(f)),el('strong',{},f.type==='person'?f.dishes.flatMap(d=>d.findings.map(x=>findingText(x,l=>ingredientName(l.ingredient_id)+(l.optional?' (optional)':'')))).join('; '):'')))):el('p',{class:'muted'},'Right for everyone at the table on this day.'),
+  s.flags.length?el('section',{},el('h3',{},'What the check found'),s.flags.map(f=>el('div',{class:'metadata-line'},el('span',{},flagText(f)),el('strong',{},f.type==='person'?f.dishes.flatMap(d=>d.findings.map(x=>findingText(x,l=>ingredientName(l.ingredient_id)+(l.optional?' (optional)':'')))).join('; '):'')))):s.dishes.length?el('p',{class:'muted'},'Right for everyone at the table on this day.'):null,
   el('h3',{},'Dishes'),s.dishes.map(d=>metadata(d.kind==='leftovers'?'Leftovers':'Recipe',d.title+(d.kind==='leftovers'?' · '+plural(d.portions,'portion')+' from '+slotLabel(d.leftovers_of):' · '+plural(d.servings,'serving')+(d.servings_source==='explicit'?' (set for this meal)':' (for who is eating)')))),
   metadata('At the table',people(s).join(', ')),s.guests.map(g=>metadata(g.name,g.constraints.length?g.constraints.map(constraintText).join('; '):'No needs given')),
   s.note?metadata('Note',s.note):null,
   s.cooked?metadata('Cooked',time(s.cooked.at)+' · '+s.cooked.portions.map(p=>p.made+' made, '+p.eaten+' eaten').join('; ')+(s.cooked.deducted?' · taken from the pantry':'')):null,
   s.leftovers?.length?metadata('Leftovers',s.leftovers.map(l=>l.portions_left?plural(l.portions_left,'portion')+' left, good until '+fullDate(l.usable_until):'None left').join('; ')):null,
-  el('h3',{},'History'),history(s.history,r=>r.dishes?.length?r.dishes.map(d=>d.leftovers_of?'leftovers of '+recipeTitle(d.recipe_id):recipeTitle(d.recipe_id)).join(', '):''));
+  el('h3',{},'History'),history(s.history,r=>slotRowText(s,r),12,SLOT_ACTIONS));
 }
 async function slotEditor(slot){
  const today=UI.aux.today,recipes=(await allRecipes()).filter(r=>r.state==='active').sort((a,b)=>a.title.localeCompare(b.title));

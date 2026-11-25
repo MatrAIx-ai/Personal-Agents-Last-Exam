@@ -51,6 +51,25 @@ async function main() {
     check('The week opens on the loaded week with its days', await page.locator('.pw-day').count() === 7 && (await page.textContent('.pw-bar h3')).includes('2 Nov'));
     await shot('01-week-1280');
 
+    // Earlier meals keep the plan they started from: a meal another member cleared, one they changed
+    // and one a guest joined show what was planned before.
+    const back = async weeks => { for (let i = 0; i < weeks; i++) { await page.click('button[aria-label="Previous week"]'); await idle(); } };
+    const slotHistory = async id => { await page.click(`[data-slot-id="${id}"]`); await idle(); return page.locator('.detail .pw-history').innerText(); };
+    await back(11);
+    const cleared = await slotHistory('2026-08-22:dinner');
+    await shot('01b-cleared-meal-1280');
+    const changed = await slotHistory('2026-08-17:dinner');
+    await shot('01c-changed-meal-1280');
+    await back(5);
+    const joined = await slotHistory('2026-07-18:dinner');
+    await shot('01d-guest-meal-1280');
+    const planned = text => (/Planned · .*\n.*[A-Za-z]/.exec(text) || [''])[0];
+    check('A cleared earlier meal shows what was planned before it was cleared', cleared.startsWith('Cleared') && /Nothing planned/.test(cleared) && planned(cleared) && !/Nothing planned/.test(planned(cleared)), cleared);
+    check('A changed earlier meal shows the plan it replaced', /^Cooked/.test(changed) && /Changed · .*Evan|Changed · .*Eli/.test(changed) && /Planned · /.test(changed), changed);
+    check('A meal a guest joined shows the plan before the guest', /Guest added[^\n]*\n[^\n]*guests: /.test(joined) && /Planned · [^\n]*\n(?![^\n]*guests)/.test(joined), joined);
+    await readable('An earlier week with a meal selected');
+    await page.click('.pw-bar button:has-text("This week")'); await idle();
+
     // Next week: Saturday's dinner shows the guests the check flags.
     await page.click('button[aria-label="Next week"]'); await idle();
     await page.click('[data-slot-id="2026-11-14:dinner"]'); await idle();
@@ -159,6 +178,22 @@ async function main() {
 
     // W1 and W3: edit a recipe (adds a revision), then save a variant from a previewed swap.
     await nav('Recipes');
+    // A new recipe that its tool's schema would refuse is named in the form, before anything is sent.
+    await page.click('.pw-bar button:has-text("New recipe")');
+    const fresh = dialog(P + 'recipes.create'); await fresh.waitFor(WAIT);
+    await fresh.locator('label.field:has-text("Title") input').fill('Weeknight omelette');
+    await fresh.locator('select[aria-label="Ingredient"]').first().selectOption('ing-egg');
+    await fresh.locator('input[aria-label="Quantity"]').first().fill('3');
+    await fresh.locator('label.field:has-text("Steps") textarea').fill('Whisk and cook.');
+    const formMessage = async () => { await submit(P + 'recipes.create'); await page.waitForFunction(() => document.querySelector('dialog[data-operation="platewright.recipes.create"] .form-error')?.textContent, null, WAIT);
+      const text = await fresh.locator('.form-error').textContent(); await fresh.locator('.form-error').evaluate(e => { e.textContent = ''; }); return text; };
+    const noMethod = await formMessage();
+    await fresh.locator('label.field:has-text("Method") input[type=checkbox]').first().check();
+    await fresh.locator('label.field:has-text("Tags") input').fill('quick, ' + 'x'.repeat(41));
+    const longTag = await formMessage();
+    check('The recipe form names a missing method and a long tag instead of a schema error', noMethod === 'Tick at least one method.' && longTag === 'Each tag can be at most 40 characters.', [noMethod, longTag]);
+    await fresh.locator('button:has-text("Cancel")').click(); await closed(P + 'recipes.create');
+    check('Nothing was written by the refused form (MCP read)', !(await mcp.call(P + 'recipes.search', {query: 'omelette'})).items.length);
     await page.fill('.toolbar input[type=search]', 'green curry'); await idle();
     await page.click('[data-record-id="rec-green-curry"]'); await idle();
     await page.click('.pw-actions button:has-text("Edit recipe")');
