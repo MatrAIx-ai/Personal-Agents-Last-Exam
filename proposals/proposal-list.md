@@ -8,7 +8,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**199 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
+**200 open non-draft proposals · 1 awaiting initial review · 9 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
@@ -146,10 +146,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🧪 Task Track
 
-**102 proposals.**
+**103 proposals.**
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-25 21:59:40 | [#259](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/259) · Fill a workshop bidding sheet under the reviewer's own conflict rule, including a collaboration that starts the same day<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/259/files) | Learning &amp; research<br>Also: Work &amp; business | Which TRL papers are conflicts depends on this reviewer's own rule — three years by publication date, the old institution for twelve months, the advisor's current students, unpublished co-writing — not on the organizers' auto list. | Design review | Awaiting review |  | [olivia3395](https://github.com/olivia3395) |  |
 | 2026-11-25 21:33:34 | [#258](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/258) · Revise and send a paper draft when the advisor set a late, conditional reversal in a recorded meeting<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/258/files) | Learning &amp; research<br>Also: Work &amp; business | "Update the draft per the meeting" depends on what this advisor actually said late in this user's meeting. That statement contradicts the summary the user was handed, and its condition is decided by a later corrected rerun. | Design review | Review requested<br>@haolun-wu |  | [olivia3395](https://github.com/olivia3395) |  |
 | 2026-11-25 21:19:54 | [#257](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/257) · Queue a side project's ablations without starving the deadline project's GPU share<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/257/files) | Learning &amp; research<br>Also: Work &amp; business | The same "queue the four ablations" request means queue all four for one user, but for Lin it means keep enough of the share for the Atlas jobs Lin announced and hold the rest. | Design review | Review requested<br>@haolun-wu |  | [olivia3395](https://github.com/olivia3395) |  |
 | 2026-11-25 20:41:44 | [#256](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/256) · Save an undelivered gift without spoiling the surprise<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/256/files) | Shopping &amp; groceries<br>Also: Social &amp; communities | Meera asked not to hear about December packages she didn't order. When a gift to her fails delivery, the agent must save it by rescheduling for when she's home, without saying what it is or who sent it. | Design review | Review requested<br>@haolun-wu |  | [dhvani1403](https://github.com/dhvani1403) |  |
