@@ -8,7 +8,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**192 open non-draft proposals · 0 awaiting initial review · 6 drafts.**
+**192 open non-draft proposals · 0 awaiting initial review · 7 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
@@ -142,10 +142,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🧪 Task Track
 
-**96 proposals.**
+**97 proposals.**
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-25 06:55:24 | [#249](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/249) · Apply Lin's crunch-season health rule before booking more evening work<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/249/files) | Fitness &amp; wellbeing<br>Also: Work &amp; business | Lin's own crunch-season rule, written after a 2025 flu, turns watch data into booking limits. The agent must apply it only when its numbers are met, and keep required meetings, personal requests and privacy intact. | Draft | Awaiting review |  | [AmyTao](https://github.com/AmyTao) |  |
 | 2026-11-25 05:35:21 | [#246](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/246) · Bring back a lab recorder after a borrower handoff<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/246/files) | Learning &amp; research | When the desk cancels its bookings, the lab offers a locker drop. Mira does not allow it for her loans: the agent must coordinate a staffed handoff with the current holder and wait for a matching signed receipt. | Design review | Review requested<br>@haolun-wu |  | [YurunChen](https://github.com/YurunChen) |  |
 | 2026-11-24 21:44:35 | [#237](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/237) · Contain a studio account incident without disrupting a client handoff<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/237/files) | Work &amp; business | Jordan's runbook authorizes removal of verified unfamiliar access but requires preserving the familiar laptop session for a client handoff; a blanket lockout would be a security failure too. | Draft | Awaiting review |  | [XinyiXiang](https://github.com/XinyiXiang) |  |
 | 2026-11-24 06:01:37 | [#229](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/229) · Finish a child's piano corner from the child's trials rather than the parent's purchase history<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/229/files) | Shopping &amp; groceries<br>Also: Learning &amp; research | The expensive piano in Adrian's receipts was a gift, and Sam's praise was about appearance. Blind trial notes identify the preferred action; a same-family stock substitution quietly changes that action before the return cutoff. | Design review | Review requested<br>@haolun-wu |  | [XuanmiaoG](https://github.com/XuanmiaoG) |  |
