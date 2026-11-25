@@ -25,6 +25,15 @@ const PORT = 3000;
 
 const server = http.createServer(async (req, res) => {
   // 1. Tool execution API bridge
+  if (req.method === 'GET' && req.url.startsWith('/api/snapshot')) {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const accountId = url.searchParams.get('account_id') || 'acc_demo_user';
+    const snap = app.snapshot(accountId);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(snap));
+    return;
+  }
+
   if (req.method === 'POST' && req.url === '/api/tools/call') {
     let body = '';
     req.on('data', chunk => { body += chunk; });

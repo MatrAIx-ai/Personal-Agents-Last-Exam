@@ -13,6 +13,20 @@ const state = {
   links: []
 };
 
+// Fallback fetch helper
+async function fetchSnapshot() {
+  if (window.recordsApp && typeof window.recordsApp.snapshot === 'function') {
+    return window.recordsApp.snapshot(state.currentAccount);
+  }
+  try {
+    const res = await fetch(`/api/snapshot?account_id=${state.currentAccount}`);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn('Snapshot fetch fallback failed:', err);
+  }
+  return { proposals: [], links: [] };
+}
+
 // Dispatcher Adapter (Supports both in-process mock and Host POST /api/tools/call)
 async function dispatchToolCall(toolName, params) {
   if (window.recordsApp && typeof window.recordsApp.callTool === 'function') {
@@ -178,12 +192,8 @@ async function loadProposals() {
   const container = document.getElementById('proposals-list-container');
   container.innerHTML = '<p class="loading">Loading pending proposals...</p>';
 
-  // Read snapshot proposals if available
-  let proposals = [];
-  if (window.recordsApp && typeof window.recordsApp.snapshot === 'function') {
-    const snap = window.recordsApp.snapshot(state.currentAccount);
-    proposals = (snap.proposals || []).filter((p) => p.status === 'PENDING');
-  }
+  const snap = await fetchSnapshot();
+  const proposals = (snap.proposals || []).filter((p) => p.status === 'PENDING');
 
   document.getElementById('proposal-count-badge').innerText = proposals.length;
   container.innerHTML = '';
@@ -239,11 +249,8 @@ async function loadGraph() {
   const container = document.getElementById('links-summary-list');
   container.innerHTML = '';
 
-  let links = [];
-  if (window.recordsApp && typeof window.recordsApp.snapshot === 'function') {
-    const snap = window.recordsApp.snapshot(state.currentAccount);
-    links = snap.links || [];
-  }
+  const snap = await fetchSnapshot();
+  const links = snap.links || [];
 
   if (links.length === 0) {
     container.innerHTML = '<p class="empty-hint">No directed links in graph.</p>';

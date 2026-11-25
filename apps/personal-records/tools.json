@@ -53,8 +53,20 @@
             },
             "required": ["id"]
           },
-          "category": { "type": "string" },
-          "idempotency_key": { "type": "string" }
+          "category": {
+            "type": "string",
+            "enum": ["tax", "employment", "insurance", "property", "utilities", "healthcare", "banking", "legal", "other"],
+            "description": "Primary domain classification"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Searchable tags"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "description": "Unique key to ensure idempotent replay"
+          }
         },
         "required": ["source_app", "title"]
       }
@@ -84,7 +96,8 @@
           "document_id": { "type": "string", "description": "Target document ID" },
           "version_number": { "type": "integer", "description": "Specific version (defaults to latest if omitted)" },
           "include_extracted_text": { "type": "boolean", "default": true },
-          "include_claims": { "type": "boolean", "default": false }
+          "include_claims": { "type": "boolean", "default": false },
+          "include_links": {"type": "boolean", "default": false, "description": "Include incoming and outgoing relationship links"}
         },
         "required": ["document_id"]
       }

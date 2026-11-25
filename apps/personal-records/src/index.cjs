@@ -193,3 +193,38 @@ class PersonalRecordsApp {
 }
 
 module.exports = { PersonalRecordsApp };
+
+// At the bottom of src/index.cjs:
+if (require.main === module) {
+  const readline = require('readline');
+  const app = new PersonalRecordsApp();
+
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: false });
+
+  rl.on('line', async (line) => {
+    if (!line.trim()) return;
+    try {
+      const msg = JSON.parse(line);
+      
+      // MCP tools/list
+      if (msg.method === 'tools/list') {
+        const toolsJson = require('../tools.json');
+        process.stdout.write(JSON.stringify({ jsonrpc: '2.0', id: msg.id, result: { tools: toolsJson.tools } }) + '\n');
+        return;
+      }
+      
+      // MCP tools/call
+      if (msg.method === 'tools/call') {
+        const { name, arguments: args } = msg.params;
+        const res = await app.callTool(name, args, { accountId: 'default_user', callerRole: 'agent' });
+        process.stdout.write(JSON.stringify({ jsonrpc: '2.0', id: msg.id, result: { content: [{ type: 'text', text: JSON.stringify(res) }] } }) + '\n');
+        return;
+      }
+
+      // Default JSON-RPC ping / init
+      process.stdout.write(JSON.stringify({ jsonrpc: '2.0', id: msg.id, result: {} }) + '\n');
+    } catch (err) {
+      process.stdout.write(JSON.stringify({ jsonrpc: '2.0', id: null, error: { code: -32603, message: err.message } }) + '\n');
+    }
+  });
+}

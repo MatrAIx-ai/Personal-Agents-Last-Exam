@@ -8,6 +8,21 @@ class DocumentService {
   }
 
   uploadDocument({ accountId, title, contentBytes, mimeType, category, tags = [], validUntil }) {
+    
+    const SUPPORTED_MIMES = [
+      'application/pdf',
+      'image/png',
+      'image/jpeg',
+      'text/plain',
+      'application/octet-stream'
+    ];
+
+    if (mimeType && !SUPPORTED_MIMES.includes(mimeType)) {
+      const err = new Error(`Unsupported format: ${mimeType}`);
+      err.code = 'UNSUPPORTED_FORMAT';
+      throw err;
+    }
+
     const buffer = Buffer.isBuffer(contentBytes) ? contentBytes : Buffer.from(contentBytes, 'base64');
     const { relPath, sha256, byteSize } = this.blobStore.saveBytes(accountId, buffer, title.slice(0, 20));
 
@@ -186,7 +201,7 @@ class DocumentService {
     return doInsertVersion(extResult);
   }
 
-  getDocument({ accountId, documentId, versionNumber, includeExtractedText = true, includeClaims = false }) {
+  getDocument({ accountId, documentId, versionNumber, includeExtractedText = true, includeClaims = false, includeLinks = false }) {
     const doc = this.db.prepare(`
       SELECT document_id, account_id, title, category, tags, current_version_number,
              verification_state, valid_until, created_at, updated_at
@@ -252,6 +267,19 @@ class DocumentService {
         WHERE document_id = ? AND version_number = ?
       `).all(documentId, targetVersion);
       result.claims = claims;
+    }
+
+    if (includeLinks) {
+      result.links = {
+        outgoing: this.db.prepare(`
+          SELECT link_id, target_id, relationship_type, metadata 
+          FROM document_links WHERE source_id = ? AND account_id = ?
+        `).all(documentId, accountId),
+        incoming: this.db.prepare(`
+          SELECT link_id, source_id, relationship_type, metadata 
+          FROM document_links WHERE target_id = ? AND account_id = ?
+        `).all(documentId, accountId)
+      };
     }
 
     return result;
