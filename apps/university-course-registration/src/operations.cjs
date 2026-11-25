@@ -118,10 +118,16 @@ function accept(ctx, data, args) {
 }
 
 // Declining closes the offer, releases its seats and takes the entry out of
-// the queue. It stays possible until the offer is closed by something else.
+// the queue. Like accepting, it answers the offer, so it has the same
+// deadline: from expires_at on, the offer waits for offers.expire. Leaving the
+// waitlist is not an answer to the offer and stays possible.
 function decline(ctx, data, args) {
   const {offer, entry} = ownOffer(data, args.id);
   if (offer.status !== 'live') fail('offer_not_live', 'Offer ' + offer.id + ' is no longer open (' + offer.status + ').');
+  if (queue.expired(offer, ctx.virtual_now)) {
+    fail('offer_expired', 'Offer ' + offer.id + ' expired at ' + offer.expires_at + ' and can no longer be declined. It is closed when its expiry is processed; '
+      + 'leaving waitlist entry ' + entry.id + ' releases its seat now.');
+  }
   queue.endOffer(offer, 'declined', ctx.virtual_now);
   queue.endEntry(entry, 'declined', ctx.virtual_now);
   const receipt_id = receipt(ctx, data, 'offer.decline', args, {course_id: entry.course_id, entry_id: entry.id, offer_id: offer.id,

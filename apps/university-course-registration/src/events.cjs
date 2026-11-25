@@ -34,11 +34,14 @@ function bundleOf(data, sectionIds) {
   if (bundle.problem) fail('invalid_bundle', bundle.problem);
   return bundle;
 }
-function theirOffer(data, payload) {
+// A competitor's offer that can still be answered. The expiry boundary is the
+// same for everyone: from expires_at on it can be neither accepted nor declined.
+function theirOffer(data, payload, now) {
   const offer = data.offers.find(o => o.id === payload.offer_id);
   const entry = offer && data.waitlist_entries.find(e => e.id === offer.entry_id);
   if (!entry || entry.occupant_ref !== payload.occupant_ref) fail('not_found', 'Offer ' + payload.offer_id + ' was not made to ' + payload.occupant_ref + '.');
   if (offer.status !== 'live') fail('offer_not_live', 'Offer ' + offer.id + ' is no longer open (' + offer.status + ').');
+  if (queue.expired(offer, now)) fail('offer_expired', 'Offer ' + offer.id + ' expired at ' + offer.expires_at + '.');
   return {offer, entry};
 }
 const holds = (data, occupant, courseId) => data.enrollments.some(e => e.status === ledger.ACTIVE && e.occupant_ref === occupant && e.course_id === courseId);
@@ -86,10 +89,8 @@ const OCCUPANCY = {
     if (offer) queue.endOffer(offer, 'cancelled', ctx.virtual_now);
     queue.endEntry(entry, 'left', ctx.virtual_now);
   },
-  // The expiry boundary is the same for everyone.
   offer_accept(ctx, data, payload) {
-    const {offer, entry} = theirOffer(data, payload);
-    if (queue.expired(offer, ctx.virtual_now)) fail('offer_expired', 'Offer ' + offer.id + ' expired at ' + offer.expires_at + '.');
+    const {offer, entry} = theirOffer(data, payload, ctx.virtual_now);
     if (data.enrollments.some(e => e.status === ledger.ACTIVE && e.occupant_ref === entry.occupant_ref && e.course_id === entry.course_id
       && e.id !== entry.swap_from_enrollment_id)) {
       fail('duplicate_enrollment', entry.occupant_ref + ' is already enrolled in this course.');
@@ -97,7 +98,7 @@ const OCCUPANCY = {
     queue.fulfil(ctx, data, entry, offer);
   },
   offer_decline(ctx, data, payload) {
-    const {offer, entry} = theirOffer(data, payload);
+    const {offer, entry} = theirOffer(data, payload, ctx.virtual_now);
     queue.endOffer(offer, 'declined', ctx.virtual_now);
     queue.endEntry(entry, 'declined', ctx.virtual_now);
   }

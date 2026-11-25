@@ -27,6 +27,8 @@ const bundleName = (ui, ids) => ids.map(id => { const found = sectionOf(ui, id);
 const enrollmentFor = (ui, course) => (ui.aux.schedule ? ui.aux.schedule.enrollments : []).find(e => e.course_id === course.id) || null;
 const entriesFor = (ui, course) => (ui.aux.waitlist ? ui.aux.waitlist.entries : []).filter(e => e.course_id === course.id);
 const offerFor = (ui, entry) => (ui.aux.waitlist ? ui.aux.waitlist.offers : []).find(o => o.entry_id === entry.id) || null;
+// An offer past its deadline can no longer be answered; the page says so wherever it would say "offered".
+const offerTag = offer => tag(offer.expired ? 'Offer deadline passed' : 'Seat offered');
 const sameBundle = (a, b) => a.length === b.length && a.every(id => b.includes(id));
 
 // A button that runs one business operation and then re-reads the App.
@@ -61,7 +63,7 @@ function row(course, ui) {
     el('span', {class: 'record-title'}, course.code + ' · ' + course.title),
     el('span', {class: 'record-subtitle'}, subtitle),
     el('span', {class: 'tags'}, enrollment ? tag('Enrolled') : null,
-      entries.some(entry => offerFor(ui, entry)) ? tag('Seat offered') : entries.length ? tag('Waiting') : null));
+      entries.some(entry => offerFor(ui, entry)) ? offerTag(entries.map(entry => offerFor(ui, entry)).find(Boolean)) : entries.length ? tag('Waiting') : null));
 }
 
 function conflictText(ui, conflict) {
@@ -88,7 +90,8 @@ function waitlistSummary(ui) {
   if (!waitlist) return note('Waitlists are not available to this account.');
   return el('section', {class: 'query-result', 'aria-label': 'Waitlist summary', 'data-summary': 'waitlists'},
     line('Waiting', waitlist.entries.length + (waitlist.entries.length === 1 ? ' entry' : ' entries')),
-    line('Seat offers open', String(waitlist.offers.length)),
+    line('Seat offers open', String(waitlist.offers.filter(o => !o.expired).length)),
+    waitlist.offers.some(o => o.expired) ? line('Offers past their deadline', String(waitlist.offers.filter(o => o.expired).length)) : null,
     note('A place in a queue or a seat offer is not an enrollment and adds no credits.'));
 }
 
@@ -118,7 +121,11 @@ function bundleLines(detail, ui) {
     const free = needed.every(id => table.get(id).available > 0);
     let state, control = null;
     if (held && sameBundle(held.sections.map(s => s.id), ids)) state = 'Your enrollment';
-    else if (waitingHere) state = offerFor(ui, waitingHere) ? 'A seat is on offer to you: see Waitlists & offers' : 'You are waiting, rank ' + waitingHere.rank;
+    else if (waitingHere) {
+      const offer = offerFor(ui, waitingHere);
+      state = !offer ? 'You are waiting, rank ' + waitingHere.rank
+        : offer.expired ? 'Your seat offer passed its deadline: see Waitlists & offers' : 'A seat is on offer to you: see Waitlists & offers';
+    }
     else if (held && free) { state = 'Seats available'; control = operation(ui, 'Swap to ' + label, 'enrollment.swap', {id: held.id, section_ids: ids}, course, true); }
     else if (held) { state = 'No seat now'; control = operation(ui, 'Wait for ' + label + ', keeping my place', 'waitlist.join', {section_ids: ids, swap_from_enrollment_id: held.id}, course); }
     else if (free) { state = 'Seats available'; control = operation(ui, 'Enroll in ' + label, 'enrollment.enroll', {section_ids: ids}, course, true); }
@@ -197,7 +204,7 @@ function waitlistView(course, ui) {
     const offer = offerFor(ui, entry);
     const part = el('section', {'data-entry': entry.id},
       heading(bundleName(ui, entry.section_ids)),
-      el('div', {class: 'tags'}, tag(offer ? 'Seat offered' : 'In queue'), entry.swap_from_enrollment_id ? tag('Swap') : null, entry.blocked_by.length ? tag('Blocked') : null),
+      el('div', {class: 'tags'}, offer ? offerTag(offer) : tag('In queue'), entry.swap_from_enrollment_id ? tag('Swap') : null, entry.blocked_by.length ? tag('Blocked') : null),
       line('Rank', String(entry.rank)),
       line('Joined', entry.joined_at),
       line('Waiting for a seat in', entry.waiting_for_section_ids.length ? entry.waiting_for_section_ids.map(id => sectionName(ui, id)).join(', ') : 'Nothing: the seats are there'));
@@ -209,11 +216,13 @@ function waitlistView(course, ui) {
     if (entry.blocked_by.length) part.append(note('A blocked entry keeps its place but is passed over and holds no seat.'));
     if (offer) {
       part.append(line(offer.expired ? 'Offer deadline passed' : 'Seat held for you until', offer.expires_at),
-        note(offer.expired ? 'This offer can no longer be accepted. You can decline it to release the seat.'
-          : 'The offer is not an enrollment. It must be accepted before the deadline; at the deadline it is too late.'));
-      part.append(el('div', {class: 'actions'},
-        offer.expired ? null : operation(ui, 'Accept offer', 'offer.accept', {id: offer.id}, course, true),
-        operation(ui, 'Decline offer', 'offer.decline', {id: offer.id}, course)));
+        note(offer.expired ? 'This offer can no longer be accepted or declined. It is closed when its deadline is processed; leaving the waitlist releases the seat now.'
+          : 'The offer is not an enrollment. It must be accepted or declined before the deadline; at the deadline it is too late.'));
+      if (!offer.expired) {
+        part.append(el('div', {class: 'actions'},
+          operation(ui, 'Accept offer', 'offer.accept', {id: offer.id}, course, true),
+          operation(ui, 'Decline offer', 'offer.decline', {id: offer.id}, course)));
+      }
     }
     part.append(el('div', {class: 'actions'}, operation(ui, 'Leave waitlist', 'waitlist.leave', {id: entry.id}, course)));
     box.append(part);

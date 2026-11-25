@@ -18,7 +18,7 @@ The page shows the same ledger an MCP client sees, for the same run and state di
 | :--- | :--- | :--- |
 | Catalog | `catalog.search` (list and search), `course.get` (sections and seats, lecture/lab combinations, prerequisites and whether each is completed, registration window), `record.get` (credits in use) | `enrollment.enroll` for a combination with seats; `waitlist.join` for one without; when the course is already held, `enrollment.swap` or `waitlist.join` as a pending swap for its other combinations |
 | My schedule | `schedule.get` (enrollments and meeting times, credits, time conflicts with the event that caused them, pending swaps) | `enrollment.withdraw`; `enrollment.swap` or a pending swap to another section of the same course |
-| Waitlists & offers | `waitlist.list` (own entries with rank, what each still waits for, what blocks it; offers with deadline and whether it has passed) | `offer.accept`, `offer.decline`, `waitlist.leave` |
+| Waitlists & offers | `waitlist.list` (own entries with rank, what each still waits for, what blocks it; offers with deadline and whether it has passed) | `offer.accept` and `offer.decline` until the offer's deadline; `waitlist.leave` at any time |
 
 A button calls one business tool with the version the page last read. If the ledger changed in the meantime the App answers `stale_version` and the page says so instead of overwriting; a refused operation shows the App's own message (for example the overlapping sections) and changes nothing. A button whose tool the current profile does not allow is not shown.
 

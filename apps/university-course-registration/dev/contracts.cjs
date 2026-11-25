@@ -392,8 +392,8 @@ function tools() {
         })),
         offers: arr(obj({
           id: id(), entry_id: id(), course_id: id(), held_section_ids: bundle(), issued_at: dateTime(),
-          expires_at: note(dateTime(), 'The offer cannot be accepted at or after this instant.'),
-          expired: note(bool(), 'True when the current time has reached expires_at. The held seats are released only when the expiry is processed.')
+          expires_at: note(dateTime(), 'The offer can be accepted or declined only before this instant.'),
+          expired: note(bool(), 'True when the current time has reached expires_at: the offer can then be neither accepted nor declined. Its held seats are released when the expiry is processed, or at once if the waitlist entry is left.')
         }))
       })),
 
@@ -483,8 +483,8 @@ function tools() {
 
     tool('waitlist.leave', false,
       'Leave the waitlist: remove one of the signed-in student\'s waiting entries. A seat offer made to the entry is '
-      + 'cancelled and its held seats are released. When the entry was a pending swap, the swap is dropped and the '
-      + 'original enrollment is kept unchanged.' + writeHint,
+      + 'cancelled and its held seats are released, also when that offer is past its deadline. When the entry was a '
+      + 'pending swap, the swap is dropped and the original enrollment is kept unchanged.' + writeHint,
       writeInput({id: note(id(), 'The waitlist entry to leave, as listed by waitlist.list.')}),
       result({id: note(id(), 'The waitlist entry that left the queue.'), receipt_id: id(), course_id: id(), section_ids: bundle(),
         cancelled_offer_id: note(nullable(id()), 'The seat offer that was cancelled with the entry, or null.')})),
@@ -502,7 +502,10 @@ function tools() {
 
     tool('offer.decline', false,
       'Decline a seat offer made to one of the signed-in student\'s waitlist entries. The offer is closed, its held '
-      + 'seats are released and the entry leaves the queue. An original enrollment the entry would have replaced is kept.' + writeHint,
+      + 'seats are released and the entry leaves the queue. An original enrollment the entry would have replaced is kept. '
+      + 'Refused with offer_expired at or after the offer\'s expires_at (the offer is then closed when its expiry is '
+      + 'processed; waitlist.leave still releases its seats), and with offer_not_live when the offer was already '
+      + 'accepted, declined, cancelled or expired.' + writeHint,
       writeInput({id: note(id(), 'The offer to decline, as listed by waitlist.list (not the waitlist entry).')}),
       result({id: note(id(), 'The offer that was declined.'), receipt_id: id(), entry_id: id(), course_id: id(), section_ids: bundle()}))
   ];

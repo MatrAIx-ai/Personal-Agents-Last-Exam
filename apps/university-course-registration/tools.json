@@ -1769,11 +1769,11 @@
                   "expires_at": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "The offer cannot be accepted at or after this instant."
+                    "description": "The offer can be accepted or declined only before this instant."
                   },
                   "expired": {
                     "type": "boolean",
-                    "description": "True when the current time has reached expires_at. The held seats are released only when the expiry is processed."
+                    "description": "True when the current time has reached expires_at: the offer can then be neither accepted nor declined. Its held seats are released when the expiry is processed, or at once if the waitlist entry is left."
                   }
                 },
                 "required": [
@@ -3551,7 +3551,7 @@
   },
   {
     "name": "university-course-registration.waitlist.leave",
-    "description": "Leave the waitlist: remove one of the signed-in student's waiting entries. A seat offer made to the entry is cancelled and its held seats are released. When the entry was a pending swap, the swap is dropped and the original enrollment is kept unchanged. Pass the version returned by your latest read or preview as expected_version and a new request_id; retrying with the same request_id and arguments is safe.",
+    "description": "Leave the waitlist: remove one of the signed-in student's waiting entries. A seat offer made to the entry is cancelled and its held seats are released, also when that offer is past its deadline. When the entry was a pending swap, the swap is dropped and the original enrollment is kept unchanged. Pass the version returned by your latest read or preview as expected_version and a new request_id; retrying with the same request_id and arguments is safe.",
     "scope": "university-course-registration.write",
     "resource_target": "current account",
     "read_only": false,
@@ -3992,7 +3992,7 @@
   },
   {
     "name": "university-course-registration.offer.decline",
-    "description": "Decline a seat offer made to one of the signed-in student's waitlist entries. The offer is closed, its held seats are released and the entry leaves the queue. An original enrollment the entry would have replaced is kept. Pass the version returned by your latest read or preview as expected_version and a new request_id; retrying with the same request_id and arguments is safe.",
+    "description": "Decline a seat offer made to one of the signed-in student's waitlist entries. The offer is closed, its held seats are released and the entry leaves the queue. An original enrollment the entry would have replaced is kept. Refused with offer_expired at or after the offer's expires_at (the offer is then closed when its expiry is processed; waitlist.leave still releases its seats), and with offer_not_live when the offer was already accepted, declined, cancelled or expired. Pass the version returned by your latest read or preview as expected_version and a new request_id; retrying with the same request_id and arguments is safe.",
     "scope": "university-course-registration.write",
     "resource_target": "current account",
     "read_only": false,

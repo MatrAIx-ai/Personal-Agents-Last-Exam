@@ -372,7 +372,7 @@ test('the Agent and an Infra event race for the last seat: exactly one gets it',
   keep('race-before-reset', {versions, winner: mine.status === 'committed' ? 'agent' : 'infra event', snapshot: (await snapshot(infra)).snapshot});
 });
 
-test('the clock reaches an offer deadline before the expiry event: acceptance fails, reads change nothing, the hold stays', async () => {
+test('the clock reaches an offer deadline before the expiry event: accepting and declining fail, reads change nothing, the hold stays', async () => {
   const infra = await connect('infra', 'expiry', 'sandbox'), agent = await connect('agent', 'expiry');
   assert.equal((await apply(infra, EVT_0007)).status, 'committed');
   const offered = await snapshot(infra);
@@ -391,8 +391,14 @@ test('the clock reaches an offer deadline before the expiry event: acceptance fa
   const late = await agent.request('tools/call', {name: tool('offer.accept'), arguments: {id: 'off-6', expected_version: list.version, request_id: 'ex-accept-2'}});
   assert.equal(late.result.isError, true);
   assert.equal(late.result.structuredContent.status, 'offer_expired');
+  // Declining answers the offer too, so it has the same deadline.
+  const declined = await agent.request('tools/call', {name: tool('offer.decline'), arguments: {id: 'off-6', expected_version: list.version, request_id: 'ex-decline-1'}});
+  assert.equal(declined.result.isError, true);
+  assert.deepEqual([declined.result.structuredContent.status, declined.result.structuredContent.applied], ['offer_expired', false]);
+  assert.match(declined.result.structuredContent.message, /can no longer be declined/);
   const still = await snapshot(infra);
-  assert.deepEqual(still.snapshot.data, offered.snapshot.data, 'reads and the refused acceptance left the ledger untouched');
+  assert.deepEqual(still.snapshot.data, offered.snapshot.data, 'reads and the refused answers left the ledger untouched');
+  assert.deepEqual(still.version, atDeadline.version, 'and the version did not move');
   const lab = (await agent.call(tool('course.get'), {id: 'crs-cs240'})).course.sections.find(s => s.id === 'sec-cs240-lab1');
   assert.deepEqual([lab.held, lab.available], [1, 0], 'the seat stays held until the expiry is processed');
 
@@ -402,6 +408,7 @@ test('the clock reaches an offer deadline before the expiry event: acceptance fa
   const end = await snapshot(infra);
   assert.deepEqual(end.snapshot.data.offers.map(o => [o.entry_id, o.status]), [['wl-noor-cs240', 'expired'], ['wl-synthetic-021-cs240', 'live']]);
   assert.equal((await agent.call(tool('offer.accept'), {id: 'off-6', expected_version: end.version, request_id: 'ex-accept-3'})).status, 'offer_not_live');
+  assert.equal((await agent.call(tool('offer.decline'), {id: 'off-6', expected_version: end.version, request_id: 'ex-decline-2'})).status, 'offer_not_live');
   assert.deepEqual((await agent.call(tool('activity.list'), {})).notices.map(n => [n.kind, n.refs.event_id]),
     [['offer_issued', 'evt-0007'], ['offer_expired', 'evt-0015']]);
   assert.deepEqual((await agent.call(tool('schedule.get'), {})).credits, {enrolled: 6, limit: 16});

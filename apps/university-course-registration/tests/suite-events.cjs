@@ -134,10 +134,17 @@ test('competitors accept, decline and lose offers under the same rules', () => {
   // The expiry boundary applies to everyone: at the deadline it is too late.
   const late = start();
   refusedEvent(late, occupancy('c-2', '2027-01-12T09:30:00-05:00', {change: 'offer_accept', occupant_ref: 'synthetic-021', offer_id: 'off-6'}), 'offer_expired');
+  refusedEvent(late, occupancy('c-2b', '2027-01-12T09:30:00-05:00', {change: 'offer_decline', occupant_ref: 'synthetic-021', offer_id: 'off-6'}), 'offer_expired',
+    /Offer off-6 expired at 2027-01-12T09:30:00-05:00/);
   refusedEvent(late, occupancy('c-3', late.now, {change: 'offer_accept', occupant_ref: 'synthetic-099', offer_id: 'off-6'}), 'not_found');
   late.event(occupancy('c-4', late.now, {change: 'offer_decline', occupant_ref: 'synthetic-021', offer_id: 'off-6'}));
   assert.deepEqual([offerOf(late, 'off-6').status, entryOf(late, 'wl-synthetic-021-cs240').status, seatsOf(late, 'sec-cs240-lab1').held], ['declined', 'declined', 0]);
   refusedEvent(late, occupancy('c-5', late.now, {change: 'offer_decline', occupant_ref: 'synthetic-021', offer_id: 'off-6'}), 'offer_not_live');
+  // Past the deadline a competitor can still leave the queue; that gives the held seat back.
+  const overdue = start();
+  overdue.event(occupancy('c-8', '2027-01-12T10:00:00-05:00', {change: 'waitlist_leave', occupant_ref: 'synthetic-021', entry_id: 'wl-synthetic-021-cs240'}));
+  assert.deepEqual([offerOf(overdue, 'off-6').status, offerOf(overdue, 'off-6').resolved_at, entryOf(overdue, 'wl-synthetic-021-cs240').status, seatsOf(overdue, 'sec-cs240-lab1').held],
+    ['cancelled', '2027-01-12T10:00:00-05:00', 'left', 0]);
   // An Infra event cannot resolve the student's own offer.
   const mine = offered();
   refusedEvent(mine, occupancy('c-6', mine.now, {change: 'offer_accept', occupant_ref: 'stu-noor', offer_id: 'off-6'}), 'invalid_event');
@@ -252,12 +259,25 @@ test('offers.expire closes exactly the offers whose deadline has been reached', 
   assert.deepEqual(g.call('schedule.get').pending_swaps, []);
 });
 
-test('at the expiry instant an offer cannot be accepted, before or after the expiry is processed', () => {
+test('from the expiry instant an offer can be neither accepted nor declined, before or after the expiry is processed', () => {
   const deadline = '2027-01-12T09:30:00-05:00';
-  // One second before the deadline it still can.
+  // One second before the deadline both answers still work.
   const early = offered();
   early.advance('2027-01-12T09:29:59-05:00');
   assert.equal(early.call('offer.accept', {id: 'off-6'}).status, 'committed');
+  // The boundary is exact: one millisecond before it, declining still works, and the expiry that follows does not rewrite it.
+  const declining = offered();
+  declining.advance('2027-01-12T09:29:59.999-05:00');
+  assert.equal(declining.call('offer.decline', {id: 'off-6'}).status, 'committed');
+  assert.deepEqual(declining.data.offers.map(o => [o.entry_id, o.status, o.resolved_at]),
+    [['wl-noor-cs240', 'declined', '2027-01-12T09:29:59.999-05:00'], ['wl-synthetic-021-cs240', 'live', null]]);
+  declining.event(event('evt-0015', deadline, 'offers.expire'));
+  assert.deepEqual([offerOf(declining, 'off-6').status, entryOf(declining, 'wl-noor-cs240').end_reason, declining.data.notices.map(n => n.kind)],
+    ['declined', 'declined', ['offer_issued']]);
+  // The same instant written with another offset is the deadline too.
+  const utc = offered();
+  utc.advance('2027-01-12T14:30:00Z');
+  rejected(utc, () => utc.call('offer.decline', {id: 'off-6'}), 'offer_expired');
 
   // The clock reaches the deadline but the expiry event has not been applied.
   const f = offered();
@@ -265,22 +285,66 @@ test('at the expiry instant an offer cannot be accepted, before or after the exp
   const stored = f.data;
   assert.equal(f.call('waitlist.list').offers[0].expired, true);
   assert.deepEqual(f.call('change.preview', {action: 'accept_offer', id: 'off-6'}).failures.map(x => x.code), ['offer_expired']);
-  rejected(f, () => f.call('offer.accept', {id: 'off-6'}), 'offer_expired', /expired at 2027-01-12T09:30:00-05:00/);
-  assert.deepEqual(f.data, stored, 'neither the reads nor the refused acceptance released anything');
+  rejected(f, () => f.call('offer.accept', {id: 'off-6'}), 'offer_expired', /expired at 2027-01-12T09:30:00-05:00 and can no longer be accepted/);
+  rejected(f, () => f.call('offer.decline', {id: 'off-6'}), 'offer_expired',
+    /expired at 2027-01-12T09:30:00-05:00 and can no longer be declined\. .*leaving waitlist entry wl-noor-cs240 releases its seat now/);
+  assert.deepEqual(f.data, stored, 'neither the reads nor the refused answers released anything');
   assert.deepEqual([offerOf(f, 'off-6').status, seatsOf(f, 'sec-cs240-lab1').held, entryOf(f, 'wl-synthetic-021-cs240').status], ['live', 1, 'queued'],
     'the seat stays held until the expiry is processed');
 
   // After the expiry event: the offer is closed, the hold is gone, the next entry is served.
   f.event(event('evt-0015', deadline, 'offers.expire'));
   rejected(f, () => f.call('offer.accept', {id: 'off-6'}), 'offer_not_live', /expired/);
+  rejected(f, () => f.call('offer.decline', {id: 'off-6'}), 'offer_not_live', /expired/);
   assert.deepEqual([offerOf(f, 'off-6').status, entryOf(f, 'wl-synthetic-021-cs240').status], ['expired', 'offered']);
+});
 
-  // Declining is still possible while the offer is open, even past its deadline: it only gives the seat back.
+test('past its deadline an offer is not answered, but leaving the queue or giving up the original still releases its seat', () => {
+  const deadline = '2027-01-12T09:30:00-05:00';
+  // The expiry event is late. Leaving the waitlist is not an answer to the offer: it works and frees the seat at once.
   const g = offered();
   g.advance('2027-01-12T11:00:00-05:00');
-  assert.equal(g.call('offer.decline', {id: 'off-6'}).status, 'committed');
-  assert.deepEqual(g.data.offers.map(o => [o.entry_id, o.status, o.expires_at]),
-    [['wl-noor-cs240', 'declined', deadline], ['wl-synthetic-021-cs240', 'live', '2027-01-13T11:00:00-05:00']]);
+  rejected(g, () => g.call('offer.decline', {id: 'off-6'}), 'offer_expired');
+  const left = g.call('waitlist.leave', {id: 'wl-noor-cs240'});
+  assert.deepEqual([left.status, left.cancelled_offer_id], ['committed', 'off-6']);
+  assert.deepEqual(g.data.offers.map(o => [o.entry_id, o.status, o.resolved_at, o.expires_at]),
+    [['wl-noor-cs240', 'cancelled', '2027-01-12T11:00:00-05:00', deadline], ['wl-synthetic-021-cs240', 'live', null, '2027-01-13T11:00:00-05:00']]);
+  assert.deepEqual([entryOf(g, 'wl-noor-cs240').status, entryOf(g, 'wl-noor-cs240').end_reason], ['left', 'left']);
+  // The expiry event, when it comes, finds nothing of hers left to close and tells her nothing new.
+  const told = g.data.notices;
+  g.event(event('late-expiry', '2027-01-12T12:00:00-05:00', 'offers.expire'));
+  assert.deepEqual([g.data.notices, offerOf(g, 'off-6').status], [told, 'cancelled']);
+
+  // A pending swap whose offer is overdue: the original can still be withdrawn, which cancels the swap and frees the held seat.
+  const h = fixture({data: swapOffered()});
+  h.advance('2027-01-11T10:00:00-05:00');
+  assert.equal(h.call('waitlist.list').offers[0].expired, true);
+  rejected(h, () => h.call('offer.accept', {id: 'off-6'}), 'offer_expired');
+  rejected(h, () => h.call('offer.decline', {id: 'off-6'}), 'offer_expired');
+  assert.equal(seatsOf(h, 'sec-cs240-lab1').held, 1);
+  const out = h.call('enrollment.withdraw', {id: 'enr-noor-cs240'});
+  assert.deepEqual(out.cancelled_entry_ids, ['wl-noor-cs240']);
+  assert.deepEqual([offerOf(h, 'off-6').status, offerOf(h, 'off-6').resolved_at, entryOf(h, 'wl-noor-cs240').status, enrollmentOf(h, 'enr-noor-cs240').status],
+    ['cancelled', '2027-01-11T10:00:00-05:00', 'cancelled', 'withdrawn']);
+  assert.deepEqual(h.data.offers.slice(1).map(o => [o.entry_id, o.status, o.issued_at]), [['wl-synthetic-021-cs240', 'live', '2027-01-11T10:00:00-05:00']]);
+
+  // When the withdrawal deadline has passed as well, neither answer nor withdrawal is possible; leaving the entry is, and keeps the original.
+  const closed = fixture({data: swapOffered(d => Object.assign(d.term.registration, {closes_at: '2027-01-11T09:40:00-05:00', withdraw_deadline: '2027-01-11T09:45:00-05:00'}))});
+  closed.advance('2027-01-11T10:00:00-05:00');
+  rejected(closed, () => closed.call('offer.decline', {id: 'off-6'}), 'offer_expired');
+  rejected(closed, () => closed.call('enrollment.withdraw', {id: 'enr-noor-cs240'}), 'withdrawal_closed');
+  assert.deepEqual(closed.call('change.preview', {action: 'accept_offer', id: 'off-6'}).failures.map(x => x.code), ['offer_expired', 'withdrawal_closed', 'registration_closed']);
+  assert.equal(closed.call('waitlist.leave', {id: 'wl-noor-cs240'}).status, 'committed');
+  assert.deepEqual([enrollmentOf(closed, 'enr-noor-cs240').status, offerOf(closed, 'off-6').status, entryOf(closed, 'wl-noor-cs240').status], ['enrolled', 'cancelled', 'left']);
+
+  // A competitor's overdue offer still looks exactly like one that does not exist: the deadline is not checked before ownership.
+  const theirs = fixture({data: withSeed(d => { d.student.credit_limit = 9; })});
+  theirs.event(EXAMPLE_EVENTS[0]);
+  assert.deepEqual(theirs.data.offers.map(o => [o.id, o.entry_id]), [['off-6', 'wl-synthetic-021-cs240']]);
+  theirs.advance('2027-01-12T10:00:00-05:00');
+  const answer = id => { try { theirs.call('offer.decline', {id}); } catch (error) { return [error.code, error.message.split(id).join('<id>')]; } return ['committed']; };
+  assert.equal(answer('off-6')[0], 'not_found');
+  assert.deepEqual(answer('off-6'), answer('no-such-row'));
 });
 
 test('a write that frees a seat offers it within the same commit', () => {
