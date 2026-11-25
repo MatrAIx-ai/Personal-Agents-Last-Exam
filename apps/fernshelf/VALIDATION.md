@@ -17,7 +17,7 @@ Checked on 24 November 2026 (America/Los_Angeles) against base `main` commit `a4
 | Fixture consistency | `npm run fixtures:check` | `minimal.json` and `reference.json`: no problems, including the history as of each date and, for the reference, the activity log and notifications; 48 image files, 564,150 bytes; every place is an invented name without coordinates |
 | Package real MCP | `node apps/fernshelf/scripts/real-mcp.cjs` | 60 checks passed |
 | Fernshelf → Mail | `node apps/fernshelf/scripts/mail-flow.cjs` | 25 checks passed (Mail 1.3.0, real router and receiver) |
-| Public verifier | `npm run app:verify -- --app apps/fernshelf --output .artifacts/fernshelf.json` | passed: 44 checks; the `business` and `event-example` stages passed from an isolated package copy |
+| Public verifier | `npm run app:verify -- --app apps/fernshelf --output .artifacts/fernshelf.json` | passed: 44 checks, the same package digest on Node 18 and 22; the `business` and `event-example` stages passed from an isolated package copy |
 | CI selection | `node runtime/ci/select-apps.cjs . a4bce02` | `full: true`, because the change adds `runtime/registrations/fernshelf.json`; all 8 Apps are selected |
 | CI submission validator | `node runtime/ci/verify-submissions.cjs . .artifacts/submissions a4bce02` | all 8 Apps PASS, `fernshelf: PASS` |
 | Base-revision validator | `git archive a4bce02 runtime package.json`, then `node <base>/runtime/ci/verify-submissions.cjs . <out> a4bce02` | all 8 Apps PASS. This run has no `fernshelf.json` registration, so it is also the fallback case |
@@ -28,7 +28,7 @@ Checked on 24 November 2026 (America/Los_Angeles) against base `main` commit `a4
 | Repository Web Host tests | `npm run test:web` | 4/4 passed |
 | Node 18 and Node 22 | every command in this table on v18.20.8 and on v22.23.1 | all passed on both (counts as above on each) |
 | Isolated package | a copy of `apps/fernshelf` alone: `npm test`, `npm run example`; then `scripts/real-mcp.cjs --runtime DIR` and `scripts/mail-flow.cjs --runtime DIR --mail DIR` | 40/40; example passed; 60/60; 25/25. Without `--runtime` the scripts stop with a message naming the option |
-| Fresh clone | `git clone` of the branch into an empty directory, `npm ci`, then `npm test` in the package and `npm run app:verify -- --app apps/fernshelf` at the root (Node 22) | 40/40; verifier passed, same package digest as the working checkout |
+| Fresh clone | `git clone` of the branch into an empty directory, then `npm test` in the package and `npm run app:verify -- --app apps/fernshelf` at the root (Node 22) | 40/40; verifier passed (44 checks) with the same package digest as the working checkout |
 
 ## Web page
 
