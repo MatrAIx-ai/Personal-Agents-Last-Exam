@@ -28,6 +28,10 @@ const catalog = require('../contribution/assets.catalog.json');
 const deepFreeze = o => { if (o && typeof o === 'object') { Object.freeze(o); Object.values(o).forEach(deepFreeze); } return o; };
 const SEEDS = {minimal: path.join(pkg, 'fixtures/minimal.json'), reference: path.join(pkg, 'fixtures/reference.json')};
 const loaded = new Map();
+// Every activity row the App writes in any test, by shape (action, actor, details keys, effect or
+// not), so tests/log-shapes.test.cjs can compare it with the rows the fixture checker accepts.
+const written = new Map();
+const note = (before, after) => { for (const r of after.activity.slice(before.activity.length)) { const k = [r.action, r.actor, r.details ? Object.keys(r.details).sort().join(',') : '-', r.cause_seq !== undefined].join('|'); if (!written.has(k)) written.set(k, r); } };
 const seedOf = name => { if (!loaded.has(name)) loaded.set(name, JSON.parse(fs.readFileSync(SEEDS[name], 'utf8'))); return loaded.get(name); };
 const CLOCK = require('../fixtures/clock.json').initial_time;
 
@@ -76,7 +80,7 @@ function fixture({seed = 'minimal', now = CLOCK, mutate, logging = true} = {}) {
     } finally { working = null; }
     if (tool.read_only) assert.equal(JSON.stringify(out.data), before, 'A read must not change business data: ' + name);
     validate(out.data);
-    if (!tool.read_only) revision++;
+    if (!tool.read_only) { revision++; note(data, out.data); }
     const result = {...out.result, status: tool.read_only ? 'ok' : 'committed', app_id: 'fernshelf', version: {epoch: 1, revision}};
     assert.ok(output.get(name)(result), 'Output schema: ' + name + ' ' + JSON.stringify(out.result).slice(0, 300));
     data = out.data;
@@ -97,6 +101,7 @@ function fixture({seed = 'minimal', now = CLOCK, mutate, logging = true} = {}) {
     try {
       const out = plugin.applyEvent(ctx('infra'), work, structuredClone(e));
       validate(out);
+      note(data, out);
       data = out; revision++;
       const receipt = {status: 'committed', event_id: e.event_id, version: {epoch: 1, revision}};
       receipts.set(e.event_id, {fp, receipt});
@@ -132,4 +137,4 @@ function fixture({seed = 'minimal', now = CLOCK, mutate, logging = true} = {}) {
 const business = data => { const {activity, notifications, ...rest} = data; return rest; };
 let eventSeq = 0;
 const ev = (operation, at, payload, event_id = 'ev-test-' + (++eventSeq)) => ({event_id, at, operation: 'fernshelf.' + operation, payload});
-module.exports = {fixture, business, ev};
+module.exports = {fixture, business, ev, written};

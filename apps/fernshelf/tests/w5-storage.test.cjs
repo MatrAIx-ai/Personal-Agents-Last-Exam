@@ -111,7 +111,7 @@ test('T13 items that are not backed up: recorded past the quota, searchable, ref
   s = storage(f);
   assert.deepEqual([s.used_bytes, s.pending_bytes], [USED - 820000000 + 1300000000, 0]);
   assert.equal(item(f, 'it-big').history.at(-1).action, 'backed_up');
-  // The audit's case: 8.1 MB free; a 9 MB item waits, then a 1 kB item is backed up on arrival.
+  // Near the quota: 8.1 MB free; a 9 MB item waits, then a 1 kB item is backed up on arrival.
   const q = fixture({mutate: d => { d.account.quota_bytes = 860000000; }});
   q.event(added('2026-11-20T10:00:00-08:00', {item_id: 'it-w1', kind: 'video', declared_bytes: 9000000}));
   q.event(added('2026-11-20T10:05:00-08:00', {item_id: 'it-w2', declared_bytes: 1000}));

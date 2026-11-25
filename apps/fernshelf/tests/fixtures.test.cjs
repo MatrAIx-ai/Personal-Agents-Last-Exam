@@ -57,6 +57,34 @@ test('consistency script refuses a history the App would not have produced, in e
   refuses(reference, d => { d.notifications.push({...d.notifications[0], id: 'ntf-0999'}); }, /notifications do not match/);
 });
 
+test('consistency script refuses a seeded log the App could not have written', () => {
+  const altered = change => { const copy = structuredClone(reference); change(copy); return problemsOf('altered', copy); };
+  const refuses = (change, pattern) => { const found = altered(change); assert.ok(found.some(x => pattern.test(x)), String(pattern) + ' in ' + JSON.stringify(found.slice(0, 5))); };
+  const row = (d, f) => d.activity.find(f);
+  // An action, a details key or an actor the App never writes.
+  refuses(d => { row(d, r => r.action === 'event.item.added').action = 'device.synced'; }, /not a row the App writes/);
+  refuses(d => { row(d, r => r.action === 'links.create').details = {expires_at: '2026-12-01T00:00:00-08:00'}; }, /not a row the App writes/);
+  refuses(d => { const r = row(d, x => x.action === 'event.member.changed'); r.details.contributions_removed = []; }, /not a row the App writes/);
+  refuses(d => { row(d, r => r.action === 'event.share.viewed').actor = 'agent'; }, /not a row the App writes/);
+  refuses(d => { delete row(d, r => r.action === 'effect.item.backed_up').cause_seq; }, /not a row the App writes/);
+  // A seeded row that looks like one written during a run.
+  refuses(d => { row(d, r => r.action === 'items.update').request_id = 'req-1'; }, /carries a request or event ID/);
+  // A happening without the rows the App writes for it: an arrival's backup, a stack, a join, a
+  // member's contributions leaving with them, a contribution.
+  refuses(d => { const r = row(d, x => x.action === 'effect.item.backed_up'); d.activity = d.activity.filter(x => x !== r); }, /no backup effect/);
+  refuses(d => { const r = row(d, x => x.action === 'effect.stack.joined'); d.activity = d.activity.filter(x => x !== r); }, /effect\.stack\.joined/);
+  refuses(d => { const r = row(d, x => x.action === 'effect.member.joined'); d.activity = d.activity.filter(x => x !== r); }, /effect\.member\.joined/);
+  refuses(d => { const r = row(d, x => x.action === 'effect.contributions.removed'); d.activity = d.activity.filter(x => x !== r); }, /contributions that left/);
+  refuses(d => { const r = row(d, x => x.action === 'effect.contributions.added'); d.activity = d.activity.filter(x => x !== r); }, /effect\.contributions\.added/);
+  refuses(d => { const r = row(d, x => x.action === 'event.item.added'); d.activity = d.activity.filter(x => x !== r); }, /does not arrive exactly once|does not follow its event/);
+  // The cover a stack shows without the change that made it the cover.
+  refuses(d => { d.activity = d.activity.filter(x => !(x.action === 'items.update' && x.details.fields.includes('make_cover'))); }, /cover is neither|items\.update row/);
+  // The 80% notice is written by the arrival that crosses the line, at that arrival's time.
+  refuses(d => { const n = d.notifications.find(x => x.kind === 'storage.threshold'); const r = row(d, x => x.object_ids[0] === n.id); const t = '2026-06-09T16:36:00-07:00'; n.at = r.at = t; }, /notifications do not match|out of time order|does not follow/);
+  // Something the account holder did in the middle of the night.
+  refuses(d => { const r = row(d, x => x.action === 'items.update' && x.at.startsWith('2025-03')); r.at = r.at.slice(0, 11) + '03:10:00' + r.at.slice(19); }, /at 3 h local time/);
+});
+
 test('W1 acceptance on the reference library: search, versions, storage, bytes, exposure; controls', () => {
   const f = fixture({seed: 'reference'});
   const nov = f.call('fernshelf.items.search', {label_id: 'pl-dana', start: '2026-11-01', end: '2026-11-30'});

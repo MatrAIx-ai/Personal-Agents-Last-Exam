@@ -9,3 +9,4 @@ require('./w5-storage.test.cjs');
 require('./cross.test.cjs');
 require('./edge-cases.test.cjs');
 require('./fixtures.test.cjs');
+require('./log-shapes.test.cjs');
