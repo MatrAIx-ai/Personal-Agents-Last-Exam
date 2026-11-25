@@ -129,6 +129,47 @@ class RoutingTests(unittest.TestCase):
             api = FakeAPI([pr(**extra)]);self.run_router(api, True)
             self.assertFalse(api.posts)
 
+    def test_bot_only_requests_and_history_do_not_fill_human_review_position(self):
+        for account in [{"login": "Copilot"}, {"login": "copilot-pull-request-reviewer"},
+                        {"login": "chatgpt-codex-connector[bot]"}, {"login": "custom-app", "type": "Bot"}]:
+            for source in ["pending", "requested", "removed", "reviewed"]:
+                with self.subTest(account=account, source=source):
+                    api = FakeAPI([pr()])
+                    if source == "pending": api.pulls[1]["requested_reviewers"] = [account]
+                    elif source == "reviewed": api.reviews[1] = [{"user": account, "state": "COMMENTED"}]
+                    else: api.events[1] = [{"id": 1, "event": "review_requested" if source == "requested" else "review_request_removed", "requested_reviewer": account}]
+                    self.assertEqual(self.run_router(api, True)[0]["status"], "requested")
+                    self.assertEqual(api.posts, [(1, {"reviewers": ["haolun-wu"]})])
+                    self.run_router(api, True)
+                    self.assertEqual(len(api.posts), 1)
+
+    def test_bot_history_does_not_override_human_or_team_removal(self):
+        for removed in [{"requested_reviewer": {"login": "external-maintainer"}},
+                        {"requested_team": {"slug": "experts"}}]:
+            api = FakeAPI([pr(requested_reviewers=[{"login": "Copilot"}])])
+            api.events[1] = [event("Copilot"), {"id": 2, "event": "review_request_removed", **removed}]
+            self.assertEqual(self.run_router(api, True)[0]["status"], "preserved")
+            self.assertFalse(api.posts)
+
+    def test_bot_only_history_still_uses_same_author_domain_affinity(self):
+        api = FakeAPI([pr(1, state="closed"), pr(2)])
+        api.events[1] = [event("Yeechin-is-here")]
+        api.events[2] = [event("Copilot")]
+        self.assertEqual(self.run_router(api, True)[0]["reviewer"], "Yeechin-is-here")
+
+    def test_bot_does_not_route_drafts_owner_or_manually_held_proposals(self):
+        for extra, expected in [({"draft": True}, "draft"),
+                                ({"user": {"login": "DavidZWZ", "id": 57624585}}, "self-managed"),
+                                ({"labels": [{"name": "review-routing:manual"}]}, "manual")]:
+            api = FakeAPI([pr(requested_reviewers=[{"login": "Copilot"}], **extra)])
+            self.assertEqual(self.run_router(api, True)[0]["status"], expected)
+            self.assertFalse(api.posts)
+
+    def test_bot_request_added_during_routing_does_not_cancel_human_assignment(self):
+        api = FakeAPI([pr()])
+        api.changed[1] = {**api.pulls[1], "requested_reviewers": [{"login": "Copilot"}]}
+        self.assertEqual(self.run_router(api, True)[0]["status"], "requested")
+
     def test_drafts_are_held_and_ready_transition_assigns(self):
         api = FakeAPI([pr(draft=True)])
         self.assertEqual(self.run_router(api, True)[0]["status"], "draft")
