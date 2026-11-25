@@ -95,8 +95,18 @@ async function run() {
     // W3: add a pickup person, change and cancel a way home.
     await section(p, 'Pickup & dismissal');
     await p.click('button:has-text("Add pickup person")');
+    check('The add-person form asks for name, relationship and phone only (no school ID field)', !(await p.$('dialog[open] [data-field=person_id]')) &&
+      (await p.$$eval('dialog[open] label.field > span', s => s.map(x => x.textContent))).join('|') === 'Full name *|Relationship to the child *|Phone number *');
+    await p.fill('dialog[open] [data-field=name]', 'Hostile Phone');
+    await p.fill('dialog[open] [data-field=relationship]', 'neighbor');
+    await p.fill('dialog[open] [data-field=phone]', '<img src=x onerror=alert(1)>');
+    let calls = 0; const countCalls = r => { if (new URL(r.url()).pathname === '/api/call') calls++; }; p.on('request', countCalls);
+    await submitDialog(p); await p.waitForTimeout(300);
+    const phoneCheck = await p.$eval('dialog[open] [data-field=phone]', e => ({valid: e.validity.valid, mismatch: e.validity.patternMismatch, message: e.validationMessage}));
+    check('A malformed phone number is stopped in the form, naming the phone field, and nothing is sent', phoneCheck.mismatch && phoneCheck.message.length > 0 && calls === 0, phoneCheck);
+    p.off('request', countCalls);
     await p.fill('dialog[open] [data-field=name]', 'June Park');
-    await p.fill('dialog[open] [data-field=relationship]', 'neighbour');
+    await p.fill('dialog[open] [data-field=relationship]', 'neighbor');
     await p.fill('dialog[open] [data-field=phone]', '555-0166');
     await submitDialog(p); await closed(p);
     const june = (await mcp.call('bellnote.pickup.get', {id: 'child-theo'})).pickup_people.find(x => x.display_name === 'June Park');
@@ -121,18 +131,24 @@ async function run() {
 
     // W4: a refused top-up, a stale form, a retried top-up after a lost response, settings.
     await section(p, 'Lunch');
+    const seen = []; const record = r => { const u = new URL(r.url()); if (u.pathname.startsWith('/api/')) seen.push(u.pathname === '/api/call' ? JSON.parse(r.postData()).name : u.pathname); };
+    p.on('request', record);
     await p.click('button.bn-row[data-child-id=child-ines]'); await settled(p);
+    p.off('request', record);
+    check('Choosing another child re-reads only that child\'s account and menu', JSON.stringify(seen.sort()) === JSON.stringify(['bellnote.lunch.account_get', 'bellnote.menu.list']) &&
+      (await p.getAttribute('[data-balance]', 'data-balance')) === '310', seen);
     await p.click('button:has-text("Add money")');
-    await p.fill('dialog[open] [data-field=amount_cents]', '200');
+    await p.fill('dialog[open] [data-money-for=amount_cents]', '2.00');
     await submitDialog(p);
     const refusal = await errorOf(p);
     await shot(p, 'desktop-topup-refused');
-    check('A refusal stays in the form with the App code and message', refusal.code === 'amount_out_of_range' && refusal.text.length > 10, refusal);
+    check('A refusal stays in the form with the App message (no protocol code shown)', refusal.code === 'amount_out_of_range' && refusal.text === 'A top-up must be between $5.00 and $200.00.' &&
+      (await p.$eval('dialog[open] .form-error', e => getComputedStyle(e, '::before').content)) === 'none', refusal);
     check('No false success after a refusal', (await p.isVisible('dialog[open]')) && (await p.textContent('#status')) !== 'Lunch account topped up.');
     // Another client changes the account while this form is open.
     const v = (await mcp.call('bellnote.preferences.get')).version;
     check('Independent MCP write commits while the form is open', (await mcp.call('bellnote.preferences.update', {email_notices: true, expected_version: v, request_id: 'mcp-pref-browser'})).status === 'committed');
-    await p.fill('dialog[open] [data-field=amount_cents]', '2000');
+    await p.fill('dialog[open] [data-money-for=amount_cents]', '20.00');
     await submitDialog(p);
     const conflict = await errorOf(p);
     check('A stale form shows the conflict instead of overwriting', conflict.code === 'stale_version', conflict);
@@ -148,11 +164,11 @@ async function run() {
       return route.continue();
     });
     await p.click('button:has-text("Add money")');
-    await p.fill('dialog[open] [data-field=amount_cents]', '2000');
+    await p.fill('dialog[open] [data-money-for=amount_cents]', '20.00');
     await p.selectOption('dialog[open] [data-field=payment_method_id]', 'pm-0001');
     await submitDialog(p);
     const lost = await errorOf(p);
-    check('A lost response is reported, not shown as success', lost.code === 'request_failed', lost);
+    check('A lost response is reported in plain words, not shown as success', lost.code === 'request_failed' && /may not have arrived/.test(lost.text), lost);
     await submitDialog(p); await closed(p);
     await p.unroute('**/api/call');
     const ines = await mcp.call('bellnote.lunch.account_get', {id: 'lunch-ines'});
@@ -160,8 +176,8 @@ async function run() {
       ines.transactions.filter(x => x.kind === 'topup' && x.request_id === sentIds[0]).length === 1, {sentIds, balance: ines.account.balance_cents});
     check('The page shows the new balance', (await p.getAttribute('[data-balance]', 'data-balance')) === '2310');
     await p.click('button:has-text("Alerts and limits")');
-    await p.fill('dialog[open] [data-field=low_balance_threshold_cents]', '800');
-    await p.fill('dialog[open] [data-field=daily_limit_cents]', '');
+    await p.fill('dialog[open] [data-money-for=low_balance_threshold_cents]', '8.00');
+    await p.fill('dialog[open] [data-money-for=daily_limit_cents]', '');
     await submitDialog(p); await closed(p);
     const acct = (await mcp.call('bellnote.lunch.account_get', {id: 'lunch-ines'})).account;
     check('W4 browser settings commit; MCP reads the threshold and no limit', acct.low_balance_threshold_cents === 800 && acct.daily_limit_cents === null);

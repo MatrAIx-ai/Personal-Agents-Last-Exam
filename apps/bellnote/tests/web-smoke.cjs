@@ -101,7 +101,7 @@ test('Bellnote web page on the shared Host: serving, boundary, reads, writes, co
       assert.equal(resp.state, 'signed'); assert.equal(resp.form_version, 2); assert.equal(resp.payment_ids.length, 1);
     });
     await t.test('W3 add a pickup person and change a way home; MCP sees both', async () => {
-      const add = await s.write('bellnote.pickup.person_add', {id: 'child-ines', name: 'June Park', relationship: 'neighbour', phone: '555-0166'});
+      const add = await s.write('bellnote.pickup.person_add', {id: 'child-ines', name: 'June Park', relationship: 'neighbor', phone: '555-0166'});
       assert.equal(add.status, 'committed', JSON.stringify(add));
       const set = await s.write('bellnote.dismissal.set', {id: 'child-ines', date: '2026-11-19', mode: 'pickup', person_id: 'person-maya', note: 'Dentist after school'});
       assert.equal(set.status, 'committed', JSON.stringify(set));

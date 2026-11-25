@@ -48,7 +48,6 @@ body[data-app=bellnote] .sidebar nav button[aria-current=page]{background:#dcebe
 .bn-kid .bn-buttons button{padding:5px 10px;font-size:11px}
 .bn-dialog p.bn-lead{font-size:13px;color:#4f5d71;margin:-12px 0 18px}
 .bn-choice{display:flex;gap:16px;font-size:13px}.bn-choice label{display:flex;gap:6px;align-items:center}.bn-choice input{width:auto}
-.form-error[data-code]::before{content:attr(data-code) " · ";font-weight:700}
 .bn-history{font-size:12px;color:#5b687b;margin:6px 0 0;padding-left:18px}
 @media(max-width:760px){body[data-app=bellnote] #records{max-height:none}.bn-item>.bn-badge{justify-self:start}.bn-page{padding:20px 16px 36px}.bn-head h2{font-size:21px}.bn-card{padding:14px}.bn-item{grid-template-columns:minmax(0,1fr)}.bn-item .bn-buttons{justify-content:flex-start}.bn-today small{display:none}}
 `;
@@ -61,6 +60,7 @@ const longDay=d=>day(d,{weekday:'long',month:'long',day:'numeric'});
 const addDays=(d,n)=>{const t=parseDay(d);t.setUTCDate(t.getUTCDate()+n);return t.toISOString().slice(0,10);};
 let zone='UTC';
 const when=(iso,o={})=>iso?new Intl.DateTimeFormat('en-US',{timeZone:zone,month:'short',day:'numeric',hour:'numeric',minute:'2-digit',...o}).format(new Date(iso)):'—';
+const zoneName=()=>{try{return new Intl.DateTimeFormat('en-US',{timeZone:zone,timeZoneName:'longGeneric'}).formatToParts(new Date()).find(p=>p.type==='timeZoneName')?.value||zone;}catch{return zone;}};
 const clock=t=>{if(!t)return '';const [h,m]=t.split(':').map(Number);return (h%12||12)+':'+String(m).padStart(2,'0')+' '+(h<12?'AM':'PM');};
 const words=s=>String(s).replace(/_/g,' ').replace(/^./,c=>c.toUpperCase());
 const initials=n=>String(n).split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();
@@ -84,14 +84,15 @@ const keyOf=ui=>[ui.section,nav.child||'',ui.section==='forms'?nav.form||'':''].
 const mine=k=>k.guardians.find(g=>g.is_me)||{};
 const can=(k,right)=>Boolean(mine(k)[right]);
 const kidName=(a,id)=>a.kids.find(k=>k.id===id)?.display_name||'Child';
-const personName=(a,id)=>{for(const k of a.kids){const g=k.guardians.find(x=>x.person_id===id);if(g)return g.display_name;}return id;};
+const personName=(a,id)=>{for(const k of a.kids){const g=k.guardians.find(x=>x.person_id===id);if(g)return g.display_name;}return /^staff[-_]/.test(id||'')?'the school office':'someone the school holds';};
 const collector=(a,p,id)=>p.pickup_people.find(x=>x.person_id===id)?.display_name||personName(a,id);
 const avatarFor=(a,k)=>el('span',{class:'bn-avatar c'+(a.kids.indexOf(k)%3),'aria-hidden':'true'},initials(k.display_name));
 function go(ui,section,patch={}){
+ if(section===ui.section&&ui.aux.key)return reselect(ui,patch);
  Object.assign(nav,patch,{scroll:true});if(patch.child)store.set('child',patch.child);if(patch.form)store.set('form',patch.form);
- return (section===ui.section?ui.refresh():ui.navigate(section)).catch(ui.error);
+ return ui.navigate(section).catch(ui.error);
 }
-function pickChild(ui,id){nav.child=id;nav.scroll=true;store.set('child',id);ui.refresh().catch(ui.error);}
+function pickChild(ui,id){return reselect(ui,{child:id});}
 
 // ---------- writes ----------
 // Shared schema forms (from the live Agent tool schema) carry the version seen when they open and
@@ -100,18 +101,43 @@ function pickChild(ui,id){nav.child=id;nav.scroll=true;store.set('child',id);ui.
 let formContext={tool:null,a:null};
 const LABELS={
  'bellnote.absences.report':{kind:'What to report',start:'Day (or first day)',end:'Last day',time_local:'Arrival or leaving time',reason:'Reason for the school'},
- 'bellnote.pickup.person_add':{name:'Full name',relationship:'Relationship to the child',phone:'Phone number',person_id:'School person ID'},
+ 'bellnote.pickup.person_add':{name:'Full name',relationship:'Relationship to the child',phone:'Phone number'},
  'bellnote.dismissal.set':{date:'School day',mode:'Way home',person_id:'Collected by',note:'Note for the office'},
- 'bellnote.lunch.topup':{amount_cents:'Amount in cents',payment_method_id:'Pay with'},
- 'bellnote.lunch.settings_update':{low_balance_threshold_cents:'Low-balance alert in cents',daily_limit_cents:'Daily spending limit in cents'},
+ 'bellnote.lunch.topup':{amount_cents:'Amount',payment_method_id:'Pay with'},
+ 'bellnote.lunch.settings_update':{low_balance_threshold_cents:'Low-balance alert',daily_limit_cents:'Daily spending limit'},
  'bellnote.preferences.update':{email_notices:'Email me a copy of each notification',default_payment_method_id:'Default payment method'}
 };
 const labels={};
 function act(ui,a,tool,defaults){
  formContext={tool,a};for(const k of Object.keys(labels))delete labels[k];Object.assign(labels,LABELS[tool]||{});
+ if(tool==='bellnote.preferences.update')kept.delete('bellnote.preferences.get{}');
  ui.action(tool,defaults);
+ // The shared form is built from the tool schema; adjust it for a guardian before it is used.
+ const d=document.querySelector('dialog[open]');if(!d)return;
+ const input=name=>d.querySelector('[data-field="'+name+'"]');
+ // The school matches people by phone number; a school-held person ID is not something a guardian types.
+ if(tool==='bellnote.pickup.person_add')input('person_id')?.closest('label')?.remove();
+ const phone=input('phone');if(phone)Object.assign(phone,{type:'tel',autocomplete:'tel',pattern:'[0-9+\\(\\) .\\-]{7,20}',title:'Digits with spaces, dots, dashes, brackets or a leading +, 7 to 20 characters, for example 555-0123.'});
+ const t=input('time_local');if(t)Object.assign(t,{pattern:'([01][0-9]|2[0-3]):[0-5][0-9]',title:'A 24-hour time, for example 10:15.'});
+ for(const [name,need] of [['amount_cents',true],['low_balance_threshold_cents',true],['daily_limit_cents',false]])moneyField(input(name),need);
 }
-function methodOptions(a){return (a.prefs?.payment_methods||[]).filter(m=>m.usable).map(m=>({value:m.id,label:m.label+(m.expiry_month?' · expires '+m.expiry_month:'')}));}
+// Amounts are typed in dollars; the hidden schema field carries whole cents.
+function moneyField(cents,required){
+ if(!cents)return;
+ const dollars=el('input',{type:'number',step:'0.01',min:'0',inputmode:'decimal',required,'data-money-for':cents.dataset.field,placeholder:cents.placeholder||'0.00'});
+ if(cents.value!=='')dollars.value=(Number(cents.value)/100).toFixed(2);
+ const sync=()=>{cents.value=dollars.value===''?'':String(Math.round(Number(dollars.value)*100));};
+ dollars.addEventListener('input',sync);
+ cents.type='hidden';cents.removeAttribute('required');cents.before(dollars);
+}
+// Core's own refusals carry protocol wording; the page says what happened instead.
+const PLAIN={invalid_arguments:'Some details are not in the expected format. Check each field and try again.',
+ idempotency_conflict:'This form was already sent with different details. Close it, refresh and try again.',
+ request_failed:'Bellnote did not answer. Your request may not have arrived; send it again and it is applied only once.'};
+new MutationObserver(()=>{for(const e of document.querySelectorAll('dialog .form-error[data-code]')){const plain=PLAIN[e.dataset.code];if(plain&&e.textContent!==plain)e.textContent=plain;}})
+ .observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['data-code']});
+const monthText=m=>{const [y,mo]=m.split('-').map(Number);return new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'short',year:'numeric'}).format(new Date(Date.UTC(y,mo-1,15)));};
+function methodOptions(a){return (a.prefs?.payment_methods||[]).filter(m=>m.usable).map(m=>({value:m.id,label:m.label+(m.expiry_month?' · expires '+monthText(m.expiry_month):'')}));}
 function pickupOptions(a){
  const k=a.child,p=a.pickup;if(!p)return [];
  return [...k.guardians.filter(g=>g.can_pickup).map(g=>({value:g.person_id,label:g.display_name+' ('+g.relationship+')'})),
@@ -130,11 +156,10 @@ function field(name){
   if(name==='date')return {options:(a.pickup?.days||[]).filter(d=>d.plan).map(d=>({value:d.date,label:day(d.date)+' · change by '+when(d.cutoff_at,{month:undefined,day:undefined})}))};
   if(name==='person_id')return {options:pickupOptions(a),emptyLabel:'Nobody (bus, after-care or walking)',help:'Only for “Pickup”: a guardian or an approved pickup person.'};
  }
- if(tool==='bellnote.pickup.person_add'&&name==='person_id')return {help:'Leave empty unless the office gave you an ID; the school matches people by phone number.'};
- if(tool==='bellnote.pickup.person_add'&&name==='phone')return {placeholder:'555-0123'};
+ if(tool==='bellnote.pickup.person_add'&&name==='phone')return {placeholder:'555-0123',help:'The school recognizes people by phone number.'};
  if(tool==='bellnote.lunch.topup'){
   const pol=a.school?.school.policy;
-  if(name==='amount_cents')return {placeholder:'2000 = $20.00',help:pol?'Between '+money(pol.topup_min_cents)+' and '+money(pol.topup_max_cents)+' at '+a.school.school.name+'.':''};
+  if(name==='amount_cents')return {placeholder:'20.00',help:pol?'Between '+money(pol.topup_min_cents)+' and '+money(pol.topup_max_cents)+' at '+a.school.school.name+'.':''};
   if(name==='payment_method_id')return {options:methodOptions(a),emptyLabel:'Default payment method'};
  }
  if(tool==='bellnote.lunch.settings_update'&&name==='daily_limit_cents')return {help:'Leave empty for no daily limit.'};
@@ -191,40 +216,77 @@ function answerSheet(ui,a,form,kid,existing){
 const button=(label,onclick,primary=false)=>el('button',{type:'button',class:primary?'primary':'',onclick},label);
 
 // ---------- loading per view ----------
+// Every Bellnote call is a full Core round trip (Core reads and validates the whole account state on
+// each call), so a view makes only the reads it shows. Two reads are kept for the page load: the
+// school (calendar, cut-offs and policy; also the district's "today") and the account preferences.
+// They change only through Infra (time, calendar events, a new seed) or the preferences form, so the
+// toolbar's Refresh and a page reload read them again, and saving preferences drops the kept copy.
+const kept=new Map();
+function keep(ui,name,args){const key=name+JSON.stringify(args);if(!kept.has(key))kept.set(key,ui.call(name,args).catch(e=>{kept.delete(key);throw e;}));return kept.get(key);}
+document.addEventListener('click',e=>{if(e.target.closest?.('.toolbar button'))kept.clear();},true);
+const schoolOf=(ui,k)=>keep(ui,'bellnote.schools.get',{id:k.school_id});
+const prefsOf=ui=>keep(ui,'bellnote.preferences.get',{});
 async function load(ui){
  const kids=ui.records;
  if(!kids.length)return {key:keyOf(ui),kids};
  const child=kids.find(k=>k.id===nav.child)||kids[0];nav.child=child.id;store.set('child',child.id);
- const school=await ui.call('bellnote.schools.get',{id:child.school_id});
- zone=school.school.time_zone;
- const a={kids,child,school,today:school.start,me:mine(kids[0]),writes:WRITES.filter(t=>ui.has(t))};
- const s=ui.section,today=a.today,call=(n,args)=>ui.call(n,args);
+ const a={kids,me:mine(kids[0]),writes:WRITES.filter(t=>ui.has(t))};
+ await viewData(ui,a,child);
+ a.key=keyOf(ui);return a;
+}
+// The reads of the current view for one child. Reads that need the school's "today" wait for it;
+// the others are sent at the same time.
+async function viewData(ui,a,child){
+ const s=ui.section,call=(n,args)=>ui.call(n,args),schoolP=schoolOf(ui,child);
+ const early={forms:()=>[call('bellnote.forms.list',{}),prefsOf(ui),nav.form?call('bellnote.forms.get',{id:nav.form}).catch(()=>null):null],
+  attendance:()=>[call('bellnote.absences.list',{child_id:child.id})],
+  pickup:()=>[can(child,'custodial')?call('bellnote.pickup.get',{id:child.id}):null],
+  lunch:()=>[call('bellnote.menu.list',{id:child.school_id}),prefsOf(ui)],
+  account:()=>[prefsOf(ui)],home:()=>[call('bellnote.forms.list',{}),call('bellnote.notifications.list',{})]}[s]?.()||[];
+ const school=await schoolP;zone=school.school.time_zone;
+ Object.assign(a,{child,school,today:school.start});
+ const today=a.today,kids=a.kids;
  if(s==='home'){
-  const [att,forms,notes,lunch,pickup]=await Promise.all([call('bellnote.attendance.list',{start:today,end:today}),call('bellnote.forms.list',{}),call('bellnote.notifications.list',{}),
+  const [att,lunch,pickup,forms,notes]=await Promise.all([call('bellnote.attendance.list',{start:today,end:today}),
    Promise.all(kids.map(k=>k.lunch_account_id?call('bellnote.lunch.account_get',{id:k.lunch_account_id,start:today,end:today}):null)),
-   Promise.all(kids.map(k=>can(k,'custodial')?call('bellnote.pickup.get',{id:k.id,start:today,end:addDays(today,6)}):null))]);
+   Promise.all(kids.map(k=>can(k,'custodial')?call('bellnote.pickup.get',{id:k.id,start:today,end:addDays(today,6)}):null)),...early]);
   Object.assign(a,{attendance:att.records,forms:forms.forms,notices:notes.notifications,lunch:lunch.map(x=>x?.account||null),pickups:pickup});
  }else if(s==='attendance'){
-  const [att,reports]=await Promise.all([call('bellnote.attendance.list',{id:child.id,start:addDays(today,-27),end:today}),call('bellnote.absences.list',{child_id:child.id})]);
+  const [att,reports]=await Promise.all([call('bellnote.attendance.list',{id:child.id,start:addDays(today,-27),end:today}),...early]);
   Object.assign(a,{attendance:att.records,reports:reports.reports});
  }else if(s==='forms'){
-  const [forms,prefs]=await Promise.all([call('bellnote.forms.list',{}),call('bellnote.preferences.get',{})]);
+  const [forms,prefs,guess]=await Promise.all(early);
   a.forms=forms.forms;a.prefs=prefs;
   const focus=a.forms.find(f=>f.id===nav.form)||formGroups(a).flatMap(g=>g.items)[0];
-  if(focus){nav.form=focus.id;store.set('form',focus.id);a.form=(await call('bellnote.forms.get',{id:focus.id})).form;}
+  if(focus){nav.form=focus.id;store.set('form',focus.id);a.form=guess?.form?.id===focus.id?guess.form:(await call('bellnote.forms.get',{id:focus.id})).form;}else a.form=null;
  }else if(s==='pickup'){
-  if(can(child,'custodial'))a.pickup=await call('bellnote.pickup.get',{id:child.id});
+  a.pickup=(await early[0])||null;
  }else if(s==='lunch'){
-  const [acct,menu,prefs]=await Promise.all([child.lunch_account_id?call('bellnote.lunch.account_get',{id:child.lunch_account_id,start:addDays(today,-13),end:today}):null,
-   call('bellnote.menu.list',{id:child.school_id}),call('bellnote.preferences.get',{})]);
+  const [acct,menu,prefs]=await Promise.all([child.lunch_account_id?call('bellnote.lunch.account_get',{id:child.lunch_account_id,start:addDays(today,-13),end:today}):null,...early]);
   Object.assign(a,{lunch:acct,menu:menu.days,prefs});
  }else if(s==='notices'){
   a.notices=(await call('bellnote.notifications.list',{start:addDays(today,-60),end:today})).notifications;
  }else if(s==='account'){
-  const [prefs,pays]=await Promise.all([call('bellnote.preferences.get',{}),call('bellnote.payments.list',{start:school.school.term.start_date,end:today})]);
+  const [pays,prefs]=await Promise.all([call('bellnote.payments.list',{start:school.school.term.start_date,end:today}),...early]);
   Object.assign(a,{prefs,payments:pays.payments});
  }
- a.key=keyOf(ui);return a;
+}
+// Choosing another child or another form re-reads only what that choice shows; the Host's refresh
+// (account version, tool list, children) runs on navigation between views, after every write and on
+// Refresh, so every write still carries the version observed at the last refresh.
+let pickTicket=0;
+async function reselect(ui,patch){
+ const ticket=++pickTicket,a=ui.aux,root=document.querySelector('#app');
+ Object.assign(nav,patch,{scroll:true});if(patch.child)store.set('child',patch.child);if(patch.form)store.set('form',patch.form);
+ root.setAttribute('aria-busy','true');
+ try{
+  const next={...a};
+  if(ui.section==='forms'&&patch.form&&a.forms){next.form=(await ui.call('bellnote.forms.get',{id:patch.form})).form;}
+  else{const child=a.kids.find(k=>k.id===nav.child)||a.kids[0];await viewData(ui,next,child);}
+  if(ticket!==pickTicket)return;
+  next.key=keyOf(ui);Object.keys(a).forEach(k=>delete a[k]);Object.assign(a,next);
+  await ui.navigate(ui.section);
+ }catch(e){ui.error(e);}finally{if(ticket===pickTicket)root.setAttribute('aria-busy','false');}
 }
 const WRITES=['bellnote.absences.report','bellnote.absences.cancel','bellnote.forms.respond','bellnote.forms.withdraw','bellnote.pickup.person_add','bellnote.pickup.person_remove',
  'bellnote.dismissal.set','bellnote.dismissal.cancel','bellnote.lunch.topup','bellnote.lunch.settings_update','bellnote.preferences.update'];
@@ -441,7 +503,7 @@ function accountList(ui){
  const a=ui.aux,p=a.prefs;
  return el('div',{class:'bn-list'},el('h3',{},'Notifications'),el('div',{class:'bn-row'},el('span',{class:'bn-avatar','aria-hidden':'true'},'@'),el('span',{},el('strong',{},p.preferences.email_notices?'Email copies on':'Email copies off'),el('small',{},'In-app notifications are always kept.')),
    ui.has('bellnote.preferences.update')?button('Edit',()=>act(ui,a,'bellnote.preferences.update',{email_notices:p.preferences.email_notices,default_payment_method_id:p.preferences.default_payment_method_id})):el('span',{})),
-  el('h3',{},'Payment methods'),...p.payment_methods.map(m=>el('div',{class:'bn-row','data-method-id':m.id},el('span',{class:'bn-avatar','aria-hidden':'true'},m.kind==='card'?'▭':'⌂'),el('span',{},el('strong',{},m.label),el('small',{},(m.expiry_month?'Expires '+m.expiry_month:'No expiry')+(m.id===p.preferences.default_payment_method_id?' · default':''))),
+  el('h3',{},'Payment methods'),...p.payment_methods.map(m=>el('div',{class:'bn-row','data-method-id':m.id},el('span',{class:'bn-avatar','aria-hidden':'true'},m.kind==='card'?'▭':'⌂'),el('span',{},el('strong',{},m.label),el('small',{},(m.expiry_month?(m.expired?'Expired ':'Expires ')+monthText(m.expiry_month):'No expiry')+(m.id===p.preferences.default_payment_method_id?' · default':''))),
    badge(m.usable?'Usable':m.expired?'Expired':'Declined',m.usable?'good':'bad'))));
 }
 function accountView(ui){
@@ -450,7 +512,7 @@ function accountView(ui){
  return el('article',{class:'bn-page'},el('header',{class:'bn-head'},el('div',{},el('span',{class:'kicker'},'Account'),el('h2',{},a.me.display_name||'Your account'),el('p',{},'Family, rights and payments this school year'))),
   el('section',{class:'bn-card'},el('h3',{},'Family and rights'),el('div',{class:'bn-items'},a.kids.map(k=>el('div',{class:'bn-item'},el('div',{},el('strong',{},k.display_name),el('small',{},k.guardians.map(g=>g.display_name+(g.is_me?' (you)':'')+': '+['custodial','can_pickup','can_sign','can_pay'].filter(r=>g[r]).map(r=>({custodial:'custodial',can_pickup:'pickup',can_sign:'sign',can_pay:'pay'}[r])).join(', ')).join(' · '))))))),
   el('section',{class:'bn-card'},el('h3',{},'Payments'),pays.length?el('div',{class:'bn-items'},pays.map(x=>el('div',{class:'bn-item','data-payment-id':x.id},el('div',{},el('strong',{},(x.kind==='form_fee'?'Form fee':'Lunch top-up')+' · '+kidName(a,x.child_id)),
-   el('small',{},when(x.paid_at)+' · '+(methods.get(x.payment_method_id)||x.payment_method_id)+(x.refunded_at?' · refunded '+when(x.refunded_at)+(x.refund_reason?' ('+words(x.refund_reason)+')':''):''))),
+   el('small',{},when(x.paid_at)+' · '+(methods.get(x.payment_method_id)||'a payment method no longer on file')+(x.refunded_at?' · refunded '+when(x.refunded_at)+(x.refund_reason?' ('+words(x.refund_reason)+')':''):''))),
    el('div',{class:'bn-buttons'},badge(words(x.status),x.status==='paid'?'good':''),el('span',{class:'bn-amount'},money(x.amount_cents)))))):el('p',{class:'bn-note'},'No payments this school year.')));
 }
 
@@ -460,7 +522,7 @@ const VIEWS={home:[homeList,homeView],attendance:[ui=>childList(ui),attendanceVi
 function toolbarContext(ui){
  const a=ui.aux,box=document.querySelector('.bn-today')||el('div',{class:'bn-today'});
  if(!box.isConnected)document.querySelector('.toolbar')?.prepend(box);
- box.replaceChildren(el('strong',{},a.today?longDay(a.today):'Bellnote'),el('small',{},(a.writes?.length?'Signed in as '+(a.me?.display_name||'guardian'):'View only: this session cannot change anything')+' · times in '+zone));
+ box.replaceChildren(el('strong',{},a.today?longDay(a.today):'Bellnote'),el('small',{},(a.writes?.length?'Signed in as '+(a.me?.display_name||'guardian'):'View only: this session cannot change anything')+' · times in '+zoneName()));
 }
 export const config={
  id:'bellnote',title:'Bellnote',description:'School–family portal: attendance, forms, pickup and lunch.',symbol:'B',
