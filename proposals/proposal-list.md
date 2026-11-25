@@ -8,7 +8,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**194 open non-draft proposals · 0 awaiting initial review · 7 drafts.**
+**195 open non-draft proposals · 0 awaiting initial review · 7 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
@@ -16,7 +16,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 | Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 5 |
 | Environment | [Chenngzz](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AChenngzz) | 3 |
 | Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 1 |
-| Task | [Yeechin-is-here](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AYeechin-is-here) | 16 |
+| Task | [Yeechin-is-here](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AYeechin-is-here) | 17 |
 | Task | [haolun-wu](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Ahaolun-wu) | 12 |
 
 Counts show pending requests, not accepted contributions or lifetime review totals. Submitted reviews leave the pending queue; multiple reviewers on one PR count separately.
@@ -143,10 +143,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🧪 Task Track
 
-**98 proposals.**
+**99 proposals.**
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-25 08:34:40 | [#252](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/252) · Follow up on a repair hold without interrupting class<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/252/files) | Home &amp; utilities | Lina has delegated one noon follow-up if her repair is still unconfirmed. A binding reply ends that authority, even if a newer automated reminder says pending. She need not be interrupted to decide again. | Design review | Review requested<br>@Yeechin-is-here |  | [YurunChen](https://github.com/YurunChen) |  |
 | 2026-11-25 08:08:10 | [#251](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/251) · Rotate family call times based on who actually accommodated<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/251/files) | Social &amp; communities | Emma’s family takes turns based on who actually accommodated. A booked slot, a failed connection or a private check-in does not spend a turn, so the calendar alone can give the wrong next time. | Design review | Review requested<br>@haolun-wu |  | [YurunChen](https://github.com/YurunChen) |  |
 | 2026-11-25 06:55:24 | [#249](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/249) · Apply Lin's crunch-season health rule before booking more evening work<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/249/files) | Fitness &amp; wellbeing<br>Also: Work &amp; business | Lin's own crunch-season rule, written after a 2025 flu, turns watch data into booking limits. The agent must apply it only when its numbers are met, and keep required meetings, personal requests and privacy intact. | Draft | Awaiting review |  | [AmyTao](https://github.com/AmyTao) |  |
 | 2026-11-25 05:35:21 | [#246](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/246) · Bring back a lab recorder after a borrower handoff<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/246/files) | Learning &amp; research | When the desk cancels its bookings, the lab offers a locker drop. Mira does not allow it for her loans: the agent must coordinate a staffed handoff with the current holder and wait for a matching signed receipt. | Design review | Review requested<br>@haolun-wu |  | [YurunChen](https://github.com/YurunChen) |  |
