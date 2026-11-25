@@ -120,6 +120,7 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
   const data = state.data || {};
   const initial = seedData(baseline) || seedData(state.initial_data) || data;
   const audit = state.audit || [];
+  const hasAudit = Array.isArray(state.audit);
   const baselineActivity = new Set((initial.activity || []).map(entry => entry.activity_id));
   const baselineSessions = new Set((initial.sessions || []).map(session => session.session_id));
   const nowMs = Date.parse(state.virtual_now || data.committed_through || 0);
@@ -202,6 +203,10 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
     if (item.client_name) return item.client_name;
     return '';
   }
+  function executionRequestId(item) {
+    if (!item) return '';
+    return item.request_id ?? (item.args && item.args.request_id) ?? (item.arguments && item.arguments.request_id) ?? '';
+  }
   for (const row of audit) {
     const requestId = row.input ? row.input.request_id || null : null;
     const candidate = row.decision === 'allow' && row.actor === 'agent' ? receiptCall(state, requestId) : null;
@@ -240,14 +245,14 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
     const left = identified(row);
     const right = identified(item);
     if ((row.tool || '') !== (item.tool || item.name || '')) return false;
-    if (String(row.request_id || '') !== String(item.request_id || '')) return false;
+    if (String(row.request_id || '') !== String(executionRequestId(item) || '')) return false;
     const code = denialCode(row);
     if (code && item.status && code !== item.status) return false;
     if (left.connection_id && right.connection_id && left.connection_id !== right.connection_id) return false;
     if (left.client_name && right.client_name && left.client_name !== right.client_name) return false;
     const rowNamed = Boolean(left.connection_id || left.client_name);
     const itemNamed = Boolean(right.connection_id || right.client_name);
-    if (!row.request_id && !item.request_id && rowNamed !== itemNamed) return false;
+    if (!row.request_id && !executionRequestId(item) && rowNamed !== itemNamed) return false;
     return true;
   }
   function fillDenied(call, item) {
@@ -257,7 +262,8 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
   }
   function groupKey(item, isRow) {
     const tool = isRow ? (item.tool || '') : (item.tool || item.name || '');
-    if (item.request_id) return tool + '\n' + item.request_id;
+    const requestId = isRow ? item.request_id : executionRequestId(item);
+    if (requestId) return tool + '\n' + requestId;
     return tool + '\n' + partyKey(identified(item));
   }
   function soleParty(item, pool, itemIsRow) {
@@ -293,7 +299,7 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
   }
   for (const row of denyRows) groupAdd(groupKey(row, true), 'rows', row);
   for (const item of denyExecs) {
-    if (audit.length) usedExecutions.add(item);
+    if (hasAudit) usedExecutions.add(item);
     groupAdd(groupKey(item, false), 'execs', item);
   }
   for (const group of groups.values()) {
@@ -334,7 +340,7 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
   const readExecs = [];
   agent_executions.forEach(item => {
     if (usedExecutions.has(item)) return;
-    if (!['ok', 'committed', 'ready'].includes(item.status) || item.request_id) return;
+    if (!['ok', 'committed', 'ready'].includes(item.status) || executionRequestId(item)) return;
     readExecs.push(item);
     const key = partyKey(item);
     if (!execGroups.has(key)) execGroups.set(key, []);
@@ -364,7 +370,7 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
     if (usedExecutions.has(item)) return;
     const tool = item.tool || item.name || null;
     const decision = ['ok', 'committed', 'ready'].includes(item.status) ? 'allow' : 'deny';
-    if (decision === 'allow' && item.request_id && calls.some(call => call.seq != null && call.decision === 'allow' && call.request_id && call.request_id === item.request_id && call.tool === tool)) return;
+    if (decision === 'allow' && executionRequestId(item) && calls.some(call => call.seq != null && call.decision === 'allow' && call.request_id && call.request_id === executionRequestId(item) && call.tool === tool)) return;
     pushCall({
       index,
       tool,
@@ -375,7 +381,7 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
       actor: item.actor || 'agent',
       caller_role: 'agent',
       virtual_time: item.virtual_time || null,
-      request_id: item.request_id || null,
+      request_id: executionRequestId(item) || null,
       decision,
       connection_id: item.connection_id || null,
       client_name: item.client_name || null
@@ -395,7 +401,7 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
   }
   for (const item of agent_executions) {
     if (['ok', 'committed', 'ready'].includes(item.status)) continue;
-    pushRejected({source: 'agent', tool: item.tool || item.name || null, reason: item.status, request_id: item.request_id || null});
+    pushRejected({source: 'agent', tool: item.tool || item.name || null, reason: item.status, request_id: executionRequestId(item) || null});
   }
   return {
     home_mode: data.home_mode || null,
