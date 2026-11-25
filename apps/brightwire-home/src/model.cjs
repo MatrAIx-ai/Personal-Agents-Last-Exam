@@ -83,9 +83,15 @@ function validateSeed(ctx, data) {
   }
 }
 
-function checkSnapshots(ctx, data) {
+function catalogAssets(ctx) {
+  const fromRuntime = ctx && ctx.assets && ctx.assets.catalog && ctx.assets.catalog.assets;
+  if (Array.isArray(fromRuntime)) return fromRuntime;
   const catalog = ctx && (ctx.catalog || (ctx.bundle && ctx.bundle.catalog));
-  const assets = catalog && catalog.assets;
+  return catalog && catalog.assets;
+}
+
+function checkSnapshots(ctx, data) {
+  const assets = catalogAssets(ctx);
   if (!Array.isArray(assets)) return;
   for (const id of data.available_snapshots || []) {
     const asset = assets.find(item => item.asset_id === id);

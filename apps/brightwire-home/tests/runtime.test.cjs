@@ -144,6 +144,24 @@ test('task 73 loads with its bundle, and a missing snapshot stays controllable',
   assert.equal(changed.state.data.devices.find(device => device.device_id === 'camera-nursery').privacy, 'privacy_off');
 });
 
+test('load_seed rejects a snapshot id that is not in the catalog', () => {
+  const model = createRuntime({registryFile: registry});
+  const state = model.create('brightwire-home', 'snap-check', 'sandbox');
+  const data = structuredClone(require('../fixtures/minimal.json'));
+  data.available_snapshots = data.available_snapshots.concat(['snap-made-up']);
+  const loaded = model.execute(state, 'infra', 'env.load_seed', {
+    expected_version: model.version(state),
+    request_id: 'snap-made-up',
+    virtual_now: data.committed_through,
+    data,
+    binding: state.binding,
+    policies: state.policies,
+    bundle: state.resources.bundle
+  });
+  assert.equal(loaded.result.status, 'invalid_seed', JSON.stringify(loaded.result));
+  assert.equal(loaded.state.data.available_snapshots.includes('snap-made-up'), false);
+});
+
 test('evidence joins the later allow row and keeps each client name', async () => {
   const fs = require('node:fs');
   const os = require('node:os');

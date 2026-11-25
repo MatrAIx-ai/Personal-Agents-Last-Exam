@@ -66,7 +66,7 @@ These limits belong to [`local-reference-v1`](profiles/local-reference.json), no
 - Per-App virtual clocks, not a global scheduler or reminder-triggered Agent sessions.
 - Mail supports the original text channel plus a separately authorized attachment channel. A custom receiver/channel is also covered by a test fixture.
 - Local media includes PDF, UTF-8 text, ICS, PNG/JPEG, MP3/WAV, MP4 and JSON; 64 assets / 1 MiB decoded bytes per App bundle. Parent-resource access mappings remain platform-controlled.
-- The [public business Web Host](web/README.md) mounts App-owned controls for Mail, Calendar, Files, Messages, Notes, Tasks and Contacts. Browser acceptance is separate from MCP tests and from model-agent, user-simulator or remote deployment validation.
+- The [public business Web Host](web/README.md) mounts App-owned controls for all seven Apps. Browser acceptance is separate from MCP tests and from model-agent, user-simulator or remote deployment validation.
 - Human workflow realism, media quality, provenance and official platform acceptance remain separate reviews.
 
 Public source does not expose a deployed service or grant access to official runs. Do not publish generated state, private records, keys or production configuration.

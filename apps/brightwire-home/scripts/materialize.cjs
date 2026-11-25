@@ -5,7 +5,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const {spawnSync} = require('node:child_process');
+const {canvas, png, jpeg} = require('./raster.cjs');
 const time = require('../src/time.cjs');
 const {project} = require('../src/house.cjs');
 
@@ -420,7 +420,7 @@ function shell() {
     activity: [],
     firings: [],
     code_uses: [],
-    sun_table: sunTable({year: 2026, month: 9, day: 1}, 122),
+    sun_table: sunTable({year: 2025, month: 1, day: 1}, 731),
     counters: freshCounters(),
     available_snapshots: ['snap-nursery', 'snap-living', 'snap-hallway', 'snap-kitchen', 'snap-garage', 'snap-entry']
   };
@@ -488,6 +488,47 @@ function closedKwh(device) {
   }
   device.energy_kwh_closed = Math.round((wattHours / 1000) * 1000) / 1000;
 }
+
+function beforeDay(day, until) {
+  if (day.year !== until.year) return day.year < until.year;
+  if (day.month !== until.month) return day.month < until.month;
+  return day.day < until.day;
+}
+
+function fortnight(data, device, start, until, person) {
+  device.power = 'off';
+  let cursor = start;
+  while (beforeDay(cursor, until)) {
+    record(data, device, () => { device.power = 'on'; }, stamp(cursor.year, cursor.month, cursor.day, 18, 0), {
+      actor_kind: 'manual', actor_id: person, command: 'turn_on', summary: device.name + ' on'
+    });
+    record(data, device, () => { device.power = 'off'; }, stamp(cursor.year, cursor.month, cursor.day, 23, 0), {
+      actor_kind: 'manual', actor_id: person, command: 'turn_off', summary: device.name + ' off'
+    });
+    cursor = shift(cursor.year, cursor.month, cursor.day, 14);
+  }
+}
+
+function switchFortnight(data, device, start, until, person) {
+  device.power = 'off';
+  let cursor = start;
+  while (beforeDay(cursor, until)) {
+    const from = stamp(cursor.year, cursor.month, cursor.day, 8, 0);
+    const to = stamp(cursor.year, cursor.month, cursor.day, 16, 0);
+    record(data, device, () => {
+      device.power = 'on';
+      device.energy.push({from, to: null});
+    }, from, {actor_kind: 'manual', actor_id: person, command: 'turn_on', summary: device.name + ' on'});
+    record(data, device, () => {
+      device.power = 'off';
+      device.energy[device.energy.length - 1].to = to;
+    }, to, {actor_kind: 'manual', actor_id: person, command: 'turn_off', summary: device.name + ' off'});
+    cursor = shift(cursor.year, cursor.month, cursor.day, 14);
+  }
+  closedKwh(device);
+}
+
+const HISTORY_START = {year: 2025, month: 1, day: 1};
 
 function dailyLight(data, device, start, days, endPower, person, finalAt) {
   device.power = 'off';
@@ -589,6 +630,9 @@ function morales(options) {
   data.devices = [living, hallway, primary, nurseryBlind, livingBlind, thermo, nurseryThermo, heater, lock, garage, camera, speaker, contact];
   const start = {year: 2026, month: 10, day: 18};
   const lightsOn = options.evening ? stamp(2026, 11, 17, 18, 0) : stamp(2026, 11, 17, 8, 30);
+  fortnight(data, living, HISTORY_START, start, 'person-hana');
+  fortnight(data, hallway, HISTORY_START, start, 'person-luis');
+  fortnight(data, primary, HISTORY_START, start, 'person-hana');
   dailyLight(data, living, start, 30, 'on', 'person-hana', lightsOn);
   dailyLight(data, hallway, start, 30, 'on', 'person-luis', lightsOn);
   dailyLight(data, primary, start, 30, 'off', 'person-hana', lightsOn);
@@ -793,13 +837,13 @@ function ruth() {
   const hall = blank({device_id: 'light-mom-hall', room_id: 'hallway', type: 'light', name: 'Hall light', brightness: 40, color_temperature: 3000, power: 'off'});
   const thermo = blank({device_id: 'thermo-mom', room_id: 'living', type: 'thermostat', name: 'Thermostat', thermo_mode: 'heat', setpoint: 68, current_temperature: 68, owner_min: 66, owner_max: 74});
   const lock = blank({device_id: 'lock-mom-front', room_id: 'hallway', type: 'lock', name: 'Front door', lock: 'locked', auto_relock_minutes: 5});
-  const speaker = blank({device_id: 'speaker-mom', room_id: 'living', type: 'speaker', name: 'Living speaker', volume: 20});
   const contact = blank({device_id: 'contact-mom-front', room_id: 'hallway', type: 'contact', name: 'Front door sensor', sensor: 'closed'});
   const motion = blank({device_id: 'motion-mom-hall', room_id: 'hallway', type: 'motion', name: 'Hall motion', sensor: 'clear'});
   const leak = blank({device_id: 'leak-mom-kitchen', room_id: 'kitchen', type: 'leak', name: 'Kitchen leak sensor', sensor: 'dry'});
   const smoke = blank({device_id: 'smoke-mom-hall', room_id: 'hallway', type: 'smoke', name: 'Hall smoke sensor', sensor: 'clear'});
   const temperature = blank({device_id: 'temp-mom-living', room_id: 'living', type: 'temperature', name: 'Living temperature', sensor: 'reading', sensor_value: 21});
-  data.devices = [light, hall, thermo, lock, speaker, contact, motion, leak, smoke, temperature];
+  data.devices = [light, hall, thermo, lock, contact, motion, leak, smoke, temperature];
+  fortnight(data, light, HISTORY_START, {year: 2026, month: 9, day: 18}, 'person-ruth');
   dailyLight(data, light, {year: 2026, month: 9, day: 18}, 60, 'off', 'person-ruth', stamp(2026, 11, 17, 8, 0));
   data.routines = [{
     routine_id: 'rt-ruth-lights',
@@ -869,13 +913,16 @@ function chen() {
     return item;
   });
   const porch = data.devices.find(item => item.device_id === 'c-switch-porch');
+  switchFortnight(data, porch, HISTORY_START, {year: 2026, month: 10, day: 18}, 'person-c1');
   const from = stamp(2026, 11, 1, 8, 0);
   record(data, porch, () => {
     porch.power = 'on';
     porch.energy.push({from, to: null});
   }, from, {actor_kind: 'manual', actor_id: 'person-c1', command: 'turn_on', summary: 'Porch switch left on'});
   const living = data.devices.find(item => item.device_id === 'c-light-living');
+  fortnight(data, living, HISTORY_START, {year: 2026, month: 11, day: 2}, 'person-c1');
   dailyLight(data, living, {year: 2026, month: 11, day: 2}, 14, 'off', 'person-c1', stamp(2026, 11, 16, 8, 0));
+  const front = data.devices.find(item => item.device_id === 'c-lock-front');
   data.access_codes.push({
     code_id: 'code-weekday',
     name: 'Weekday cleaner',
@@ -887,8 +934,31 @@ function chen() {
     revoked: false,
     approval: 'approved',
     pending_confirmation_id: null,
-    created_at: stamp(2026, 11, 2, 10, 0)
+    created_at: stamp(2025, 1, 6, 8, 0)
   });
+  let monday = {year: 2025, month: 1, day: 6};
+  while (beforeDay(monday, {year: 2026, month: 11, day: 3})) {
+    const at = stamp(monday.year, monday.month, monday.day, 9, 30);
+    const locked = stamp(monday.year, monday.month, monday.day, 9, 40);
+    data.code_uses.push({
+      use_id: 'use-' + data.counters.code_use,
+      at,
+      lock_device_id: 'c-lock-front',
+      code_id: 'code-weekday',
+      holder_name: 'Weekday cleaner',
+      outcome: 'unlocked',
+      reason: null
+    });
+    data.counters.code_use += 1;
+    record(data, front, () => { front.lock = 'unlocked'; front.unlocked_at = at; }, at, {
+      actor_kind: 'guest_code', actor_id: 'code-weekday', cause: 'guest_code', command: 'unlock', summary: 'Weekday cleaner unlocked the front door'
+    });
+    record(data, front, () => { front.lock = 'locked'; front.unlocked_at = null; }, locked, {
+      actor_kind: 'manual', actor_id: 'person-c1', command: 'lock', summary: 'Front door locked after the cleaner'
+    });
+    const next = shift(monday.year, monday.month, monday.day, 28);
+    monday = next;
+  }
   return data;
 }
 
@@ -961,41 +1031,40 @@ const tools = [
   tool('alerts.snooze', 'Snooze an alert until a later virtual time.', false, {alert_id: id(), until: dt()}, ['alert_id', 'until'], {outcome: {type: 'string'}})
 ];
 
-function draw(file, spec) {
-  const probe = spawnSync('ffmpeg', ['-version'], {stdio: 'pipe'});
-  if (probe.error || probe.status !== 0) {
-    throw new Error('ffmpeg is not available. Install ffmpeg before regenerating Brightwire images.');
-  }
-  const font = '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf';
-  if (String(spec.filter || '').includes('drawtext') && !fs.existsSync(font)) {
-    throw new Error('Liberation Sans was not found at ' + font + '. Install that font before regenerating Brightwire images.');
-  }
-  fs.mkdirSync(path.dirname(file), {recursive: true});
-  const jpeg = file.endsWith('.jpg') || file.endsWith('.jpeg');
-  const args = ['-y'];
-  if (jpeg) args.push('-fflags', '+bitexact');
-  args.push('-f', 'lavfi', '-i', spec.input, '-vf', spec.filter, '-frames:v', '1');
-  if (jpeg) args.push('-map_metadata', '-1', '-flags:v', '+bitexact', '-update', '1');
-  args.push(file);
-  const result = spawnSync('ffmpeg', args, {stdio: 'pipe'});
-  if (result.error) throw new Error('ffmpeg failed to start: ' + result.error.message);
-  if (result.status !== 0) throw new Error(result.stderr ? result.stderr.toString() : 'ffmpeg exited without a status');
+function iconImage(label, color) {
+  const image = canvas(64, 64, 0xF4F1EA);
+  image.fillRect(6, 6, 52, 52, color);
+  image.text(label, 10, 22, 0xffffff, 2);
+  return png(image);
+}
+
+function planImage(label) {
+  const image = canvas(480, 280, 0xF7F4EE);
+  image.fillRect(20, 20, 200, 112, 0xD9E2EC);
+  image.fillRect(240, 20, 208, 112, 0xE7D8C9);
+  image.fillRect(20, 152, 432, 104, 0xD5E0D2);
+  image.text(label, 32, 176, 0x243038, 3);
+  return png(image);
+}
+
+function snapshotImage(label, color) {
+  const image = canvas(320, 176, color);
+  image.fillRect(24, 24, 120, 80, 0xffffff);
+  image.text(label, 160, 64, 0x243038, 3);
+  return jpeg(image);
 }
 
 function images() {
-  const font = '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf';
   const icons = [
-    ['living', 'Liv', '0x4A6FA5'], ['hallway', 'Hall', '0x5C6B73'], ['nursery', 'Nurs', '0xC47B7B'],
-    ['kitchen', 'Kit', '0xC4893A'], ['primary', 'Prim', '0x6B5B95'], ['garage', 'Gar', '0x6E7B5A'],
-    ['bedroom', 'Bed', '0x3E6B6B'], ['bath', 'Bath', '0x4F7C8A'], ['entry', 'Door', '0x8A5A44']
+    ['living', 'Liv', 0x4A6FA5], ['hallway', 'Hall', 0x5C6B73], ['nursery', 'Nurs', 0xC47B7B],
+    ['kitchen', 'Kit', 0xC4893A], ['primary', 'Prim', 0x6B5B95], ['garage', 'Gar', 0x6E7B5A],
+    ['bedroom', 'Bed', 0x3E6B6B], ['bath', 'Bath', 0x4F7C8A], ['entry', 'Door', 0x8A5A44]
   ];
   const made = [];
   for (const [name, label, color] of icons) {
     const file = path.join(root, 'assets/icons', name + '.png');
-    draw(file, {
-      input: 'color=c=0xF4F1EA:s=64x64',
-      filter: 'drawbox=x=6:y=6:w=52:h=52:color=' + color + ':t=fill,drawtext=fontfile=' + font + ':text=' + label + ':fontcolor=white:fontsize=12:x=(w-text_w)/2:y=(h-text_h)/2'
-    });
+    fs.mkdirSync(path.dirname(file), {recursive: true});
+    fs.writeFileSync(file, iconImage(label, color));
     made.push({asset_id: 'icon-' + name, role: 'ui.icon', file, mime: 'image/png', width: 64, height: 64, alt: name + ' room icon'});
   }
   const plans = [
@@ -1005,28 +1074,19 @@ function images() {
   ];
   for (const [name, label] of plans) {
     const file = path.join(root, 'assets/plans', name + '.png');
-    draw(file, {
-      input: 'color=c=0xF7F4EE:s=480x280',
-      filter: [
-        'drawbox=x=20:y=20:w=200:h=110:color=0xD9E2EC:t=fill',
-        'drawbox=x=240:y=20:w=210:h=110:color=0xE7D8C9:t=fill',
-        'drawbox=x=20:y=150:w=430:h=100:color=0xD5E0D2:t=fill',
-        'drawtext=fontfile=' + font + ':text=' + label.replace(' ', '\\ ') + ':fontcolor=0x243038:fontsize=28:x=30:y=180'
-      ].join(',')
-    });
+    fs.mkdirSync(path.dirname(file), {recursive: true});
+    fs.writeFileSync(file, planImage(label));
     made.push({asset_id: 'plan-' + name, role: 'ui.floor_plan', file, mime: 'image/png', width: 480, height: 280, alt: label + ' plan'});
   }
   const shots = [
-    ['nursery', 'Nursery', '0xE7C7C7'], ['living', 'Living', '0xC9D4E4'], ['hallway', 'Hallway', '0xD5D8DC'],
-    ['kitchen', 'Kitchen', '0xE6D3B3'], ['garage', 'Garage', '0xD5DCCB'], ['entry', 'Entry', '0xE4D0C4']
+    ['nursery', 'Nursery', 0xE7C7C7], ['living', 'Living', 0xC9D4E4], ['hallway', 'Hallway', 0xD5D8DC],
+    ['kitchen', 'Kitchen', 0xE6D3B3], ['garage', 'Garage', 0xD5DCCB], ['entry', 'Entry', 0xE4D0C4]
   ];
   for (const [name, label, color] of shots) {
     const file = path.join(root, 'assets/snapshots', name + '.jpg');
-    draw(file, {
-      input: 'color=c=' + color + ':s=320x180',
-      filter: 'drawbox=x=24:y=24:w=120:h=80:color=0xFFFFFF:t=fill,drawtext=fontfile=' + font + ':text=' + label + ':fontcolor=0x243038:fontsize=28:x=160:y=70'
-    });
-    made.push({asset_id: 'snap-' + name, role: 'ui.snapshot', file, mime: 'image/jpeg', width: 320, height: 180, alt: label + ' camera snapshot'});
+    fs.mkdirSync(path.dirname(file), {recursive: true});
+    fs.writeFileSync(file, snapshotImage(label, color));
+    made.push({asset_id: 'snap-' + name, role: 'ui.snapshot', file, mime: 'image/jpeg', width: 320, height: 176, alt: label + ' camera snapshot'});
   }
   return made;
 }
@@ -1102,4 +1162,4 @@ function main() {
 }
 
 if (require.main === module) main();
-module.exports = {draw};
+module.exports = {iconImage, planImage, snapshotImage, images};

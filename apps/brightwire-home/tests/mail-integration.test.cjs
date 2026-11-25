@@ -112,10 +112,18 @@ test('a committed Brightwire notice is delivered to Mail once, and a missing gra
     ]});
     clients.push(deniedRouter);
     await deniedRouter.initialize();
+    const inboxBefore = await mail.call('mail.search', {folder: 'inbox'});
     const denied = await publishPending({snapshot: {data: before, run_id: 'bw-mail-denied'}, router: deniedRouter});
     assert.equal(denied.stopped, true);
     assert.equal(denied.results[0].receipt.code, 'recipient_not_authorized');
     assert.deepEqual(created.state.data.devices, before.devices);
+    const inboxAfter = await mail.call('mail.search', {folder: 'inbox'});
+    assert.equal(inboxAfter.messages.length, inboxBefore.messages.length);
+    const deniedMail = new Client('mail', 'infra', 'bw-mail-denied', dir, 'bw-mail-denied-reader', {registry: path.join(root, 'examples/registry.mail.json')});
+    clients.push(deniedMail);
+    await deniedMail.initialize();
+    const deniedSnapshot = await deniedMail.call('env.snapshot');
+    assert.equal(deniedSnapshot.snapshot.data.messages.some(message => /Brightwire/.test(message.subject || '')), false);
     let publishes = 0;
     const dropping = {
       async call(name, args) {

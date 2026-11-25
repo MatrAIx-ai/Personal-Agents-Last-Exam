@@ -151,7 +151,7 @@ Owner notices start as `pending_delivery`. `src/publisher.cjs` `publishPending({
 | Faults, quiet hours, door left open, energy, codes | the tests with those names in `tests/business.test.cjs` |
 | Mail commit, duplicate, missing grant | `tests/mail-integration.test.cjs` |
 | Task 73 evidence and the disabled morning routine | `task 73 grades calls by actor and ignores the disabled morning routine` |
-| Seed history on or after 2026-01-01 | `every fixture history instant is on or after 2026-01-01 and not after its cursor` |
+| Seed history from 2025-01-01, with the task cursor on or after 2026-01-01 | `fixture history starts on 2025-01-01 and the task cursor is on or after 2026-01-01` |
 
 ## Limits
 

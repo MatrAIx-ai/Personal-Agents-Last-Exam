@@ -585,6 +585,12 @@ function runAction(ctx, data, action, meta) {
     const scope = className ? effectiveScope(data, className) : 'none';
     if (scope === 'none' || scope === 'view') return {device_id: device.device_id, command: action.command, outcome: 'scope_insufficient'};
     if (scope === 'confirm') {
+      try {
+        assertApplicable(device, action.command, action.args || {}, meta.at || stamp(ctx));
+      } catch (error) {
+        if (!error.code) throw error;
+        return {device_id: device.device_id, command: action.command, outcome: error.code};
+      }
       const confirmation = openConfirmation(ctx, data, {
         target: {kind: 'device', id: device.device_id},
         stored: {kind: 'device_command', device_id: device.device_id, command: action.command, args: action.args || {}},
@@ -911,10 +917,24 @@ function applyDue(ctx, data, effect, nowMs, pending, fromMs) {
   }
 }
 
-function scopeOrConfirm(ctx, data, className, stored, target, summary) {
+function assertApplicable(device, command, args, at) {
+  const trial = structuredClone(device);
+  applyCommand({announcements: []}, trial, command, args || {}, at);
+}
+
+function assertShare(device, recipient, duration) {
+  if (device.type !== 'camera') fail('unsupported_command', 'Only a camera can be shared.');
+  operable(device, 'share');
+  if (device.privacy !== 'privacy_off') fail('unsupported_command', 'The camera is in privacy mode.');
+  if (typeof recipient !== 'string' || !recipient.includes('@') || recipient.length > 200) fail('invalid_arguments', 'The recipient must be an address.');
+  if (!Number.isInteger(duration) || duration < 1 || duration > 1440) fail('value_out_of_range', 'Share duration must be 1 to 1440 minutes.');
+}
+
+function scopeOrConfirm(ctx, data, className, stored, target, summary, validate) {
   const scope = effectiveScope(data, className);
   if (scope === 'none' || scope === 'view') fail('scope_insufficient', 'The assistant scope for ' + className + ' does not allow this.');
   if (scope === 'confirm') {
+    if (validate) validate();
     const confirmation = openConfirmation(ctx, data, {target, stored, summary});
     return {outcome: 'confirmation_required', confirmation_id: confirmation.confirmation_id};
   }
@@ -1055,6 +1075,24 @@ function createCode(ctx, data, fields) {
 }
 
 function executeStored(ctx, data, confirmation) {
+  try {
+    applyStored(ctx, data, confirmation);
+  } catch (error) {
+    if (!error.code) throw error;
+    activity(ctx, data, {
+      actor_kind: 'assistant',
+      actor_id: 'assistant',
+      cause: 'confirmation',
+      event_id: ctx.event_id || null,
+      request_id: ctx.request_id || null,
+      device_id: confirmation.stored && confirmation.stored.device_id || null,
+      command: 'confirmation_failed',
+      summary: error.code
+    });
+  }
+}
+
+function applyStored(ctx, data, confirmation) {
   const stored = confirmation.stored;
   ctx.cause = 'confirmation';
   ctx.request_id = ctx.request_id || null;
@@ -1119,11 +1157,7 @@ function executeStored(ctx, data, confirmation) {
 }
 
 function startShare(ctx, data, device, recipient, duration) {
-  if (device.type !== 'camera') fail('unsupported_command', 'Only a camera can be shared.');
-  operable(device, 'share');
-  if (device.privacy !== 'privacy_off') fail('unsupported_command', 'The camera is in privacy mode.');
-  if (typeof recipient !== 'string' || !recipient.includes('@') || recipient.length > 200) fail('invalid_arguments', 'The recipient must be an address.');
-  if (!Number.isInteger(duration) || duration < 1 || duration > 1440) fail('value_out_of_range', 'Share duration must be 1 to 1440 minutes.');
+  assertShare(device, recipient, duration);
   const session = {
     session_id: nextId(data, 'session', 'cs'),
     device_id: device.device_id,
@@ -1449,7 +1483,7 @@ function writes(ctx, data, name, args) {
     if (!className) fail('unsupported_command', 'Sensors change through events.');
     const held = scopeOrConfirm(ctx, data, className, {
       kind: 'device_command', device_id: device.device_id, command: args.command, args: args.args || {}
-    }, {kind: 'device', id: device.device_id}, args.command + ' ' + device.name);
+    }, {kind: 'device', id: device.device_id}, args.command + ' ' + device.name, () => assertApplicable(device, args.command, args.args || {}, stamp(ctx)));
     if (held) return held;
     const change = applyDirect(ctx, data, device, args.command, args.args || {}, {
       actor_kind: 'assistant', actor_id: 'assistant', cause: 'direct_command', request_id: args.request_id, summary: args.command + ' ' + device.name
@@ -1460,7 +1494,7 @@ function writes(ctx, data, name, args) {
     const device = requireDevice(data, args.device_id);
     const held = scopeOrConfirm(ctx, data, 'camera', {
       kind: 'camera_share', device_id: device.device_id, recipient: args.recipient, duration_minutes: args.duration_minutes
-    }, {kind: 'device', id: device.device_id}, 'Share ' + device.name);
+    }, {kind: 'device', id: device.device_id}, 'Share ' + device.name, () => assertShare(device, args.recipient, args.duration_minutes));
     if (held) return held;
     const session = startShare(ctx, data, device, args.recipient, args.duration_minutes);
     return {outcome: 'applied', session_id: session.session_id, device_id: device.device_id};

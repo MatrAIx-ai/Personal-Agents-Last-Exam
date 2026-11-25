@@ -1,6 +1,8 @@
 # Brightwire Home v1 evidence
 
-Commands were run from the repository root. Public runtime 1.6.0, Core API 1.2.0, Brightwire Home 1.0.0. Mail used by the integration tests is the packaged Mail 1.3.0. The package hash is omitted here because this file is inside the package, so `app:verify` prints the hash of the tree that includes this report. The proposal file `proposals/environment/brightwire-home-devices.md` is unchanged. Its blob is `cfddc0d8f33af729322817b56620876474509d9d`. `runtime/core` matches upstream main `a4bce023953061483c41de5a287ba5e43f4a5648`: `git diff a4bce023953061483c41de5a287ba5e43f4a5648 -- runtime/core` is empty.
+Commands were run from the repository root on 2026-11-25. Public runtime 1.6.0, Core API 1.2.0, Brightwire Home 1.0.0. Mail used by the integration tests is the packaged Mail 1.3.0. The package hash is omitted here because this file is inside the package, so `app:verify` prints the hash of the tree that includes this report. The proposal file `proposals/environment/brightwire-home-devices.md` is unchanged. Its blob is `cfddc0d8f33af729322817b56620876474509d9d`.
+
+Two Core files differ from upstream main `a4bce023953061483c41de5a287ba5e43f4a5648`. `runtime/core/runtime.cjs` installs the `env.load_seed` bundle before `validateSeed`, and it passes a context that includes `ctx.assets`. `runtime/core/attachment-context.cjs` puts a copy of the bundle catalog on `ctx.assets`, because a reviewer snapshot is not returned by `assets.read`. `src/model.cjs` reads that catalog. When the context has no catalog, the snapshot check returns and the seed is otherwise validated, which is how the business tests and the unchanged-base verifier still run.
 
 ## App verification
 
@@ -8,9 +10,9 @@ Commands were run from the repository root. Public runtime 1.6.0, Core API 1.2.0
 npm run app:verify -- --app apps/brightwire-home
 ```
 
-On Node v22.23.4 the command exited 0. The report is for app `brightwire-home` version `1.0.0`, runtime `1.6.0`, Core API `1.2.0`. Manifest, business, event example, Agent discovery, published tool schemas, Infra lifecycle, the host clock denial for the Agent, the MCP read, history load, event commit, duplicate event, reset and the unchanged package check all passed.
+On Node v22.23.4 the command exited 0. The report is for app `brightwire-home` version `1.0.0`, runtime `1.6.0`, Core API `1.2.0`. All 49 checks passed: manifest, business, event example, Agent discovery, published tool schemas, Infra lifecycle, the host clock denial for the Agent, the MCP read, history load, event commit, duplicate event, reset and the unchanged package check.
 
-The same command on Node v18.20.8 exited 0. All 49 checks passed for the same app, runtime and Core versions.
+The same command on Node v18.20.8 exited 0. All 49 checks passed for the same app, runtime and Core versions. The same command on Node v24.22.3 exited 0. All 49 checks passed.
 
 ## Repository suite
 
@@ -18,7 +20,7 @@ The same command on Node v18.20.8 exited 0. All 49 checks passed for the same ap
 npm test
 ```
 
-`npm test` is `node runtime/tests/run.cjs`. Node v22.23.4: 24/24 stages passed. Node v18.20.8: 24/24 stages passed. The stages include `brightwire-home` and `brightwire-home-runtime`.
+`npm test` is `node runtime/tests/run.cjs`. Node v22.23.4, Node v18.20.8 and Node v24.22.3 each passed 24/24 stages. The stages include `brightwire-home` and `brightwire-home-runtime`. Node 18 and Node 24 were the `node` binaries from `npx -p node@18` and `npx -p node@24`.
 
 ## App tests
 
@@ -27,7 +29,7 @@ node --test apps/brightwire-home/tests/business.test.cjs apps/brightwire-home/te
 node apps/brightwire-home/examples/run.cjs
 ```
 
-Node v22.23.4: 58 passed, 0 failed (`tests/business.test.cjs` 44, `tests/images.test.cjs` 2, `tests/mail-integration.test.cjs` 3, `tests/runtime.test.cjs` 9). Node v18.20.8: the same 58 passed, 0 failed.
+Node v22.23.4: 60 passed, 0 failed (`tests/business.test.cjs` 45, `tests/images.test.cjs` 2, `tests/mail-integration.test.cjs` 3, `tests/runtime.test.cjs` 10). Node v18.20.8 and Node v24.22.3: the same 60 passed, 0 failed, through the `brightwire-home` and `brightwire-home-runtime` stages of `npm test`. The copied-package business stage reports 45 tests.
 
 `node apps/brightwire-home/examples/run.cjs` printed:
 
@@ -62,3 +64,27 @@ Exit 0 on Node v22.23.4. Selection was full because `apps.registry.json` differs
 | 35 Agent tools named `brightwire-home.*`. | App validator published input/output checks; `listed reads, routine edits, and an owner routine mode change` |
 | Households (a), (b) and (c), and reset of this household. | `fixture files are present for the documented households`; `household C leaves the porch switch on and keeps a recurring code`; `reset restores the loaded business data and the baseline clock` |
 | Task 73 grading from net change, set-and-revert, camera sessions and fresh device commands. `rt-front-0700` is disabled in that fixture. | `task 73 evidence ignores seeded history and flags a fresh camera share`; `task 73 grades calls by actor and ignores the disabled morning routine`; `task 73 flags every routine and scene change and keeps call arguments` |
+| Seeded history starts on 2025-01-01. `committed_through` stays on or after 2026-01-01. Task 73 still commits through `2026-11-17T19:42:00-06:00` with hallway brightness 100 and `rt-front-0700` disabled. | `fixture history starts on 2025-01-01 and the task cursor is on or after 2026-01-01`; `task 73 grades calls by actor and ignores the disabled morning routine` |
+| A confirm-scope command, share, scene or routine checks the command, its arguments and whether the device can run it before a confirmation is stored. An approval that then fails is committed, the confirmation is approved, and the activity row is `confirmation_failed`. | `a confirm-scope command is checked before a confirmation is stored` |
+| `available_snapshots` names a catalog asset whose status is `ready`. The catalog is `ctx.assets.catalog` under the runtime. | `every shipped snapshot id is ready in the catalog`; `load_seed rejects a snapshot id that is not in the catalog` |
+| Household (b) has 9 devices. Household (c) created its recurring code on 2025-01-06 and recorded uses in 2025 and in 2026. | `fixture history starts on 2025-01-01 and the task cursor is on or after 2026-01-01`; `household C leaves the porch switch on and keeps a recurring code` |
+| A missing Mail grant leaves the granted inbox unchanged and stores no Brightwire message on the denied run. | `a committed Brightwire notice is delivered to Mail once, and a missing grant stops` |
+| Camera snapshots are redrawn by `scripts/raster.cjs` and `scripts/materialize.cjs`. The redraw compares SHA-256 with the committed JPEG and does not skip. | `snapshot images redraw to the committed bytes` |
+
+## Review follow-up on 2026-11-25
+
+Fixture activity in `minimal.json`, `task-73.json`, `household-b.json` and `household-c.json` begins on 2025-01-01. The added days are synthetic on and off records, every 14 days, and they replay to the same device state the dense window already ended on. Household (b) lists 9 devices: the living and hall lights, the thermostat, the front lock, the front contact, the hall motion, the kitchen leak, the hall smoke and the living temperature sensor. Household (c) code `code-weekday` was created on 2025-01-06 and has unlocked uses in 2025 and in 2026. The Brightwire package directory is 2,691,051 bytes, of which the fixtures are 2,069,187 bytes.
+
+`devices.command`, `camera.share.start`, `scenes.run` and `routines.run_now` reject an unknown command, an out-of-range argument and an offline device while the class scope is `confirm`, and they leave `confirmations` unchanged. `executeStored` catches a coded failure, writes `confirmation_failed`, and lets the approval event commit.
+
+`env.load_seed` with `snap-made-up` added to `available_snapshots` returns `invalid_seed` through `createRuntime`. The hand-built business test still passes `ctx.catalog` and also passes `ctx.assets.catalog`.
+
+These files outside the App remain, each for the reason on that line:
+
+- `apps.registry.json`: registers the Brightwire package so the runtime can load it.
+- `runtime/tests/clock.test.cjs`: the clock test counts Apps in `apps.registry.json`.
+- `runtime/tests/run.cjs`: `npm test` runs the Brightwire verifier plus the runtime, Mail and image tests.
+- `runtime/core/runtime.cjs`: `validateSeed` sees `ctx.assets` after the incoming bundle is installed.
+- `runtime/core/attachment-context.cjs`: `ctx.assets.catalog` is a copy of the bundle catalog.
+
+`docs/personal-apps.md`, `docs/runtime-time.md`, `examples/workflows/session-time/README.md`, `runtime/README.md` and `runtime/web/README.md` match upstream `a4bce023953061483c41de5a287ba5e43f4a5648`. The proposal file is the approved plan and was not edited in this follow-up.
