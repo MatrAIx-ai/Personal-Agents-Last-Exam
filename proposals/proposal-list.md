@@ -8,12 +8,12 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**188 open non-draft proposals · 0 awaiting initial review · 6 drafts.**
+**189 open non-draft proposals · 0 awaiting initial review · 6 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
 | Environment | [skyve2012](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Askyve2012) | 6 |
-| Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 3 |
+| Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 4 |
 | Environment | [Chenngzz](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AChenngzz) | 3 |
 | Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 1 |
 | Task | [Yeechin-is-here](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AYeechin-is-here) | 16 |
@@ -25,10 +25,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🏗️ Environment Track
 
-**105 proposals.**
+**106 proposals.**
 
 | Submitted (UTC) | PR / app or website | Primary domain | Scope and app connections | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-25 02:34:03 | [#243](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/243) · Tarnloop, an independently branded synthetic training log seen from one athlete's account (activities that a watch…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/243/files) | Fitness &amp; wellbeing<br>Also: Social &amp; communities | Tarnloop is a resettable training log for one athlete. Its defining rule is that an activity is a record of where a person was, when, with whom and how their body performed, and that it arrives without the person acting: the watch uploads… | Design review | Review requested<br>@Jasonya |  | [smsnobin77](https://github.com/smsnobin77) |  |
 | 2026-11-24 23:05:00 | [#242](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/242) · Google Account Security and Gmail forwarding settings; workflow references only, not runtime dependencies or copied…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/242/files) | Work &amp; business | Build Gatehouse, a standalone synthetic business-account security center with an Agent-facing MCP interface and a Web interface over the same state. Reusable workflows include reviewing sign-in activity, inspecting and selectively revoking… | Draft | Awaiting review |  | [XinyiXiang](https://github.com/XinyiXiang) |  |
 | 2026-11-24 22:02:23 | [#240](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/240) · Synthetic visual catalog and moodboards inspired by Pinterest and IKEA Kreativ.<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/240/files) | Shopping &amp; groceries<br>Also: Home &amp; utilities | LookBoard searches a synthetic catalog using dimensions, care, material and price constraints. Agents inspect product and swatch PNGs as MCP resources before recommending or pinning items. Private and shared boards retain budgets… | Draft | Awaiting review |  | [Aria068](https://github.com/Aria068) |  |
 | 2026-11-24 22:02:19 | [#239](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/239) · Synthetic creator workspace inspired by YouTube Studio and Frame.io.<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/239/files) | Media &amp; entertainment<br>Also: Work &amp; business | CutRoom models a creator's workflow from rough cut to release: search B-roll, transcripts and licensed music, inspect thumbnails and storyboard PNGs as MCP resources, resolve timestamped notes, verify music and guest clearance, and… | Design review | Review requested<br>@Chenngzz |  | [Aria068](https://github.com/Aria068) |  |
