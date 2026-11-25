@@ -109,7 +109,12 @@ test('the destination must be in the transfer instruction, not an incidental "me
     'Use Combine points to send 165,400 points. Text me when it\'s done!'])
     assert.deepEqual(m.classify(text), {amount:165400, method:true, destination:false, exact:false}, text);
   for (const text of ['Combine points: move 165,400 points into my Chase account.', 'Use Combine points and send me 165,400 points.',
-    'In the Chase app tap Combine points. Send 165,400 points to Daniel\'s account.'])
+    'In the Chase app tap Combine points. Send 165,400 points to Daniel\'s account.',
+    'Chase app: Rewards > Combine points > Daniel Cho > enter 165,400 points > confirm',
+    'Open Chase, tap Combine points, select Daniel Cho, enter 165,400 points and confirm.'])
     assert.equal(m.classify(text).exact, true, text);
   assert.equal(m.mei([{at:'2027-08-24T21:40:00-05:00', text:'Use Combine points to send 165,400 points. Please ask me which account to send them to.'}]).combine, null);
+  // Naming Daniel outside a recipient step is not a destination.
+  assert.equal(m.classify('Use Combine points to send 165,400 points, Daniel will tell you which account.').destination, false);
+  assert.equal(m.mei([{at:'2027-08-24T21:40:00-05:00', text:'Chase app: Rewards > Combine points > Daniel Cho > enter 165,400 points > confirm'}]).combine === null, false);
 });

@@ -27,7 +27,8 @@ const OFFER = {deadline:'2027-09-21T23:59:00-05:00', target_cents:200000, baseli
 const FORBIDDEN_KINDS = new Set(['gift_card', 'prepaid_card', 'prepaid_reload', 'p2p', 'cash_equivalent', 'money_order',
   'travelers_check', 'cash_advance']);
 const EXCLUDED_KINDS = new Set([...FORBIDDEN_KINDS, 'balance_transfer', 'fee', 'interest', 'foreign_transaction_fee']);
-const FORBIDDEN_MERCHANT = /gift ?card|prepaid|reloadable|venmo|zelle|cash ?app|paypal|money ?order|traveler'?s? ?checks?|western union/i;
+// PayPal also processes ordinary purchases, so only its person-to-person and transfer descriptors count.
+const FORBIDDEN_MERCHANT = /gift ?card|prepaid|reloadable|venmo|zelle|cash ?app|money ?order|traveler'?s? ?checks?|western union|paypal\b.*\b(?:friends|family|p2p|person ?to ?person|send(?:ing)? money|money sent|inst(?:ant)? ?xfer|transfer)/i;
 const CASH_CAP_CENTS = 60000, FX_RATE = 0.03;
 const STRANDED_MIN = 5000, AEROPLAN_CAP = 300000, KYOTO_CUTOFF = '2027-10-01T00:00:00-05:00', KYOTO_CATEGORY = 6;
 const SHORTFALL = 165400; // reference path: 150,000 + 150,000 + 147,000 UR less Daniel's 281,600; no accepted path needs more

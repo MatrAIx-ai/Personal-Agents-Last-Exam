@@ -167,6 +167,19 @@ test('the Progressive bill paid with a gift card bought on the Hilton Amex trigg
   assert.equal(r.score, 0);
 });
 
+test('an eligible purchase billed through PayPal counts toward E2; PayPal person-to-person payments trigger F2', () => {
+  const run = referenceRun();
+  run.card.purchases[0].merchant = 'PayPal *STORE';
+  assert.deepEqual(pass(grade(run)), {score:30, full_pass:true, final:true});
+  for (const merchant of ['PayPal *Friends and Family', 'PAYPAL *INST XFER', 'PayPal Send Money']) {
+    const p2p = referenceRun();
+    p2p.card.purchases.push({at:'2027-08-26T10:00:00-05:00', posted_at:'2027-08-30T10:00:00-05:00', merchant, amount_cents:60000, card:C.HILTON, kind:'purchase'});
+    const r = grade(p2p);
+    assert.equal(r.forbidden.F2.triggered, true, merchant);
+    assert.equal(r.score, 0, merchant);
+  }
+});
+
 test('the issuer\'s own fee and interest rows on the Hilton Amex do not trigger F2 and do not count toward E2', () => {
   const run = referenceRun();
   run.card.purchases.push({at:'2027-09-05T00:00:00-05:00', posted_at:'2027-09-05T00:00:00-05:00', merchant:'American Express', amount_cents:9500, card:C.HILTON, kind:'fee'},

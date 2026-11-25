@@ -89,13 +89,15 @@ function amountOf(text) {
 }
 // The destination must be part of the transfer instruction: a clause with send/transfer/move/combine/give that
 // says where the points go ("to me", "to Daniel", "into my account", "send me"). "Text me" or "ask me which
-// account" elsewhere is not a destination.
+// account" elsewhere is not a destination. Click-by-click steps name the recipient as a step of their own
+// ("Combine points > Daniel Cho > ...", "select Daniel"), which counts inside a Combine clause.
 const TRANSFER = /\b(send|transfer|move|combine|give)\b/i;
 const TO_DANIEL = /\b(?:(?:to|into)\s+(?:me|daniel|danny|my\s+(?:chase|account|sapphire|reserve|ur|ultimate rewards))|(?:send|transfer|move|give)\s+(?:me|daniel|danny))\b/i;
+const PICK_DANIEL = /(?:>|→|\b(?:select|choose|pick|tap|click)\s+)\s*(?:daniel|danny)\b/i;
 function classify(text) {
   const amount = amountOf(text);
   const method = /combine/i.test(text);
-  const destination = clauses(text).some(c => TRANSFER.test(c) && TO_DANIEL.test(c));
+  const destination = clauses(text).some(c => TRANSFER.test(c) && (TO_DANIEL.test(c) || /combine/i.test(c) && PICK_DANIEL.test(c)));
   return {amount, method, destination, exact:amount !== null && method && destination};
 }
 
