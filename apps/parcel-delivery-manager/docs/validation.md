@@ -11,12 +11,12 @@ All checks below used synthetic data, temporary state directories and local stdi
 | Approved scope | The whole proposal [`proposals/environment/parcel-delivery-management.md`](../../../proposals/environment/parcel-delivery-management.md) at commit `4e27c750d8658e06863d9724b236b2b2314c0363`, approved by @Chenngzz with `/approve-plan` on 2026-11-23T23:09:02Z (PR MatrAIx-ai/Personal-Agents-Last-Exam#101). The proposal file is unchanged since approval. |
 | v1 deadline | 2026-12-07T23:09:02Z |
 | Package | `apps/parcel-delivery-manager/`, App version 0.1.0 |
-| Evidence baseline | Commit `b21387b6296eb43ce7b12911e3a88532e21d5d6e`, package sha256 `eebd902a946092f76146989304ff64b9106013dd76a7fb0fbdc718333390d81c` |
+| Evidence baseline | Commit `2dc8aed17c307bdbe158138d9c74e34ec3d11041`, package sha256 `2e416fc7f7d333e977e180f0cad799eeaca265e81fcafeee5e5dfa056cfb6b07` |
 | Runtime | Public runtime 1.6.0, Core API 1.2.0, contribution revision 0.4.0. The branch includes upstream `main` at `a4bce02`; `runtime/` is identical to it. |
 | Environment | Linux x86_64 container. Node.js v22.23.5 and v18.20.8. Browser acceptance: Chromium 158.0.8127.36 with Playwright 1.63.0 on Node 22. |
 | Date of the runs | 2026-11-25 (UTC) |
 
-This report and the JSON reports in [`validation/`](validation/) were updated in the commit after the baseline. That commit changes only files under `docs/`. The package hash covers every file in the package, so it differs at the submitted commit; `git diff --stat b21387b..HEAD -- apps/parcel-delivery-manager` shows the difference is documentation only.
+This report and the JSON reports in [`validation/`](validation/) were updated in the commit after the baseline. That commit changes only files under `docs/`. The package hash covers every file in the package, so it differs at the submitted commit; `git diff --stat 2dc8aed..HEAD -- apps/parcel-delivery-manager` shows the difference is documentation only.
 
 **Delivered in v1.** Sixteen Agent MCP tools and ten trusted `carrier.*` events for the four workflows W1–W4; a business Web App with the six planned views on the shared Web Host; the data catalog (24 parcels in eight seeds, six identities, nine verified addresses, six pickup points, six policy profiles); reset and replay; tests and the reports here. The tools and events are listed in the package [README](../README.md).
 
@@ -24,16 +24,17 @@ This report and the JSON reports in [`validation/`](validation/) were updated in
 
 | Evidence | Result | What was exercised |
 | --- | --- | --- |
-| App-only business tests | **Passed**, 80 of 80, on Node 22 and Node 18 | The real plugin hooks with schema checks on every call: W1–W4 success and refusal paths, time boundaries, role boundaries, the data catalog, diagnostics, corner cases, 51 incoherent-seed rules and a short random walk |
-| Deeper random search | **Passed**, 72,000 steps | `FUZZ_RUNS=30 FUZZ_STEPS=300`: from each of the eight seeds, 30 walks of 300 random operations and events with invariants checked after every step. 11,179 events and 3,502 Agent writes were committed and 39,124 steps were refused. No unexpected failure and no invariant broken. |
-| Coverage of the business code | Lines 100% except one defensive line; branches 95.6% to 100% per module | Measured with `node --test --experimental-test-coverage` on Node 22 |
+| App-only business tests | **Passed**, 94 of 94, on Node 22 and Node 18 | The real plugin hooks with schema checks on every call: W1–W4 success and refusal paths, time and window boundaries, role boundaries, the data catalog, diagnostics, corner cases, 63 incoherent-seed rules and a short random walk |
+| Deeper random search | **Passed**, 72,000 steps | `FUZZ_RUNS=30 FUZZ_STEPS=300`: from each of the eight seeds, 30 walks of 300 random operations and events with invariants checked after every step. 11,179 events and 3,502 Agent writes were committed and 39,124 steps were refused. No unexpected failure and no invariant broken. Run at `b21387b`; `src/` is unchanged since. |
+| Mutation analysis | 589 of 599 changes noticed (98.3%) | `npm run test:mutation` changes the business code in 604 single places (5 do not parse) and runs the App-only tests against each. The ten changes the tests do not notice are checks that another rule already guarantees; they are listed in section 5. |
+| Coverage of the business code | Lines 100%; branches 95.6% to 100% per module | Measured with `node --test --experimental-test-coverage` on Node 22 |
 | Public verifier (`app:verify`) | **Passed**, 46 checks, on Node 22 and Node 18, same package hash | An isolated copy of the package with real Core and separate Agent and Infra MCP processes: discovery, argument and role restrictions, read, history load, event apply and retry, reset, separate run, restart |
 | Unmodified upstream validator | **Passed**, 46 checks, same package hash | `runtime/ci/verify-submissions.cjs` from a separate checkout of upstream `main` (`a4bce02`), run against this branch. It selected only this App. This is what the `base-runtime-compatibility` job does. |
 | Real-MCP workflow check | **Passed**, 105 checks, on Node 22 and Node 18 | W1–W4 through real Core: permissions, retries, stale versions, clock-only advance, separate runs per person, reset from history, concurrent collectors, every catalog seed, host diagnostics |
-| Browser acceptance | **Passed**, 67 checks, Node 22 | The real page in Chromium on the shared Web Host, with independent Agent and Infra MCP inspection: recipient, read-only profile, collector, failure-to-return and catalog-seed runs |
+| Browser acceptance | **Passed**, 76 checks, Node 22 | The real page in Chromium on the shared Web Host, with independent Agent and Infra MCP inspection: recipient, pickup, failure-and-return, read-only profile, collector and catalog-seed runs. Each workflow's requests are made through the page. |
 | Repository reference suite (`npm test`) | **Passed**, 22 of 22 stages | Confirms the existing reference Apps and runtime are unaffected by this package |
 | Shared contract copies (`contracts:check`) | **Passed** | Schema copies and derived declarations match the runtime sources |
-| Upstream CI | See the PR checks for the submitted commit | At the earlier commit `669cedf` the "App runtime validation" workflow concluded Success (run 45485854184). Its `business-web` job tests only the seven reference Apps, so the browser acceptance above is author-run. |
+| Upstream CI | See the PR checks for the submitted commit | At the earlier commit `c8b4353` the "App runtime validation" workflow concluded Success (run 45516090987). Its `business-web` job tests only the seven reference Apps, so the browser acceptance above is author-run. |
 | Agent trials | **Not run** | See section 8 |
 | Independent reproduction | **Not run** | See section 8 |
 | Human review | **Pending** | Realism, usability and provenance are for reviewers |
@@ -46,11 +47,12 @@ From a clean checkout of the submitted commit. Node.js 18 or newer; no install i
 
 ```sh
 # App-only (no runtime needed); from apps/parcel-delivery-manager
-npm test                 # 80 tests
+npm test                 # 94 tests
 npm run example
 npm run check:schemas    # generated tool and event contracts match their source
 npm run check:fixtures   # catalog files match the generator
 FUZZ_RUNS=30 FUZZ_STEPS=300 node --test tests/fuzz.test.cjs   # optional: the deeper random search, about five minutes
+npm run test:mutation    # optional: the mutation analysis, about four minutes
 
 # From the repository root: real host
 npm run contracts:check
@@ -62,7 +64,7 @@ node runtime/ci/verify-submissions.cjs /path/to/this/checkout /path/to/reports <
 
 # Browser acceptance (Node 20+, which Playwright requires)
 npm ci && npx playwright install chromium
-node apps/parcel-delivery-manager/tests/web/acceptance.cjs .artifacts/parcel-web                            # 67 checks, report.json and screenshots
+node apps/parcel-delivery-manager/tests/web/acceptance.cjs .artifacts/parcel-web                            # 76 checks, report.json and screenshots
 
 # Look at it
 node apps/parcel-delivery-manager/scripts/load-seed.cjs 08-expiry-return --run demo
@@ -104,7 +106,7 @@ Names in quotation marks are test titles in `tests/*.test.cjs` (App), check name
 
 | Start, then action | Observed | Control | Evidence |
 | --- | --- | --- | --- |
-| Redirect S001 to a counter; carrier applies; arrival event | An applied redirect leaves the parcel in transit with no pass. Arrival starts pickup epoch 1, sets the deadline to arrival plus the policy window and issues the recipient's pass. | Arrival at another point, for an old plan or repeated is rejected; the deadline is not extended. | App "W2 redirect: an applied redirect is not readiness; arrival starts the deadline once"; MCP "Deadline is the arrival time plus the policy window", "A repeated arrival, with either epoch, is rejected" |
+| Redirect S001 to a counter; carrier applies; arrival event | An applied redirect leaves the parcel in transit with no pass. Arrival starts pickup epoch 1, sets the deadline to arrival plus the policy window and issues the recipient's pass. | Arrival at another point, for an old plan or repeated is rejected; the deadline is not extended. | App "W2 redirect: an applied redirect is not readiness; arrival starts the deadline once"; MCP "Deadline is the arrival time plus the policy window", "A repeated arrival, with either epoch, is rejected"; Web "Redirect sent from the browser is pending in the App", "An applied redirect shows the new plan and no pass before the parcel arrives", "Arrival shows the pass and the deadline, the same as MCP", "The handoff is shown with who collected and where" |
 | Handoff at the point | The first valid handoff closes the parcel and consumes the pass | Wrong code, person, point or epoch, a closed hour and the deadline instant are each refused and consume nothing | App "W2 collection needs the right pass, person, point, arrival and opening hours", "W2 collection exactly at the deadline fails; one second earlier succeeds"; MCP "Collection exactly at the deadline fails" |
 | The point closes, then reopens | Collection is refused while closed; the deadline does not move; the recipient is notified | The carrier cannot apply a redirect to a point that closed after the request | App "W2 a closed point cannot hand over parcels and does not extend the deadline", "W2 the carrier cannot apply a redirect to a point that closed after the request" |
 | The carrier moves a ready parcel to another point | The old pass is invalid at once. Nothing can be collected until arrival at the new point, which starts epoch 2 with a new pass and deadline. | The old code and the old epoch fail at the new point | App "W2 relocation: the old pass dies at once and the new one needs arrival at the new point" |
@@ -124,7 +126,7 @@ Names in quotation marks are test titles in `tests/*.test.cjs` (App), check name
 | Start, then action | Observed | Control | Evidence |
 | --- | --- | --- | --- |
 | A delivery fails | The reason, the action deadline and the available options are shown | A `delivered` event is rejected while the failure is open | App "W4 a failed delivery shows its reason, deadline and next actions"; Web "Failed delivery shows its reason, the action deadline and the recovery options" |
-| Recover by redelivery, by redirect and a collector, or by a hold | Each path completes through W1, W2 and W3 to `delivered` or `collected`; the failure stays in the timeline | The old failure deadline cannot return a recovered parcel | App "W4 recovery by redelivery completes through W1", "W4 recovery by pickup redirect completes through W2 and W3", "W4 recovery by hold completes after the hold ends" |
+| Recover by redelivery, by redirect and a collector, or by a hold | Each path completes through W1, W2 and W3 to `delivered` or `collected`; the failure stays in the timeline | The old failure deadline cannot return a recovered parcel | App "W4 recovery by redelivery completes through W1", "W4 recovery by pickup redirect completes through W2 and W3", "W4 recovery by hold completes after the hold ends"; Web "Redelivery requested in the browser after a failed attempt is pending in the App", "Once the carrier applies it the parcel is on its way again and the failure stays in the timeline" |
 | No action; the clock passes the deadline; then the deadline event; then return completion | In the gap nothing changes and nothing can be requested. The deadline event starts the return with its reason. Only `return_completed` finishes it. The failure reason stays visible on the returned parcel. | A deadline event is rejected before its deadline or for the wrong state | App "W4 an unanswered failed delivery: the deadline event starts the return, a later event completes it", "W4 deadline events are rejected before their deadline and for the wrong parcel state"; MCP "Pickup expiry starts the return", "Only the trusted completion event finishes the return"; Web "Terminal outcome keeps the failure reason and timeline visible" |
 | A parcel being returned | Changes, authorizations and every event except return completion are refused; a pending request is closed with `return_started`; passes and authorizations end | Refused through MCP and when sent directly from the page | App "W4 a request still pending at the deadline is closed with return_started", "W4 pickup expiry: passes and authorizations end, the parcel returns"; MCP "Submitting a change on a returning parcel fails with return_started"; Web "A change sent directly for a returning parcel is refused" |
 | The pickup point closes | The closure note and the unchanged deadline are visible; another eligible point completes pickup with a new epoch | A closed point cannot receive a parcel that is on its way | App "W4 point closure: reason and unchanged deadline are visible; another point completes pickup", "W4 a point that closes while the parcel is on its way cannot receive it" |
@@ -140,12 +142,14 @@ After the workflow tests passed, the code was probed for cases the workflow test
 | A point open all day (`00:00` to `23:59`) was closed in the last minute of the day, so a handoff then was refused | An opening-hours entry may close at `24:00`. This also allows hours past midnight, written as two entries. | "a point open until 24:00 is open in the last minute of the day, and hours can run past midnight" |
 | `options.get` offered a kind of change when nothing could be chosen for it: a zero-day date window, no eligible pickup point, no other address | Such a kind is refused with `no_available_date` or `no_eligible_destination` | "an option is offered only when something can be chosen for it" |
 | An empty or very long person name in the Task's binding made `collectors.list` and `grants.list` fail their output contract | A name is optional; none is shown for an empty one and the first 120 characters of a long one | "names from the binding may be missing, empty or very long" |
-| Seed validation accepted a repeated tracking number and a pending request that could never be applied (superseded plan, missing destination) | Both are rejected when a seed is loaded | "every rule that makes a ledger incoherent is enforced when a seed is loaded" (51 rules, each checked for its own message) |
+| Seed validation accepted a repeated tracking number and a pending request that could never be applied (superseded plan, missing destination) | Both are rejected when a seed is loaded | "every rule that makes a ledger incoherent is enforced when a seed is loaded" (63 rules, each checked for its own message) |
 | With a run clock earlier than the loaded history, a preview said yes and the submission then failed | Preview, options and submission all give `invalid_time`; reads still work | "a run whose clock precedes the loaded history can read but not request anything" |
 
 The same file also covers cases that already behaved correctly: day boundaries on daylight-saving days and in distant time zones, service days counted in the carrier's zone, times written with a UTC offset, the longest texts a seed and a carrier may supply, new IDs that do not collide with seeded ones, an empty ledger, a request still pending when the parcel is delivered, fails or goes out, a parcel moved before it reaches its point, a note-only point update, one person who is both a recipient and a collector, and one collector authorized for two parcels.
 
 `tests/fuzz.test.cjs` is a random walk with fixed random seeds. From each catalog seed it applies random Agent operations and carrier events, valid, stale, out of order and unauthorized, adds new parcels as it goes, and after every step checks that: a refused step changed nothing; nothing failed in an unexpected way; closed parcels and decided requests never change; plan revisions and pickup epochs only grow; a pickup deadline never moves within one arrival; only events move a parcel or decide a request; a handoff consumes exactly one pass; no pass is active for a parcel that is not ready; and each person sees exactly their own parcels and those they are currently authorized for. The App's own seed rules and output contracts are also checked at every step. A short walk runs with `npm test`; the deeper search is in section 2.
+
+A mutation analysis then measured how much the tests actually pin down. `scripts/mutation-analysis.cjs` changes the business code in one place at a time, an operator flipped or a statement removed, and runs the App-only tests against each change. The first run left 53 of 599 changes unnoticed. None of them exposed a defect, but about thirty were behaviour that no test fixed in place: the inclusive ends of date windows, the first instant after a hold ends, the opening and closing minute of a point, estimated delivery after a change, a repeated or misplaced failed-delivery report, events at the same instant, who receives a closure notice, the history of a request the system closes, what a collector sees while the recipient has a pending request, positive search matches and the open-only filter. `tests/boundaries.test.cjs` and eleven more incoherent-seed rules now cover them, and 589 of 599 changes are noticed. The ten that remain are checks that another rule already guarantees: for example, the handoff re-checks that a pass matches the current pickup epoch and point, which the seed rules already ensure for every active pass. They are kept as a second line of defence.
 
 One measurement is not part of the test suite: a ledger at the schema's limit of 500 parcels, with about 1,500 requests and 4,000 notices, loaded and answered every tool; the rule check that runs after each commit took about 20 ms.
 
@@ -155,7 +159,7 @@ One measurement is not part of the test suite: a ledger at the schema's limit of
 | --- | --- | --- |
 | Package and contract | Passed | The verifier runs an isolated copy holding only this package. No dependency on another App. Business code imports only Node built-ins and package files. `tools.json` and the seed and event schemas are generated from one source and checked for drift. |
 | Existing App dependencies | Not applicable | None declared or used |
-| App-only business | Passed | 80 tests against the real hooks, including refusals, missing objects, invalid input, read-only behaviour, corner cases and a random walk; every refused call or event is checked to leave data unchanged |
+| App-only business | Passed | 94 tests against the real hooks, including refusals, missing objects, invalid input, read-only behaviour, boundaries, corner cases and a random walk; every refused call or event is checked to leave data unchanged. A mutation analysis finds the tests notice 98.3% of single-place changes to the business code. |
 | Real MCP | Passed | Verifier (46) and real-MCP check (105): discovery, calls, results matching committed state, forged person or account arguments rejected, reads that do not change the version |
 | Authority | Passed | The Agent cannot call any `env.*` operation. Physical progress, decisions, handoffs and returns happen only through Infra events. Core object constraints limit a write to one parcel ("Write outside the permitted parcel is denied by Core"). |
 | History and lifecycle | Passed | Infra loads history and every catalog seed; a failed load or event commits nothing; reset restores records, credentials and clock; runs are separate; another account needs an explicit trusted binding |
@@ -165,7 +169,7 @@ One measurement is not part of the test suite: a ledger at the schema's limit of
 | Generic routing | Not applicable | The Messaging runtime is not changed |
 | Resources | Not applicable | The App has no media or attachments; `capabilities.resources` is false |
 | Optional diagnostics | Passed | An absent or failing log hook leaves results unchanged (App test). The host's diagnostics file records this App's steps and holds no pass code, address, name, tracking number or parcel description (real-MCP). Logging was not part of the approved scope. |
-| GUI | Passed, author-run | Shared Web Host; real browser controls; the same state through MCP and after reload; stale edit and lost response; denied and forged requests sent directly; no downloadable state or source; untrusted text rendered as text; no script error or content-security violation |
+| GUI | Passed, author-run | Shared Web Host; real browser controls for every workflow's requests; the same state through MCP and after reload; stale edit and lost response; denied and forged requests sent directly; no downloadable state or source; untrusted text rendered as text; no script error or content-security violation |
 | Human review | Pending | For reviewers |
 
 ## 7. Changes since the approved proposal
@@ -183,7 +187,7 @@ The proposal file is as approved. These are the places where v1 differs from its
 | One acting account per run | As proposed. Records carry no account field, so one ledger loads for a recipient, a collector or an unauthorized person by changing the acting account. | Simplifies the separate seeded runs the proposal specifies |
 | Six planned views, 24 parcels, six identities, nine verified addresses, six points, six profiles, eight seeds | Delivered as planned. In addition there is a three-parcel default seed for the verifier and one unverified address used to test a refusal. | — |
 | The Web App is started by the shared Host | It starts with a package-local registry (`web.registry.json`). The root `apps.registry.json` is not changed. | Whether to list this App in the root registry is left to maintainers |
-| Effort of 4–5 and 1.5–2 person-days for the rows that include the browser bridge (lines 78, 81) | The bridge work was not needed. Actual effort is for the author to report in the PR. | Review item 1 |
+| Effort of 4–5 and 1.5–2 person-days for the rows that include the browser bridge (lines 78, 81) | The bridge part of that work was not needed. No revised figure is given here; the author confirmed about 30 hours per week in the PR on 2026-11-24. | Review items 1 and 3 |
 
 ## 8. Not run, limits and remaining work
 
@@ -195,7 +199,6 @@ The proposal file is as approved. These are the places where v1 differs from its
 - **Local reference profile only.** Remote authentication, HTTPS, multi-user sessions and production deployment are outside this profile and outside the approved scope. Simultaneous sessions of several people in one run are out of scope; separate seeded runs are used, as proposed.
 - **Not in the root registry.** See section 7.
 - **Screenshots and traces are not committed.** They are regenerated by the browser acceptance command.
-- **Effort accounting.** To be reported by the author.
 - **The proposal file stays as approved.** The differences are recorded in section 7 of this report instead.
 - **What the tests do not cover.** Browsers other than Chromium; an accessibility audit; Node versions other than 18 and 22; operating systems other than Linux; the random walk runs against the App's hooks, not through Core, whose own checks are covered by the verifier and the real-MCP check; a single parcel with more than 1,000 timeline entries, which is the schema's limit.
 - **Planned for after v1.** Broader edge-case coverage from review feedback, the Agent trials and the independent reproduction above.
@@ -204,10 +207,10 @@ The proposal file is as approved. These are the places where v1 differs from its
 
 | Requirement or mode | Required? Scope source | Verdict | Command or browser action | Observed | Gap and owner |
 | --- | --- | --- | --- | --- | --- |
-| Package and business tests | Yes, proposal validation acceptance | Passed | `npm test`, `npm run example` in the package | 80 of 80 on Node 18 and 22 | — |
+| Package and business tests | Yes, proposal validation acceptance | Passed | `npm test`, `npm run example` in the package | 94 of 94 on Node 18 and 22 | — |
 | Public runtime and independent base | Yes, lifecycle merge protection | Passed locally | `npm run app:verify`, upstream `verify-submissions.cjs`, `tests/mcp/workflows.cjs` | 46, 46 and 105 checks; one package hash across all three verifier runs | CI on the submitted commit: see the PR |
 | Cross-App integration | No, out of approved scope | Not applicable | — | No dependency, channel or receiver declared | — |
-| GUI workflows and isolation | Yes, proposal and review item 1 | Passed, author-run | `tests/web/acceptance.cjs` | 67 checks across five kinds of run | Not covered by upstream browser CI; reviewer reproduction pending |
+| GUI workflows and isolation | Yes, proposal and review item 1 | Passed, author-run | `tests/web/acceptance.cjs` | 76 checks across six kinds of run | Not covered by upstream browser CI; reviewer reproduction pending |
 | Human workflow and provenance | Yes | Pending | — | [`PROVENANCE.md`](../PROVENANCE.md) lists every file group, the data sources and the references | Reviewers |
 | Agent trials | Yes, proposal M4 | Not run | — | — | Author and reviewers: agree models, runs and cap |
 | Independent reproduction | Yes, proposal M4 | Not run | — | — | Reviewer volunteer to be found |
