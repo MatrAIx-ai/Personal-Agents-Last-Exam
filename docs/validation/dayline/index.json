@@ -1,0 +1,128 @@
+{
+  "schema": "dayline.v1-evidence-index",
+  "recorded_at": "2026-11-25T18:17:11Z",
+  "app_id": "dayline",
+  "app_version": "1.0.0",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "proposal": "proposals/environment/dayline.md",
+  "proposal_commit": "7d2c59d544f86d1afaca4bd83e3dc5f409450547",
+  "proposal_blob_sha": "3d8e6c04a099a460b7864fd6759af78b54f54edd",
+  "proposal_status": "plan approved for implementation by the assigned Track reviewer (/approve-plan for this commit); the proposal file is unchanged since",
+  "public_runtime_base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
+  "app_package_commit": "c4b8fa7cbecacfceeaa3e5a0814217fedc5d2682",
+  "app_package_sha256": "5f5c19df1164cd72d6bc39ff956dd1e25fe023636a0b86a9fd46113ac89e5803",
+  "app_package_git_tree": "ddeea80dfec5d3725bafcd2960a47ae8face9663",
+  "package_hash_agrees_in": [
+    "public-runtime.node22.json",
+    "public-runtime.node18.json",
+    "base-runtime.json",
+    "mcp-walkthrough.node22.json",
+    "mcp-walkthrough.node18.json"
+  ],
+  "tested_node": {
+    "18": "v18.20.8",
+    "22": "v22.23.2"
+  },
+  "tested_os": "Darwin 27.2.0 arm64 (macOS 27.2.1)",
+  "interface": {
+    "operations": 11,
+    "read": 8,
+    "write": 3,
+    "events": 1
+  },
+  "checks": {
+    "standalone_business": {
+      "node22": {
+        "tests": 19,
+        "pass": 19,
+        "fail": 0,
+        "skipped": 0
+      },
+      "node18": {
+        "tests": 19,
+        "pass": 19,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    "standalone_event_example": "examples/run.cjs passed from a copy of apps/dayline alone, with only PATH and LANG set, on both Node versions",
+    "generators_reproduce_committed_files": "dev/build-fixtures.cjs and dev/build-contracts.cjs, run in a copy, left every file byte-identical on both Node versions",
+    "public_app_verifier": {
+      "node22": 42,
+      "node18": 42,
+      "passed": true
+    },
+    "ci_submission_verifier": {
+      "command": "node runtime/ci/verify-submissions.cjs . <out> a4bce023953061483c41de5a287ba5e43f4a5648",
+      "selection": {
+        "full": false,
+        "ids": [
+          "dayline"
+        ]
+      },
+      "node22": "dayline: PASS",
+      "node18": "dayline: PASS"
+    },
+    "mcp_walkthrough": {
+      "node22": {
+        "checks": 45,
+        "calls": 87,
+        "passed": true
+      },
+      "node18": {
+        "checks": 45,
+        "calls": 87,
+        "passed": true
+      },
+      "trace_outcomes": {
+        "permission_denied": 2,
+        "ok": 64,
+        "ready": 4,
+        "committed": 9,
+        "duplicate_replay": 3,
+        "idempotency_conflict": 2,
+        "invalid_event": 2,
+        "stale_version": 1
+      }
+    },
+    "reference_suite": {
+      "node22": {
+        "stages": 22,
+        "passed": 22
+      },
+      "node18": {
+        "stages": 22,
+        "passed": 22
+      }
+    },
+    "base_runtime_verifier": {
+      "checks": 42,
+      "passed": true,
+      "node": "v22.23.2",
+      "selection": {
+        "full": false,
+        "ids": [
+          "dayline"
+        ]
+      }
+    }
+  },
+  "reports": [
+    "base-runtime.json",
+    "mcp-walkthrough.node18.json",
+    "mcp-walkthrough.node22.json",
+    "public-runtime.node18.json",
+    "public-runtime.node22.json",
+    "reference-suite.node18.json",
+    "reference-suite.node22.json"
+  ],
+  "report_edits": "In reference-suite.node*.json, report paths inside stage commands were rewritten from a local temporary directory to .artifacts/. No other report was edited.",
+  "not_claimed": [
+    "agent or model trials",
+    "GUI or reviewer console",
+    "production deployment",
+    "official PR CI on the implementation commit",
+    "human review of realism and invented names"
+  ]
+}

@@ -1,0 +1,202 @@
+{
+  "schema": "pale.app-verification.v1",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "app_id": "dayline",
+  "app_version": "1.0.0",
+  "package_sha256": "5f5c19df1164cd72d6bc39ff956dd1e25fe023636a0b86a9fd46113ac89e5803",
+  "node": "v22.23.2",
+  "verified_at": "2026-11-25T18:16:07.172Z",
+  "checks": [
+    {
+      "name": "Manifest, schemas, seed, references, media and declarations load",
+      "status": "passed"
+    },
+    {
+      "name": "business standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "event-example standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "Agent discovery excludes administrative tools",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for dayline.outlets.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for dayline.front_pages.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for dayline.front_page.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for dayline.search",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for dayline.story.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for dayline.edition.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for dayline.history.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for dayline.saved.list",
+      "status": "passed"
+    },
+    {
+      "name": "Infra exposes the lifecycle interface and host clock operation",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.advance_time",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.apply_event",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.event_status",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.load_seed",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.reset",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.snapshot",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.validate_bundle",
+      "status": "passed"
+    },
+    {
+      "name": "Real MCP business read succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "MCP content and structured result agree",
+      "status": "passed"
+    },
+    {
+      "name": "MCP envelope remains unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Read does not change business data",
+      "status": "passed"
+    },
+    {
+      "name": "Caller cannot override run or role",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads history, relationships and assets",
+      "status": "passed"
+    },
+    {
+      "name": "Loaded historical records match input",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid history is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Rejected history leaves business state unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Declared incoming event commits",
+      "status": "passed"
+    },
+    {
+      "name": "Event changes business data",
+      "status": "passed"
+    },
+    {
+      "name": "Committed event is queryable",
+      "status": "passed"
+    },
+    {
+      "name": "Identical event retry is deduplicated",
+      "status": "passed"
+    },
+    {
+      "name": "Duplicate has no additional state change",
+      "status": "passed"
+    },
+    {
+      "name": "Same event ID with changed content is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Old version cannot reset a changed App",
+      "status": "passed"
+    },
+    {
+      "name": "A separate run retains its own initial data",
+      "status": "passed"
+    },
+    {
+      "name": "Reset returns ready",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded business baseline",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances epoch",
+      "status": "passed"
+    },
+    {
+      "name": "New MCP process reads persisted App state",
+      "status": "passed"
+    },
+    {
+      "name": "Submitted package remains unchanged",
+      "status": "passed"
+    }
+  ],
+  "stages": [
+    {
+      "name": "business",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "TAP version 13\n# Subtest: reads are side-effect free; opening an edition leaves the reading history intact\nok 1 - reads are side-effect free; opening an edition leaves the reading history intact\n  ---\n  duration_ms: 7.623542\n  type: 'test'\n  ...\n# Subtest: front pages list editions in editorial order with private read/saved flags\nok 2 - front pages list editions in editorial order with private read/saved flags\n  ---\n  duration_ms: 2.182041\n  type: 'test'\n  ...\n# Subtest: edition.publish inserts at the requested position, keeps relative order and is visible on commit\nok 3 - edition.publish inserts at the requested position, keeps relative order and is visible on commit\n  ---\n  duration_ms: 8.680584\n  type: 'test'\n  ...\n# Subtest: an unknown story, outlet, credited edition or placement fails the whole update\nok 4 - an unknown story, outlet, credited edition or placement fails the whole update\n  ---\n  duration_ms: 2.348958\n  type: 'test'\n  ...\n# Subtest: one story group holds the pre-vote preview, the original dispatch, two straight reprints and the locally expanded edition\nok 5 - one story group holds the pre-vote preview, the original dispatch, two straight reprints and the locally expanded edition\n  ---\n  duration_ms: 3.363667\n  type: 'test'\n  ...\n# Subtest: Spanish and English airport-strike editions trace back to one regional report\nok 6 - Spanish and English airport-strike editions trace back to one regional report\n  ---\n  duration_ms: 2.3505\n  type: 'test'\n  ...\n# Subtest: saving twice leaves one bookmark and the result never echoes the headline\nok 7 - saving twice leaves one bookmark and the result never echoes the headline\n  ---\n  duration_ms: 1.82425\n  type: 'test'\n  ...\n# Subtest: marking read is explicit and idempotent\nok 8 - marking read is explicit and idempotent\n  ---\n  duration_ms: 1.279917\n  type: 'test'\n  ...\n# Subtest: two reader instances share the public catalog but keep private state separate\nok 9 - two reader instances share the public catalog but keep private state separate\n  ---\n  duration_ms: 2.420042\n  type: 'test'\n  ...\n# Subtest: seed validation rejects inconsistent catalogs and private state\nok 10 - seed validation rejects inconsistent catalogs and private state\n  ---\n  duration_ms: 1.295875\n  type: 'test'\n  ...\n# Subtest: a story group declared for a later event stays hidden until an edition is published to it\nok 11 - a story group declared for a later event stays hidden until an edition is published to it\n  ---\n  duration_ms: 1.663583\n  type: 'test'\n  ...\n# Subtest: search filters, ordering and limits\nok 12 - search filters, ordering and limits\n  ---\n  duration_ms: 2.565375\n  type: 'test'\n  ...\n# Subtest: sports fixtures: preview and schedule are scoreboard-free; the full recap is distinct from the wire brief\nok 13 - sports fixtures: preview and schedule are scoreboard-free; the full recap is distinct from the wire brief\n  ---\n  duration_ms: 1.930708\n  type: 'test'\n  ...\n# Subtest: diagnostics carry IDs only and cannot change business results\nok 14 - diagnostics carry IDs only and cannot change business results\n  ---\n  duration_ms: 2.050458\n  type: 'test'\n  ...\n# Subtest: lists put the latest write first when writes share the session clock\nok 15 - lists put the latest write first when writes share the session clock\n  ---\n  duration_ms: 1.37425\n  type: 'test'\n  ...\n# Subtest: search matches the start of words, not substrings\nok 16 - search matches the start of words, not substrings\n  ---\n  duration_ms: 2.000417\n  type: 'test'\n  ...\n# Subtest: a seed loaded before its latest record still loads, but writes on later editions fail clearly\nok 17 - a seed loaded before its latest record still loads, but writes on later editions fail clearly\n  ---\n  duration_ms: 0.746334\n  type: 'test'\n  ...\n# Subtest: edition.publish rejects inconsistent timing and content with invalid_event\nok 18 - edition.publish rejects inconsistent timing and content with invalid_event\n  ---\n  duration_ms: 0.899791\n  type: 'test'\n  ...\n# Subtest: task data ships a dataset whose record count matches its seed\nok 19 - task data ships a dataset whose record count matches its seed\n  ---\n  duration_ms: 0.262\n  type: 'test'\n  ...\n1..19\n# tests 19\n# suites 0\n# pass 19\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 113.693625\n",
+      "errors": ""
+    },
+    {
+      "name": "event-example",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "{\n  \"app\": \"dayline\",\n  \"local_front_page\": {\n    \"before\": [\n      \"1. library-1 (Valley Daily)\",\n      \"2. rail-local-1 (Valley Daily)\",\n      \"3. burnban-valley-1 (Valley Daily)\",\n      \"4. rail-harbor-1 (Harbor Ledger)\",\n      \"5. gulls-valley-1 (Valley Daily)\"\n    ],\n    \"after\": [\n      \"1. rail-local-2 (Valley Daily)\",\n      \"2. library-1 (Valley Daily)\",\n      \"3. rail-local-1 (Valley Daily)\",\n      \"4. burnban-valley-1 (Valley Daily)\",\n      \"5. rail-harbor-1 (Harbor Ledger)\",\n      \"6. gulls-valley-1 (Valley Daily)\"\n    ]\n  },\n  \"save_result\": {\n    \"edition_id\": \"gulls-recap-1\",\n    \"saved\": true,\n    \"changed\": true\n  },\n  \"reading_list\": [\n    \"gulls-recap-1\",\n    \"postal-standard-1\"\n  ]\n}\n",
+      "errors": ""
+    }
+  ],
+  "passed": true,
+  "remaining": [
+    "App-specific approved workflow coverage",
+    "Human data/media/provenance review",
+    "Production remote authentication and deployment checks when applicable"
+  ]
+}
