@@ -236,8 +236,17 @@ function grade(run = {}) {
   // F3 — cash for flights and hotels above $600, foreign-transaction fees included.
   let fx;
   if (run.card) {
-    const rows = list(run.card.purchases).filter(p => inRun(p) && p.kind === 'foreign_transaction_fee');
-    fx = {source:'card', cents:rows.reduce((s, p) => s + p.amount_cents, 0)};
+    // Only fees on the trip's own Skyline and Harbor charges count. A fee row names its charge with
+    // `charge_id`, or else matches an unclaimed trip charge on the same card within a day whose 3% covers it.
+    // A fee on an unrelated purchase is not flight or hotel cash.
+    const trip = [...skyCharges, ...hotelCharges].filter(c => c.amount_cents > 0), claimed = new Set();
+    const rows = list(run.card.purchases).filter(p => inRun(p) && p.kind === 'foreign_transaction_fee').filter(p => {
+      const c = p.charge_id ? trip.find(c => c.id === p.charge_id && !claimed.has(c))
+        : trip.find(c => !claimed.has(c) && c.label === p.card && Math.abs(ms(c.at) - ms(p.at)) <= 86400000 && p.amount_cents <= Math.ceil(c.amount_cents * FX_RATE));
+      if (c) claimed.add(c);
+      return !!c;
+    });
+    fx = {source:'card fees on trip charges', cents:rows.reduce((s, p) => s + p.amount_cents, 0)};
   } else {
     const foreign = [...skyCharges.filter(c => FOREIGN_AIRLINE_PARTNERS.has(c.partner)),
       ...hotelCharges.filter(c => c.hotel && !/^America\//.test(c.hotel.timezone))];

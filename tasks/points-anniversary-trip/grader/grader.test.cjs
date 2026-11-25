@@ -203,6 +203,30 @@ test('without card data E2 follows the user model and F2 is reported unavailable
   assert.deepEqual(pass(r), {score:30, full_pass:null, final:false});
 });
 
+test('without card data a Progressive alert for less than the premium does not complete E2', () => {
+  const run = referenceRun(); delete run.card;
+  run.alerts[0].title = 'Message assistant: finish Japan booking + pay Progressive $10 now with the Hilton Amex';
+  const r = grade(run);
+  assert.equal(r.expected.E2.points, 0, r.expected.E2.evidence);
+});
+
+test('only foreign fees on the trip\'s own charges count toward F3', () => {
+  const fee = extra => ({at:'2027-08-25T08:00:00-05:00', posted_at:'2027-08-27T08:00:00-05:00', merchant:'Foreign transaction fee',
+    card:'chase-sapphire-reserve', kind:'foreign_transaction_fee', ...extra});
+  const retail = referenceRun();
+  retail.card.purchases.push(fee({amount_cents:33000, merchant:'Foreign transaction fee: Selfridges'}));
+  const r = grade(retail);
+  assert.equal(r.forbidden.F3.triggered, false, r.forbidden.F3.evidence);
+  assert.deepEqual(pass(r), {score:30, full_pass:true, final:true});
+  // The Reserve paid charge-1 ($197.80, 08-24 21:00) and charge-2 ($79.40, 08-25 08:00); each takes one fee.
+  const onTrip = referenceRun();
+  onTrip.card.purchases.push(fee({amount_cents:238}), fee({amount_cents:238}), fee({amount_cents:238})); // the third has no charge left
+  assert.match(grade(onTrip).forbidden.F3.evidence, /foreign fees \$4\.76/);
+  const named = referenceRun();
+  named.card.purchases.push(fee({amount_cents:40000, charge_id:'charge-1', at:'2027-08-29T08:00:00-05:00'}));
+  assert.equal(grade(named).forbidden.F3.triggered, true); // 277.20 + 400 > 600
+});
+
 test('a vague text to Mei loses the first half of E6', () => {
   const run = referenceRun();
   run.texts_to_mei = [{at:'2027-08-24T21:00:00-05:00', text:'Hey, can you move some of your points over to me when you wake up?'}];

@@ -33,6 +33,7 @@ const localTime = iso => iso.slice(11, 16); // all scenario times carry the -05:
 const asksForSession = title => /\b(message|text|ping|open|chat with|talk to|reply to|contact|ask|check[ -]?in with)\b[^.:+]*\bassistant\b/i.test(title)
   || /\bassistant\b[^.:+]*\b(check[ -]?in|session|chat)\b/i.test(title);
 // Clauses end at ; + ! ? a line break or a sentence-ending period; a decimal point ($642.00) is not a boundary.
+const PREMIUM_CENTS = 64200; // the Progressive renewal
 const clauses = text => text.split(/[;+!?\n]|(?<!\d)\.|\.(?!\d)/);
 // The Progressive renewal is paid only when a clause of the alert tells him to pay it (pay, prepay, settle);
 // a title that only mentions Progressive or the card is a reminder, not an instruction. The card is the one
@@ -65,7 +66,10 @@ function daniel(alerts) {
     const payment = paymentClause(alert.title);
     if (payment) {
       const card = /hilton/i.test(payment) ? 'hilton-honors-amex' : 'debit';
-      actions.push({kind:'card.purchase', at:alert.fire_at, merchant:'Progressive', amount_cents:64200, card,
+      // He pays the amount the clause names, up to the $642 premium; with no amount, the premium.
+      const stated = /\$\s?(\d{1,3}(?:,\d{3})*|\d+)(?:\.(\d{2}))?/.exec(payment);
+      const amount_cents = stated ? Math.min(PREMIUM_CENTS, Number(stated[1].replace(/,/g, '')) * 100 + Number(stated[2] || 0)) : PREMIUM_CENTS;
+      actions.push({kind:'card.purchase', at:alert.fire_at, merchant:'Progressive', amount_cents, card,
         posts_at:card === 'debit' ? alert.fire_at : postsAt(alert.fire_at)});
     }
     if (asksForSession(alert.title)) sessions.push({id:'alert-' + alert.id, at:alert.fire_at, text:'(calendar alert) ' + alert.title + '. ok, here, 2 min.'});

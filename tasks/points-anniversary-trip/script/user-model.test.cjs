@@ -104,6 +104,14 @@ test('the card is the one named in the payment clause, not elsewhere in the titl
   assert.equal(m.daniel([alert('h', '2027-08-25T08:00:00-05:00', 'Message assistant about the trip + pay Progressive $642, Hilton Amex')]).actions[0].card, 'hilton-honors-amex');
 });
 
+test('he pays the amount the payment clause names, up to the $642 premium', () => {
+  const paid = title => m.daniel([alert('p', '2027-08-25T08:00:00-05:00', title)]).actions.map(a => a.amount_cents);
+  assert.deepEqual(paid('Pay Progressive $10 with the Hilton Amex; message assistant'), [1000]);
+  assert.deepEqual(paid('Pay $642.00 to Progressive with the Hilton Amex'), [64200]);
+  assert.deepEqual(paid('Pay Progressive $1,200 with the Hilton Amex'), [64200]);
+  assert.deepEqual(paid('Pay Progressive with the Hilton Amex'), [64200]);
+});
+
 test('the destination must be in the transfer instruction, not an incidental "me"', () => {
   for (const text of ['Use Combine points to send 165,400 points. Please ask me which account to send them to.',
     'Use Combine points to send 165,400 points. Text me when it\'s done!'])
