@@ -3,8 +3,7 @@
 const crypto=require('node:crypto');
 const {copy,fail}=require('./helpers.cjs'),assets=require('./assets.cjs');
 function create(state,pkg){
- const catalog=state.resources&&state.resources.bundle&&state.resources.bundle.catalog?copy(state.resources.bundle.catalog):{assets:[]};
- return {catalog,read(id){
+ return {read(id){
   const a=state.resources.bundle.catalog.assets.find(a=>a.asset_id===id);
   if(!require('./resource-access.cjs').allowed(pkg,state,a))fail('not_available','Attachment is not available to this caller');
   if(a.availability.status!=='ready')fail('unavailable','Attachment bytes are unavailable');

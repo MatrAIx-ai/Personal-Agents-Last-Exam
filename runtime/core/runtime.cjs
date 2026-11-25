@@ -27,7 +27,7 @@ function createRuntime({registryFile,assemblyFile}={}){
  }
  function validateData(s,data,code='invalid_seed'){
   const p=get(s.app_id);if(!p.validators.seed(data))fail(code,'Data does not match '+p.manifest.schemas.seed);
-  p.plugin.validateSeed(context(s,undefined,true),data);
+  p.plugin.validateSeed(context(s),data);
  }
  function create(app,run='run-demo',profile='scenario',epoch=1){
   const p=get(app),c=configs.get(app);if(!/^[-a-zA-Z0-9_]{1,80}$/.test(run)||!c.policies[profile])fail('invalid_configuration','Invalid run / profile');
@@ -97,11 +97,11 @@ function createRuntime({registryFile,assemblyFile}={}){
     if(args.request_id&&s.receipts[key]){if(s.receipts[key].fingerprint!==fp)fail('idempotency_conflict','The same request_id cannot identify different seed bundles.');return {state:original,result:{...copy(s.receipts[key].result),duplicate:true}};}
     checkVersion(s,args.expected_version);
     if(!args.binding&&args.data.account_id!==s.data.account_id)fail('invalid_seed','Changing account requires an explicit trusted binding');
-    s.virtual_now=args.virtual_now||s.virtual_now;s.initial_virtual_now=s.virtual_now;s.binding=copy(args.binding||s.binding);s.policies=copy(args.policies||s.policies);checkConfig(p,s.binding,s.policies);if(!s.policies[s.profile])fail('invalid_configuration','Current profile unavailable');if(!p.validators.seed(args.data))fail('invalid_seed','Data does not match '+p.manifest.schemas.seed);
-    s.resources=assets.check(p,args.data,args.bundle||assets.legacy(p,args.data,s.resources,s.data.account_id),{runId:s.run_id});s.initial_resources=copy(s.resources);validateData(s,args.data);
+    s.virtual_now=args.virtual_now||s.virtual_now;s.initial_virtual_now=s.virtual_now;s.binding=copy(args.binding||s.binding);s.policies=copy(args.policies||s.policies);checkConfig(p,s.binding,s.policies);if(!s.policies[s.profile])fail('invalid_configuration','Current profile unavailable');validateData(s,args.data);
+    s.resources=assets.check(p,args.data,args.bundle||assets.legacy(p,args.data,s.resources,s.data.account_id),{runId:s.run_id});s.initial_resources=copy(s.resources);
     s.data=copy(args.data);s.initial_data=copy(args.data);s.epoch++;s.revision=0;s.next_id=1;s.audit=[];s.receipts={};changed=true;result={status:'ready',loaded:p.plugin.objects?.(s.data).length||0,quality:copy(s.resources.quality)};if(args.request_id)s.receipts[key]={fingerprint:fp,result:{...copy(result),app_id:s.app_id,version:version(s)}};
    }else if(name==='env.validate_bundle'){
-    const candidate={...s,binding:args.binding||s.binding,policies:args.policies||s.policies};if(args.bundle)candidate.resources={...s.resources,bundle:args.bundle};checkConfig(p,candidate.binding,candidate.policies);validateData(candidate,args.data);
+    const candidate={...s,binding:args.binding||s.binding,policies:args.policies||s.policies};checkConfig(p,candidate.binding,candidate.policies);validateData(candidate,args.data);
     const quality=assets.inspect(p,args.data,args.bundle,{runId:s.run_id});result={status:quality.automated_pass?'ok':'invalid_bundle',quality};
    }else if(name==='env.apply_event'){
     const e=args.event,key='event:'+e.event_id,fp=JSON.stringify({event:e,bundle:args.bundle}),prior=s.receipts[key];

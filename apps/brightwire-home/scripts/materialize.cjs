@@ -843,6 +843,7 @@ function ruth() {
   const smoke = blank({device_id: 'smoke-mom-hall', room_id: 'hallway', type: 'smoke', name: 'Hall smoke sensor', sensor: 'clear'});
   const temperature = blank({device_id: 'temp-mom-living', room_id: 'living', type: 'temperature', name: 'Living temperature', sensor: 'reading', sensor_value: 21});
   data.devices = [light, hall, thermo, lock, contact, motion, leak, smoke, temperature];
+  data.available_snapshots = ['nursery', 'living', 'hallway', 'kitchen', 'garage', 'entry'].map(name => 'snap-ruth-' + name);
   fortnight(data, light, HISTORY_START, {year: 2026, month: 9, day: 18}, 'person-ruth');
   dailyLight(data, light, {year: 2026, month: 9, day: 18}, 60, 'off', 'person-ruth', stamp(2026, 11, 17, 8, 0));
   data.routines = [{
@@ -904,7 +905,7 @@ function chen() {
     if (type === 'switch') { item.power = 'off'; item.rated_watts = type === 'switch' && deviceId.endsWith('porch') ? 60 : 800; }
     if (type === 'lock') { item.lock = 'locked'; item.auto_relock_minutes = 10; }
     if (type === 'garage') item.garage = 'closed';
-    if (type === 'camera') { item.privacy = 'privacy_off'; item.snapshot_asset_id = deviceId.endsWith('porch') ? 'snap-garage' : 'snap-hallway'; }
+    if (type === 'camera') { item.privacy = 'privacy_off'; item.snapshot_asset_id = deviceId.endsWith('porch') ? 'snap-chen-garage' : 'snap-chen-hallway'; }
     if (type === 'speaker') item.volume = 10;
     if (type === 'contact') item.sensor = 'closed';
     if (type === 'motion') item.sensor = 'clear';
@@ -959,6 +960,7 @@ function chen() {
     const next = shift(monday.year, monday.month, monday.day, 28);
     monday = next;
   }
+  data.available_snapshots = ['nursery', 'living', 'hallway', 'kitchen', 'garage', 'entry'].map(name => 'snap-chen-' + name);
   return data;
 }
 
@@ -1047,10 +1049,11 @@ function planImage(label) {
   return png(image);
 }
 
-function snapshotImage(label, color) {
+function snapshotImage(label, color, salt) {
   const image = canvas(320, 176, color);
-  image.fillRect(24, 24, 120, 80, 0xffffff);
-  image.text(label, 160, 64, 0x243038, 3);
+  image.fillRect(0, 32, 320, 112, 0x243038);
+  image.text(label, 16, 32, 0xffffff, 16);
+  if (salt) image.fillRect(0, 0, 16, 16, salt);
   return jpeg(image);
 }
 
@@ -1079,14 +1082,30 @@ function images() {
     made.push({asset_id: 'plan-' + name, role: 'ui.floor_plan', file, mime: 'image/png', width: 480, height: 280, alt: label + ' plan'});
   }
   const shots = [
-    ['nursery', 'Nursery', 0xE7C7C7], ['living', 'Living', 0xC9D4E4], ['hallway', 'Hallway', 0xD5D8DC],
-    ['kitchen', 'Kitchen', 0xE6D3B3], ['garage', 'Garage', 0xD5DCCB], ['entry', 'Entry', 0xE4D0C4]
+    ['nursery', 'NUR', 'Nursery', 0xE7C7C7], ['living', 'LIV', 'Living', 0xC9D4E4], ['hallway', 'HAL', 'Hallway', 0xD5D8DC],
+    ['kitchen', 'KIT', 'Kitchen', 0xE6D3B3], ['garage', 'GAR', 'Garage', 0xD5DCCB], ['entry', 'ENT', 'Entry', 0xE4D0C4]
   ];
-  for (const [name, label, color] of shots) {
-    const file = path.join(root, 'assets/snapshots', name + '.jpg');
-    fs.mkdirSync(path.dirname(file), {recursive: true});
-    fs.writeFileSync(file, snapshotImage(label, color));
-    made.push({asset_id: 'snap-' + name, role: 'ui.snapshot', file, mime: 'image/jpeg', width: 320, height: 176, alt: label + ' camera snapshot'});
+  const households = [
+    ['', 'bw-household-morales', 0],
+    ['ruth-', 'bw-household-ruth', 0x1A2744],
+    ['chen-', 'bw-household-chen', 0x4A2C1A]
+  ];
+  for (const [prefix, accountId, salt] of households) {
+    for (const [name, label, title, color] of shots) {
+      const file = path.join(root, 'assets/snapshots', prefix + name + '.jpg');
+      fs.mkdirSync(path.dirname(file), {recursive: true});
+      fs.writeFileSync(file, snapshotImage(label, color, salt));
+      made.push({
+        asset_id: 'snap-' + prefix + name,
+        role: 'ui.snapshot',
+        file,
+        mime: 'image/jpeg',
+        width: 320,
+        height: 176,
+        alt: title + ' camera snapshot',
+        account_id: accountId
+      });
+    }
   }
   return made;
 }
@@ -1104,7 +1123,7 @@ function catalog(made) {
         asset_id: item.asset_id,
         scope: {level: 'package', app_id: 'brightwire-home'},
         roles: [item.role],
-        subjects: [],
+        subjects: item.account_id ? [{app_id: 'brightwire-home', account_id: item.account_id, object_type: 'household', object_id: item.account_id}] : [],
         mime_type: item.mime,
         availability: {status: 'ready'},
         storage: {adapter: 'storage.file', path: path.relative(root, item.file).split(path.sep).join('/'), packaging: 'bundled'},
@@ -1137,6 +1156,8 @@ function main() {
   const older = ruth();
   const larger = chen();
   const seeds = {minimal, 'task-73': task, 'household-b': older, 'household-c': larger};
+  const made = images();
+  writeJson(path.join(root, 'contribution/assets.catalog.json'), catalog(made));
   const {compile} = require('../tests/schema-validator.cjs');
   const valid = compile(seedSchema, path.join(root, 'schemas'));
   const plugin = require('../plugin.cjs');
@@ -1156,8 +1177,6 @@ function main() {
     scenario: {allow: tools.filter(item => item.read_only).map(item => item.name), constraints: {}},
     sandbox: {allow: tools.map(item => item.name), constraints: {}}
   });
-  const made = images();
-  writeJson(path.join(root, 'contribution/assets.catalog.json'), catalog(made));
   console.log('Materialized ' + tools.length + ' tools and ' + made.length + ' images.');
 }
 

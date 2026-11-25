@@ -180,17 +180,15 @@ test('a thrown command rolls back catch-up as well as the command', () => {
 
 test('scenes keep successful actions when a sibling fails, and unattended creates must be operable', () => {
   const house = fixture();
-  const made = house.call('brightwire-home.scenes.create', {
+  const beforeScenes = house.data.scenes.length;
+  assert.equal(codeOf(capture(() => house.call('brightwire-home.scenes.create', {
     name: 'Mixed',
     actions: [
       {kind: 'device', device_id: 'light-primary', command: 'turn_on', args: {}},
       {kind: 'device', device_id: 'light-primary', command: 'set_brightness', args: {brightness: 0}}
     ]
-  });
-  const ran = house.call('brightwire-home.scenes.run', {scene_id: made.scene_id});
-  assert.equal(ran.outcome, 'partial');
-  assert.equal(device(house.data, 'light-primary').power, 'on');
-  assert.equal(device(house.data, 'light-primary').brightness, 40);
+  }))), 'value_out_of_range');
+  assert.equal(house.data.scenes.length, beforeScenes);
   const count = house.data.routines.length;
   assert.equal(codeOf(capture(() => house.call('brightwire-home.routines.create', {
     name: 'Unlock later',
@@ -1295,6 +1293,63 @@ test('task 73 flags every routine and scene change and keeps call arguments', ()
   assert.equal(bare.calls.find(call => call.seq === 3).tool, 'env.advance_time');
   assert.equal(bare.calls.find(call => call.seq === 3).actor, 'infra');
   assert.equal(bare.calls.filter(call => call.tool === 'brightwire-home.devices.command').length, 2);
+  const sharedId = exportEvidence({
+    snapshot: {
+      data: house.data,
+      receipts: {
+        'request:cam': {fingerprint: JSON.stringify({name: 'brightwire-home.devices.command', args: {device_id: 'camera-nursery', command: 'set_privacy', args: {privacy: 'privacy_off'}}})}
+      },
+      audit: [
+        {seq: 1, actor: 'agent', tool: 'brightwire-home.camera.share.start', decision: 'deny', input: {request_id: 'cam'}},
+        {seq: 2, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'allow', input: {request_id: 'cam'}}
+      ]
+    },
+    agent_executions: [
+      {tool: 'brightwire-home.camera.share.start', status: 'invalid_arguments', request_id: 'cam', args: {device_id: 'camera-nursery', recipient: '@', duration_minutes: 15}},
+      {tool: 'brightwire-home.devices.command', status: 'committed', request_id: 'cam', args: {device_id: 'camera-nursery', command: 'set_privacy', args: {privacy: 'privacy_off'}}}
+    ]
+  });
+  const deniedShare = sharedId.calls.find(call => call.seq === 1);
+  const privacy = sharedId.calls.find(call => call.seq === 2);
+  assert.equal(deniedShare.tool, 'brightwire-home.camera.share.start');
+  assert.equal(deniedShare.command, null);
+  assert.equal(deniedShare.target, 'camera-nursery');
+  assert.equal(privacy.tool, 'brightwire-home.devices.command');
+  assert.equal(privacy.command, 'set_privacy');
+  assert.equal(privacy.target, 'camera-nursery');
+  const reads = exportEvidence({
+    snapshot: {
+      data: house.data,
+      audit: [
+        {seq: 1, actor: 'agent', tool: 'brightwire-home.devices.get', decision: 'allow'},
+        {seq: 2, actor: 'agent', tool: 'brightwire-home.devices.get', decision: 'allow'}
+      ]
+    },
+    agent_executions: [
+      {tool: 'brightwire-home.devices.get', status: 'ok', args: {device_id: 'light-living'}},
+      {tool: 'brightwire-home.devices.get', status: 'ok', args: {device_id: 'light-hallway'}}
+    ]
+  });
+  assert.equal(reads.calls.find(call => call.seq === 1).target, 'light-living');
+  assert.equal(reads.calls.find(call => call.seq === 2).target, 'light-hallway');
+  const failed = exportEvidence({
+    snapshot: {
+      data: {
+        ...house.data,
+        activity: house.data.activity.concat([{
+          activity_id: 'act-failed',
+          at: house.ctx.virtual_now,
+          actor_kind: 'assistant',
+          actor_id: 'assistant',
+          cause: 'confirmation',
+          command: 'confirmation_failed',
+          summary: 'device_offline',
+          device_id: 'lock-front'
+        }])
+      }
+    }
+  });
+  assert.equal(failed.history.find(entry => entry.activity_id === 'act-failed').reason, 'device_offline');
 });
 
 test('a confirm-scope command is checked before a confirmation is stored', () => {
@@ -1383,6 +1438,77 @@ test('a confirm-scope command is checked before a confirmation is stored', () =>
   assert.equal(house.data.activity.some(entry => entry.command === 'confirmation_failed' && entry.summary === 'device_offline'), true);
 });
 
+test('a saved scene or routine rejects an out-of-range action before confirmation', () => {
+  const house = fixture();
+  const before = house.data.confirmations.length;
+  const scene = house.data.scenes.find(item => item.created_by !== 'assistant' && !item.deleted);
+  assert.ok(scene);
+  assert.equal(codeOf(capture(() => house.call('brightwire-home.scenes.update', {
+    scene_id: scene.scene_id,
+    name: scene.name,
+    actions: [{kind: 'device', device_id: 'light-living', command: 'set_brightness', args: {brightness: 140}}]
+  }))), 'value_out_of_range');
+  const routine = house.data.routines.find(item => item.created_by !== 'assistant' && !item.deleted);
+  assert.ok(routine);
+  assert.equal(codeOf(capture(() => house.call('brightwire-home.routines.update', {
+    routine_id: routine.routine_id,
+    actions: [{kind: 'device', device_id: 'light-living', command: 'set_brightness', args: {brightness: 140}}]
+  }))), 'value_out_of_range');
+  assert.equal(house.data.confirmations.length, before);
+  assert.equal(house.data.scenes.find(item => item.scene_id === scene.scene_id).actions.some(action => action.args && action.args.brightness === 140), false);
+});
+
+test('a camera share addressed to @ is rejected before a confirmation is stored', () => {
+  const house = fixture();
+  const before = house.data.confirmations.length;
+  const sessions = house.data.sessions.length;
+  house.mutate(data => { data.scopes.camera = 'operate'; });
+  house.call('brightwire-home.devices.command', {device_id: 'camera-nursery', command: 'set_privacy', args: {privacy: 'privacy_off'}});
+  house.mutate(data => { data.scopes.camera = 'confirm'; });
+  assert.equal(codeOf(capture(() => house.call('brightwire-home.camera.share.start', {
+    device_id: 'camera-nursery', recipient: '@', duration_minutes: 15
+  }))), 'invalid_arguments');
+  assert.equal(house.data.confirmations.length, before);
+  assert.equal(house.data.sessions.length, sessions);
+});
+
+test('approving a code window another code already holds records confirmation_failed', () => {
+  const house = fixture();
+  const first = house.call('brightwire-home.access_codes.create', {
+    name: 'Painter',
+    holder_name: 'Painter',
+    locks: ['lock-front'],
+    schedule: {kind: 'window', start: at(2026, 11, 20, 8, 0), end: at(2026, 11, 20, 18, 0)}
+  });
+  assert.equal(first.outcome, 'applied');
+  house.mutate(data => { data.scopes.access_codes = 'confirm'; });
+  const queued = house.call('brightwire-home.access_codes.update', {
+    code_id: first.code_id,
+    schedule: {kind: 'window', start: at(2026, 11, 22, 8, 0), end: at(2026, 11, 22, 18, 0)}
+  });
+  assert.equal(queued.outcome, 'confirmation_required');
+  const created = house.call('brightwire-home.access_codes.create', {
+    name: 'Plumber',
+    holder_name: 'Plumber',
+    locks: ['lock-front'],
+    schedule: {kind: 'window', start: at(2026, 11, 22, 8, 0), end: at(2026, 11, 22, 18, 0)}
+  });
+  assert.equal(created.outcome, 'confirmation_required');
+  house.event({
+    event_id: 'approve-plumber', at: at(2026, 11, 17, 12, 1), operation: 'confirmation.resolved',
+    payload: {confirmation_id: created.confirmation_id, decision: 'approved', by_person_id: 'person-hana'}
+  });
+  house.event({
+    event_id: 'approve-painter', at: at(2026, 11, 17, 12, 2), operation: 'confirmation.resolved',
+    payload: {confirmation_id: queued.confirmation_id, decision: 'approved', by_person_id: 'person-hana'}
+  });
+  const painter = house.data.access_codes.find(item => item.code_id === first.code_id);
+  assert.equal(painter.schedule.start, at(2026, 11, 20, 8, 0));
+  const confirmation = house.data.confirmations.find(item => item.confirmation_id === queued.confirmation_id);
+  assert.equal(confirmation.status, 'approved');
+  assert.equal(house.data.activity.filter(entry => entry.command === 'confirmation_failed' && entry.summary === 'invalid_arguments').length, 1);
+});
+
 test('a relock with no later write is visible from the start clock', () => {
   const house = fixture();
   house.event({
@@ -1421,11 +1547,10 @@ test('every shipped snapshot id is ready in the catalog', () => {
     virtual_now: broken.committed_through
   };
   assert.equal(codeOf(capture(() => plugin.validateSeed(ctx, broken))), 'invalid_seed');
-  const faded = structuredClone(catalog);
-  faded.assets.find(asset => asset.asset_id === 'snap-nursery').availability.status = 'missing';
-  assert.equal(codeOf(capture(() => plugin.validateSeed({...ctx, catalog: faded}, require('../fixtures/minimal.json')))), 'invalid_seed');
-  const viaAssets = {app_id: ctx.app_id, binding: ctx.binding, virtual_now: ctx.virtual_now, assets: {catalog: faded}};
-  assert.equal(codeOf(capture(() => plugin.validateSeed(viaAssets, require('../fixtures/minimal.json')))), 'invalid_seed');
+  const icon = structuredClone(require('../fixtures/minimal.json'));
+  icon.available_snapshots = icon.available_snapshots.concat(['icon-living']);
+  assert.equal(codeOf(capture(() => plugin.validateSeed(ctx, icon))), 'invalid_seed');
+  assert.equal(capture(() => plugin.validateSeed({app_id: ctx.app_id, binding: ctx.binding, virtual_now: ctx.virtual_now}, require('../fixtures/minimal.json'))), null);
 });
 
 test('the reviewer page uses a placeholder when a snapshot is not ready', () => {

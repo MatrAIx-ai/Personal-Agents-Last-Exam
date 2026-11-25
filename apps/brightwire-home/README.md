@@ -23,7 +23,7 @@ node runtime/mcp-server.cjs --registry apps.registry.json --app brightwire-home 
 node runtime/mcp-server.cjs --registry apps.registry.json --app brightwire-home --role agent --run demo --state-dir .state
 ```
 
-Brightwire is enabled in `apps.registry.json`. The default registry is `examples/registry.json`, so both commands pass `--registry apps.registry.json`. `node runtime/web/server.cjs --registry apps.registry.json --app brightwire-home` has no business page to mount. Reviewers read `gui/src/view.js`, which draws the floor plan, room icons and camera snapshots from the asset catalog. A placeholder stands in when the catalog has no ready entry for that asset.
+Brightwire is enabled in `apps.registry.json`. The default registry is `examples/registry.json`, so both commands pass `--registry apps.registry.json`. The business page is `node runtime/web/server.cjs --registry apps.registry.json --app brightwire-home`. It lists devices by room and type and calls the Agent tools for commands, scenes, routines, modes, guest codes, camera share and confirmation cancel. Reviewers still read `gui/src/view.js`, which draws the floor plan, room icons and camera snapshots from the asset catalog. A placeholder stands in when the catalog has no ready entry for that asset.
 
 ## Using this App in a task
 
@@ -156,11 +156,11 @@ Owner notices start as `pending_delivery`. `src/publisher.cjs` `publishPending({
 ## Limits
 
 - One household per account. Devices are already paired in the seed.
-- Sunrise and sunset need a `sun_table` row for that date. A missing row is a miss.
+- Sunrise and sunset need a `sun_table` row for that date. When the row is missing, the first commit whose cursor has passed noon on that date records one miss. A later commit on the same date does not record a second miss.
 - `hearth_appliance_id` is a string a task can join to Hearth. It is not checked against another App.
 - Home Repair Slots is the same kind of shared id: a task turns a booking into an access code with Brightwire's own tools.
 - Family chat is not sent. A Messages post would be authored as the household owner.
-- There is no business web page.
+- Snapshot ids in `available_snapshots` are checked against this package's `contribution/assets.catalog.json` when a seed is loaded. Each id must be a ready `ui.snapshot`. A task that ships its own bundle must keep those ids and the household subject on each one. `env.apply_event` rejects a bundle that drops a listed snapshot.
 - Sensor events and faults are actor kind `manual`, with actor id `sensor` or `fault`.
 - The activity actor for a routine firing is kind `routine` and the actor id is the routine id, for example `rt-lamps-1900`.
 - An obstructed garage keeps its last open or closed position. `close` throws `obstructed` and leaves that position. `fault.clear` removes the fault. `open` is still accepted while the fault is set.
@@ -182,6 +182,8 @@ evaluator/export.cjs      Snapshot joined to audit, for graders
 fixtures/                 minimal, task-73, household-b, household-c, bindings, clock, policies
 examples/scenario.json    Front door opens at 12:05, no quiet-hours alert
 examples/run.cjs          Runs that scenario
+gui/index.html            Business page
+gui/src/app.js            Business controls
 gui/src/view.js           Reviewer text
 assets/                   9 room icons, 3 floor plans, 6 camera snapshots
 tests/business.test.cjs   Household tests
@@ -189,4 +191,4 @@ tests/runtime.test.cjs    Public runtime
 tests/mail-integration.test.cjs
 ```
 
-`node scripts/materialize.cjs` rewrites `tools.json`, the event schema, the seed schema, the fixtures and the reviewer images. Snapshot JPEGs are drawn with bit-exact ffmpeg flags, so the file does not store an encoder version. Run the script from this directory after a schema change.
+`node scripts/materialize.cjs` rewrites `tools.json`, the event schema, the seed schema, the fixtures and the reviewer images. Icons, floor plans and snapshots are drawn by `scripts/raster.cjs`. Snapshot labels use 16 pixel blocks so the JPEG stays readable. Run the script from this directory after a schema change.

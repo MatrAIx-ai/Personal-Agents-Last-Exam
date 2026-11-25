@@ -160,6 +160,34 @@ test('load_seed rejects a snapshot id that is not in the catalog', () => {
   });
   assert.equal(loaded.result.status, 'invalid_seed', JSON.stringify(loaded.result));
   assert.equal(loaded.state.data.available_snapshots.includes('snap-made-up'), false);
+  const iconData = structuredClone(require('../fixtures/minimal.json'));
+  iconData.available_snapshots = iconData.available_snapshots.concat(['icon-living']);
+  const iconLoad = model.execute(state, 'infra', 'env.load_seed', {
+    expected_version: model.version(state),
+    request_id: 'snap-icon',
+    virtual_now: iconData.committed_through,
+    data: iconData,
+    binding: state.binding,
+    policies: state.policies,
+    bundle: state.resources.bundle
+  });
+  assert.equal(iconLoad.result.status, 'invalid_seed', JSON.stringify(iconLoad.result));
+  const dropped = structuredClone(state.resources.bundle);
+  dropped.catalog.assets = dropped.catalog.assets.filter(asset => asset.asset_id !== 'snap-nursery');
+  delete dropped.blobs['snap-nursery'];
+  dropped.dataset.expected_counts.assets -= 1;
+  const event = model.execute(state, 'infra', 'env.apply_event', {
+    expected_version: model.version(state),
+    event: {
+      event_id: 'drop-snapshot',
+      at: '2026-11-18T09:01:00-08:00',
+      operation: 'sensor.change',
+      payload: {device_id: 'contact-front', state: 'open'}
+    },
+    bundle: dropped
+  });
+  assert.equal(event.result.status, 'invalid_bundle', JSON.stringify(event.result));
+  assert.equal(event.state.resources.bundle.catalog.assets.some(asset => asset.asset_id === 'snap-nursery'), true);
 });
 
 test('evidence joins the later allow row and keeps each client name', async () => {

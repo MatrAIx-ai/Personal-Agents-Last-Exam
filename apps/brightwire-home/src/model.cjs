@@ -83,20 +83,15 @@ function validateSeed(ctx, data) {
   }
 }
 
-function catalogAssets(ctx) {
-  const fromRuntime = ctx && ctx.assets && ctx.assets.catalog && ctx.assets.catalog.assets;
-  if (Array.isArray(fromRuntime)) return fromRuntime;
-  const catalog = ctx && (ctx.catalog || (ctx.bundle && ctx.bundle.catalog));
-  return catalog && catalog.assets;
-}
+const packageCatalog = require('../contribution/assets.catalog.json');
 
 function checkSnapshots(ctx, data) {
-  const assets = catalogAssets(ctx);
-  if (!Array.isArray(assets)) return;
+  const assets = packageCatalog.assets || [];
   for (const id of data.available_snapshots || []) {
     const asset = assets.find(item => item.asset_id === id);
-    if (!asset || !asset.availability || asset.availability.status !== 'ready') {
-      fail('invalid_seed', 'available_snapshots lists ' + id + ' without a ready catalog asset.');
+    const snapshot = asset && Array.isArray(asset.roles) && asset.roles.includes('ui.snapshot');
+    if (!asset || !snapshot || !asset.availability || asset.availability.status !== 'ready') {
+      fail('invalid_seed', 'available_snapshots lists ' + id + ' without a ready snapshot in the package catalog.');
     }
   }
 }
@@ -183,4 +178,12 @@ function objects(data) {
   ];
 }
 
-module.exports = {validateSeed, records, objects, references: () => [], assetReferences: () => []};
+function assetReferences(data) {
+  return (data.available_snapshots || []).map(asset_id => ({
+    asset_id,
+    object_type: 'household',
+    object_id: data.account_id
+  }));
+}
+
+module.exports = {validateSeed, records, objects, references: () => [], assetReferences};

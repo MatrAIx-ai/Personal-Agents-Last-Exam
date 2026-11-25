@@ -46,7 +46,7 @@ npm run app:verify -- --app apps/brightwire-home
 npm test
 ```
 
-Validation evidence for this tree is in [`contribution/evidence.md`](contribution/evidence.md).
+Validation evidence for this tree is in [https://github.com/suraj-ranganath/Personal-Agents-Last-Exam/blob/environment-proposal/brightwire-home-devices/apps/brightwire-home/contribution/evidence.md](https://github.com/suraj-ranganath/Personal-Agents-Last-Exam/blob/environment-proposal/brightwire-home-devices/apps/brightwire-home/contribution/evidence.md). The package hash is the `package_sha256` value printed by `npm run app:verify -- --app apps/brightwire-home`.
 
 The candidate suite and the App validator are reported separately.
 
@@ -60,7 +60,7 @@ Candidate suite (`npm test`):
 
 App validator (`npm run app:verify -- --app apps/brightwire-home`): 49 checks passed on Node v22.23.4, Node v18.20.8 and Node v24.22.3.
 
-App tests on Node v22.23.4, Node v18.20.8 and Node v24.22.3: 60 passed, 0 failed (`tests/business.test.cjs` 45, `tests/images.test.cjs` 2, `tests/mail-integration.test.cjs` 3, `tests/runtime.test.cjs` 10).
+App tests on Node v22.23.4, Node v18.20.8 and Node v24.22.3: 63 passed, 0 failed (`tests/business.test.cjs` 48, `tests/images.test.cjs` 2, `tests/mail-integration.test.cjs` 3, `tests/runtime.test.cjs` 10). The business page check is `node apps/brightwire-home/tests/web-gui.cjs` and is separate from those four files.
 
 - Example: `{"app":"brightwire-home","contact":"open","alerts":0,"committed_through":"2026-11-17T12:05:00-06:00"}`.
 - Runtime tests: 10 passed. Replay, stale version, reset, catch-up rollback, a task 73 load with the package bundle, `env.load_seed` rejecting `snap-made-up`, an MCP join of two clients, the task 73 hallway brightness receipt, a clock advance that reuses the living-room request id and stays `env.advance_time`, and an approved confirmation joined to its Infra event.
@@ -82,10 +82,8 @@ Files outside the App, with the reason each one stays:
 - `apps.registry.json`: registers the Brightwire package so the runtime can load it.
 - `runtime/tests/clock.test.cjs`: the clock test counts Apps in `apps.registry.json`.
 - `runtime/tests/run.cjs`: `npm test` runs the Brightwire verifier plus the runtime, Mail and image tests.
-- `runtime/core/runtime.cjs`: `validateSeed` sees `ctx.assets` after the incoming bundle is installed.
-- `runtime/core/attachment-context.cjs`: `ctx.assets.catalog` is a copy of the bundle catalog.
 
-`docs/personal-apps.md`, `docs/runtime-time.md`, `examples/workflows/session-time/README.md`, `runtime/README.md` and `runtime/web/README.md` match upstream `a4bce023953061483c41de5a287ba5e43f4a5648`.
+`runtime/core` matches upstream `a4bce023953061483c41de5a287ba5e43f4a5648`. `docs/personal-apps.md`, `docs/runtime-time.md`, `examples/workflows/session-time/README.md`, `runtime/README.md` and `runtime/web/README.md` match that revision as well.
 
 ## How the implementation suggestion was handled
 
@@ -101,7 +99,7 @@ Every Agent tool is prefixed with `brightwire-home.`. The proposal file was not 
 
 - One household per account. Devices are already paired in the seed.
 - Schedules use the fixture UTC offset. The timezone name is a label. Daylight-saving transitions are not applied.
-- Sunrise and sunset need a `sun_table` row. A missing row is a miss with reason `no_sun_time`.
+- Sunrise and sunset need a `sun_table` row. When the row is missing, the first commit whose cursor has passed noon on that date records one miss with reason `no_sun_time`. A later commit on the same date does not record a second miss.
 - Recurring code schedules are not checked for overlap. Window codes on the same lock are.
 - `schedule.process_due` with nothing due still advances `committed_through` when the clock has moved, so the same window is not scanned again. It adds no device change and no firing in that case.
 - An obstructed garage keeps its last open or closed position. `close` throws `obstructed`. `open` is still accepted. A jammed lock stores `lock: "jammed"` until `fault.clear`.
@@ -113,12 +111,12 @@ Every Agent tool is prefixed with `brightwire-home.`. The proposal file was not 
 - `records()` returns one household summary, so bundles should keep `expected_counts.records` at 1.
 - In-process `execute` audit rows omit `input.request_id`. The MCP server adds it, along with `connection_id` and `client_name`. The helper keeps `request_id` on the activity either way.
 - Assistant mode carry is the list `assistant_carried_modes`. A member mode change or an owner routine clears the whole list.
-- A caught-up routine records device changes at `fired_at`. An auto-relock that was already due is stored at its due time, before that routine. A relock whose unlock was replaced by a later unlock is skipped.
+- A scheduled routine that is still inside its catch-up window records its device changes at the commit time, in `fired_at`. An auto-relock that was already due is stored at its due time. Device actions that the relock triggers are stored at that same due time. A relock whose unlock was replaced by a later unlock is skipped.
 - Mail reconciliation uses an Infra Mail client. `env.event_status` and `env.snapshot` are not Agent tools.
 - `env.reset` clears the previous audit and then records the reset itself.
-- There is no business web page. `node runtime/web/server.cjs --registry apps.registry.json --app brightwire-home` has nothing to mount.
+- The business page is `node runtime/web/server.cjs --registry apps.registry.json --app brightwire-home`. It uses the Agent tools for device commands, scenes, routines, modes, guest codes, camera share and confirmation cancel. `gui/src/view.js` remains the reviewer renderer.
 - Family chat is not sent.
 
 ## Comment draft
 
-@Jasonya The follow-up is on `environment-proposal/brightwire-home-devices`. Fixture history starts on 2025-01-01, confirm-scope writes are checked before a confirmation is stored, and `env.load_seed` rejects a snapshot id that is not a ready catalog asset. `npm run app:verify -- --app apps/brightwire-home` passed 49 checks. `npm test` passed 24/24 on Node 22.23.4, Node 18.20.8 and Node 24.22.3. The proposal file is unchanged (`cfddc0d8f33af729322817b56620876474509d9d`). The validation record is `apps/brightwire-home/contribution/evidence.md`.
+@Jasonya The follow-up is on `environment-proposal/brightwire-home-devices`. `runtime/core` matches upstream again. Snapshot ids are checked against the package catalog, and a bundle that drops a listed snapshot does not commit. The business page is `node runtime/web/server.cjs --registry apps.registry.json --app brightwire-home`. `npm run app:verify -- --app apps/brightwire-home` passed 49 checks. `npm test` passed 24/24 on Node 22.23.4, Node 18.20.8 and Node 24.22.3. The proposal file is unchanged (`cfddc0d8f33af729322817b56620876474509d9d`). The validation record is [https://github.com/suraj-ranganath/Personal-Agents-Last-Exam/blob/environment-proposal/brightwire-home-devices/apps/brightwire-home/contribution/evidence.md](https://github.com/suraj-ranganath/Personal-Agents-Last-Exam/blob/environment-proposal/brightwire-home-devices/apps/brightwire-home/contribution/evidence.md).

@@ -9,18 +9,20 @@ const {snapshotImage} = require('../scripts/materialize.cjs');
 const root = path.resolve(__dirname, '..');
 const catalog = require('../contribution/assets.catalog.json');
 const shots = [
-  ['nursery', 'Nursery', 0xE7C7C7],
-  ['living', 'Living', 0xC9D4E4],
-  ['hallway', 'Hallway', 0xD5D8DC],
-  ['kitchen', 'Kitchen', 0xE6D3B3],
-  ['garage', 'Garage', 0xD5DCCB],
-  ['entry', 'Entry', 0xE4D0C4]
+  ['nursery', 'NUR', 0xE7C7C7],
+  ['living', 'LIV', 0xC9D4E4],
+  ['hallway', 'HAL', 0xD5D8DC],
+  ['kitchen', 'KIT', 0xE6D3B3],
+  ['garage', 'GAR', 0xD5DCCB],
+  ['entry', 'ENT', 0xE4D0C4]
 ];
 
 test('committed snapshots match the asset catalog and omit an encoder version', () => {
-  const listed = catalog.assets.filter(asset => String(asset.asset_id).startsWith('snap-'));
+  const listed = catalog.assets.filter(asset => /^snap-[a-z]+$/.test(asset.asset_id));
   assert.equal(listed.length, shots.length);
-  for (const asset of listed) {
+  const owned = catalog.assets.filter(asset => asset.roles.includes('ui.snapshot'));
+  assert.equal(owned.length, shots.length * 3);
+  for (const asset of owned) {
     const file = path.join(root, asset.storage.path);
     const bytes = fs.readFileSync(file);
     const digest = crypto.createHash('sha256').update(bytes).digest('hex');

@@ -917,16 +917,30 @@ function applyDue(ctx, data, effect, nowMs, pending, fromMs) {
   }
 }
 
+function assertActionArguments(device, command, args) {
+  const table = COMMANDS[device.type];
+  const trial = structuredClone(device);
+  table[command](trial, args || {}, '2026-01-01T12:00:00-06:00', {announcements: []});
+}
+
 function assertApplicable(device, command, args, at) {
   const trial = structuredClone(device);
   applyCommand({announcements: []}, trial, command, args || {}, at);
+}
+
+function emailAddress(value) {
+  if (typeof value !== 'string' || value.length < 3 || value.length > 200 || /\s/.test(value)) return false;
+  const at = value.indexOf('@');
+  if (at < 1 || at !== value.lastIndexOf('@')) return false;
+  const domain = value.slice(at + 1);
+  return domain.includes('.') && domain[0] !== '.' && !domain.endsWith('.');
 }
 
 function assertShare(device, recipient, duration) {
   if (device.type !== 'camera') fail('unsupported_command', 'Only a camera can be shared.');
   operable(device, 'share');
   if (device.privacy !== 'privacy_off') fail('unsupported_command', 'The camera is in privacy mode.');
-  if (typeof recipient !== 'string' || !recipient.includes('@') || recipient.length > 200) fail('invalid_arguments', 'The recipient must be an address.');
+  if (!emailAddress(recipient)) fail('invalid_arguments', 'The recipient must be an address.');
   if (!Number.isInteger(duration) || duration < 1 || duration > 1440) fail('value_out_of_range', 'Share duration must be 1 to 1440 minutes.');
 }
 
@@ -957,7 +971,9 @@ function normalizedActions(data, actions) {
     }
     const device = requireDevice(data, action.device_id);
     if (!COMMANDS[device.type] || !COMMANDS[device.type][action.command]) fail('unknown_device_in_action', 'The action does not match the device.');
-    return {kind: 'device', device_id: action.device_id, command: action.command, args: copy(action.args || {})};
+    const args = copy(action.args || {});
+    assertActionArguments(device, action.command, args);
+    return {kind: 'device', device_id: action.device_id, command: action.command, args};
   });
 }
 
@@ -1105,6 +1121,12 @@ function applyStored(ctx, data, confirmation) {
     setMode(ctx, data, stored.mode, false);
   } else if (stored.kind === 'routine_update') {
     const routine = requireRoutine(data, stored.routine_id);
+    if (stored.patch && stored.patch.actions) {
+      for (const action of stored.patch.actions) {
+        if (action.kind !== 'device') continue;
+        assertActionArguments(requireDevice(data, action.device_id), action.command, action.args || {});
+      }
+    }
     const before = automationSnap(routine, 'routine');
     Object.assign(routine, stored.patch);
     routine.last_edited_by = 'assistant';
@@ -1127,6 +1149,12 @@ function applyStored(ctx, data, confirmation) {
     recordAutomation(ctx, data, 'routine_delete', before, automationSnap(routine, 'routine'), 'delete ' + routine.name);
   } else if (stored.kind === 'scene_update') {
     const scene = requireScene(data, stored.scene_id);
+    if (stored.patch && stored.patch.actions) {
+      for (const action of stored.patch.actions) {
+        if (action.kind !== 'device') continue;
+        assertActionArguments(requireDevice(data, action.device_id), action.command, action.args || {});
+      }
+    }
     const before = automationSnap(scene, 'scene');
     Object.assign(scene, stored.patch);
     recordAutomation(ctx, data, 'scene_update', before, automationSnap(scene, 'scene'), 'Updated scene ' + scene.name);
@@ -1144,6 +1172,9 @@ function applyStored(ctx, data, confirmation) {
   } else if (stored.kind === 'code_update') {
     const code = data.access_codes.find(item => item.code_id === stored.code_id);
     if (!code || code.revoked) fail('invalid_arguments', 'That code cannot be updated.');
+    const nowMs = Date.parse(ctx.virtual_now);
+    assertCodeSchedule(data, {...stored.schedule, locks: code.locks}, nowMs, code.code_id);
+    if (activeCodeCount(data, nowMs) > data.max_active_codes) fail('code_limit_reached', 'The household is at its access code limit.');
     code.schedule = stored.schedule;
   } else if (stored.kind === 'code_revoke') {
     const code = data.access_codes.find(item => item.code_id === stored.code_id);

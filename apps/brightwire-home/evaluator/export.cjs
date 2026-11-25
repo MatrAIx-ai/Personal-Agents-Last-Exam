@@ -143,7 +143,8 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
       caller_role: match ? match.actor || null : null,
       connection_id: match ? match.connection_id || null : null,
       client_name: match ? match.client_name || null : null,
-      tool: match ? match.tool || null : null
+      tool: match ? match.tool || null : null,
+      reason: entry.command === 'confirmation_failed' ? entry.summary || null : null
     };
   });
   const actorHistory = history.filter(entry => !actor_kind || entry.actor_kind === actor_kind);
@@ -216,17 +217,18 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
     const candidate = row.decision === 'allow' && row.actor === 'agent' ? receiptCall(state, requestId) : null;
     const stored = candidate && candidate.tool === row.tool ? candidate : null;
     const execution = stored ? null : (row.decision === 'deny' ? nextDenied(row.tool, requestId) : null);
-    const args = stored ? stored.args : (execution && execution.args);
-    const bareDeny = row.decision === 'deny' && !execution;
-    const linked = row.actor === 'agent' && !bareDeny
-      ? history.find(entry => entry.request_id && entry.request_id === requestId && (!entry.device_id || !args || !args.device_id || args.device_id === entry.device_id))
+    const denied = row.decision === 'deny';
+    const args = denied ? (execution && execution.args) : (stored ? stored.args : null);
+    const linked = !denied && row.actor === 'agent'
+      ? history.find(entry => entry.request_id && entry.request_id === requestId && entry.tool === row.tool && (!entry.device_id || !args || !args.device_id || args.device_id === entry.device_id))
       : null;
     pushCall({
       seq: row.seq,
       tool: row.tool || null,
-      target: bareDeny ? null : (argTarget(args) || callTarget(linked, row, execution)),
-      command: bareDeny ? null : ((args && args.command) || callCommand(linked, row, execution)),
-      arguments: bareDeny ? {} : allowArguments(args),
+      target: denied ? (execution ? argTarget(execution.args) : null) : (argTarget(args) || callTarget(linked, row, null)),
+      command: denied ? (execution && execution.args && execution.args.command || null) : ((args && args.command) || callCommand(linked, row, null)),
+      arguments: denied ? (execution ? allowArguments(execution.args) : {}) : allowArguments(args),
+      reason: linked && linked.reason ? linked.reason : null,
       outcome: (execution && execution.status) || (row.result && row.result.status) || row.reason || row.decision,
       actor: row.actor || null,
       caller_role: row.actor || null,
@@ -246,6 +248,9 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
       const open = calls.find(call => call.seq != null && call.decision === 'allow' && call.tool === tool && !call.request_id && !pairedReads.has(call.seq));
       if (open) {
         pairedReads.add(open.seq);
+        if (!open.target) open.target = callTarget(null, null, item);
+        if (!open.command) open.command = callCommand(null, null, item);
+        if (!Object.keys(open.arguments || {}).length) open.arguments = allowArguments(item.args);
         return;
       }
     }
