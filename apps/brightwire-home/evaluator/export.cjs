@@ -248,46 +248,51 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
     if (!call.target) call.target = callTarget(null, null, item);
     if (!call.command) call.command = callCommand(null, null, item);
     if (!Object.keys(call.arguments || {}).length) call.arguments = allowArguments(item.args);
-    usedExecutions.add(item);
   }
-  let pendingRows = calls.filter(call => call.seq != null && call.decision === 'deny');
-  let pendingExecs = agent_executions.filter(item => !['ok', 'committed', 'ready'].includes(item.status));
-  let moved = true;
-  while (moved) {
-    moved = false;
-    for (const item of pendingExecs) {
-      const rows = pendingRows.filter(row => denyCompatible(row, item));
-      if (rows.length !== 1) continue;
-      const execs = pendingExecs.filter(other => denyCompatible(rows[0], other));
-      if (execs.length !== 1) continue;
-      fillDenied(rows[0], item);
-      pendingRows = pendingRows.filter(row => row !== rows[0]);
-      pendingExecs = pendingExecs.filter(other => other !== item);
-      moved = true;
-      break;
-    }
-  }
-  const remain = new Map();
-  function remainAdd(key, kind, value) {
-    if (!remain.has(key)) remain.set(key, {rows: [], execs: []});
-    remain.get(key)[kind].push(value);
-  }
-  function remainKey(item, isRow) {
+  function groupKey(item, isRow) {
     const tool = isRow ? (item.tool || '') : (item.tool || item.name || '');
     if (item.request_id) return tool + '\n' + item.request_id;
     return tool + '\n' + partyKey(item);
   }
-  for (const row of pendingRows) remainAdd(remainKey(row, true), 'rows', row);
-  for (const item of pendingExecs) remainAdd(remainKey(item, false), 'execs', item);
-  for (const bucket of remain.values()) {
-    const rows = bucket.rows;
-    const execs = bucket.execs.filter(item => rows.some(row => denyCompatible(row, item)));
-    const matchedRows = rows.filter(row => execs.some(item => denyCompatible(row, item)));
-    const complete = matchedRows.length === rows.length && execs.length === bucket.execs.length && matchedRows.length === execs.length && matchedRows.every(row => execs.every(item => denyCompatible(row, item)));
-    if (complete && matchedRows.length) {
-      execs.forEach((item, index) => fillDenied(matchedRows[index], item));
-    } else if (matchedRows.length) {
-      for (const item of execs) usedExecutions.add(item);
+  const denyRows = calls.filter(call => call.seq != null && call.decision === 'deny');
+  const denyExecs = agent_executions.filter(item => !['ok', 'committed', 'ready'].includes(item.status));
+  const deniedTools = new Set(denyRows.map(row => row.tool || ''));
+  const groups = new Map();
+  function groupAdd(key, kind, value) {
+    if (!groups.has(key)) groups.set(key, {rows: [], execs: []});
+    groups.get(key)[kind].push(value);
+  }
+  for (const row of denyRows) groupAdd(groupKey(row, true), 'rows', row);
+  for (const item of denyExecs) {
+    const tool = item.tool || item.name || '';
+    if (deniedTools.has(tool)) usedExecutions.add(item);
+    groupAdd(groupKey(item, false), 'execs', item);
+  }
+  for (const group of groups.values()) {
+    const rows = group.rows;
+    const execs = group.execs;
+    if (!rows.length || !execs.length) continue;
+    const ordered = rows.length === execs.length && rows.every((row, index) => denyCompatible(row, execs[index]));
+    if (ordered) {
+      execs.forEach((item, index) => fillDenied(rows[index], item));
+      continue;
+    }
+    let openRows = rows.slice();
+    let openExecs = execs.slice();
+    let found = true;
+    while (found) {
+      found = false;
+      for (const item of openExecs) {
+        const fits = openRows.filter(row => denyCompatible(row, item));
+        if (fits.length !== 1) continue;
+        const rivals = openExecs.filter(other => denyCompatible(fits[0], other));
+        if (rivals.length !== 1) continue;
+        fillDenied(fits[0], item);
+        openRows = openRows.filter(row => row !== fits[0]);
+        openExecs = openExecs.filter(other => other !== item);
+        found = true;
+        break;
+      }
     }
   }
   const openGroups = new Map();

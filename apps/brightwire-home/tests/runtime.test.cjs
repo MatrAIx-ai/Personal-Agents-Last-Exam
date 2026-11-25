@@ -198,6 +198,11 @@ test('three runs keep their own snapshot readiness', () => {
   const stateB = model.create('brightwire-home', 'snap-b', 'sandbox');
   const dataB = structuredClone(stateB.data);
   dataB.available_snapshots = dataB.available_snapshots.filter(id => id !== 'snap-nursery');
+  const bundleB = structuredClone(stateB.resources.bundle);
+  const nursery = bundleB.catalog.assets.find(asset => asset.asset_id === 'snap-nursery');
+  nursery.availability = {status: 'missing', reason: 'The replacement bundle has no bytes for this snapshot.'};
+  delete nursery.integrity;
+  delete bundleB.blobs['snap-nursery'];
   const loadedB = model.execute(stateB, 'infra', 'env.load_seed', {
     expected_version: model.version(stateB),
     request_id: 'seed-b-drop-id',
@@ -205,9 +210,11 @@ test('three runs keep their own snapshot readiness', () => {
     data: dataB,
     binding: stateB.binding,
     policies: stateB.policies,
-    bundle: stateB.resources.bundle
+    bundle: bundleB
   });
   assert.equal(loadedB.result.status, 'ready', JSON.stringify(loadedB.result));
+  const afterB = model.execute(runA, 'agent', 'brightwire-home.devices.get', {device_id: 'camera-nursery'});
+  assert.equal(afterB.result.device.snapshot_status, 'ready');
   const missingB = model.execute(loadedB.state, 'agent', 'brightwire-home.devices.get', {device_id: 'camera-nursery'});
   assert.equal(missingB.result.device.snapshot_status, 'asset_missing');
   const runC = model.create('brightwire-home', 'snap-c', 'sandbox');

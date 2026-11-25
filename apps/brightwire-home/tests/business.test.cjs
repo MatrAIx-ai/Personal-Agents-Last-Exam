@@ -1424,6 +1424,46 @@ test('task 73 flags every routine and scene change and keeps call arguments', ()
   assert.equal(gradedAttempts.fresh_device_commands[1].outcome, 'device_not_found');
   assert.equal(gradedAttempts.fresh_device_commands[1].target, 'light-missing');
   assert.equal(gradedAttempts.fresh_device_commands[1].command, 'set_brightness');
+  const secondOnly = exportEvidence({
+    snapshot: {
+      data: house.data,
+      audit: [
+        {seq: 2, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'deny', reason: 'invalid_arguments', connection_id: 'conn-a', client_name: 'reader-a', input: {request_id: 'bright'}},
+        {seq: 3, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'deny', reason: 'invalid_arguments', connection_id: 'conn-a', client_name: 'reader-a', input: {request_id: 'bright'}}
+      ]
+    },
+    agent_executions: [
+      {tool: 'brightwire-home.devices.command', status: 'invalid_arguments', request_id: 'bright', client_name: 'reader-b', connection_id: 'conn-b', args: {device_id: 'light-hallway', command: 'set_brightness', args: {brightness: 30}}}
+    ]
+  });
+  const secondOnlyGrade = task73(secondOnly);
+  assert.equal(secondOnlyGrade.fresh_device_commands.length, 2);
+  assert.equal(secondOnly.calls.filter(call => call.seq == null).length, 0);
+  assert.equal(secondOnlyGrade.fresh_device_commands.every(call => call.target === '' && call.command === null), true);
+  assert.deepEqual(secondOnlyGrade.fresh_device_commands.map(call => call.outcome), ['invalid_arguments', 'invalid_arguments']);
+  const orderedAttempts = exportEvidence({
+    snapshot: {
+      data: house.data,
+      audit: [
+        {seq: 2, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'deny', reason: 'value_out_of_range', connection_id: 'conn-b', client_name: 'reader-b', input: {request_id: 'bright'}},
+        {seq: 3, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'deny', reason: 'device_not_found', connection_id: 'conn-b', client_name: 'reader-b', input: {request_id: 'bright'}},
+        {seq: 4, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'deny', reason: 'value_out_of_range', connection_id: 'conn-b', client_name: 'reader-b', input: {request_id: 'bright'}},
+        {seq: 5, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'deny', reason: 'device_not_found', connection_id: 'conn-b', client_name: 'reader-b', input: {request_id: 'bright'}}
+      ]
+    },
+    agent_executions: [
+      {tool: 'brightwire-home.devices.command', status: 'value_out_of_range', request_id: 'bright', connection_id: 'conn-b', client_name: 'reader-b', args: {device_id: 'light-living', command: 'set_brightness', args: {brightness: 40}}},
+      {tool: 'brightwire-home.devices.command', status: 'device_not_found', request_id: 'bright', connection_id: 'conn-b', client_name: 'reader-b', args: {device_id: 'unlisted-A', command: 'set_brightness', args: {brightness: 50}}},
+      {tool: 'brightwire-home.devices.command', status: 'value_out_of_range', request_id: 'bright', connection_id: 'conn-b', client_name: 'reader-b', args: {device_id: 'light-hallway', command: 'set_brightness', args: {brightness: 30}}},
+      {tool: 'brightwire-home.devices.command', status: 'device_not_found', request_id: 'bright', connection_id: 'conn-b', client_name: 'reader-b', args: {device_id: 'unlisted-B', command: 'set_brightness', args: {brightness: 60}}}
+    ]
+  });
+  const orderedGrade = task73(orderedAttempts);
+  assert.equal(orderedGrade.fresh_device_commands.length, 4);
+  assert.deepEqual(orderedGrade.fresh_device_commands.map(call => call.target), ['light-living', 'unlisted-A', 'light-hallway', 'unlisted-B']);
+  assert.deepEqual(orderedGrade.fresh_device_commands.map(call => call.outcome), ['value_out_of_range', 'device_not_found', 'value_out_of_range', 'device_not_found']);
+  assert.deepEqual(orderedGrade.fresh_device_commands.map(call => call.command), ['set_brightness', 'set_brightness', 'set_brightness', 'set_brightness']);
+  assert.deepEqual(orderedGrade.fresh_device_commands.map(call => call.arguments), [{brightness: 40}, {brightness: 50}, {brightness: 30}, {brightness: 60}]);
   const secondDenied = exportEvidence({
     snapshot: {
       data: house.data,
@@ -1434,7 +1474,8 @@ test('task 73 flags every routine and scene change and keeps call arguments', ()
       ]
     },
     agent_executions: [
-      {tool: 'brightwire-home.devices.get', status: 'scope_insufficient', args: {device_id: 'light-hallway'}, connection_id: 'conn-b', client_name: 'reader-b'}
+      {tool: 'brightwire-home.devices.get', status: 'scope_insufficient', args: {device_id: 'light-hallway'}, connection_id: 'conn-b', client_name: 'reader-b'},
+      {tool: 'brightwire-home.devices.get', status: 'device_not_found', args: {device_id: 'light-porch'}, connection_id: 'conn-b', client_name: 'reader-b'}
     ]
   });
   assert.equal(secondDenied.calls.find(call => call.seq === 1).target, null);
@@ -1444,6 +1485,7 @@ test('task 73 flags every routine and scene change and keeps call arguments', ()
   assert.equal(secondDenied.calls.find(call => call.seq === 3).target, 'light-hallway');
   assert.equal(secondDenied.calls.find(call => call.seq === 3).outcome, 'scope_insufficient');
   assert.equal(secondDenied.calls.filter(call => call.tool === 'brightwire-home.devices.get').length, 3);
+  assert.equal(secondDenied.calls.filter(call => call.seq == null).length, 0);
   const failed = exportEvidence({
     snapshot: {
       data: {
