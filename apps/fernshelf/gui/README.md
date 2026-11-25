@@ -1,6 +1,6 @@
 # Fernshelf web page
 
-`index.html` and `src/app.js` are Fernshelf's own page and controller: the account holder's photo library with its albums, sharing, removal requests, storage, activity and trash. The repository's shared Web Host (`runtime/web/server.cjs`) serves them and connects the page to a fixed **Agent** MCP process for one run. The shared `runtime/web/client.js` supplies the session, tool discovery, schema forms, versioned writes and text-only DOM helpers. `src/view.js` is the compatible reviewer renderer named by the legacy profile in `contribution/gui.json`.
+`index.html` and `src/app.js` are Fernshelf's own page and controller: the account holder's photo library with its albums, sharing, removal requests, storage, activity and trash. The repository's shared Web Host (`runtime/web/server.cjs`) serves them and connects the page to a fixed **Agent** MCP process for one run. The shared `runtime/web/client.js` supplies the session, tool discovery, the MCP call, the New album schema form and text-only DOM helpers; Fernshelf's controller makes its own forms and writes, with the version handling described below. `src/view.js` is the compatible reviewer renderer named by the legacy profile in `contribution/gui.json`.
 
 The page was added after plan approval, because the maintainers asked every Environment for one ([comment on #111](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/111#issuecomment-7123353250)); the approved plan described an MCP-only App. No business schema, tool, event or seed format changed for it.
 
@@ -16,7 +16,7 @@ Open the access link the Host prints. `apps/fernshelf/web.registry.json` is a on
 
 - `--profile sandbox` (on a new run) allows every Agent write. `--profile scenario` allows only the ten reads: the page then shows no write controls, and the Host refuses a forced write.
 - Starting a Host on an existing run never resets it or changes its policy. Loading a task, injecting events or moving the clock stays with the separate Infra MCP connection; the page has no route for any of them.
-- The same run, registry and state directory let an MCP client and this page observe the same backend. **Refresh** reads it again; reopening the page shows what is committed.
+- The same run, registry and state directory let an MCP client and this page observe the same backend. **Refresh** reads it again; reopening the page shows what is committed. The page also reads the whole view again after each of its own writes, and as soon as any of its reads shows that something changed elsewhere.
 
 ## Views
 
@@ -55,37 +55,41 @@ All 13 Agent writes are reachable from the page. Not in the page, by design:
 - Mail notices: the Infra-run sender (`src/publisher.cjs`) needs a Messaging publisher connection the browser does not have.
 - Several-item `albums.update` `order` beyond moving one item earlier or later, and `remove_ids` on several items at once: the page offers per-item moves and removal; the MCP tool accepts the longer forms.
 
-## Behaviour shared with the Host's other Apps
+## Forms, versions and what the page keeps
 
-- Forms are built from the live Agent tool schemas; Fernshelf only chooses which fields an action shows and prefills the rest (for example the album ID and the decision).
-- A write carries the version observed when the form or view was read. If anything committed in between, Core answers `stale_version`, the form shows the conflict, and nothing is overwritten.
-- An unchanged form or button retried after a failure reuses its request ID, so a write whose response was lost commits once.
-- There is no business data kept in the browser beyond what the page has read; the open view and an unsent form are the only page state (the open view is kept in `sessionStorage` across a reload).
-- **Refresh** (and the first load, and a search) reads everything again. The refresh that follows one of the page's own writes re-reads the items, the selected item and what that write can have changed, and keeps the rest from the last read: the account (plan, people, labels), image bytes (an item's file never changes), and the album list, requests, album details and album covers the write did not touch. Changes made outside the page (an Agent on another connection, an Infra event) therefore appear on Refresh, as with the Host's other Apps.
-- App text is inserted as text nodes. The page's styles are added to the shared stylesheet through the CSS object model at start-up (the Host serves one stylesheet and its Content-Security-Policy allows no inline styles).
+- **Forms.** Each form shows only the fields a person fills in: Rename (title), Edit details (caption, favourite, archived, corrected capture time), Invite (person, role), Change role (role), Create link (expiry), Honour and Decline (a note). The album, member, request and the decision are set by the button that opened the form; no form asks for a record ID. A form is offered only when the live Agent discovery lists its tool; a field a task policy denies is refused by Core (`permission_denied`) and the form says the action is not available. New album is the shared schema form, whose only field is the title.
+- **One version per view.** Core keeps one version for the whole library, and every read answers with it. The page reads a view as one batch: every page of the items, the trash, the account, the albums, the requests, the open album and whatever the open view needs (storage, notifications, the albums behind Sharing and Requests). If the answers carry different versions, because something committed while they were being read, the batch is read again. So everything on screen was read at one version.
+- **Writes carry the version of what they show.** Buttons and confirmations send the version of the view. A form first reads the record it shows (the item, the album or the requests) and sends the version of that read. If anything committed since, Core answers `stale_version`, the form says "Something changed in the library since this was opened…", and nothing is overwritten.
+- **Reading again.** After each of its own writes the page reads the whole view again. When any later read (an image, "who can see this", an album cover, a form) answers with a newer version than the view's, the view is out of date and the page reads it again. **Refresh**, the first load and a search do the same.
+- **What is kept.** Only image bytes (an item's file never changes, and a purged item is never read again) and the tool schemas are kept between reads. The open view and an unsent form are the only other page state (the open view is kept in `sessionStorage` across a reload).
+- **Retries.** An unchanged form or button retried after a failure reuses its request ID, so a write whose answer was lost commits once.
+- App text is inserted as text nodes. The page's styles are added to the shared stylesheet through the CSS object model at start-up (the Host serves one stylesheet and its Content-Security-Policy allows no inline styles); one of these rules makes the `hidden` attribute always hide.
 
 ## Performance
 
-The cause is Core's per-call cost: Core reads and validates the run's whole state on every MCP call, and the Agent process answers one call at a time. With the reference library and its two years of history (about 465 KB of state), a call took 0.27–0.32 s, measured on the real runtime (median of five calls per tool, Linux, 20 cores, load average about 4; Node 22 at the low end, Node 18 at the high end). The Host also lists the tools before each call. The page therefore keeps its calls few:
+The page is slow, and the cause is Core's per-call cost: Core reads and validates the run's whole state on every MCP call, and the Agent process answers one call at a time. The reference library with its two-year history and complete activity log is about 654 KB of state. On the real runtime a read took 0.41–0.48 s and a write 0.23–0.28 s (median of five calls per tool, three runs on each Node version, Linux, 20 cores, load average 1–2; Node 22 at the low end, Node 18 at the high end); at load average 3–4.5 a read took 0.48–0.57 s. The Host also lists the tools before each call.
 
-- independent reads (later pages of items, the trash, account, albums, requests, the open album) are sent together;
-- the refresh after one of the page's own writes skips what that write cannot have changed (see above);
+Correctness comes first, so the page reads the whole view again after every write (see above) instead of keeping lists that could have changed. A load of the Photos view is 8 to 11 calls: the Host's list read, every page of the items, the trash, the account, the albums, the requests, then the selected item and "who can see this". What keeps it from being slower:
+
+- the reads of one view are sent together;
+- a dialog closes as soon as its write commits, and the view is read behind it;
 - image bytes are read once per page load and reused; the photo panel's image goes ahead of queued thumbnails, and thumbnails load two at a time as they scroll into view;
-- album covers are chosen once per page load and kept until a write changes that album;
+- album covers are read only for cards on screen;
 - the search box refreshes after a pause in typing.
 
-Measured in Chromium against the shared Host on a fresh `sandbox` run of the reference library (same machine and load; Node 18 / Node 22):
+Measured in Chromium 141 against the shared Host on a fresh `sandbox` run of the reference library, three runs on each Node version (the Host on that version), load average 1–2:
 
-| Action | Time until the page is idle | Calls |
-| --- | --- | --- |
-| First load (grid shown, idle) | 5.2 s / 4.2 s; first thumbnail 6.0 s / 4.2 s | 9, then thumbnails |
-| Open a photo with a file | image 1.9 s / 1.3 s; "who can see this" 3.7 s / 2.6 s | 4 |
-| Edit a caption (form closes after 0.9 s) | 3.8 s / 3.3 s | 6 after the write |
-| Create an album (opens it) | 4.4 s / 3.9 s | 7 |
-| Create a link | 4.2 s / 3.7 s | 6 |
-| Refresh button (reads everything) | 4.4 s / 3.9 s | 7 |
+| Action | Node 18 | Node 22 | Calls |
+| --- | --- | --- | --- |
+| First load (grid shown, idle) | 6.7 s; first thumbnail 6.8–7.0 s | 6.2 s; first thumbnail 6.4–7.0 s | 11, then thumbnails |
+| Open a photo with a file | image 2.3 s; "who can see this" 4.1 s | image 1.8–2.3 s; "who can see this" 3.6 s | 4 |
+| Open Edit details (reads the item) | 0.8 s | 0.8 s | 1 |
+| Save a caption | form closes 0.8–1.4 s; idle 6.7 s | form closes 0.8–0.9 s; idle 6.2 s | 10 |
+| Create an album (opens it) | 6.9–7.0 s | 6.0–6.5 s | 9 |
+| Create a link (form opened to idle) | 7.5 s | 6.9–7.5 s | 10 |
+| Refresh button | 5.9–6.4 s | 5.4–5.9 s | 8 |
 
-Before these measures (same machine, Node 18, with the fixture as it was before the 2025 history was added) the page took 4.8 s for the caption edit, 6.5 s to create an album and 3.7 s to show the panel image, because every refresh read the account and every list again and re-read every visible image. No single call comes near the Host's request timeout. The browser test (`npm run test:browser`) takes about 4 minutes.
+Under more load these grow in proportion to the per-call time. No single call came near the Host's request timeout or the runtime client's 6 s limit: the slowest single read measured was 0.67 s. The browser test (`npm run test:browser`) took 7–9 minutes at load average 4–5.
 
 ## Checks
 
