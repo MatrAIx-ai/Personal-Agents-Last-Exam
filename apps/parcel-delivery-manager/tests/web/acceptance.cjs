@@ -290,8 +290,26 @@ const out = path.resolve(process.argv[2] || process.env.PALE_WEB_REPORT_DIR || '
     record('Failed delivery shows its reason, the action deadline and the recovery options', /Delivery failed/.test(text) && /Nobody was available to receive the parcel/.test(text) &&
       /Choose a new option by\s+Mar 6, 2026, 8:00 PM UTC/.test(text) && await v.page.locator('[data-change=reschedule]').count() === 1 && await v.page.locator('[data-change=redirect]').count() === 1);
     await v.shot('1-delivery-failed');
+    // Recover a second failed parcel through the page: choose a new date, the carrier applies it.
+    await v.applyEvent({event_id: 'web-failed-2', at: '2026-03-04T20:05:00Z', operation: 'carrier.delivery_failed',
+      payload: {shipment_id: 'S003', plan_revision: 1, reason: 'An adult signature was required and nobody could sign.'}});
+    await refresh(); await v.select('S003');
+    await v.page.locator('[data-change=reschedule]').click();
+    await v.dialog.locator('[data-field=delivery_date]').fill('2026-03-07');
+    await v.submit.click(); await v.page.locator('dialog[open][data-step=review]').waitFor();
+    await v.submit.click(); await v.closed();
+    const redelivery = (await v.snapshot()).changes.find(c => c.shipment_id === 'S003' && c.status === 'pending');
+    record('Redelivery requested in the browser after a failed attempt is pending in the App', redelivery?.target.delivery_date === '2026-03-07' && /Delivery failed/.test(await v.detail()));
+    await v.applyEvent({event_id: 'web-redelivery', at: '2026-03-04T21:00:00Z', operation: 'carrier.change_resolved',
+      payload: {shipment_id: 'S003', change_id: redelivery.id, base_plan_revision: 1, decision: 'applied', reason: null}});
+    await refresh(); await v.nav('Active parcels'); await v.select('S003');
+    text = await v.detail();
+    record('Once the carrier applies it the parcel is on its way again and the failure stays in the timeline', /In transit/.test(text) && !/Failed attempt/.test(text) &&
+      /on 2026-03-07/.test(text) && /Delivery attempt failed: An adult signature was required/.test(text));
+    await v.nav('Needs action'); await v.select('S001');
+
     record('Infra advances the clock past the deadline without any event', (await advance('2026-03-06T20:00:00Z')).status === 'committed');
-    await refresh();
+    await refresh(); await v.select('S001');
     text = await v.detail();
     record('After the deadline passes by the clock the page shows it and offers no change', /Delivery failed/.test(text) && /Deadline passed/.test(text) && /passed/.test(text) &&
       await v.page.locator('[data-blocked=deadline_passed]').count() === 1 && await v.page.locator('[data-change]').count() === 0 &&
@@ -313,6 +331,40 @@ const out = path.resolve(process.argv[2] || process.env.PALE_WEB_REPORT_DIR || '
     record('Terminal outcome keeps the failure reason and timeline visible', /Returned to sender/.test(text) && /Nobody was available/.test(text) && /Return to sender started/.test(text) &&
       await v.page.locator('[data-panel=options]').count() === 0);
     await v.shot('4-returned');
+
+    // ================= W2 in the browser: redirect, arrival, handoff =================
+    const u = await open('pickup', 'sandbox');
+    const reload = async () => { await u.page.getByRole('button', {name: 'Refresh'}).click(); await u.settle(); };
+    await u.select('S001');
+    await u.page.locator('[data-change=redirect]').click();
+    const choices = await u.dialog.locator('[data-field=point_id] option').allInnerTexts();
+    record('Redirect form lists the eligible pickup points with their kind and access', choices.length === 3 && choices.includes('Quay Street depot counter (counter, step-free)') &&
+      choices.includes('Foundry Lane parcel locker (locker, not step-free)'));
+    await u.dialog.locator('[data-field=point_id]').selectOption('P03');
+    await u.submit.click(); await u.page.locator('dialog[open][data-step=review]').waitFor();
+    record('Redirect preview names the pickup point before anything is sent', /Pickup at Quay Street depot counter/.test(await u.dialog.innerText()) && (await u.snapshot()).changes.length === 1);
+    await u.submit.click(); await u.closed();
+    const toPoint = (await u.snapshot()).changes.find(c => c.shipment_id === 'S001' && c.status === 'pending');
+    record('Redirect sent from the browser is pending in the App', toPoint?.target.point_id === 'P03' && /Home delivery to Home/.test(await u.detail()));
+    await u.applyEvent({event_id: 'web-redirect', at: '2026-03-02T15:00:00Z', operation: 'carrier.change_resolved',
+      payload: {shipment_id: 'S001', change_id: toPoint.id, base_plan_revision: 1, decision: 'applied', reason: null}});
+    await reload();
+    text = await u.detail();
+    record('An applied redirect shows the new plan and no pass before the parcel arrives', /Pickup at Quay Street depot counter/.test(text) && /In transit/.test(text) &&
+      await u.page.locator('[data-pass]').count() === 0 && await u.page.locator('[data-panel=collection]').count() === 0);
+    await u.applyEvent({event_id: 'web-arrival', at: '2026-03-03T15:00:00Z', operation: 'carrier.pickup_ready', payload: {shipment_id: 'S001', plan_revision: 2, point_id: 'P03', pickup_epoch: 1}});
+    await reload();
+    const shown = await u.page.locator('[data-pass-code]').innerText(), viaAgent = (await u.agent.call(T('pass.get'), {id: 'S001'})).pass;
+    record('Arrival shows the pass and the deadline, the same as MCP', shown === viaAgent.code && viaAgent.valid_now === true && /Ready for pickup/.test(await u.detail()) &&
+      /Collect by\s+Mar 6, 2026, 3:00 PM UTC/.test(await u.detail()));
+    await u.shot('1-ready-after-redirect');
+    await u.applyEvent({event_id: 'web-handoff', at: '2026-03-04T15:00:00Z', operation: 'carrier.collected',
+      payload: {shipment_id: 'S001', point_id: 'P03', pickup_epoch: 1, collector_person_id: 'person-maya', pass_code: shown}});
+    await reload();
+    record('A collected parcel leaves the active list', await u.page.locator('[data-record-id=S001]').count() === 0);
+    await u.nav('Closed'); await u.select('S001');
+    text = await u.detail();
+    record('The handoff is shown with who collected and where', /Collected/.test(text) && /Collected at Quay Street depot counter by Maya Chen/.test(text) && await u.page.locator('[data-pass]').count() === 0);
 
     // ================= Restricted profile: reads only =================
     const r = await open('read-only', 'scenario');

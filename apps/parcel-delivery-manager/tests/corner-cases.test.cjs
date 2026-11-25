@@ -296,12 +296,23 @@ test('every rule that makes a ledger incoherent is enforced when a seed is loade
     ['opening hours that close before they open', d => { d.pickup_points[0].hours[0] = {weekday: 0, opens: '21:00', closes: '09:00'}; }, /open before they close/],
     ['unknown time zone for a point', d => { d.pickup_points[0].time_zone = 'Nowhere/Here'; }, /time zone/],
     ['notice about a missing parcel', d => { d.notices[0].shipment_id = 'S999'; }, /missing record/],
-    ['duplicate record ID', d => { d.passes.push(structuredClone(d.passes[0])); }, /Duplicate ID/]
+    ['duplicate record ID', d => { d.passes.push(structuredClone(d.passes[0])); }, /Duplicate ID/],
+    ['history entry later than the last update', d => { find(d, 'shipments', 'S003').history.push({at: '2026-03-02T00:00:00Z', action: 'late'}); }, /invalid history timeline/],
+    ['opening hours of zero length', d => { d.pickup_points[0].hours[0] = {weekday: 0, opens: '09:00', closes: '09:00'}; }, /open before they close/],
+    ['saved collector for a recipient outside the binding', d => { d.collectors.push({recipient_person_id: 'person-nobody', person_id: 'person-alex', relationship: 'x'}); }, /Collector recipient is not a person/],
+    ['request by someone outside the binding', d => { find(d, 'changes', 'C001').requested_by_person_id = 'person-nobody'; }, /Change requester is not a person/],
+    ['pickup plan with a delivery day', d => { find(d, 'shipments', 'S002').plan.delivery_date = '2026-03-05'; }, /must name only a point/],
+    ['pickup plan with a hold', d => { find(d, 'shipments', 'S002').plan.hold_until = '2026-03-05'; }, /must name only a point/],
+    ['pickup plan without a point', d => { find(d, 'shipments', 'S002').plan.point_id = null; }, /must name only a point/],
+    ['deadline at the moment of readiness', d => { find(d, 'shipments', 'S002').pickup.deadline = find(d, 'shipments', 'S002').pickup.ready_at; }, /deadline must follow readiness/],
+    ['authorization with no history', d => { find(d, 'grants', 'G001').history = []; }, /invalid history timeline/],
+    ['authorization history before its creation', d => { find(d, 'grants', 'G001').history[0].at = '2026-03-01T00:00:00Z'; }, /invalid history timeline/],
+    ['authorization that expires the moment it starts', d => { find(d, 'grants', 'G001').expires_at = find(d, 'grants', 'G001').created_at; }, /must expire after it is created/]
   ];
   for (const [name, mutate, pattern] of cases) {
     const bad = structuredClone(good);
     mutate(bad);
     assert.throws(() => plugin.validateSeed(base.ctx, bad), error => { assert.equal(error.code, 'invalid_seed', name); assert.match(error.message, pattern, name); return true; }, name);
   }
-  assert.ok(cases.length >= 50);
+  assert.ok(cases.length >= 60);
 });

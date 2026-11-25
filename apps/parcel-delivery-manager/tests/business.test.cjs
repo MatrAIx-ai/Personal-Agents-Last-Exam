@@ -118,6 +118,7 @@ require('./w3-delegation.test.cjs');
 require('./w4-recovery.test.cjs');
 require('./catalog.test.cjs');
 require('./corner-cases.test.cjs');
+require('./boundaries.test.cjs');
 require('./fuzz.test.cjs');
 
 test('optional diagnostics cannot change business results', () => {

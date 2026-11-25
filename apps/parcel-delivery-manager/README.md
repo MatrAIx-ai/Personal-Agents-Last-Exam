@@ -14,6 +14,7 @@ npm run example        # applies examples/scenario.json to the fixture
 npm run check:schemas  # generated contracts match scripts/build-schemas.cjs
 npm run check:fixtures # catalog files match scripts/build-fixtures.cjs
 FUZZ_RUNS=30 FUZZ_STEPS=300 node --test tests/fuzz.test.cjs   # optional deeper random search, about five minutes
+npm run test:mutation  # optional: changes the business code one place at a time and reports what the tests miss, about four minutes
 ```
 
 From the repository root, with real Agent and Infra MCP processes on the public runtime:
