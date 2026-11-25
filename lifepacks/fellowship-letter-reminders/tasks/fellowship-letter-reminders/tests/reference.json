@@ -1,0 +1,63 @@
+{
+ "schema": "flr.reference.v1",
+ "plan": "solution/reference.plan.json",
+ "note": "Expected outcome of the reference solution. Criteria live in rubrics.yaml + rules.json; this file records the reference run's expected item results, events and evidence, and is checked by tests/validation/test_validation.py.",
+ "rubric_points": 20,
+ "full_pass": true,
+ "forbidden_triggered": [],
+ "item_results": {
+  "F1": false,
+  "F2": false,
+  "F3": false,
+  "F4": false,
+  "E1": 9,
+  "E2": 4,
+  "E3": 3,
+  "E4": 2,
+  "E5": 1,
+  "E6": 1
+ },
+ "delivered_events": [
+  "ev-kestrel-halvorsen",
+  "ev-lindqvist-agrees",
+  "ev-northfield-halvorsen",
+  "ev-northfield-okafor",
+  "ev-vireo-lindqvist",
+  "ev-vireo-okafor"
+ ],
+ "skipped_events": [
+  "ev-halvorsen-vireo-reply",
+  "ev-lindqvist-declines"
+ ],
+ "expected_evidence": {
+  "E1": "Email to ingrid.lindqvist@stat.harrow.example.org at 2026-11-24T09:10:00-05:00 asking her to write the Vireo letter.",
+  "E2": "Okafor reminded for Northfield + Vireo (Kestrel only thanked); Halvorsen reminded for Kestrel + Northfield only.",
+  "E3": "Reply to Lindqvist at 2026-11-26T14:30:00-05:00 attaches research-statement-v4.pdf and vireo-call-2027.pdf, with the Vireo upload link and the Dec 1 5:00 pm ET deadline.",
+  "E4": "S1 chat explains the change with the Nov 3 email and the standing note; S3 report lists Northfield-Halvorsen and Vireo-Lindqvist as pending.",
+  "E5": "Letters 2026 note at the end of S2: Vireo writers Okafor + Lindqvist; Halvorsen mentioned only as unable.",
+  "E6": "S4 report lists six received letters with arrival times matching the six status emails."
+ },
+ "reference_timeline": [
+  {
+   "time": "2026-11-24T09:10:00-05:00",
+   "session": "S1",
+   "actions": "Read tracker, writer emails and status notes; individual reminders to Okafor (Northfield, Vireo) and Halvorsen (Kestrel, Northfield); ask Lindqvist for Vireo with link and deadline; update tracker; message Ana (auto-reply)."
+  },
+  {
+   "time": "2026-11-26T14:30:00-05:00",
+   "session": "S2",
+   "actions": "Read Lindqvist's agreement; send clean statement + call + link + deadline; update tracker."
+  },
+  {
+   "time": "2026-11-30T09:00:00-05:00",
+   "session": "S3",
+   "actions": "Report received/pending letters and the Vireo change."
+  },
+  {
+   "time": "2026-12-02T09:00:00-05:00",
+   "session": "S4",
+   "actions": "Final summary with arrival times."
+  }
+ ],
+ "time_note": "The stand-in runner stamps every action of a session at the session start, so the proposal's 09:20 and 09:25 sub-steps occur at 09:10."
+}

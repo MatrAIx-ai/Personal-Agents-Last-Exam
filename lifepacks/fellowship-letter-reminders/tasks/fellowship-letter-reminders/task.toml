@@ -1,0 +1,25 @@
+version = "1.0"
+
+[metadata]
+author_name = "jpli02"
+category = "learning-and-research"
+tags = ["lifepack", "personal-agent", "multi-session", "mail", "messages", "notes", "files", "contacts"]
+difficulty = "hard"
+proposal = "proposals/task/fellowship-letter-reminders.md"
+lifepack_format_version = "1.0"
+
+[verifier]
+# tests/test.sh grades the exported run (run.json) and writes /logs/verifier/reward.json.
+timeout_sec = 600.0
+
+[agent]
+# Whole scenario, four sessions (S1-S4). Per-session budgets follow the frozen model roster.
+timeout_sec = 3600.0
+
+[environment]
+build_timeout_sec = 900.0
+cpus = 2
+memory_mb = 4096
+storage_mb = 4096
+# Apps run locally from the pinned PALE checkout; the environment itself needs no network.
+allow_internet = false

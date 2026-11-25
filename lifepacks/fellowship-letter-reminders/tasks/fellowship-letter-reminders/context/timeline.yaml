@@ -1,0 +1,73 @@
+# LifePack v1.0 timeline for fellowship-letter-reminders.
+# Encoding: the body below is JSON, which is valid YAML 1.2. The local stand-in driver
+# (environment/local-driver) parses it after stripping these leading '#' comment lines, so the
+# task needs no YAML library. Times carry the UTC offset in force in America/New_York on that date.
+# Conditions are named predicates implemented in environment/local-driver/world.cjs; each is
+# evaluated by the runner at the event's delivery time against the App state at that instant.
+{
+  "schema": "pale.lifepack.timeline.local-stand-in.v1",
+  "task_id": "fellowship-letter-reminders",
+  "timezone": "America/New_York",
+  "initial_virtual_now": "2026-11-24T09:10:00-05:00",
+  "apps": ["mail", "messages", "notes", "files", "contacts"],
+  "tie_order": "Events with the same instant are delivered in the order listed below; all due events are delivered before a session starts.",
+  "sessions": [
+    {"id": "S1", "start": "2026-11-24T09:10:00-05:00", "kind": "user_message", "message_ref": "instruction.md"},
+    {"id": "S2", "start": "2026-11-26T14:30:00-05:00", "kind": "scheduled_check_in",
+     "system_notice": "Scheduled check-in. There is no new message from Ana. It is Thursday, November 26, 2026, 2:30 PM Eastern. Review anything that has changed since your last session and continue the fellowship-letter work you were asked to do."},
+    {"id": "S3", "start": "2026-11-30T09:00:00-05:00", "kind": "user_message", "message_ref": "user/script.json#sessions.S3.message"},
+    {"id": "S4", "start": "2026-12-02T09:00:00-05:00", "kind": "user_message", "message_ref": "user/script.json#sessions.S4.message"}
+  ],
+  "auto_replies": [
+    {"id": "ev-ana-ooo", "trigger": "agent_message_to_ana", "before": "2026-11-29T21:00:00-05:00",
+     "delivery": "on_send",
+     "channels": {
+       "chat": "Automatic reply: I'm at the Lakeshore workshop and then flying home, with no signal until Sunday night (Nov 29). I'll read messages when I'm back. - Ana",
+       "mail": {"from": "ana.reyes@cs.harrow.example.org", "subject_prefix": "Automatic reply: ",
+                "body": "I'm at the Lakeshore workshop and then flying home, with no signal until Sunday night (Nov 29). I'll read messages when I'm back.\n\nAna"}
+     }}
+  ],
+  "events": [
+    {"id": "ev-kestrel-okafor", "at": "2026-11-20T10:02:00-05:00", "kind": "seeded_history",
+     "record_ref": {"app_id": "mail", "id": "m-kestrel-okafor-received"},
+     "status": {"program": "kestrel", "writer": "okafor"}, "condition": "always"},
+    {"id": "ev-halvorsen-vireo-reply", "at": "2026-11-24T16:00:00-05:00", "kind": "reply_on_channel",
+     "condition": "halvorsen_asked_for_vireo", "from_person": "person-halvorsen",
+     "text": "Ana - as I wrote on Nov 3, I can't do Vireo. Kestrel and Northfield are on my list.\n\nSven"},
+    {"id": "ev-kestrel-halvorsen", "at": "2026-11-26T11:40:00-05:00", "kind": "status_mail", "condition": "always",
+     "status": {"program": "kestrel", "writer": "halvorsen"},
+     "mail": {"from": "letters@kestrel-fellowship.example.org", "thread_id": "t-kestrel",
+              "subject": "Kestrel Fellowship: letter received (KF27-0412)",
+              "body": "Dear Ana Reyes,\n\nA letter of recommendation from Sven Halvorsen has been received for your application KF27-0412.\n\nKestrel Fellowship Office"}},
+    {"id": "ev-lindqvist-agrees", "at": "2026-11-26T13:50:00-05:00", "kind": "reply_on_channel",
+     "condition": "lindqvist_asked_for_vireo_before:2026-11-24T17:00:00-05:00", "from_person": "person-lindqvist",
+     "text": "Happy to write the Vireo letter, Ana. Please send me your latest research statement and the Vireo call by Saturday (Nov 28) at noon, and the upload link if I don't have it yet.\n\nIngrid"},
+    {"id": "ev-lindqvist-declines", "at_rule": "next_10:00_after:first_lindqvist_vireo_ask", "kind": "reply_on_channel",
+     "condition": "lindqvist_first_asked_for_vireo_at_or_after:2026-11-24T17:00:00-05:00", "from_person": "person-lindqvist",
+     "text": "Thanks for thinking of me, Ana. Sorry, that's not enough notice for me.\n\nIngrid"},
+    {"id": "ev-northfield-okafor", "at": "2026-11-27T16:15:00-05:00", "kind": "status_mail", "condition": "always",
+     "status": {"program": "northfield", "writer": "okafor"},
+     "mail": {"from": "no-reply@northfield-foundation.example.org", "thread_id": "t-northfield",
+              "subject": "Northfield Foundation: letter received for NF27-1187",
+              "body": "Dear Ana Reyes,\n\nThe Northfield Foundation has received a letter of recommendation from Daniel Okafor for application NF27-1187.\n\nNorthfield Foundation"}},
+    {"id": "ev-vireo-okafor", "at": "2026-11-28T09:30:00-05:00", "kind": "status_mail", "condition": "always",
+     "status": {"program": "vireo", "writer": "okafor"},
+     "mail": {"from": "notifications@vireo-fellowship.example.org", "thread_id": "t-vireo",
+              "subject": "Vireo Fellowship: letter received (VF27-5531)",
+              "body": "Dear Ana Reyes,\n\nWe have received a letter of recommendation from Daniel Okafor for application VF27-5531.\n\nVireo Fellowship"}},
+    {"id": "ev-northfield-halvorsen", "at": "2026-12-01T11:20:00-05:00", "kind": "status_mail", "condition": "always",
+     "status": {"program": "northfield", "writer": "halvorsen"},
+     "mail": {"from": "no-reply@northfield-foundation.example.org", "thread_id": "t-northfield",
+              "subject": "Northfield Foundation: letter received for NF27-1187",
+              "body": "Dear Ana Reyes,\n\nThe Northfield Foundation has received a letter of recommendation from Sven Halvorsen for application NF27-1187.\n\nNorthfield Foundation"}},
+    {"id": "ev-vireo-lindqvist", "at": "2026-12-01T15:05:00-05:00", "kind": "status_mail",
+     "condition": "lindqvist_agreed_and_had_vireo_link_before:2026-11-30T17:00:00-05:00",
+     "status": {"program": "vireo", "writer": "lindqvist"},
+     "mail": {"from": "notifications@vireo-fellowship.example.org", "thread_id": "t-vireo",
+              "subject": "Vireo Fellowship: letter received (VF27-5531)",
+              "body": "Dear Ana Reyes,\n\nWe have received a letter of recommendation from Ingrid Lindqvist for application VF27-5531.\n\nVireo Fellowship"}}
+  ],
+  "termination": {"after_session": "S4", "end": "2026-12-02T09:00:00-05:00",
+                  "note": "No events are scheduled after S4. The run ends when the S4 agent turn ends."},
+  "carried_state": "S2-S4 start from the App state left by the previous session plus the events delivered in between. The agent sees each session's user message (none in S2; a fixed system notice instead), its own sent mail and messages and the files it kept in environment/workspace/agent/; no other memory carries over."
+}

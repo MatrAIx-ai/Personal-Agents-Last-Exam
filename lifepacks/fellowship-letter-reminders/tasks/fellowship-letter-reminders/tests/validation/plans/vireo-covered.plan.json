@@ -1,0 +1,167 @@
+{
+ "name": "vireo-covered",
+ "description": "Reference, but the reminder to Halvorsen also says Vireo is covered (no request). Must not trigger F1 or Halvorsen's reply.",
+ "sessions": {
+  "S1": [
+   {
+    "call": "notes.list",
+    "args": {
+     "query": "Letters"
+    }
+   },
+   {
+    "call": "notes.get",
+    "args": {
+     "id": "note-letters-2026"
+    }
+   },
+   {
+    "call": "mail.search",
+    "args": {
+     "query": "letter"
+    }
+   },
+   {
+    "call": "mail.get",
+    "args": {
+     "id": "m-halvorsen-1103"
+    }
+   },
+   {
+    "call": "mail.get",
+    "args": {
+     "id": "m-kestrel-okafor-received"
+    }
+   },
+   {
+    "call": "messages.list",
+    "args": {
+     "query": "backup"
+    }
+   },
+   {
+    "call": "contacts.list",
+    "args": {}
+   },
+   {
+    "send_mail": {
+     "to": [
+      "d.okafor@cs.harrow.example.org"
+     ],
+     "subject": "Reminder: Northfield and Vireo letters due Dec 1, 5 pm ET",
+     "body": "Dear Daniel,\n\nA quick reminder that my Northfield Foundation Fellowship and Vireo Fellowship letters are due Tuesday, December 1, 2026 at 5:00 pm ET. The upload links:\n\nNorthfield: https://northfield-foundation.example.org/recommend/NF27-1187\nVireo: https://vireo-fellowship.example.org/letters/VF27-5531\n\nKestrel already confirmed your letter on Nov 20 - thank you!\n\nBest,\nAna"
+    }
+   },
+   {
+    "send_mail": {
+     "to": [
+      "sven.halvorsen@corvidlabs.example.com"
+     ],
+     "subject": "Reminder: Kestrel and Northfield letters due Dec 1, 5 pm ET",
+     "body": "Dear Sven,\n\nA quick reminder that my Kestrel Postdoctoral Fellowship and Northfield Foundation Fellowship letters are due Tuesday, December 1, 2026 at 5:00 pm ET. The upload links:\n\nKestrel: https://kestrel-fellowship.example.org/letters/KF27-0412\nNorthfield: https://northfield-foundation.example.org/recommend/NF27-1187\n\nVireo is covered, so there's nothing needed from you there. Thank you again for supporting these.\n\nBest,\nAna"
+    }
+   },
+   {
+    "send_mail": {
+     "to": [
+      "ingrid.lindqvist@stat.harrow.example.org"
+     ],
+     "subject": "Could you write my Vireo Fellowship letter?",
+     "body": "Dear Ingrid,\n\nOne of my writers can no longer write for the Vireo Fellowship. Could you write that letter, as you kindly offered in September? It is due Tuesday, December 1, 2026 at 5:00 pm ET, which is a week from today.\n\nUpload link: https://vireo-fellowship.example.org/letters/VF27-5531\n\nI can send my research statement and the Vireo call right away.\n\nThank you so much,\nAna"
+    }
+   },
+   {
+    "edit_note": {
+     "id": "note-letters-2026",
+     "replace": [
+      [
+       "Kestrel Postdoctoral Fellowship\n  Writers: Daniel Okafor, Sven Halvorsen\n",
+       "Kestrel Postdoctoral Fellowship\n  Writers: Daniel Okafor, Sven Halvorsen\n  Status: Okafor received Nov 20; Halvorsen reminded Nov 24\n"
+      ],
+      [
+       "Northfield Foundation Fellowship\n  Writers: Daniel Okafor, Sven Halvorsen\n",
+       "Northfield Foundation Fellowship\n  Writers: Daniel Okafor, Sven Halvorsen\n  Status: both reminded Nov 24\n"
+      ],
+      [
+       "Vireo Fellowship\n  Writers: Daniel Okafor, Sven Halvorsen\n",
+       "Vireo Fellowship\n  Writers: Daniel Okafor, Ingrid Lindqvist (asked Nov 24 under the backup line below; Sven can't write for Vireo - his Nov 3 email)\n  Status: Okafor reminded Nov 24\n"
+      ]
+     ]
+    }
+   },
+   {
+    "say": "Reminders are out: Daniel for Northfield and Vireo (Kestrel already received his letter on Nov 20), Sven for Kestrel and Northfield. Sven wrote on Nov 3 that he can't write for Vireo, so per your Letters note I asked Ingrid today to write the Vireo letter - her one-week notice window closes today. I updated the Letters 2026 note."
+   }
+  ],
+  "S2": [
+   {
+    "call": "mail.search",
+    "args": {
+     "query": "Vireo"
+    }
+   },
+   {
+    "call": "mail.get",
+    "args": {
+     "id": "in-ev-lindqvist-agrees"
+    }
+   },
+   {
+    "call": "files.list",
+    "args": {
+     "query": "research-statement"
+    }
+   },
+   {
+    "send_mail": {
+     "to": [
+      "ingrid.lindqvist@stat.harrow.example.org"
+     ],
+     "subject": "Re: Could you write my Vireo Fellowship letter?",
+     "body": "Dear Ingrid,\n\nThank you so much! Attached are my final research statement (research-statement-v4.pdf) and the Vireo call (vireo-call-2027.pdf); the call is also at https://vireo-fellowship.example.org/2027/call .\n\nUpload link: https://vireo-fellowship.example.org/letters/VF27-5531\nDeadline: Tuesday, December 1, 2026, 5:00 pm ET.\n\nBest,\nAna",
+     "attach_files": [
+      "file-statement-v4",
+      "file-vireo-call"
+     ]
+    }
+   },
+   {
+    "edit_note": {
+     "id": "note-letters-2026",
+     "replace": [
+      [
+       "Status: Okafor received Nov 20; Halvorsen reminded Nov 24",
+       "Status: Okafor received Nov 20; Halvorsen received Nov 26"
+      ],
+      [
+       "Ingrid Lindqvist (asked Nov 24 under",
+       "Ingrid Lindqvist (agreed Nov 26; statement, call, link sent; asked Nov 24 under"
+      ]
+     ]
+    }
+   }
+  ],
+  "S3": [
+   {
+    "call": "mail.search",
+    "args": {
+     "query": "received"
+    }
+   },
+   {
+    "final": "Welcome back! Where the letters stand (from the programs' status emails):\n\nReceived:\n- Kestrel - Daniel Okafor: received Nov 20, 10:02 am\n- Kestrel - Sven Halvorsen: received Nov 26, 11:40 am\n- Northfield - Daniel Okafor: received Nov 27, 4:15 pm\n- Vireo - Daniel Okafor: received Nov 28, 9:30 am\n\nStill pending:\n- Northfield - Sven Halvorsen: pending\n- Vireo - Ingrid Lindqvist: pending\n\nWhat changed: Sven wrote on Nov 3 that he can't write for Vireo, so on Nov 24 I asked Ingrid under your standing backup note (her one-week window closed that day). She agreed on Nov 26 and has your clean statement, the Vireo call, the upload link and the deadline. Nothing you need to do right now; both pending letters are due Dec 1 at 5 pm ET."
+   }
+  ],
+  "S4": [
+   {
+    "call": "mail.search",
+    "args": {
+     "query": "received"
+    }
+   },
+   {
+    "final": "Final summary - all six letters arrived before the Dec 1, 5 pm ET deadline:\n\n- Kestrel - Daniel Okafor: received Nov 20, 10:02 am\n- Kestrel - Sven Halvorsen: received Nov 26, 11:40 am\n- Northfield - Daniel Okafor: received Nov 27, 4:15 pm\n- Vireo - Daniel Okafor: received Nov 28, 9:30 am\n- Northfield - Sven Halvorsen: received Dec 1, 11:20 am\n- Vireo - Ingrid Lindqvist: received Dec 1, 3:05 pm\n\nNot received: none."
+   }
+  ]
+ }
+}
