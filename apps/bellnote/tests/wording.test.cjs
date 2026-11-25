@@ -1,7 +1,8 @@
 'use strict';
 // What a guardian reads: refusal messages and notification text name people, days and times, never
-// record IDs, ISO timestamps or field names (the web page shows both as they are); and the tool
-// descriptions state the rules the handlers apply.
+// record IDs, ISO timestamps or field names (the web page shows both as they are; the one exception is a
+// refusal of an unknown ID the caller sent, which repeats it); and the tool descriptions state the rules
+// the handlers apply.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {fixture, ev} = require('./harness.cjs');
@@ -31,7 +32,7 @@ test('refusal messages name people, days and times instead of record IDs and tim
     ['bellnote.forms.withdraw', {id: 'fr-0005'}, 'not_yours'],
     ['bellnote.forms.withdraw', {id: 'fr-0011'}, 'invalid_state'],
     ['bellnote.forms.respond', {id: 'form-pumpkin', child_id: 'child-theo', action: 'decline', form_version: 1}, 'closed', /closed on Friday, October 9 at 16:00/],
-    ['bellnote.pickup.person_add', {id: 'child-theo', name: 'Pat', relationship: 'neighbor', phone: '555-0177', person_id: 'person-rosa'}, 'conflict'],
+    ['bellnote.pickup.person_add', {id: 'child-theo', name: 'Pat', relationship: 'neighbor', phone: '555-0177', person_id: 'person-rosa'}, 'conflict', /for someone else\. To add the person who has this number, send the request without a person ID/],
     ['bellnote.pickup.person_add', {id: 'child-ines', name: 'Owen Pike', relationship: 'friend', phone: '555-0177'}, 'conflict', /already on Ines Okafor's list \(approved\)/],
     ['bellnote.pickup.person_remove', {id: 'pp-0003'}, 'invalid_state', /already denied/],
     ['bellnote.dismissal.set', {id: 'child-theo', date: '2026-11-16', mode: 'bus'}, 'too_late', /changes on Monday, November 16 passed at 13:40/],

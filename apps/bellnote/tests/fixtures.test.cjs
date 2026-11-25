@@ -57,7 +57,7 @@ test('the consistency checks catch broken fixtures', () => {
 test('the App\'s rules apply to hand-written records and to the minimal fixture as well', () => {
   const minimal = require('../fixtures/minimal.json');
   const broken = [
-    // The original state of the pumpkin-farm answers: Dana signed and paid for Ines, whose link has no can_pay.
+    // Swapping the children of the two pumpkin-farm answers gives Dana a paid answer for Ines, whose link has no can_pay.
     [reference, 'a fee paid by a guardian who cannot pay', d => { d.form_responses.find(r => r.id === 'fr-0001').child_id = 'child-theo'; d.form_responses.find(r => r.id === 'fr-0002').child_id = 'child-ines';
       d.payments.find(p => p.id === 'pay-0003').child_id = 'child-theo'; }, /fr-0002 fee paid by a guardian who cannot pay/],
     [reference, 'an answer by a guardian who cannot sign', d => { d.guardian_links.find(l => l.id === 'gl-theo-dana').can_sign = false; }, /fr-0002 answered by a guardian who cannot sign/],

@@ -43,6 +43,9 @@ test('Bellnote web page on the shared Host: serving, boundary, reads, writes, co
       for (const view of ['Home', 'Attendance', 'Forms', 'Pickup & dismissal', 'Lunch', 'Notifications', 'Account']) assert.ok(controller.includes("'" + view + "'"), view);
       for (const tool of WRITES) assert.ok(controller.includes("'" + tool + "'"), tool);
       assert.ok(!/innerHTML|insertAdjacentHTML|outerHTML|eval\(|new Function|fetch\(/.test(controller), 'controller renders text only and makes no requests of its own');
+      // Business data lives only in the current view's reads: no module-level cache that outlives a refresh, and no
+      // dependence on the Host's toolbar markup to learn when one happens.
+      assert.ok(!/^(const|let|var) [\w$]+ *= *new (Weak)?(Map|Set)\(|\.toolbar button/m.test(controller), 'controller keeps no read results between refreshes');
       for (const p of ['/shared/client.js', '/shared/style.css']) assert.equal((await s.get(p)).status, 200, p);
     });
     await t.test('hidden paths, fixtures, state and Infra routes are refused', async () => {

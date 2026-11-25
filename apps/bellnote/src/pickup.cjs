@@ -57,7 +57,7 @@ function resolvePerson(ctx, data, args) {
     // the person the number belongs to, so a restricted person cannot be added under another ID.
     if (match && match.person_id !== args.person_id && !c.restricted(data, args.id, args.person_id)) {
       if (c.restricted(data, args.id, match.person_id)) c.fail('restricted_person', 'The school office holds a restriction for the person with this phone number.');
-      c.fail('conflict', 'The school holds this phone number for another person; give each person\'s own number.');
+      c.fail('conflict', 'The school holds this phone number for someone else. To add the person who has this number, send the request without a person ID; otherwise give this person\'s own phone number.');
     }
     return {person_id: args.person_id, created: false};
   }

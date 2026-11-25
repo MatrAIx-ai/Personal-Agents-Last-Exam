@@ -136,9 +136,23 @@ async function run() {
     p.on('request', record);
     await p.click('button.bn-row[data-child-id=child-ines]'); await settled(p);
     p.off('request', record);
-    check('Choosing another child re-reads only that child\'s account and menu', JSON.stringify(seen.sort()) === JSON.stringify(['bellnote.lunch.account_get', 'bellnote.menu.list']) &&
+    check('Choosing another child re-reads that child\'s Lunch view (school, account, menu, payment methods), not the children list', JSON.stringify(seen.sort()) === JSON.stringify(['bellnote.lunch.account_get', 'bellnote.menu.list', 'bellnote.preferences.get', 'bellnote.schools.get']) &&
       (await p.getAttribute('[data-balance]', 'data-balance')) === '310', seen);
     await p.click('button:has-text("Add money")');
+    // Only a plain dollar amount is accepted; anything else is stopped at the field and nothing is sent.
+    let topups = 0; const countTopups = r => { if (new URL(r.url()).pathname === '/api/call' && JSON.parse(r.postData()).name === 'bellnote.lunch.topup') topups++; };
+    p.on('request', countTopups);
+    const refusedAmounts = [];
+    for (const typed of ['1,50', '7,5', '1e3', '12.345', '-5', ' 5', '5 ', '', '$5', '.5']) {
+      await p.fill('dialog[open] [data-money-for=amount_cents]', typed);
+      await submitDialog(p); await p.waitForTimeout(100);
+      const state = await p.$eval('dialog[open] [data-money-for=amount_cents]', e => ({valid: e.validity.valid, cents: e.form.querySelector('[data-field=amount_cents]').value}));
+      if (state.valid || state.cents !== '') refusedAmounts.push({typed, ...state});
+    }
+    await p.fill('dialog[open] [data-money-for=amount_cents]', '12.5');
+    const cents = await p.$eval('dialog[open] [data-field=amount_cents]', e => e.value);
+    p.off('request', countTopups);
+    check('The dollar field refuses anything but a plain amount with at most two decimals, sends nothing, and reads 12.5 as 1250 cents', refusedAmounts.length === 0 && topups === 0 && cents === '1250', {refusedAmounts, topups, cents});
     await p.fill('dialog[open] [data-money-for=amount_cents]', '2.00');
     await submitDialog(p);
     const refusal = await errorOf(p);
@@ -157,11 +171,13 @@ async function run() {
     await p.click('dialog[open] .form-actions button:not(.primary)');
     await p.click('.toolbar button:has-text("Refresh")'); await settled(p);
     // Lose the response of the first submit: the request reaches the Host, the page never sees the answer.
+    // The retry is held back for a moment, so the form can be read while it is in flight.
     let dropped = 0, sentIds = [];
     await p.route('**/api/call', async route => {
       const body = JSON.parse(route.request().postData() || '{}');
       if (body.name === 'bellnote.lunch.topup') sentIds.push(body.arguments.request_id);
       if (body.name === 'bellnote.lunch.topup' && !dropped) { dropped++; await route.fetch(); return route.abort('connectionreset'); }
+      if (body.name === 'bellnote.lunch.topup') await new Promise(r => setTimeout(r, 1200));
       return route.continue();
     });
     await p.click('button:has-text("Add money")');
@@ -170,7 +186,10 @@ async function run() {
     await submitDialog(p);
     const lost = await errorOf(p);
     check('A lost response is reported in plain words, not shown as success', lost.code === 'request_failed' && /may not have arrived/.test(lost.text), lost);
-    await submitDialog(p); await closed(p);
+    await submitDialog(p); await p.waitForTimeout(400);
+    const inFlight = await p.$eval('dialog[open] .form-error', e => e.textContent).catch(() => 'dialog closed early');
+    check('While the retry is in flight the earlier message is not shown again', inFlight === '', inFlight);
+    await closed(p);
     await p.unroute('**/api/call');
     const ines = await mcp.call('bellnote.lunch.account_get', {id: 'lunch-ines'});
     check('Retry of the unchanged form reuses its request ID and commits once', sentIds.length === 2 && sentIds[0] === sentIds[1] && ines.account.balance_cents === 2310 &&
@@ -179,6 +198,14 @@ async function run() {
     await p.click('button:has-text("Alerts and limits")');
     await p.fill('dialog[open] [data-money-for=low_balance_threshold_cents]', '8.00');
     await p.fill('dialog[open] [data-money-for=daily_limit_cents]', '');
+    // A request the Host turns down (here an ended session) is not reported as "no answer".
+    await p.route('**/api/call', route => JSON.parse(route.request().postData() || '{}').name === 'bellnote.lunch.settings_update'
+      ? route.fulfill({status: 401, contentType: 'application/json', body: JSON.stringify({error: 'Open the access link printed by the Host'})}) : route.continue());
+    await submitDialog(p);
+    const ended = await errorOf(p);
+    await p.unroute('**/api/call');
+    check('A Host refusal without a code says the page could not send it and to reload, not that Bellnote did not answer', ended.code === 'request_failed' &&
+      /could not send the request \(Open the access link printed by the Host\)\. Reload the page/.test(ended.text) && !/did not answer/.test(ended.text), ended);
     await submitDialog(p); await closed(p);
     const acct = (await mcp.call('bellnote.lunch.account_get', {id: 'lunch-ines'})).account;
     check('W4 browser settings commit; MCP reads the threshold and no limit', acct.low_balance_threshold_cents === 800 && acct.daily_limit_cents === null);
@@ -202,6 +229,28 @@ async function run() {
     const prefs = (await mcp.call('bellnote.preferences.get')).preferences;
     check('Preferences commit; MCP reads them', prefs.email_notices === false && prefs.default_payment_method_id === 'pm-0002');
     await shot(p, 'desktop-account');
+    // Another Agent connection changes a preference; moving between views shows it, and an unchanged save keeps it.
+    let pv = (await mcp.call('bellnote.preferences.get')).version;
+    check('Another client turns email copies on', (await mcp.call('bellnote.preferences.update', {email_notices: true, expected_version: pv, request_id: 'mcp-pref-other-1'})).status === 'committed');
+    await section(p, 'Home'); await section(p, 'Account');
+    check('After moving between views the Account view shows the other client\'s change', (await p.textContent('.collection')).includes('Email copies on'));
+    await p.click('.collection button:has-text("Edit")');
+    check('The preferences form is prefilled with the current value', (await p.inputValue('dialog[open] [data-field=email_notices]')) === 'true');
+    await submitDialog(p); await closed(p);
+    let after = (await mcp.call('bellnote.preferences.get')).preferences;
+    check('Saving the unchanged form keeps the other client\'s change', after.email_notices === true && after.default_payment_method_id === 'pm-0002', after);
+    // A change made while the form is open: the save is refused as stale and nothing is overwritten.
+    await p.click('.collection button:has-text("Edit")');
+    pv = (await mcp.call('bellnote.preferences.get')).version;
+    check('Another client turns email copies off while the form is open', (await mcp.call('bellnote.preferences.update', {email_notices: false, expected_version: pv, request_id: 'mcp-pref-other-2'})).status === 'committed');
+    await p.selectOption('dialog[open] [data-field=default_payment_method_id]', 'pm-0001');
+    await submitDialog(p);
+    const prefConflict = await errorOf(p);
+    after = (await mcp.call('bellnote.preferences.get')).preferences;
+    check('The stale preferences form shows the conflict and the other client\'s change stays', prefConflict.code === 'stale_version' && after.email_notices === false && after.default_payment_method_id === 'pm-0002', {prefConflict, after});
+    await p.click('dialog[open] .form-actions button:not(.primary)');
+    await section(p, 'Home'); await section(p, 'Account');
+    check('Moving between views then shows email copies off', (await p.textContent('.collection')).includes('Email copies off'));
     await section(p, 'Notifications');
     await p.click('button.bn-row[data-notice-id]'); await settled(p);
     check('Notifications list and reader render', (await p.$$('button.bn-row[data-notice-id]')).length > 5 && Boolean(await p.$('article[data-notice-id]')));
@@ -216,6 +265,24 @@ async function run() {
     });
     check('Direct management and fixture requests from the business session are denied', direct['env.snapshot'] === 403 && direct['env.reset'] === 403 && direct['env.apply_event'] === 403 && direct.fixture === 404, direct);
     check('Desktop page has no horizontal overflow', await noOverflow(p));
+
+    // Infra closes a school day and moves the time while the page is open; moving between views shows both.
+    await section(p, 'Attendance');
+    check('The toolbar shows the district\'s today', (await p.textContent('.bn-today strong')) === 'Tuesday, November 17');
+    let iv = (await infra.call('env.snapshot')).version;
+    const closedDay = await infra.call('env.apply_event', {expected_version: iv, event: {event_id: 'ev-browser-close', at: '2026-11-17T09:00:00-08:00', operation: 'bellnote.school.day_changed',
+      payload: {school_id: 'school-alder', date: '2026-11-20', kind: 'closed', reason: 'Water main repair'}}});
+    iv = (await infra.call('env.snapshot')).version;
+    const moved = await infra.call('env.advance_time', {expected_version: iv, request_id: 'browser-advance-1', virtual_now: '2026-11-18T07:00:00-08:00'});
+    check('Infra closes Friday and moves the time to Wednesday 07:00', ['committed', 'ready'].includes(closedDay.status) && ['committed', 'ready'].includes(moved.status), {closedDay, moved});
+    await section(p, 'Home');
+    check('After moving to another view the toolbar shows the new today', (await p.textContent('.bn-today strong')) === 'Wednesday, November 18');
+    await section(p, 'Attendance');
+    await p.click('button:has-text("Report absence or late arrival")');
+    const offered = await p.$$eval('dialog[open] [data-field=start] option', o => o.map(x => x.value));
+    check('The report form no longer offers the past day or the closed day', offered[0] === '2026-11-18' && !offered.includes('2026-11-17') && !offered.includes('2026-11-20'), offered);
+    await p.click('dialog[open] .form-actions button:not(.primary)');
+    check('The coming days name the closed day', (await p.textContent('.detail')).includes('No school: Fri, Nov 20 (Water main repair)'));
     await p.context().close();
 
     // Phone width: every view, no horizontal page scroll.
@@ -241,8 +308,8 @@ async function run() {
       await rp.context().close();
     } finally { await r.stop(); }
     check('No browser JavaScript errors', consoleErrors.length === 0, consoleErrors);
-    check('Only the deliberately provoked requests failed (1 dropped response, 3 management calls, 1 fixture)', networkLogs.length === 5 &&
-      networkLogs.filter(x => /ERR_CONNECTION_RESET/.test(x)).length === 1 && networkLogs.filter(x => /403/.test(x)).length === 3 && networkLogs.filter(x => /404/.test(x)).length === 1, networkLogs);
+    check('Only the deliberately provoked requests failed (1 dropped response, 1 ended session, 3 management calls, 1 fixture)', networkLogs.length === 6 &&
+      networkLogs.filter(x => /ERR_CONNECTION_RESET/.test(x)).length === 1 && networkLogs.filter(x => /401/.test(x)).length === 1 && networkLogs.filter(x => /403/.test(x)).length === 3 && networkLogs.filter(x => /404/.test(x)).length === 1, networkLogs);
     const summary = {schema: 'bellnote.web-browser.v1', node: process.version, browser: browser.version(), checks, console_errors: consoleErrors, provoked_network_failures: networkLogs, screenshots: fs.readdirSync(out).filter(f => f.endsWith('.png')).sort()};
     fs.writeFileSync(path.join(out, 'report.json'), JSON.stringify(summary, null, 2) + '\n');
     console.log(checks.length + ' browser checks passed; screenshots in ' + out);

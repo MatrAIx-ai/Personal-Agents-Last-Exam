@@ -30,7 +30,7 @@ All 23 tools are `bellnote.<name>` (12 reads, 11 writes). Every write takes Core
 - **Forms list phase** is `closed` once the due time passes; otherwise `answered` when every child in scope (one child with `child_id`, else every addressed child) has a signed or declined answer (a `needs_review` answer does not count), else `open`. `accepting_answers` tells whether answers are still taken.
 - **Daily spending** for `over_daily_limit` is the day's purchases net of same-day meal refunds credited to the balance.
 - **Time is the environment's.** Bellnote has no timers or clock event. A form's `closed`, a dismissal change's `past`, a passed cut-off, an expired card (after the last day of its expiry month), `moot` on a closed day, `restricted_item`, `over_daily_limit` and `excluded_for` are derived at read time from stored records and `ctx.virtual_now`, never stored.
-- **Notifications are for what other people did**, never for the guardian's own writes and never for the passing of time. Their text, like every refusal message, names people, days ("Tuesday, November 17") and local times; it never shows a record ID. When `email_notices` is on at that moment, the notification also stores the full Mail wire message.
+- **Notifications are for what other people did**, never for the guardian's own writes and never for the passing of time. Their text names people, days ("Tuesday, November 17") and local times and never shows a record ID. Refusal messages are written the same way, except that a refusal of an ID the caller sent that the account does not hold (a child, form, payment method, school-held person or form question) repeats that ID back. When `email_notices` is on at that moment, the notification also stores the full Mail wire message.
 - **The activity log** has one row per committed Agent write, one per applied event and one per effect of that event (`effect.form_response.needs_review`, `effect.dismissal_change.void`, `effect.notification.written`), each with sequence, virtual time, actor, action, child, object ID and the `request_id` or `event_id` behind it. A replay, a refusal or a clock move writes none.
 
 ## Data
@@ -79,7 +79,7 @@ Web GUI checks (pinned public runtime as below; the browser check also needs Pla
 
 ```sh
 npm run web:smoke             # 14 checks on the real shared Web Host, no browser
-npm run web:browser           # 49 checks clicking the page in Chromium; screenshots in .artifacts/bellnote-web/
+npm run web:browser           # 64 checks clicking the page in Chromium; screenshots in .artifacts/bellnote-web/
 ```
 
 With the pinned public runtime (found automatically in a full checkout, or `--runtime DIR` / `PALE_RUNTIME_ROOT`):

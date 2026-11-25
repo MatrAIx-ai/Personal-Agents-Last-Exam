@@ -103,14 +103,13 @@ const LABELS={
  'bellnote.absences.report':{kind:'What to report',start:'Day (or first day)',end:'Last day',time_local:'Arrival or leaving time',reason:'Reason for the school'},
  'bellnote.pickup.person_add':{name:'Full name',relationship:'Relationship to the child',phone:'Phone number'},
  'bellnote.dismissal.set':{date:'School day',mode:'Way home',person_id:'Collected by',note:'Note for the office'},
- 'bellnote.lunch.topup':{amount_cents:'Amount',payment_method_id:'Pay with'},
- 'bellnote.lunch.settings_update':{low_balance_threshold_cents:'Low-balance alert',daily_limit_cents:'Daily spending limit'},
+ 'bellnote.lunch.topup':{amount_cents:'Amount in dollars',payment_method_id:'Pay with'},
+ 'bellnote.lunch.settings_update':{low_balance_threshold_cents:'Low-balance alert in dollars',daily_limit_cents:'Daily spending limit in dollars'},
  'bellnote.preferences.update':{email_notices:'Email me a copy of each notification',default_payment_method_id:'Default payment method'}
 };
 const labels={};
 function act(ui,a,tool,defaults){
  formContext={tool,a};for(const k of Object.keys(labels))delete labels[k];Object.assign(labels,LABELS[tool]||{});
- if(tool==='bellnote.preferences.update')kept.delete('bellnote.preferences.get{}');
  ui.action(tool,defaults);
  // The shared form is built from the tool schema; adjust it for a guardian before it is used.
  const d=document.querySelector('dialog[open]');if(!d)return;
@@ -121,20 +120,34 @@ function act(ui,a,tool,defaults){
  const t=input('time_local');if(t)Object.assign(t,{pattern:'([01][0-9]|2[0-3]):[0-5][0-9]',title:'A 24-hour time, for example 10:15.'});
  for(const [name,need] of [['amount_cents',true],['low_balance_threshold_cents',true],['daily_limit_cents',false]])moneyField(input(name),need);
 }
-// Amounts are typed in dollars; the hidden schema field carries whole cents.
+// Amounts are typed in dollars; the hidden schema field carries whole cents. Only a plain amount is
+// accepted (digits, optionally a point and one or two decimals): a comma, an exponent, a sign, a space
+// or a third decimal is stopped at the field instead of being read as some other amount.
+const DOLLARS=/^[0-9]+(\.[0-9]{1,2})?$/;
+const toCents=v=>{if(!DOLLARS.test(v))return null;const [whole,frac='']=v.split('.');return Number(whole)*100+Number(frac.padEnd(2,'0'));};
 function moneyField(cents,required){
  if(!cents)return;
- const dollars=el('input',{type:'number',step:'0.01',min:'0',inputmode:'decimal',required,'data-money-for':cents.dataset.field,placeholder:cents.placeholder||'0.00'});
+ const dollars=el('input',{type:'text',inputmode:'decimal',autocomplete:'off',required,pattern:DOLLARS.source.slice(1,-1),'data-money-for':cents.dataset.field,placeholder:cents.placeholder||'0.00',
+  title:'A dollar amount such as 20 or 20.50: digits, optionally a point and at most two decimals.'});
  if(cents.value!=='')dollars.value=(Number(cents.value)/100).toFixed(2);
- const sync=()=>{cents.value=dollars.value===''?'':String(Math.round(Number(dollars.value)*100));};
+ const sync=()=>{const c=toCents(dollars.value);cents.value=c===null?'':String(c);};
  dollars.addEventListener('input',sync);
  cents.type='hidden';cents.removeAttribute('required');cents.before(dollars);
 }
 // Core's own refusals carry protocol wording; the page says what happened instead.
 const PLAIN={invalid_arguments:'Some details are not in the expected format. Check each field and try again.',
- idempotency_conflict:'This form was already sent with different details. Close it, refresh and try again.',
- request_failed:'Bellnote did not answer. Your request may not have arrived; send it again and it is applied only once.'};
-new MutationObserver(()=>{for(const e of document.querySelectorAll('dialog .form-error[data-code]')){const plain=PLAIN[e.dataset.code];if(plain&&e.textContent!==plain)e.textContent=plain;}})
+ idempotency_conflict:'This form was already sent with different details. Close it, refresh and try again.'};
+// A refusal without a code comes from the page's own request: either no answer arrived (the request
+// may still have been applied, and an unchanged retry is applied only once) or the Host turned the
+// request down (for example an ended session), which a retry from this page will not fix.
+const NO_ANSWER=/failed to fetch|networkerror|load failed|network connection|timed? ?out/i;
+const plainError=(code,text)=>PLAIN[code]||(code==='request_failed'?(NO_ANSWER.test(text)?'Bellnote did not answer. Your request may not have arrived; send it again and it is applied only once.'
+ :'This page could not send the request ('+text.replace(/\.$/,'')+'). Reload the page with the access link and try again.'):null);
+// The shared form clears the message text when it is sent again but keeps data-code, so an empty
+// message is left alone; each new message is rewritten once.
+new MutationObserver(()=>{for(const e of document.querySelectorAll('dialog .form-error[data-code]')){
+ if(!e.textContent||e.textContent===e.dataset.shown)continue;const plain=plainError(e.dataset.code,e.textContent);
+ if(plain){e.dataset.shown=plain;e.textContent=plain;}}})
  .observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['data-code']});
 const monthText=m=>{const [y,mo]=m.split('-').map(Number);return new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'short',year:'numeric'}).format(new Date(Date.UTC(y,mo-1,15)));};
 function methodOptions(a){return (a.prefs?.payment_methods||[]).filter(m=>m.usable).map(m=>({value:m.id,label:m.label+(m.expiry_month?' · expires '+monthText(m.expiry_month):'')}));}
@@ -217,15 +230,13 @@ const button=(label,onclick,primary=false)=>el('button',{type:'button',class:pri
 
 // ---------- loading per view ----------
 // Every Bellnote call is a full Core round trip (Core reads and validates the whole account state on
-// each call), so a view makes only the reads it shows. Two reads are kept for the page load: the
-// school (calendar, cut-offs and policy; also the district's "today") and the account preferences.
-// They change only through Infra (time, calendar events, a new seed) or the preferences form, so the
-// toolbar's Refresh and a page reload read them again, and saving preferences drops the kept copy.
-const kept=new Map();
-function keep(ui,name,args){const key=name+JSON.stringify(args);if(!kept.has(key))kept.set(key,ui.call(name,args).catch(e=>{kept.delete(key);throw e;}));return kept.get(key);}
-document.addEventListener('click',e=>{if(e.target.closest?.('.toolbar button'))kept.clear();},true);
-const schoolOf=(ui,k)=>keep(ui,'bellnote.schools.get',{id:k.school_id});
-const prefsOf=ui=>keep(ui,'bellnote.preferences.get',{});
+// each call), so a view makes only the reads it shows. Nothing read here outlives the view: moving
+// to another view, every write and Refresh go through the Host's refresh, which reads children.list
+// and the account version first and then calls load(), so every value a form is prefilled from was
+// read after the version that form sends. A change made elsewhere after that version (another
+// client, an Infra event or a time move) makes the write stale_version instead of overwriting it.
+const schoolOf=(ui,k)=>ui.call('bellnote.schools.get',{id:k.school_id});
+const prefsOf=ui=>ui.call('bellnote.preferences.get',{});
 async function load(ui){
  const kids=ui.records;
  if(!kids.length)return {key:keyOf(ui),kids};
@@ -271,9 +282,10 @@ async function viewData(ui,a,child){
   Object.assign(a,{prefs,payments:pays.payments});
  }
 }
-// Choosing another child or another form re-reads only what that choice shows; the Host's refresh
-// (account version, tool list, children) runs on navigation between views, after every write and on
-// Refresh, so every write still carries the version observed at the last refresh.
+// Choosing another child or another form stays in the view and re-reads that choice only (the whole
+// view's reads for a child, forms.get for a form). The version is not re-read, so these reads are
+// at least as recent as the version a write sends: a change made in between can only make the
+// write stale_version, never let stale values through.
 let pickTicket=0;
 async function reselect(ui,patch){
  const ticket=++pickTicket,a=ui.aux,root=document.querySelector('#app');
