@@ -126,6 +126,7 @@ The wire message ID is `fernshelf-<notification ID>-<digest>`, where the digest 
 | `src/reads.cjs`, `src/library.cjs`, `src/albums.cjs`, `src/removals.cjs`, `src/events.cjs` | W1 reads; item edits and trash; albums, members, saving and links; answering removal requests; the seven events |
 | `src/model.cjs` | Seed validation, records, objects and media references |
 | `src/notify.cjs`, `src/publisher.cjs` | Notifications with their wire messages; the Infra-run Mail sender |
+| `schemas/` | Generated seed (definitions inlined), events and state schemas; copies of the shared platform schemas and of Mail's wire schema |
 | `scripts/` | Contract and fixture builders, consistency checks, real-MCP and Mail-flow scripts |
 | `tests/` | Business tests (`business.test.cjs` loads them all), App-only harness, verifier inputs (`cases.json`); `web-smoke.cjs` and `web-browser.cjs` for the page |
 | `gui/` | `index.html`, `src/app.js` (the page's controller), `src/view.js` (reviewer renderer), `README.md` |

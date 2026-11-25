@@ -67,9 +67,9 @@ All 13 Agent writes are reachable from the page. Not in the page, by design:
 
 ## Performance
 
-The page is slow, and the cause is Core's per-call cost: Core reads and validates the run's whole state on every MCP call, and the Agent process answers one call at a time. The reference library with its two-year history and complete activity log is about 654 KB of state. On the real runtime a read took 0.41–0.48 s and a write 0.23–0.28 s (median of five calls per tool, three runs on each Node version, Linux, 20 cores, load average 1–2; Node 22 at the low end, Node 18 at the high end); at load average 3–4.5 a read took 0.48–0.57 s. The Host also lists the tools before each call.
+Each call costs what Core does around it: Core reads the run's whole state, validates it, runs the App, validates the result and writes the state back, and the Agent process answers one call at a time. The stored state of a fresh run of the reference library is about 3.0 MB: the library (about 654 KB compact, mostly the two-year history and its 1,259-row activity log) twice, as the current and the initial data, and the 48 image files twice. On the real runtime a read took 0.14–0.24 s and a write 0.11–0.18 s (median of five calls per tool, three runs on each Node version, Linux, 20 cores, load average 2.6–5; Node 22 at the low end, Node 18 at the high end; one Node 22 run at load average 4.2 had read medians up to 0.32 s). In a CPU profile of the Agent process, most of a call is Core validating the library against the seed schema six times (the state's data and initial data when it reads the state, the data again, the App's result, and the state's data and initial data before it writes), then Core's check of the image bundle (a hash of every file), copying, parsing and writing the state; the App's own code is under 10 ms. The published seed schema has its definitions inlined, because the validator resolves a reference into another schema file on the file system each time it meets one. The Host also lists the tools before each call, which reads and validates the state once more.
 
-Correctness comes first, so the page reads the whole view again after every write (see above) instead of keeping lists that could have changed. A load of the Photos view is 8 to 11 calls: the Host's list read, every page of the items, the trash, the account, the albums, the requests, then the selected item and "who can see this". What keeps it from being slower:
+Correctness comes first, so the page reads the whole view again after every write (see above) instead of keeping lists that could have changed. A load of the Photos view is 8 to 11 calls: the Host's list read, every page of the items, the trash, the account, the albums, the requests, then the selected item and "who can see this". Each of them is needed for the guarantees above: the Host's list read starts every refresh, the items come 200 to a page, the trash is a separate search, and the other lists are read again so that all of them carry one version. What keeps it from being slower:
 
 - the reads of one view are sent together;
 - a dialog closes as soon as its write commits, and the view is read behind it;
@@ -77,19 +77,19 @@ Correctness comes first, so the page reads the whole view again after every writ
 - album covers are read only for cards on screen;
 - the search box refreshes after a pause in typing.
 
-Measured in Chromium 141 against the shared Host on a fresh `sandbox` run of the reference library, three runs on each Node version (the Host on that version), load average 1–2:
+Measured in Chromium 141 against the shared Host on a fresh `sandbox` run of the reference library, three runs on each Node version (the Host on that version), load average 2.6–5:
 
 | Action | Node 18 | Node 22 | Calls |
 | --- | --- | --- | --- |
-| First load (grid shown, idle) | 6.7 s; first thumbnail 6.8–7.0 s | 6.2 s; first thumbnail 6.4–7.0 s | 11, then thumbnails |
-| Open a photo with a file | image 2.3 s; "who can see this" 4.1 s | image 1.8–2.3 s; "who can see this" 3.6 s | 4 |
-| Open Edit details (reads the item) | 0.8 s | 0.8 s | 1 |
-| Save a caption | form closes 0.8–1.4 s; idle 6.7 s | form closes 0.8–0.9 s; idle 6.2 s | 10 |
-| Create an album (opens it) | 6.9–7.0 s | 6.0–6.5 s | 9 |
-| Create a link (form opened to idle) | 7.5 s | 6.9–7.5 s | 10 |
-| Refresh button | 5.9–6.4 s | 5.4–5.9 s | 8 |
+| First load (grid shown, idle) | 2.7–3.2 s; first thumbnail 2.8–3.5 s | 2.7–3.7 s; first thumbnail 2.9–3.7 s | 11–13, with thumbnails |
+| Open a photo with a file | image 0.3–0.8 s; "who can see this" 0.6–0.8 s | image 0.3 s; "who can see this" 0.6 s | 2 (the image if not yet read) |
+| Open Edit details (reads the item) | 0.3–0.8 s | 0.3 s | 1 |
+| Save a caption | form closes 0.4–0.9 s; idle 2.7–3.7 s | form closes 0.3–0.9 s; idle 2.6–2.8 s | 10 |
+| Create an album (opens it) | 2.9–3.4 s | 2.4–3.0 s | 9 |
+| Create a link (form opened to idle) | 2.9–3.9 s | 2.9–3.0 s | 10 |
+| Refresh button | 2.4–2.9 s | 2.4 s | 8 |
 
-Under more load these grow in proportion to the per-call time. No single call came near the Host's request timeout or the runtime client's 6 s limit: the slowest single read measured was 0.67 s. The browser test (`npm run test:browser`) took 7–9 minutes at load average 4–5.
+Under more load these grow in proportion to the per-call time. No single call came near the Host's request timeout or the runtime client's 6 s limit: the slowest single read measured was 0.33 s. The browser test (`npm run test:browser`) took 3–4 minutes at load average 3.5–4.6.
 
 ## Checks
 
