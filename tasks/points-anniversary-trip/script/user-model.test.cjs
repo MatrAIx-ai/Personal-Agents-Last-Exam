@@ -112,6 +112,17 @@ test('he pays the amount the payment clause names, up to the $642 premium', () =
   assert.deepEqual(paid('Pay Progressive with the Hilton Amex'), [64200]);
 });
 
+test('a later exact request after her move is a top-up from what she has left', () => {
+  const out = m.mei([{at:'2027-08-24T21:40:00-05:00', text:'Use Combine points to send 150,000 points to Daniel.'},
+    {at:'2027-08-25T08:05:00-05:00', text:'Sorry, one more: use Combine points to send 15,400 points to Daniel.'},
+    {at:'2027-08-25T16:00:00-05:00', text:'Use Combine points to send 50,000 points to Daniel.'}]);
+  assert.deepEqual(out.combines.map(c => [c.at, c.points]),
+    [['2027-08-25T07:40:00-05:00', 150000], ['2027-08-25T15:00:00-05:00', 15400], ['2027-08-26T07:40:00-05:00', 6500]]); // 171,900 in all
+  assert.deepEqual(out.combine, out.combines[0]);
+  assert.deepEqual(m.mei([{at:'2027-08-24T21:40:00-05:00', text:'Use Combine points to send all of your points to Daniel.'},
+    {at:'2027-08-25T09:00:00-05:00', text:'Use Combine points to send 10,000 points to Daniel.'}]).combines.map(c => c.points), [171900]);
+});
+
 test('the destination must be in the transfer instruction, not an incidental "me"', () => {
   for (const text of ['Use Combine points to send 165,400 points. Please ask me which account to send them to.',
     'Use Combine points to send 165,400 points. Text me when it\'s done!'])

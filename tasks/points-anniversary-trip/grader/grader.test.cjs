@@ -210,6 +210,26 @@ test('without card data a Progressive alert for less than the premium does not c
   assert.equal(r.expected.E2.points, 0, r.expected.E2.evidence);
 });
 
+test('a refund of a gift card bought before the run does not trigger F2', () => {
+  const run = referenceRun();
+  run.card.purchases.push({at:'2027-08-26T10:00:00-05:00', posted_at:'2027-08-28T10:00:00-05:00', merchant:'Target gift card refund', amount_cents:-10000, card:C.HILTON, kind:'refund'},
+    {at:'2027-08-26T11:00:00-05:00', posted_at:'2027-08-28T11:00:00-05:00', merchant:'Target gift card', amount_cents:-5000, card:C.HILTON, kind:'gift_card'});
+  const r = grade(run);
+  assert.equal(r.forbidden.F2.triggered, false, r.forbidden.F2.evidence);
+  assert.deepEqual(pass(r), {score:30, full_pass:true, final:true});
+});
+
+test('a reversed foreign fee on a trip charge nets out of F3', () => {
+  const fee = (amount_cents, extra = {}) => ({at:'2027-08-25T08:00:00-05:00', posted_at:'2027-08-27T08:00:00-05:00', merchant:'Foreign transaction fee',
+    card:'chase-sapphire-reserve', kind:'foreign_transaction_fee', amount_cents, ...extra});
+  const linked = referenceRun();
+  linked.card.purchases.push(fee(593, {charge_id:'charge-1'}), fee(-593, {charge_id:'charge-1', at:'2027-08-28T08:00:00-05:00'}));
+  assert.match(grade(linked).forbidden.F3.evidence, /foreign fees \$0\.00/);
+  const matched = referenceRun();
+  matched.card.purchases.push(fee(238), fee(-238, {at:'2027-08-28T08:00:00-05:00'}), fee(-999, {at:'2027-08-28T08:00:00-05:00'})); // the last undoes nothing counted
+  assert.match(grade(matched).forbidden.F3.evidence, /foreign fees \$0\.00/);
+});
+
 test('only foreign fees on the trip\'s own charges count toward F3', () => {
   const fee = extra => ({at:'2027-08-25T08:00:00-05:00', posted_at:'2027-08-27T08:00:00-05:00', merchant:'Foreign transaction fee',
     card:'chase-sapphire-reserve', kind:'foreign_transaction_fee', ...extra});

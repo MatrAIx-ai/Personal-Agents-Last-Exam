@@ -119,26 +119,29 @@ function dayRead(sentAt) { // within the hour, between 09:00 and 21:00
 }
 function mei(texts) {
   const ordered = [...texts].sort((a, b) => ms(a.at) - ms(b.at));
-  if (!ordered.length) return {replies:[], combine:null};
-  const replies = [];
+  if (!ordered.length) return {replies:[], combine:null, combines:[]};
+  const replies = [], combines = [];
   const reads = [...NIGHT_SLOTS.filter(slot => ms(slot) >= ms(ordered[0].at)).map(at => ({at, night:true})),
     ...ordered.filter(m => ms(m.at) > ms(SHIFTS_END)).map(m => ({at:dayRead(m.at), night:false}))]
     .sort((a, b) => ms(a.at) - ms(b.at));
+  // Each read looks at the texts since her last move; a later exact request (a top-up) is a new move from what she has left.
+  let left = MEI_BALANCE, since = -Infinity, asked = false;
   for (const read of reads) {
-    const seen = ordered.filter(m => ms(m.at) <= ms(read.at));
-    if (!seen.length) continue;
+    const seen = ordered.filter(m => ms(m.at) <= ms(read.at) && ms(m.at) > since);
+    if (!seen.length || left <= 0) continue;
     const exact = [...seen].reverse().find(m => classify(m.text).exact); // the latest exact instructions win
     const actAt = read.night && read.at.endsWith('07:30:00' + TZ) ? read.at.replace('07:30', '07:40') : read.at;
-    if (exact) return act(exact, actAt, replies);
-    if (!replies.length) replies.push({at:actAt, text:read.night ? 'how many and where exactly? going to sleep, text me the steps' : 'how many and where exactly?'});
+    if (exact) {
+      const {amount} = classify(exact.text), points = amount === 'all' ? left : Math.min(amount, left);
+      left -= points; since = ms(seen.at(-1).at); asked = false;
+      replies.push({at:actAt, text:'done, sent ' + points.toLocaleString('en-US') + ' to you.' + (read.night ? ' sleeping 💤' : '')});
+      combines.push({at:actAt, to_person_id:'person-daniel', points});
+    } else if (!asked) {
+      asked = true;
+      replies.push({at:actAt, text:read.night ? 'how many and where exactly? going to sleep, text me the steps' : 'how many and where exactly?'});
+    }
   }
-  return {replies, combine:null};
-}
-function act(message, at, replies) {
-  const {amount} = classify(message.text);
-  const points = amount === 'all' ? MEI_BALANCE : Math.min(amount, MEI_BALANCE);
-  replies.push({at, text:'done, sent ' + points.toLocaleString('en-US') + ' to you. sleeping 💤'});
-  return {replies, combine:{at, to_person_id:'person-daniel', points}};
+  return {replies, combine:combines[0] || null, combines};
 }
 
 function answer(question) { return SESSION1_ANSWERS.find(([pattern]) => pattern.test(question))[1]; }
