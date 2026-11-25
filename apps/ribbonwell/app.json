@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "app_id": "ribbonwell",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Nobin Sarwar (@smsnobin77); repository issue / PR tagged app:ribbonwell"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "ribbonwell.item.added",
+    "ribbonwell.item.changed",
+    "ribbonwell.claim.recorded",
+    "ribbonwell.exchange.opened",
+    "ribbonwell.exchange.member_changed",
+    "ribbonwell.exchange.drawn"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "business web page and reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "One account per App instance; the Agent acts only as the member bound to it.",
+    "Nothing is bought inside the App: a purchase is a recorded state.",
+    "Holds last exactly 14 x 24 hours and keep the UTC offset of the clock they were computed from.",
+    "No messaging: notifications are an in-App log."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}
