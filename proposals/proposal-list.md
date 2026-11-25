@@ -8,7 +8,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**202 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
+**203 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
@@ -16,7 +16,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 | Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 6 |
 | Environment | [Chenngzz](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AChenngzz) | 3 |
 | Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 2 |
-| Task | [Yeechin-is-here](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AYeechin-is-here) | 17 |
+| Task | [Yeechin-is-here](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AYeechin-is-here) | 18 |
 | Task | [haolun-wu](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Ahaolun-wu) | 15 |
 
 Counts show pending requests, not accepted contributions or lifetime review totals. Submitted reviews leave the pending queue; multiple reviewers on one PR count separately.
@@ -146,10 +146,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🧪 Task Track
 
-**105 proposals.**
+**106 proposals.**
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-25 23:00:33 | [#263](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/263) · Hand a new house-sitter the cat's current dose, not the guide's<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/263/files) | Home &amp; utilities | "Send the guide" would give a new sitter four times the cat's current dose and an old door code. The right handoff joins the vet's change, the codes note and Marco's own limits. | Design review | Review requested<br>@Yeechin-is-here |  | [jpli02](https://github.com/jpli02) |  |
 | 2026-11-25 22:58:27 | [#262](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/262) · Defer a postponed jury date as a caregiving hardship without exposing Mom's diagnosis<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/262/files) | Public service &amp; law<br>Also: Health &amp; care | Dani asks to "postpone again", but she already used her one postponement. Only a caregiving deferral, backed by the letter that omits Mom's diagnosis, can work, and it gets one try. | Design review | Review requested<br>@TianyuCodings |  | [jpli02](https://github.com/jpli02) |  |
 | 2026-11-25 22:52:42 | [#261](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/261) · Read between the lines when my girlfriend says she’s tired after I praise my ex<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/261/files) | Social &amp; communities | Xiaohe once told Zhou Ran how it felt when he walked out mid-argument. That history makes a brief acknowledgment before letting her rest especially meaningful here. | Design review | Review requested<br>@haolun-wu |  | [shuyhere](https://github.com/shuyhere) |  |
 | 2026-11-25 21:59:40 | [#259](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/259) · Fill a workshop bidding sheet under the reviewer's own conflict rule, including a collaboration that starts the same day<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/259/files) | Learning &amp; research<br>Also: Work &amp; business | Which TRL papers are conflicts depends on this reviewer's own rule — three years by publication date, the old institution for twelve months, the advisor's current students, unpublished co-writing — not on the organizers' auto list. | Design review | Review requested<br>@haolun-wu |  | [olivia3395](https://github.com/olivia3395) |  |
