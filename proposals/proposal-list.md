@@ -8,7 +8,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**191 open non-draft proposals · 1 awaiting initial review · 6 drafts.**
+**191 open non-draft proposals · 0 awaiting initial review · 6 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
@@ -17,7 +17,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 | Environment | [Chenngzz](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AChenngzz) | 2 |
 | Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 1 |
 | Task | [Yeechin-is-here](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AYeechin-is-here) | 16 |
-| Task | [haolun-wu](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Ahaolun-wu) | 10 |
+| Task | [haolun-wu](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Ahaolun-wu) | 11 |
 
 Counts show pending requests, not accepted contributions or lifetime review totals. Submitted reviews leave the pending queue; multiple reviewers on one PR count separately.
 
@@ -145,7 +145,7 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| 2026-11-25 05:35:21 | [#246](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/246) · Bring back a lab recorder after a borrower handoff<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/246/files) | Learning &amp; research | When the desk cancels its bookings, the lab offers a locker drop. Mira does not allow it for her loans: the agent must coordinate a staffed handoff with the current holder and wait for a matching signed receipt. | Design review | Awaiting review |  | [YurunChen](https://github.com/YurunChen) |  |
+| 2026-11-25 05:35:21 | [#246](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/246) · Bring back a lab recorder after a borrower handoff<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/246/files) | Learning &amp; research | When the desk cancels its bookings, the lab offers a locker drop. Mira does not allow it for her loans: the agent must coordinate a staffed handoff with the current holder and wait for a matching signed receipt. | Design review | Review requested<br>@haolun-wu |  | [YurunChen](https://github.com/YurunChen) |  |
 | 2026-11-24 21:44:35 | [#237](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/237) · Contain a studio account incident without disrupting a client handoff<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/237/files) | Work &amp; business | Jordan's runbook authorizes removal of verified unfamiliar access but requires preserving the familiar laptop session for a client handoff; a blanket lockout would be a security failure too. | Draft | Awaiting review |  | [XinyiXiang](https://github.com/XinyiXiang) |  |
 | 2026-11-24 06:01:37 | [#229](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/229) · Finish a child's piano corner from the child's trials rather than the parent's purchase history<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/229/files) | Shopping &amp; groceries<br>Also: Learning &amp; research | The expensive piano in Adrian's receipts was a gift, and Sam's praise was about appearance. Blind trial notes identify the preferred action; a same-family stock substitution quietly changes that action before the return cutoff. | Design review | Review requested<br>@haolun-wu |  | [XuanmiaoG](https://github.com/XuanmiaoG) |  |
 | 2026-11-24 06:01:22 | [#228](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/228) · Lower a retiree's phone bill without turning a familiar kitchen phone into an app<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/228/files) | Home &amp; utilities<br>Also: Money &amp; insurance | Evelyn enjoys her tablet but wants her kitchen calling routine preserved. A same-name cheaper plan loses its phone jack mid-switch, while her daughter's earlier one-off help is mistaken for ongoing authority. | Design review | Review requested<br>@Yeechin-is-here |  | [XuanmiaoG](https://github.com/XuanmiaoG) |  |
