@@ -86,7 +86,7 @@ Exit 0 on Node v22.23.4. Selection was full because `apps.registry.json` differs
 
 ## Review follow-up on 2026-11-25
 
-Fixture activity in `minimal.json`, `task-73.json`, `household-b.json` and `household-c.json` begins on 2025-01-01. The added days are synthetic on and off records, every 14 days, and they replay to the same device state the dense window already ended on. Household (b) lists 9 devices: the living and hall lights, the thermostat, the front lock, the front contact, the hall motion, the kitchen leak, the hall smoke and the living temperature sensor. Household (c) code `code-weekday` was created on 2025-01-06 and has unlocked uses in 2025 and in 2026. The default bundle has 6 snapshots. The Brightwire package directory is 2,859,205 bytes, of which the fixtures are 2,069,187 bytes and the snapshot files are 16,861 bytes. The package stays above 2 MB because the fixture history from 2025-01-01 is already that large, and the JSON stays pretty-printed.
+Fixture activity in `minimal.json`, `task-73.json`, `household-b.json` and `household-c.json` begins on 2025-01-01. The added days are synthetic on and off records, every 14 days, and they replay to the same device state the dense window already ended on. Household (b) lists 9 devices: the living and hall lights, the thermostat, the front lock, the front contact, the hall motion, the kitchen leak, the hall smoke and the living temperature sensor. Household (c) code `code-weekday` was created on 2025-01-06 and has unlocked uses in 2025 and in 2026. The default bundle has 6 snapshots. The Brightwire package directory is 2,860,100 bytes, of which the fixtures are 2,069,187 bytes and the snapshot files are 16,861 bytes. The package stays above 2 MB because the fixture history from 2025-01-01 is already that large, and the JSON stays pretty-printed.
 
 `devices.command`, `camera.share.start`, `scenes.run` and `routines.run_now` reject an unknown command, an out-of-range argument and an offline device while the class scope is `confirm`, and they leave `confirmations` unchanged. A saved scene or routine with brightness 140 is rejected before a confirmation is stored. A camera share addressed to `@` is rejected the same way. `executeStored` catches a coded failure, writes `confirmation_failed`, and lets the approval event commit. Approving a code window that another code already holds leaves the first code unchanged, leaves the confirmation approved, and records one `confirmation_failed` row.
 
@@ -109,3 +109,11 @@ These files outside the App remain, each for the reason on that line:
 - `runtime/registrations/brightwire-home.json`: lets `brightwire-home.devices.get` read the household snapshot, so a camera read can see that the committed bundle marks it missing.
 
 `runtime/core` matches upstream `a4bce023953061483c41de5a287ba5e43f4a5648`. `docs/personal-apps.md`, `docs/runtime-time.md`, `examples/workflows/session-time/README.md`, `runtime/README.md` and `runtime/web/README.md` match that revision as well. The proposal file is the approved plan and was not edited in this follow-up.
+
+## Commit and package hash
+
+Implementation commit `31dc5b6775c0c65bf8e85ad784521cac6db6c8a8`.
+
+`package_sha256` `9b3da08888ad6f88353468b1fab6e9c2bef210695b8b9156ce240d1a5cd8ffe9`.
+
+That hash is the `package_sha256` from `npm run app:verify -- --app apps/brightwire-home` on that commit, on Node v18.20.8, v22.23.4 and v24.22.3. This paragraph was added after that commit, so a later verify of the commit that contains this paragraph prints a new hash. Cite the hash printed for the commit you review. The evidence URL for the implementation commit is `https://github.com/suraj-ranganath/Personal-Agents-Last-Exam/blob/31dc5b6775c0c65bf8e85ad784521cac6db6c8a8/apps/brightwire-home/contribution/evidence.md`.
