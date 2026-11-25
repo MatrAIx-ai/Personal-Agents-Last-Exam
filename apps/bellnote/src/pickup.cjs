@@ -1,8 +1,8 @@
 'use strict';
 // W3: who may collect each child, restrictions, and one-day dismissal changes.
 const c = require('./common.cjs');
-const {notify, longDate} = require('./notify.cjs');
-const MODE_TEXT = {guardian_pickup: 'collected by a guardian', bus: 'the bus', after_care: 'after-care', walker: 'walking home'};
+const {notify, longDate, listText} = require('./notify.cjs');
+const MODE_TEXT = {guardian_pickup: 'collected by a guardian', bus: 'taking the bus', after_care: 'going to after-care', walker: 'walking home'};
 
 // Phone numbers compare by digits, ignoring a leading country code 1.
 function digits(phone) {
@@ -51,13 +51,13 @@ function resolvePerson(ctx, data, args) {
   const phone = digits(args.phone);
   const match = data.people.find(p => p.phone && digits(p.phone) === phone);
   if (args.person_id) {
-    if (!c.person(data, args.person_id)) c.fail('not_found', 'Person ' + args.person_id + ' is not known to the school.');
+    if (!c.person(data, args.person_id)) c.fail('not_found', 'The school holds no person with ID ' + args.person_id + '.');
     // A phone number the school holds for someone else cannot be attached to this person: that
     // would put another person's contact details on this entry. The restriction check runs on
     // the person the number belongs to, so a restricted person cannot be added under another ID.
     if (match && match.person_id !== args.person_id && !c.restricted(data, args.id, args.person_id)) {
       if (c.restricted(data, args.id, match.person_id)) c.fail('restricted_person', 'The school office holds a restriction for the person with this phone number.');
-      c.fail('conflict', 'This phone number belongs to another person on file (' + match.person_id + ').');
+      c.fail('conflict', 'The school holds this phone number for another person; give each person\'s own number.');
     }
     return {person_id: args.person_id, created: false};
   }
@@ -71,7 +71,7 @@ function addPerson(ctx, data, args) {
   if (c.restricted(data, kid.id, person_id)) c.fail('restricted_person', 'The school office holds a restriction for this person and ' + kid.display_name + '.');
   if (c.guardianLink(data, kid.id, person_id)) c.fail('conflict', 'This person is already a guardian of ' + kid.display_name + '.');
   const existing = data.pickup_people.find(p => p.child_id === kid.id && p.person_id === person_id && ['pending_review', 'approved'].includes(p.status));
-  if (existing) c.fail('conflict', 'This person is already on the list (' + existing.id + ', ' + existing.status + ').');
+  if (existing) c.fail('conflict', 'This person is already on ' + kid.display_name + '\'s list (' + existing.status.replace(/_/g, ' ') + ').');
   if (created) data.people.push({person_id, display_name: args.name, phone: args.phone});
   const review = c.policy(data, c.school(data, kid.school_id)).pickup_person_review;
   const pp = {id: c.nextId(data.pickup_people, 'pp'), child_id: kid.id, person_id, display_name: args.name, relationship: args.relationship,
@@ -84,10 +84,10 @@ function addPerson(ctx, data, args) {
 function removePerson(ctx, data, args) {
   const pp = c.find(data.pickup_people, args.id, 'Pickup person');
   c.requireRight(data, pp.child_id, 'custodial');
-  if (!['approved', 'pending_review'].includes(pp.status)) c.fail('invalid_state', 'This pickup person is already ' + pp.status + '.');
+  if (!['approved', 'pending_review'].includes(pp.status)) c.fail('invalid_state', 'This pickup person is already ' + pp.status.replace(/_/g, ' ') + '.');
   const ahead = data.dismissal_changes.filter(d => d.child_id === pp.child_id && d.person_id === pp.person_id && d.status === 'active')
     .map(d => changeView(ctx, data, d)).filter(d => d.phase === 'upcoming' && !d.moot);
-  if (ahead.length) c.fail('in_use', 'Named in dismissal change ' + ahead.map(d => d.id).join(', ') + '; cancel or replace it first.');
+  if (ahead.length) c.fail('in_use', pp.display_name + ' is named in the way home for ' + listText(ahead.map(d => longDate(d.date))) + '; cancel or replace that change first.');
   pp.status = 'removed';
   pp.history.push({at: ctx.virtual_now, action: 'removed', by: data.owner_person_id, request_id: args.request_id});
   c.activity(ctx, data, {actor: 'agent', action: 'pickup.person_remove', child_id: pp.child_id, object_id: pp.id, request_id: args.request_id});
@@ -117,7 +117,7 @@ function set(ctx, data, args) {
   c.requireRight(data, kid.id, 'custodial');
   if (!c.time.validDate(args.date)) c.fail('invalid_arguments', 'date must be YYYY-MM-DD.');
   const info = c.schoolDay(data, c.school(data, kid.school_id), args.date);
-  if (c.passed(ctx, info.dismissal_change_cutoff_at)) c.fail('too_late', 'The cut-off for changes on ' + args.date + ' passed at ' + info.dismissal_change_cutoff_at + '.');
+  if (c.passed(ctx, info.dismissal_change_cutoff_at)) c.fail('too_late', 'The cut-off for changes on ' + longDate(args.date) + ' passed at ' + c.time.localTime(info.dismissal_change_cutoff_at, c.tz(data)) + '.');
   if ((args.mode === 'pickup') !== Boolean(args.person_id)) c.fail('invalid_arguments', 'A pickup change names exactly one person; other modes name none.');
   if (args.mode === 'pickup') checkCollector(data, kid.id, args.person_id);
   const id = c.nextId(data.dismissal_changes, 'dc');
@@ -135,7 +135,7 @@ function cancel(ctx, data, args) {
   c.requireRight(data, d.child_id, 'custodial');
   const view = changeView(ctx, data, d);
   if (view.status !== 'active') c.fail('invalid_state', 'This dismissal change is ' + view.status + '.');
-  if (view.cutoff_passed) c.fail('too_late', 'The cut-off for changes on ' + d.date + ' passed at ' + view.cutoff_at + '.');
+  if (view.cutoff_passed) c.fail('too_late', 'The cut-off for changes on ' + longDate(d.date) + ' passed' + (view.cutoff_at ? ' at ' + c.time.localTime(view.cutoff_at, c.tz(data)) : '') + '.');
   d.status = 'cancelled';
   d.history.push({at: ctx.virtual_now, action: 'cancelled', by: data.owner_person_id, request_id: args.request_id});
   c.activity(ctx, data, {actor: 'agent', action: 'dismissal.cancel', child_id: d.child_id, object_id: d.id, request_id: args.request_id});
@@ -167,12 +167,13 @@ function reviewed(ctx, data, event, row) {
     }
   }
   const verb = {approve: 'approved', deny: 'did not approve', revoke: 'removed'}[p.decision];
+  const outcome = {approve: 'approved to collect', deny: 'not approved to collect', revoke: 'no longer allowed to collect'}[p.decision];
   // Nothing of the pickup list reaches a guardian who is not custodial for the child.
   if (!c.myLink(data, pp.child_id)?.custodial) return;
   notify(ctx, data, {kind: 'pickup.person_reviewed', child_id: pp.child_id, object_type: 'pickup_person', object_id: pp.id, event_id: event.event_id,
-    cause_seq: row.seq, title: s.name + ': ' + pp.display_name + ' ' + verb + ' for ' + kid.display_name,
+    cause_seq: row.seq, title: s.name + ': ' + pp.display_name + ' ' + outcome + ' ' + kid.display_name,
     body: 'The office ' + verb + ' ' + pp.display_name + ' as a person who may collect ' + kid.display_name + '.' +
-      (voided.length ? ' ' + voided.length + ' dismissal change(s) naming them no longer apply.' : '')});
+      (voided.length ? ' The way home planned with them for ' + listText(voided.map(d => longDate(d.date))) + ' no longer applies.' : '')});
   for (const d of voided) {
     notify(ctx, data, {kind: 'dismissal.void', child_id: d.child_id, object_type: 'dismissal_change', object_id: d.id, event_id: event.event_id,
       cause_seq: row.seq, title: kid.display_name + "'s dismissal change for " + longDate(d.date) + ' no longer applies',
@@ -209,4 +210,4 @@ function recorded(ctx, data, event, row) {
     body: who + ' recorded that ' + kid.display_name + ' will be ' + describe(data, d) + ' on ' + longDate(p.date) + '.' +
       (prior ? ' This replaces the earlier plan (' + describe(data, prior) + (prior.recorded_by === data.owner_person_id ? ', set by you' : '') + ').' : '')});
 }
-module.exports = {get, addPerson, removePerson, set, cancel, reviewed, recorded, changeView, activeChange, describe, checkCollector};
+module.exports = {get, addPerson, removePerson, set, cancel, reviewed, recorded, changeView, activeChange, describe, checkCollector, MODE_TEXT};

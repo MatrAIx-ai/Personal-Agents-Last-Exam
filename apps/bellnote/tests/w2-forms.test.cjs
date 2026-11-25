@@ -23,8 +23,9 @@ const paidFor = (f, responseId) => f.data.payments.filter(p => p.object_id === r
 
 test('T04 forms list by child and phase; forms.get shows text, questions, fee, due time and version; closed at the due-time boundary', () => {
   const f = fixture();
+  const n0 = f.data.notifications.filter(n => n.kind === 'form.published').length;
   publish(f);
-  assert.equal(f.data.notifications.filter(n => n.kind === 'form.published').length, 1);
+  assert.equal(f.data.notifications.filter(n => n.kind === 'form.published').length, n0 + 1);
   assert.deepEqual(f.call('bellnote.forms.list', {child_id: 'child-theo'}).forms.map(x => x.id), ['form-fluclinic', 'form-aquarium']);
   assert.deepEqual(f.call('bellnote.forms.list', {child_id: 'child-nico'}).forms, []);
   const form = f.call('bellnote.forms.get', {id: 'form-aquarium'}).form;

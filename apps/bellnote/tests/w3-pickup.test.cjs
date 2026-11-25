@@ -139,7 +139,7 @@ test('T13 the other guardian replaces mine; a revoke voids changes ahead; an ear
   g.event(ev('school.day_changed', '2026-11-18T13:05:00-08:00', {school_id: 'school-alder', date: '2026-11-20', kind: 'early_dismissal', dismissal_local: '12:30', reason: 'Staff training'}));
   const note = g.data.notifications.at(-1);
   assert.match(note.body, /dismiss at 12:30 on Friday, November 20 \(usually 15:10\)/);
-  assert.match(note.body, new RegExp('collected by Rosa Delgado \\(' + fri.id + '\\)'));
+  assert.match(note.body, /Theo Okafor's way home that day is still collected by Rosa Delgado\./);
   assert.match(note.body, /until 11:00/);
   const view = g.call('bellnote.pickup.get', {id: 'child-theo', start: '2026-11-20', end: '2026-11-20'});
   assert.equal(view.dismissal_changes[0].status, 'active'); assert.equal(view.days[0].cutoff_at, '2026-11-20T11:00:00-08:00');

@@ -47,10 +47,11 @@ function displayName(data, personId) {
 function myLink(data, childId) {
   return data.guardian_links.find(l => l.child_id === childId && l.person_id === data.owner_person_id) || null;
 }
+const RIGHT_TEXT = {custodial: 'custodial rights', can_sign: 'the right to sign forms', can_pay: 'the right to pay', can_pickup: 'the right to collect'};
 function requireRight(data, childId, right) {
-  child(data, childId);
+  const kid = child(data, childId);
   const l = myLink(data, childId);
-  if (!l || !l[right]) fail('not_permitted', 'Your guardian record for this child does not include ' + right + '.');
+  if (!l || !l[right]) fail('not_permitted', 'Your guardian record for ' + kid.display_name + ' does not include ' + RIGHT_TEXT[right] + '.');
   return l;
 }
 const guardianLink = (data, childId, personId) => data.guardian_links.find(l => l.child_id === childId && l.person_id === personId) || null;
@@ -84,7 +85,10 @@ function dayInfo(data, s, date) {
 const passed = (ctx, iso) => Date.parse(ctx.virtual_now) >= Date.parse(iso);
 function schoolDay(data, s, date) {
   const info = dayInfo(data, s, date);
-  if (!info.school_day) fail('not_school_day', date + ' is not a school day at ' + s.name + ' (' + info.kind + ').');
+  if (!info.school_day) {
+    const why = {outside_term: 'outside the term', weekend: 'a weekend', closed: 'closed' + (info.reason ? ': ' + info.reason : '')}[info.kind];
+    fail('not_school_day', time.longDate(date) + ' is not a school day at ' + s.name + ' (' + why + ').');
+  }
   return info;
 }
 

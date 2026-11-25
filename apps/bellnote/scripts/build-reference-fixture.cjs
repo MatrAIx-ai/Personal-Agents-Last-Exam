@@ -19,10 +19,10 @@ function build({withHistory = true} = {}) {
   // ---- schools: a 12-week window (5 October to 25 December 2026) with 3 closed days and 2 early dismissals each.
   const cal = (date, kind, reason, dismissal = null, changed = null) => ({date, kind, dismissal_local: dismissal, reason,
     changed_at: changed ? changed[0] : null, event_id: changed ? changed[1] : null});
-  const closure = ['2026-10-14T16:30:00-07:00', 'ev-hist-closure-1016'];
+  const closure = ['2026-10-14T16:30:00-07:00', 'ev-hist-closure-1016-alder'], closureK = ['2026-10-14T16:30:00-07:00', 'ev-hist-closure-1016-kestrel'];
   d.schools[0].calendar = [cal('2026-10-16', 'closed', 'District air-quality closure', null, closure), cal('2026-10-23', 'early_dismissal', 'Parent-teacher conferences', '12:30'),
     cal('2026-11-26', 'closed', 'Thanksgiving break'), cal('2026-11-27', 'closed', 'Thanksgiving break'), cal('2026-12-18', 'early_dismissal', 'Last day before winter break', '12:30')];
-  d.schools[1].calendar = [cal('2026-10-09', 'early_dismissal', 'Teacher planning afternoon', '12:15'), cal('2026-10-16', 'closed', 'District air-quality closure', null, closure),
+  d.schools[1].calendar = [cal('2026-10-09', 'early_dismissal', 'Teacher planning afternoon', '12:15'), cal('2026-10-16', 'closed', 'District air-quality closure', null, closureK),
     cal('2026-11-26', 'closed', 'Thanksgiving break'), cal('2026-11-27', 'closed', 'Thanksgiving break'), cal('2026-12-04', 'early_dismissal', 'Teacher planning afternoon', '12:15')];
   d.staff.push({id: 'staff-cafe-kestrel', name: 'Kestrel cafeteria office', role: 'Cafeteria', school_id: 'school-kestrel'});
   d.people.push({person_id: 'person-lena', display_name: 'Lena Marsh', phone: '555-0155'}, {person_id: 'person-owen', display_name: 'Owen Pike', phone: '555-0177'},
@@ -77,7 +77,8 @@ function build({withHistory = true} = {}) {
   for (const kid of d.children) {
     const s = schoolOf[kid.id];
     for (const date of schoolDays(s, '2026-09-21', '2026-11-16')) {
-      const sp = special[kid.id + '|' + date] || {status: 'present'}, markAt = at(date, s.id === 'school-alder' ? '09:15' : '08:45');
+      const sp = special[kid.id + '|' + date] || {status: 'present'};
+      const markAt = sp.time && sp.time > '09:00' ? at(date, time.isoInZone(time.zonedInstant(date, sp.time, TZ) + 10 * 60000, TZ).slice(11, 16)) : at(date, s.id === 'school-alder' ? '09:15' : '08:45');
       d.attendance.push({id: 'att-' + kid.id + '-' + date, child_id: kid.id, date, status: sp.status, time_local: sp.time || null,
         explanation: sp.status === 'present' ? null : sp.report ? 'explained' : 'unexplained', report_id: sp.report || null, office_review: sp.review || null,
         marked_by: office(s), marked_at: markAt, history: [h(markAt, 'marked', {status: sp.status, by: office(s)})]});
@@ -134,8 +135,8 @@ function build({withHistory = true} = {}) {
   const resp = (id, formId, child, by, state, version, answers, when, extra = {}) => ({id, form_id: formId, child_id: child, by_person_id: by, state, form_version: version,
     answers, paid_cents: 0, payment_ids: [], answered_at: when, history: [h(when, state === 'needs_review' ? 'signed' : state, {by, form_version: version})], ...extra});
   d.form_responses = [
-    resp('fr-0001', 'form-pumpkin', 'child-theo', 'person-maya', 'signed', 1, {'q-emergency': '555-0100'}, at('2026-09-29', '20:00'), {paid_cents: 600, payment_ids: ['pay-0003']}),
-    resp('fr-0002', 'form-pumpkin', 'child-ines', 'person-dana', 'signed', 1, {'q-emergency': '555-0142', 'q-chaperone': true}, at('2026-09-30', '07:40'), {paid_cents: 600}),
+    resp('fr-0001', 'form-pumpkin', 'child-ines', 'person-maya', 'signed', 1, {'q-emergency': '555-0100'}, at('2026-09-29', '20:00'), {paid_cents: 600, payment_ids: ['pay-0003']}),
+    resp('fr-0002', 'form-pumpkin', 'child-theo', 'person-dana', 'signed', 1, {'q-emergency': '555-0142', 'q-chaperone': true}, at('2026-09-30', '07:40'), {paid_cents: 600}),
     resp('fr-0003', 'form-picture-day', 'child-theo', 'person-maya', 'declined', 1, {}, at('2026-09-24', '21:00')),
     resp('fr-0004', 'form-picture-day', 'child-ines', 'person-dana', 'signed', 1, {'q-size': 'youth_s'}, at('2026-09-25', '07:30')),
     resp('fr-0005', 'form-fluclinic', 'child-theo', 'person-dana', 'signed', 1, {'q-consent-allergies': 'none'}, at('2026-11-10', '07:45')),
@@ -213,7 +214,7 @@ function build({withHistory = true} = {}) {
   }
   d.lunch_transactions = tx;
   d.payments = [...payments,
-    pay('pay-0003', 'form_fee', 'child-theo', 600, 'pm-0001', 'form_response', 'fr-0001', at('2026-09-29', '20:00')),
+    pay('pay-0003', 'form_fee', 'child-ines', 600, 'pm-0001', 'form_response', 'fr-0001', at('2026-09-29', '20:00')),
     pay('pay-0004', 'form_fee', 'child-theo', 1800, 'pm-0002', 'form_response', 'fr-0007', at('2026-11-12', '21:00')),
     pay('pay-0005', 'form_fee', 'child-theo', 500, 'pm-0001', 'form_response', 'fr-0013', at('2026-11-10', '20:30')),
     pay('pay-0006', 'form_fee', 'child-ines', 500, 'pm-0001', 'form_response', 'fr-0014', at('2026-11-10', '20:31'), 'refunded', at('2026-11-13', '07:00'), 'withdrawn')]
@@ -226,11 +227,12 @@ function build({withHistory = true} = {}) {
     addTx(acct.child_id, 'adjustment', target[acct.id] - sum, at('2026-08-26', '08:00'), {note: 'Balance carried over from last year'});
   }
   tx.sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
-  const lowNotes = [];
+  const lowNotes = [], refundNotes = [];
   for (const acct of d.lunch_accounts) {
     let bal = 0, notified = false;
     for (const t of tx.filter(x => x.lunch_account_id === acct.id)) {
       bal += t.amount_cents;
+      if (t.kind === 'refund') refundNotes.push({acct, t, bal});
       if (bal < acct.low_balance_threshold_cents && !notified && t.kind === 'purchase') { notified = true; lowNotes.push({acct, t, bal}); }
       else if (bal >= acct.low_balance_threshold_cents) notified = false;
     }
@@ -242,29 +244,48 @@ function build({withHistory = true} = {}) {
   const note = (kind, when, child, objType, objId, title, body) => nt.push({id: 'ntf-' + String(nt.length + 1).padStart(4, '0'), kind, at: when, child_id: child,
     object_type: objType, object_id: objId, title, body, event_id: null, wire: null});
   const pub = f => note('form.published', f.published_at, f.child_ids.length === 1 ? f.child_ids[0] : null, 'form', f.id, (f.school_id === A ? 'Alder Elementary' : 'Kestrel Ridge Middle School') + ': ' + f.title,
-    'A new form "' + f.title + '" is open until ' + time.localDate(f.due_at, TZ) + ' ' + time.localTime(f.due_at, TZ) + '.' + (f.fee_cents ? ' Fee: $' + (f.fee_cents / 100).toFixed(2) + '.' : ''));
+    (f.school_id === A ? 'Alder Elementary' : 'Kestrel Ridge Middle School') + ' sent a form for ' + f.child_ids.map(id => d.children.find(k => k.id === id).display_name).join(' and ') +
+      ': "' + f.title + '". ' + (f.fee_cents ? 'Fee: $' + (f.fee_cents / 100).toFixed(2) + '. ' : 'No fee. ') + 'Answers are due by ' + time.longDateTime(f.due_at, TZ) + '.');
   const F = id => d.forms.find(f => f.id === id);
-  ['form-picture-day', 'form-pumpkin', 'form-k-science', 'form-library', 'form-k-band', 'form-fluclinic'].forEach(id => pub(F(id)));
-  note('form.answered', at('2026-09-25', '07:30'), 'child-ines', 'form_response', 'fr-0004', 'Dana Okafor signed "Picture day order" for Ines Okafor', 'Dana Okafor signed "Picture day order" for Ines Okafor (version 1).');
-  note('form.answered', at('2026-09-30', '07:40'), 'child-ines', 'form_response', 'fr-0002', 'Dana Okafor signed "Pumpkin farm walk" for Ines Okafor', 'Dana Okafor signed "Pumpkin farm walk" for Ines Okafor (version 1).');
+  d.forms.forEach(pub);
+  // The other guardians' answers, in the App's wording.
+  const answered = r => { const f = F(r.form_id), who = d.people.find(p => p.person_id === r.by_person_id).display_name, kid = d.children.find(k => k.id === r.child_id).display_name,
+    verb = r.state === 'declined' ? 'declined' : 'signed';
+    note('form.answered', r.answered_at, r.child_id, 'form_response', r.id, who + ' ' + verb + ' "' + f.title + '" for ' + kid,
+      who + ' ' + verb + ' "' + f.title + '" for ' + kid + ' (version ' + r.form_version + '). Their answer holds the form for ' + kid + '; it cannot be changed from this account.'); };
+  d.form_responses.filter(r => r.by_person_id !== d.owner_person_id).forEach(answered);
+  // The office's reviews of pickup people.
+  for (const p of d.pickup_people) for (const x of p.history.filter(e => ['approved', 'denied'].includes(e.action))) {
+    const kid = d.children.find(k => k.id === p.child_id).display_name, verb = x.action === 'approved' ? 'approved' : 'did not approve';
+    note('pickup.person_reviewed', x.at, p.child_id, 'pickup_person', p.id, 'Alder Elementary: ' + p.display_name + (x.action === 'approved' ? ' approved to collect ' : ' not approved to collect ') + kid,
+      'The office ' + verb + ' ' + p.display_name + ' as a person who may collect ' + kid + '.');
+  }
   note('absence.reviewed', at('2026-09-29', '14:00'), 'child-theo', 'absence_report', 'rep-0001', "Alder Elementary: Theo Okafor's report marked excused", 'The office reviewed your report for Theo Okafor (Tuesday, September 29) and marked it excused.');
-  note('pickup.person_reviewed', at('2026-10-02', '11:00'), 'child-theo', 'pickup_person', 'pp-0003', 'Alder Elementary: Lena Marsh did not approve for Theo Okafor', 'The office did not approve Lena Marsh as a person who may collect Theo Okafor.');
-  note('absence.reviewed', at('2026-10-07', '13:30'), 'child-ines', 'absence_report', 'rep-0002', "Alder Elementary: Ines Okafor's report marked excused", 'The office reviewed the report for Ines Okafor (October 6 and 7) and marked it excused.');
+  note('absence.reviewed', at('2026-10-07', '13:30'), 'child-ines', 'absence_report', 'rep-0002', "Alder Elementary: Ines Okafor's report marked excused", 'The office reviewed the report sent by Dana Okafor for Ines Okafor (Tuesday, October 6 and Wednesday, October 7) and marked it excused.');
   note('school.day_changed', at('2026-10-14', '16:30'), null, 'school_day', 'day-alder-2026-10-16', 'Alder Elementary: closed on Friday, October 16',
-    'Alder Elementary will be closed on Friday, October 16. Reason given: District air-quality closure. Theo Okafor: report rep-0003 no longer applies to that day.');
+    'Alder Elementary will be closed on Friday, October 16. Reason given: District air-quality closure. Theo Okafor: no dismissal change for that day. Theo Okafor: the absence reported on Monday, October 12 no longer applies to that day. Ines Okafor: no dismissal change for that day.');
+  note('school.day_changed', at('2026-10-14', '16:30'), 'child-nico', 'school_day', 'day-kestrel-2026-10-16', 'Kestrel Ridge Middle School: closed on Friday, October 16',
+    'Kestrel Ridge Middle School will be closed on Friday, October 16. Reason given: District air-quality closure.');
   note('absence.reviewed', at('2026-10-21', '15:00'), 'child-ines', 'absence_report', 'rep-0004', "Alder Elementary: Ines Okafor's report marked unexcused", 'The office reviewed your report for Ines Okafor (Wednesday, October 21) and marked it unexcused. Note from the office: Not an excused reason under district policy.');
   note('attendance.unexplained', at('2026-10-28', '08:45'), 'child-nico', 'attendance_record', 'att-child-nico-2026-10-28', 'Kestrel Ridge Middle School: Nico Reyes marked absent on Wednesday, October 28',
     'Kestrel Ridge Middle School marked Nico Reyes absent on Wednesday, October 28 and has no report from a guardian for that day.');
   note('dismissal.recorded', at('2026-11-04', '18:00'), 'child-ines', 'dismissal_change', 'dc-0002', 'Dana Okafor changed Ines Okafor\'s way home on Friday, November 6', 'Dana Okafor recorded that Ines Okafor will be collected by Dana Okafor on Friday, November 6.');
+  for (const {acct, t, bal} of refundNotes) {
+    const name = d.children.find(k => k.id === acct.child_id).display_name, money = c => '$' + (Math.abs(c) / 100).toFixed(2);
+    note('lunch.refund', t.at, acct.child_id, 'lunch_transaction', t.id, 'Lunch refund for ' + name + ': ' + money(t.amount_cents),
+      'The cafeteria credited ' + money(t.amount_cents) + ' to ' + name + "'s lunch account for " + t.item + '. Balance: ' + money(bal) + '.');
+  }
   for (const {acct, t, bal} of lowNotes) {
     const name = d.children.find(k => k.id === acct.child_id).display_name, money = c => (c < 0 ? '-$' : '$') + (Math.abs(c) / 100).toFixed(2);
     note('lunch.low_balance', t.at, acct.child_id, 'lunch_account', acct.id, name + "'s lunch balance is " + money(bal),
       name + "'s lunch balance fell to " + money(bal) + ', under your threshold of ' + money(acct.low_balance_threshold_cents) + '.');
   }
+  note('attendance.unexplained', at('2026-11-06', '13:20'), 'child-nico', 'attendance_record', 'att-child-nico-2026-11-06', 'Kestrel Ridge Middle School: Nico Reyes marked leaving early on Friday, November 6',
+    'Kestrel Ridge Middle School marked Nico Reyes leaving early (13:10) on Friday, November 6 and has no report from a guardian for that day.');
   note('attendance.unexplained', at('2026-11-12', '09:15'), 'child-theo', 'attendance_record', 'att-child-theo-2026-11-12', 'Alder Elementary: Theo Okafor marked late on Thursday, November 12',
-    'Alder Elementary marked Theo Okafor late (09:05) on Thursday, November 12 and has no report from a guardian for that day.');
+    'Alder Elementary marked Theo Okafor late (09:05) on Thursday, November 12 and has no report from a guardian for that day. Open Bellnote to report the reason.');
   note('form.changed', at('2026-11-16', '10:30'), 'child-theo', 'form', 'form-aquarium', 'Alder Elementary: "Grade 3 aquarium trip" was changed',
-    'The school changed text, event_date on "Grade 3 aquarium trip" (Aquarium moved our booking). Your signature for Theo Okafor no longer counts: review version 2 and sign again or withdraw.');
+    'The school changed the text and the event date on "Grade 3 aquarium trip" (Aquarium moved our booking). Your signature for Theo Okafor no longer counts: review version 2 and sign again or withdraw.');
   note('dismissal.recorded', at('2026-11-16', '21:15'), 'child-theo', 'dismissal_change', 'dc-0004', 'Dana Okafor changed Theo Okafor\'s way home on Friday, November 20', 'Dana Okafor recorded that Theo Okafor will be collected by Dana Okafor on Friday, November 20.');
   nt.sort((a, b) => Date.parse(a.at) - Date.parse(b.at)).forEach((x, i) => { x.id = 'ntf-' + String(i + 1).padStart(4, '0'); });
   d.notifications = nt;

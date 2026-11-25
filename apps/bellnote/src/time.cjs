@@ -100,6 +100,13 @@ function monthEnd(month, tz) {
   const next = m === 12 ? (y + 1) + '-01-01' : y + '-' + pad(m + 1) + '-01';
   return zonedInstant(next, '00:00', tz);
 }
+// Human-readable forms used in messages and notification text: "Tuesday, November 17" and
+// "Tuesday, November 17 at 08:30" (the instant's wall time in the zone).
+function longDate(date) {
+  const d = parseDate(date);
+  return new Date(d.t).toLocaleDateString('en-US', {weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC'});
+}
+const longDateTime = (iso, tz) => longDate(localDate(iso, tz)) + ' at ' + localTime(iso, tz);
 const hasOffset = iso => typeof iso === 'string' && /(Z|[+-]\d{2}:\d{2})$/.test(iso) && Number.isFinite(Date.parse(iso));
 module.exports = {validZone, validDate, parseLocal, minutesOf, zonedInstant, zonedIso, isoInZone, localDate, localTime,
-  addDays, weekday, daysBetween, eachDate, monthEnd, hasOffset};
+  addDays, weekday, daysBetween, eachDate, monthEnd, hasOffset, longDate, longDateTime};

@@ -18,7 +18,7 @@ test('fixtures pass the consistency checks and the reference fixture matches its
   // The hand-written 2026–27 records keep their counts; the generated history adds its own series.
   const handWritten = k => reference[k].filter(r => !history.isGenerated(r.id) && !(['attendance', 'menu_days'].includes(k) && r.date < '2026-08-26'));
   assert.deepEqual(['schools', 'children', 'pickup_people', 'restrictions', 'absence_reports', 'forms', 'form_responses', 'lunch_accounts', 'payment_methods', 'payments', 'notifications']
-    .map(k => handWritten(k).length), [2, 3, 6, 1, 6, 10, 14, 3, 2, 8, 20]);
+    .map(k => handWritten(k).length), [2, 3, 6, 1, 6, 10, 14, 3, 2, 8, 34]);
   assert.ok(handWritten('attendance').length >= 110 && handWritten('lunch_transactions').length >= 80);
   const {generated, records} = check(reference);
   assert.deepEqual(generated, {attendance: 27, absence_reports: 14, forms: 18, form_responses: 23, dismissal_changes: 30, pickup_people: 2, lunch_transactions: 192,
@@ -54,6 +54,33 @@ test('the consistency checks catch broken fixtures', () => {
   }
 });
 
+test('the App\'s rules apply to hand-written records and to the minimal fixture as well', () => {
+  const minimal = require('../fixtures/minimal.json');
+  const broken = [
+    // The original state of the pumpkin-farm answers: Dana signed and paid for Ines, whose link has no can_pay.
+    [reference, 'a fee paid by a guardian who cannot pay', d => { d.form_responses.find(r => r.id === 'fr-0001').child_id = 'child-theo'; d.form_responses.find(r => r.id === 'fr-0002').child_id = 'child-ines';
+      d.payments.find(p => p.id === 'pay-0003').child_id = 'child-theo'; }, /fr-0002 fee paid by a guardian who cannot pay/],
+    [reference, 'an answer by a guardian who cannot sign', d => { d.guardian_links.find(l => l.id === 'gl-theo-dana').can_sign = false; }, /fr-0002 answered by a guardian who cannot sign/],
+    [reference, 'a report sent after its cut-off', d => { const r = d.absence_reports.find(x => x.id === 'rep-0001'); r.submitted_at = r.history[0].at = '2026-09-29T08:31:00-07:00'; }, /rep-0001 submitted after its cut-off/],
+    [reference, 'a way-home change naming a person the office denied', d => { d.dismissal_changes.find(x => x.id === 'dc-0001').person_id = 'person-lena'; }, /dc-0001 names a person not approved at the time/],
+    [reference, 'a way-home change recorded after its cut-off', d => { d.dismissal_changes.find(x => x.id === 'dc-0001').created_at = '2026-10-23T11:30:00-07:00'; }, /dc-0001 recorded after its cut-off/],
+    [reference, 'a pickup person added by a guardian without custodial rights', d => { d.pickup_people.find(x => x.id === 'pp-0006').added_by = 'person-maya'; }, /pp-0006 added by a guardian without custodial rights/],
+    [reference, 'a top-up outside the range', d => { const t = d.lunch_transactions.find(x => x.payment_id === 'pay-0001'); t.amount_cents += 20000; d.payments.find(p => p.id === 'pay-0001').amount_cents += 20000;
+      d.lunch_accounts.find(a => a.id === t.lunch_account_id).balance_cents += 20000; }, /top-up outside the top-up range/],
+    [reference, 'a form without its published notice', d => { d.notifications = d.notifications.filter(n => !(n.kind === 'form.published' && n.object_id === 'form-aquarium')); }, /form-aquarium: 0 form\.published notifications/],
+    [reference, 'a refund without its notice', d => { d.notifications = d.notifications.filter(n => n.kind !== 'lunch.refund' || n.id.startsWith('ntf-h')); }, /lunch\.refund notifications/],
+    [reference, 'a notice that shows a record ID', d => { d.notifications.find(n => n.id === 'ntf-0001').body += ' (rep-0003)'; }, /ntf-0001 text shows a record ID/],
+    [reference, 'a notice with an ISO date', d => { d.notifications.find(n => n.id === 'ntf-0001').body += ' Due 2026-10-01.'; }, /ntf-0001 text shows an ISO date/],
+    [minimal, 'minimal: an answer by a guardian who cannot sign', d => { d.guardian_links.find(l => l.id === 'gl-theo-dana').can_sign = false; }, /fr-0001 answered by a guardian who cannot sign/],
+    [minimal, 'minimal: a missing review notice', d => { d.notifications = d.notifications.filter(n => n.kind !== 'pickup.person_reviewed'); }, /pp-0001: 0 pickup\.person_reviewed notifications/]
+  ];
+  for (const [base, name, mutate, expected] of broken) {
+    const d = structuredClone(base); mutate(d);
+    const {problems} = check(d);
+    assert.ok(problems.some(p => expected.test(p)), name + ': ' + JSON.stringify(problems).slice(0, 400));
+  }
+});
+
 test('the proposal example events apply to the reference fixture', () => {
   const f = fixture({seed: reference});
   f.call('bellnote.preferences.update', {email_notices: true});
@@ -61,7 +88,7 @@ test('the proposal example events apply to the reference fixture', () => {
   f.event({event_id: 'ev-bn-130', at: '2026-11-18T12:10:00-08:00', operation: 'bellnote.lunch.charged', payload: {transaction_id: 'tx-0412', child_id: 'child-ines', kind: 'purchase', amount_cents: -425, item: 'Peanut noodle bowl', allergens: ['peanut', 'wheat', 'soy']}});
   f.event({event_id: 'ev-bn-160', at: '2026-11-18T13:05:00-08:00', operation: 'bellnote.school.day_changed', payload: {school_id: 'school-alder', date: '2026-11-20', kind: 'early_dismissal', dismissal_local: '12:30', reason: 'Staff training'}});
   const n = f.data.notifications.at(-1);
-  assert.match(n.body, /Theo Okafor's dismissal plan for that day is still: collected by Dana Okafor \(dc-0004\)/);
+  assert.match(n.body, /Theo Okafor's way home that day is still collected by Dana Okafor\./);
   assert.match(n.body, /until 11:00/);
   assert.ok(wireValid(n.wire));
   f.event({event_id: 'ev-bn-121', at: '2026-11-19T21:15:00-08:00', operation: 'bellnote.dismissal.recorded', payload: {change_id: 'dc-0031', child_id: 'child-theo', date: '2026-11-20', mode: 'pickup', person_id: 'person-rosa', recorded_by: 'person-dana'}});
@@ -74,8 +101,8 @@ test('the proposal example events apply to the reference fixture', () => {
 });
 
 test('T03 a report from an earlier school year keeps its state instead of reading moot', () => {
-  // Before the fix, a day before the current term read `moot` (reason outside_term), so every report
-  // of an earlier year listed as moot. Moot is only for days that became closed.
+  // A day before the current term (whose calendar the App does not hold) is not `moot`: moot is only
+  // for days that became closed, so a report of an earlier year keeps the state it ended in.
   const f = fixture({mutate: d => {
     d.absence_reports.push({id: 'rep-0099', child_id: 'child-theo', kind: 'absent', dates: ['2026-05-12'], time_local: null, reason: 'Fever', state: 'excused', cancelled_dates: [],
       submitted_by: 'person-maya', submitted_at: '2026-05-12T07:00:00-07:00', reviewed_by: 'staff-office-alder', reviewed_at: '2026-05-12T14:00:00-07:00', review_note: null,

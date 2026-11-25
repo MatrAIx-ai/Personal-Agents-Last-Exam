@@ -65,19 +65,20 @@ function dayChanged(ctx, data, event, row) {
   const dayId = 'day-' + s.id.replace(/^school-/, '') + '-' + p.date;
   row.object_id = dayId;
   const after = c.dayInfo(data, s, p.date), zone = c.tz(data);
+  const REPORT_TEXT = {absent: 'absence', late: 'late arrival', early_leave: 'early leave'};
   const kids = data.children.filter(k => k.school_id === s.id);
   // Pickup details are given only for children the account holder is custodial for.
   const lines = kids.flatMap(k => {
     const out = [], custodial = !!c.myLink(data, k.id)?.custodial, d = pickup.activeChange(data, k.id, p.date);
     if (custodial && p.kind === 'closed') {
       const whose = d && (d.recorded_by === data.owner_person_id ? 'your dismissal change' : 'the dismissal change recorded by ' + c.displayName(data, d.recorded_by));
-      out.push(k.display_name + ': ' + (d ? whose + ' (' + pickup.describe(data, d) + ', ' + d.id + ') no longer applies.' : 'no dismissal change for that day.'));
+      out.push(k.display_name + ': ' + (d ? whose + ' (' + pickup.describe(data, d) + ') no longer applies.' : 'no dismissal change for that day.'));
     } else if (custodial) {
-      out.push(k.display_name + "'s dismissal plan for that day is still: " + (d ? pickup.describe(data, d) + ' (' + d.id + ')' : 'the default, ' + k.default_dismissal.replace('_', ' ')) + '.');
+      out.push(k.display_name + "'s way home that day is still " + (d ? pickup.describe(data, d) : 'the usual one (' + pickup.MODE_TEXT[k.default_dismissal] + ')') + '.');
     }
     const moot = data.absence_reports.filter(r => r.child_id === k.id && r.state !== 'cancelled' && r.dates.includes(p.date) &&
       attendance.reportView(ctx, data, r).days.find(x => x.date === p.date).state === 'moot');
-    if (moot.length) out.push(k.display_name + ': report ' + moot.map(r => r.id).join(', ') + ' no longer applies to that day.');
+    for (const r of moot) out.push(k.display_name + ': the ' + REPORT_TEXT[r.kind] + ' reported on ' + longDate(c.time.localDate(r.submitted_at, zone)) + ' no longer applies to that day.');
     return out;
   });
   const when = p.kind === 'closed' ? s.name + ' will be closed on ' + longDate(p.date) + '.'
@@ -87,6 +88,6 @@ function dayChanged(ctx, data, event, row) {
   notify(ctx, data, {kind: 'school.day_changed', child_id: kids.length === 1 ? kids[0].id : null, object_type: 'school_day', object_id: dayId,
     event_id: event.event_id, cause_seq: row.seq,
     title: s.name + ': ' + (p.kind === 'closed' ? 'closed' : 'early dismissal at ' + p.dismissal_local) + ' on ' + longDate(p.date),
-    body: when + ' Reason given: ' + p.reason + '. ' + lines.join(' ') + cutoff});
+    body: [when, 'Reason given: ' + p.reason + '.', ...lines].join(' ') + cutoff});
 }
 module.exports = {children, schoolGet, payments, notifications, preferences, updatePreferences, dayChanged};

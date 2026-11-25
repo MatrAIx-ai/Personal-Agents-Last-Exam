@@ -1,7 +1,8 @@
 'use strict';
 // W2: forms and permission slips, one answer per form and child, versions and fees.
 const c = require('./common.cjs');
-const {notify, money} = require('./notify.cjs');
+const {notify, money, listText} = require('./notify.cjs');
+const FIELD_TEXT = Object.freeze({title: 'the title', text: 'the text', questions: 'the questions', fee_cents: 'the fee', event_date: 'the event date', due_at: 'the due time'});
 const MATERIAL = Object.freeze(['title', 'text', 'questions', 'fee_cents', 'event_date']);
 const ACTIVE = Object.freeze(['signed', 'declined', 'needs_review']);
 
@@ -40,19 +41,20 @@ function get(ctx, data, args) {
     my_rights: f.child_ids.map(id => { const l = c.myLink(data, id); return {child_id: id, can_sign: !!l?.can_sign, can_pay: !!l?.can_pay}; })}};
 }
 
+const TYPE_TEXT = {text: 'a non-empty text of at most 2000 characters', choice: 'one of the listed options', boolean: 'yes or no (true or false)', number: 'a number'};
 // Answers must cover every required question with a value of the declared type.
 function checkAnswers(f, answers, required, code) {
   const known = new Map(f.questions.map(q => [q.id, q]));
   for (const [id, v] of Object.entries(answers || {})) {
     const q = known.get(id);
-    if (!q) c.fail(code, 'The form has no question ' + id + '.');
+    if (!q) c.fail(code, 'The form has no question "' + id + '".');
     const ok = q.type === 'text' ? typeof v === 'string' && v.trim().length > 0 && v.length <= 2000
       : q.type === 'choice' ? typeof v === 'string' && q.options.includes(v)
         : q.type === 'boolean' ? typeof v === 'boolean'
           : q.type === 'number' ? typeof v === 'number' && Number.isFinite(v) : false;
-    if (!ok) c.fail(code, 'Answer to ' + id + ' does not match its type (' + q.type + ').');
+    if (!ok) c.fail(code, 'The answer to "' + q.label + '" must be ' + TYPE_TEXT[q.type] + '.');
   }
-  if (required) for (const q of f.questions) if (q.required && !Object.hasOwn(answers || {}, q.id)) c.fail(code, 'Question ' + q.id + ' is required.');
+  if (required) for (const q of f.questions) if (q.required && !Object.hasOwn(answers || {}, q.id)) c.fail(code, '"' + q.label + '" needs an answer to sign.');
 }
 function refundAll(ctx, data, r, reason) {
   for (const id of r.payment_ids) {
@@ -65,13 +67,13 @@ function refundAll(ctx, data, r, reason) {
 function respond(ctx, data, args) {
   const f = c.find(data.forms, args.id, 'Form');
   c.child(data, args.child_id);
-  if (!f.child_ids.includes(args.child_id)) c.fail('not_found', 'Form ' + f.id + ' is not addressed to ' + args.child_id + '.');
+  if (!f.child_ids.includes(args.child_id)) c.fail('not_found', '"' + f.title + '" is not addressed to ' + c.child(data, args.child_id).display_name + '.');
   c.requireRight(data, args.child_id, 'can_sign');
-  if (phase(ctx, f) === 'closed') c.fail('closed', 'The form closed at ' + f.due_at + '.');
+  if (phase(ctx, f) === 'closed') c.fail('closed', 'The form closed on ' + c.time.longDateTime(f.due_at, c.tz(data)) + '.');
   let r = responseOf(data, f.id, args.child_id);
   const me = data.owner_person_id;
   if (r && ACTIVE.includes(r.state) && (r.by_person_id !== me || r.state !== 'needs_review')) {
-    c.fail('already_answered', 'This child already has an answer (' + r.state + ') from ' + c.displayName(data, r.by_person_id) + '.');
+    c.fail('already_answered', 'This child already has an answer (' + r.state.replace(/_/g, ' ') + ') from ' + c.displayName(data, r.by_person_id) + '.');
   }
   if (args.form_version !== f.version) c.fail('stale_form', 'The form is at version ' + f.version + '; read it again before answering.');
   checkAnswers(f, args.answers, args.action === 'sign', 'missing_answer');
@@ -105,8 +107,8 @@ function withdraw(ctx, data, args) {
   const r = c.find(data.form_responses, args.id, 'Form response'), f = c.find(data.forms, r.form_id, 'Form');
   c.requireRight(data, r.child_id, 'can_sign');
   if (r.by_person_id !== data.owner_person_id) c.fail('not_yours', 'Only the guardian who answered can withdraw this answer.');
-  if (!ACTIVE.includes(r.state)) c.fail('invalid_state', 'The answer is already ' + r.state + '.');
-  if (phase(ctx, f) === 'closed') c.fail('closed', 'The form closed at ' + f.due_at + '.');
+  if (!ACTIVE.includes(r.state)) c.fail('invalid_state', 'The answer is already ' + r.state.replace(/_/g, ' ') + '.');
+  if (phase(ctx, f) === 'closed') c.fail('closed', 'The form closed on ' + c.time.longDateTime(f.due_at, c.tz(data)) + '.');
   const refunded = r.paid_cents;
   refundAll(ctx, data, r, 'withdrawn');
   r.state = 'withdrawn';
@@ -147,7 +149,7 @@ function published(ctx, data, event, row) {
   notify(ctx, data, {kind: 'form.published', child_id: row.child_id, object_type: 'form', object_id: f.id, event_id: event.event_id, cause_seq: row.seq,
     title: s.name + ': ' + p.title,
     body: s.name + ' sent a form for ' + names + ': "' + p.title + '". ' + (p.fee_cents ? 'Fee: ' + money(p.fee_cents) + '. ' : 'No fee. ') +
-      'Answers are due by ' + c.time.localDate(p.due_at, c.tz(data)) + ' ' + c.time.localTime(p.due_at, c.tz(data)) + '.'});
+      'Answers are due by ' + c.time.longDateTime(p.due_at, c.tz(data)) + '.'});
 }
 function changed(ctx, data, event, row) {
   const p = event.payload, f = data.forms.find(x => x.id === p.form_id);
@@ -180,7 +182,7 @@ function changed(ctx, data, event, row) {
     : 'None of your answers is affected.';
   notify(ctx, data, {kind: 'form.changed', child_id: f.child_ids.length === 1 ? f.child_ids[0] : null, object_type: 'form', object_id: f.id,
     event_id: event.event_id, cause_seq: row.seq, title: s.name + ': "' + f.title + '" was changed',
-    body: 'The school changed ' + fields.join(', ') + ' on "' + f.title + '"' + (p.reason ? ' (' + p.reason + ')' : '') + '. ' + mine});
+    body: 'The school changed ' + listText(fields.map(k => FIELD_TEXT[k])) + ' on "' + f.title + '"' + (p.reason ? ' (' + p.reason + ')' : '') + '. ' + mine});
 }
 function answered(ctx, data, event, row) {
   const p = event.payload, f = data.forms.find(x => x.id === p.form_id);

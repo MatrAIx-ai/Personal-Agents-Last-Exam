@@ -1,7 +1,7 @@
 'use strict';
-// Rules tightened after an independent review: what a non-custodial guardian learns, fees on the
-// other guardian's answers, the `answered` listing phase, moot days, refused late events, the
-// daily spend with refunds, the person_id mapping, late/early-leave cut-offs, fee decreases and
+// Rules where the plan was silent or that cut across workflows: what a non-custodial guardian learns,
+// fees on the other guardian's answers, the `answered` listing phase, moot days, refused late events,
+// the daily spend with refunds, the person_id mapping, late/early-leave cut-offs, fee decreases and
 // exactly one notification per occurrence.
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -58,8 +58,8 @@ test('T13 closed-day notice names whose dismissal change it was', () => {
   f.event(ev('dismissal.recorded', '2026-11-17T08:00:00-08:00', {change_id: 'dc-d1', child_id: 'child-ines', date: '2026-11-19', mode: 'pickup', person_id: 'person-dana', recorded_by: 'person-dana'}));
   f.event(ev('school.day_changed', '2026-11-17T09:00:00-08:00', {school_id: 'school-alder', date: '2026-11-19', kind: 'closed', reason: 'Power outage'}));
   const body = f.data.notifications.at(-1).body;
-  assert.match(body, /Theo Okafor: your dismissal change \(walking home, dc-0001\) no longer applies/);
-  assert.match(body, /Ines Okafor: the dismissal change recorded by Dana Okafor \(collected by Dana Okafor, dc-d1\) no longer applies/);
+  assert.match(body, /Theo Okafor: your dismissal change \(walking home\) no longer applies/);
+  assert.match(body, /Ines Okafor: the dismissal change recorded by Dana Okafor \(collected by Dana Okafor\) no longer applies/);
 });
 
 test('T05/T06 the other guardian can sign a fee form only with can_pay for that child', () => {
@@ -105,7 +105,7 @@ test('T03 a multi-day report reads moot per day; the whole report only when ever
   let v = f.call('bellnote.absences.list', {id: r.id}).reports[0];
   assert.equal(v.state, 'submitted'); assert.deepEqual(v.moot_dates, ['2026-11-19']);
   assert.deepEqual(v.days.map(d => [d.date, d.state, d.moot_reason]), [['2026-11-18', 'reported', null], ['2026-11-19', 'moot', 'closed']]);
-  assert.match(f.data.notifications.at(-1).body, new RegExp('report ' + r.id + ' no longer applies'));
+  assert.match(f.data.notifications.at(-1).body, /Theo Okafor: the absence reported on Tuesday, November 17 no longer applies to that day\./);
   assert.deepEqual(f.call('bellnote.absences.cancel', {id: r.id}).cancelled_dates, ['2026-11-18'], 'Only reported days are cancelled');
   const g = fixture({now: '2026-11-17T07:00:00-08:00'});
   const r2 = g.call('bellnote.absences.report', {id: 'child-theo', kind: 'absent', start: '2026-11-18', end: '2026-11-19', reason: 'x'});
@@ -135,8 +135,9 @@ test('An early dismissal before a reported early-leave or arrival time makes tha
   for (const id of [leave.id, late.id]) {
     const v = f.call('bellnote.absences.list', {id}).reports[0];
     assert.equal(v.state, 'moot'); assert.equal(v.days[0].moot_reason, 'time_outside_day');
-    assert.match(f.data.notifications.at(-1).body, new RegExp(id));
   }
+  assert.match(f.data.notifications.at(-1).body, /Theo Okafor: the early leave reported on Tuesday, November 17 no longer applies to that day\./);
+  assert.match(f.data.notifications.at(-1).body, /Ines Okafor: the late arrival reported on Tuesday, November 17 no longer applies to that day\./);
   // A report time still inside the shortened day stays reported.
   const g = fixture({now: '2026-11-17T07:00:00-08:00'});
   const ok = g.call('bellnote.absences.report', {id: 'child-theo', kind: 'early_leave', start: '2026-11-20', time_local: '11:00', reason: 'Dentist'});

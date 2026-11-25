@@ -437,7 +437,7 @@
   },
   {
     "name": "bellnote.absences.list",
-    "description": "Absence, late-arrival and early-leave reports with their state (submitted, excused, unexcused, cancelled, or moot when every day became a closed day) and per-day cut-offs. Filter by report id, child_id or state.",
+    "description": "Absence, late-arrival and early-leave reports with their state (submitted, excused, unexcused, cancelled, or moot when every day no longer applies: it became a closed day, or for a late arrival or early leave an early dismissal moved the end of the day to or before the reported time), moot_dates and per-day cut-offs. Filter by report id, child_id or state.",
     "read_only": true,
     "scope": "bellnote.absences.list",
     "resource_target": "absence_report",
@@ -670,7 +670,7 @@
   },
   {
     "name": "bellnote.forms.list",
-    "description": "Forms addressed to the account's children with phase (closed once the due time passes; otherwise answered when every child in scope has a signed or declined answer, else open), fee, due time, version and each child's answer (unanswered, signed, declined, withdrawn, needs_review).",
+    "description": "Forms addressed to the account's children with phase (closed once the due time passes; otherwise answered when every child in scope has a signed or declined answer, a needs_review answer not counting, else open), fee, due time, version and each child's answer (unanswered, signed, declined, withdrawn, needs_review).",
     "read_only": true,
     "scope": "bellnote.forms.list",
     "resource_target": "form",
@@ -820,7 +820,7 @@
   },
   {
     "name": "bellnote.pickup.get",
-    "description": "Who may collect one child (id): guardians with can_pickup, standing pickup people by state, restrictions on file with the school office, the default way home, dismissal changes in start..end and the resulting plan per day. Requires your custodial right for the child.",
+    "description": "Who may collect one child (id): guardians with can_pickup, standing pickup people by state, restrictions on file with the school office, the default way home, dismissal changes in start..end (default today..+14) and the resulting plan per day. Requires your custodial right for the child.",
     "read_only": true,
     "scope": "bellnote.pickup.get",
     "resource_target": "child",
@@ -1191,7 +1191,7 @@
   },
   {
     "name": "bellnote.lunch.account_get",
-    "description": "Read one lunch account (id): balance, low-balance threshold, daily spending limit, the child's meal restrictions and the transactions in start..end, each with restricted_item and over_daily_limit computed at read time.",
+    "description": "Read one lunch account (id): balance, low-balance threshold, daily spending limit, the child's meal restrictions and the transactions in start..end (default the last 14 days), each with restricted_item and over_daily_limit computed at read time.",
     "read_only": true,
     "scope": "bellnote.lunch.account_get",
     "resource_target": "lunch_account",
@@ -1464,7 +1464,7 @@
   },
   {
     "name": "bellnote.menu.list",
-    "description": "The lunch menu per school day in start..end (default this week) for the account's schools or one school (id): items with allergen tags and excluded_for, the children whose restrictions exclude the item. A school day without a menu has menu_published false.",
+    "description": "The lunch menu per school day in start..end (default today..+6) for the account's schools or one school (id): items with allergen tags and excluded_for, the children whose restrictions exclude the item. A school day without a menu has menu_published false.",
     "read_only": true,
     "scope": "bellnote.menu.list",
     "resource_target": "school",
@@ -1952,7 +1952,7 @@
   },
   {
     "name": "bellnote.absences.report",
-    "description": "Report an absence (one day or a range of up to 10 school days), a late arrival or an early leave (one day, with time_local) for child id, with a reason. Needs your custodial right and must be made before each day's absence cut-off.",
+    "description": "Report an absence (one day or a range of up to 10 school days), a late arrival or an early leave (one day, with time_local inside that day's school hours) for child id, with a reason. Needs your custodial right. An absence must be reported before the first day's absence cut-off; a late arrival can be reported until the stated arrival time and an early leave until the stated leaving time.",
     "read_only": false,
     "scope": "bellnote.absences.report",
     "resource_target": "child",
@@ -2085,7 +2085,7 @@
   },
   {
     "name": "bellnote.absences.cancel",
-    "description": "Cancel a submitted report (id) for its days that have not passed their cut-off; days already past stay reported.",
+    "description": "Cancel a submitted report (id) for its days that have not passed their cut-off; days already past stay reported. Needs your custodial right.",
     "read_only": false,
     "scope": "bellnote.absences.cancel",
     "resource_target": "absence_report",
@@ -2192,7 +2192,7 @@
   },
   {
     "name": "bellnote.forms.respond",
-    "description": "Answer form id for child_id: sign with the required answers, or decline. form_version must be the current version shown by forms.get. Signing a form with a fee charges payment_method_id (or the default) once.",
+    "description": "Answer form id for child_id: sign with the required answers, or decline. Needs your can_sign right for the child. form_version must be the current version shown by forms.get. Signing a form with a fee needs your can_pay right and charges payment_method_id (or the default) once; signing again after a change charges only a fee increase.",
     "read_only": false,
     "scope": "bellnote.forms.respond",
     "resource_target": "form",
@@ -2360,7 +2360,7 @@
   },
   {
     "name": "bellnote.forms.withdraw",
-    "description": "Withdraw your own answer (form response id) while the form is open; a paid fee is refunded.",
+    "description": "Withdraw your own answer (form response id) while the form is open; a paid fee is refunded. An answer by another guardian is refused (not_yours).",
     "read_only": false,
     "scope": "bellnote.forms.withdraw",
     "resource_target": "form_response",
@@ -2454,7 +2454,7 @@
   },
   {
     "name": "bellnote.pickup.person_add",
-    "description": "Add a person who may collect child id (name, relationship, phone, or the person_id the school already holds). Needs your custodial right; a new person counts only once the office approves them where the district reviews additions.",
+    "description": "Add a person who may collect child id: name, relationship and phone, and optionally the person_id the school already holds. Needs your custodial right. The person is matched by person_id, else by a phone number the school already holds, never by name; a person restricted for the child is refused. Where the school's policy reviews additions the person counts only once the office approves them.",
     "read_only": false,
     "scope": "bellnote.pickup.person_add",
     "resource_target": "child",
@@ -2583,7 +2583,7 @@
   },
   {
     "name": "bellnote.pickup.person_remove",
-    "description": "Remove a pickup person (id) from a child's list. Refused while a dismissal change still ahead names them.",
+    "description": "Remove a pickup person (id) from a child's list. Needs your custodial right. Refused while a dismissal change still ahead names them.",
     "read_only": false,
     "scope": "bellnote.pickup.person_remove",
     "resource_target": "pickup_person",
@@ -2671,7 +2671,7 @@
   },
   {
     "name": "bellnote.dismissal.set",
-    "description": "Set how child id goes home on one school day (date): mode pickup with the person_id of an approved guardian or pickup person, or bus, after_care, walker. Replaces an earlier change for that day; must be made before that day's cut-off.",
+    "description": "Set how child id goes home on one school day (date): mode pickup with the person_id of an approved guardian or pickup person, or bus, after_care, walker. Needs your custodial right. Replaces an earlier change for that day; must be made before that day's dismissal-change cut-off.",
     "read_only": false,
     "scope": "bellnote.dismissal.set",
     "resource_target": "child",
@@ -2809,7 +2809,7 @@
   },
   {
     "name": "bellnote.dismissal.cancel",
-    "description": "Cancel an active dismissal change (id) before that day's cut-off; the child's default way home applies.",
+    "description": "Cancel an active dismissal change (id), yours or another custodial guardian's, before that day's dismissal-change cut-off; the child's default way home applies. Needs your custodial right.",
     "read_only": false,
     "scope": "bellnote.dismissal.cancel",
     "resource_target": "dismissal_change",
@@ -2903,7 +2903,7 @@
   },
   {
     "name": "bellnote.lunch.topup",
-    "description": "Top up lunch account id by amount_cents from payment_method_id (or the default). The amount must be inside the district's top-up range. A top-up is final in the portal.",
+    "description": "Top up lunch account id by amount_cents from payment_method_id (or the default). Needs your can_pay right for the child. The amount must be inside the top-up range of the child's school (schools.get policy). A top-up is final in the portal.",
     "read_only": false,
     "scope": "bellnote.lunch.topup",
     "resource_target": "lunch_account",
@@ -3104,7 +3104,7 @@
   },
   {
     "name": "bellnote.lunch.settings_update",
-    "description": "Set the low-balance threshold and/or the daily spending limit (null clears it) of lunch account id.",
+    "description": "Set the low-balance threshold and/or the daily spending limit (null clears it) of lunch account id. Needs your can_pay right for the child.",
     "read_only": false,
     "scope": "bellnote.lunch.settings_update",
     "resource_target": "lunch_account",

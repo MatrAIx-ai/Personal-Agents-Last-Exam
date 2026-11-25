@@ -26,6 +26,7 @@
 const fs = require('node:fs'), path = require('node:path');
 const time = require('../src/time.cjs');
 const {longDate, money} = require('../src/notify.cjs');
+const {MODE_TEXT} = require('../src/pickup.cjs');
 
 const SEED = 20250101, FLOOR = '2025-01-01', LAST = '2026-08-25', TZ = 'America/Los_Angeles';
 const at = (date, hm) => time.zonedIso(date, hm, TZ);
@@ -88,17 +89,17 @@ function dayOf(school, date) {
 }
 const isSchoolDay = (school, date) => dayOf(school, date).school_day;
 // Where each child was in each year (the child record holds only the current school and grade).
-const ENROLMENT = {
+const ENROLLMENT = {
   'child-theo': [{year: '2024-25', school: A, grade: '1'}, {year: '2025-26', school: A, grade: '2'}],
   'child-ines': [{year: '2025-26', school: A, grade: 'K'}],
   'child-nico': [{year: '2024-25', school: A, grade: '5'}, {year: '2025-26', school: K, grade: '6'}]
 };
-function enrolment(child, date) {
+function enrollment(child, date) {
   const y = yearOf(date);
-  return y ? ENROLMENT[child].find(e => e.year === y.id) || null : null;
+  return y ? ENROLLMENT[child].find(e => e.year === y.id) || null : null;
 }
-const schoolOn = (child, date) => (enrolment(child, date) || {}).school || null;
-const schoolDaysOf = (child, start, end) => time.eachDate(start, end).filter(d => { const e = enrolment(child, d); return e && isSchoolDay(e.school, d); });
+const schoolOn = (child, date) => (enrollment(child, date) || {}).school || null;
+const schoolDaysOf = (child, start, end) => time.eachDate(start, end).filter(d => { const e = enrollment(child, d); return e && isSchoolDay(e.school, d); });
 // Absence cut-off (Alder: 08:30; Kestrel: 09:00) and dismissal-change cut-off (Alder: 90 minutes
 // before that day's dismissal; Kestrel: 12:00), as the district policy and the school override say.
 const absenceCutoff = (school, date) => at(date, school === A ? '08:30' : '09:00');
@@ -155,7 +156,7 @@ function generate(base) {
     out.pickup_people.push({id, child_id: child, person_id: SITTER, display_name: 'Marisol Teague', relationship: 'babysitter', phone: '555-0126', status: 'removed',
       added_by: MAYA, created_at: at(added, '20:05'), history: [h(at(added, '20:05'), 'added_pending_review', {by: MAYA}), h(at(reviewed, rt), 'approved', {by: OFFICE[A]}),
         h(at('2026-06-15', child === 'child-theo' ? '19:00' : '19:01'), 'removed', {by: MAYA})]});
-    note('pickup.person_reviewed', at(reviewed, rt), child, 'pickup_person', id, SCHOOL_NAME[A] + ': Marisol Teague approved for ' + kids[child].display_name,
+    note('pickup.person_reviewed', at(reviewed, rt), child, 'pickup_person', id, SCHOOL_NAME[A] + ': Marisol Teague approved to collect ' + kids[child].display_name,
       'The office approved Marisol Teague as a person who may collect ' + kids[child].display_name + '.');
   }
   const SITTER_FROM = {'child-theo': '2025-01-09', 'child-ines': '2025-08-29'}, SITTER_TO = '2026-06-12';
@@ -163,16 +164,16 @@ function generate(base) {
   // ---- calendar announcements.
   for (const school of [A, K]) for (const e of CALENDAR[school].filter(x => x.announced_at)) {
     const s = SCHOOL_NAME[school], dayId = 'day-' + school.slice(7) + '-' + e.date;
-    const here = Object.keys(ENROLMENT).filter(c => schoolOn(c, e.date) === school);
+    const here = Object.keys(ENROLLMENT).filter(c => schoolOn(c, e.date) === school);
     const custodial = here.filter(c => base.guardian_links.some(l => l.child_id === c && l.person_id === MAYA && l.custodial));
     const lines = custodial.map(c => e.kind === 'closed' ? kids[c].display_name + ': no dismissal change for that day.'
-      : kids[c].display_name + "'s dismissal plan for that day is still: the default, " + kids[c].default_dismissal.replace('_', ' ') + '.');
+      : kids[c].display_name + "'s way home that day is still the usual one (" + MODE_TEXT[kids[c].default_dismissal] + ').');
     const when = e.kind === 'closed' ? s + ' will be closed on ' + longDate(e.date) + '.'
       : s + ' will dismiss at ' + e.dismissal_local + ' on ' + longDate(e.date) + ' (usually ' + BELL[school].dismissal + ').';
     const cutoff = e.kind === 'early_dismissal' && custodial.length ? ' Changes for that day can be made until ' + time.localTime(dismissalCutoff(school, e.date), TZ) + ' that day.' : '';
     note('school.day_changed', e.announced_at, here.length === 1 ? here[0] : null, 'school_day', dayId,
       s + ': ' + (e.kind === 'closed' ? 'closed' : 'early dismissal at ' + e.dismissal_local) + ' on ' + longDate(e.date),
-      when + ' Reason given: ' + e.reason + '. ' + lines.join(' ') + cutoff);
+      [when, 'Reason given: ' + e.reason + '.', ...lines].join(' ') + cutoff);
   }
 
   // ---- attendance exceptions and reports.
@@ -198,7 +199,7 @@ function generate(base) {
       const text = {absent: 'absent', late: 'late', left_early: 'leaving early'}[status];
       note('attendance.unexplained', when, child, 'attendance_record', rec.id, SCHOOL_NAME[school] + ': ' + kids[child].display_name + ' marked ' + text + ' on ' + longDate(date),
         SCHOOL_NAME[school] + ' marked ' + kids[child].display_name + ' ' + text + (timeLocal ? ' (' + timeLocal + ')' : '') + ' on ' + longDate(date) +
-          ' and has no report from a guardian for that day. Open Bellnote to report the reason.');
+          ' and has no report from a guardian for that day.' + (base.guardian_links.some(l => l.child_id === child && l.person_id === MAYA && l.custodial) ? ' Open Bellnote to report the reason.' : ''));
     }
   };
   const minutes = (lo, hi) => { const m = lo + Math.floor(rnd() * (hi - lo)); return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
@@ -279,7 +280,7 @@ function generate(base) {
       const created = at(time.addDays(date, -1), minutes(18 * 60 + 30, 21 * 60 + 45));
       const d = {id: dcId(), child_id: child, date, mode, person_id: person, note: null, recorded_by: by, actor: 'seed', created_at: created, status: 'active',
         replaces: null, replaced_by: null, request_id: null, event_id: null, history: [h(created, 'recorded', {by})]};
-      const describe = x => x.mode === 'pickup' ? 'collected by ' + name(x.person_id) : x.mode === 'after_care' ? 'after-care' : x.mode;
+      const describe = x => x.mode === 'pickup' ? 'collected by ' + name(x.person_id) : MODE_TEXT[x.mode];
       out.dismissal_changes.push(d);
       if (by === DANA) note('dismissal.recorded', created, child, 'dismissal_change', d.id, 'Dana Okafor changed ' + kids[child].display_name + "'s way home on " + longDate(date),
         'Dana Okafor recorded that ' + kids[child].display_name + ' will be ' + describe(d) + ' on ' + longDate(date) + '.');
@@ -322,7 +323,7 @@ function generate(base) {
     const names = kidsOf.map(k => kids[k].display_name).join(' and ');
     note('form.published', published, kidsOf.length === 1 ? kidsOf[0] : null, 'form', id, SCHOOL_NAME[school] + ': ' + title,
       SCHOOL_NAME[school] + ' sent a form for ' + names + ': "' + title + '". ' + (fee ? 'Fee: ' + money(fee) + '. ' : 'No fee. ') +
-        'Answers are due by ' + time.localDate(due, TZ) + ' ' + time.localTime(due, TZ) + '.');
+        'Answers are due by ' + time.longDateTime(due, TZ) + '.');
     return f;
   };
   let frN = 0;
@@ -394,7 +395,7 @@ function generate(base) {
   f.versions.push({version: 2, at: changedAt, title: f.title, text: f.text, questions: structuredClone(f.questions), fee_cents: f.fee_cents, event_date: f.event_date, reason, event_id: null});
   f.history.push(h(changedAt, 'changed', {version: 2, changed_fields: ['text', 'event_date'], reason}));
   note('form.changed', changedAt, T, 'form', f.id, SCHOOL_NAME[A] + ': "' + f.title + '" was changed',
-    'The school changed text, event_date on "' + f.title + '" (' + reason + '). Your signature for Theo Okafor no longer counts: review version 2 and sign again or withdraw.');
+    'The school changed the text and the event date on "' + f.title + '" (' + reason + '). Your signature for Theo Okafor no longer counts: review version 2 and sign again or withdraw.');
   const resigned = at('2026-01-12', '20:05');
   sci.history.push(h(changedAt, 'needs_review', {form_version: 2}), h(resigned, 'signed', {by: MAYA, form_version: 2}));
   Object.assign(sci, {form_version: 2, answered_at: resigned});
@@ -561,7 +562,7 @@ function historyProblems(data, fail) {
     const kid = data.children.find(k => k.id === t.child_id);
     if (t.allergens.some(x => kid.meal_restrictions.includes(x))) fail(t.id + ' carries a restricted allergen');
   }
-  // Enrolment: Ines has no school-day records before kindergarten.
+  // Enrollment: Ines has no school-day records before kindergarten.
   for (const k of ['attendance', 'lunch_transactions']) for (const r of gen(k)) {
     const date = r.date || time.localDate(r.at, TZ);
     if (r.child_id === 'child-ines' && date < '2025-08-24') fail(r.id + ' is before Ines started school');
@@ -652,7 +653,7 @@ function historyProblems(data, fail) {
   return counts;
 }
 
-module.exports = {SEED, FLOOR, LAST, CALENDAR, YEARS, ENROLMENT, generate, merge, historyProblems, isGenerated, isSchoolDay, schoolOn, dayOf};
+module.exports = {SEED, FLOOR, LAST, CALENDAR, YEARS, ENROLLMENT, generate, merge, historyProblems, isGenerated, isSchoolDay, schoolOn, dayOf, absenceCutoff, dismissalCutoff};
 if (require.main === module) {
   const {build} = require('./build-reference-fixture.cjs');
   const file = path.resolve(__dirname, '../fixtures/reference.json'), data = build(), text = JSON.stringify(data, null, 2) + '\n';

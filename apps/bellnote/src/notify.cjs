@@ -32,8 +32,7 @@ function notify(ctx, data, {kind, child_id = null, object_type, object_id, title
 }
 // Human-readable helpers for notification text.
 const money = cents => (cents < 0 ? '-' : '') + '$' + (Math.abs(cents) / 100).toFixed(2);
-function longDate(date) {
-  const [y, m, d] = date.split('-').map(Number), dt = new Date(Date.UTC(y, m - 1, d));
-  return dt.toLocaleDateString('en-US', {weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC'});
-}
-module.exports = {KINDS, notify, wireMessage, sourceURI, money, longDate};
+const longDate = c.time.longDate;
+// "a", "a and b", "a, b and c".
+const listText = items => items.length < 2 ? items.join('') : items.slice(0, -1).join(', ') + ' and ' + items.at(-1);
+module.exports = {KINDS, notify, wireMessage, sourceURI, money, longDate, listText};

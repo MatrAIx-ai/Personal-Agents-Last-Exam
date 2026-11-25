@@ -1,7 +1,7 @@
 'use strict';
 // W1: attendance by day and absence / late-arrival / early-leave reports.
 const c = require('./common.cjs');
-const {notify, longDate} = require('./notify.cjs');
+const {notify, longDate, listText} = require('./notify.cjs');
 const MAX_REPORT_SCHOOL_DAYS = 10, MAX_REPORT_SPAN_DAYS = 31;
 
 const isOpen = r => r.state !== 'cancelled';
@@ -57,7 +57,8 @@ function report(ctx, data, args) {
   const childId = args.id;
   c.requireRight(data, childId, 'custodial');
   const s = c.schoolOf(data, childId), start = args.start, end = args.end || args.start;
-  if (!c.time.validDate(start) || !c.time.validDate(end) || end < start) c.fail('invalid_window', 'The report must start on or before the day it ends.');
+  for (const d of [start, end]) if (!c.time.validDate(d)) c.fail('invalid_window', d + ' is not a calendar date (YYYY-MM-DD).');
+  if (end < start) c.fail('invalid_window', 'The report must start on or before the day it ends.');
   if (args.kind !== 'absent' && start !== end) c.fail('invalid_window', 'A late arrival or early leave covers exactly one day.');
   if (c.time.daysBetween(start, end) > MAX_REPORT_SPAN_DAYS) c.fail('invalid_window', 'A report may span at most ' + (MAX_REPORT_SPAN_DAYS + 1) + ' calendar days.');
   c.schoolDay(data, s, start); c.schoolDay(data, s, end);
@@ -72,10 +73,15 @@ function report(ctx, data, args) {
     }
   }
   const cutoff = dayCutoff(data, covered[0], args.kind, args.time_local);
-  if (c.passed(ctx, cutoff)) c.fail('too_late', 'The cut-off for ' + covered[0].date + ' passed at ' + cutoff + '.');
+  if (c.passed(ctx, cutoff)) {
+    c.fail('too_late', (args.kind === 'absent' ? 'The absence cut-off for ' : 'The time to report this for ') + longDate(covered[0].date) + ' passed at ' + c.time.localTime(cutoff, c.tz(data)) + '.');
+  }
   const dates = covered.map(d => d.date);
   const clash = data.absence_reports.find(r => r.child_id === childId && isOpen(r) && r.dates.some(d => dates.includes(d)));
-  if (clash) c.fail('conflict', 'Report ' + clash.id + ' already covers ' + clash.dates.filter(d => dates.includes(d)).join(', ') + '.');
+  if (clash) {
+    c.fail('conflict', 'A report sent on ' + c.time.longDateTime(clash.submitted_at, c.tz(data)) + ' already covers ' +
+      listText(clash.dates.filter(d => dates.includes(d)).map(longDate)) + '; cancel it first or report other days.');
+  }
   const r = {id: c.nextId(data.absence_reports, 'rep'), child_id: childId, kind: args.kind, dates, time_local: args.time_local || null,
     reason: args.reason, state: 'submitted', cancelled_dates: [], submitted_by: data.owner_person_id, submitted_at: ctx.virtual_now,
     reviewed_by: null, reviewed_at: null, review_note: null, request_id: args.request_id,
@@ -95,7 +101,7 @@ function cancel(ctx, data, args) {
   const r = c.find(data.absence_reports, args.id, 'Report');
   c.requireRight(data, r.child_id, 'custodial');
   const view = reportView(ctx, data, r);
-  if (view.state !== 'submitted') c.fail('invalid_state', 'Only a submitted report can be cancelled; this one is ' + view.state + '.');
+  if (view.state !== 'submitted') c.fail('invalid_state', 'Only a submitted report can be cancelled; this one is ' + view.state.replace(/_/g, ' ') + '.');
   const ahead = view.days.filter(d => d.state === 'reported' && !d.cutoff_passed).map(d => d.date);
   if (!ahead.length) c.fail('too_late', 'Every day of this report has passed its cut-off.');
   r.cancelled_dates.push(...ahead);
@@ -142,7 +148,8 @@ function marked(ctx, data, event, row) {
       event_id: event.event_id, cause_seq: row.seq,
       title: s.name + ': ' + kid.display_name + ' marked ' + STATUS_TEXT[p.status] + ' on ' + longDate(p.date),
       body: s.name + ' marked ' + kid.display_name + ' ' + STATUS_TEXT[p.status] + (a.time_local ? ' (' + a.time_local + ')' : '') +
-        ' on ' + longDate(p.date) + ' and has no report from a guardian for that day. Open Bellnote to report the reason.'});
+        ' on ' + longDate(p.date) + ' and has no report from a guardian for that day.' +
+        (c.myLink(data, p.child_id)?.custodial ? ' Open Bellnote to report the reason.' : '')});
   }
 }
 function reviewed(ctx, data, event, row) {
@@ -161,7 +168,8 @@ function reviewed(ctx, data, event, row) {
   notify(ctx, data, {kind: 'absence.reviewed', child_id: r.child_id, object_type: 'absence_report', object_id: r.id,
     event_id: event.event_id, cause_seq: row.seq,
     title: s.name + ': ' + kid.display_name + "'s report marked " + p.decision,
-    body: 'The office reviewed your report for ' + kid.display_name + ' (' + r.dates.map(longDate).join(', ') + ') and marked it ' +
+    body: 'The office reviewed ' + (r.submitted_by === data.owner_person_id ? 'your report' : 'the report sent by ' + c.displayName(data, r.submitted_by)) +
+      ' for ' + kid.display_name + ' (' + listText(r.dates.map(longDate)) + ') and marked it ' +
       p.decision + '.' + (p.note ? ' Note from the office: ' + p.note : '')});
 }
 module.exports = {list, reports, report, cancel, marked, reviewed, reportView, reportCovering, isOpen};

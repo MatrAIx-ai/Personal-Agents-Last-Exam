@@ -111,7 +111,7 @@ function charged(ctx, data, event, row) {
   if (p.kind === 'refund') {
     notify(ctx, data, {kind: 'lunch.refund', child_id: kid.id, object_type: 'lunch_transaction', object_id: tx.id, event_id: event.event_id, cause_seq: row.seq,
       title: 'Lunch refund for ' + kid.display_name + ': ' + money(Math.abs(p.amount_cents)),
-      body: payment ? 'The cafeteria office refunded the top-up ' + payment.id + ' (' + money(payment.amount_cents) + ') to its payment method. ' + kid.display_name + "'s balance is now " + money(balance) + '.'
+      body: payment ? 'The cafeteria office refunded the ' + money(payment.amount_cents) + ' top-up of ' + c.time.longDate(c.time.localDate(payment.paid_at, c.tz(data))) + ' to its payment method. ' + kid.display_name + "'s balance is now " + money(balance) + '.'
         : 'The cafeteria credited ' + money(p.amount_cents) + ' to ' + kid.display_name + "'s lunch account" + (p.item ? ' for ' + p.item : '') + '. Balance: ' + money(balance) + '.'});
   }
   if (balance < acct.low_balance_threshold_cents && !acct.low_balance_notified) {

@@ -140,5 +140,5 @@ test('T03 cancel ahead of the cut-off, partial cancel, invalid_state, office rev
   refused(h, 'bellnote.absences.cancel', {id: r3.id}, 'invalid_state');
   assert.equal(h.tryEvent(ev('absence.reviewed', '2026-11-18T14:00:00-08:00', {report_id: r3.id, decision: 'excused', reviewed_by: 'staff-office-alder'})).status, 'invalid_event');
   const closedNote = h.data.notifications.find(n => n.kind === 'school.day_changed');
-  assert.match(closedNote.body, new RegExp(r3.id));
+  assert.match(closedNote.body, /Theo Okafor: the absence reported on Tuesday, November 17 no longer applies to that day\./);
 });
