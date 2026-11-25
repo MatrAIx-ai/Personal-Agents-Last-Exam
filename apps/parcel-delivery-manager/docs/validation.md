@@ -15,8 +15,9 @@ All checks below used synthetic data, temporary state directories and local stdi
 | Runtime | Public runtime 1.6.0, Core API 1.2.0, contribution revision 0.4.0. The branch includes upstream `main` at `a4bce02`; `runtime/` is identical to it. |
 | Environment | Linux x86_64 container. Node.js v22.23.5 and v18.20.8. Browser acceptance: Chromium 158.0.8127.36 with Playwright 1.63.0 on Node 22. |
 | Date of the runs | 2026-11-25 (UTC) |
+| Question for the reviewers | The configuration of the Agent trials: [section 10](#10-question-for-the-reviewers-agent-trials) |
 
-This report and the JSON reports in [`validation/`](validation/) were updated in the commit after the baseline. That commit changes only files under `docs/`. The package hash covers every file in the package, so it differs at the submitted commit; `git diff --stat 2dc8aed..HEAD -- apps/parcel-delivery-manager` shows the difference is documentation only.
+This report and the JSON reports in [`validation/`](validation/) were updated in the commits after the baseline. Those commits change only files under `docs/`. The package hash covers every file in the package, so it differs at the submitted commit; `git diff --stat 2dc8aed..HEAD -- apps/parcel-delivery-manager` shows the difference is documentation only.
 
 **Delivered in v1.** Sixteen Agent MCP tools and ten trusted `carrier.*` events for the four workflows W1–W4; a business Web App with the six planned views on the shared Web Host; the data catalog (24 parcels in eight seeds, six identities, nine verified addresses, six pickup points, six policy profiles); reset and replay; tests and the reports here. The tools and events are listed in the package [README](../README.md).
 
@@ -34,7 +35,7 @@ This report and the JSON reports in [`validation/`](validation/) were updated in
 | Browser acceptance | **Passed**, 76 checks, Node 22 | The real page in Chromium on the shared Web Host, with independent Agent and Infra MCP inspection: recipient, pickup, failure-and-return, read-only profile, collector and catalog-seed runs. Each workflow's requests are made through the page. |
 | Repository reference suite (`npm test`) | **Passed**, 22 of 22 stages | Confirms the existing reference Apps and runtime are unaffected by this package |
 | Shared contract copies (`contracts:check`) | **Passed** | Schema copies and derived declarations match the runtime sources |
-| Upstream CI | See the PR checks for the submitted commit | At the earlier commit `c8b4353` the "App runtime validation" workflow concluded Success (run 45516090987). Its `business-web` job tests only the seven reference Apps, so the browser acceptance above is author-run. |
+| Upstream CI | See the PR checks for the submitted commit | At the earlier commit `271f866` the "App runtime validation" workflow concluded Success (run 45519615754), with `public-runtime (18)`, `public-runtime (22)`, `base-runtime-compatibility` and `business-web` all successful. Its `business-web` job tests only the seven reference Apps, so the browser acceptance above is author-run. |
 | Agent trials | **Not run** | See section 8 |
 | Independent reproduction | **Not run** | See section 8 |
 | Human review | **Pending** | Realism, usability and provenance are for reviewers |
@@ -191,7 +192,7 @@ The proposal file is as approved. These are the places where v1 differs from its
 
 ## 8. Not run, limits and remaining work
 
-- **Agent trials: not run.** The proposal leaves the models, run count and spending cap to be agreed before any paid run. This needs a decision with the reviewers.
+- **Agent trials: not run.** The proposal leaves the models, run count and spending cap to be agreed before any paid run. This needs a decision with the reviewers; the question is in section 10.
 - **Independent reproduction: not run.** A reviewer or maintainer volunteer is still to be found, as the proposal plans for M4.
 - **Human review: pending.** Workflow realism, usability and provenance.
 - **Upstream browser CI does not cover this App.** The `business-web` job tests the seven reference Apps. The browser acceptance here is author-run and reproducible with the command in section 3.
@@ -212,7 +213,21 @@ The proposal file is as approved. These are the places where v1 differs from its
 | Cross-App integration | No, out of approved scope | Not applicable | — | No dependency, channel or receiver declared | — |
 | GUI workflows and isolation | Yes, proposal and review item 1 | Passed, author-run | `tests/web/acceptance.cjs` | 76 checks across six kinds of run | Not covered by upstream browser CI; reviewer reproduction pending |
 | Human workflow and provenance | Yes | Pending | — | [`PROVENANCE.md`](../PROVENANCE.md) lists every file group, the data sources and the references | Reviewers |
-| Agent trials | Yes, proposal M4 | Not run | — | — | Author and reviewers: agree models, runs and cap |
+| Agent trials | Yes, proposal M4 | Not run | — | — | Author and reviewers: agree models, runs and cap (section 10) |
 | Independent reproduction | Yes, proposal M4 | Not run | — | — | Reviewer volunteer to be found |
 
 **Recommendation.** Ready for implementation review of v1 against the approved proposal, with the differences in section 7 and the open items in section 8 visible. Acceptance and merge remain maintainer decisions.
+
+## 10. Question for the reviewers: Agent trials
+
+The approved proposal (line 92) leaves the models, the run count and the spending cap of the Agent trials to be agreed before any paid run. No trial has been run. They are planned for M4, after v1, as stated in the PR on 2026-11-24.
+
+**Question: what configuration do the reviewers expect for an Environment?**
+
+Unless the reviewers prefer otherwise, the author plans one unhinted run per workflow on one current flagship model from each of GPT, Claude and Gemini, 12 runs in total:
+
+- Each run starts from a catalog seed and its event schedule: W1 `01-normal-delivery`, W2 `04-redirect-readiness`, W3 `05-delegation`, W4 `06-failed-delivery`.
+- The Agent has only this App's Agent MCP tools. Infra loads the seed and applies the scheduled events.
+- A run passes when the final business state is the expected one. Every failed run gets a failure analysis.
+- Each model's exact identifier, the run date and the configuration are recorded.
+- The spending cap will be stated in the PR before the first paid run.
