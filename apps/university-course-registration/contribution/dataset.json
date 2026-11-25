@@ -1,0 +1,65 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "university-course-registration-minimal",
+  "version": "1.0.0",
+  "description": "Hand-authored synthetic catalog, academic record and enrollment ledger for one fictional university and term (the default seed), plus six generated scenario seeds on a larger synthetic catalog. Not a benchmark task and not derived from any real institution's catalog or student records.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-authored synthetic records; no external collection, scraping or copied course catalog.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "generated-scenarios",
+      "kind": "synthetic",
+      "description": "The six seeds in fixtures/scenarios/, written by the package's own generator from a hand-authored fictional catalog and scenario definitions. Background occupancy uses a fixed-seed generator; offers, notices and receipts are produced by running the App's handlers. expected_counts below describes the default seed only; a scenario seed is loaded without a bundle.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "deterministic script",
+        "tool": "dev/generate-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20270111,
+        "parameters": {
+          "scenarios": 6,
+          "courses": 21,
+          "sections": 34,
+          "student_accounts": 4
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized timestamps to the university's UTC offset and assigned stable record IDs."
+  ],
+  "expected_counts": {
+    "records": 25,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}

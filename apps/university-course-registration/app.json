@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "app_id": "university-course-registration",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:university-course-registration"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "university-course-registration.occupancy.change",
+    "university-course-registration.section.reschedule",
+    "university-course-registration.offers.expire"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "One fictional university and one term; synthetic records only.",
+    "v1 delivers three of six Web views; the remaining views, browser validation and the continuation test script are later milestones (see README).",
+    "No clock or scheduler: offer expiry and all time advances are supplied by Infra events."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

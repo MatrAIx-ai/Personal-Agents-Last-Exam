@@ -1,0 +1,325 @@
+{
+  "title": "University Course Registration: Infra events",
+  "description": "Scenario events supplied by a Task and applied by Infra. Generated from dev/contracts.cjs.",
+  "type": "object",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "university-course-registration.occupancy.change"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "change": {
+                  "const": "withdraw"
+                },
+                "occupant_ref": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "enrollment_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                }
+              },
+              "required": [
+                "change",
+                "occupant_ref",
+                "enrollment_id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "change": {
+                  "const": "enroll"
+                },
+                "occupant_ref": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "section_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "minItems": 1,
+                  "maxItems": 2,
+                  "uniqueItems": true
+                },
+                "enrollment_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                }
+              },
+              "required": [
+                "change",
+                "occupant_ref",
+                "section_ids"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "change": {
+                  "const": "waitlist_join"
+                },
+                "occupant_ref": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "section_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "minItems": 1,
+                  "maxItems": 2,
+                  "uniqueItems": true
+                },
+                "entry_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                }
+              },
+              "required": [
+                "change",
+                "occupant_ref",
+                "section_ids"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "change": {
+                  "const": "waitlist_leave"
+                },
+                "occupant_ref": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "entry_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                }
+              },
+              "required": [
+                "change",
+                "occupant_ref",
+                "entry_id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "change": {
+                  "const": "offer_accept"
+                },
+                "occupant_ref": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "offer_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                }
+              },
+              "required": [
+                "change",
+                "occupant_ref",
+                "offer_id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "change": {
+                  "const": "offer_decline"
+                },
+                "occupant_ref": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "offer_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                }
+              },
+              "required": [
+                "change",
+                "occupant_ref",
+                "offer_id"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "university-course-registration.section.reschedule"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "section_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "meetings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "days": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "MON",
+                        "TUE",
+                        "WED",
+                        "THU",
+                        "FRI",
+                        "SAT",
+                        "SUN"
+                      ]
+                    },
+                    "minItems": 1,
+                    "maxItems": 7,
+                    "uniqueItems": true
+                  },
+                  "start": {
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "end": {
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  }
+                },
+                "required": [
+                  "days",
+                  "start",
+                  "end"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 10
+            }
+          },
+          "required": [
+            "section_id",
+            "meetings"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "university-course-registration.offers.expire"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

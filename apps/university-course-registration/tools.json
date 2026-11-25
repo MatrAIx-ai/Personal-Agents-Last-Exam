@@ -1,0 +1,4188 @@
+[
+  {
+    "name": "university-course-registration.catalog.search",
+    "description": "Search this term's course catalog. Returns each matching course with all of its sections: meeting times, capacity, seats taken by enrolled students, seats held by pending waitlist offers, seats available, credits and prerequisite course codes. A course that requires a lab must be taken as one lecture plus one lab. Filters are optional and combine with AND. Read only.",
+    "scope": "university-course-registration.read",
+    "resource_target": "current account",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "term_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "description": "Term to search. Optional: this portal serves a single term."
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Case-insensitive text matched against the course code, title and department."
+        },
+        "department": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "description": "Exact department name, case-insensitive, for example \"Mathematics\"."
+        },
+        "days": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "MON",
+              "TUE",
+              "WED",
+              "THU",
+              "FRI",
+              "SAT",
+              "SUN"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 7,
+          "uniqueItems": true,
+          "description": "Keep only courses that can be taken entirely on these days: at least one complete lecture/lab bundle meets on no other day."
+        },
+        "open_only": {
+          "type": "boolean",
+          "description": "When true, keep only courses with at least one complete lecture/lab bundle in which every section has a seat available. A free lecture whose only labs are full does not count."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "university-course-registration"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "term": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "id",
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "courses": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "code": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 20,
+                    "pattern": "^[A-Z][A-Z0-9-]*$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "department": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "credits": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "requires_lab": {
+                    "type": "boolean"
+                  },
+                  "prerequisite_codes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 20,
+                      "pattern": "^[A-Z][A-Z0-9-]*$"
+                    }
+                  },
+                  "sections": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                        },
+                        "kind": {
+                          "enum": [
+                            "lecture",
+                            "lab"
+                          ]
+                        },
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 40
+                        },
+                        "meetings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "days": {
+                                "type": "array",
+                                "items": {
+                                  "enum": [
+                                    "MON",
+                                    "TUE",
+                                    "WED",
+                                    "THU",
+                                    "FRI",
+                                    "SAT",
+                                    "SUN"
+                                  ]
+                                },
+                                "minItems": 1,
+                                "maxItems": 7,
+                                "uniqueItems": true
+                              },
+                              "start": {
+                                "type": "string",
+                                "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                              },
+                              "end": {
+                                "type": "string",
+                                "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                              }
+                            },
+                            "required": [
+                              "days",
+                              "start",
+                              "end"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "maxItems": 10
+                        },
+                        "capacity": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "enrolled": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Seats taken by enrolled students."
+                        },
+                        "held": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Seats reserved by pending waitlist offers; not enrollments, and not available to anyone else until released."
+                        },
+                        "available": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "capacity - enrolled - held."
+                        },
+                        "version": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "description": "Increases each time this section's meeting times change."
+                        },
+                        "linked_lecture_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                          },
+                          "uniqueItems": true,
+                          "description": "Present on a lab that can only be combined with these lecture sections. Absent: any lecture of the course."
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "kind",
+                        "label",
+                        "meetings",
+                        "capacity",
+                        "enrolled",
+                        "held",
+                        "available",
+                        "version"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "code",
+                  "title",
+                  "department",
+                  "credits",
+                  "requires_lab",
+                  "prerequisite_codes",
+                  "sections"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "term",
+            "courses"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "university-course-registration.course.get",
+    "description": "Read one course: its sections with seats, which lecture/lab combinations form a valid bundle and whether each is currently available, the prerequisite courses and whether the signed-in student has completed each, the registration window and whether it is open now, and the student's current enrollment in the course if any. Read only.",
+    "scope": "university-course-registration.read",
+    "resource_target": "current account",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "description": "The course ID, for example the id returned by catalog.search (not the course code)."
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "university-course-registration"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "course": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "code": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 20,
+                  "pattern": "^[A-Z][A-Z0-9-]*$"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "department": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "credits": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "requires_lab": {
+                  "type": "boolean"
+                },
+                "prerequisite_codes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 20,
+                    "pattern": "^[A-Z][A-Z0-9-]*$"
+                  }
+                },
+                "sections": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      "kind": {
+                        "enum": [
+                          "lecture",
+                          "lab"
+                        ]
+                      },
+                      "label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 40
+                      },
+                      "meetings": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "days": {
+                              "type": "array",
+                              "items": {
+                                "enum": [
+                                  "MON",
+                                  "TUE",
+                                  "WED",
+                                  "THU",
+                                  "FRI",
+                                  "SAT",
+                                  "SUN"
+                                ]
+                              },
+                              "minItems": 1,
+                              "maxItems": 7,
+                              "uniqueItems": true
+                            },
+                            "start": {
+                              "type": "string",
+                              "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                            },
+                            "end": {
+                              "type": "string",
+                              "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                            }
+                          },
+                          "required": [
+                            "days",
+                            "start",
+                            "end"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "maxItems": 10
+                      },
+                      "capacity": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "enrolled": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Seats taken by enrolled students."
+                      },
+                      "held": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Seats reserved by pending waitlist offers; not enrollments, and not available to anyone else until released."
+                      },
+                      "available": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "capacity - enrolled - held."
+                      },
+                      "version": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "Increases each time this section's meeting times change."
+                      },
+                      "linked_lecture_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                        },
+                        "uniqueItems": true,
+                        "description": "Present on a lab that can only be combined with these lecture sections. Absent: any lecture of the course."
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "label",
+                      "meetings",
+                      "capacity",
+                      "enrolled",
+                      "held",
+                      "available",
+                      "version"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "code",
+                "title",
+                "department",
+                "credits",
+                "requires_lab",
+                "prerequisite_codes",
+                "sections"
+              ],
+              "additionalProperties": false
+            },
+            "prerequisites": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 20,
+                    "pattern": "^[A-Z][A-Z0-9-]*$"
+                  },
+                  "completed": {
+                    "type": "boolean",
+                    "description": "Whether the student's academic record lists this course as completed."
+                  }
+                },
+                "required": [
+                  "code",
+                  "completed"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "registration": {
+              "type": "object",
+              "properties": {
+                "opens_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "closes_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Registration is closed at and after this instant."
+                },
+                "open": {
+                  "type": "boolean",
+                  "description": "Whether registration for this course is open at the current time."
+                }
+              },
+              "required": [
+                "opens_at",
+                "closes_at",
+                "open"
+              ],
+              "additionalProperties": false
+            },
+            "bundles": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "section_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "minItems": 1,
+                    "maxItems": 2,
+                    "uniqueItems": true
+                  },
+                  "available": {
+                    "type": "boolean",
+                    "description": "True when every section of this lecture/lab combination has a seat available."
+                  }
+                },
+                "required": [
+                  "section_ids",
+                  "available"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "enrollment_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The student's current enrollment in this course, or null."
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "course",
+            "prerequisites",
+            "registration",
+            "bundles",
+            "enrollment_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "university-course-registration.record.get",
+    "description": "Read the signed-in student's academic record and the rules that apply: completed courses, enrolled credits and the credit limit, the term's registration window, the withdrawal deadline and whether an enrollment can still be given up now, and the enrollment policy (queue order, offer window, expiry boundary, swap and conflict rules). The record cannot be changed through this App. Read only.",
+    "scope": "university-course-registration.read",
+    "resource_target": "current account",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "university-course-registration"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "student": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "program": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "program"
+              ],
+              "additionalProperties": false
+            },
+            "completed_courses": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 20,
+                    "pattern": "^[A-Z][A-Z0-9-]*$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "credits": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 30
+                  },
+                  "term": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "grade": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 10
+                  }
+                },
+                "required": [
+                  "code",
+                  "title",
+                  "credits",
+                  "term",
+                  "grade"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "credits": {
+              "type": "object",
+              "properties": {
+                "enrolled": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Credits of all currently enrolled courses. Waitlist entries and offers do not count."
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "The student's credit limit for the term."
+                }
+              },
+              "required": [
+                "enrolled",
+                "limit"
+              ],
+              "additionalProperties": false
+            },
+            "university": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "timezone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "timezone"
+              ],
+              "additionalProperties": false
+            },
+            "term": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "registration": {
+                  "type": "object",
+                  "properties": {
+                    "opens_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "closes_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "withdraw_deadline": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "opens_at",
+                    "closes_at",
+                    "withdraw_deadline"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "registration"
+              ],
+              "additionalProperties": false
+            },
+            "withdrawal": {
+              "type": "object",
+              "properties": {
+                "deadline": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "An enrollment cannot be given up, by withdrawing or by swapping out of it, at or after this instant."
+                },
+                "open": {
+                  "type": "boolean",
+                  "description": "Whether an enrollment can still be given up at the current time."
+                }
+              },
+              "required": [
+                "deadline",
+                "open"
+              ],
+              "additionalProperties": false
+            },
+            "enrollment_policy": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                "version": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                "offer_window_minutes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 43200
+                },
+                "queue": {
+                  "type": "object",
+                  "properties": {
+                    "order": {
+                      "const": "join_sequence"
+                    },
+                    "bundle": {
+                      "const": "all_sections_or_none"
+                    },
+                    "skipped_entries": {
+                      "const": "keep_position_without_hold"
+                    },
+                    "join": {
+                      "const": "only_when_target_bundle_is_unavailable"
+                    }
+                  },
+                  "required": [
+                    "order",
+                    "bundle",
+                    "skipped_entries",
+                    "join"
+                  ],
+                  "additionalProperties": false
+                },
+                "expiry": {
+                  "type": "object",
+                  "properties": {
+                    "boundary": {
+                      "const": "invalid_at_or_after_expires_at"
+                    },
+                    "hold_release": {
+                      "const": "on_offers_expire_event"
+                    }
+                  },
+                  "required": [
+                    "boundary",
+                    "hold_release"
+                  ],
+                  "additionalProperties": false
+                },
+                "swaps": {
+                  "type": "object",
+                  "properties": {
+                    "max_pending_per_enrollment": {
+                      "const": 1
+                    },
+                    "original": {
+                      "const": "kept_until_replacement_commits"
+                    }
+                  },
+                  "required": [
+                    "max_pending_per_enrollment",
+                    "original"
+                  ],
+                  "additionalProperties": false
+                },
+                "conflicts": {
+                  "type": "object",
+                  "properties": {
+                    "rule": {
+                      "const": "no_new_conflicts"
+                    }
+                  },
+                  "required": [
+                    "rule"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "id",
+                "version",
+                "offer_window_minutes",
+                "queue",
+                "expiry",
+                "swaps",
+                "conflicts"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "student",
+            "completed_courses",
+            "credits",
+            "university",
+            "term",
+            "withdrawal",
+            "enrollment_policy"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "university-course-registration.schedule.get",
+    "description": "Read the signed-in student's current schedule: each enrollment with its sections and meeting times, enrolled credits, every pair of sections whose meeting times overlap and the meeting-time change that caused it when there was one, and pending swaps waiting for a seat. Waitlist entries and offers are not enrollments and are not part of the schedule. Read only.",
+    "scope": "university-course-registration.read",
+    "resource_target": "current account",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "university-course-registration"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "enrollments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "course_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "code": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 20,
+                    "pattern": "^[A-Z][A-Z0-9-]*$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "credits": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "enrolled_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "sections": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                        },
+                        "kind": {
+                          "enum": [
+                            "lecture",
+                            "lab"
+                          ]
+                        },
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 40
+                        },
+                        "meetings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "days": {
+                                "type": "array",
+                                "items": {
+                                  "enum": [
+                                    "MON",
+                                    "TUE",
+                                    "WED",
+                                    "THU",
+                                    "FRI",
+                                    "SAT",
+                                    "SUN"
+                                  ]
+                                },
+                                "minItems": 1,
+                                "maxItems": 7,
+                                "uniqueItems": true
+                              },
+                              "start": {
+                                "type": "string",
+                                "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                              },
+                              "end": {
+                                "type": "string",
+                                "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                              }
+                            },
+                            "required": [
+                              "days",
+                              "start",
+                              "end"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "maxItems": 10
+                        },
+                        "version": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "kind",
+                        "label",
+                        "meetings",
+                        "version"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "course_id",
+                  "code",
+                  "title",
+                  "credits",
+                  "enrolled_at",
+                  "sections"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "credits": {
+              "type": "object",
+              "properties": {
+                "enrolled": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Credits of all currently enrolled courses. Waitlist entries and offers do not count."
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "The student's credit limit for the term."
+                }
+              },
+              "required": [
+                "enrolled",
+                "limit"
+              ],
+              "additionalProperties": false
+            },
+            "conflicts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "section_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "caused_by": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "event_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                          },
+                          "section_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                          },
+                          "replaced_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "from_version": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "to_version": {
+                            "type": "integer",
+                            "minimum": 1
+                          }
+                        },
+                        "required": [
+                          "event_id",
+                          "section_id",
+                          "replaced_at",
+                          "from_version",
+                          "to_version"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The meeting-time change that produced this overlap, or null when the overlap does not come from such a change."
+                  }
+                },
+                "required": [
+                  "section_ids",
+                  "caused_by"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "pending_swaps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "entry_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "from_enrollment_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "course_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "section_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "minItems": 1,
+                    "maxItems": 2,
+                    "uniqueItems": true
+                  },
+                  "status": {
+                    "enum": [
+                      "queued",
+                      "offered"
+                    ]
+                  }
+                },
+                "required": [
+                  "entry_id",
+                  "from_enrollment_id",
+                  "course_id",
+                  "section_ids",
+                  "status"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "enrollments",
+            "credits",
+            "conflicts",
+            "pending_swaps"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "university-course-registration.waitlist.list",
+    "description": "Read the signed-in student's own waitlist entries and seat offers. Each entry shows its rank among entries waiting for the same seats, the sections it is still waiting for, and any rule that currently blocks it from receiving or accepting an offer. Each offer shows when it expires. A waitlist position or an offer is not an enrollment. Other students' entries are not shown. Read only.",
+    "scope": "university-course-registration.read",
+    "resource_target": "current account",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "university-course-registration"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "course_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "code": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 20,
+                    "pattern": "^[A-Z][A-Z0-9-]*$"
+                  },
+                  "section_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "minItems": 1,
+                    "maxItems": 2,
+                    "uniqueItems": true
+                  },
+                  "swap_from_enrollment_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The enrollment this entry would replace when it is a pending swap; otherwise null."
+                  },
+                  "status": {
+                    "enum": [
+                      "queued",
+                      "offered"
+                    ]
+                  },
+                  "joined_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "rank": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "1 means no earlier entry is waiting for any of the same seats."
+                  },
+                  "waiting_for_section_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "description": "Sections of the bundle that have no seat for this entry right now."
+                  },
+                  "blocked_by": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 60,
+                          "description": "not_found, invalid_state, offer_not_live, offer_expired, invalid_bundle, withdrawal_closed, registration_closed, swap_required, pending_swap_exists, duplicate_enrollment, prerequisite_missing, seats_available, section_full, credit_limit_exceeded or time_conflict."
+                        },
+                        "message": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1000
+                        },
+                        "missing_prerequisites": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 20,
+                            "pattern": "^[A-Z][A-Z0-9-]*$"
+                          }
+                        },
+                        "full_section_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                          }
+                        },
+                        "conflicts": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100,
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                            },
+                            "minItems": 2,
+                            "maxItems": 2
+                          }
+                        },
+                        "offer_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                          "description": "With section_full: the student's own live offer that is holding a seat in one of the full sections. Accept that offer to use the seat."
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "description": "Rules other than seat availability that this entry fails right now. A blocked entry keeps its place but holds no seat."
+                  }
+                },
+                "required": [
+                  "id",
+                  "course_id",
+                  "code",
+                  "section_ids",
+                  "swap_from_enrollment_id",
+                  "status",
+                  "joined_at",
+                  "rank",
+                  "waiting_for_section_ids",
+                  "blocked_by"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "offers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "entry_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "course_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "held_section_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "minItems": 1,
+                    "maxItems": 2,
+                    "uniqueItems": true
+                  },
+                  "issued_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "expires_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The offer cannot be accepted at or after this instant."
+                  },
+                  "expired": {
+                    "type": "boolean",
+                    "description": "True when the current time has reached expires_at. The held seats are released only when the expiry is processed."
+                  }
+                },
+                "required": [
+                  "id",
+                  "entry_id",
+                  "course_id",
+                  "held_section_ids",
+                  "issued_at",
+                  "expires_at",
+                  "expired"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "entries",
+            "offers"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "university-course-registration.activity.list",
+    "description": "Read the signed-in student's notices (seat offers, expiries, meeting-time changes, cancelled swaps) and the receipts of every committed write, oldest first. A notice informs; it never accepts an offer or changes an enrollment by itself. Read only.",
+    "scope": "university-course-registration.read",
+    "resource_target": "current account",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "university-course-registration"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "notices": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "seq": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "kind": {
+                    "enum": [
+                      "offer_issued",
+                      "offer_expired",
+                      "section_rescheduled",
+                      "swap_cancelled"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  },
+                  "refs": {
+                    "type": "object",
+                    "properties": {
+                      "event_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      "course_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      "section_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      "enrollment_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      "entry_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      "offer_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      "from_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "to_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "expires_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "seq",
+                  "at",
+                  "kind",
+                  "text",
+                  "refs"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "receipts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "seq": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "enum": [
+                      "enrollment.enroll",
+                      "enrollment.withdraw",
+                      "enrollment.swap",
+                      "waitlist.join",
+                      "waitlist.leave",
+                      "offer.accept",
+                      "offer.decline"
+                    ]
+                  },
+                  "request_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "refs": {
+                    "type": "object",
+                    "properties": {
+                      "course_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      "enrollment_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      "replaced_enrollment_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      "entry_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      "offer_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      "section_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                        },
+                        "minItems": 1,
+                        "maxItems": 2,
+                        "uniqueItems": true
+                      },
+                      "cancelled_entry_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                        },
+                        "maxItems": 50,
+                        "uniqueItems": true
+                      },
+                      "existing": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "seq",
+                  "at",
+                  "action",
+                  "request_id",
+                  "refs"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "notices",
+            "receipts"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "university-course-registration.change.preview",
+    "description": "Preview one change without making it: enrolling in a bundle, withdrawing from an enrollment, swapping an enrollment for another bundle, or accepting a seat offer. Returns whether it would be allowed now, every rule it fails, the credits and schedule that would result, the time conflicts it would introduce or resolve, and any pending swap it would cancel. Nothing is stored. The returned version is the state the preview was computed from: use it as expected_version for the write, which re-checks everything and is refused if the state has changed. Read only.",
+    "scope": "university-course-registration.read",
+    "resource_target": "current account",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "enum": [
+            "enroll",
+            "withdraw",
+            "swap",
+            "accept_offer"
+          ],
+          "description": "enroll takes section_ids; withdraw takes id; swap takes id and section_ids; accept_offer takes id (the offer)."
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "description": "The enrollment to withdraw from or to replace, or the offer to accept. Not used for enroll."
+        },
+        "section_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "description": "The target bundle for enroll or swap: the lecture section ID, plus one lab section ID when the course requires a lab."
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "university-course-registration"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "action": {
+              "enum": [
+                "enroll",
+                "withdraw",
+                "swap",
+                "accept_offer"
+              ]
+            },
+            "allowed": {
+              "type": "boolean"
+            },
+            "failures": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60,
+                    "description": "not_found, invalid_state, offer_not_live, offer_expired, invalid_bundle, withdrawal_closed, registration_closed, swap_required, pending_swap_exists, duplicate_enrollment, prerequisite_missing, seats_available, section_full, credit_limit_exceeded or time_conflict."
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "missing_prerequisites": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 20,
+                      "pattern": "^[A-Z][A-Z0-9-]*$"
+                    }
+                  },
+                  "full_section_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    }
+                  },
+                  "conflicts": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    }
+                  },
+                  "offer_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                    "description": "With section_full: the student's own live offer that is holding a seat in one of the full sections. Accept that offer to use the seat."
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "credits": {
+              "type": "object",
+              "properties": {
+                "current": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "resulting": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "current",
+                "resulting",
+                "limit"
+              ],
+              "additionalProperties": false
+            },
+            "schedule": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "course_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                  },
+                  "code": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 20,
+                    "pattern": "^[A-Z][A-Z0-9-]*$"
+                  },
+                  "section_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "minItems": 1,
+                    "maxItems": 2,
+                    "uniqueItems": true
+                  },
+                  "change": {
+                    "enum": [
+                      "kept",
+                      "added",
+                      "removed"
+                    ]
+                  }
+                },
+                "required": [
+                  "course_id",
+                  "code",
+                  "section_ids",
+                  "change"
+                ],
+                "additionalProperties": false
+              },
+              "description": "The schedule after the change: enrollments kept, the bundle added and the enrollment removed."
+            },
+            "conflicts": {
+              "type": "object",
+              "properties": {
+                "current": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "resulting": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "introduced": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "resolved": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                }
+              },
+              "required": [
+                "current",
+                "resulting",
+                "introduced",
+                "resolved"
+              ],
+              "additionalProperties": false
+            },
+            "cancelled_entry_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "description": "Pending swaps that were tied to the enrollment given up and are therefore cancelled."
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "action",
+            "allowed",
+            "failures",
+            "credits",
+            "schedule",
+            "conflicts",
+            "cancelled_entry_ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "university-course-registration.enrollment.enroll",
+    "description": "Enroll the signed-in student in one lecture/lab bundle: the lecture section plus one lab section when the course requires a lab. Nothing changes and an error status is returned if the bundle is invalid, registration is closed, the student is already enrolled in the course, a prerequisite is missing, any section is full, the credit limit would be exceeded or a new time conflict would result. Pass the version returned by your latest read or preview as expected_version and a new request_id; retrying with the same request_id and arguments is safe.",
+    "scope": "university-course-registration.write",
+    "resource_target": "current account",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "section_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "description": "The bundle to enroll in: the lecture section ID, plus one lab section ID when the course requires a lab."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "The version returned by your most recent read or preview of this App. A write based on an older version is refused with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "A new identifier for this request. Reuse it only to retry the identical request; the original result is then returned and nothing is applied twice."
+        }
+      },
+      "required": [
+        "section_ids",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "university-course-registration"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+              "description": "The new enrollment."
+            },
+            "receipt_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "course_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "section_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "minItems": 1,
+              "maxItems": 2,
+              "uniqueItems": true
+            },
+            "credits": {
+              "type": "object",
+              "properties": {
+                "enrolled": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Credits of all currently enrolled courses. Waitlist entries and offers do not count."
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "The student's credit limit for the term."
+                }
+              },
+              "required": [
+                "enrolled",
+                "limit"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "receipt_id",
+            "course_id",
+            "section_ids",
+            "credits"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "university-course-registration.enrollment.withdraw",
+    "description": "Withdraw the signed-in student from one of their enrollments. The seats of the whole bundle are released. A pending swap that was waiting to replace this enrollment is cancelled, not turned into an enrollment. Nothing changes and an error status is returned if the enrollment is not held by this student or the withdrawal deadline has passed. Pass the version returned by your latest read or preview as expected_version and a new request_id; retrying with the same request_id and arguments is safe.",
+    "scope": "university-course-registration.write",
+    "resource_target": "current account",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "description": "The enrollment to withdraw from, as listed by schedule.get."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "The version returned by your most recent read or preview of this App. A write based on an older version is refused with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "A new identifier for this request. Reuse it only to retry the identical request; the original result is then returned and nothing is applied twice."
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "university-course-registration"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+              "description": "The enrollment that was withdrawn."
+            },
+            "receipt_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "course_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "section_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "minItems": 1,
+              "maxItems": 2,
+              "uniqueItems": true
+            },
+            "cancelled_entry_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "description": "Pending swaps that were tied to the enrollment given up and are therefore cancelled."
+            },
+            "credits": {
+              "type": "object",
+              "properties": {
+                "enrolled": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Credits of all currently enrolled courses. Waitlist entries and offers do not count."
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "The student's credit limit for the term."
+                }
+              },
+              "required": [
+                "enrolled",
+                "limit"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "receipt_id",
+            "course_id",
+            "section_ids",
+            "cancelled_entry_ids",
+            "credits"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "university-course-registration.enrollment.swap",
+    "description": "Replace one of the signed-in student's enrollments with another bundle that is available now, in one step: the new bundle is taken and the old one given up together, or nothing changes. Use it to change sections of the same course or to move to a different course. A seat in a section shared by both bundles is kept, so only the other sections need a free seat. Eligibility is judged on the schedule with the old bundle replaced. On any failure the original enrollment is kept. Pass the version returned by your latest read or preview as expected_version and a new request_id; retrying with the same request_id and arguments is safe.",
+    "scope": "university-course-registration.write",
+    "resource_target": "current account",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "description": "The enrollment to replace, as listed by schedule.get."
+        },
+        "section_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "description": "The bundle to move to: the lecture section ID, plus one lab section ID when the course requires a lab."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "The version returned by your most recent read or preview of this App. A write based on an older version is refused with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "A new identifier for this request. Reuse it only to retry the identical request; the original result is then returned and nothing is applied twice."
+        }
+      },
+      "required": [
+        "id",
+        "section_ids",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "university-course-registration"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+              "description": "The new enrollment."
+            },
+            "replaced_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+              "description": "The enrollment that was given up."
+            },
+            "receipt_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "course_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "section_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "minItems": 1,
+              "maxItems": 2,
+              "uniqueItems": true
+            },
+            "cancelled_entry_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "description": "Pending swaps that were tied to the enrollment given up and are therefore cancelled."
+            },
+            "credits": {
+              "type": "object",
+              "properties": {
+                "enrolled": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Credits of all currently enrolled courses. Waitlist entries and offers do not count."
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "The student's credit limit for the term."
+                }
+              },
+              "required": [
+                "enrolled",
+                "limit"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "replaced_id",
+            "receipt_id",
+            "course_id",
+            "section_ids",
+            "cancelled_entry_ids",
+            "credits"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "university-course-registration.waitlist.join",
+    "description": "Join the waitlist for one lecture/lab bundle that has no seat for the signed-in student right now. Optionally name one of the student's enrollments to swap from: the entry then waits to replace that enrollment, which is kept until the replacement commits. A waitlist entry is not an enrollment and counts toward neither credits nor the timetable. When seats become available, entries are served in the order they joined: an eligible entry receives a time-limited offer, and an entry that fails a rule at that moment keeps its place, holds no seat and shows what blocks it. Joining again for the same bundle returns the existing entry with its rank unchanged. Refused with seats_available when every section the entry would newly occupy has a seat (enroll or swap directly), with swap_required when the student is already enrolled in the course and names no enrollment to swap from, and with pending_swap_exists when that enrollment already has a pending swap. Pass the version returned by your latest read or preview as expected_version and a new request_id; retrying with the same request_id and arguments is safe.",
+    "scope": "university-course-registration.write",
+    "resource_target": "current account",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "section_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "description": "The bundle to wait for: the lecture section ID, plus one lab section ID when the course requires a lab."
+        },
+        "swap_from_enrollment_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Optional. One of the student's current enrollments, as listed by schedule.get, that this entry should replace once a seat is offered and accepted. Omit it, or pass null, for an entry that is not a swap."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "The version returned by your most recent read or preview of this App. A write based on an older version is refused with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "A new identifier for this request. Reuse it only to retry the identical request; the original result is then returned and nothing is applied twice."
+        }
+      },
+      "required": [
+        "section_ids",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "university-course-registration"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+              "description": "The waitlist entry."
+            },
+            "receipt_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "course_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "section_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "minItems": 1,
+              "maxItems": 2,
+              "uniqueItems": true
+            },
+            "swap_from_enrollment_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The enrollment this entry would replace, or null for a plain entry."
+            },
+            "existing": {
+              "type": "boolean",
+              "description": "True when the student was already waiting for this bundle: the entry and its rank are unchanged."
+            },
+            "rank": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "1 means no earlier entry is waiting for any of the same seats."
+            },
+            "waiting_for_section_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "description": "Sections of the bundle that have no seat for this entry right now."
+            },
+            "blocked_by": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60,
+                    "description": "not_found, invalid_state, offer_not_live, offer_expired, invalid_bundle, withdrawal_closed, registration_closed, swap_required, pending_swap_exists, duplicate_enrollment, prerequisite_missing, seats_available, section_full, credit_limit_exceeded or time_conflict."
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "missing_prerequisites": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 20,
+                      "pattern": "^[A-Z][A-Z0-9-]*$"
+                    }
+                  },
+                  "full_section_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                    }
+                  },
+                  "conflicts": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    }
+                  },
+                  "offer_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                    "description": "With section_full: the student's own live offer that is holding a seat in one of the full sections. Accept that offer to use the seat."
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              },
+              "description": "Rules other than seat availability that this entry fails right now. A blocked entry keeps its place but holds no seat."
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "receipt_id",
+            "course_id",
+            "section_ids",
+            "swap_from_enrollment_id",
+            "existing",
+            "rank",
+            "waiting_for_section_ids",
+            "blocked_by"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "university-course-registration.waitlist.leave",
+    "description": "Leave the waitlist: remove one of the signed-in student's waiting entries. A seat offer made to the entry is cancelled and its held seats are released. When the entry was a pending swap, the swap is dropped and the original enrollment is kept unchanged. Pass the version returned by your latest read or preview as expected_version and a new request_id; retrying with the same request_id and arguments is safe.",
+    "scope": "university-course-registration.write",
+    "resource_target": "current account",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "description": "The waitlist entry to leave, as listed by waitlist.list."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "The version returned by your most recent read or preview of this App. A write based on an older version is refused with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "A new identifier for this request. Reuse it only to retry the identical request; the original result is then returned and nothing is applied twice."
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "university-course-registration"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+              "description": "The waitlist entry that left the queue."
+            },
+            "receipt_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "course_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "section_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "minItems": 1,
+              "maxItems": 2,
+              "uniqueItems": true
+            },
+            "cancelled_offer_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The seat offer that was cancelled with the entry, or null."
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "receipt_id",
+            "course_id",
+            "section_ids",
+            "cancelled_offer_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "university-course-registration.offer.accept",
+    "description": "Accept a seat offer made to one of the signed-in student's waitlist entries. All rules are checked again on the schedule that would result. A plain entry becomes an enrollment; a pending swap gives up its original enrollment and takes the new bundle together. Refused with offer_expired at or after the offer's expires_at, and with offer_not_live when the offer was already accepted, declined, cancelled or expired. On any failure nothing changes: the original enrollment is kept, and an offer that is still live stays held until it is accepted, declined, cancelled or expired. Pass the version returned by your latest read or preview as expected_version and a new request_id; retrying with the same request_id and arguments is safe.",
+    "scope": "university-course-registration.write",
+    "resource_target": "current account",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "description": "The offer to accept, as listed by waitlist.list (not the waitlist entry)."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "The version returned by your most recent read or preview of this App. A write based on an older version is refused with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "A new identifier for this request. Reuse it only to retry the identical request; the original result is then returned and nothing is applied twice."
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "university-course-registration"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+              "description": "The new enrollment."
+            },
+            "receipt_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "offer_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "entry_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "course_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "section_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "minItems": 1,
+              "maxItems": 2,
+              "uniqueItems": true
+            },
+            "replaced_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The enrollment given up when the offer fulfilled a pending swap; otherwise null."
+            },
+            "credits": {
+              "type": "object",
+              "properties": {
+                "enrolled": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Credits of all currently enrolled courses. Waitlist entries and offers do not count."
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "The student's credit limit for the term."
+                }
+              },
+              "required": [
+                "enrolled",
+                "limit"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "receipt_id",
+            "offer_id",
+            "entry_id",
+            "course_id",
+            "section_ids",
+            "replaced_id",
+            "credits"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "university-course-registration.offer.decline",
+    "description": "Decline a seat offer made to one of the signed-in student's waitlist entries. The offer is closed, its held seats are released and the entry leaves the queue. An original enrollment the entry would have replaced is kept. Pass the version returned by your latest read or preview as expected_version and a new request_id; retrying with the same request_id and arguments is safe.",
+    "scope": "university-course-registration.write",
+    "resource_target": "current account",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "description": "The offer to decline, as listed by waitlist.list (not the waitlist entry)."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "The version returned by your most recent read or preview of this App. A write based on an older version is refused with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "A new identifier for this request. Reuse it only to retry the identical request; the original result is then returned and nothing is applied twice."
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "university-course-registration"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+              "description": "The offer that was declined."
+            },
+            "receipt_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "entry_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "course_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+            },
+            "section_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "minItems": 1,
+              "maxItems": 2,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "receipt_id",
+            "entry_id",
+            "course_id",
+            "section_ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+]
