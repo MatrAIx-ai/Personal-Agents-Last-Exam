@@ -105,6 +105,11 @@ function inline(schema) {
   return Object.fromEntries(Object.entries(schema).map(([k, v]) => [k, inline(v)]));
 }
 
+// The published seed schema is self-contained as well: Core validates the whole seed (and the state's
+// data and initial_data) on every call, and its validator resolves a file $ref on the file system each
+// time it meets one, which made validation about four times slower than with the definitions inlined.
+const SEED_PUBLISHED = (({$defs, ...rest}) => inline(rest))(seed);
+
 // ---- Inputs shared by tools and events ---------------------------------------------------------------
 // Constraint and guest inputs take plain strings for what they name, so the App can answer
 // invalid_constraint for anything that is not in its tables.
@@ -270,7 +275,7 @@ tool('shopping.item.remove', 'Remove a manual line; a derived line is excluded i
 function outputs() {
   return {
     'tools.json': T,
-    'schemas/seed.schema.json': seed,
+    'schemas/seed.schema.json': SEED_PUBLISHED,
     'schemas/events.schema.json': events
   };
 }

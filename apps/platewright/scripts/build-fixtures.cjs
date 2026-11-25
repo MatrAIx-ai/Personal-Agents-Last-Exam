@@ -344,6 +344,13 @@ function reference() {
     const r = data.recipes.find(x => x.id === p.recipe_id);
     p.revision = r.revisions.filter(x => Date.parse(x.at) <= Date.parse(s.cooked.at)).length;
   }
+  // Meals before the hand-written weeks keep a short history: the account's planning row is dropped
+  // when a later row records how the meal ended, since that row repeats the same dishes and people.
+  // Changes made by other members stay. This keeps the reference seed under 1 MB as compact JSON.
+  for (const s of data.plan) {
+    if (s.date > History.LAST) continue;
+    s.history = s.history.filter((row, i) => !(row.actor === 'agent' && row.action === 'set' && i < s.history.length - 1));
+  }
   // Generated notifications take their own ID series, so the hand-written ones keep ntf-0001 to ntf-0014.
   let own = 0, gen = 0;
   for (const n of data.notifications) n.id = n.event_id.startsWith('ev-pw-h') ? 'ntf-h' + String(++gen).padStart(4, '0') : 'ntf-' + String(++own).padStart(4, '0');
@@ -360,10 +367,21 @@ function reference() {
 function outputs() {
   return {'fixtures/minimal.json': minimal(), 'fixtures/reference.json': reference()};
 }
+// One record per line: lists of records are written with each record as compact JSON on its own
+// line, which keeps the files small and still lets a diff point at the record that changed.
+const records = v => Array.isArray(v) && v.length > 0 && v.every(x => x && typeof x === 'object');
+function layout(value, indent = '') {
+  const inner = indent + '  ';
+  if (records(value)) return '[\n' + value.map(x => inner + JSON.stringify(x)).join(',\n') + '\n' + indent + ']';
+  if (value && typeof value === 'object' && !Array.isArray(value) && (!indent || Object.values(value).some(records))) {
+    return '{\n' + Object.entries(value).map(([k, v]) => inner + JSON.stringify(k) + ': ' + layout(v, inner)).join(',\n') + '\n' + indent + '}';
+  }
+  return JSON.stringify(value);
+}
 function build({check = false} = {}) {
   const drift = [];
   for (const [file, value] of Object.entries(outputs())) {
-    const text = JSON.stringify(value, null, 2) + '\n', target = path.join(root, file);
+    const text = layout(value) + '\n', target = path.join(root, file);
     if (check) { if (!fs.existsSync(target) || fs.readFileSync(target, 'utf8') !== text) drift.push(file); }
     else fs.writeFileSync(target, text);
   }

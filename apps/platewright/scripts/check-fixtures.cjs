@@ -4,9 +4,10 @@
 // recipe lines convert to grams (or are listed as not convertible on purpose), diet tags follow from
 // the lines, titles and ingredient lists are distinct, constraint states and slot states agree with
 // the loaded time, every timestamp is on or after 2025-01-01 (where the household's history starts),
-// the only flags present are the ones each fixture is meant to show, the generated history obeys the
-// App's rules as of each date (see historyProblems), and the reference fits its declared counts and
-// its size budget.
+// the only flags present are the ones each fixture is meant to show, every record obeys the App's
+// rules as of its own date, hand-written and generated alike (see recordProblems), notification text
+// reads as words rather than record IDs (see unreadable), the reference's two years read as lived-in
+// (see historyProfile), and the reference fits its declared counts and its size budget.
 //   node scripts/check-fixtures.cjs [--output FILE]
 const fs = require('node:fs'), path = require('node:path');
 const plugin = require('../plugin.cjs');
@@ -16,9 +17,9 @@ const {toGrams} = require('../src/units.cjs');
 const {DIETS, localDate} = require('../src/common.cjs');
 const root = path.resolve(__dirname, '..');
 const FLOOR = '2025-01-01';
-// Size budget: the pretty-printed file, and the compact JSON that Infra sends in one env.load_seed
-// request, which must stay well under Core's 2 MiB limit on one request line.
-const MAX_FILE_BYTES = 2621440, MAX_COMPACT_BYTES = 1572864;
+// Size budget: the file (one record per line) and the compact JSON that Infra sends in one
+// env.load_seed request. Core validates the whole seed on every call, so its size is its speed.
+const MAX_FILE_BYTES = 1100000, MAX_COMPACT_BYTES = 1048576;
 const read = f => JSON.parse(fs.readFileSync(path.join(root, f), 'utf8'));
 
 // Ingredients counted without a weight per piece: their lines are not convertible to grams on purpose.
@@ -56,6 +57,15 @@ const EXPECTED = {
     stale: true, history: true
   }
 };
+
+// Text a person reads (notification titles and bodies) names things in words: no record IDs, no
+// slot IDs, no ISO dates and no vocabulary keys with underscores. Returns what is wrong, or null.
+function unreadable(text) {
+  const rules = [[/\d{4}-\d{2}-\d{2}/, 'an ISO date'], [/\b(ing|rec|person|con|guest|sl|ntf|ev|rule)-[a-z0-9]/, 'a record ID'],
+    [/:(breakfast|lunch|snack|dinner)\b/, 'a slot ID'], [/[a-z]_[a-z]/, 'a vocabulary key'], [/\b(null|undefined)\b|\[object/, 'a missing value']];
+  const hit = rules.find(([re]) => re.test(text));
+  return hit ? `contains ${hit[1]}: ${text}` : null;
+}
 
 function checkFixture(file) {
   const data = read(file), problems = [], counts = {};
@@ -107,7 +117,8 @@ function checkFixture(file) {
     const stale = require('../src/shopping.cjs').view({virtual_now: now}, data).list.stale;
     if (stale !== expected.stale) fail('shopping list stale ' + stale);
   }
-  if (expected.history) Object.assign(counts, historyProblems(data, today, fail));
+  recordProblems(data, fail);
+  if (expected.history) Object.assign(counts, historyProfile(data, today, fail));
   const bytes = fs.statSync(path.join(root, file)).size, compact = Buffer.byteLength(JSON.stringify(data));
   Object.assign(counts, {bytes, compact_bytes: compact, ingredients: data.ingredients.length, substitution_rules: data.substitution_rules.length, recipes: data.recipes.length,
     variants: data.recipes.filter(r => r.variant).length, members: data.members.length, constraints: Object.keys(states).length, plan_slots: data.plan.length,
@@ -117,12 +128,13 @@ function checkFixture(file) {
   return {file, passed: !problems.length, problems, counts};
 }
 
-// The household's history obeys the App's rules as of each date. Flags of planned and cooked slots
-// are checked above with the App's own check (constraints as they stood on each meal's date); here:
-// recipes planned only once created and before archived, cooked revisions, leftovers within the
-// household's limit and never more than were left, pantry rows that are possible, a history that
-// covers every month from January 2025, seasonality, and the size of default reads.
-function historyProblems(data, today, fail) {
+// Every record obeys the App's rules as of its own date, whether it was written by hand or generated.
+// Flags of planned and cooked slots are checked above with the App's own check (constraints as they
+// stood on each meal's date); here: recipes planned only once created and before archived, cooked
+// revisions, a slot's last history row agreeing with its state, leftovers within the household's limit
+// and never more than were left, pantry rows that are possible, notifications in time order with one
+// activity row each, and notification text that reads as words.
+function recordProblems(data, fail) {
   const recipes = new Map(data.recipes.map(r => [r.id, r])), slots = new Map(data.plan.map(s => [s.id, s]));
   for (const s of data.plan) {
     const set = s.history.filter(h => h.dishes.length && ['set', 'replaced'].includes(h.action));
@@ -135,6 +147,13 @@ function historyProblems(data, today, fail) {
       const r = recipes.get(p.recipe_id), current = r.revisions.filter(x => Date.parse(x.at) <= Date.parse(s.cooked.at)).length;
       if (p.revision !== current) fail(`${s.id}: cooked from revision ${p.revision}, but revision ${current} was current`);
     }
+  }
+  // A slot's last change of state is the state it is in (guest rows do not change the state).
+  const STATE_OF = {set: 'planned', replaced: 'planned', cleared: 'cleared', cooked: 'cooked', skipped: 'skipped'};
+  for (const s of data.plan) {
+    const last = s.history.filter(h => STATE_OF[h.action]).at(-1);
+    if (!last || STATE_OF[last.action] !== s.state) fail(`${s.id}: its history ends ${last ? last.action : 'without a change of state'}, but it is ${s.state}`);
+    if (s.history.some((h, i) => i && Date.parse(h.at) < Date.parse(s.history[i - 1].at))) fail(`${s.id}: history rows out of order`);
   }
   // Leftovers eaten: within leftover_max_days of the source and never more than it left.
   const taken = new Map();
@@ -149,9 +168,7 @@ function historyProblems(data, today, fail) {
     if (n > left) fail(`${id}: ${n} portions of leftovers eaten, ${left} left`);
   }
   // Pantry rows: in time order, never negative, cooking only takes, the item is its last row.
-  let pantryRows = 0;
   for (const p of data.pantry) {
-    pantryRows += p.history.length;
     p.history.forEach((h, i) => {
       if (h.quantity < 0) fail(`pantry ${p.ingredient_id}: negative stock at ${h.at}`);
       if (i && Date.parse(h.at) < Date.parse(p.history[i - 1].at)) fail(`pantry ${p.ingredient_id}: rows out of order at ${h.at}`);
@@ -160,6 +177,16 @@ function historyProblems(data, today, fail) {
     const last = p.history.at(-1);
     if (last.quantity !== p.quantity || last.use_by !== p.use_by || last.at !== p.updated_at) fail(`pantry ${p.ingredient_id}: the item differs from its last row`);
   }
+  // Notifications: one per event, in time order, each with an activity row, worded for a person.
+  data.notifications.forEach((n, i) => { if (i && Date.parse(n.at) < Date.parse(data.notifications[i - 1].at)) fail(`notification ${n.id} out of order`); });
+  if (data.notifications.map(n => n.event_id).join() !== data.activity.map(a => a.event_id).join()) fail('notifications and activity rows do not match one to one');
+  for (const n of data.notifications) for (const text of [n.title, n.body]) { const problem = unreadable(text); if (problem) fail(`notification ${n.id} ${problem}`); }
+}
+
+// What makes the reference read as two lived-in years: every month from January 2025 has a plan,
+// soups and stews follow the seasons, and default reads stay sized for a week or a page.
+function historyProfile(data, today, fail) {
+  const pantryRows = data.pantry.reduce((n, p) => n + p.history.length, 0);
   // Every month from January 2025 to the loaded month has a lived-in plan.
   const months = {};
   for (const s of data.plan) months[s.date.slice(0, 7)] = (months[s.date.slice(0, 7)] || 0) + 1;
@@ -172,9 +199,6 @@ function historyProblems(data, today, fail) {
     return xs.filter(s => s.dishes.some(d => !d.leftovers_of && WARM.includes(d.recipe_id))).length / xs.length; };
   const winter = share(m => m === 12 || m <= 2), summer = share(m => m >= 6 && m <= 8);
   if (!(winter > 2 * summer)) fail(`soups and stews are not seasonal (winter ${winter}, summer ${summer})`);
-  // Notifications: one per event, in time order, each with an activity row.
-  data.notifications.forEach((n, i) => { if (i && Date.parse(n.at) < Date.parse(data.notifications[i - 1].at)) fail(`notification ${n.id} out of order`); });
-  if (data.notifications.map(n => n.event_id).join() !== data.activity.map(a => a.event_id).join()) fail('notifications and activity rows do not match one to one');
   // Default reads stay sized for a week or a page, not two years.
   const ctx = {app_id: 'platewright', virtual_now: read('fixtures/clock.json').initial_time};
   const size = (op, args) => Buffer.byteLength(JSON.stringify(plugin.handleTool(ctx, data, 'platewright.' + op, args).result));
@@ -194,7 +218,7 @@ function run() {
     detail: `${app.fixtures.seed}: ${seed && seed.counts.records} records; dataset.json expects ${dataset.expected_counts.records}`};
   return {schema: 'platewright.fixture-check.v1', passed: results.every(r => r.passed) && declared.passed, results, declared_counts: declared};
 }
-module.exports = {run, checkFixture};
+module.exports = {run, checkFixture, unreadable};
 if (require.main === module) {
   const report = run(), text = JSON.stringify(report, null, 2) + '\n';
   const i = process.argv.indexOf('--output');
