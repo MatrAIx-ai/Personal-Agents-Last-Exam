@@ -12,6 +12,12 @@ const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov',
 const localTime=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:\d{2})$/.exec(String(iso||''));
  return m?MONTHS[+m[2]-1]+' '+(+m[3])+', '+m[4]+':'+m[5]+' (UTC'+(m[6]==='Z'?'+00:00':m[6])+')':time(iso);};
 const leg=f=>f.flight_number+' '+f.origin+' '+localTime(f.departs_at)+' → '+f.dest+' '+localTime(f.arrives_at);
+// Book award's optional seats: one "flight_id passenger_id seat" per line, sent as skyline.book seat objects.
+export const seatLines=text=>text.split('\n').map(x=>x.trim()).filter(Boolean).map(line=>{
+ const parts=line.split(/[\s,]+/);
+ if(parts.length!==3)throw Error('Each seat line needs a flight ID, a passenger ID and a seat, for example PC12-2027-10-21 pax-daniel 3A.');
+ const [flight_id,passenger_id,seat]=parts;return {flight_id,passenger_id,seat:seat.toUpperCase()};
+});
 export const config={
  id:'skyline',title:'Skyline Miles',description:'Award flights, trips and points for this member.',
  list:'skyline.trips',collection:'trips',listArgs:{},get:'skyline.trips',item:'trip',
@@ -83,7 +89,8 @@ Object.assign(config,{
   const a=ui.aux.account;
   if(name==='passenger_ids'&&a)return {options:a.passengers.map(p=>({value:p.id,label:p.name}))};
   if(name==='payment_label'&&a)return {options:a.payment_labels.map(l=>({value:l,label:l}))};
-  if(name==='seats')return {help:'Leave empty for the first free seats (they may not sit together); choose seats later on the trip.'};
+  if(name==='seats')return {placeholder:'PC12-2027-10-21 pax-daniel 3A',parse:seatLines,
+   help:'One seat per line: flight ID, passenger ID and seat. Leave empty for the first free seats (they may not sit together); choose seats later on the trip.'};
   if(name==='date')return {placeholder:'YYYY-MM-DD',help:'Local date of the first departure.'};
   return {};
  },

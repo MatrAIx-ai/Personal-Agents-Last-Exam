@@ -172,12 +172,13 @@ export async function mount(config){
           if(datetime){const date=new Date(value);input.value=new Date(date-date.getTimezoneOffset()*60000).toISOString().slice(0,16);}
           else input.value=Array.isArray(value)?value.join('\n'):String(value);
         }
-        if(s.type==='array')wrap.append(el('small',{},'One value per line.'));
+        if(s.type==='array'&&!spec.parse)wrap.append(el('small',{},'One value per line.'));
         if(datetime)wrap.append(el('small',{},'Your browser’s local time.'));
         readers.push(async out=>{
           const v=input.value;
           if(v===''){if(nullable)out[key]=null;else if(s.type==='array'&&(value!==undefined||isRequired))out[key]=[];else if(isRequired||value!==undefined)out[key]='';return;}
-          out[key]=s.type==='array'?v.split(/[\n,]/).map(x=>x.trim()).filter(Boolean):datetime?new Date(v).toISOString():['integer','number'].includes(s.type)?Number(v):v;
+          // An App may parse its own text format (for example lines that become objects); a thrown error is shown on the form.
+          out[key]=spec.parse?spec.parse(v):s.type==='array'?v.split(/[\n,]/).map(x=>x.trim()).filter(Boolean):datetime?new Date(v).toISOString():['integer','number'].includes(s.type)?Number(v):v;
         });
       }
       if(spec.placeholder)input.placeholder=spec.placeholder;
