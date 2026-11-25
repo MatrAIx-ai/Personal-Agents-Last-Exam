@@ -187,13 +187,22 @@ tool('removals.respond', false, 'Answer a pending or declined removal request (i
   {id: ID, state: en('honored', 'declined'), cleared: arr(any(['item_id', 'album_ids', 'link_ids'])), not_removable: arr(ID),
     already_seen: arr(any(['item_id', 'views', 'saves']))}, ['note'], 'removal_request');
 
+// ---- published seed schema ----------------------------------------------------------------------
+// The seed schema is written above with named definitions; the published copy has every one of them
+// inlined, with no $defs and no $ref. Core validates the whole seed several times per call (the state's
+// data and initial_data, then the data on load and after the handler), and its validator resolves a
+// "seed.schema.json#/$defs/..." reference on the file system each time it meets one, which was most of
+// the time of every call. The definitions have no cycles, so inlining gives the same schema in meaning
+// (tests/schema-inline.test.cjs checks this against the definitions and with Core's validator).
+const SEED_PUBLISHED = (({$defs, ...rest}) => inline(rest))(seed);
+
 // ---- state envelope ------------------------------------------------------------------------------
 const state = JSON.parse(fs.readFileSync(path.join(root, 'schemas/state.schema.json'), 'utf8'));
 state.properties.package_version = {const: app.version};
 state.properties.core_api_version = {const: app.core_api_version};
 state.properties.app_id = {const: app.app_id};
 
-const outputs = {'tools.json': tools, 'schemas/seed.schema.json': seed, 'schemas/events.schema.json': events, 'schemas/state.schema.json': state};
+const outputs = {'tools.json': tools, 'schemas/seed.schema.json': SEED_PUBLISHED, 'schemas/events.schema.json': events, 'schemas/state.schema.json': state};
 function build({check = false} = {}) {
   const drift = [];
   for (const [file, value] of Object.entries(outputs)) {
@@ -203,7 +212,7 @@ function build({check = false} = {}) {
   }
   return drift;
 }
-module.exports = {build, operations, tools};
+module.exports = {build, operations, tools, seed, SEED_PUBLISHED};
 if (require.main === module) {
   const check = process.argv.includes('--check'), drift = build({check});
   if (drift.length) { console.error('Generated contract drift: ' + drift.join(', ')); process.exitCode = 1; }
