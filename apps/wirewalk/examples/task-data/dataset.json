@@ -1,0 +1,64 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "wirewalk-public-history-dario",
+  "version": "1.0.0",
+  "description": "Hand-authored synthetic public posts, accounts and reader bookmarks for three storylines from Saturday to Monday, Oct. 10-12, 2026 (fictional): a late-night train cancellation, a county wildfire, and two analysts' readings of one company's shipment figure. Includes one rendered station-board image. Not a benchmark task.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Original fictional text authored for this package by @byshail. All accounts, people, places, agencies, companies, posts and links are invented; no external posts, articles or alerts were collected, translated or adapted.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.1.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "rendered-board",
+      "kind": "synthetic",
+      "description": "Original image rendered for this package by @byshail with tests/board-image.cjs (shared by dev/build-fixtures.cjs and the business tests) from the two text lines quoted in the post's alt text. In the story the rider posts it as a cropped photo; it is a rendering, and no photograph, screenshot or external asset was used.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "procedural",
+        "tool": "tests/board-image.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20261010,
+        "parameters": {
+          "font": "5x7 LED",
+          "scale": 5
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "The second reader's seed (examples/task-data) is the minimal seed plus examples/scenario.json and examples/wildfire-events.json, with a different account and bookmarks.",
+    "The board image's pixels are a deterministic rendering of its alt-text lines; tests decode the PNG and compare."
+  ],
+  "expected_counts": {
+    "records": 44,
+    "assets": 1
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "reject"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, image legibility, variation and reuse permissions."
+  }
+}

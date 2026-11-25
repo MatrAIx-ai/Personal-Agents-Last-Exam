@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "app_id": "wirewalk",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:wirewalk (@byshail)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "post.publish"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Reader only: the Agent searches, reads and bookmarks. It cannot post, reply, repost, like, follow or send direct messages; public posts enter only through the seed or Infra's post.publish.",
+    "One image: a rendered PNG with alt text. Agent byte reads of it need a platform resource-access registration that this package does not add; the alt text carries the visible text, so tasks run on text reads.",
+    "post.publish carries text and link cards, not images. A post's publication time is the event time.",
+    "No live ingestion: every account, post and link is a synthetic fixture on the reserved .example domain; nothing is fetched.",
+    "One reader account per App instance. The public history is copied into each instance, so Infra applies every post.publish event to every reader instance in the run.",
+    "Search matches the start of words (case- and accent-insensitive); there is no ranking, recommendation or trending.",
+    "Wirewalk neither publishes nor receives cross-App notifications; alerts are drafted and sent with Mail.",
+    "MCP only: no GUI and no reviewer console."
+  ],
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

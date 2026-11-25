@@ -1,0 +1,2994 @@
+[
+  {
+    "name": "wirewalk.feed.list",
+    "description": "List the public Wirewalk feed, newest publication first (post ID breaks ties). Each post shows its author, publication time, stable link, text and its reply, quote or repost relationship. Returns up to limit posts (default 20) and a next_cursor. A cursor keeps the result set fixed at the first page: posts published later, even at the same timestamp, appear only in a fresh call. A cursor that no longer matches its query or the feed is rejected. Only posts published at or before the current time are visible; an unknown post and a post not yet published get the same not_found response.",
+    "read_only": true,
+    "scope": "wirewalk.feed.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "wirewalk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "posts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "original",
+                  "reply",
+                  "quote",
+                  "repost"
+                ]
+              },
+              "author": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "display_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "kind": {
+                    "enum": [
+                      "person",
+                      "organization"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "display_name",
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              "published_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "link": {
+                "type": "string",
+                "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                "maxLength": 300
+              },
+              "text": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "parent": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "kind": {
+                        "enum": [
+                          "original",
+                          "reply",
+                          "quote",
+                          "repost"
+                        ]
+                      },
+                      "author_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "author_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "link": {
+                        "type": "string",
+                        "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                        "maxLength": 300
+                      },
+                      "text": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "author_id",
+                      "author_name",
+                      "published_at",
+                      "link",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "quoted": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "kind": {
+                        "enum": [
+                          "original",
+                          "reply",
+                          "quote",
+                          "repost"
+                        ]
+                      },
+                      "author_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "author_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "link": {
+                        "type": "string",
+                        "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                        "maxLength": 300
+                      },
+                      "text": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "author_id",
+                      "author_name",
+                      "published_at",
+                      "link",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "source": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "kind": {
+                        "enum": [
+                          "original",
+                          "reply",
+                          "quote",
+                          "repost"
+                        ]
+                      },
+                      "author_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "author_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "link": {
+                        "type": "string",
+                        "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                        "maxLength": 300
+                      },
+                      "text": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "author_id",
+                      "author_name",
+                      "published_at",
+                      "link",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                      "maxLength": 300
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "description": {
+                      "type": "string",
+                      "minLength": 0,
+                      "maxLength": 500
+                    }
+                  },
+                  "required": [
+                    "url",
+                    "title",
+                    "description"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 4
+              },
+              "media": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "asset_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "alt_text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "alt_text"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 4
+              },
+              "counts": {
+                "type": "object",
+                "properties": {
+                  "replies": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "quotes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "reposts": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "replies",
+                  "quotes",
+                  "reposts"
+                ],
+                "additionalProperties": false
+              },
+              "bookmarked": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "author",
+              "published_at",
+              "link",
+              "text",
+              "parent",
+              "quoted",
+              "source",
+              "links",
+              "media",
+              "counts",
+              "bookmarked"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "total",
+        "posts",
+        "next_cursor"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "wirewalk.search",
+    "description": "Search visible post text (the post's own text, image alt text and link titles and descriptions; case- and accent-insensitive, every query word must match the start of a word). Reposts carry no text of their own, so they match only filter-only searches; a query with no letters or digits is rejected. Optional exact author_id and kind filters and an inclusive since/until window (since must not be later than until). Newest publication first, with post ID breaking ties; paging works as in wirewalk.feed.list. Only posts published at or before the current time are visible; an unknown post and a post not yet published get the same not_found response.",
+    "read_only": true,
+    "scope": "wirewalk.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "author_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "kind": {
+          "enum": [
+            "original",
+            "reply",
+            "quote",
+            "repost"
+          ]
+        },
+        "since": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "wirewalk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "posts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "original",
+                  "reply",
+                  "quote",
+                  "repost"
+                ]
+              },
+              "author": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "display_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "kind": {
+                    "enum": [
+                      "person",
+                      "organization"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "display_name",
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              "published_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "link": {
+                "type": "string",
+                "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                "maxLength": 300
+              },
+              "text": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "parent": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "kind": {
+                        "enum": [
+                          "original",
+                          "reply",
+                          "quote",
+                          "repost"
+                        ]
+                      },
+                      "author_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "author_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "link": {
+                        "type": "string",
+                        "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                        "maxLength": 300
+                      },
+                      "text": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "author_id",
+                      "author_name",
+                      "published_at",
+                      "link",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "quoted": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "kind": {
+                        "enum": [
+                          "original",
+                          "reply",
+                          "quote",
+                          "repost"
+                        ]
+                      },
+                      "author_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "author_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "link": {
+                        "type": "string",
+                        "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                        "maxLength": 300
+                      },
+                      "text": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "author_id",
+                      "author_name",
+                      "published_at",
+                      "link",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "source": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "kind": {
+                        "enum": [
+                          "original",
+                          "reply",
+                          "quote",
+                          "repost"
+                        ]
+                      },
+                      "author_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "author_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "link": {
+                        "type": "string",
+                        "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                        "maxLength": 300
+                      },
+                      "text": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "author_id",
+                      "author_name",
+                      "published_at",
+                      "link",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                      "maxLength": 300
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "description": {
+                      "type": "string",
+                      "minLength": 0,
+                      "maxLength": 500
+                    }
+                  },
+                  "required": [
+                    "url",
+                    "title",
+                    "description"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 4
+              },
+              "media": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "asset_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "alt_text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "alt_text"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 4
+              },
+              "counts": {
+                "type": "object",
+                "properties": {
+                  "replies": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "quotes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "reposts": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "replies",
+                  "quotes",
+                  "reposts"
+                ],
+                "additionalProperties": false
+              },
+              "bookmarked": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "author",
+              "published_at",
+              "link",
+              "text",
+              "parent",
+              "quoted",
+              "source",
+              "links",
+              "media",
+              "counts",
+              "bookmarked"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "total",
+        "posts",
+        "next_cursor"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "wirewalk.post.get",
+    "description": "Read one post with its author, publication time, stable link, the post it replies to, quotes or reposts, and the visible replies, quotes and reposts of it (oldest first). Only posts published at or before the current time are visible; an unknown post and a post not yet published get the same not_found response.",
+    "read_only": true,
+    "scope": "wirewalk.post.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "wirewalk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "post": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "kind": {
+              "enum": [
+                "original",
+                "reply",
+                "quote",
+                "repost"
+              ]
+            },
+            "author": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "display_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "kind": {
+                  "enum": [
+                    "person",
+                    "organization"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "display_name",
+                "kind"
+              ],
+              "additionalProperties": false
+            },
+            "published_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "link": {
+              "type": "string",
+              "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+              "maxLength": 300
+            },
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "parent": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "kind": {
+                      "enum": [
+                        "original",
+                        "reply",
+                        "quote",
+                        "repost"
+                      ]
+                    },
+                    "author_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "author_name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "published_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "link": {
+                      "type": "string",
+                      "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                      "maxLength": 300
+                    },
+                    "text": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "author_id",
+                    "author_name",
+                    "published_at",
+                    "link",
+                    "text"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "quoted": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "kind": {
+                      "enum": [
+                        "original",
+                        "reply",
+                        "quote",
+                        "repost"
+                      ]
+                    },
+                    "author_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "author_name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "published_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "link": {
+                      "type": "string",
+                      "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                      "maxLength": 300
+                    },
+                    "text": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "author_id",
+                    "author_name",
+                    "published_at",
+                    "link",
+                    "text"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "source": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "kind": {
+                      "enum": [
+                        "original",
+                        "reply",
+                        "quote",
+                        "repost"
+                      ]
+                    },
+                    "author_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "author_name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "published_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "link": {
+                      "type": "string",
+                      "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                      "maxLength": 300
+                    },
+                    "text": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "author_id",
+                    "author_name",
+                    "published_at",
+                    "link",
+                    "text"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "links": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                    "maxLength": 300
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "url",
+                  "title",
+                  "description"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 4
+            },
+            "media": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "asset_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "alt_text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "asset_id",
+                  "alt_text"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 4
+            },
+            "counts": {
+              "type": "object",
+              "properties": {
+                "replies": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "quotes": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "reposts": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "replies",
+                "quotes",
+                "reposts"
+              ],
+              "additionalProperties": false
+            },
+            "bookmarked": {
+              "type": "boolean"
+            },
+            "replies": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "kind": {
+                    "enum": [
+                      "original",
+                      "reply",
+                      "quote",
+                      "repost"
+                    ]
+                  },
+                  "author_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "author_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "published_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "link": {
+                    "type": "string",
+                    "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                    "maxLength": 300
+                  },
+                  "text": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "author_id",
+                  "author_name",
+                  "published_at",
+                  "link",
+                  "text"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 5000
+            },
+            "quotes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "kind": {
+                    "enum": [
+                      "original",
+                      "reply",
+                      "quote",
+                      "repost"
+                    ]
+                  },
+                  "author_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "author_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "published_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "link": {
+                    "type": "string",
+                    "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                    "maxLength": 300
+                  },
+                  "text": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "author_id",
+                  "author_name",
+                  "published_at",
+                  "link",
+                  "text"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 5000
+            },
+            "reposted_by": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "repost_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "account_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "display_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "published_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "repost_id",
+                  "account_id",
+                  "display_name",
+                  "published_at"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 5000
+            },
+            "saved_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "kind",
+            "author",
+            "published_at",
+            "link",
+            "text",
+            "parent",
+            "quoted",
+            "source",
+            "links",
+            "media",
+            "counts",
+            "bookmarked",
+            "replies",
+            "quotes",
+            "reposted_by",
+            "saved_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "post"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "wirewalk.thread.get",
+    "description": "Open the conversation around a post: the chain of posts it replies to (root first), the post itself and every visible reply below it, in conversation order with depth. Quotes start their own conversations. Opening a repost opens its source's conversation. Only posts published at or before the current time are visible; an unknown post and a post not yet published get the same not_found response.",
+    "read_only": true,
+    "scope": "wirewalk.thread.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "wirewalk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "root_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "focus_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "posts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "original",
+                  "reply",
+                  "quote",
+                  "repost"
+                ]
+              },
+              "author": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "display_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "kind": {
+                    "enum": [
+                      "person",
+                      "organization"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "display_name",
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              "published_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "link": {
+                "type": "string",
+                "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                "maxLength": 300
+              },
+              "text": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "parent": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "kind": {
+                        "enum": [
+                          "original",
+                          "reply",
+                          "quote",
+                          "repost"
+                        ]
+                      },
+                      "author_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "author_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "link": {
+                        "type": "string",
+                        "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                        "maxLength": 300
+                      },
+                      "text": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "author_id",
+                      "author_name",
+                      "published_at",
+                      "link",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "quoted": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "kind": {
+                        "enum": [
+                          "original",
+                          "reply",
+                          "quote",
+                          "repost"
+                        ]
+                      },
+                      "author_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "author_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "link": {
+                        "type": "string",
+                        "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                        "maxLength": 300
+                      },
+                      "text": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "author_id",
+                      "author_name",
+                      "published_at",
+                      "link",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "source": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "kind": {
+                        "enum": [
+                          "original",
+                          "reply",
+                          "quote",
+                          "repost"
+                        ]
+                      },
+                      "author_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "author_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "link": {
+                        "type": "string",
+                        "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                        "maxLength": 300
+                      },
+                      "text": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "author_id",
+                      "author_name",
+                      "published_at",
+                      "link",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                      "maxLength": 300
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "description": {
+                      "type": "string",
+                      "minLength": 0,
+                      "maxLength": 500
+                    }
+                  },
+                  "required": [
+                    "url",
+                    "title",
+                    "description"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 4
+              },
+              "media": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "asset_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "alt_text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "alt_text"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 4
+              },
+              "counts": {
+                "type": "object",
+                "properties": {
+                  "replies": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "quotes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "reposts": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "replies",
+                  "quotes",
+                  "reposts"
+                ],
+                "additionalProperties": false
+              },
+              "bookmarked": {
+                "type": "boolean"
+              },
+              "depth": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "relation": {
+                "enum": [
+                  "ancestor",
+                  "focus",
+                  "reply"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "author",
+              "published_at",
+              "link",
+              "text",
+              "parent",
+              "quoted",
+              "source",
+              "links",
+              "media",
+              "counts",
+              "bookmarked",
+              "depth",
+              "relation"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 5000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "root_id",
+        "focus_id",
+        "posts"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "wirewalk.account.get",
+    "description": "Inspect a public account: display name, kind (person or organization), bio, location, join date, profile link, visible post count and its most recent visible posts (default 10).",
+    "read_only": true,
+    "scope": "wirewalk.account.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "wirewalk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "account": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "display_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "kind": {
+              "enum": [
+                "person",
+                "organization"
+              ]
+            },
+            "bio": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 300
+            },
+            "location": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "joined_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "link": {
+              "type": "string",
+              "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+              "maxLength": 300
+            },
+            "post_count": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "id",
+            "display_name",
+            "kind",
+            "bio",
+            "location",
+            "joined_at",
+            "link",
+            "post_count"
+          ],
+          "additionalProperties": false
+        },
+        "recent_posts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "original",
+                  "reply",
+                  "quote",
+                  "repost"
+                ]
+              },
+              "author": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "display_name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "kind": {
+                    "enum": [
+                      "person",
+                      "organization"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "display_name",
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              "published_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "link": {
+                "type": "string",
+                "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                "maxLength": 300
+              },
+              "text": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "parent": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "kind": {
+                        "enum": [
+                          "original",
+                          "reply",
+                          "quote",
+                          "repost"
+                        ]
+                      },
+                      "author_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "author_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "link": {
+                        "type": "string",
+                        "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                        "maxLength": 300
+                      },
+                      "text": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "author_id",
+                      "author_name",
+                      "published_at",
+                      "link",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "quoted": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "kind": {
+                        "enum": [
+                          "original",
+                          "reply",
+                          "quote",
+                          "repost"
+                        ]
+                      },
+                      "author_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "author_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "link": {
+                        "type": "string",
+                        "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                        "maxLength": 300
+                      },
+                      "text": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "author_id",
+                      "author_name",
+                      "published_at",
+                      "link",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "source": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "kind": {
+                        "enum": [
+                          "original",
+                          "reply",
+                          "quote",
+                          "repost"
+                        ]
+                      },
+                      "author_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "author_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "link": {
+                        "type": "string",
+                        "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                        "maxLength": 300
+                      },
+                      "text": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "author_id",
+                      "author_name",
+                      "published_at",
+                      "link",
+                      "text"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                      "maxLength": 300
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "description": {
+                      "type": "string",
+                      "minLength": 0,
+                      "maxLength": 500
+                    }
+                  },
+                  "required": [
+                    "url",
+                    "title",
+                    "description"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 4
+              },
+              "media": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "asset_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "alt_text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "alt_text"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 4
+              },
+              "counts": {
+                "type": "object",
+                "properties": {
+                  "replies": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "quotes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "reposts": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "replies",
+                  "quotes",
+                  "reposts"
+                ],
+                "additionalProperties": false
+              },
+              "bookmarked": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "author",
+              "published_at",
+              "link",
+              "text",
+              "parent",
+              "quoted",
+              "source",
+              "links",
+              "media",
+              "counts",
+              "bookmarked"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "account",
+        "recent_posts"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "wirewalk.bookmarks.list",
+    "description": "List this reader's private bookmarks, most recently saved first. Other accounts never see them.",
+    "read_only": true,
+    "scope": "wirewalk.bookmarks.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "wirewalk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "bookmarks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "saved_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "post": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "kind": {
+                    "enum": [
+                      "original",
+                      "reply",
+                      "quote",
+                      "repost"
+                    ]
+                  },
+                  "author": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "display_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "kind": {
+                        "enum": [
+                          "person",
+                          "organization"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "display_name",
+                      "kind"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "published_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "link": {
+                    "type": "string",
+                    "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                    "maxLength": 300
+                  },
+                  "text": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "parent": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "kind": {
+                            "enum": [
+                              "original",
+                              "reply",
+                              "quote",
+                              "repost"
+                            ]
+                          },
+                          "author_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "author_name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "published_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "link": {
+                            "type": "string",
+                            "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                            "maxLength": 300
+                          },
+                          "text": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 1000
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "author_id",
+                          "author_name",
+                          "published_at",
+                          "link",
+                          "text"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "quoted": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "kind": {
+                            "enum": [
+                              "original",
+                              "reply",
+                              "quote",
+                              "repost"
+                            ]
+                          },
+                          "author_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "author_name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "published_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "link": {
+                            "type": "string",
+                            "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                            "maxLength": 300
+                          },
+                          "text": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 1000
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "author_id",
+                          "author_name",
+                          "published_at",
+                          "link",
+                          "text"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "source": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "kind": {
+                            "enum": [
+                              "original",
+                              "reply",
+                              "quote",
+                              "repost"
+                            ]
+                          },
+                          "author_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "author_name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "published_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "link": {
+                            "type": "string",
+                            "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                            "maxLength": 300
+                          },
+                          "text": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 1000
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "author_id",
+                          "author_name",
+                          "published_at",
+                          "link",
+                          "text"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "links": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "pattern": "^https://([a-z0-9-]+\\.)+example(/[A-Za-z0-9._~%/?=&#@:-]*)?$",
+                          "maxLength": 300
+                        },
+                        "title": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "description": {
+                          "type": "string",
+                          "minLength": 0,
+                          "maxLength": 500
+                        }
+                      },
+                      "required": [
+                        "url",
+                        "title",
+                        "description"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 4
+                  },
+                  "media": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "asset_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "alt_text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1000
+                        }
+                      },
+                      "required": [
+                        "asset_id",
+                        "alt_text"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 4
+                  },
+                  "counts": {
+                    "type": "object",
+                    "properties": {
+                      "replies": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "quotes": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "reposts": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "replies",
+                      "quotes",
+                      "reposts"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "bookmarked": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "author",
+                  "published_at",
+                  "link",
+                  "text",
+                  "parent",
+                  "quoted",
+                  "source",
+                  "links",
+                  "media",
+                  "counts",
+                  "bookmarked"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "saved_at",
+              "post"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 1000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "bookmarks"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "wirewalk.bookmarks.add",
+    "description": "Bookmark a visible post for this reader. Bookmarking a post that is already bookmarked leaves one bookmark (changed: false). Returns only the post ID and bookmark status.",
+    "read_only": false,
+    "scope": "wirewalk.bookmarks.add",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "wirewalk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "post_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "bookmarked": {
+          "const": true
+        },
+        "changed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "post_id",
+        "bookmarked",
+        "changed"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "wirewalk.bookmarks.remove",
+    "description": "Remove this reader's bookmark on a visible post. Removing a bookmark that does not exist changes nothing (changed: false).",
+    "read_only": false,
+    "scope": "wirewalk.bookmarks.remove",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "wirewalk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "post_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "bookmarked": {
+          "const": false
+        },
+        "changed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "post_id",
+        "bookmarked",
+        "changed"
+      ],
+      "additionalProperties": false
+    }
+  }
+]
