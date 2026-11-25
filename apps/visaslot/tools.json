@@ -1,0 +1,3594 @@
+[
+  {
+    "name": "visaslot.competence",
+    "description": "Find the competent consulate for a trip. Give every stay in the Schengen area with its country and dates; nights are counted per country. The main destination is the country with the most nights; on a tie, the tied country entered first (earliest check-in). Returns the night counts, the main country, which rule decided it and the consulates of that country. Reading changes nothing.",
+    "read_only": true,
+    "scope": "visaslot.competence",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "trip": {
+          "type": "object",
+          "properties": {
+            "stays": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "country": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{2}$",
+                    "description": "ISO 3166-1 alpha-2 country code, e.g. DE or FR."
+                  },
+                  "check_in": {
+                    "type": "string",
+                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                    "description": "Calendar date YYYY-MM-DD."
+                  },
+                  "check_out": {
+                    "type": "string",
+                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                    "description": "Calendar date YYYY-MM-DD."
+                  }
+                },
+                "required": [
+                  "country",
+                  "check_in",
+                  "check_out"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 60,
+              "minItems": 1
+            }
+          },
+          "required": [
+            "stays"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "trip"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "visaslot"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "nights_by_country": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "country": {
+                "type": "string",
+                "pattern": "^[A-Z]{2}$",
+                "description": "ISO 3166-1 alpha-2 country code, e.g. DE or FR."
+              },
+              "nights": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "first_night": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Calendar date YYYY-MM-DD."
+              }
+            },
+            "required": [
+              "country",
+              "nights",
+              "first_night"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 60
+        },
+        "total_nights": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "main_country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2 country code, e.g. DE or FR."
+        },
+        "rule": {
+          "enum": [
+            "most_nights",
+            "tie_first_entry"
+          ]
+        },
+        "consulates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "country": {
+                "type": "string",
+                "pattern": "^[A-Z]{2}$",
+                "description": "ISO 3166-1 alpha-2 country code, e.g. DE or FR."
+              },
+              "city": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "timezone": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "description": "IANA time zone; slot times carry its UTC offset and dates are local dates there."
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "country",
+              "city",
+              "timezone"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "nights_by_country",
+        "total_nights",
+        "main_country",
+        "rule",
+        "consulates"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "visaslot.slots",
+    "description": "List the open appointment slots at a consulate between two local dates (inclusive), earliest first. Slots in the past and slots taken, booked or closed are not listed; availability changes over time. Each slot carries its version: book with it. Reading changes nothing.",
+    "read_only": true,
+    "scope": "visaslot.slots",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "consulate_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "from": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Calendar date YYYY-MM-DD."
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Calendar date YYYY-MM-DD."
+        }
+      },
+      "required": [
+        "consulate_id",
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "visaslot"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "consulate": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "country": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$",
+              "description": "ISO 3166-1 alpha-2 country code, e.g. DE or FR."
+            },
+            "city": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "IANA time zone; slot times carry its UTC offset and dates are local dates there."
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "country",
+            "city",
+            "timezone"
+          ],
+          "additionalProperties": false
+        },
+        "from": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Calendar date YYYY-MM-DD."
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Calendar date YYYY-MM-DD."
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "slots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "consulate_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "slot_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              }
+            },
+            "required": [
+              "consulate_id",
+              "slot_at",
+              "version"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "consulate",
+        "from",
+        "to",
+        "as_of",
+        "slots"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "visaslot.book",
+    "description": "Book an open slot. Give the slot time and the slot version from visaslot.slots. A slot taken since the search fails with slot_unavailable; a slot whose version changed fails with stale_version. Booking is free.",
+    "read_only": false,
+    "scope": "visaslot.book",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "consulate_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "slot_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "slot_version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "consulate_id",
+        "slot_at",
+        "slot_version",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "visaslot"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "appointment": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "consulate_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "country": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$",
+              "description": "ISO 3166-1 alpha-2 country code, e.g. DE or FR."
+            },
+            "slot_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "status": {
+              "enum": [
+                "booked",
+                "cancelled",
+                "held"
+              ]
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "description": "Increases on booking, reschedule, cancellation and hold. A file submission does not change it."
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "enum": [
+                      "booked",
+                      "cancelled",
+                      "held"
+                    ]
+                  },
+                  "slot_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The slot the appointment held after this step."
+                  },
+                  "action": {
+                    "enum": [
+                      "booked",
+                      "rescheduled",
+                      "cancelled",
+                      "cancelled_by_consulate",
+                      "held"
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "status",
+                  "slot_at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 200,
+              "minItems": 1,
+              "description": "Every booking, reschedule, cancellation and hold, with the slot held after it."
+            },
+            "cancellation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "by": {
+                      "enum": [
+                        "applicant",
+                        "consulate"
+                      ]
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "by",
+                    "at",
+                    "reason"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "check": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "appointment_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "held_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "result": {
+                      "enum": [
+                        "complete",
+                        "refused"
+                      ]
+                    },
+                    "missing": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "item": {
+                                "enum": [
+                                  "visa_file",
+                                  "appointment",
+                                  "invitation_letter",
+                                  "travel_signature",
+                                  "accommodation",
+                                  "travel"
+                                ]
+                              },
+                              "rule": {
+                                "enum": [
+                                  "file_submitted",
+                                  "consulate_competent",
+                                  "name_matches_passport",
+                                  "letter_issued_by_appointment",
+                                  "signature_valid_through_return"
+                                ]
+                              },
+                              "expected": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 200
+                              },
+                              "found": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 200
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "item",
+                              "rule",
+                              "expected",
+                              "found"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "item": {
+                                "const": "accommodation"
+                              },
+                              "rule": {
+                                "const": "covers_every_night"
+                              },
+                              "nights": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                                  "description": "Calendar date YYYY-MM-DD."
+                                },
+                                "maxItems": 400,
+                                "minItems": 1
+                              }
+                            },
+                            "required": [
+                              "item",
+                              "rule",
+                              "nights"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ],
+                        "description": "One entry per failed rule, in rule order."
+                      },
+                      "maxItems": 6
+                    }
+                  },
+                  "required": [
+                    "appointment_id",
+                    "held_at",
+                    "result",
+                    "missing"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "file_version": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Version of the registered visa file, or null when none is registered."
+            }
+          },
+          "required": [
+            "id",
+            "consulate_id",
+            "country",
+            "slot_at",
+            "status",
+            "version",
+            "created_at",
+            "updated_at",
+            "history",
+            "cancellation",
+            "check",
+            "file_version"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "appointment"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "visaslot.reschedule",
+    "description": "Move a booked appointment to another open slot at the same consulate before the current slot starts. Give the appointment version and the new slot version you read; stale versions fail with stale_version. The old slot is released. A registered visa file stays on the appointment.",
+    "read_only": false,
+    "scope": "visaslot.reschedule",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "appointment_version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "slot_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "slot_version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "appointment_id",
+        "appointment_version",
+        "slot_at",
+        "slot_version",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "visaslot"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "appointment": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "consulate_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "country": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$",
+              "description": "ISO 3166-1 alpha-2 country code, e.g. DE or FR."
+            },
+            "slot_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "status": {
+              "enum": [
+                "booked",
+                "cancelled",
+                "held"
+              ]
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "description": "Increases on booking, reschedule, cancellation and hold. A file submission does not change it."
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "enum": [
+                      "booked",
+                      "cancelled",
+                      "held"
+                    ]
+                  },
+                  "slot_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The slot the appointment held after this step."
+                  },
+                  "action": {
+                    "enum": [
+                      "booked",
+                      "rescheduled",
+                      "cancelled",
+                      "cancelled_by_consulate",
+                      "held"
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "status",
+                  "slot_at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 200,
+              "minItems": 1,
+              "description": "Every booking, reschedule, cancellation and hold, with the slot held after it."
+            },
+            "cancellation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "by": {
+                      "enum": [
+                        "applicant",
+                        "consulate"
+                      ]
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "by",
+                    "at",
+                    "reason"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "check": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "appointment_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "held_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "result": {
+                      "enum": [
+                        "complete",
+                        "refused"
+                      ]
+                    },
+                    "missing": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "item": {
+                                "enum": [
+                                  "visa_file",
+                                  "appointment",
+                                  "invitation_letter",
+                                  "travel_signature",
+                                  "accommodation",
+                                  "travel"
+                                ]
+                              },
+                              "rule": {
+                                "enum": [
+                                  "file_submitted",
+                                  "consulate_competent",
+                                  "name_matches_passport",
+                                  "letter_issued_by_appointment",
+                                  "signature_valid_through_return"
+                                ]
+                              },
+                              "expected": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 200
+                              },
+                              "found": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 200
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "item",
+                              "rule",
+                              "expected",
+                              "found"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "item": {
+                                "const": "accommodation"
+                              },
+                              "rule": {
+                                "const": "covers_every_night"
+                              },
+                              "nights": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                                  "description": "Calendar date YYYY-MM-DD."
+                                },
+                                "maxItems": 400,
+                                "minItems": 1
+                              }
+                            },
+                            "required": [
+                              "item",
+                              "rule",
+                              "nights"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ],
+                        "description": "One entry per failed rule, in rule order."
+                      },
+                      "maxItems": 6
+                    }
+                  },
+                  "required": [
+                    "appointment_id",
+                    "held_at",
+                    "result",
+                    "missing"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "file_version": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Version of the registered visa file, or null when none is registered."
+            }
+          },
+          "required": [
+            "id",
+            "consulate_id",
+            "country",
+            "slot_at",
+            "status",
+            "version",
+            "created_at",
+            "updated_at",
+            "history",
+            "cancellation",
+            "check",
+            "file_version"
+          ],
+          "additionalProperties": false
+        },
+        "released_slot": {
+          "type": "object",
+          "properties": {
+            "consulate_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "slot_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "consulate_id",
+            "slot_at",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "appointment",
+        "released_slot"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "visaslot.cancel",
+    "description": "Cancel a booked appointment before its slot starts. Give the appointment version you read; a stale version fails with stale_version. The slot is released.",
+    "read_only": false,
+    "scope": "visaslot.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "appointment_version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "appointment_id",
+        "appointment_version",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "visaslot"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "appointment": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "consulate_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "country": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$",
+              "description": "ISO 3166-1 alpha-2 country code, e.g. DE or FR."
+            },
+            "slot_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "status": {
+              "enum": [
+                "booked",
+                "cancelled",
+                "held"
+              ]
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "description": "Increases on booking, reschedule, cancellation and hold. A file submission does not change it."
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "enum": [
+                      "booked",
+                      "cancelled",
+                      "held"
+                    ]
+                  },
+                  "slot_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The slot the appointment held after this step."
+                  },
+                  "action": {
+                    "enum": [
+                      "booked",
+                      "rescheduled",
+                      "cancelled",
+                      "cancelled_by_consulate",
+                      "held"
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "status",
+                  "slot_at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 200,
+              "minItems": 1,
+              "description": "Every booking, reschedule, cancellation and hold, with the slot held after it."
+            },
+            "cancellation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "by": {
+                      "enum": [
+                        "applicant",
+                        "consulate"
+                      ]
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "by",
+                    "at",
+                    "reason"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "check": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "appointment_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "held_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "result": {
+                      "enum": [
+                        "complete",
+                        "refused"
+                      ]
+                    },
+                    "missing": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "item": {
+                                "enum": [
+                                  "visa_file",
+                                  "appointment",
+                                  "invitation_letter",
+                                  "travel_signature",
+                                  "accommodation",
+                                  "travel"
+                                ]
+                              },
+                              "rule": {
+                                "enum": [
+                                  "file_submitted",
+                                  "consulate_competent",
+                                  "name_matches_passport",
+                                  "letter_issued_by_appointment",
+                                  "signature_valid_through_return"
+                                ]
+                              },
+                              "expected": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 200
+                              },
+                              "found": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 200
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "item",
+                              "rule",
+                              "expected",
+                              "found"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "item": {
+                                "const": "accommodation"
+                              },
+                              "rule": {
+                                "const": "covers_every_night"
+                              },
+                              "nights": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                                  "description": "Calendar date YYYY-MM-DD."
+                                },
+                                "maxItems": 400,
+                                "minItems": 1
+                              }
+                            },
+                            "required": [
+                              "item",
+                              "rule",
+                              "nights"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ],
+                        "description": "One entry per failed rule, in rule order."
+                      },
+                      "maxItems": 6
+                    }
+                  },
+                  "required": [
+                    "appointment_id",
+                    "held_at",
+                    "result",
+                    "missing"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "file_version": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Version of the registered visa file, or null when none is registered."
+            }
+          },
+          "required": [
+            "id",
+            "consulate_id",
+            "country",
+            "slot_at",
+            "status",
+            "version",
+            "created_at",
+            "updated_at",
+            "history",
+            "cancellation",
+            "check",
+            "file_version"
+          ],
+          "additionalProperties": false
+        },
+        "released_slot": {
+          "type": "object",
+          "properties": {
+            "consulate_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "slot_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "consulate_id",
+            "slot_at",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "appointment",
+        "released_slot"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "visaslot.appointments",
+    "description": "List this applicant's appointments in slot order, with their status, version, history (every booking, reschedule, cancellation and hold with the slot held), visa file version and check result (read the file with visaslot.file.get); give id to read one (also returned as item). Reading changes nothing.",
+    "read_only": true,
+    "scope": "visaslot.appointments",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "visaslot"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "consulate_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "country": {
+                "type": "string",
+                "pattern": "^[A-Z]{2}$",
+                "description": "ISO 3166-1 alpha-2 country code, e.g. DE or FR."
+              },
+              "slot_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "status": {
+                "enum": [
+                  "booked",
+                  "cancelled",
+                  "held"
+                ]
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000,
+                "description": "Increases on booking, reschedule, cancellation and hold. A file submission does not change it."
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "status": {
+                      "enum": [
+                        "booked",
+                        "cancelled",
+                        "held"
+                      ]
+                    },
+                    "slot_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The slot the appointment held after this step."
+                    },
+                    "action": {
+                      "enum": [
+                        "booked",
+                        "rescheduled",
+                        "cancelled",
+                        "cancelled_by_consulate",
+                        "held"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "status",
+                    "slot_at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 200,
+                "minItems": 1,
+                "description": "Every booking, reschedule, cancellation and hold, with the slot held after it."
+              },
+              "cancellation": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "by": {
+                        "enum": [
+                          "applicant",
+                          "consulate"
+                        ]
+                      },
+                      "at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "reason": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 500
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "by",
+                      "at",
+                      "reason"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "check": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "appointment_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "held_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "result": {
+                        "enum": [
+                          "complete",
+                          "refused"
+                        ]
+                      },
+                      "missing": {
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "item": {
+                                  "enum": [
+                                    "visa_file",
+                                    "appointment",
+                                    "invitation_letter",
+                                    "travel_signature",
+                                    "accommodation",
+                                    "travel"
+                                  ]
+                                },
+                                "rule": {
+                                  "enum": [
+                                    "file_submitted",
+                                    "consulate_competent",
+                                    "name_matches_passport",
+                                    "letter_issued_by_appointment",
+                                    "signature_valid_through_return"
+                                  ]
+                                },
+                                "expected": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 200
+                                },
+                                "found": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 200
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "item",
+                                "rule",
+                                "expected",
+                                "found"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "item": {
+                                  "const": "accommodation"
+                                },
+                                "rule": {
+                                  "const": "covers_every_night"
+                                },
+                                "nights": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                                    "description": "Calendar date YYYY-MM-DD."
+                                  },
+                                  "maxItems": 400,
+                                  "minItems": 1
+                                }
+                              },
+                              "required": [
+                                "item",
+                                "rule",
+                                "nights"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ],
+                          "description": "One entry per failed rule, in rule order."
+                        },
+                        "maxItems": 6
+                      }
+                    },
+                    "required": [
+                      "appointment_id",
+                      "held_at",
+                      "result",
+                      "missing"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "file_version": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Version of the registered visa file, or null when none is registered."
+              }
+            },
+            "required": [
+              "id",
+              "consulate_id",
+              "country",
+              "slot_at",
+              "status",
+              "version",
+              "created_at",
+              "updated_at",
+              "history",
+              "cancellation",
+              "check",
+              "file_version"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        },
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "consulate_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "country": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$",
+              "description": "ISO 3166-1 alpha-2 country code, e.g. DE or FR."
+            },
+            "slot_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "status": {
+              "enum": [
+                "booked",
+                "cancelled",
+                "held"
+              ]
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "description": "Increases on booking, reschedule, cancellation and hold. A file submission does not change it."
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "enum": [
+                      "booked",
+                      "cancelled",
+                      "held"
+                    ]
+                  },
+                  "slot_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The slot the appointment held after this step."
+                  },
+                  "action": {
+                    "enum": [
+                      "booked",
+                      "rescheduled",
+                      "cancelled",
+                      "cancelled_by_consulate",
+                      "held"
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "status",
+                  "slot_at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 200,
+              "minItems": 1,
+              "description": "Every booking, reschedule, cancellation and hold, with the slot held after it."
+            },
+            "cancellation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "by": {
+                      "enum": [
+                        "applicant",
+                        "consulate"
+                      ]
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "by",
+                    "at",
+                    "reason"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "check": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "appointment_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "held_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "result": {
+                      "enum": [
+                        "complete",
+                        "refused"
+                      ]
+                    },
+                    "missing": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "item": {
+                                "enum": [
+                                  "visa_file",
+                                  "appointment",
+                                  "invitation_letter",
+                                  "travel_signature",
+                                  "accommodation",
+                                  "travel"
+                                ]
+                              },
+                              "rule": {
+                                "enum": [
+                                  "file_submitted",
+                                  "consulate_competent",
+                                  "name_matches_passport",
+                                  "letter_issued_by_appointment",
+                                  "signature_valid_through_return"
+                                ]
+                              },
+                              "expected": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 200
+                              },
+                              "found": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 200
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "item",
+                              "rule",
+                              "expected",
+                              "found"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "item": {
+                                "const": "accommodation"
+                              },
+                              "rule": {
+                                "const": "covers_every_night"
+                              },
+                              "nights": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                                  "description": "Calendar date YYYY-MM-DD."
+                                },
+                                "maxItems": 400,
+                                "minItems": 1
+                              }
+                            },
+                            "required": [
+                              "item",
+                              "rule",
+                              "nights"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ],
+                        "description": "One entry per failed rule, in rule order."
+                      },
+                      "maxItems": 6
+                    }
+                  },
+                  "required": [
+                    "appointment_id",
+                    "held_at",
+                    "result",
+                    "missing"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "file_version": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Version of the registered visa file, or null when none is registered."
+            }
+          },
+          "required": [
+            "id",
+            "consulate_id",
+            "country",
+            "slot_at",
+            "status",
+            "version",
+            "created_at",
+            "updated_at",
+            "history",
+            "cancellation",
+            "check",
+            "file_version"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "visaslot.checklist",
+    "description": "Read the required-document checklist for a visa category, e.g. business. Each item says which VisaSlot rules check it at the appointment. Reading changes nothing.",
+    "read_only": true,
+    "scope": "visaslot.checklist",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,59}$"
+        }
+      },
+      "required": [
+        "category"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "visaslot"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "category": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,59}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "checked_by": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "file_submitted",
+                    "consulate_competent",
+                    "name_matches_passport",
+                    "letter_issued_by_appointment",
+                    "signature_valid_through_return",
+                    "covers_every_night"
+                  ]
+                },
+                "maxItems": 6,
+                "uniqueItems": true,
+                "description": "Rules VisaSlot applies to this item at the appointment; empty when the consulate checks it in person."
+              }
+            },
+            "required": [
+              "item",
+              "label",
+              "description",
+              "checked_by"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 40
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "file_submitted",
+              "consulate_competent",
+              "name_matches_passport",
+              "letter_issued_by_appointment",
+              "signature_valid_through_return",
+              "covers_every_night"
+            ]
+          },
+          "maxItems": 6
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "category",
+        "title",
+        "items",
+        "rules"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "visaslot.file.submit",
+    "description": "Register the visa file on a booked appointment, replacing any earlier file, until the appointment starts. Give the invitation letter, travel signature, every accommodation stay and the travel dates, each with the source record you read it from. A letter or signature dated after today at the consulate is rejected. Returns the file and the items that would be missing if the appointment were held now.",
+    "read_only": false,
+    "scope": "visaslot.file.submit",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "documents": {
+          "type": "object",
+          "properties": {
+            "invitation_letter": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "object",
+                  "properties": {
+                    "app_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "object_type": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "object_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    }
+                  },
+                  "required": [
+                    "app_id",
+                    "object_type",
+                    "object_id"
+                  ],
+                  "additionalProperties": false,
+                  "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                },
+                "name_on_letter": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "issued_on": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                  "description": "Date the letter was issued. Must not be after the submission date at the consulate."
+                }
+              },
+              "required": [
+                "source",
+                "name_on_letter",
+                "issued_on"
+              ],
+              "additionalProperties": false
+            },
+            "travel_signature": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "object",
+                  "properties": {
+                    "app_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "object_type": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "object_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    }
+                  },
+                  "required": [
+                    "app_id",
+                    "object_type",
+                    "object_id"
+                  ],
+                  "additionalProperties": false,
+                  "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                },
+                "signed_on": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                  "description": "Date of the travel signature. Must not be after the submission date at the consulate."
+                },
+                "valid_until": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                  "description": "Lapse date, exclusive: the signature is valid before this date and lapsed on it. After signed_on."
+                }
+              },
+              "required": [
+                "source",
+                "signed_on",
+                "valid_until"
+              ],
+              "additionalProperties": false
+            },
+            "accommodation": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "country": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{2}$",
+                    "description": "ISO 3166-1 alpha-2 country code, e.g. DE or FR."
+                  },
+                  "check_in": {
+                    "type": "string",
+                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                    "description": "Calendar date YYYY-MM-DD."
+                  },
+                  "check_out": {
+                    "type": "string",
+                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                    "description": "After check_in. Nights are check_in up to the day before check_out."
+                  },
+                  "source": {
+                    "type": "object",
+                    "properties": {
+                      "app_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "object_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "object_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                      }
+                    },
+                    "required": [
+                      "app_id",
+                      "object_type",
+                      "object_id"
+                    ],
+                    "additionalProperties": false,
+                    "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                  }
+                },
+                "required": [
+                  "country",
+                  "check_in",
+                  "check_out",
+                  "source"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 60,
+              "minItems": 1,
+              "description": "Stays in any order; no two stays may share a night."
+            },
+            "travel": {
+              "type": "object",
+              "properties": {
+                "enter_on": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                  "description": "Date of entry into the Schengen area."
+                },
+                "leave_on": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                  "description": "Date of the return departure; after enter_on. Nights are enter_on up to the day before leave_on."
+                },
+                "source": {
+                  "type": "object",
+                  "properties": {
+                    "app_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "object_type": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "object_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                    }
+                  },
+                  "required": [
+                    "app_id",
+                    "object_type",
+                    "object_id"
+                  ],
+                  "additionalProperties": false,
+                  "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                }
+              },
+              "required": [
+                "enter_on",
+                "leave_on"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "invitation_letter",
+            "travel_signature",
+            "accommodation",
+            "travel"
+          ],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "appointment_id",
+        "documents",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "visaslot"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "file": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "submitted_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "documents": {
+              "type": "object",
+              "properties": {
+                "invitation_letter": {
+                  "type": "object",
+                  "properties": {
+                    "source": {
+                      "type": "object",
+                      "properties": {
+                        "app_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "object_type": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "object_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        }
+                      },
+                      "required": [
+                        "app_id",
+                        "object_type",
+                        "object_id"
+                      ],
+                      "additionalProperties": false,
+                      "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                    },
+                    "name_on_letter": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "issued_on": {
+                      "type": "string",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                      "description": "Date the letter was issued. Must not be after the submission date at the consulate."
+                    }
+                  },
+                  "required": [
+                    "source",
+                    "name_on_letter",
+                    "issued_on"
+                  ],
+                  "additionalProperties": false
+                },
+                "travel_signature": {
+                  "type": "object",
+                  "properties": {
+                    "source": {
+                      "type": "object",
+                      "properties": {
+                        "app_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "object_type": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "object_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        }
+                      },
+                      "required": [
+                        "app_id",
+                        "object_type",
+                        "object_id"
+                      ],
+                      "additionalProperties": false,
+                      "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                    },
+                    "signed_on": {
+                      "type": "string",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                      "description": "Date of the travel signature. Must not be after the submission date at the consulate."
+                    },
+                    "valid_until": {
+                      "type": "string",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                      "description": "Lapse date, exclusive: the signature is valid before this date and lapsed on it. After signed_on."
+                    }
+                  },
+                  "required": [
+                    "source",
+                    "signed_on",
+                    "valid_until"
+                  ],
+                  "additionalProperties": false
+                },
+                "accommodation": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "country": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{2}$",
+                        "description": "ISO 3166-1 alpha-2 country code, e.g. DE or FR."
+                      },
+                      "check_in": {
+                        "type": "string",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                        "description": "Calendar date YYYY-MM-DD."
+                      },
+                      "check_out": {
+                        "type": "string",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                        "description": "After check_in. Nights are check_in up to the day before check_out."
+                      },
+                      "source": {
+                        "type": "object",
+                        "properties": {
+                          "app_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "object_type": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                          },
+                          "object_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          }
+                        },
+                        "required": [
+                          "app_id",
+                          "object_type",
+                          "object_id"
+                        ],
+                        "additionalProperties": false,
+                        "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                      }
+                    },
+                    "required": [
+                      "country",
+                      "check_in",
+                      "check_out",
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 60,
+                  "minItems": 1,
+                  "description": "Stays in any order; no two stays may share a night."
+                },
+                "travel": {
+                  "type": "object",
+                  "properties": {
+                    "enter_on": {
+                      "type": "string",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                      "description": "Date of entry into the Schengen area."
+                    },
+                    "leave_on": {
+                      "type": "string",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                      "description": "Date of the return departure; after enter_on. Nights are enter_on up to the day before leave_on."
+                    },
+                    "source": {
+                      "type": "object",
+                      "properties": {
+                        "app_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "object_type": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "object_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                        }
+                      },
+                      "required": [
+                        "app_id",
+                        "object_type",
+                        "object_id"
+                      ],
+                      "additionalProperties": false,
+                      "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                    }
+                  },
+                  "required": [
+                    "enter_on",
+                    "leave_on"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "invitation_letter",
+                "travel_signature",
+                "accommodation",
+                "travel"
+              ],
+              "additionalProperties": false
+            },
+            "locked_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Set when the appointment is held; a locked file cannot change."
+            }
+          },
+          "required": [
+            "version",
+            "submitted_at",
+            "documents",
+            "locked_at"
+          ],
+          "additionalProperties": false
+        },
+        "replaced_version": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "missing_if_held_now": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "item": {
+                    "enum": [
+                      "visa_file",
+                      "appointment",
+                      "invitation_letter",
+                      "travel_signature",
+                      "accommodation",
+                      "travel"
+                    ]
+                  },
+                  "rule": {
+                    "enum": [
+                      "file_submitted",
+                      "consulate_competent",
+                      "name_matches_passport",
+                      "letter_issued_by_appointment",
+                      "signature_valid_through_return"
+                    ]
+                  },
+                  "expected": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "found": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "item",
+                  "rule",
+                  "expected",
+                  "found"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "item": {
+                    "const": "accommodation"
+                  },
+                  "rule": {
+                    "const": "covers_every_night"
+                  },
+                  "nights": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                      "description": "Calendar date YYYY-MM-DD."
+                    },
+                    "maxItems": 400,
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "item",
+                  "rule",
+                  "nights"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "description": "One entry per failed rule, in rule order."
+          },
+          "maxItems": 6
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "appointment_id",
+        "file",
+        "replaced_version",
+        "missing_if_held_now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "visaslot.file.get",
+    "description": "Read the visa file registered on an appointment, its earlier versions, and the items that would be missing if the appointment were held now (null once it is held or cancelled; a held appointment shows its check). Reading changes nothing.",
+    "read_only": true,
+    "scope": "visaslot.file.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "appointment_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "visaslot"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "appointment_status": {
+          "enum": [
+            "booked",
+            "cancelled",
+            "held"
+          ]
+        },
+        "file": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "version": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000
+                },
+                "submitted_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "documents": {
+                  "type": "object",
+                  "properties": {
+                    "invitation_letter": {
+                      "type": "object",
+                      "properties": {
+                        "source": {
+                          "type": "object",
+                          "properties": {
+                            "app_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            "object_type": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 80
+                            },
+                            "object_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                            }
+                          },
+                          "required": [
+                            "app_id",
+                            "object_type",
+                            "object_id"
+                          ],
+                          "additionalProperties": false,
+                          "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                        },
+                        "name_on_letter": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "issued_on": {
+                          "type": "string",
+                          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                          "description": "Date the letter was issued. Must not be after the submission date at the consulate."
+                        }
+                      },
+                      "required": [
+                        "source",
+                        "name_on_letter",
+                        "issued_on"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "travel_signature": {
+                      "type": "object",
+                      "properties": {
+                        "source": {
+                          "type": "object",
+                          "properties": {
+                            "app_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            "object_type": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 80
+                            },
+                            "object_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                            }
+                          },
+                          "required": [
+                            "app_id",
+                            "object_type",
+                            "object_id"
+                          ],
+                          "additionalProperties": false,
+                          "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                        },
+                        "signed_on": {
+                          "type": "string",
+                          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                          "description": "Date of the travel signature. Must not be after the submission date at the consulate."
+                        },
+                        "valid_until": {
+                          "type": "string",
+                          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                          "description": "Lapse date, exclusive: the signature is valid before this date and lapsed on it. After signed_on."
+                        }
+                      },
+                      "required": [
+                        "source",
+                        "signed_on",
+                        "valid_until"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "accommodation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "country": {
+                            "type": "string",
+                            "pattern": "^[A-Z]{2}$",
+                            "description": "ISO 3166-1 alpha-2 country code, e.g. DE or FR."
+                          },
+                          "check_in": {
+                            "type": "string",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "Calendar date YYYY-MM-DD."
+                          },
+                          "check_out": {
+                            "type": "string",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                            "description": "After check_in. Nights are check_in up to the day before check_out."
+                          },
+                          "source": {
+                            "type": "object",
+                            "properties": {
+                              "app_id": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              },
+                              "object_type": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              },
+                              "object_id": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                              }
+                            },
+                            "required": [
+                              "app_id",
+                              "object_type",
+                              "object_id"
+                            ],
+                            "additionalProperties": false,
+                            "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                          }
+                        },
+                        "required": [
+                          "country",
+                          "check_in",
+                          "check_out",
+                          "source"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "maxItems": 60,
+                      "minItems": 1,
+                      "description": "Stays in any order; no two stays may share a night."
+                    },
+                    "travel": {
+                      "type": "object",
+                      "properties": {
+                        "enter_on": {
+                          "type": "string",
+                          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                          "description": "Date of entry into the Schengen area."
+                        },
+                        "leave_on": {
+                          "type": "string",
+                          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                          "description": "Date of the return departure; after enter_on. Nights are enter_on up to the day before leave_on."
+                        },
+                        "source": {
+                          "type": "object",
+                          "properties": {
+                            "app_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            "object_type": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 80
+                            },
+                            "object_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                            }
+                          },
+                          "required": [
+                            "app_id",
+                            "object_type",
+                            "object_id"
+                          ],
+                          "additionalProperties": false,
+                          "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                        }
+                      },
+                      "required": [
+                        "enter_on",
+                        "leave_on"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "invitation_letter",
+                    "travel_signature",
+                    "accommodation",
+                    "travel"
+                  ],
+                  "additionalProperties": false
+                },
+                "locked_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Set when the appointment is held; a locked file cannot change."
+                }
+              },
+              "required": [
+                "version",
+                "submitted_at",
+                "documents",
+                "locked_at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "submitted_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "documents": {
+                "type": "object",
+                "properties": {
+                  "invitation_letter": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "object",
+                        "properties": {
+                          "app_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "object_type": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                          },
+                          "object_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          }
+                        },
+                        "required": [
+                          "app_id",
+                          "object_type",
+                          "object_id"
+                        ],
+                        "additionalProperties": false,
+                        "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                      },
+                      "name_on_letter": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "issued_on": {
+                        "type": "string",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                        "description": "Date the letter was issued. Must not be after the submission date at the consulate."
+                      }
+                    },
+                    "required": [
+                      "source",
+                      "name_on_letter",
+                      "issued_on"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "travel_signature": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "object",
+                        "properties": {
+                          "app_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "object_type": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                          },
+                          "object_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          }
+                        },
+                        "required": [
+                          "app_id",
+                          "object_type",
+                          "object_id"
+                        ],
+                        "additionalProperties": false,
+                        "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                      },
+                      "signed_on": {
+                        "type": "string",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                        "description": "Date of the travel signature. Must not be after the submission date at the consulate."
+                      },
+                      "valid_until": {
+                        "type": "string",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                        "description": "Lapse date, exclusive: the signature is valid before this date and lapsed on it. After signed_on."
+                      }
+                    },
+                    "required": [
+                      "source",
+                      "signed_on",
+                      "valid_until"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "accommodation": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "country": {
+                          "type": "string",
+                          "pattern": "^[A-Z]{2}$",
+                          "description": "ISO 3166-1 alpha-2 country code, e.g. DE or FR."
+                        },
+                        "check_in": {
+                          "type": "string",
+                          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                          "description": "Calendar date YYYY-MM-DD."
+                        },
+                        "check_out": {
+                          "type": "string",
+                          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                          "description": "After check_in. Nights are check_in up to the day before check_out."
+                        },
+                        "source": {
+                          "type": "object",
+                          "properties": {
+                            "app_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            "object_type": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 80
+                            },
+                            "object_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                            }
+                          },
+                          "required": [
+                            "app_id",
+                            "object_type",
+                            "object_id"
+                          ],
+                          "additionalProperties": false,
+                          "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                        }
+                      },
+                      "required": [
+                        "country",
+                        "check_in",
+                        "check_out",
+                        "source"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 60,
+                    "minItems": 1,
+                    "description": "Stays in any order; no two stays may share a night."
+                  },
+                  "travel": {
+                    "type": "object",
+                    "properties": {
+                      "enter_on": {
+                        "type": "string",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                        "description": "Date of entry into the Schengen area."
+                      },
+                      "leave_on": {
+                        "type": "string",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                        "description": "Date of the return departure; after enter_on. Nights are enter_on up to the day before leave_on."
+                      },
+                      "source": {
+                        "type": "object",
+                        "properties": {
+                          "app_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "object_type": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                          },
+                          "object_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                          }
+                        },
+                        "required": [
+                          "app_id",
+                          "object_type",
+                          "object_id"
+                        ],
+                        "additionalProperties": false,
+                        "description": "The record the agent read these facts from. VisaSlot stores it for grading; it never reads that App."
+                      }
+                    },
+                    "required": [
+                      "enter_on",
+                      "leave_on"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "invitation_letter",
+                  "travel_signature",
+                  "accommodation",
+                  "travel"
+                ],
+                "additionalProperties": false
+              },
+              "replaced_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "version",
+              "submitted_at",
+              "documents",
+              "replaced_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        },
+        "missing_if_held_now": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "item": {
+                        "enum": [
+                          "visa_file",
+                          "appointment",
+                          "invitation_letter",
+                          "travel_signature",
+                          "accommodation",
+                          "travel"
+                        ]
+                      },
+                      "rule": {
+                        "enum": [
+                          "file_submitted",
+                          "consulate_competent",
+                          "name_matches_passport",
+                          "letter_issued_by_appointment",
+                          "signature_valid_through_return"
+                        ]
+                      },
+                      "expected": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "found": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "item",
+                      "rule",
+                      "expected",
+                      "found"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "item": {
+                        "const": "accommodation"
+                      },
+                      "rule": {
+                        "const": "covers_every_night"
+                      },
+                      "nights": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                          "description": "Calendar date YYYY-MM-DD."
+                        },
+                        "maxItems": 400,
+                        "minItems": 1
+                      }
+                    },
+                    "required": [
+                      "item",
+                      "rule",
+                      "nights"
+                    ],
+                    "additionalProperties": false
+                  }
+                ],
+                "description": "One entry per failed rule, in rule order."
+              },
+              "maxItems": 6
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "check": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "appointment_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "held_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "result": {
+                  "enum": [
+                    "complete",
+                    "refused"
+                  ]
+                },
+                "missing": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "item": {
+                            "enum": [
+                              "visa_file",
+                              "appointment",
+                              "invitation_letter",
+                              "travel_signature",
+                              "accommodation",
+                              "travel"
+                            ]
+                          },
+                          "rule": {
+                            "enum": [
+                              "file_submitted",
+                              "consulate_competent",
+                              "name_matches_passport",
+                              "letter_issued_by_appointment",
+                              "signature_valid_through_return"
+                            ]
+                          },
+                          "expected": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "found": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 200
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "item",
+                          "rule",
+                          "expected",
+                          "found"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "item": {
+                            "const": "accommodation"
+                          },
+                          "rule": {
+                            "const": "covers_every_night"
+                          },
+                          "nights": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                              "description": "Calendar date YYYY-MM-DD."
+                            },
+                            "maxItems": 400,
+                            "minItems": 1
+                          }
+                        },
+                        "required": [
+                          "item",
+                          "rule",
+                          "nights"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ],
+                    "description": "One entry per failed rule, in rule order."
+                  },
+                  "maxItems": 6
+                }
+              },
+              "required": [
+                "appointment_id",
+                "held_at",
+                "result",
+                "missing"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "appointment_id",
+        "appointment_status",
+        "file",
+        "history",
+        "missing_if_held_now",
+        "check"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

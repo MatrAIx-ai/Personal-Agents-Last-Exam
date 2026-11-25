@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:confdesk:events:1",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "confdesk.registration.open"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "confdesk.deadline.passed"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "confdesk.letter.issue"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "registration_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "counted_from": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Day 0: the registration (or correction request) date in the business calendar, whatever the hour."
+            },
+            "business_days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60,
+              "description": "Must equal the desk's own rule."
+            },
+            "counted_days": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Calendar date YYYY-MM-DD in the business calendar's time zone."
+              },
+              "maxItems": 60,
+              "minItems": 1,
+              "description": "The Monday-Friday non-holiday dates counted, in order."
+            },
+            "skipped_holidays": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Calendar date YYYY-MM-DD in the business calendar's time zone."
+              },
+              "maxItems": 60,
+              "description": "Weekday holidays passed over while counting."
+            },
+            "due_on": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "The last counted day; the event is applied on or after this date."
+            }
+          },
+          "required": [
+            "registration_id",
+            "counted_from",
+            "business_days",
+            "counted_days",
+            "skipped_holidays",
+            "due_on"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "confdesk.correction.issue"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "registration_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "counted_from": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "Day 0: the registration (or correction request) date in the business calendar, whatever the hour."
+            },
+            "business_days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60,
+              "description": "Must equal the desk's own rule."
+            },
+            "counted_days": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Calendar date YYYY-MM-DD in the business calendar's time zone."
+              },
+              "maxItems": 60,
+              "minItems": 1,
+              "description": "The Monday-Friday non-holiday dates counted, in order."
+            },
+            "skipped_holidays": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "description": "Calendar date YYYY-MM-DD in the business calendar's time zone."
+              },
+              "maxItems": 60,
+              "description": "Weekday holidays passed over while counting."
+            },
+            "due_on": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+              "description": "The last counted day; the event is applied on or after this date."
+            }
+          },
+          "required": [
+            "registration_id",
+            "counted_from",
+            "business_days",
+            "counted_days",
+            "skipped_holidays",
+            "due_on"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}
