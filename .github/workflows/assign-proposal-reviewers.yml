@@ -3,15 +3,16 @@ name: Assign proposal reviewers
 on:
   pull_request_target:
     branches: [main]
-    types: [opened, edited, synchronize, reopened, ready_for_review, labeled, unlabeled]
+    types: [opened, edited, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
     paths:
       - .github/review-policy.json
       - .github/workflows/assign-proposal-reviewers.yml
       - scripts/assign_proposal_reviewers.py
+      - scripts/review_identity.py
   schedule:
-    - cron: '41 * * * *'
+    - cron: '41 */6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -20,7 +21,8 @@ permissions:
   issues: read
 
 concurrency:
-  group: proposal-review-routing
+  group: proposal-automation-writer
+  queue: max
   cancel-in-progress: false
 
 jobs:

@@ -86,6 +86,8 @@ For a proposed App package layout, locally testable Mail/Calendar examples and d
 
 Start with a realistic user situation and a clear personalization idea. The proposal should help reviewers understand the person, the story and what makes the task interesting.
 
+**Final delivery format:** use [LifePack v1.0](docs/lifepack-task-format.md) for the completed task package, context, grading and run evidence. A proposal describes this work; the runnable package follows plan approval in the same PR.
+
 - **Domains:** one primary domain and optional secondary domains from the same [domain list](#environment-domains).
 - **User persona and prior history:** the background, preferences and experiences that matter to the task.
 - **Story outline:** what the user wants, what happens or changes, and what a good outcome looks like. Include a rough time span only if relevant.

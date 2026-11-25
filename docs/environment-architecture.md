@@ -9,7 +9,7 @@ Keep one implementation per App and one shared runtime. Domains classify workflo
 | App | Business records, transitions, tools, incoming-event effects and App data migrations | Task narrative, global clock scheduling or another App's state |
 | Core | Shared validation, policy enforcement, state commits and lifecycle | Domain-specific migrations or a sample task's date |
 | Messaging | Receiver contracts, trusted bindings, grants and delivery receipts | A second mailbox/calendar or task decisions |
-| Task package (LifePack draft) | Persona, history, timeline, initial workspace, instructions and grading | A separate implementation of each App |
+| Task package ([LifePack v1.0](lifepack-task-format.md)) | Persona, history, timeline, initial workspace, instructions and grading | A separate implementation of each App |
 | Runner / user harness | Loading the task, scheduling sessions/events, user interaction and aligned evidence | App business rules |
 
 The LifePack adapter, global scheduler and user harness are planned components. `examples/scenario.json` is an App event example, not a competing full task format.
