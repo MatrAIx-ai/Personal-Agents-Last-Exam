@@ -1,0 +1,2621 @@
+[
+  {
+    "name": "questshelf.catalog.search",
+    "description": "Search games across catalog or user-owned shelves by platform, genre, tag, max main-story hours, offline support, cross-play platforms, and co-op count.",
+    "read_only": true,
+    "scope": "questshelf.catalog.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "platform": {
+          "enum": [
+            "pc",
+            "handheld",
+            "switch",
+            "ps5",
+            "xbox"
+          ]
+        },
+        "owned_only": {
+          "type": "boolean"
+        },
+        "shelf_status": {
+          "enum": [
+            "backlog",
+            "playing",
+            "completed",
+            "dropped"
+          ]
+        },
+        "genre": {
+          "enum": [
+            "adventure",
+            "puzzle",
+            "coop_action",
+            "action_rpg",
+            "racing",
+            "party",
+            "rpg",
+            "horror",
+            "strategy",
+            "shooter",
+            "sports",
+            "mystery",
+            "roguelite"
+          ]
+        },
+        "tag": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "max_hours": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 500
+        },
+        "max_session_minutes": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 480
+        },
+        "offline_ok": {
+          "type": "boolean"
+        },
+        "cross_play_platforms": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "pc",
+              "handheld",
+              "switch",
+              "ps5",
+              "xbox"
+            ]
+          },
+          "minItems": 2,
+          "maxItems": 5,
+          "uniqueItems": true
+        },
+        "min_coop_players": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "exclude_muted": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "questshelf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "questshelf.game.get",
+    "description": "Read full game metadata, playtime breakdown, tags, asset_ids, MCP resource_uris for cover/HUD preview PNGs, and current user shelf status.",
+    "read_only": true,
+    "scope": "questshelf.game.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "game_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "game_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "questshelf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "game": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            },
+            "genre": {
+              "enum": [
+                "adventure",
+                "puzzle",
+                "coop_action",
+                "action_rpg",
+                "racing",
+                "party",
+                "rpg",
+                "horror",
+                "strategy",
+                "shooter",
+                "sports",
+                "mystery",
+                "roguelite"
+              ]
+            },
+            "platforms": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "pc",
+                  "handheld",
+                  "switch",
+                  "ps5",
+                  "xbox"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 5,
+              "uniqueItems": true
+            },
+            "cross_play_platforms": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "pc",
+                  "handheld",
+                  "switch",
+                  "ps5",
+                  "xbox"
+                ]
+              },
+              "maxItems": 5,
+              "uniqueItems": true
+            },
+            "offline_ok": {
+              "type": "boolean"
+            },
+            "coop_max_players": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 16
+            },
+            "typical_session_minutes": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 480
+            },
+            "playtime_hours": {
+              "type": "object",
+              "properties": {
+                "main": {
+                  "type": "number",
+                  "minimum": 0.5,
+                  "maximum": 500
+                },
+                "main_extra": {
+                  "type": "number",
+                  "minimum": 0.5,
+                  "maximum": 800
+                },
+                "completionist": {
+                  "type": "number",
+                  "minimum": 0.5,
+                  "maximum": 1500
+                }
+              },
+              "required": [
+                "main",
+                "main_extra",
+                "completionist"
+              ],
+              "additionalProperties": false
+            },
+            "critic_rating": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "hud_font_pt": {
+              "type": "integer",
+              "minimum": 6,
+              "maximum": 36
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "maxItems": 30,
+              "uniqueItems": true
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            "asset_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 16,
+              "uniqueItems": true
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "genre",
+            "platforms",
+            "cross_play_platforms",
+            "offline_ok",
+            "coop_max_players",
+            "typical_session_minutes",
+            "playtime_hours",
+            "critic_rating",
+            "hud_font_pt",
+            "tags",
+            "summary",
+            "asset_ids",
+            "updated_at"
+          ],
+          "additionalProperties": false
+        },
+        "shelf_entry": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "game_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "status": {
+                  "enum": [
+                    "backlog",
+                    "playing",
+                    "completed",
+                    "dropped"
+                  ]
+                },
+                "owned_platforms": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "pc",
+                      "handheld",
+                      "switch",
+                      "ps5",
+                      "xbox"
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 5,
+                  "uniqueItems": true
+                },
+                "hours_logged": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 5000
+                },
+                "rating": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "drop_reasons": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "first_person_motion_sickness",
+                      "horror",
+                      "tiny_ui_text",
+                      "excessive_grind",
+                      "too_long",
+                      "no_offline_mode",
+                      "other"
+                    ]
+                  },
+                  "maxItems": 10,
+                  "uniqueItems": true
+                },
+                "note": {
+                  "type": "string",
+                  "maxLength": 400
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "game_id",
+                "status",
+                "owned_platforms",
+                "hours_logged",
+                "rating",
+                "drop_reasons",
+                "note",
+                "updated_at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "resource_uris": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "game",
+        "shelf_entry",
+        "resource_uris"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "questshelf.asset.read",
+    "description": "Read a verified cover/HUD visual preview PNG belonging to a game via Core ctx.assets.read.",
+    "read_only": true,
+    "scope": "questshelf.asset.read",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "game_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "asset_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "game_id",
+        "asset_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "questshelf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "file": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "file"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "questshelf.shelf.list",
+    "description": "List the user's cross-platform game shelf entries, optionally filtered by status.",
+    "read_only": true,
+    "scope": "questshelf.shelf.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "backlog",
+            "playing",
+            "completed",
+            "dropped"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "questshelf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "shelves": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "game_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "status": {
+                "enum": [
+                  "backlog",
+                  "playing",
+                  "completed",
+                  "dropped"
+                ]
+              },
+              "owned_platforms": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "pc",
+                    "handheld",
+                    "switch",
+                    "ps5",
+                    "xbox"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 5,
+                "uniqueItems": true
+              },
+              "hours_logged": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 5000
+              },
+              "rating": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "drop_reasons": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "first_person_motion_sickness",
+                    "horror",
+                    "tiny_ui_text",
+                    "excessive_grind",
+                    "too_long",
+                    "no_offline_mode",
+                    "other"
+                  ]
+                },
+                "maxItems": 10,
+                "uniqueItems": true
+              },
+              "note": {
+                "type": "string",
+                "maxLength": 400
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "game_id",
+              "status",
+              "owned_platforms",
+              "hours_logged",
+              "rating",
+              "drop_reasons",
+              "note",
+              "updated_at"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "shelves"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "questshelf.preferences.get",
+    "description": "Read the user's preferred platforms, muted tags, not-interested game IDs, avoid reasons, and HUD readability threshold.",
+    "read_only": true,
+    "scope": "questshelf.preferences.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "questshelf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "preferred_platforms": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "pc",
+                  "handheld",
+                  "switch",
+                  "ps5",
+                  "xbox"
+                ]
+              },
+              "maxItems": 5,
+              "uniqueItems": true
+            },
+            "muted_tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "maxItems": 40,
+              "uniqueItems": true
+            },
+            "not_interested": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 200,
+              "uniqueItems": true
+            },
+            "avoid_reasons": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "first_person_motion_sickness",
+                  "horror",
+                  "tiny_ui_text",
+                  "excessive_grind",
+                  "too_long",
+                  "no_offline_mode",
+                  "other"
+                ]
+              },
+              "maxItems": 10,
+              "uniqueItems": true
+            },
+            "min_hud_font_pt": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 6,
+                  "maximum": 36
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "preferred_platforms",
+            "muted_tags",
+            "not_interested",
+            "avoid_reasons",
+            "min_hud_font_pt",
+            "updated_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preferences"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "questshelf.recommend.rank",
+    "description": "Deterministically rank candidate games using shelf preferences, drop-reason penalties, muted tags, not-interested exclusions, and runtime constraints (including optional friend cross-play matching).",
+    "read_only": true,
+    "scope": "questshelf.recommend.rank",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "pool": {
+          "enum": [
+            "backlog",
+            "catalog",
+            "unplayed"
+          ]
+        },
+        "platform": {
+          "enum": [
+            "pc",
+            "handheld",
+            "switch",
+            "ps5",
+            "xbox"
+          ]
+        },
+        "max_hours": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 500
+        },
+        "max_session_minutes": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 480
+        },
+        "offline_ok": {
+          "type": "boolean"
+        },
+        "with_friend_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "questshelf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "recommendations"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "questshelf.friends.list",
+    "description": "List friend profiles, their platforms, and their owned games for co-op matching.",
+    "read_only": true,
+    "scope": "questshelf.friends.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "questshelf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "friends": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "friend_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "platforms": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "pc",
+                    "handheld",
+                    "switch",
+                    "ps5",
+                    "xbox"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 5,
+                "uniqueItems": true
+              },
+              "owned_games": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "game_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "platform": {
+                      "enum": [
+                        "pc",
+                        "handheld",
+                        "switch",
+                        "ps5",
+                        "xbox"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "game_id",
+                    "platform"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 200
+              }
+            },
+            "required": [
+              "friend_id",
+              "name",
+              "platforms",
+              "owned_games"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "friends"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "questshelf.poll.list",
+    "description": "List open and closed game-night polls. Polls past closes_at without poll.close remain status='open' with voting_expired=true.",
+    "read_only": true,
+    "scope": "questshelf.poll.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "open",
+            "closed"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "questshelf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "polls": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "poll_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "closed"
+                ]
+              },
+              "candidate_game_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "minItems": 1,
+                "maxItems": 10,
+                "uniqueItems": true
+              },
+              "invited_friend_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "maxItems": 20,
+                "uniqueItems": true
+              },
+              "max_session_minutes": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 10,
+                    "maximum": 480
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "votes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "voter_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "selected_game_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "maxItems": 10,
+                      "uniqueItems": true
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 300
+                    },
+                    "voted_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "voter_id",
+                    "selected_game_ids",
+                    "note",
+                    "voted_at"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 50
+              },
+              "winner_game_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "maxItems": 10,
+                "uniqueItems": true
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "closes_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "closed_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "voting_expired": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "poll_id",
+              "title",
+              "status",
+              "candidate_game_ids",
+              "invited_friend_ids",
+              "max_session_minutes",
+              "votes",
+              "winner_game_ids",
+              "created_at",
+              "closes_at",
+              "closed_at",
+              "voting_expired"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "polls"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "questshelf.shelf.upsert",
+    "description": "Create or update a user's shelf entry (backlog, playing, completed, dropped). Structured drop_reasons automatically enrich negative-feedback preferences.",
+    "read_only": false,
+    "scope": "questshelf.shelf.upsert",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "game_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "status": {
+          "enum": [
+            "backlog",
+            "playing",
+            "completed",
+            "dropped"
+          ]
+        },
+        "owned_platforms": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "pc",
+              "handheld",
+              "switch",
+              "ps5",
+              "xbox"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 5,
+          "uniqueItems": true
+        },
+        "hours_logged": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5000
+        },
+        "rating": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "drop_reasons": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "first_person_motion_sickness",
+              "horror",
+              "tiny_ui_text",
+              "excessive_grind",
+              "too_long",
+              "no_offline_mode",
+              "other"
+            ]
+          },
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "game_id",
+        "status",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "questshelf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "entry": {
+          "type": "object",
+          "properties": {
+            "game_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "backlog",
+                "playing",
+                "completed",
+                "dropped"
+              ]
+            },
+            "owned_platforms": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "pc",
+                  "handheld",
+                  "switch",
+                  "ps5",
+                  "xbox"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 5,
+              "uniqueItems": true
+            },
+            "hours_logged": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 5000
+            },
+            "rating": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "drop_reasons": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "first_person_motion_sickness",
+                  "horror",
+                  "tiny_ui_text",
+                  "excessive_grind",
+                  "too_long",
+                  "no_offline_mode",
+                  "other"
+                ]
+              },
+              "maxItems": 10,
+              "uniqueItems": true
+            },
+            "note": {
+              "type": "string",
+              "maxLength": 400
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "game_id",
+            "status",
+            "owned_platforms",
+            "hours_logged",
+            "rating",
+            "drop_reasons",
+            "note",
+            "updated_at"
+          ],
+          "additionalProperties": false
+        },
+        "avoid_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "entry",
+        "avoid_reasons"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "questshelf.preferences.update",
+    "description": "Update preferred platforms, muted tags, not-interested game IDs, avoid reasons, or minimum HUD font size.",
+    "read_only": false,
+    "scope": "questshelf.preferences.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "preferred_platforms": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "pc",
+              "handheld",
+              "switch",
+              "ps5",
+              "xbox"
+            ]
+          },
+          "maxItems": 5,
+          "uniqueItems": true
+        },
+        "muted_tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "maxItems": 40,
+          "uniqueItems": true
+        },
+        "not_interested": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 200,
+          "uniqueItems": true
+        },
+        "avoid_reasons": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "first_person_motion_sickness",
+              "horror",
+              "tiny_ui_text",
+              "excessive_grind",
+              "too_long",
+              "no_offline_mode",
+              "other"
+            ]
+          },
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "min_hud_font_pt": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 6,
+              "maximum": 36
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "questshelf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "preferred_platforms": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "pc",
+                  "handheld",
+                  "switch",
+                  "ps5",
+                  "xbox"
+                ]
+              },
+              "maxItems": 5,
+              "uniqueItems": true
+            },
+            "muted_tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "maxItems": 40,
+              "uniqueItems": true
+            },
+            "not_interested": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 200,
+              "uniqueItems": true
+            },
+            "avoid_reasons": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "first_person_motion_sickness",
+                  "horror",
+                  "tiny_ui_text",
+                  "excessive_grind",
+                  "too_long",
+                  "no_offline_mode",
+                  "other"
+                ]
+              },
+              "maxItems": 10,
+              "uniqueItems": true
+            },
+            "min_hud_font_pt": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 6,
+                  "maximum": 36
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "preferred_platforms",
+            "muted_tags",
+            "not_interested",
+            "avoid_reasons",
+            "min_hud_font_pt",
+            "updated_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preferences"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "questshelf.poll.create",
+    "description": "Create a new game-night poll with validated candidate games and invited friends (at most one open poll per account).",
+    "read_only": false,
+    "scope": "questshelf.poll.create",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "poll_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "candidate_game_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "minItems": 1,
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "invited_friend_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 20,
+          "uniqueItems": true
+        },
+        "max_session_minutes": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 480
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "closes_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "title",
+        "candidate_game_ids",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "questshelf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "poll": {
+          "type": "object",
+          "properties": {
+            "poll_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "status": {
+              "enum": [
+                "open",
+                "closed"
+              ]
+            },
+            "candidate_game_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "minItems": 1,
+              "maxItems": 10,
+              "uniqueItems": true
+            },
+            "invited_friend_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 20,
+              "uniqueItems": true
+            },
+            "max_session_minutes": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 10,
+                  "maximum": 480
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "votes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "voter_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "selected_game_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "maxItems": 10,
+                    "uniqueItems": true
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  "voted_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "voter_id",
+                  "selected_game_ids",
+                  "note",
+                  "voted_at"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 50
+            },
+            "winner_game_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 10,
+              "uniqueItems": true
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closes_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "closed_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "poll_id",
+            "title",
+            "status",
+            "candidate_game_ids",
+            "invited_friend_ids",
+            "max_session_minutes",
+            "votes",
+            "winner_game_ids",
+            "created_at",
+            "closes_at",
+            "closed_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "poll"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "questshelf.poll.update",
+    "description": "Update title, candidate games, invited friends, max session minutes, or closing time on an open poll.",
+    "read_only": false,
+    "scope": "questshelf.poll.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "poll_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "candidate_game_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "minItems": 1,
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "invited_friend_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 20,
+          "uniqueItems": true
+        },
+        "max_session_minutes": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 480
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "closes_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "poll_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "questshelf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "poll": {
+          "type": "object",
+          "properties": {
+            "poll_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "status": {
+              "enum": [
+                "open",
+                "closed"
+              ]
+            },
+            "candidate_game_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "minItems": 1,
+              "maxItems": 10,
+              "uniqueItems": true
+            },
+            "invited_friend_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 20,
+              "uniqueItems": true
+            },
+            "max_session_minutes": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 10,
+                  "maximum": 480
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "votes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "voter_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "selected_game_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "maxItems": 10,
+                    "uniqueItems": true
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  "voted_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "voter_id",
+                  "selected_game_ids",
+                  "note",
+                  "voted_at"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 50
+            },
+            "winner_game_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 10,
+              "uniqueItems": true
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closes_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "closed_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "poll_id",
+            "title",
+            "status",
+            "candidate_game_ids",
+            "invited_friend_ids",
+            "max_session_minutes",
+            "votes",
+            "winner_game_ids",
+            "created_at",
+            "closes_at",
+            "closed_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "poll"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "questshelf.poll.vote",
+    "description": "Cast or update the current user's vote on an open game-night poll (voting twice updates rather than duplicates).",
+    "read_only": false,
+    "scope": "questshelf.poll.vote",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "poll_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "selected_game_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "minItems": 1,
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "poll_id",
+        "selected_game_ids",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "questshelf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "poll": {
+          "type": "object",
+          "properties": {
+            "poll_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "status": {
+              "enum": [
+                "open",
+                "closed"
+              ]
+            },
+            "candidate_game_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "minItems": 1,
+              "maxItems": 10,
+              "uniqueItems": true
+            },
+            "invited_friend_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 20,
+              "uniqueItems": true
+            },
+            "max_session_minutes": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 10,
+                  "maximum": 480
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "votes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "voter_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "selected_game_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "maxItems": 10,
+                    "uniqueItems": true
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  "voted_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "voter_id",
+                  "selected_game_ids",
+                  "note",
+                  "voted_at"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 50
+            },
+            "winner_game_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 10,
+              "uniqueItems": true
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closes_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "closed_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "poll_id",
+            "title",
+            "status",
+            "candidate_game_ids",
+            "invited_friend_ids",
+            "max_session_minutes",
+            "votes",
+            "winner_game_ids",
+            "created_at",
+            "closes_at",
+            "closed_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "poll"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "questshelf.poll.close",
+    "description": "Close an open game-night poll and tally winning game IDs deterministically.",
+    "read_only": false,
+    "scope": "questshelf.poll.close",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "poll_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "poll_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "questshelf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "poll": {
+          "type": "object",
+          "properties": {
+            "poll_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "status": {
+              "enum": [
+                "open",
+                "closed"
+              ]
+            },
+            "candidate_game_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "minItems": 1,
+              "maxItems": 10,
+              "uniqueItems": true
+            },
+            "invited_friend_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 20,
+              "uniqueItems": true
+            },
+            "max_session_minutes": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 10,
+                  "maximum": 480
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "votes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "voter_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "selected_game_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "maxItems": 10,
+                    "uniqueItems": true
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  "voted_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "voter_id",
+                  "selected_game_ids",
+                  "note",
+                  "voted_at"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 50
+            },
+            "winner_game_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 10,
+              "uniqueItems": true
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closes_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "closed_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "poll_id",
+            "title",
+            "status",
+            "candidate_game_ids",
+            "invited_friend_ids",
+            "max_session_minutes",
+            "votes",
+            "winner_game_ids",
+            "created_at",
+            "closes_at",
+            "closed_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "poll"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

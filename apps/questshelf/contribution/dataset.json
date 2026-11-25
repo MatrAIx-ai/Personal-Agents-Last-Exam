@@ -1,0 +1,62 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "questshelf-minimal",
+  "version": "1.0.0",
+  "description": "Synthetic cross-platform game catalog, friend libraries, shelves, polls, and PNG HUD/camera preview cards for QuestShelf.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-authored fictional cross-platform game metadata, shelf logs, friend libraries, and poll fixtures.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.0.0",
+        "seed": 42,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "synthetic-previews",
+      "kind": "synthetic",
+      "description": "Programmatically rendered PNG game camera & HUD preview cards via Python Matplotlib/PIL.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "script",
+        "tool": "matplotlib+PIL",
+        "tool_version": "3.x",
+        "seed": 42,
+        "parameters": {
+          "palette_colors": 64
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized ISO timestamps, verified SHA-256 digests, quantized PNGs to <= 1 MiB bundle budget."
+  ],
+  "expected_counts": {
+    "records": 20,
+    "assets": 20
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "reject"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Synthetic local fixtures prepared for v1 validation."
+  }
+}
