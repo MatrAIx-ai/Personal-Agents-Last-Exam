@@ -232,15 +232,21 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
     if (!call || call.decision !== 'deny' || !call.outcome || call.outcome === 'deny') return '';
     return call.outcome;
   }
+  const identity = new Map();
+  function identified(item) {
+    return identity.get(item) || item;
+  }
   function denyCompatible(row, item) {
+    const left = identified(row);
+    const right = identified(item);
     if ((row.tool || '') !== (item.tool || item.name || '')) return false;
     if (String(row.request_id || '') !== String(item.request_id || '')) return false;
     const code = denialCode(row);
     if (code && item.status && code !== item.status) return false;
-    if (row.connection_id && item.connection_id && row.connection_id !== item.connection_id) return false;
-    if (row.client_name && item.client_name && row.client_name !== item.client_name) return false;
-    const rowNamed = Boolean(row.connection_id || row.client_name);
-    const itemNamed = Boolean(item.connection_id || item.client_name);
+    if (left.connection_id && right.connection_id && left.connection_id !== right.connection_id) return false;
+    if (left.client_name && right.client_name && left.client_name !== right.client_name) return false;
+    const rowNamed = Boolean(left.connection_id || left.client_name);
+    const itemNamed = Boolean(right.connection_id || right.client_name);
     if (!row.request_id && !item.request_id && rowNamed !== itemNamed) return false;
     return true;
   }
@@ -252,11 +258,34 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
   function groupKey(item, isRow) {
     const tool = isRow ? (item.tool || '') : (item.tool || item.name || '');
     if (item.request_id) return tool + '\n' + item.request_id;
-    return tool + '\n' + partyKey(item);
+    return tool + '\n' + partyKey(identified(item));
+  }
+  function soleParty(item, pool, itemIsRow) {
+    const hasConn = Boolean(item.connection_id);
+    const hasClient = Boolean(item.client_name);
+    if (hasConn === hasClient) return null;
+    const matches = [];
+    const seen = new Set();
+    for (const other of pool) {
+      if (!other.connection_id || !other.client_name) continue;
+      if (!denyCompatible(itemIsRow ? item : other, itemIsRow ? other : item)) continue;
+      const key = other.connection_id + '\n' + other.client_name;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      matches.push(other);
+    }
+    return matches.length === 1 ? matches[0] : null;
   }
   const denyRows = calls.filter(call => call.seq != null && call.decision === 'deny');
   const denyExecs = agent_executions.filter(item => !['ok', 'committed', 'ready'].includes(item.status));
-  const deniedTools = new Set(denyRows.map(row => row.tool || ''));
+  for (const item of denyExecs) {
+    const party = soleParty(item, denyRows, false);
+    if (party) identity.set(item, {connection_id: party.connection_id, client_name: party.client_name});
+  }
+  for (const row of denyRows) {
+    const party = soleParty(row, denyExecs, true);
+    if (party) identity.set(row, {connection_id: party.connection_id, client_name: party.client_name});
+  }
   const groups = new Map();
   function groupAdd(key, kind, value) {
     if (!groups.has(key)) groups.set(key, {rows: [], execs: []});
@@ -264,8 +293,7 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
   }
   for (const row of denyRows) groupAdd(groupKey(row, true), 'rows', row);
   for (const item of denyExecs) {
-    const tool = item.tool || item.name || '';
-    if (deniedTools.has(tool)) usedExecutions.add(item);
+    if (audit.length) usedExecutions.add(item);
     groupAdd(groupKey(item, false), 'execs', item);
   }
   for (const group of groups.values()) {

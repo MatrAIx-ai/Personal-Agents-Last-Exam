@@ -1486,6 +1486,55 @@ test('task 73 flags every routine and scene change and keeps call arguments', ()
   assert.equal(secondDenied.calls.find(call => call.seq === 3).outcome, 'scope_insufficient');
   assert.equal(secondDenied.calls.filter(call => call.tool === 'brightwire-home.devices.get').length, 3);
   assert.equal(secondDenied.calls.filter(call => call.seq == null).length, 0);
+  const partialName = exportEvidence({
+    snapshot: {
+      data: house.data,
+      audit: [
+        {seq: 1, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'deny', reason: 'invalid_arguments', connection_id: 'conn-1', client_name: 'grader'}
+      ]
+    },
+    agent_executions: [
+      {tool: 'brightwire-home.devices.command', status: 'invalid_arguments', client_name: 'grader', args: {device_id: 'light-hallway', command: 'set_brightness', args: {brightness: 30}}}
+    ]
+  });
+  const partialGrade = task73(partialName);
+  assert.equal(partialGrade.fresh_device_commands.length, 1);
+  assert.equal(partialGrade.fresh_device_commands[0].outcome, 'invalid_arguments');
+  assert.equal(partialGrade.fresh_device_commands[0].target, 'light-hallway');
+  assert.equal(partialGrade.fresh_device_commands[0].command, 'set_brightness');
+  assert.deepEqual(partialGrade.fresh_device_commands[0].arguments, {brightness: 30});
+  const ambiguousName = exportEvidence({
+    snapshot: {
+      data: house.data,
+      audit: [
+        {seq: 1, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'deny', reason: 'invalid_arguments', connection_id: 'conn-1', client_name: 'grader'},
+        {seq: 2, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'deny', reason: 'invalid_arguments', connection_id: 'conn-2', client_name: 'grader'}
+      ]
+    },
+    agent_executions: [
+      {tool: 'brightwire-home.devices.command', status: 'invalid_arguments', client_name: 'grader', args: {device_id: 'light-hallway', command: 'set_brightness', args: {brightness: 30}}}
+    ]
+  });
+  const ambiguousGrade = task73(ambiguousName);
+  assert.equal(ambiguousGrade.fresh_device_commands.length, 2);
+  assert.equal(ambiguousGrade.fresh_device_commands.every(call => call.target === '' && call.command === null), true);
+  const malformed = exportEvidence({
+    snapshot: {
+      data: house.data,
+      audit: [
+        {seq: 1, actor: 'agent', tool: 'brightwire-home.devices.command', decision: 'allow', input: {request_id: 'lamp', device_id: 'light-living', command: 'turn_off'}}
+      ]
+    },
+    agent_executions: [
+      {tool: 'brightwire-home.devices.command', status: 'committed', request_id: 'lamp', args: {device_id: 'light-living', command: 'turn_off'}},
+      {tool: 'brightwire-home.devices.command', status: '-32602', client_name: 'grader', args: {device_id: 'light-hallway', command: 'set_brightness', args: {brightness: 30}}}
+    ]
+  });
+  const malformedGrade = task73(malformed);
+  assert.equal(malformedGrade.fresh_device_commands.length, 1);
+  assert.equal(malformedGrade.fresh_device_commands[0].target, 'light-living');
+  assert.equal(malformedGrade.fresh_device_commands[0].command, 'turn_off');
+  assert.equal(malformed.calls.filter(call => call.seq == null).length, 0);
   const failed = exportEvidence({
     snapshot: {
       data: {
