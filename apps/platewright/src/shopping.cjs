@@ -159,10 +159,12 @@ function addManual(data, input, who) {
   list.lines.push(line);
   return line;
 }
+// A line as a person names it in a message: its ingredient or its text, then its ID.
+const lineLabel = (data, l) => `${l.ingredient_id ? (data.ingredients.find(i => i.id === l.ingredient_id) || {name: l.ingredient_id}).name : l.text} (${l.id})`;
 // needed <-> ticked for any line; needed <-> excluded for derived lines only.
-function tick(line, ticked, who) {
-  if (line.state === 'excluded') fail('invalid_state', `${line.id} is excluded; include it again before ticking it.`);
-  if ((line.state === 'ticked') === ticked) fail('invalid_state', `${line.id} is already ${line.state}.`);
+function tick(data, line, ticked, who) {
+  if (line.state === 'excluded') fail('invalid_state', `${lineLabel(data, line)} is not being bought; put it back on the list before ticking it.`);
+  if ((line.state === 'ticked') === ticked) fail('invalid_state', `${lineLabel(data, line)} is already ${line.state}.`);
   line.state = ticked ? 'ticked' : 'needed';
   line.history.push(lineRow(who, ticked ? 'ticked' : 'unticked'));
 }
@@ -181,24 +183,24 @@ function itemSet(ctx, data, args) {
   if (!line) fail('not_found', `There is no line ${args.id} on the list.`);
   if (!itemKeys.length && args.ticked === undefined && args.excluded === undefined) fail('invalid_arguments', 'Nothing to change on the line.');
   if (line.kind === 'derived') {
-    if (itemKeys.length) fail('derived_line', `${line.id} is derived from the plan and changes only when the list is generated again; exclude it or add a manual line.`);
+    if (itemKeys.length) fail('derived_line', `${lineLabel(data, line)} comes from the plan and changes only when the list is generated again; exclude it or add a manual line.`);
     if (args.excluded !== undefined) {
-      if (line.state === 'ticked') fail('invalid_state', `${line.id} is ticked; untick it before excluding it.`);
-      if ((line.state === 'excluded') === args.excluded) fail('invalid_state', `${line.id} is already ${line.state}.`);
+      if (line.state === 'ticked') fail('invalid_state', `${lineLabel(data, line)} is ticked; untick it before excluding it.`);
+      if ((line.state === 'excluded') === args.excluded) fail('invalid_state', `${lineLabel(data, line)} is already ${line.state}.`);
       if (args.excluded && !(args.reason && args.reason.trim())) fail('invalid_arguments', 'Excluding a derived line needs a reason.');
       line.state = args.excluded ? 'excluded' : 'needed';
       line.excluded_reason = args.excluded ? args.reason.trim() : null;
       line.history.push(lineRow(who, args.excluded ? 'excluded' : 'included'));
-    } else tick(line, args.ticked, who);
+    } else tick(data, line, args.ticked, who);
     return {id: line.id, state: line.state, kind: 'derived'};
   }
-  if (args.excluded !== undefined) fail('invalid_state', `${line.id} is a manual line; remove it instead of excluding it.`);
+  if (args.excluded !== undefined) fail('invalid_state', `${lineLabel(data, line)} was added by hand; remove it instead of excluding it.`);
   const fields = itemKeys.length ? manualFields(data, args, line) : null;
   if (args.ticked !== undefined) {
-    if (line.state === 'ticked' === args.ticked) fail('invalid_state', `${line.id} is already ${line.state}.`);
+    if (line.state === 'ticked' === args.ticked) fail('invalid_state', `${lineLabel(data, line)} is already ${line.state}.`);
   }
   if (fields) { Object.assign(line, fields); line.history.push(lineRow(who, 'changed')); }
-  if (args.ticked !== undefined) tick(line, args.ticked, who);
+  if (args.ticked !== undefined) tick(data, line, args.ticked, who);
   return {id: line.id, state: line.state, kind: 'manual'};
 }
 
@@ -206,7 +208,7 @@ function itemRemove(ctx, data, args) {
   const list = needList(data);
   const line = list.lines.find(l => l.id === args.id);
   if (!line) fail('not_found', `There is no line ${args.id} on the list.`);
-  if (line.kind === 'derived') fail('derived_line', `${line.id} is derived from the plan; exclude it with a reason instead of removing it.`);
+  if (line.kind === 'derived') fail('derived_line', `${lineLabel(data, line)} comes from the plan; exclude it with a reason instead of removing it.`);
   list.lines = list.lines.filter(l => l.id !== line.id);
   return {id: line.id, state: 'removed', kind: 'manual'};
 }

@@ -58,7 +58,7 @@ function target(data, input) {
 
 function dates(from, to) {
   for (const d of [from, to]) if (d !== null && !c.isDate(d)) fail('invalid_arguments', `${d} is not a calendar date.`);
-  if (from !== null && to !== null && to < from) fail('invalid_window', `expires_on ${to} is before effective_from ${from}.`);
+  if (from !== null && to !== null && to < from) fail('invalid_window', `The end date (${c.dateText(to)}) is before the start date (${c.dateText(from)}).`);
 }
 
 // Guests carry a name and constraints of the same five kinds, without dates.

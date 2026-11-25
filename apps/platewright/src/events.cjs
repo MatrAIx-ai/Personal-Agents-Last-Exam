@@ -15,18 +15,23 @@ const {fail, copy} = c;
 const nameOf = (data, id) => (id ? data.members.find(m => m.person_id === id).display_name : 'A household member');
 const ingName = (data, id) => data.ingredients.find(i => i.id === id).name;
 
+// Notification text is read by people (in the App's activity) as well as by the Agent, so it names
+// things the way a person would: ingredient names, "dinner on Sat 14 Nov 2026", no record IDs.
+const AMOUNT = {kcal: 'kcal', protein_g: 'g protein', carbs_g: 'g carbohydrate', fat_g: 'g fat', sodium_mg: 'mg sodium'};
+const DIET_WORDS = {gluten_free: 'gluten-free', lactose_free: 'lactose-free'};
 function describe(data, con) {
   const what = {
-    allergy: () => `${con.strict ? 'strict ' : ''}allergy to ${con.allergen}`,
-    medical: () => `medical restriction on ${con.ingredient_id ? ingName(data, con.ingredient_id) : con.flag}`,
-    diet: () => `${con.diet} diet`,
-    limit: () => `limit of ${con.max} ${con.nutrient} per meal`,
-    dislike: () => `dislike of ${con.ingredient_id ? ingName(data, con.ingredient_id) : con.tag}`
+    allergy: () => `${con.strict ? 'strict ' : ''}allergy to ${c.words(con.allergen)}`,
+    medical: () => `medical restriction on ${con.ingredient_id ? ingName(data, con.ingredient_id).toLowerCase() : c.words(con.flag)}`,
+    diet: () => `${DIET_WORDS[con.diet] || c.words(con.diet)} diet`,
+    limit: () => `limit of ${con.max} ${AMOUNT[con.nutrient]} per meal`,
+    dislike: () => `dislike of ${con.ingredient_id ? ingName(data, con.ingredient_id).toLowerCase() : c.words(con.tag)}`
   }[con.kind]();
-  const from = con.effective_from ? ` from ${con.effective_from}` : '';
-  const to = con.expires_on ? ` until ${con.expires_on}` : '';
+  const from = con.effective_from ? ` from ${c.dateText(con.effective_from)}` : '';
+  const to = con.expires_on ? ` until ${c.dateText(con.expires_on)}` : '';
   return what + from + to;
 }
+const meal = slot => c.slotText(slot.id);
 
 // "Evan added a constraint" when Evan acts for himself, "Nora added a constraint for Evan" otherwise.
 const aConstraint = (who, m, own) => (who.by === m.person_id ? own : 'a constraint for ' + m.display_name);
@@ -52,14 +57,14 @@ const HANDLERS = {
   'plan.changed'(data, p, who, today) {
     const slot = P.setSlot(data, p.id, {dishes: p.action === 'clear' ? [] : p.dishes, attendees: p.attendees, guests: p.guests, note: p.note}, who, today);
     const titles = slot.dishes.map(d => data.recipes.find(r => r.id === d.recipe_id).title);
-    return {object_id: slot.id, title: `${nameOf(data, who.by)} ${p.action === 'clear' ? 'cleared' : 'changed'} ${slot.meal} on ${slot.date}`,
-      body: p.action === 'clear' ? `Nothing is planned for ${slot.id} any more.` : `${slot.id}: ${titles.join(', ')}.`};
+    return {object_id: slot.id, title: `${nameOf(data, who.by)} ${p.action === 'clear' ? 'cleared' : 'changed'} ${meal(slot)}`,
+      body: p.action === 'clear' ? `Nothing is planned for ${meal(slot)} any more.` : `Now planned for ${meal(slot)}: ${titles.join(', ')}.`};
   },
   'guest.changed'(data, p, who, today) {
     const slot = P.slotOf(data, p.id);
-    if (!slot) fail('not_found', `There is no slot ${p.id}.`);
-    if (slot.date < today) fail('past_slot', `${slot.id} has passed.`);
-    if (slot.state !== 'planned') fail('invalid_state', `${slot.id} is ${slot.state}; guests change only on a planned slot.`);
+    if (!slot) fail('not_found', `Nothing is planned for ${c.slotText(p.id)}.`);
+    if (slot.date < today) fail('past_slot', `The ${meal(slot)} has passed.`);
+    if (slot.state !== 'planned') fail('invalid_state', `The ${meal(slot)} is ${slot.state}; guests change only on a planned meal.`);
     let action, guestName;
     if (p.action === 'set') {
       const [guest] = H.normalizeGuests(data, [p.guest]);
@@ -69,7 +74,7 @@ const HANDLERS = {
       guestName = guest.name;
     } else {
       const guest = slot.guests.find(g => g.guest_id === p.guest_id);
-      if (!guest) fail('not_found', `${p.guest_id} is not a guest at ${slot.id}.`);
+      if (!guest) fail('not_found', `Guest ${p.guest_id} is not coming to ${meal(slot)}.`);
       slot.guests = slot.guests.filter(g => g.guest_id !== p.guest_id);
       action = 'guest_removed';
       guestName = guest.name;
@@ -78,7 +83,7 @@ const HANDLERS = {
     slot.history.push({at: who.at, actor: who.actor, by: who.by, action, request_id: null, event_id: who.event_id,
       dishes: copy(slot.dishes), attendees: copy(slot.attendees), guest_ids: slot.guests.map(g => g.guest_id)});
     const verb = {guest_added: 'is coming to', guest_changed: 'changed their needs for', guest_removed: 'is no longer coming to'}[action];
-    return {object_id: slot.id, title: `Guest update for ${slot.meal} on ${slot.date}`, body: `${guestName} ${verb} ${slot.id}.`};
+    return {object_id: slot.id, title: `Guest update for ${meal(slot)}`, body: `${guestName} ${verb} ${meal(slot)}.`};
   },
   'pantry.changed'(data, p, who) {
     const seen = new Set();
@@ -88,7 +93,7 @@ const HANDLERS = {
       Pantry.check(data, item);
     }
     for (const item of p.items) Pantry.apply(data, item, who, 'event');
-    const text = p.items.map(i => `${ingName(data, i.ingredient_id)} ${i.quantity} ${i.unit}`).join(', ');
+    const text = p.items.map(i => `${ingName(data, i.ingredient_id)} ${c.quantityText(i.quantity, i.unit)}`).join(', ');
     return {object_id: 'pantry', title: `${nameOf(data, who.by)} updated the pantry`, body: `${text}.${p.note ? ' Note: ' + p.note : ''}`};
   },
   'shopping.changed'(data, p, who) {
@@ -96,13 +101,13 @@ const HANDLERS = {
     if (p.action === 'tick') {
       const line = list.lines.find(l => l.id === p.line_id);
       if (!line) fail('not_found', `There is no line ${p.line_id} on the list.`);
-      S.tick(line, true, who);
+      S.tick(data, line, true, who);
       return {object_id: line.id, title: `${nameOf(data, who.by)} ticked a shopping line`,
         body: `${line.ingredient_id ? ingName(data, line.ingredient_id) : line.text} is bought.`};
     }
     const line = S.addManual(data, {ingredient_id: p.ingredient_id, text: p.text, quantity: p.quantity, unit: p.unit}, who);
     return {object_id: line.id, title: `${nameOf(data, who.by)} added a shopping line`,
-      body: `${line.text || ingName(data, line.ingredient_id)}${line.quantity !== null ? ' ' + line.quantity + (line.unit ? ' ' + line.unit : '') : ''}.`};
+      body: `${line.text || ingName(data, line.ingredient_id)}${line.quantity !== null ? ' ' + c.quantityText(line.quantity, line.unit) : ''}.`};
   }
 };
 

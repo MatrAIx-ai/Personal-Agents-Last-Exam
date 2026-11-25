@@ -18,7 +18,7 @@ function notify(data, {at, kind, event_id, by, object_id, title, body}) {
 function list(ctx, data, args) {
   const zone = data.household.time_zone;
   for (const d of [args.start, args.end]) if (d !== undefined && !c.isDate(d)) c.fail('invalid_arguments', `${d} is not a calendar date.`);
-  if (args.start && args.end && args.end < args.start) c.fail('invalid_window', `The window ends (${args.end}) before it starts (${args.start}).`);
+  if (args.start && args.end && args.end < args.start) c.fail('invalid_window', `The window ends on ${c.dateText(args.end)}, before it starts on ${c.dateText(args.start)}.`);
   const rows = data.notifications.filter(n => {
     const day = c.localDate(n.at, zone);
     return (!args.start || day >= args.start) && (!args.end || day <= args.end) && (!args.kind || n.kind === args.kind);

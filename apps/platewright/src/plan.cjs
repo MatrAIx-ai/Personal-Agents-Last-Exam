@@ -124,7 +124,7 @@ function window(ctx, data, args, maxDays) {
   }
   if (!end) end = c.addDays(start, 6);
   for (const d of [start, end]) if (!c.isDate(d)) fail('invalid_arguments', `${d} is not a calendar date.`);
-  if (end < start) fail('invalid_window', `The window ends (${end}) before it starts (${start}).`);
+  if (end < start) fail('invalid_window', `The window ends on ${c.dateText(end)}, before it starts on ${c.dateText(start)}.`);
   if (c.daysBetween(start, end) + 1 > maxDays) fail('invalid_window', `A window can cover at most ${maxDays} days.`);
   return {start, end};
 }
@@ -144,16 +144,16 @@ function normalizeDishes(data, slotId, slotPos, dishes) {
       return {recipe_id: d.recipe_id, servings: d.servings ?? null};
     }
     const source = slotOf(data, d.leftovers_of);
-    if (!source) fail('leftover_unavailable', `There is no slot ${d.leftovers_of} to take leftovers from.`);
-    if (!before(source, slotPos)) fail('leftover_unavailable', `${d.leftovers_of} is not earlier than ${slotId}.`);
-    if (!['planned', 'cooked'].includes(source.state)) fail('leftover_unavailable', `${d.leftovers_of} is ${source.state}; it leaves no leftovers.`);
+    if (!source) fail('leftover_unavailable', `Nothing is planned for ${c.slotText(d.leftovers_of)} to take leftovers from.`);
+    if (!before(source, slotPos)) fail('leftover_unavailable', `Leftovers must come from an earlier meal; ${c.slotText(d.leftovers_of)} is not earlier than ${c.slotText(slotId)}.`);
+    if (!['planned', 'cooked'].includes(source.state)) fail('leftover_unavailable', `The ${c.slotText(d.leftovers_of)} was ${source.state}; it leaves no leftovers.`);
     const cooked = source.dishes.filter(x => !isLeftover(x));
-    if (!cooked.length) fail('leftover_unavailable', `${d.leftovers_of} is itself only leftovers.`);
+    if (!cooked.length) fail('leftover_unavailable', `The ${c.slotText(d.leftovers_of)} is itself only leftovers.`);
     let recipeId = d.recipe_id;
     if (recipeId === undefined) {
-      if (cooked.length > 1) fail('leftover_unavailable', `${d.leftovers_of} has several dishes; name the recipe_id of the leftovers.`);
+      if (cooked.length > 1) fail('leftover_unavailable', `The ${c.slotText(d.leftovers_of)} has several dishes; name the recipe_id of the leftovers.`);
       recipeId = cooked[0].recipe_id;
-    } else if (!cooked.some(x => x.recipe_id === recipeId)) fail('leftover_unavailable', `${d.leftovers_of} did not plan ${recipeId}.`);
+    } else if (!cooked.some(x => x.recipe_id === recipeId)) fail('leftover_unavailable', `The ${c.slotText(d.leftovers_of)} did not plan recipe ${recipeId}.`);
     if (!(d.portions > 0) || !Number.isFinite(d.portions)) fail('invalid_quantity', 'Leftover portions must be positive.');
     return {leftovers_of: source.id, recipe_id: recipeId, portions: d.portions};
   });
@@ -168,11 +168,11 @@ function historyRow(who, action, slot) {
 // dishes = [] clears the slot. Returns the slot.
 function setSlot(data, id, input, who, todayDate) {
   const pos = parseSlotId(id), existing = slotOf(data, id);
-  if (pos.date < todayDate) fail('past_slot', `${id} has passed; past slots cannot be set or cleared.`);
-  if (existing && existing.state === 'cooked') fail('invalid_state', `${id} was cooked and cannot change.`);
+  if (pos.date < todayDate) fail('past_slot', `The ${c.slotText(id)} has passed; past meals cannot be planned or cleared.`);
+  if (existing && existing.state === 'cooked') fail('invalid_state', `The ${c.slotText(id)} was cooked and cannot change.`);
   if (!input.dishes.length) {
-    if (!existing) fail('not_found', `There is no slot ${id} to clear.`);
-    if (existing.state !== 'planned') fail('invalid_state', `${id} is ${existing.state}; only a planned slot can be cleared.`);
+    if (!existing) fail('not_found', `Nothing is planned for ${c.slotText(id)}, so there is nothing to clear.`);
+    if (existing.state !== 'planned') fail('invalid_state', `The ${c.slotText(id)} is ${existing.state}; only a planned meal can be cleared.`);
     existing.state = 'cleared';
     existing.dishes = [];
     existing.updated_at = who.at;
@@ -222,8 +222,8 @@ function deduct(data, slot) {
 
 function markTool(ctx, data, args) {
   const slot = slotOf(data, args.id), t = c.today(ctx, data);
-  if (!slot) fail('not_found', `There is no slot ${args.id}.`);
-  if (slot.state !== 'planned') fail('invalid_state', `${slot.id} is ${slot.state}; only a planned slot can be marked.`);
+  if (!slot) fail('not_found', `Nothing is planned for ${c.slotText(args.id)}.`);
+  if (slot.state !== 'planned') fail('invalid_state', `The ${c.slotText(slot.id)} is ${slot.state}; only a planned meal can be marked.`);
   const who = agentWho(ctx, data, args);
   if (args.status === 'skipped') {
     if (args.portions || args.deduct_pantry) fail('invalid_arguments', 'Portions and pantry deduction apply only to a cooked slot.');
@@ -232,11 +232,11 @@ function markTool(ctx, data, args) {
     slot.history.push(historyRow(who, 'skipped', slot));
     return {id: slot.id, state: 'skipped', portions: [], deducted: false, short: []};
   }
-  if (slot.date > t) fail('not_yet', `${slot.id} is in the future; it cannot be marked cooked before its date.`);
+  if (slot.date > t) fail('not_yet', `The ${c.slotText(slot.id)} is still to come; it cannot be marked cooked before its date.`);
   const recipeDishes = slot.dishes.filter(d => !isLeftover(d));
   const given = new Map();
   for (const p of args.portions || []) {
-    if (!recipeDishes.some(d => d.recipe_id === p.recipe_id)) fail('invalid_arguments', `${p.recipe_id} is not a dish cooked in ${slot.id}.`);
+    if (!recipeDishes.some(d => d.recipe_id === p.recipe_id)) fail('invalid_arguments', `Recipe ${p.recipe_id} is not a dish cooked at the ${c.slotText(slot.id)}.`);
     if (given.has(p.recipe_id)) fail('invalid_arguments', `${p.recipe_id} is listed twice.`);
     given.set(p.recipe_id, p);
   }

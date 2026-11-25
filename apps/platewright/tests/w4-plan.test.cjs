@@ -181,3 +181,18 @@ test('T11 a limit that cannot be checked shows on the slot as limit_unchecked, n
   assert.deepEqual(slotOf(f, '2026-11-10:dinner').flags.map(x => [x.type, x.id, x.nutrient]), [['limit_unchecked', 'guest-ruth', 'sodium_mg']]);
   assert.deepEqual(require('../plugin.cjs').flagsFromSnapshot(f.data)['2026-11-10:dinner'], slotOf(f, '2026-11-10:dinner').flags);
 });
+
+test('refusals a person can meet in the web interface name meals and dates in words', () => {
+  const {unreadable} = require('../scripts/check-fixtures.cjs');
+  const f = fixture({seed: require('../fixtures/reference.json')});
+  const messages = [
+    f.message(P + 'plan.slot.set', {id: '2026-11-05:dinner', dishes: [{recipe_id: 'rec-dal'}]}),
+    f.message(P + 'plan.slot.set', {id: '2026-11-14:lunch', dishes: [{leftovers_of: '2026-11-14:dinner', portions: 2}]}),
+    f.message(P + 'plan.slot.set', {id: '2026-11-16:lunch', dishes: [{leftovers_of: '2026-11-09:breakfast', portions: 2}]}),
+    f.message(P + 'plan.slot.mark', {id: '2026-11-14:dinner', status: 'cooked'}),
+    f.message(P + 'members.constraint.set', {id: 'person-evan', constraint: {kind: 'dislike', tag: 'spicy', effective_from: '2026-11-20', expires_on: '2026-11-10', note: 'x'}}),
+    f.message(P + 'shopping.generate', {start: '2026-11-20', end: '2026-11-10'}),
+    f.message(P + 'plan.get', {start: '2026-11-20', end: '2026-11-10'})];
+  assert.ok(messages.every(Boolean), JSON.stringify(messages));
+  assert.deepEqual(messages.map(unreadable).filter(Boolean), []);
+});

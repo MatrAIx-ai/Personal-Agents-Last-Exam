@@ -17,6 +17,7 @@ const TOOLS={
 const ALLERGENS=['milk','egg','fish','crustacean_shellfish','tree_nut','peanut','wheat','soy','sesame'];
 const DIETS=['vegetarian','vegan','pescatarian','gluten_free','lactose_free','no_pork','no_alcohol'];
 const NUTRIENTS={kcal:'kcal',protein_g:'protein (g)',carbs_g:'carbohydrate (g)',fat_g:'fat (g)',sodium_mg:'sodium (mg)'};
+const AMOUNT={kcal:'kcal',protein_g:'g protein',carbs_g:'g carbohydrate',fat_g:'g fat',sodium_mg:'mg sodium'};
 const MEALS=['breakfast','lunch','snack','dinner'];
 const UNITS_BY={mass:['g','kg','oz','lb'],volume:['ml','l','tsp','tbsp','cup','fl_oz'],count:['each']};
 const VERDICT={unsafe:'Unsafe',may_contain:'May contain',unsuitable:'Unsuitable',over_limit:'Over limit',disliked:'Disliked',ok_if_omitted:'OK if omitted',ok:'OK'};
@@ -82,6 +83,7 @@ body[data-pw-view=week] .collection-count,body[data-pw-view=shopping] .collectio
 .pw-checks{display:flex;gap:6px 14px;flex-wrap:wrap}
 .pw-checks label{display:flex;gap:6px;align-items:center;font-size:13px;font-weight:400}
 .pw-checks input{width:auto}
+.pw-inline label.pw-checks{display:flex;flex-direction:row;align-items:center;gap:6px;flex:none;min-width:0;padding-bottom:10px;font-size:13px}
 .pw-subform{border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:10px}
 .pw-subform .pw-inline{margin:0}
 .pw-chip{display:inline-flex;gap:6px;align-items:center;border-radius:6px;background:#f1f3f6;padding:2px 4px 2px 8px;font-size:11px;margin:2px 4px 2px 0}
@@ -89,7 +91,7 @@ body[data-pw-view=week] .collection-count,body[data-pw-view=shopping] .collectio
 .pw-verdicts{display:grid;gap:6px;margin:10px 0}
 .pw-verdicts div{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-size:13px}
 @media(max-width:1150px){body[data-app=platewright] .workspace{grid-template-columns:minmax(0,1fr)}body[data-app=platewright] .detail{border-top:1px solid var(--line)}}
-@media(max-width:760px){body[data-app=platewright] #records{max-height:none}body[data-pw-view=recipes] #records,body[data-pw-view=archived] #records{max-height:360px;overflow:auto}.pw-pane{padding:0 14px 18px}.pw-slot{grid-template-columns:62px minmax(0,1fr)}.pw-slot .pw-state{grid-column:2;justify-self:start}}
+@media(max-width:760px){body[data-app=platewright] #records{max-height:none}body[data-pw-view=recipes] #records,body[data-pw-view=archived] #records{max-height:360px;overflow:auto}.pw-pane{padding:0 14px 18px}.pw-slot{grid-template-columns:76px minmax(0,1fr)}.pw-slot .meal{letter-spacing:.02em;word-break:keep-all}.pw-slot .pw-state{grid-column:2;justify-self:start}}
 `;
 try{const sheet=new CSSStyleSheet();sheet.replaceSync(CSS);document.adoptedStyleSheets=[...document.adoptedStyleSheets,sheet];}catch(e){/* shared styles still apply */}
 
@@ -102,10 +104,25 @@ const dayLabel=(d,o={weekday:'short',day:'numeric',month:'short'})=>new Intl.Dat
 const time=at=>at?dayLabel(at.slice(0,10),{day:'numeric',month:'short',year:'numeric'})+', '+at.slice(11,16):'—';
 const words=s=>String(s??'').replace(/_/g,' ');
 const cap=s=>words(s).replace(/^./,c=>c.toUpperCase());
-const qty=(q,u)=>q==null?'':(Math.round(q*100)/100)+' '+(u==='each'?'':words(u));
+const qty=(q,u)=>q==null?'':(Math.round(q*100)/100)+(u==='each'?'':' '+words(u));
+// Dates and meals are always shown the same way: "20 Nov 2026", "Sat 14 Nov dinner".
+const fullDate=d=>d?dayLabel(d.slice(0,10),{day:'numeric',month:'short',year:'numeric'}):'';
+const slotLabel=id=>dayLabel(String(id).slice(0,10))+' '+String(id).slice(11);
+const plural=(n,one,many=one+'s')=>n+' '+(n===1?one:many);
+const daysLeft=n=>n===0?'last day':n===1?'1 day left':n+' days left';
+// Names for what the tools refer to by ID. The ingredient table cannot change during a run (no tool or
+// event edits it), so it is read once per page load. Recipe titles come from every read that carries
+// them and are read again only when a shown record names a recipe the page has not seen.
+const ingredientNames=new Map(),recipeTitles=new Map();
+const ingredientName=id=>ingredientNames.get(id)||'an ingredient';
+const recipeTitle=id=>recipeTitles.get(id)||'a recipe';
+const learnTitles=rows=>{for(const r of rows||[])if(r?.id&&r.title&&('revision' in r||'variant_of' in r))recipeTitles.set(r.id,r.title);};
 const has=name=>!!UI&&UI.has(name);
 const enumOf=(tool,...path)=>{let s=schemas.get(tool);for(const k of path)s=s&&(k==='[]'?s.items:(s.properties||{})[k]);return s?.enum||s?.items?.enum||[];};
-const memberName=id=>UI?.aux.household?.members.find(m=>m.person_id===id)?.display_name||words(String(id).replace(/^person-/,''));
+// Member names cannot change through any tool or event, so they are kept from the last household read.
+const memberNames=new Map();
+const learnMembers=members=>{for(const m of members||[])memberNames.set(m.person_id,m.display_name);};
+const memberName=id=>memberNames.get(id)||'A household member';
 const button=(label,onclick,extra={})=>el('button',{type:'button',onclick:e=>{e.stopPropagation();Promise.resolve(onclick(e)).catch(err=>UI.error(err));},...extra},label);
 const rerender=()=>UI.navigate(UI.section);
 const show=(section,key,id)=>{focus[key]=id;return UI.navigate(section);};
@@ -115,24 +132,58 @@ const dateInput=(value,attrs={})=>el('input',{type:'date',value:value||'',...att
 const numberInput=(value,attrs={})=>el('input',{type:'number',step:'any',value:value??'',...attrs});
 const textInput=(value,attrs={})=>el('input',{type:'text',value:value??'',...attrs});
 function checks(options,chosen){const box=el('div',{class:'pw-checks'});for(const [v,l] of options)box.append(el('label',{},el('input',{type:'checkbox',value:v,checked:chosen.includes(v)}),l));box.values=()=>[...box.querySelectorAll('input:checked')].map(i=>i.value);return box;}
+// History rows name what happened; a few actions read better in other words.
+const ACTION_WORDS={event:'Changed',derived:'Added from the plan',needed_again:'Needed again',revised:'Edited'};
 function history(rows,describe,limit=12){
  const list=el('ol',{class:'pw-history',reversed:true});const shown=[...rows].reverse();
- const fill=n=>{list.replaceChildren(...shown.slice(0,n).map(r=>el('li',{},el('strong',{},cap(r.action)),' · '+time(r.at)+' · '+(r.by?memberName(r.by):'')+(r.actor==='event'?' (their change)':''),describe?.(r)?el('small',{},describe(r)):null)));};
+ const fill=n=>{list.replaceChildren(...shown.slice(0,n).map(r=>el('li',{},el('strong',{},ACTION_WORDS[r.action]||cap(r.action)),' · '+time(r.at)+(r.by?' · '+memberName(r.by)+(r.actor==='event'?' (their change)':''):r.actor==='event'?' · another household member':''),describe?.(r)?el('small',{},describe(r)):null)));};
  fill(limit);
  const more=shown.length>limit?button('Show all '+shown.length,()=>{fill(shown.length);more.remove();}):null;
  return el('div',{},list,more);
 }
-async function allIngredients(){
- const out=[];let offset=0;
- while(offset!==null){const r=await UI.call(TOOLS.ingredients,{limit:100,offset});out.push(...r.items);offset=r.next_offset;}
- return out.sort((a,b)=>a.name.localeCompare(b.name));
+// The whole ingredient table, read once per page load: the first page gives the total, the other
+// pages are requested together.
+let ingredientTable=null;
+function allIngredients(){
+ if(!ingredientTable)ingredientTable=(async()=>{
+  const first=await UI.call(TOOLS.ingredients,{limit:100,offset:0}),offsets=[];
+  for(let o=first.items.length;o<first.total;o+=100)offsets.push(o);
+  const rest=await Promise.all(offsets.map(offset=>UI.call(TOOLS.ingredients,{limit:100,offset})));
+  const out=[first,...rest].flatMap(r=>r.items).sort((a,b)=>a.name.localeCompare(b.name));
+  for(const i of out)ingredientNames.set(i.id,i.name);
+  return out;
+ })().catch(e=>{ingredientTable=null;throw e;});
+ return ingredientTable;
 }
+// Every recipe, archived ones included (read fresh each time: recipes can change during a run).
+async function allRecipes(){
+ const out=[];let offset=0;
+ while(offset!==null){const r=await UI.call(TOOLS.search,{limit:100,offset,include_archived:true});out.push(...r.items);offset=r.next_offset;}
+ learnTitles(out);return out;
+}
+// Reads the ingredient names only when something about to be shown names an ingredient.
+const namesIngredients=value=>JSON.stringify(value??null).includes('"ingredient_id"');
+const ensureIngredientNames=value=>has(TOOLS.ingredients)&&namesIngredients(value)?allIngredients().catch(()=>null):null;
 const unitsFor=(ing,tool)=>{const all=enumOf(tool,'unit').length?enumOf(tool,'unit'):enumOf(TOOLS.create,'lines','[]','unit');return all.filter(u=>!ing||ing.measures.some(m=>UNITS_BY[m].includes(u)));};
+const unitOptions=(ing,tool)=>unitsFor(ing,tool).map(u=>[u,words(u)]);
+const unitSelect=(ing,tool,value,attrs={})=>select(unitOptions(ing,tool),value,attrs);
+const refillUnits=(box,ing,tool)=>box.replaceChildren(...unitOptions(ing,tool).map(([v,l])=>el('option',{value:v},l)));
+// What the check found, in words, with the names of the ingredients involved.
+function findingText(f,lineName){
+ const names=[...new Set(f.lines.map(lineName))].join(', ');
+ const text={contains_allergen:()=>'contains '+words(f.allergen),may_contain_allergen:()=>'may contain '+words(f.allergen),
+  medical_ingredient:()=>'medically excluded',medical_flag:()=>'medically excluded ('+words(f.flag)+')',
+  diet_flag:()=>'not '+words(f.diet)+' ('+(f.flags||[]).map(words).join(', ')+')',
+  over_limit:()=>Math.round(f.value*10)/10+' '+(AMOUNT[f.nutrient]||words(f.nutrient))+', more than the '+f.max+' allowed',
+  disliked_ingredient:()=>'disliked',disliked_tag:()=>'disliked ('+words(f.tag)+')'}[f.reason];
+ return (text?text():words(f.reason))+(names&&f.reason!=='over_limit'?': '+names:'');
+}
 
 // A modal form for one write. The page keeps no business data of its own: the write goes through the
 // shared client's perform(), which sends the version this page last read (the form is modal, so
 // that is the version seen when it opened) and reuses the request ID when an unchanged form is
-// submitted again; Core decides. A refusal shows the App's code and message and nothing is assumed.
+// submitted again; Core decides. A refusal shows the App's message (its code is kept on the element
+// for tests) and nothing is assumed.
 function formDialog({title,tool,fields=[],build,submitLabel,note,after,danger}){
  if(!has(tool))throw Error('This operation is not allowed for the current account and policy.');
  const error=el('p',{role:'alert',class:'form-error'});
@@ -143,7 +194,7 @@ function formDialog({title,tool,fields=[],build,submitLabel,note,after,danger}){
  form.addEventListener('submit',async event=>{
   event.preventDefault();error.textContent='';delete error.dataset.code;submit.disabled=true;
   try{const args=await build();const result=await UI.perform(tool,args);d.close();await after?.(result);}
-  catch(e){error.textContent=(e.code?e.code+': ':'')+e.message;error.dataset.code=e.code||'request_failed';}
+  catch(e){error.textContent=e.message;error.dataset.code=e.code||'request_failed';}
   finally{submit.disabled=false;}
  });
  d.append(form);d.addEventListener('close',()=>d.remove());document.body.append(d);d.showModal();
@@ -154,12 +205,12 @@ const confirmDialog=(title,tool,args,note,after)=>formDialog({title,tool,note,bu
 // ---- Meal plan --------------------------------------------------------------------------------------
 function slotSummary(s){
  if(!s.dishes.length)return 'Cleared';
- return s.dishes.map(d=>d.kind==='leftovers'?'Leftovers: '+(d.title||d.recipe_id):d.title||d.recipe_id).join(' + ');
+ return s.dishes.map(d=>d.kind==='leftovers'?'Leftovers: '+d.title:d.title).join(' + ');
 }
 const people=s=>s.attendees.map(memberName).concat(s.guests.map(g=>g.name+' (guest)'));
 function flagText(f){
  if(f.type==='person')return f.name+': '+VERDICT[f.verdict];
- return {archived_recipe:'Archived recipe',stale_base:'Base recipe changed since this variant',leftover_short:'Not enough leftovers ('+f.available+' left)',leftover_expired:'Leftovers older than '+f.leftover_max_days+' days',limit_unchecked:f.name+': limit cannot be checked'}[f.type]||cap(f.type);
+ return {archived_recipe:'Archived recipe',stale_base:'Base recipe changed since this variant',leftover_short:'Not enough leftovers ('+f.available+' left)',leftover_expired:'Leftovers older than '+plural(f.leftover_max_days,'day'),limit_unchecked:f.name+': limit cannot be checked'}[f.type]||cap(f.type);
 }
 const flagChip=f=>el('span',{class:'pw-warn '+(f.verdict||'')},flagText(f));
 function weekView(shown,ui){
@@ -176,7 +227,7 @@ function weekView(shown,ui){
   for(const s of slots){
    const warn=s.flags.filter(f=>f.type!=='person'||f.verdict!=='ok');
    box.append(el('button',{type:'button',class:'pw-slot '+s.state,'data-slot-id':s.id,'aria-pressed':String(focus.week===s.id),onclick:()=>show('week','week',s.id).catch(ui.error)},
-    el('span',{class:'meal'},s.meal),el('span',{},el('strong',{},slotSummary(s)),el('small',{},people(s).join(', ')),warn.map(flagChip)),
+    el('span',{class:'meal'},cap(s.meal)),el('span',{},el('strong',{},slotSummary(s)),el('small',{},people(s).join(', ')),warn.map(flagChip)),
     el('span',{class:'pw-state '+s.state},cap(s.state))));
   }
   if(!slots.length)box.append(el('p',{class:'pw-none'},'Nothing planned'));
@@ -193,18 +244,18 @@ function slotDetail(ui){
  if(s.state==='planned'&&s.date<=today&&has(TOOLS.slotMark))actions.append(button('Mark cooked',()=>markDialog(s,'cooked')));
  if(s.state==='planned'&&has(TOOLS.slotMark))actions.append(button('Mark skipped',()=>markDialog(s,'skipped')));
  if(s.state==='planned'&&future&&has(TOOLS.slotSet))actions.append(button('Clear',()=>confirmDialog('Clear this meal',TOOLS.slotSet,{id:s.id,dishes:[]},'The meal stays in the plan\'s history as cleared.')));
- return el('article',{class:'pw-slot-detail'},el('span',{class:'kicker'},dayLabel(s.date,{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · '+s.meal),
+ return el('article',{class:'pw-slot-detail'},el('span',{class:'kicker'},dayLabel(s.date,{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · '+cap(s.meal)),
   el('h2',{},slotSummary(s)),el('div',{class:'tags'},tag(cap(s.state)),tag(cap(s.phase))),actions,
-  s.flags.length?el('section',{},el('h3',{},'What the check found'),s.flags.map(f=>el('div',{class:'metadata-line'},el('span',{},flagText(f)),el('strong',{},f.type==='person'?f.dishes.flatMap(d=>d.findings.map(x=>words(x.reason)+': '+x.lines.map(l=>words(l.ingredient_id.replace(/^ing-/,''))+(l.optional?' (optional)':'')).join(', '))).join('; '):'')))):el('p',{class:'muted'},'Right for everyone at the table on this day.'),
-  el('h3',{},'Dishes'),s.dishes.map(d=>metadata(d.kind==='leftovers'?'Leftovers':'Recipe',(d.title||d.recipe_id)+(d.kind==='leftovers'?' · '+d.portions+' portions from '+d.leftovers_of:' · '+d.servings+' servings ('+words(d.servings_source)+')'))),
+  s.flags.length?el('section',{},el('h3',{},'What the check found'),s.flags.map(f=>el('div',{class:'metadata-line'},el('span',{},flagText(f)),el('strong',{},f.type==='person'?f.dishes.flatMap(d=>d.findings.map(x=>findingText(x,l=>ingredientName(l.ingredient_id)+(l.optional?' (optional)':'')))).join('; '):'')))):el('p',{class:'muted'},'Right for everyone at the table on this day.'),
+  el('h3',{},'Dishes'),s.dishes.map(d=>metadata(d.kind==='leftovers'?'Leftovers':'Recipe',d.title+(d.kind==='leftovers'?' · '+plural(d.portions,'portion')+' from '+slotLabel(d.leftovers_of):' · '+plural(d.servings,'serving')+(d.servings_source==='explicit'?' (set for this meal)':' (for who is eating)')))),
   metadata('At the table',people(s).join(', ')),s.guests.map(g=>metadata(g.name,g.constraints.length?g.constraints.map(constraintText).join('; '):'No needs given')),
   s.note?metadata('Note',s.note):null,
   s.cooked?metadata('Cooked',time(s.cooked.at)+' · '+s.cooked.portions.map(p=>p.made+' made, '+p.eaten+' eaten').join('; ')+(s.cooked.deducted?' · taken from the pantry':'')):null,
-  s.leftovers?.length?metadata('Leftovers',s.leftovers.map(l=>l.portions_left+' left'+(l.usable_until?' until '+l.usable_until:'')).join('; ')):null,
-  el('h3',{},'History'),history(s.history,r=>r.dishes?.length?r.dishes.map(d=>d.leftovers_of?'leftovers':d.recipe_id.replace(/^rec-/,'')).join(', '):''));
+  s.leftovers?.length?metadata('Leftovers',s.leftovers.map(l=>l.portions_left?plural(l.portions_left,'portion')+' left, good until '+fullDate(l.usable_until):'None left').join('; ')):null,
+  el('h3',{},'History'),history(s.history,r=>r.dishes?.length?r.dishes.map(d=>d.leftovers_of?'leftovers of '+recipeTitle(d.recipe_id):recipeTitle(d.recipe_id)).join(', '):''));
 }
 async function slotEditor(slot){
- const today=UI.aux.today,recipes=(await UI.call(TOOLS.search,{limit:100})).items.filter(r=>r.state==='active').sort((a,b)=>a.title.localeCompare(b.title));
+ const today=UI.aux.today,recipes=(await allRecipes()).filter(r=>r.state==='active').sort((a,b)=>a.title.localeCompare(b.title));
  const members=(UI.aux.household?.members)||(await UI.call(TOOLS.household,{})).members;
  const id=slot.id||null,dateBox=dateInput(slot.date,{min:today,required:true}),mealBox=select(MEALS,slot.meal||'dinner');
  if(id){dateBox.disabled=true;mealBox.disabled=true;}
@@ -259,7 +310,7 @@ async function slotEditor(slot){
    return {id:id||dateBox.value+':'+mealBox.value,dishes:[...dishes.querySelectorAll('[data-dish]')].map(r=>r.read()),attendees:attendees.values(),
     guests:[...guests.querySelectorAll('[data-guest]')].map(r=>r.read()),...(note.value.trim()?{note:note.value.trim()}:{})};
   },
-  after:r=>{focus.week=r.id;if(r.id.slice(0,10)<UI.aux.plan.start||r.id.slice(0,10)>UI.aux.plan.end){const d=new Date(r.id.slice(0,10)+'T12:00:00Z');weekStart=addDays(r.id.slice(0,10),-((d.getUTCDay()+6)%7));}return UI.navigate('week');}});
+  after:r=>{focus.week=r.id;const shown=UI.aux.plan;if(!shown||r.id.slice(0,10)<shown.start||r.id.slice(0,10)>shown.end){const d=new Date(r.id.slice(0,10)+'T12:00:00Z');weekStart=addDays(r.id.slice(0,10),-((d.getUTCDay()+6)%7));}return UI.navigate('week');}});
 }
 function markDialog(s,status){
  const recipesCooked=s.dishes.filter(d=>d.kind==='recipe');
@@ -271,7 +322,9 @@ function markDialog(s,status){
   fields:status==='cooked'?[...rows.map(r=>r.node),el('label',{class:'pw-checks'},deduct,'Take the ingredients from the pantry')]:[],
   build:()=>status==='skipped'?{id:s.id,status}:{id:s.id,status,deduct_pantry:deduct.checked,
    ...(rows.length?{portions:rows.map(r=>({recipe_id:r.d.recipe_id,...(r.made.value!==''?{made:Number(r.made.value)}:{}),...(r.eaten.value!==''?{eaten:Number(r.eaten.value)}:{})}))}:{})},
-  after:r=>{if(r.short?.length)UI.error(Error('Cooked. Short in the pantry: '+r.short.map(x=>words(x.ingredient_id.replace(/^ing-/,''))+' '+qty(x.quantity,x.unit)+' ('+words(x.reason)+')').join(', ')));}});
+  after:async r=>{if(!r.short?.length)return;await ensureIngredientNames(r.short);
+   const why={not_in_pantry:'not in the pantry',no_conversion:'stored in a unit that cannot be converted',not_enough:'not enough',expired:'past its use-by date'};
+   UI.error(Error('Cooked. Short in the pantry: '+r.short.map(x=>ingredientName(x.ingredient_id)+' '+qty(x.quantity,x.unit)+' ('+(why[x.reason]||words(x.reason))+')').join(', ')));}});
 }
 
 // ---- Recipes -----------------------------------------------------------------------------------------
@@ -287,15 +340,16 @@ function recipeList(shown,ui){
 function ingredientRows(recipe){
  return el('table',{class:'pw-table'},el('tbody',{},recipe.lines.map(l=>el('tr',{},el('td',{class:'q'},qty(l.quantity,l.unit)),el('td',{},l.name,l.optional?el('small',{},'optional'):null,l.note?el('small',{},l.note):null)))));
 }
-function nutritionBlock(n,missing){
- if(!n)return el('p',{class:'muted'},'Nutrition cannot be computed: no weight for '+(missing||[]).map(m=>words(m.ingredient_id.replace(/^ing-/,''))).join(', ')+'.');
+const lineNamer=recipe=>l=>recipe.lines.find(x=>x.line===l.line)?.name||ingredientName(l.ingredient_id);
+function nutritionBlock(n,missing,recipe){
+ if(!n)return el('p',{class:'muted'},'Nutrition cannot be computed: no weight for '+[...new Set((missing||[]).map(lineNamer(recipe)))].join(', ')+'.');
  return el('div',{class:'pw-nutrition'},Object.entries(NUTRIENTS).map(([k,l])=>el('div',{},el('strong',{},n[k]),el('small',{},l))));
 }
 function recipeView(r,ui){
  const art=el('article',{class:'pw-recipe'});
- const ingredients=el('div',{},ingredientRows(r)),nutrition=el('div',{},nutritionBlock(r.nutrition,r.missing_for));
+ const ingredients=el('div',{},ingredientRows(r)),nutrition=el('div',{},nutritionBlock(r.nutrition,r.missing_for,r));
  const servings=numberInput(r.servings,{min:1,max:200,'aria-label':'Servings'}),units=select(enumOf(TOOLS.recipe,'unit_system').length?enumOf(TOOLS.recipe,'unit_system'):['recipe','metric','us'],r.unit_system,{'aria-label':'Units'});
- const scale=async()=>{const x=(await ui.call(TOOLS.recipe,{id:r.id,servings:Number(servings.value),unit_system:units.value})).recipe;ingredients.replaceChildren(ingredientRows(x));nutrition.replaceChildren(nutritionBlock(x.nutrition,x.missing_for));};
+ const scale=async()=>{const x=(await ui.call(TOOLS.recipe,{id:r.id,servings:Number(servings.value),unit_system:units.value})).recipe;ingredients.replaceChildren(ingredientRows(x));nutrition.replaceChildren(nutritionBlock(x.nutrition,x.missing_for,x));};
  const actions=el('div',{class:'pw-actions'});
  if(r.state==='active'&&has(TOOLS.slotSet))actions.append(button('Plan this',()=>slotEditor({date:ui.aux.today,recipe_id:r.id}),{class:'primary'}));
  if(r.state==='active'&&!r.variant&&has(TOOLS.update))actions.append(button('Edit recipe',()=>recipeEditor(r)));
@@ -306,7 +360,7 @@ function recipeView(r,ui){
  const members=ui.aux.household?.members||[],who=checks(members.map(m=>[m.person_id,m.display_name]),members.map(m=>m.person_id)),on=dateInput(ui.aux.today),verdicts=el('div',{class:'pw-verdicts'});
  const runCheck=async()=>{const c=await ui.call(TOOLS.check,{id:r.id,members:who.values(),...(on.value?{date:on.value}:{})});
   verdicts.replaceChildren(...c.verdicts.map(v=>el('div',{'data-verdict':v.verdict},el('strong',{},v.name),el('span',{class:'pw-warn '+v.verdict},VERDICT[v.verdict]),
-   el('small',{},v.findings.map(f=>words(f.reason)+': '+f.lines.map(l=>words(l.ingredient_id.replace(/^ing-/,''))).join(', ')).join('; ')+(v.unchecked.length?' limit not checkable':'')))));};
+   el('small',{},[...v.findings.map(f=>findingText(f,lineNamer(r))),...(v.unchecked.length?['limit cannot be checked: nutrition unknown']:[])].join('; ')))));};
  art.append(...[el('span',{class:'kicker'},(r.variant?'Variant · ':'')+(r.state==='archived'?'Archived · ':'')+'Revision '+r.revision),el('h2',{},r.title),
   el('div',{class:'tags'},r.tags.map(tag),r.method_tags.map(m=>tag(m))),actions,
   el('div',{class:'pw-inline'},el('label',{},'Servings',servings),el('label',{},'Units',units),button('Scale',scale)),
@@ -315,7 +369,7 @@ function recipeView(r,ui){
   metadata('Time',(r.active_minutes!=null?r.active_minutes+' min active · ':'')+(r.total_minutes!=null?r.total_minutes+' min total':'')),
   metadata('Contains',r.contains.map(words).join(', ')||'None of the nine allergens'),r.may_contain.length?metadata('May contain',r.may_contain.map(words).join(', ')):null,
   metadata('Flags',r.flags.map(words).join(', ')||'None'),
-  r.variant?metadata('Variant of',r.variant.base_recipe_id+' (revision '+r.variant.base_revision+')'+(r.variant.stale_base?' · the base has changed since':'')+(r.variant.unverified?' · unverified swap':'')):null,
+  r.variant?metadata('Variant of',r.variant.base_title+' (revision '+r.variant.base_revision+')'+(r.variant.stale_base?' · the base has changed since':'')+(r.variant.unverified?' · unverified swap':'')):null,
   el('h3',{},'Check for the table'),el('div',{class:'pw-subform'},who,el('div',{class:'pw-inline'},el('label',{},'On',on),button('Check',runCheck)),verdicts),
   el('h3',{},'Revisions'),history(r.history,x=>x.revision?'revision '+x.revision:'')].flat().filter(x=>x!=null));
  return art;
@@ -328,16 +382,17 @@ async function recipeEditor(r){
  const steps=el('textarea',{rows:5},(r?.steps||[]).join('\n'));
  const lines=el('div',{class:'pw-subform'}),addLine=l=>{
   const ing=select([['','Ingredient']].concat(ingredients.map(i=>[i.id,i.name])),l?.ingredient_id||'',{'aria-label':'Ingredient'});
-  const q=numberInput(l?.as_written?.quantity??l?.quantity??'',{min:0,'aria-label':'Quantity'}),unit=select(unitsFor(byId.get(l?.ingredient_id),TOOLS.pantrySet),l?.as_written?.unit??l?.unit,{'aria-label':'Unit'});
-  ing.addEventListener('change',()=>{const keep=unit.value;unit.replaceChildren(...unitsFor(byId.get(ing.value),TOOLS.pantrySet).map(u=>el('option',{value:u},words(u))));if([...unit.options].some(o=>o.value===keep))unit.value=keep;});
+  const q=numberInput(l?.as_written?.quantity??l?.quantity??'',{min:0,'aria-label':'Quantity'}),unit=unitSelect(byId.get(l?.ingredient_id),TOOLS.pantrySet,l?.as_written?.unit??l?.unit,{'aria-label':'Unit'});
+  ing.addEventListener('change',()=>{const keep=unit.value;refillUnits(unit,byId.get(ing.value),TOOLS.pantrySet);if([...unit.options].some(o=>o.value===keep))unit.value=keep;});
   const optional=el('input',{type:'checkbox',checked:!!l?.optional});
   const row=el('div',{class:'pw-inline','data-line':''},el('label',{},'Ingredient',ing),el('label',{},'Quantity',q),el('label',{},'Unit',unit),el('label',{class:'pw-checks'},optional,'optional'),button('Remove',()=>row.remove()));
-  row.read=()=>{if(!ing.value)throw Error('Choose an ingredient on every line.');return {ingredient_id:ing.value,quantity:Number(q.value),unit:unit.value,optional:optional.checked,...(l?.note?{note:l.note}:{})};};
+  row.read=()=>{if(!ing.value&&q.value==='')return null;if(!ing.value)throw Error('Choose an ingredient on every line that has a quantity.');return {ingredient_id:ing.value,quantity:Number(q.value),unit:unit.value,optional:optional.checked,...(l?.note?{note:l.note}:{})};};
   lines.insertBefore(row,lines.lastChild);
  };
  lines.append(button('+ Add a line',()=>addLine()));
- for(const l of r?.lines||[{},{}])addLine(l.ingredient_id?l:null);
- const read=()=>({title:title.value.trim(),servings:Number(servings.value),lines:[...lines.querySelectorAll('[data-line]')].map(x=>x.read()),method_tags:methods.values(),
+ for(const l of r?.lines||[{}])addLine(l.ingredient_id?l:null);
+ const readLines=()=>{const out=[...lines.querySelectorAll('[data-line]')].map(x=>x.read()).filter(Boolean);if(!out.length)throw Error('Add at least one ingredient.');return out;};
+ const read=()=>({title:title.value.trim(),servings:Number(servings.value),lines:readLines(),method_tags:methods.values(),
   steps:steps.value.split('\n').map(s=>s.trim()).filter(Boolean),tags:tags.value.split(',').map(s=>s.trim()).filter(Boolean),
   active_minutes:active.value===''?null:Number(active.value),total_minutes:total.value===''?null:Number(total.value)});
  formDialog({title:r?'Edit recipe':'New recipe',tool:r?TOOLS.update:TOOLS.create,submitLabel:r?'Save changes':'Save recipe',note:r?'Saving adds a revision; earlier revisions stay readable.':null,
@@ -370,9 +425,8 @@ async function variantDialog(r){
 // ---- Shopping list -----------------------------------------------------------------------------------
 function shoppingView(shown,ui){
  const list=ui.aux.shopping?.list,pane=el('div',{class:'pw-pane'});
- const today=ui.aux.today,plan=ui.aux.plan;
  const bar=el('div',{class:'pw-bar'},el('h3',{},list?'For '+dayLabel(list.start,{day:'numeric',month:'short'})+' – '+dayLabel(list.end,{day:'numeric',month:'short'}):'No list yet'));
- if(has(TOOLS.generate))bar.append(button(list?'New list':'Make a list',()=>generateDialog(list||{start:plan?.start||today,end:plan?.end||today}),{class:list?'':'primary'}));
+ if(has(TOOLS.generate))bar.append(button(list?'New list':'Make a list',()=>generateDialog(list),{class:list?'':'primary'}));
  if(list&&has(TOOLS.lineSet))bar.append(button('Add item',()=>lineDialog()));
  pane.append(bar);
  if(!list){pane.append(el('p',{class:'muted'},'Make a list from the planned meals of a window, less what the pantry already holds.'));return pane;}
@@ -381,13 +435,13 @@ function shoppingView(shown,ui){
   const box=el('input',{type:'checkbox',checked:l.state==='ticked','aria-label':(l.state==='ticked'?'Untick ':'Tick ')+(l.name||l.text),disabled:!has(TOOLS.lineSet)||l.state==='excluded'});
   box.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();UI.perform(TOOLS.lineSet,{id:l.id,ticked:l.state!=='ticked'}).catch(err=>UI.error(err));});
   return el('div',{class:'pw-row '+l.state,role:'button',tabindex:'0','data-line-id':l.id,'aria-pressed':String(focus.shopping===l.id),onclick:()=>show('shopping','shopping',l.id).catch(ui.error)},
-   box,el('span',{class:'grow'},el('strong',{},l.name||l.text),el('small',{},l.kind==='manual'?'Added by hand':'For '+l.slots.map(s=>dayLabel(s.slice(0,10),{weekday:'short'})+' '+s.slice(11)).join(', '))),
+   box,el('span',{class:'grow'},el('strong',{},l.name||l.text),el('small',{},l.kind==='manual'?'Added by hand':'For '+l.slots.map(slotLabel).join(', '))),
    el('span',{},qty(l.quantity,l.unit)),l.surplus?tag('Surplus'):null);
  };
  const groups=[['Still to buy',x=>x.state==='needed'],['In the basket',x=>x.state==='ticked'],['Not buying',x=>x.state==='excluded']];
  for(const [label,test] of groups){const ls=list.lines.filter(test);if(ls.length)pane.append(el('h4',{class:'pw-group'},label+' · '+ls.length),...ls.map(row));}
- if(list.optional_lines?.length)pane.append(el('h4',{class:'pw-group'},'Optional, not on the list'),el('p',{class:'muted'},list.optional_lines.map(o=>o.name||o.ingredient_id).join(', ')));
- if(list.expiring_before_use?.length)pane.append(el('h4',{class:'pw-group'},'In the pantry but expiring before use'),el('p',{class:'muted'},list.expiring_before_use.map(o=>(o.name||o.ingredient_id)+' (use by '+o.use_by+')').join(', ')));
+ if(list.optional_lines?.length)pane.append(el('h4',{class:'pw-group'},'Optional, not on the list'),el('p',{class:'muted'},[...new Set(list.optional_lines.map(o=>o.name))].join(', ')));
+ if(list.expiring_before_use?.length)pane.append(el('h4',{class:'pw-group'},'In the pantry but expiring before use'),el('p',{class:'muted'},list.expiring_before_use.map(o=>o.name+' (use by '+fullDate(o.use_by)+', needed '+fullDate(o.first_needed)+')').join(', ')));
  return pane;
 }
 function lineDetail(ui){
@@ -400,10 +454,12 @@ function lineDetail(ui){
  }
  if(l.kind==='manual'&&has(TOOLS.lineRemove))actions.append(button('Remove',()=>confirmDialog('Remove item',TOOLS.lineRemove,{id:l.id},null,()=>{focus.shopping=null;})));
  return el('article',{},el('span',{class:'kicker'},l.kind==='manual'?'Added by hand':'From the plan'),el('h2',{},l.name||l.text),el('div',{class:'tags'},tag(cap(l.state)),l.surplus?tag('Surplus'):null),actions,
-  metadata('To buy',qty(l.quantity,l.unit)),l.kind==='derived'?[metadata('Needed in all',qty(l.needed_total,l.unit)),metadata('From the pantry',qty(l.from_pantry,l.unit)),metadata('For',l.slots.join(', ')),metadata('First needed',l.first_needed)]:null,
+  metadata('To buy',qty(l.quantity,l.unit)),l.kind==='derived'?[metadata('Needed in all',qty(l.needed_total,l.unit)),metadata('From the pantry',qty(l.from_pantry,l.unit)),metadata('For',l.slots.map(slotLabel).join(', ')),metadata('First needed',fullDate(l.first_needed))]:null,
   l.excluded_reason?metadata('Why not',l.excluded_reason):null,el('h3',{},'History'),history(l.history));
 }
-function generateDialog(w){
+async function generateDialog(w){
+ // Without a list, the form starts on the current week of the plan.
+ if(!w){const p=has(TOOLS.plan)?await UI.call(TOOLS.plan,{}):null;w={start:p?.start||UI.aux.today||'',end:p?.end||UI.aux.today||''};}
  const start=dateInput(w.start,{required:true}),end=dateInput(w.end,{required:true});
  formDialog({title:'Make a shopping list',tool:TOOLS.generate,submitLabel:'Make list',note:'From every planned meal in the window (at most 28 days), less usable pantry stock. Your own items, ticks and exclusions are kept.',
   fields:[el('div',{class:'pw-inline'},el('label',{},'From',start),el('label',{},'To',end))],build:()=>({start:start.value,end:end.value})});
@@ -411,8 +467,8 @@ function generateDialog(w){
 async function lineDialog(l){
  const ingredients=await allIngredients(),byId=new Map(ingredients.map(i=>[i.id,i]));
  const ing=select([['','Something else (free text)']].concat(ingredients.map(i=>[i.id,i.name])),l?.ingredient_id||'',{'aria-label':'Ingredient'});
- const text=textInput(l?.text||'',{placeholder:'e.g. Birthday candles'}),q=numberInput(l?.quantity??1,{min:0}),unit=select(unitsFor(byId.get(l?.ingredient_id),TOOLS.lineSet),l?.unit||'each');
- ing.addEventListener('change',()=>{unit.replaceChildren(...unitsFor(byId.get(ing.value),TOOLS.lineSet).map(u=>el('option',{value:u},words(u))));text.disabled=!!ing.value;});
+ const text=textInput(l?.text||'',{placeholder:'e.g. Birthday candles'}),q=numberInput(l?.quantity??1,{min:0}),unit=unitSelect(byId.get(l?.ingredient_id),TOOLS.lineSet,l?.unit||'each');
+ ing.addEventListener('change',()=>{const i=byId.get(ing.value);refillUnits(unit,i,TOOLS.lineSet);if(i)unit.value=i.buy_unit;text.disabled=!!ing.value;});
  text.disabled=!!ing.value;
  if(l)ing.disabled=true;
  formDialog({title:l?'Edit item':'Add to the list',tool:TOOLS.lineSet,submitLabel:l?'Save':'Add',
@@ -442,7 +498,7 @@ function pantryView(shown,ui){
  return pane;
 }
 const pantryRow=i=>el('button',{type:'button',class:'pw-row','data-item-id':i.ingredient_id,'aria-pressed':String(focus.pantry===i.ingredient_id),onclick:()=>show('pantry','pantry',i.ingredient_id).catch(UI.error)},
- el('span',{class:'grow'},el('strong',{},i.name),el('small',{},i.use_by?'Use by '+dayLabel(i.use_by,{day:'numeric',month:'short',year:'numeric'})+(i.days_left!=null&&i.days_left>=0?' · '+i.days_left+' days left':''):'No use-by date')),
+ el('span',{class:'grow'},el('strong',{},i.name),el('small',{},i.use_by?'Use by '+fullDate(i.use_by)+(i.state==='in_stock'&&i.days_left!=null&&i.days_left>=0?' · '+daysLeft(i.days_left):''):'No use-by date')),
  el('span',{},i.state==='out'?'out':qty(i.quantity,i.unit)),i.freshness==='expired'&&i.state==='in_stock'?el('span',{class:'pw-warn unsafe'},'Expired'):i.freshness==='use_soon'?el('span',{class:'pw-warn'},'Use soon'):null);
 function pantryDetail(ui){
  const i=ui.aux.pantry?.items.find(x=>x.ingredient_id===focus.pantry);
@@ -450,14 +506,14 @@ function pantryDetail(ui){
  const actions=el('div',{class:'pw-actions'});
  if(has(TOOLS.pantrySet)){actions.append(button('Update stock',()=>pantryDialog(i),{class:'primary'}));if(i.state==='in_stock')actions.append(button('Used up',()=>confirmDialog('Mark '+i.name+' used up',TOOLS.pantrySet,{id:i.ingredient_id,quantity:0,unit:i.unit})));}
  return el('article',{},el('span',{class:'kicker'},'Pantry'),el('h2',{},i.name),el('div',{class:'tags'},tag(cap(i.freshness)),i.state==='out'?tag('Used up'):null),actions,
-  metadata('In stock',qty(i.quantity,i.unit)),metadata('Use by',i.use_by||'No date'),metadata('Last changed',time(i.updated_at)),
-  el('h3',{},'History'),history(i.history,r=>qty(r.quantity,r.unit)+(r.use_by?' · use by '+r.use_by:'')+(r.slot_id?' · cooking '+r.slot_id:'')));
+  metadata('In stock',qty(i.quantity,i.unit)),metadata('Use by',i.use_by?fullDate(i.use_by):'No date'),metadata('Last changed',time(i.updated_at)),
+  el('h3',{},'History'),history(i.history,r=>qty(r.quantity,r.unit)+(r.use_by?' · use by '+fullDate(r.use_by):'')+(r.slot_id?' · cooking '+slotLabel(r.slot_id):'')));
 }
 async function pantryDialog(item){
  const ingredients=await allIngredients(),byId=new Map(ingredients.map(i=>[i.id,i]));
  const ing=select([['','Choose an ingredient']].concat(ingredients.map(i=>[i.id,i.name])),item?.ingredient_id||'',{'aria-label':'Ingredient',required:true,disabled:!!item});
- const q=numberInput(item?.quantity??'',{min:0,required:true}),unit=select(unitsFor(byId.get(item?.ingredient_id),TOOLS.pantrySet),item?.unit||byId.get(item?.ingredient_id)?.buy_unit);
- ing.addEventListener('change',()=>{const i=byId.get(ing.value);unit.replaceChildren(...unitsFor(i,TOOLS.pantrySet).map(u=>el('option',{value:u},words(u))));if(i)unit.value=i.buy_unit;});
+ const q=numberInput(item?.quantity??'',{min:0,required:true}),unit=unitSelect(byId.get(item?.ingredient_id),TOOLS.pantrySet,item?.unit||byId.get(item?.ingredient_id)?.buy_unit);
+ ing.addEventListener('change',()=>{const i=byId.get(ing.value);refillUnits(unit,i,TOOLS.pantrySet);if(i)unit.value=i.buy_unit;});
  const useBy=dateInput(item?.use_by),none=el('input',{type:'checkbox',checked:!!item&&!item.use_by});
  formDialog({title:item?'Update '+item.name:'Add to the pantry',tool:TOOLS.pantrySet,submitLabel:'Save',
   fields:[field('Ingredient',ing),el('div',{class:'pw-inline'},el('label',{},'Quantity',q),el('label',{},'Unit',unit)),el('div',{class:'pw-inline'},el('label',{},'Use by',useBy),el('label',{class:'pw-checks'},none,'No use-by date'))],
@@ -467,20 +523,20 @@ async function pantryDialog(item){
 
 // ---- Household --------------------------------------------------------------------------------------
 function constraintText(c){
- const what={allergy:()=>(c.strict?'Strict allergy to ':'Allergy to ')+words(c.allergen),medical:()=>'Medical: no '+words((c.ingredient_id||c.flag||'').replace(/^ing-/,'')),diet:()=>cap(c.diet)+' diet',
-  limit:()=>'At most '+c.max+' '+(NUTRIENTS[c.nutrient]||c.nutrient)+' per meal',dislike:()=>'Dislikes '+words((c.ingredient_id||c.tag||'').replace(/^ing-/,''))}[c.kind];
+ const what={allergy:()=>(c.strict?'Strict allergy to ':'Allergy to ')+words(c.allergen),medical:()=>'Medical: no '+(c.ingredient_id?ingredientName(c.ingredient_id).toLowerCase():words(c.flag)),diet:()=>cap(c.diet)+' diet',
+  limit:()=>'At most '+c.max+' '+(AMOUNT[c.nutrient]||words(c.nutrient))+' per meal',dislike:()=>'Dislikes '+(c.ingredient_id?ingredientName(c.ingredient_id).toLowerCase():words(c.tag))}[c.kind];
  return what?what():cap(c.kind);
 }
-const dates=c=>(c.effective_from?'from '+c.effective_from:'')+(c.expires_on?' until '+c.expires_on:'')+(c.ended_at?' · ended '+c.ended_at.slice(0,10):'');
+const dates=c=>[c.effective_from?'from '+fullDate(c.effective_from):'',c.expires_on?'until '+fullDate(c.expires_on):'',c.ended_at?'ended '+fullDate(c.ended_at):''].filter(Boolean).join(' · ').replace(/^./,x=>x.toUpperCase());
 function householdView(shown,ui){
  const h=ui.aux.household,pane=el('div',{class:'pw-pane'});
  if(!h)return el('div',{class:'empty'},el('h3',{},'The household is not available'));
  pane.append(el('div',{class:'pw-bar'},el('h3',{},'Who eats here')));
  for(const m of h.members){
-  const current=m.constraints.filter(c=>['active','scheduled'].includes(c.state));
+  const current=m.constraints.filter(c=>c.state==='active'),later=m.constraints.filter(c=>c.state==='scheduled');
   pane.append(el('button',{type:'button',class:'pw-card','data-member-id':m.person_id,'aria-pressed':String(focus.household===m.person_id),onclick:()=>show('household','household',m.person_id).catch(ui.error)},
-   el('h4',{},m.display_name+(m.account_holder?' (you)':'')),el('small',{},'Portion '+m.portion_factor+' · '+current.length+' current needs'),
-   el('div',{},current.map(c=>el('span',{class:'pw-warn '+(c.kind==='allergy'?'unsafe':'')},constraintText(c)+(c.state==='scheduled'?' (from '+c.effective_from+')':''))))));
+   el('h4',{},m.display_name+(m.account_holder?' (you)':'')),el('small',{},['Portion '+m.portion_factor,plural(current.length,'current need'),later.length?plural(later.length,'need')+' starting later':''].filter(Boolean).join(' · ')),
+   el('div',{},[...current,...later].map(c=>el('span',{class:'pw-warn '+(c.kind==='allergy'?'unsafe':'')},constraintText(c)+(c.state==='scheduled'?' (from '+fullDate(c.effective_from)+')':''))))));
  }
  return pane;
 }
@@ -492,7 +548,7 @@ function memberDetail(ui){
   el('div',{class:'pw-bar'},el('h3',{},constraintText(c)),tag(cap(c.state)),
    ['active','scheduled'].includes(c.state)&&has(TOOLS.constraintSet)?button('Change',()=>constraintDialog(m,c)):null,
    ['active','scheduled'].includes(c.state)&&has(TOOLS.constraintRemove)?button('End',()=>endDialog(m,c)):null),
-  el('small',{},dates(c)||'No dates'),c.note?el('p',{},c.note):null,history(c.history,r=>r.note||'',3)));
+  el('small',{},dates(c)||'No start or end date'),c.note?el('p',{},c.note):null,history(c.history,r=>r.note||'',3)));
  return el('article',{},el('span',{class:'kicker'},'Household member'),el('h2',{},m.display_name),
   el('div',{class:'pw-actions'},has(TOOLS.constraintSet)?button('Add a need',()=>constraintDialog(m),{class:'primary'}):null),
   metadata('Portion factor',String(m.portion_factor)),el('h3',{},'Dietary needs'),rows.length?rows:el('p',{class:'muted'},'No needs recorded: everything checks as OK.'));
@@ -540,8 +596,9 @@ function activityView(shown,ui){
 }
 
 // ---- Mount ------------------------------------------------------------------------------------------
-// Each view reads only what it shows. Core's cost per call grows with the household's history, so
-// a view's main list is the shared client's list call and at most two more reads follow it.
+// Each view reads only what it shows: its main list is the shared client's list call and at most one
+// more read follows it (reads the page needs together are sent together). Every call costs one Core
+// transaction over the whole household history, so nothing that cannot change is read twice.
 const recipeLike=r=>r&&'revision' in r&&'servings' in r;
 const VIEWS={
  week:{list:TOOLS.plan,collection:'slots',args:()=>weekStart?{start:weekStart,end:addDays(weekStart,6)}:{}},
@@ -564,18 +621,33 @@ const config={
  heading:r=>r.title,subtitle:r=>(r.tags||[]).join(', '),
  async load(ui){
   UI=ui;const view=group(ui.section);
-  const listed=await fetch('/api/tools');if(listed.ok)schemas=new Map((await listed.json()).tools.map(t=>[t.name,t.inputSchema]));
+  // The tool schemas (for option lists) do not change while the page is open.
+  if(!schemas.size){const listed=await fetch('/api/tools');if(listed.ok)schemas=new Map((await listed.json()).tools.map(t=>[t.name,t.inputSchema]));}
   const read=(name,args)=>ui.has(name)?ui.call(name,args):Promise.resolve(null);
   const aux={};
-  if(view==='week'||view==='recipes'){
+  if(view==='week'){
+   const slots=ui.records;
+   for(const s of slots)for(const d of s.dishes)recipeTitles.set(d.recipe_id,d.title);
+   const unknown=slots.some(s=>s.history.some(h=>h.dishes.some(d=>!recipeTitles.has(d.recipe_id))));
+   [aux.household]=await Promise.all([read(TOOLS.household,{}),ensureIngredientNames(slots.map(s=>[s.flags,s.guests])),
+    unknown&&has(TOOLS.search)?allRecipes().catch(()=>null):null]);
+   aux.today=aux.household?.today||lastToday;
+   const start=weekStart||weekOf(aux.today,aux.household?.household.week_start);aux.plan={start,end:addDays(start,6),today:aux.today,slots};
+  }else if(view==='recipes'){
+   learnTitles(ui.records);
    aux.household=await read(TOOLS.household,{});aux.today=aux.household?.today||lastToday;
-   if(view==='week'){const start=weekStart||weekOf(aux.today,aux.household?.household.week_start);aux.plan={start,end:addDays(start,6),today:aux.today,slots:ui.records};}
-  }else if(view==='shopping'){
-   aux.household={members:ui.records};
-   [aux.shopping,aux.plan]=await Promise.all([read(TOOLS.shopping,{}),read(TOOLS.plan,{})]);aux.today=aux.plan?.today||lastToday;
-  }else if(view==='pantry')aux.pantry={items:ui.records};
-  else if(view==='household')aux.household={members:ui.records,household:null};
-  else if(view==='activity')aux.notifications={notifications:ui.records};
+  }else{
+   const needMembers=!memberNames.size&&view!=='household'&&has(TOOLS.household);
+   const [extra,household]=await Promise.all([view==='shopping'?read(TOOLS.shopping,{}):null,needMembers?read(TOOLS.household,{}):null,
+    view==='household'?ensureIngredientNames(ui.records.map(m=>m.constraints)):null]);
+   if(household)learnMembers(household.members);
+   aux.today=household?.today||lastToday;
+   if(view==='shopping'){aux.household={members:ui.records};aux.shopping=extra;}
+   else if(view==='pantry')aux.pantry={items:ui.records};
+   else if(view==='household')aux.household={members:ui.records,household:null};
+   else if(view==='activity')aux.notifications={notifications:ui.records};
+  }
+  if(aux.household?.members)learnMembers(aux.household.members);
   if(aux.today)lastToday=aux.today;
   loadedFor=ui.section;
   return aux;

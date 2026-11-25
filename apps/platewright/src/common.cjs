@@ -59,6 +59,22 @@ function localDate(instant, zone) {
 // "Today" is virtual_now in the household's time zone.
 const today = (ctx, data) => localDate(ctx.virtual_now, data.household.time_zone);
 
+// ---- Wording shared by notifications and messages ------------------------------------------------
+// Dates and meals in the words a person uses: "Sat 14 Nov 2026", "dinner on Sat 14 Nov 2026".
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function dateText(date) {
+  if (!isDate(date)) return String(date);
+  const d = new Date(date + 'T00:00:00Z');
+  return `${DAY_NAMES[d.getUTCDay()]} ${d.getUTCDate()} ${MONTH_NAMES[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+}
+function slotText(id) {
+  const m = /^(\d{4}-\d{2}-\d{2}):([a-z]+)$/.exec(String(id));
+  return m ? `${m[2]} on ${dateText(m[1])}` : String(id);
+}
+const words = value => String(value).replace(/_/g, ' ');
+const quantityText = (quantity, unit) => (unit === 'each' || !unit ? `${quantity}` : `${quantity} ${words(unit)}`);
+
 // ---- Small numeric helpers ----------------------------------------------------------------------
 // Trims floating-point noise from exact values (1049.9999999 -> 1050) without rounding real fractions.
 const exact = n => Math.round(n * 1e6) / 1e6;
@@ -95,5 +111,5 @@ function slug(text) {
 module.exports = {
   ALLERGENS, FLAGS, DIETS, NUTRIENTS, KINDS, METHODS, MEALS, WEEKDAYS, EVENT_KINDS, ID_PATTERN,
   fail, copy, isDate, addDays, daysBetween, weekday, validTimeZone, localDate, today, exact, ceilHalf,
-  byId, ingredient, recipe, member, nextId, slug
+  byId, ingredient, recipe, member, nextId, slug, dateText, slotText, words, quantityText
 };

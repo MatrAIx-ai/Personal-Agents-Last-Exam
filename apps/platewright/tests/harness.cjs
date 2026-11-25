@@ -91,6 +91,8 @@ function fixture({seed = require('../fixtures/minimal.json'), now = require('../
     call, event,
     refuse: (name, args) => attempt(() => call(name, args)),
     refuseEvent: e => attempt(() => event(e)),
+    // The message that comes with a refusal, as the web interface shows it.
+    message(name, args) { try { call(name, args); } catch (e) { return e.message; } return null; },
     // Infra's env.advance_time: moves the clock; runs no App code.
     advance(iso) { assert.ok(Date.parse(iso) >= Date.parse(virtualNow), 'Clock cannot move backwards'); virtualNow = iso; revision++; }
   };

@@ -15,7 +15,8 @@ const registry = path.join(locate.packageDir, 'web.registry.json');
 const out = locate.option('output') || path.join(path.dirname(runtime), '.artifacts/web/platewright');
 const P = 'platewright.';
 const HOSTILE = '<img src=x onerror="window.__pwned=1">Zoë & "Co"';
-const WAIT = {timeout: 40000};
+const WAIT = {timeout: 20000};
+const {unreadable} = require('../scripts/check-fixtures.cjs');
 
 async function main() {
   fs.mkdirSync(out, {recursive: true});
@@ -37,6 +38,12 @@ async function main() {
     const submit = async op => { await dialog(op).locator('button[type=submit]').click(); };
     const closed = op => dialog(op).waitFor({state: 'detached', ...WAIT});
     const shot = async name => { await page.screenshot({path: path.join(out, name + '.png'), fullPage: false}); };
+    // What a person reads in a view: no record IDs, slot IDs, ISO dates, vocabulary keys or missing values.
+    const readable = async where => {
+      const lines = (await page.locator('#app').innerText()).split('\n').map(x => x.trim()).filter(Boolean);
+      const bad = lines.map(unreadable).filter(Boolean);
+      check(`${where}: the page shows names, dates and words, not IDs or keys`, !bad.length, bad.slice(0, 5));
+    };
 
     await page.goto(host.accessUrl);
     await page.waitForSelector('.pw-day', WAIT); await idle();
@@ -49,6 +56,7 @@ async function main() {
     await page.click('[data-slot-id="2026-11-14:dinner"]'); await idle();
     const detail = await page.textContent('.detail');
     check('A slot shows what the check found for each guest', detail.includes('Maya: Unsafe') && detail.includes('Ines: Unsuitable'), detail.slice(0, 300));
+    await readable('Meal plan with a meal selected');
     await shot('02-slot-flags-1280');
 
     // W4: plan Tuesday's breakfast with a guest whose name is hostile text.
@@ -79,6 +87,8 @@ async function main() {
     const lineId = await page.locator('.pw-row.needed').first().getAttribute('data-line-id');
     await page.locator(`.pw-row[data-line-id="${lineId}"] input[type=checkbox]`).click(); await idle();
     check('Ticking a line commits (MCP read)', (await mcp.call(P + 'shopping.get', {})).list.lines.find(l => l.id === lineId).state === 'ticked');
+    await page.click(`.pw-row[data-line-id="${lineId}"]`); await idle();
+    await readable('Shopping list with an item selected');
     await shot('04-shopping-1280');
 
     // A lost response: the server commits, the page sees a network failure; sending the unchanged form
@@ -102,6 +112,7 @@ async function main() {
     // W5: pantry; a stale form shows the conflict, then a fresh one saves.
     await nav('Pantry');
     await page.click('[data-item-id="ing-egg"]'); await idle();
+    await readable('Pantry with an item selected');
     await page.click('.pw-actions button:has-text("Update stock")');
     const set = dialog(P + 'pantry.set'); await set.waitFor(WAIT);
     await set.locator('input[type=number]').fill('18');
@@ -111,7 +122,8 @@ async function main() {
     await submit(P + 'pantry.set');
     await page.waitForFunction(() => document.querySelector('dialog[data-operation="platewright.pantry.set"] .form-error')?.dataset.code, null, WAIT);
     const conflict = await set.locator('.form-error').textContent();
-    check('The stale form shows the conflict and writes nothing', conflict.startsWith('stale_version') &&
+    const conflictCode = await set.locator('.form-error').getAttribute('data-code');
+    check('The stale form shows the conflict and writes nothing', conflictCode === 'stale_version' && !conflict.includes('stale_version') &&
       (await mcp.call(P + 'pantry.list', {})).items.find(i => i.ingredient_id === 'ing-egg').quantity !== 18, conflict);
     await shot('05-stale-conflict-1280');
     await set.locator('button:has-text("Cancel")').click();
@@ -126,6 +138,7 @@ async function main() {
     // W2: a need whose end is before its start is refused with the App's code; corrected, it saves.
     await nav('Household');
     await page.click('[data-member-id="person-evan"]'); await idle();
+    await readable('Household with a member selected');
     await page.click('.pw-actions button:has-text("Add a need")');
     const need = dialog(P + 'members.constraint.set'); await need.waitFor(WAIT);
     await need.locator('select[aria-label="Kind"]').selectOption('dislike');
@@ -136,7 +149,8 @@ async function main() {
     await submit(P + 'members.constraint.set');
     await page.waitForFunction(() => document.querySelector('dialog[data-operation="platewright.members.constraint.set"] .form-error')?.dataset.code, null, WAIT);
     const refusal = await need.locator('.form-error').textContent();
-    check('A refusal shows the App code and message', refusal.startsWith('invalid_window:') && refusal.length > 'invalid_window: '.length, refusal);
+    const refusalCode = await need.locator('.form-error').getAttribute('data-code');
+    check('A refusal shows the App\'s message in words (its code stays on the element)', refusalCode === 'invalid_window' && refusal.length > 10 && !unreadable(refusal), refusal);
     await shot('06-refusal-1280');
     await until.fill('2026-11-30');
     await submit(P + 'members.constraint.set'); await closed(P + 'members.constraint.set'); await idle();
@@ -158,6 +172,11 @@ async function main() {
     await page.click('.pw-inline button:has-text("Scale")');
     await page.waitForFunction(() => document.querySelector('.pw-recipe .pw-table')?.textContent.includes('1050 ml'), null, WAIT);
     check('Scaling to 6 servings shows 1050 ml of coconut milk', true);
+    await page.click('.pw-recipe .pw-inline button:has-text("Check")');
+    await page.waitForFunction(() => document.querySelector('.pw-recipe .pw-verdicts [data-verdict]'), null, WAIT);
+    const verdicts = await page.textContent('.pw-recipe .pw-verdicts');
+    check('The check for the table names the ingredient a finding is about', verdicts.includes('Green curry paste') && !verdicts.includes('green-curry-paste'), verdicts);
+    await readable('Recipe with the check for the table');
     await page.click('.pw-actions button:has-text("Swap ingredients")');
     const swap = dialog(P + 'recipes.variant.create'); await swap.waitFor(WAIT);
     await swap.locator('select[aria-label="Swap for Fish sauce"]').selectOption('rule-fish-sauce-tamari');
@@ -180,6 +199,7 @@ async function main() {
     await page.fill('.toolbar input[type=search]', ''); await idle();
     await nav('Activity');
     check('Activity shows the other member\'s change after the view is read again', (await page.textContent('#records')).includes('Eli changed the pantry') || (await page.textContent('#records')).includes('Market run'), (await page.textContent('#records')).slice(0, 300));
+    await readable('Activity');
     await shot('09-activity-1280');
 
     // Reload keeps committed state.
