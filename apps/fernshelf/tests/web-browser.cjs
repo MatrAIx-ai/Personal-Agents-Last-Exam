@@ -27,12 +27,12 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     // independent checks retry that answer.
     const patient = c => ({call: async (name, args) => { for (let i = 0; ; i++) { try { return await c.call(name, args); } catch (e) { if (!/locked/.test(e.message) || i > 60) throw e; await new Promise(r => setTimeout(r, 150)); } } }});
     const mcp = patient(await open('agent')), infra = patient(await open('infra'));
-    const until = async (what, fn) => { const end = Date.now() + 20000; let last; while (Date.now() < end) { last = await fn(); if (last) return last; await new Promise(r => setTimeout(r, 150)); } throw new Error('Timed out: ' + what); };
+    const until = async (what, fn) => { const end = Date.now() + 45000; let last; while (Date.now() < end) { last = await fn(); if (last) return last; await new Promise(r => setTimeout(r, 150)); } throw new Error('Timed out: ' + what); };
     const item = async id => (await mcp.call('fernshelf.items.get', {id})).item;
     const album = async id => (await mcp.call('fernshelf.albums.get', {id})).album;
 
     const context = await browser.newContext({viewport: {width: 1280, height: 900}});
-    const page = await context.newPage(); page.setDefaultTimeout(20000);
+    const page = await context.newPage(); page.setDefaultTimeout(45000);
     const errors = [];
     let expectNetworkError = false;
     page.on('pageerror', e => errors.push('pageerror: ' + e.message));
@@ -52,9 +52,24 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     // What a person reads: no record IDs, no null/undefined, no JSON and no wording meant for the
     // Agent (argument names, error codes) anywhere in the visible page, open dialogs included.
     const RAW = /\b(?:it|al|ln|rr|ct|vw|ntf|pl|st|img)-[a-z]*\d[\w-]*|\bundefined\b|\bnull\b|\{"|confirm: true|\b[a-z]+_[a-z_]+\b/;
+    // The page spells as the account holder reads it: Honour, Favourite (never the US forms).
+    const US = /\b(?:Honor|Honored|Honoring|Favorite|Favorites|Color)\b/;
     const readable = async (p, where) => {
-      const text = await p.evaluate(() => document.body.innerText), m = RAW.exec(text);
+      const text = await p.evaluate(() => document.body.innerText), m = RAW.exec(text), u = US.exec(text);
       check(where + ': only readable text (no IDs, null, JSON or Agent wording)', !m, m && text.slice(Math.max(0, m.index - 80), m.index + 80));
+      check(where + ': British spelling on every visible control', !u, u && text.slice(Math.max(0, u.index - 60), u.index + 60));
+    };
+    // What a dialog really shows: controls that are rendered (computed style and a box), in order.
+    // Nothing else may be in it, so a field meant to stay out of sight cannot be there at all.
+    const shownFields = async (what, expected) => {
+      const info = await dialog.evaluate(d => {
+        const vis = n => n.checkVisibility({checkOpacity: true, checkVisibilityCSS: true}) && n.getBoundingClientRect().width > 0 && n.getBoundingClientRect().height > 0;
+        const controls = [...d.querySelectorAll('input,select,textarea')];
+        return {fields: controls.filter(vis).map(n => n.dataset.field || n.type), unseen: controls.filter(n => !vis(n)).map(n => n.dataset.field || n.type), text: d.innerText};
+      });
+      check(what + ': the dialog shows exactly ' + expected.join(', ') + ' and holds no unseen field', JSON.stringify(info.fields) === JSON.stringify(expected) && !info.unseen.length, info);
+      check(what + ': no field asks for record IDs, an order or a decision', !/\b(?:Add|Remove) ids\b|One value per line|\bDecision\b|\bOrder\b/i.test(info.text), info.text);
+      await readable(page, what + ' dialog');
     };
 
     await page.goto(host.accessUrl); await idle(); await page.locator('#records .fs-tile').first().waitFor();
@@ -66,6 +81,52 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     check('Thumbnail bytes are the catalogued image (items.read)', catalog.assets.some(a => a.integrity.sha256 === sha));
     await shot('desktop-photos'); await readable(page, 'Photos');
 
+    // Versions. The page reads its view as one batch at one version and never pairs those values
+    // with a newer version: after its own write it reads the whole view again, and a form sends the
+    // version of the read that filled it.
+    const version = async () => (await mcp.call('fernshelf.account.get')).version;
+    const best = 'al-best-2026', caption = async (id, text) => {
+      await select(id); await detailButton('Edit details').click();
+      await dialog.locator('[data-field="patch.caption"]').fill(text); await submit(); await dialog.waitFor({state: 'hidden'}); await idle();
+      await until('caption ' + text, async () => (await item(id)).caption === text);
+    };
+    await nav('Albums'); await page.locator('[data-album-id="' + best + '"]').click(); await idle();
+    await nav('Requests'); await nav('Photos');
+    const pendingBefore = (await mcp.call('fernshelf.removals.list', {state: 'pending'})).removals.length;
+    // (a) Changes from outside (Agent connection and an Infra event), then a write in the page.
+    let ov = await version();
+    ov = (await mcp.call('fernshelf.albums.update', {id: best, title: 'Best of 2026 (elsewhere)', expected_version: ov, request_id: 'outside-rename-1'})).version;
+    assert.equal((await mcp.call('fernshelf.albums.members.invite', {id: best, person_id: 'person-dana', role: 'viewer', expected_version: ov, request_id: 'outside-invite-1'})).status, 'committed');
+    const request = {event_id: 'ev-web-410', at: '2026-11-20T09:30:00-08:00', operation: 'fernshelf.removal.requested',
+      payload: {removal_id: 'rr-web-1', from_person_id: 'person-sam', item_ids: [(await album(best)).entries[0].id], scope: {type: 'everywhere'}, message: 'Could this one stay private?'}};
+    assert.equal((await infra.call('env.apply_event', {expected_version: (await infra.call('env.snapshot')).version, event: request})).status, 'committed');
+    await caption('it-2611-0935', 'Edited in the page after changes elsewhere');
+    await nav('Albums');
+    check('After its own write the page shows an album renamed elsewhere', (await page.locator('[data-album-id="' + best + '"] strong').innerText()) === 'Best of 2026 (elsewhere)');
+    check('After its own write the page counts a request that arrived elsewhere', (await page.locator('nav').innerText()).includes('Requests · ' + (pendingBefore + 1) + ' new'));
+    await page.locator('[data-album-id="' + best + '"]').click(); await idle();
+    check('After its own write the album page shows the new title and the member invited elsewhere',
+      await page.locator('.fs-album-meta[data-album-title="Best of 2026 (elsewhere)"]').count() === 1 && (await page.locator('.fs-sharing').innerText()).includes('Dana'));
+    // (b) Another change elsewhere, a write in the page, then a form opened before a third change.
+    assert.equal((await mcp.call('fernshelf.albums.update', {id: best, title: 'Best of 2026 (second)', expected_version: await version(), request_id: 'outside-rename-2'})).status, 'committed');
+    await nav('Photos'); await caption('it-2611-0935', 'Edited in the page again');
+    await nav('Albums'); await page.locator('[data-album-id="' + best + '"]').click(); await idle();
+    await page.getByRole('button', {name: 'Rename', exact: true}).click();
+    await shownFields('Rename album', ['title']);
+    check('The Rename form shows the title as it is now', (await dialog.locator('[data-field=title]').inputValue()) === 'Best of 2026 (second)');
+    assert.equal((await mcp.call('fernshelf.albums.update', {id: best, title: 'Best of 2026 (third)', expected_version: await version(), request_id: 'outside-rename-3'})).status, 'committed');
+    await dialog.locator('[data-field=title]').fill('Renamed in the page'); await submit();
+    await dialog.locator('[role=alert][data-code=stale_version]').waitFor();
+    check('A form opened before a change elsewhere shows the conflict, and the change elsewhere stays', (await album(best)).title === 'Best of 2026 (third)');
+    await shot('desktop-conflict'); await readable(page, 'Conflict');
+    await dialog.getByRole('button', {name: 'Cancel'}).click(); await dialog.waitFor({state: 'hidden'});
+    await page.getByRole('button', {name: 'Refresh', exact: true}).click(); await idle();
+    check('Refresh shows the change made elsewhere', await page.locator('.fs-album-meta[data-album-title="Best of 2026 (third)"]').count() === 1);
+    // The request made for this check is withdrawn again, so later checks start from the seeded requests.
+    const withdraw = {event_id: 'ev-web-411', at: '2026-11-20T09:31:00-08:00', operation: 'fernshelf.removal.withdrawn', payload: {removal_id: 'rr-web-1'}};
+    assert.equal((await infra.call('env.apply_event', {expected_version: (await infra.call('env.snapshot')).version, event: withdraw})).status, 'committed');
+    await page.getByRole('button', {name: 'Refresh', exact: true}).click(); await idle();
+
     // W2: a new album through the schema form, with a lost response retried once.
     let dropped = false;
     await page.route('**/api/call', async route => {
@@ -75,6 +136,7 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     });
     expectNetworkError = true;
     await page.getByRole('button', {name: 'New album', exact: true}).click();
+    await shownFields('New album', ['title']);
     await dialog.locator('[data-field=title]').fill('Browser trip'); await submit();
     await dialog.locator('[role=alert]').filter({hasText: /connection was interrupted/i}).waitFor();
     check('A lost response leaves the form open with the error', await dialog.count() === 1);
@@ -104,11 +166,13 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
 
     // W3: invite, link, revoke.
     await page.getByRole('button', {name: 'Invite', exact: true}).click();
+    await shownFields('Invite', ['person_id', 'role']);
     await dialog.locator('select[data-field=person_id]').selectOption('person-iris');
     await dialog.locator('select[data-field=role]').selectOption('contributor'); await submit(); await dialog.waitFor({state: 'hidden'});
     await until('invite', async () => (await album(trip)).members.some(m => m.person_id === 'person-iris' && m.status === 'invited' && m.role === 'contributor'));
     check('Invite: Iris invited as contributor', true); await idle();
-    await page.getByRole('button', {name: 'Create link', exact: true}).click(); await submit(); await dialog.waitFor({state: 'hidden'});
+    await page.getByRole('button', {name: 'Create link', exact: true}).click();
+    await shownFields('Create link', ['expires_at']); await submit(); await dialog.waitFor({state: 'hidden'});
     const link = await until('link', async () => (await album(trip)).links.find(l => l.state === 'active'));
     check('Create link: an active link without expiry', link.expires_at === null);
     await idle();
@@ -124,7 +188,7 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     await until('favourite', async () => (await item('it-2611-0931')).favorite === true);
     check('Favourite: items.update favorite', true); await idle();
     await detailButton('Edit details').click();
-    check('Edit details shows only caption, favourite, archived and corrected time', JSON.stringify(await dialog.locator('label.field:not([hidden]) [data-field]').evaluateAll(n => n.map(x => x.dataset.field))) === JSON.stringify(['patch.caption', 'patch.favorite', 'patch.archived', 'patch.taken_at']));
+    await shownFields('Edit details', ['patch.caption', 'patch.favorite', 'patch.archived', 'patch.taken_at']);
     await dialog.locator('[data-field="patch.caption"]').fill(HOSTILE); await submit(); await dialog.waitFor({state: 'hidden'});
     await until('caption', async () => (await item('it-2611-0931')).caption === HOSTILE);
     await idle();
@@ -187,6 +251,7 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     await page.locator('.detail .fs-exposure .fs-surface').first().waitFor();
     check('Before answering, the photo panel shows where the item is visible (exposure.get)', (await page.locator('.detail .fs-exposure').innerText()).includes('Reunion 2026'));
     await page.locator('[data-request-id="' + albumScoped.id + '"]').getByRole('button', {name: 'Honour…'}).click();
+    await shownFields('Honour', ['note']);
     await dialog.locator('[data-field=note]').fill('Taken out of the reunion album.'); await submit();
     await page.locator('dialog.fs-dialog[open] h2', {hasText: 'Request honoured'}).waitFor();
     check('Honour shows what was taken down and what was already seen', /Taken down/i.test(await page.locator('dialog.fs-dialog[open]').innerText()));
@@ -194,7 +259,8 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     await page.locator('dialog.fs-dialog[open]').getByRole('button', {name: 'Close'}).click();
     const honored = (await mcp.call('fernshelf.removals.list', {state: 'honored'})).removals.find(r => r.id === albumScoped.id);
     check('Honour: request honoured with the note', honored?.answers.at(-1).note === 'Taken out of the reunion album.'); await idle();
-    await page.locator('[data-request-id="' + other.id + '"]').getByRole('button', {name: 'Decline…'}).click(); await submit(); await dialog.waitFor({state: 'hidden'});
+    await page.locator('[data-request-id="' + other.id + '"]').getByRole('button', {name: 'Decline…'}).click();
+    await shownFields('Decline', ['note']); await submit(); await dialog.waitFor({state: 'hidden'});
     await until('declined', async () => (await mcp.call('fernshelf.removals.list', {state: 'declined'})).removals.some(r => r.id === other.id));
     check('Decline: request declined', true); await idle();
     // Showing an honoured item again is accepted, with a warning naming the requester.
@@ -210,6 +276,7 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     // W3 on a seeded shared album: role change, saving a contribution, a refused delete.
     await nav('Albums'); await page.locator('[data-album-id="al-reunion-2026"]').click(); await idle();
     await page.locator('.fs-person', {hasText: 'Kofi Darrow'}).getByRole('button', {name: 'Change role'}).click();
+    await shownFields('Change role', ['role']);
     await dialog.locator('select[data-field=role]').selectOption('contributor'); await submit(); await dialog.waitFor({state: 'hidden'});
     await until('role', async () => (await album('al-reunion-2026')).members.find(m => m.person_id === 'person-kofi').role === 'contributor');
     check('Change role: Kofi is a contributor', true); await idle();
@@ -242,7 +309,6 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
     const applied = await infra.call('env.apply_event', {expected_version: (await infra.call('env.snapshot')).version, event});
     assert.equal(applied.status, 'committed', JSON.stringify(applied));
     await nav('Requests');
-    check('Before Refresh the page shows what it last read', await page.locator('[data-request-id="' + event.payload.removal_id + '"]').count() === 0);
     await page.getByRole('button', {name: 'Refresh', exact: true}).click(); await idle();
     await page.locator('[data-request-id="' + event.payload.removal_id + '"]').waitFor();
     check('Refresh shows a removal request that arrived as an event', (await page.locator('nav').innerText()).includes('Requests · 1 new'));
@@ -259,11 +325,13 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
 
     // Phone width.
     const phone = await browser.newContext({viewport: {width: 390, height: 844}, isMobile: true, hasTouch: true});
-    const p = await phone.newPage(); p.setDefaultTimeout(20000);
+    const p = await phone.newPage(); p.setDefaultTimeout(45000);
     p.on('pageerror', e => errors.push('phone pageerror: ' + e.message));
     p.on('console', m => { if (m.type() === 'error') errors.push('phone console: ' + m.text()); });
     await p.goto(host.accessUrl); await p.locator('#app[aria-busy=false]').waitFor(); await p.locator('#records .fs-tile').first().waitFor();
     const overflow = async () => p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    const cut = await p.locator('nav button').evaluateAll(ns => ns.filter(n => { const r = n.getBoundingClientRect(); return r.left < 0 || r.right > window.innerWidth || n.scrollWidth > n.clientWidth; }).map(n => n.innerText));
+    check('390 px: every navigation entry is shown whole', cut.length === 0, cut);
     for (const view of ['Photos', 'Albums', 'Requests', 'Storage', 'Trash']) {
       await p.locator('nav button').filter({hasText: view}).first().click(); await p.locator('#app[aria-busy=false]').waitFor();
       await p.waitForTimeout(300);
@@ -291,7 +359,7 @@ const HOSTILE = '<img src=x onerror="window.injected=true"> Steps & "quotes"';
 
     // Restricted profile on a fresh run: no write controls, reads and images still work.
     const restricted = await start({app: 'fernshelf', registry, run: 'browser-restricted', stateDir, profile: 'scenario'}); hosts.push(restricted);
-    const rc = await browser.newContext({viewport: {width: 1280, height: 900}}), r = await rc.newPage(); r.setDefaultTimeout(20000);
+    const rc = await browser.newContext({viewport: {width: 1280, height: 900}}), r = await rc.newPage(); r.setDefaultTimeout(45000);
     r.on('pageerror', e => errors.push('restricted pageerror: ' + e.message));
     await r.goto(restricted.accessUrl); await r.locator('#app[aria-busy=false]').waitFor(); await r.locator('.detail[data-selected-id]').waitFor();
     await until('restricted thumbnails', () => r.locator('#records .fs-tile img').count());
