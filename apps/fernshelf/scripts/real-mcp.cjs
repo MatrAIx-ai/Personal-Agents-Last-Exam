@@ -67,11 +67,12 @@ async function run() {
     check('Read leaves business data byte-identical', JSON.stringify(after.snapshot.data) === JSON.stringify(s.snapshot.data));
     check('Read leaves the version unchanged while the audit grows by one row', JSON.stringify(after.version) === JSON.stringify(s.version) && after.snapshot.audit.length === s.snapshot.audit.length + 1);
     // A committed write, its replay and a conflicting reuse; a stale version.
-    const args = {title: 'For Dana', request_id: 'create-1', expected_version: s.version};
+    const seededRows = s.snapshot.data.activity.length, args = {title: 'For Dana', request_id: 'create-1', expected_version: s.version};
     const w = await agent.call('fernshelf.albums.create', args);
     check('albums.create commits with the next revision', w.status === 'committed' && w.version.revision === s.version.revision + 1 && w.state === 'private', w);
     s = await snap();
-    check('One activity row for the committed write', s.snapshot.data.activity.length === 1 && s.snapshot.data.activity[0].request_id === 'create-1');
+    check('One activity row for the committed write, after the seeded history', s.snapshot.data.activity.length === seededRows + 1 && s.snapshot.data.activity.at(-1).request_id === 'create-1' &&
+      s.snapshot.data.activity.at(-1).seq === s.snapshot.data.activity.at(-2).seq + 1);
     const replay = await agent.call('fernshelf.albums.create', args);
     after = await snap();
     check('Exact replay returns the stored receipt marked duplicate and creates nothing', replay.duplicate === true && replay.id === w.id && same(after, s), replay);

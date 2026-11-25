@@ -97,7 +97,7 @@ test('Fernshelf page on the shared Web Host (sandbox profile)', async t => {
       assert.equal(removals.removals.filter(r => r.state === 'pending').length, 2);
       const storage = await s.call('fernshelf.storage.summary');
       assert.equal(storage.storage.used_bytes, 13950000000);
-      assert.equal((await s.call('fernshelf.notifications.list')).notifications.length, 18);
+      assert.equal((await s.call('fernshelf.notifications.list')).notifications.length, 27);
       const exposure = await s.call('fernshelf.exposure.get', {id: 'it-2611-0931'});
       assert.deepEqual(exposure.visible_to, ['person-kofi', 'person-omar', 'person-ruth', 'person-theo']);
       const bytes = await s.call('fernshelf.items.read', {id: 'it-2611-0931'});

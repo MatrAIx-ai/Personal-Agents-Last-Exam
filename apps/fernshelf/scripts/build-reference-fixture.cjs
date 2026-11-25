@@ -2,13 +2,15 @@
 'use strict';
 // Builds the reference fixture deterministically: fixtures/reference.json, the script-drawn PNG
 // files in assets/, contribution/assets.catalog.json and the counts in contribution/dataset.json.
-// Everything is fictional. The library was opened and imported on 2026-01-03, so only capture
-// times (taken_at) are earlier than 2026-01-01. `--check` fails if any output differs.
+// Everything is fictional. The account was opened on 2025-01-04 with an import of the older phone's
+// photos (capture times from 2024); after that the phone backed up each photo shortly after it was
+// taken, and scripts/reference-history.cjs adds the account's history across 2025 and 2026 (edits,
+// albums filled over time, links, views and saves, removal requests, trash and purges, the activity
+// log). Nothing other than taken_at is dated before 2025-01-01. `--check` fails if any output differs.
 //   node scripts/build-reference-fixture.cjs [--check]
 const fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto');
 const {draw, hash} = require('../dev/draw-images.cjs');
 const {zoneOffset} = require('../src/common.cjs');
-const {wireMessage} = require('../src/notify.cjs');
 const root = path.resolve(__dirname, '..');
 const ZONE = 'America/Los_Angeles', ACCOUNT = 'fernshelf-maya', GB = 1e9;
 const CLOCK = require('../fixtures/clock.json').initial_time;
@@ -16,6 +18,10 @@ const CLOCK = require('../fixtures/clock.json').initial_time;
 // ---- helpers ------------------------------------------------------------------------------------
 function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 const R = rng(20261122);
+// A second stream for the dates and history added for 2025, so the records drawn from R (IDs,
+// sizes, captions, albums, trash) stay exactly as they were.
+const SEED_HISTORY = 20250104, R2 = rng(SEED_HISTORY);
+const between2 = (lo, hi) => lo + Math.floor(R2() * (hi - lo + 1));
 const pick = list => list[Math.floor(R() * list.length)];
 const between = (lo, hi) => lo + Math.floor(R() * (hi - lo + 1));
 // A local wall time in the account zone ("2026-11-14T16:41:10") as a timestamp with its offset.
@@ -51,7 +57,7 @@ const PLACE = Object.fromEntries(PLACES.map((p, k) => [p[0], k]));
 
 // ---- items --------------------------------------------------------------------------------------
 const items = [];
-const IMPORT = local('2026-01-03T10:00:00');
+const OPENED = local('2025-01-04T10:00:00'), BEFORE_HISTORY = local('2026-01-03T10:00:00');
 let importSeq = 0;
 function addItem(o) {
   const it = {id: o.id, kind: o.kind || 'photo', taken_at: o.taken_at, added_at: o.added_at, place: o.place ?? null, people: o.people || [], caption: o.caption ?? null,
@@ -61,8 +67,11 @@ function addItem(o) {
   items.push(it);
   return it;
 }
+// Photos taken before the account was opened came in with the import on opening day; later ones
+// were backed up by the phone between one and ninety minutes after they were taken.
 const addedFor = taken => {
-  if (before(taken, IMPORT)) { const at = plus(IMPORT, importSeq++); return {added_at: at, importedAt: at}; }
+  if (before(taken, OPENED)) { const at = plus(OPENED, 600 + importSeq++); return {added_at: at, importedAt: at}; }
+  if (before(taken, BEFORE_HISTORY)) return {added_at: plus(taken, between2(60, 5400))};
   return {added_at: plus(taken, between(60, 5400))};
 };
 const photoBytes = () => between(2400000, 7800000);
@@ -200,7 +209,7 @@ const trashPhotos = trashPool.filter((_, k) => k % 3 === 0).slice(0, 18);
 const active = trashPhotos.slice(0, 14), past = trashPhotos.slice(14, 18);
 // Large originals are what people clear out first.
 active.forEach((it, k) => { it.declared_bytes = between(7000000, 8000000); trash(it, plus(local('2026-10-25T20:00:00'), k * 86400 + k * 600)); });
-trash(SPECIAL['it-2611-0958'], local('2026-11-19T08:30:00'));
+trash(SPECIAL['it-2611-0958'], local('2026-11-19T09:40:00'));
 past.forEach((it, k) => trash(it, plus(local('2026-09-20T19:00:00'), k * 5 * 86400)));
 const lastTrash = active[active.length - 1];
 lastTrash.declared_bytes = 110000000 - active.slice(0, -1).reduce((n, i) => n + i.declared_bytes, 0) - SPECIAL['it-2611-0958'].declared_bytes;
@@ -266,11 +275,11 @@ const best = base.filter(i => ok(i) && year(i, 2026) && i.favorite).slice(0, 9).
 const bestAlbum = album('al-best-2026', 'Best of 2026', local('2026-03-01T20:00:00'), [...best, D1.id, 'it-2611-0942', 'it-2611-0931', active[3].id]);
 const winterItems = base.filter(i => i.outing.winter && ok(i) && !used.has(i.id)).map(i => i.id);
 const winter = album('al-winter-visit', 'Winter visit', local('2026-01-04T09:00:00'), [...winterItems, 'it-2611-0960']);
-album('al-pip', 'Pip', local('2026-01-05T09:00:00'), base.filter(i => ok(i) && i.people.includes('pl-pip')).slice(0, 14).map(i => i.id));
+album('al-pip', 'Pip', local('2025-03-02T20:00:00'), base.filter(i => ok(i) && i.people.includes('pl-pip')).slice(0, 14).map(i => i.id));
 const recitalItems = base.filter(i => i.outing.recital && ok(i)).map(i => i.id);
 album('al-recital-2026', 'Spring recital 2026', local('2026-04-19T09:00:00'), recitalItems);
 album('al-2025', '2025 highlights', local('2026-01-06T20:00:00'), base.filter(i => ok(i) && year(i, 2025) && !used.has(i.id)).filter((_, k) => k % 6 === 0).slice(0, 15).map(i => i.id));
-album('al-trails', 'Trail days', local('2026-01-07T20:00:00'), base.filter(i => ok(i) && i.place && /Ridge|Meadow|lookout|Lake/.test(i.place.label)).slice(0, 12).map(i => i.id));
+album('al-trails', 'Trail days', local('2025-05-03T20:00:00'), base.filter(i => ok(i) && i.place && /Ridge|Meadow|lookout|Lake/.test(i.place.label)).slice(0, 12).map(i => i.id));
 album('al-kitchen', 'Kitchen redo', local('2026-03-15T20:00:00'), base.filter(i => ok(i) && i.place && /kitchen|bakery|cafe/i.test(i.place.label)).slice(0, 8).map(i => i.id));
 album('al-keep', 'Screenshots to keep', local('2026-02-01T20:00:00'), items.filter(i => i.source === 'screenshot' && i.state === 'active').slice(0, 6).map(i => i.id));
 // Links: Reunion (active, expires 31 Dec), Cabin (revoked), recital (expired), winter visit (active, no expiry).
@@ -361,54 +370,39 @@ assets.sort((a, b) => (a.asset_id < b.asset_id ? -1 : 1));
 
 // ---- storage: exactly 13.95 GB used of 15 GB --------------------------------------------------------
 const QUOTA = 15 * GB, USED = 13.95 * GB;
-const isPast = it => it.state === 'trashed' && Date.parse(it.purge_at) <= Date.parse(CLOCK);
+const isPast = it => it.state === 'purged' || (it.state === 'trashed' && Date.parse(it.purge_at) <= Date.parse(CLOCK));
 const counted = () => items.filter(i => i.backed_up && !isPast(i)).reduce((n, i) => n + i.declared_bytes, 0);
 const balance = videos.find(v => v.state === 'active' && v !== trashVideo && !Object.values(albums).some(a => a.item_ids.includes(v.id)));
 balance.caption = 'Lake swim, the whole afternoon';
 balance.declared_bytes += USED - counted();
 if (balance.declared_bytes < 500e6 || balance.declared_bytes > 3e9) throw Error('Balance video out of range: ' + balance.declared_bytes);
 
-// ---- notifications (18) -------------------------------------------------------------------------
-const nameOf = id => people.find(p => p.person_id === id).display_name;
-const notifications = [];
-const note = (kind, at, object_type, object_id, title, body, level = null) => notifications.push({id: null, kind, at, title, body, object_type, object_id, event_id: null, level, wire: null});
-for (const [a, list] of [[reunion, reunion.members], [cabin, cabin.members], [garden, garden.members]]) {
-  for (const m of list) {
-    if (m.status === 'joined') note('album.activity', m.joined_at, 'album', a.id, nameOf(m.person_id) + ' joined ' + a.title, nameOf(m.person_id) + ' accepted your invitation to the shared album ' + a.title + '.');
-    if (m.status === 'left') note('album.activity', m.ended_at, 'album', a.id, nameOf(m.person_id) + ' left ' + a.title, nameOf(m.person_id) + ' left the shared album ' + a.title + '. The 2 items they added left the album with them; anything you saved stays in your library.');
-  }
-}
-for (const [a, who, at, n] of [[reunion, 'person-omar', omarAt, 4], [reunion, 'person-theo', theoAt, 2], [cabin, 'person-sam', samAt, 4]]) {
-  note('album.activity', at, 'album', a.id, nameOf(who) + ' added ' + n + ' photos in ' + a.title, nameOf(who) + ' added ' + n + ' photos in the shared album ' + a.title + '. Contributions are not in your library until you save them.');
-}
-note('storage.threshold', local('2026-07-12T16:20:00'), 'account', ACCOUNT, 'Your Fernshelf storage is 80% full',
-  'You are using 12.01 GB of your 15.00 GB. When it is full, new photos and videos wait on your device until there is space. Open Fernshelf to review storage and the trash.', 80);
-for (const r of removals) {
-  const albumTitle = r.scope.album_id ? albums.find(a => a.id === r.scope.album_id).title : null, n = r.item_ids.length;
-  note('removal.requested', r.requested_at, 'removal_request', r.id, nameOf(r.from_person_id) + ' asked you to take down ' + n + ' photo' + (n === 1 ? '' : 's'),
-    nameOf(r.from_person_id) + ' asked that ' + n + ' photo' + (n === 1 ? '' : 's') + ' showing them be removed from ' + (albumTitle ? 'the shared album ' + albumTitle : 'everywhere they are shared') +
-    '. Their note: ' + r.message + ' Open Fernshelf to see where each photo is visible and to answer the request.');
-  if (r.state === 'withdrawn') note('removal.withdrawn', r.withdrawn_at, 'removal_request', r.id, nameOf(r.from_person_id) + ' withdrew a removal request',
-    nameOf(r.from_person_id) + ' withdrew their request to take down ' + n + ' photo' + (n === 1 ? '' : 's') + '. Their note: ' + r.withdraw_message + ' Nothing in your albums was changed.');
-}
-notifications.sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
+// ---- history from 2025: edits, 2025 sharing, trash and purges, notifications, activity -------------
+for (const it of items) delete it.outing;
+const history = require('./reference-history.cjs').extend({items, stacks, albums, links, views, removals, people, base, ACCOUNT, OWNER: 'person-maya', OPENED, CLOCK,
+  QUOTA, RETENTION, ZONE, local, plus, days, before, H, R2, between2, fromUtc, photoBytes2: () => between2(2400000, 7800000)});
 
 // ---- assemble -----------------------------------------------------------------------------------
-for (const it of items) delete it.outing;
 items.sort((a, b) => Date.parse(a.added_at) - Date.parse(b.added_at) || (a.id < b.id ? -1 : 1));
 const data = {account_id: ACCOUNT, owner_person_id: 'person-maya',
-  account: {display_name: 'Maya Fenwick', plan: 'Fernshelf 15 GB', quota_bytes: QUOTA, trash_retention_days: RETENTION, time_zone: ZONE, email_notices: true, opened_at: IMPORT},
-  people, labels, items, stacks, albums, links, views, removals, notifications, activity: []};
-data.notifications.forEach((n, k) => { n.id = 'ntf-' + String(k + 1).padStart(4, '0'); n.wire = wireMessage(data, n); });
+  account: {display_name: 'Maya Fenwick', plan: 'Fernshelf 15 GB', quota_bytes: QUOTA, trash_retention_days: RETENTION, time_zone: ZONE, email_notices: true, opened_at: OPENED},
+  people, labels, items, stacks, albums, links, views, removals, notifications: history.notifications, activity: history.activity};
 const records = require('../src/model.cjs').records(data).length;
 const dataset = JSON.parse(fs.readFileSync(path.join(root, 'contribution/dataset.json'), 'utf8'));
 dataset.expected_counts = {records, assets: assets.length};
-dataset.sources = [dataset.sources.find(x => x.source_id === 'authored'), {source_id: 'drawn', kind: 'synthetic',
-  description: 'Stand-in PNG images drawn by dev/draw-images.cjs: flat scenes of colour fields and shapes with light grain and a stamped caption. No people, faces, photographs or generative model.',
-  uri: null, license: 'MIT', usage: 'permitted', collection: null,
-  generation: {method: 'procedural', tool: 'dev/draw-images.cjs', tool_version: '1.0.0', seed: null, parameters: {width: 128, height: 96, seed_from: 'FNV-1a hash of the item ID'}}}];
+const synthetic = (source_id, description, generation) => ({source_id, kind: 'synthetic', description, uri: null, license: 'MIT', usage: 'permitted', collection: null, generation});
+dataset.record_source_ids = ['authored', 'procedural', 'history'];
+dataset.sources = [
+  synthetic('authored', 'Story records written out by hand in scripts/build-reference-fixture.cjs: the November 2026 reunion and the other dated photos, the shared albums with their members and contributions, the links and views, the removal requests and their messages. People, places and captions are fictional; no external collection.',
+    {method: 'manual', tool: 'scripts/build-reference-fixture.cjs', tool_version: '1.1.0', seed: null, parameters: {}}),
+  synthetic('procedural', 'The rest of the library generated by scripts/build-reference-fixture.cjs from a fixed seed: outings with capture times from January 2024 to October 2026, screenshots and downloads, stacks and exact duplicates, sizes, the trash and the private albums.',
+    {method: 'procedural', tool: 'scripts/build-reference-fixture.cjs', tool_version: '1.1.0', seed: 20261122, parameters: {items: 420, capture_from: '2024-01-01', clock: CLOCK}}),
+  synthetic('history', 'The account history from its opening on 2025-01-04 to the fixture clock, generated by scripts/reference-history.cjs from its own fixed seed: arrival times, edits, items trashed and restored, photos purged, 2025 links, members, views, saves and removal requests, the time each item entered each album, every notification and the activity log.',
+    {method: 'procedural', tool: 'scripts/reference-history.cjs', tool_version: '1.0.0', seed: SEED_HISTORY, parameters: {opened_at: OPENED, history_from: '2025-01-01'}}),
+  synthetic('drawn', 'Stand-in PNG images drawn by dev/draw-images.cjs: flat scenes of colour fields and shapes with light grain and a stamped caption. No people, faces, photographs or generative model.',
+    {method: 'procedural', tool: 'dev/draw-images.cjs', tool_version: '1.0.0', seed: null, parameters: {width: 128, height: 96, seed_from: 'FNV-1a hash of the item ID'}})];
 dataset.transformations = ['Timestamps carry explicit UTC offsets; local days are resolved in America/Los_Angeles.',
-  'Records and images are generated by scripts/build-reference-fixture.cjs with a fixed pseudo-random seed; fixtures/minimal.json is hand-authored.'];
+  'fixtures/reference.json, the images in assets/ and contribution/assets.catalog.json are written by scripts/build-reference-fixture.cjs (with scripts/reference-history.cjs); `--check` confirms they match byte for byte. fixtures/minimal.json is written by hand.'];
 const catalog = {schema_version: 'pale.asset-catalog.v1', catalog_id: 'fernshelf-assets', app_id: 'fernshelf', dataset_ref: 'dataset.json', assets, extensions: []};
 
 const outputs = {'fixtures/reference.json': JSON.stringify(data, null, 2) + '\n', 'contribution/assets.catalog.json': JSON.stringify(catalog, null, 2) + '\n',

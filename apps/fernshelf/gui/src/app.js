@@ -339,14 +339,19 @@ function storageView(){
   el('h3',{class:'fs-month'},'Largest items'),largest.length?grid(largest,{group:false}):el('p',{class:'muted fs-pad'},'None.'),
   el('h3',{class:'fs-month'},'Duplicate copies'),dups.length?grid(dups,{group:false}):el('p',{class:'muted fs-pad'},'No duplicates found.'));
 }
+// Notices from the last 90 days (counted back from the newest) are listed; older ones, which go
+// back to when the account was opened, sit under one collapsed "Earlier" entry.
+const RECENT_DAYS=90;
 function activityView(){
  const list=el('div',{class:'fs-cards'});
  const target=n=>n.object_type==='album'&&A.albums.some(a=>a.id===n.object_id&&!a.deleted_at)?'album:'+n.object_id:n.object_type==='removal_request'?'requests':n.kind==='storage.threshold'?'storage':null;
- for(const n of [...A.notifications].sort((a,b)=>Date.parse(b.at)-Date.parse(a.at))){
-  const to=target(n);
-  list.append(el('article',{class:'fs-card notice '+n.kind.replace('.','-')},el('div',{class:'fs-card-head'},el('h3',{},n.title),el('time',{},when(n.at))),el('p',{},n.body),
-   to?button(to==='requests'?'Open requests':to==='storage'?'Open storage':'Open album',()=>{picking=false;return ui.navigate(to);},'quiet'):null));
- }
+ const notice=n=>{const to=target(n);
+  return el('article',{class:'fs-card notice '+n.kind.replace('.','-')},el('div',{class:'fs-card-head'},el('h3',{},n.title),el('time',{},when(n.at))),el('p',{},n.body),
+   to?button(to==='requests'?'Open requests':to==='storage'?'Open storage':'Open album',()=>{picking=false;return ui.navigate(to);},'quiet'):null);};
+ const all=[...A.notifications].sort((a,b)=>Date.parse(b.at)-Date.parse(a.at));
+ const since=all.length?Date.parse(all[0].at)-RECENT_DAYS*864e5:0,recent=all.filter(n=>Date.parse(n.at)>=since),older=all.filter(n=>Date.parse(n.at)<since);
+ list.append(...recent.map(notice));
+ if(older.length)list.append(el('details',{class:'fs-earlier'},el('summary',{},'Earlier · '+plural(older.length,'notice')+' since '+month(older[older.length-1].at)),el('div',{class:'fs-cards nested'},older.map(notice))));
  if(!list.children.length)list.append(el('div',{class:'empty'},el('h3',{},'No activity yet')));
  return el('div',{class:'fs-pane'},el('div',{class:'fs-head'},el('p',{class:'muted'},'What members, link viewers, requesters and your devices did. Your own changes are not listed here.')),list);
 }
@@ -619,6 +624,8 @@ body[data-app=fernshelf] .record.fs-tile[aria-pressed=true]{box-shadow:0 0 0 3px
 .fs-surface{display:flex;flex-direction:column;padding:8px 10px;border-radius:8px;background:#f7f9fa;margin:6px 0;font-size:12px}
 .fs-exposure p{font-size:13px;margin:4px 0}
 .fs-history summary{cursor:pointer;font-size:12px;color:#5f6d80;margin-top:22px}
+.fs-earlier summary{cursor:pointer;font-size:13px;font-weight:600;color:#38475a;padding:6px 0}
+.fs-cards.nested{padding:8px 0 0}
 .fs-choices{display:grid;gap:6px}
 .fs-choice{display:flex;justify-content:space-between;align-items:center;text-align:left}
 .fs-choice small{font-size:11px}

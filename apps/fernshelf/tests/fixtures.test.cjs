@@ -7,7 +7,7 @@ const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const {fixture, ev} = require('./harness.cjs');
 const {build} = require('../scripts/build-reference-fixture.cjs');
-const {run: checkFixtures} = require('../scripts/check-fixtures.cjs');
+const {run: checkFixtures, problemsOf} = require('../scripts/check-fixtures.cjs');
 const catalog = require('../contribution/assets.catalog.json');
 const reference = require('../fixtures/reference.json');
 
@@ -26,6 +26,35 @@ const rejected = (f, e) => { const before = f.revision, r = f.tryEvent(e); asser
 test('reference fixture matches its builder and passes the consistency script', () => {
   assert.deepEqual(build({check: true}), []);
   assert.deepEqual(checkFixtures().problems, []);
+});
+
+test('consistency script refuses a history the App would not have produced, in either fixture', () => {
+  const minimal = require('../fixtures/minimal.json');
+  const altered = (data, change) => { const copy = structuredClone(data); change(copy); return problemsOf('altered', copy); };
+  const refuses = (data, change, pattern) => assert.ok(altered(data, change).some(x => pattern.test(x)), String(pattern));
+  assert.deepEqual(problemsOf('reference', reference), []);
+  assert.deepEqual(problemsOf('minimal', minimal), []);
+  const item = (d, id) => d.items.find(i => i.id === id);
+  // Dates: the 2025-01-01 floor and the account's opening, for hand-written and generated records alike.
+  refuses(reference, d => { d.albums[0].created_at = '2024-12-30T10:00:00-08:00'; }, /before 2025-01-01/);
+  refuses(minimal, d => { d.links[0].created_at = '2025-12-30T10:00:00-08:00'; }, /before the account was opened/);
+  // An item trashed before it was added, in either fixture.
+  refuses(reference, d => { const i = item(d, 'it-2611-0958'); i.trashed_at = i.history[1].at = '2026-11-19T08:30:00-08:00'; i.purge_at = '2026-12-19T08:30:00-08:00'; }, /history/);
+  refuses(minimal, d => { const i = item(d, 'it-m09'); i.trashed_at = i.history[1].at = '2026-08-30T09:00:00-07:00'; i.purge_at = '2026-09-29T09:00:00-07:00'; }, /history/);
+  // A view through a link after it expired or was revoked, or by someone who had not joined.
+  refuses(reference, d => { d.views.find(v => v.id === 'vw-0001').at = '2025-07-20T10:00:00-07:00'; }, /link was not active/);
+  refuses(minimal, d => { d.links[0].revoked_at = '2026-11-15T13:00:00-08:00'; d.links[0].revoke_reason = 'revoked'; }, /link was not active/);
+  refuses(reference, d => { d.views.find(v => v.id === 'vw-0011').at = '2025-07-21T07:00:00-07:00'; }, /not a joined member then/);
+  // A member who joined before being invited; an honour on an album that was not shared then.
+  refuses(minimal, d => { d.albums[0].members[0].joined_at = d.albums[0].members[0].history[1].at = '2026-11-14T19:00:00-08:00'; }, /member times/);
+  refuses(reference, d => { const r = d.removals.find(x => x.id === 'rr-0010'); r.honored_at = r.answers[0].at = '2025-12-20T10:00:00-08:00'; }, /not shared then/);
+  // Storage over the quota at some point in the past.
+  refuses(reference, d => { d.account.quota_bytes = 5e9; }, /over the quota/);
+  // The log: a missing row, an album item that never entered its album, a missing or extra notification.
+  refuses(reference, d => { d.activity = d.activity.filter(r => r.action !== 'links.revoke'); }, /links.revoke/);
+  refuses(reference, d => { d.activity = d.activity.filter(r => !(r.action === 'albums.update' && r.object_ids[0] === 'al-pip')); }, /never entered al-pip/);
+  refuses(reference, d => { d.notifications = d.notifications.filter(n => n.kind !== 'storage.threshold'); }, /notifications do not match/);
+  refuses(reference, d => { d.notifications.push({...d.notifications[0], id: 'ntf-0999'}); }, /notifications do not match/);
 });
 
 test('W1 acceptance on the reference library: search, versions, storage, bytes, exposure; controls', () => {
