@@ -71,9 +71,10 @@ function renderApp(state) {
   recentDays.forEach((row) => {
     const tr = document.createElement("tr");
     if (row.status === "no_data") {
+      const reasonLabel = row.reason === "device_not_worn" ? "Device Not Worn" : (row.reason || "No Data");
       tr.innerHTML = `
         <td><strong>${row.date}</strong></td>
-        <td><span class="badge badge-warning">No Data (${row.reason})</span></td>
+        <td><span class="badge badge-warning">No Data (${reasonLabel})</span></td>
         <td>--</td><td>--</td><td>--</td><td>--</td><td>--</td>
       `;
     } else {
