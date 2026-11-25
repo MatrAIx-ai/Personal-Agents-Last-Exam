@@ -1,0 +1,3774 @@
+{
+  "app": "kinodex",
+  "package_sha256": "8a75a977bf41e1a39113083e966cc9a61f04ae65f42d1fb37c87807ab5c474f0",
+  "runtime": "1.6.0",
+  "node": "v22.23.2",
+  "passed": true,
+  "checks": [
+    "Default scenario policy exposes the 18 read tools only",
+    "Default policy denies agent writes",
+    "Agent cannot call env.apply_event",
+    "Agent cannot call env.load_seed",
+    "Agent cannot call env.reset",
+    "Agent cannot call env.snapshot",
+    "Agent cannot call env.advance_time",
+    "Both accounts load the same catalog at the fixture clock",
+    "Dana: Copper Sky and Quiet Harbour leave her services this week",
+    "Dana: Fieldglass leaves Brightreel but stays on Northcast",
+    "Dana: the reply names both titles and explains Fieldglass",
+    "Dana: the watchlist is saved once at watchlist_version 2",
+    "Dana: those two first, the rest in their original order",
+    "Ines (UK): only Fieldglass leaves her services this week",
+    "Ines: her watchlist moves from watchlist_version 4 to 5",
+    "kinodex-dana: five new diary entries on the trip dates with the companion in watched_with",
+    "kinodex-dana: the Salt Year entry names the extended edition",
+    "kinodex-dana: no correction is submitted",
+    "kinodex-ines: five new diary entries on the trip dates with the companion in watched_with",
+    "kinodex-ines: the Salt Year entry names the extended edition",
+    "kinodex-ines: no correction is submitted",
+    "Dana: The Wrenfield Clock (seen Nov 2025) is the one rewatch",
+    "Dana: half-star ratings, none 5, in her usual spread",
+    "Ines: Salt Year (seen in 2025) is her rewatch, in whole stars",
+    "kinodex-dana: lantern-hill-guide-v2 commits",
+    "kinodex-dana: the event moves the clock to its time",
+    "kinodex-dana: replaying the identical event is a duplicate with no new version",
+    "kinodex-ines: lantern-hill-guide-v2 commits",
+    "kinodex-ines: the event moves the clock to its time",
+    "kinodex-ines: replaying the identical event is a duplicate with no new version",
+    "Reusing an event ID with different content is an idempotency conflict",
+    "Lantern Hill: version 2 is current, version 1 rated violence and frightening mild",
+    "Dana's reply: moderate frightening scenes, sustained child peril, no barn detail",
+    "Dana's reply: Brightreel until 23:59 tonight, then $3.99 to rent",
+    "Ines's reply: UK certificate PG and on her Kettlewing subscription with no end date",
+    "The spoiler-safe read withheld exactly the flagged barn item",
+    "Request 1 changes no diary, rating or watchlist (Dana)",
+    "Request 1 changes nothing for Ines",
+    "Session 2 reads a newer Core version than session 1 (clock and event moved it) while watchlist_version stays 2",
+    "A write with session 1's Core version is stale and stores nothing",
+    "Dana: one available_on_my_services rule each for Copper Sky and Quiet Harbour, none for Fieldglass",
+    "Ines: one rule, for Fieldglass",
+    "The watchlist stays at version 2",
+    "kinodex-dana: copper-sky-northcast-ads commits",
+    "kinodex-ines: copper-sky-northcast-ads commits",
+    "A US free_with_ads offer on Northcast plus the UK-only subscription and the Openfern ads leave the rule active with no notice",
+    "kinodex-dana: copper-sky-northcast-return commits",
+    "kinodex-dana: fieldglass-uk-return commits",
+    "kinodex-ines: copper-sky-northcast-return commits",
+    "kinodex-ines: fieldglass-uk-return commits",
+    "Dana: one stored notice, for Copper Sky",
+    "Dana: the rule is triggered and keeps the Northcast offer that fired it",
+    "Dana's follow-up reply names Copper Sky and Northcast",
+    "Ines's follow-up reply names Fieldglass and Northcast",
+    "kinodex-dana: a second Copper Sky Northcast offer commits",
+    "kinodex-ines: a second Copper Sky Northcast offer commits",
+    "The second matching event adds no alert notice",
+    "Both instances still carry identical catalogs after the same events",
+    "Dana's and Ines's account state stays separate",
+    "Dana: one activity row per committed write or event (none for replays, failures, reads or the clock)",
+    "Every activity row joins to a Core receipt by request_id or event_id",
+    "Reset returns ready",
+    "Reset restores the loaded catalog and account",
+    "Reset restores the loaded clock",
+    "Resetting Dana leaves Ines's instance unchanged",
+    "A task constraint on patch fields denies a watched_on edit",
+    "The same tool accepts a permitted field",
+    "A byte-identical retry returns the stored receipt marked duplicate, with no second entry",
+    "The same request_id with different input is an idempotency conflict",
+    "A stale Core expected_version is rejected",
+    "A stale watchlist_version (App field) is rejected separately",
+    "A future watched_on returns invalid_date",
+    "A rating of 3.3 returns invalid_rating",
+    "Harbor Lights with hide_spoilers: synopses up to S1E2 only",
+    "Deleting the entry returns the rating and review it removed",
+    "After the delete the boundary moves back to S1E1",
+    "Mira's boundary comes from Dana's entries with Mira in watched_with (episode 4; Dana's is 5)",
+    "While Brightreel still carries Copper Sky, the rule returns already_true with the offer and stores nothing",
+    "An upcoming Northcast offer does not make the Ambervane rule already_true",
+    "A second identical rule returns duplicate_alert",
+    "price_below on subscription-only Fieldglass returns invalid_threshold",
+    "142 minutes for the theatrical edition of Salt Year is accepted (submitted, current 118)",
+    "142 minutes for the extended edition returns no_change",
+    "A second open correction for the same title, field and edition returns already_submitted",
+    "By the clock alone: Ambervane is available on Northcast, but its rule stays active (item 2)",
+    "By the clock alone: Fieldglass's Brightreel offer passes its end time (Northcast remains), Marrow Bay enters the seven-day window and al-04 reaches expires_at",
+    "Time passing writes no activity row, notice or stored status",
+    "An expired rule cannot be updated (not_active)",
+    "ambervane-northcast-start commits",
+    "The Ambervane rule is triggered by the event, with one notice",
+    "A triggered rule cannot be updated (not_active)",
+    "A needs_info decision commits",
+    "The needs_info correction is amended once and returns to submitted",
+    "The approval commits",
+    "The approved guide correction adds guide version 2",
+    "One notice per decision, plus a guide_updated notice because Harbor Lights is on the watchlist",
+    "A Salt Year purchase price drop (Tinlark US, $17.99 to $9.99) at the rule's expires_at commits",
+    "The rule stays expired and the event writes no alert notice",
+    "salt-year-runtime-decision (verbatim) commits",
+    "The agent's correction keeps the decision, note and decision time",
+    "Withdrawing a decided correction returns already_decided",
+    "A decision with no open correction fails with target_not_found and applied: false",
+    "Core audit records a deny row with that reason, the data and clock are unchanged and no receipt is stored",
+    "The failed event can be retried later with the same event_id",
+    "add-plumvale: services.update triggers the active Quiet Harbour rule",
+    "add-plumvale: the rule keeps the matching offer, the services.update cause and the request ID",
+    "add-plumvale: no notice is written",
+    "add-plumvale: an identical retry is a duplicate and does not trigger again",
+    "Adding Plumvale matches the Plumvale US subscription",
+    "A stale account update is rejected",
+    "It preserves the prior region, subscriptions, rule state and notices",
+    "Reset between runs returns ready",
+    "Reset restores the loaded account and clock (Dec 7 09:00)",
+    "switch-uk: services.update triggers the active Quiet Harbour rule",
+    "switch-uk: the rule keeps the matching offer, the services.update cause and the request ID",
+    "switch-uk: no notice is written",
+    "switch-uk: an identical retry is a duplicate and does not trigger again",
+    "Switching to the UK matches the Northcast UK subscription",
+    "An unknown region returns not_found and changes nothing"
+  ],
+  "reference_replies": {
+    "request_2_session_1": {
+      "kinodex-dana": "Leaving your services this week: Copper Sky leaves Brightreel on Friday, Dec 4 (its Northcast offer is UK-only); Quiet Harbour leaves Brightreel on Sunday, Dec 6 (its Northcast offer is UK-only). Fieldglass leaves Brightreel on Wednesday, Dec 2 but stays on Northcast, which you also have, so you keep it. I moved Copper Sky and Quiet Harbour to the top of your watchlist and will check again on Monday.",
+      "kinodex-ines": "Leaving your services this week: Fieldglass leaves Kettlewing on Thursday, Dec 3 (its Northcast offer is US-only). I moved Fieldglass to the top of your watchlist and will check again on Monday."
+    },
+    "request_3": {
+      "kinodex-dana": "Logged 5 entries with Jules: Salt Year (4), The Wrenfield Clock (4), Pellmoor Junction (3.5), Harbor Lights S1E1 (3.5), Harbor Lights S1E2 (3.5). Ratings use your usual half-star scale. Salt Year is listed as a 118-minute theatrical and a 142-minute extended edition; the airline showed the extended edition, so the runtime is not wrong and I did not submit a correction. The Wrenfield Clock is marked as a rewatch (first logged 2025-11-14).",
+      "kinodex-ines": "Logged 5 entries with Tomas: Salt Year (4), The Wrenfield Clock (4), Pellmoor Junction (4), Harbor Lights S1E1 (4), Harbor Lights S1E2 (4). Ratings use your usual whole-star scale. Salt Year is listed as a 118-minute theatrical and a 142-minute extended edition; the airline showed the extended edition, so the runtime is not wrong and I did not submit a correction. Salt Year is marked as a rewatch (first logged 2025-06-21)."
+    },
+    "request_1": {
+      "kinodex-dana": "Lantern Hill is rated PG in the US, but its parental guide was updated on Friday, Dec 4 (version 2): frightening scenes went from mild to moderate and violence went from mild to moderate, and the frightening-scenes summary now says \"Sustained child peril\". One frightening-scenes detail is marked as a spoiler, so I have left it out. It is included with Brightreel until 23:59 tonight; after midnight it is rent-only at $3.99.",
+      "kinodex-ines": "Lantern Hill is rated PG in the UK, but its parental guide was updated on Saturday, Dec 5 (version 2): frightening scenes went from mild to moderate and violence went from mild to moderate, and the frightening-scenes summary now says \"Sustained child peril\". One frightening-scenes detail is marked as a spoiler, so I have left it out. It is on your Kettlewing subscription with no end date, so there is no rush."
+    },
+    "request_2_session_2": {
+      "kinodex-dana": "Copper Sky and Quiet Harbour have now left your subscriptions (Copper Sky can still be rented on Brightreel). I set an alert for each and will tell you when one is included with your subscriptions again. Fieldglass is still on Northcast.",
+      "kinodex-ines": "Fieldglass has now left your subscriptions. I set an alert and will tell you when it is included with your subscriptions again."
+    },
+    "request_2_follow_up": {
+      "kinodex-dana": "Good news: Copper Sky is back on Northcast — it is included with your Northcast subscription again (since Thursday, Dec 10).",
+      "kinodex-ines": "Good news: Fieldglass is back on Northcast — it is included with your Northcast subscription again (since Thursday, Dec 10)."
+    }
+  },
+  "task_context": {
+    "accounts": {
+      "kinodex-dana": {
+        "utc_offset_hours": -8,
+        "child": "Mira",
+        "companion": "person-jules",
+        "companion_name": "Jules"
+      },
+      "kinodex-ines": {
+        "utc_offset_hours": 0,
+        "child": "her nephew",
+        "companion": "person-tomas",
+        "companion_name": "Tomas"
+      }
+    },
+    "trip": {
+      "flight_date": "2026-11-26",
+      "films": [
+        "Salt Year",
+        "The Wrenfield Clock",
+        "Pellmoor Junction"
+      ],
+      "series": "Harbor Lights",
+      "episodes": [
+        [
+          1,
+          1,
+          "2026-11-27"
+        ],
+        [
+          1,
+          2,
+          "2026-11-28"
+        ]
+      ],
+      "runtime_claim": {
+        "title": "Salt Year",
+        "minutes": 142
+      }
+    }
+  },
+  "observations": {
+    "rating_style": {
+      "kinodex-dana": {
+        "step": 0.5,
+        "min": 1.5,
+        "max": 4.5,
+        "mean": 3.4
+      },
+      "kinodex-ines": {
+        "step": 1,
+        "min": 1,
+        "max": 5,
+        "mean": 3.82
+      }
+    },
+    "request_2": {
+      "dana_watchlist_after_session_1": [
+        "tt-copper-sky",
+        "tt-quiet-harbour",
+        "tt-the-sallowdale-signal",
+        "tt-fieldglass",
+        "tt-under-ulvergate-bridge",
+        "tt-return-to-fallowgate",
+        "tt-the-dravelwick-accord",
+        "tt-harbor-lights",
+        "tt-the-braskmere-ledger",
+        "tt-ostlefold-station",
+        "tt-sallowridge-nights",
+        "tt-return-to-juniverridge",
+        "tt-the-corvfold-circuit",
+        "tt-gristford-station"
+      ],
+      "dana_alerts": [
+        {
+          "alert_id": "alert-8",
+          "title_id": "tt-copper-sky",
+          "status": "triggered",
+          "trigger": {
+            "at": "2026-12-10T06:00:00-08:00",
+            "cause": "event",
+            "event_id": "copper-sky-northcast-return",
+            "operation": "offer.publish",
+            "request_id": null,
+            "offer": {
+              "offer_id": "of-copper-sky-northcast-us-2026-12",
+              "service_id": "northcast",
+              "region": "US",
+              "type": "subscription",
+              "price": null,
+              "currency": null,
+              "available_from": "2026-12-10T06:00:00-08:00",
+              "available_until": null
+            },
+            "season_number": null,
+            "notice_id": "notice-11"
+          }
+        },
+        {
+          "alert_id": "alert-9",
+          "title_id": "tt-quiet-harbour",
+          "status": "active",
+          "trigger": null
+        }
+      ],
+      "ines_alerts": [
+        {
+          "alert_id": "alert-8",
+          "title_id": "tt-fieldglass",
+          "status": "triggered"
+        }
+      ]
+    },
+    "dana_activity": [
+      [
+        1,
+        "2026-12-01T09:00:00-08:00",
+        "agent",
+        "kinodex.watchlist.save",
+        "dana-w1",
+        "watchlist",
+        {
+          "alert_ids": [],
+          "notice_ids": []
+        }
+      ],
+      [
+        2,
+        "2026-12-01T09:00:00-08:00",
+        "agent",
+        "kinodex.diary.log",
+        "dana-w2",
+        "diary-2",
+        {
+          "alert_ids": [],
+          "notice_ids": []
+        }
+      ],
+      [
+        3,
+        "2026-12-01T09:00:00-08:00",
+        "agent",
+        "kinodex.diary.log",
+        "dana-w3",
+        "diary-3",
+        {
+          "alert_ids": [],
+          "notice_ids": []
+        }
+      ],
+      [
+        4,
+        "2026-12-01T09:00:00-08:00",
+        "agent",
+        "kinodex.diary.log",
+        "dana-w4",
+        "diary-4",
+        {
+          "alert_ids": [],
+          "notice_ids": []
+        }
+      ],
+      [
+        5,
+        "2026-12-01T09:00:00-08:00",
+        "agent",
+        "kinodex.diary.log",
+        "dana-w5",
+        "diary-5",
+        {
+          "alert_ids": [],
+          "notice_ids": []
+        }
+      ],
+      [
+        6,
+        "2026-12-01T09:00:00-08:00",
+        "agent",
+        "kinodex.diary.log",
+        "dana-w6",
+        "diary-6",
+        {
+          "alert_ids": [],
+          "notice_ids": []
+        }
+      ],
+      [
+        7,
+        "2026-12-04T18:00:00-08:00",
+        "event",
+        "title.update",
+        "lantern-hill-guide-v2",
+        "tt-lantern-hill",
+        {
+          "alert_ids": [],
+          "notice_ids": []
+        }
+      ],
+      [
+        8,
+        "2026-12-07T09:00:00-08:00",
+        "agent",
+        "kinodex.alerts.create",
+        "dana-w13",
+        "alert-8",
+        {
+          "alert_ids": [],
+          "notice_ids": []
+        }
+      ],
+      [
+        9,
+        "2026-12-07T09:00:00-08:00",
+        "agent",
+        "kinodex.alerts.create",
+        "dana-w14",
+        "alert-9",
+        {
+          "alert_ids": [],
+          "notice_ids": []
+        }
+      ],
+      [
+        10,
+        "2026-12-08T06:00:00-08:00",
+        "event",
+        "offer.publish",
+        "copper-sky-northcast-ads",
+        "of-copper-sky-northcast-fwa-us",
+        {
+          "alert_ids": [],
+          "notice_ids": []
+        }
+      ],
+      [
+        11,
+        "2026-12-10T06:00:00-08:00",
+        "event",
+        "offer.publish",
+        "copper-sky-northcast-return",
+        "of-copper-sky-northcast-us-2026-12",
+        {
+          "alert_ids": [
+            "alert-8"
+          ],
+          "notice_ids": [
+            "notice-11"
+          ]
+        }
+      ],
+      [
+        12,
+        "2026-12-10T06:00:00-08:00",
+        "event",
+        "offer.publish",
+        "fieldglass-uk-return",
+        "of-fieldglass-northcast-uk-2026-12",
+        {
+          "alert_ids": [],
+          "notice_ids": []
+        }
+      ],
+      [
+        13,
+        "2026-12-11T06:00:00-08:00",
+        "event",
+        "offer.publish",
+        "copper-sky-northcast-4k",
+        "of-copper-sky-northcast-us-4k",
+        {
+          "alert_ids": [],
+          "notice_ids": []
+        }
+      ]
+    ],
+    "snapshot_before_reset": {
+      "account": "kinodex-dana",
+      "version": {
+        "epoch": 2,
+        "revision": 16
+      },
+      "virtual_now": "2026-12-11T06:00:00-08:00",
+      "diary": 255,
+      "alerts": 7,
+      "notices": 5,
+      "activity": 13,
+      "receipts": 17,
+      "audit_rows": 45
+    },
+    "controls": {
+      "constraints": {
+        "kinodex.diary.update": {
+          "fields": [
+            "rating",
+            "review"
+          ]
+        },
+        "kinodex.alerts.update": {
+          "fields": [
+            "expires_at"
+          ]
+        }
+      },
+      "already_true_message": "Already true: offer of-00011 (Brightreel, subscription, US, until 2026-12-04T23:59:00-08:00) matches now. No rule was stored.",
+      "corrections": [
+        {
+          "correction_id": "corr-7",
+          "field": "runtime",
+          "target": {
+            "edition_id": "ed-salt-year-theatrical"
+          },
+          "status": "declined",
+          "decisions": [
+            {
+              "decision": "declined",
+              "note": "The 142-minute runtime belongs to the extended edition, which is listed separately.",
+              "decided_at": "2026-12-09T10:30:00-08:00",
+              "event_id": "salt-year-runtime-decision"
+            }
+          ]
+        },
+        {
+          "correction_id": "corr-8",
+          "field": "guide_item",
+          "target": {
+            "item_id": "gi-hl-storm"
+          },
+          "status": "approved",
+          "decisions": [
+            {
+              "decision": "needs_info",
+              "note": "Which episode?",
+              "decided_at": "2026-12-04T10:00:00-08:00",
+              "event_id": "hl-storm-needs-info"
+            },
+            {
+              "decision": "approved",
+              "note": null,
+              "decided_at": "2026-12-05T10:00:00-08:00",
+              "event_id": "hl-storm-approved"
+            }
+          ]
+        }
+      ]
+    },
+    "account_run_1": {
+      "account": {
+        "region": "US",
+        "time_zone": "America/Los_Angeles",
+        "service_ids": [
+          "brightreel",
+          "northcast",
+          "plumvale"
+        ],
+        "settings_version": 4,
+        "updated_at": "2026-12-07T09:00:00-08:00"
+      },
+      "triggered": {
+        "rule": "alert-1",
+        "offer": {
+          "offer_id": "of-00017",
+          "service_id": "plumvale",
+          "region": "US",
+          "type": "subscription",
+          "price": null,
+          "currency": null,
+          "available_from": "2026-10-01T00:00:00-07:00",
+          "available_until": null
+        },
+        "settings_version": 4
+      }
+    },
+    "account_run_2": {
+      "triggered": {
+        "rule": "alert-1",
+        "offer": {
+          "offer_id": "of-00019",
+          "service_id": "northcast",
+          "region": "UK",
+          "type": "subscription",
+          "price": null,
+          "currency": null,
+          "available_from": "2026-04-01T00:00:00-07:00",
+          "available_until": null
+        },
+        "settings_version": 4
+      }
+    }
+  },
+  "management_call_example": {
+    "method": "tools/call",
+    "params": {
+      "name": "env.apply_event",
+      "arguments": {
+        "expected_version": {
+          "epoch": 2,
+          "revision": 6
+        },
+        "event": {
+          "event_id": "lantern-hill-guide-v2",
+          "at": "2026-12-04T18:00:00-08:00",
+          "operation": "title.update",
+          "payload": {
+            "title_id": "tt-lantern-hill",
+            "guide_version": {
+              "version": 2,
+              "reason": "correction_approved",
+              "categories": {
+                "violence": {
+                  "severity": "moderate"
+                },
+                "frightening": {
+                  "severity": "moderate",
+                  "summary": "Sustained child peril.",
+                  "add_items": [
+                    {
+                      "item_id": "gi-lh-barn",
+                      "text": "A long sequence in which a child is trapped in a burning barn.",
+                      "spoiler": true
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "trace_summary": {
+    "calls": 198,
+    "by_outcome": {
+      "permission_denied": 7,
+      "ok": 111,
+      "ready": 6,
+      "committed": 50,
+      "duplicate_replay": 5,
+      "idempotency_conflict": 2,
+      "stale_version": 4,
+      "object_version_conflict": 1,
+      "invalid_date": 1,
+      "invalid_rating": 1,
+      "already_true": 1,
+      "duplicate_alert": 1,
+      "invalid_threshold": 1,
+      "no_change": 1,
+      "already_submitted": 1,
+      "not_active": 2,
+      "already_decided": 1,
+      "target_not_found": 1,
+      "not_found": 1
+    },
+    "note": "Duplicate replays are counted once as duplicate_replay; denials keep their status."
+  },
+  "trace": [
+    {
+      "seq": 1,
+      "run": "december",
+      "instance": "default",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/default/agent#2",
+      "tool": "kinodex.watchlist.save",
+      "request_id": "denied",
+      "event_id": null,
+      "status": "permission_denied",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 2,
+      "run": "december",
+      "instance": "default",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/default/agent#2",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": null,
+      "status": "permission_denied",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 3,
+      "run": "december",
+      "instance": "default",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/default/agent#2",
+      "tool": "env.load_seed",
+      "request_id": null,
+      "event_id": null,
+      "status": "permission_denied",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 4,
+      "run": "december",
+      "instance": "default",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/default/agent#2",
+      "tool": "env.reset",
+      "request_id": null,
+      "event_id": null,
+      "status": "permission_denied",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 5,
+      "run": "december",
+      "instance": "default",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/default/agent#2",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "permission_denied",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 6,
+      "run": "december",
+      "instance": "default",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/default/agent#2",
+      "tool": "env.advance_time",
+      "request_id": null,
+      "event_id": null,
+      "status": "permission_denied",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 7,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 8,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.load_seed",
+      "request_id": "load-dana",
+      "event_id": null,
+      "status": "ready",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 9,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 10,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.load_seed",
+      "request_id": "load-ines",
+      "event_id": null,
+      "status": "ready",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 11,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 12,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 13,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.watchlist.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 14,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.offers.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 15,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.account.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 16,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.offers.for_title",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 17,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.offers.for_title",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 18,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.watchlist.save",
+      "request_id": "dana-w1",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 19,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.diary.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 20,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.titles.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 21,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.titles.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 22,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.reviews.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 23,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.diary.log",
+      "request_id": "dana-w2",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 24,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.titles.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 25,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.reviews.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 26,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.diary.log",
+      "request_id": "dana-w3",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 27,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.titles.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 28,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.reviews.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 29,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.diary.log",
+      "request_id": "dana-w4",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 30,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.titles.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 31,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.episodes.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 32,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.diary.log",
+      "request_id": "dana-w5",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 33,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.diary.log",
+      "request_id": "dana-w6",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 34,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.watchlist.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 35,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.offers.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 36,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.account.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 37,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.offers.for_title",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 38,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.watchlist.save",
+      "request_id": "ines-w7",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 39,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.diary.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 40,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.titles.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 41,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.titles.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 42,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.reviews.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 43,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.diary.log",
+      "request_id": "ines-w8",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 44,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.titles.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 45,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.reviews.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 46,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.diary.log",
+      "request_id": "ines-w9",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 47,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.titles.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 48,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.reviews.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 49,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.diary.log",
+      "request_id": "ines-w10",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 50,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.titles.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 51,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.episodes.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 52,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.diary.log",
+      "request_id": "ines-w11",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 53,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.diary.log",
+      "request_id": "ines-w12",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 54,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.watchlist.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 55,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 56,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 57,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "lantern-hill-guide-v2",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 58,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 59,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "lantern-hill-guide-v2",
+      "status": "committed",
+      "duplicate": true,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 60,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 61,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "lantern-hill-guide-v2",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 62,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 63,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "lantern-hill-guide-v2",
+      "status": "committed",
+      "duplicate": true,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 64,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 65,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "lantern-hill-guide-v2",
+      "status": "idempotency_conflict",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 66,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 67,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 68,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.advance_time",
+      "request_id": "dana-clock-2026-12-05T19:00:00-08:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 69,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.advance_time",
+      "request_id": "ines-clock-2026-12-05T19:00:00-08:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 70,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.titles.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 71,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.titles.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 72,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.guide.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 73,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.offers.for_title",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 74,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.account.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 75,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.titles.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 76,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.titles.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 77,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.guide.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 78,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.offers.for_title",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 79,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.account.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 80,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 81,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 82,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.advance_time",
+      "request_id": "dana-clock-2026-12-07T09:00:00-08:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 83,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.advance_time",
+      "request_id": "ines-clock-2026-12-07T09:00:00-08:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 84,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.watchlist.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 85,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.alerts.create",
+      "request_id": "dana-stale-alert",
+      "event_id": null,
+      "status": "stale_version",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 86,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.offers.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 87,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.alerts.create",
+      "request_id": "dana-w13",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 88,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.alerts.create",
+      "request_id": "dana-w14",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 11
+      }
+    },
+    {
+      "seq": 89,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.watchlist.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 90,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.alerts.create",
+      "request_id": "ines-stale-alert",
+      "event_id": null,
+      "status": "stale_version",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 91,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.offers.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 92,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.alerts.create",
+      "request_id": "ines-w15",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 93,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 11
+      }
+    },
+    {
+      "seq": 94,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.watchlist.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 11
+      }
+    },
+    {
+      "seq": 95,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 11
+      }
+    },
+    {
+      "seq": 96,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "copper-sky-northcast-ads",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 12
+      }
+    },
+    {
+      "seq": 97,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "copper-sky-northcast-ads",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 11
+      }
+    },
+    {
+      "seq": 98,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 12
+      }
+    },
+    {
+      "seq": 99,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "copper-sky-northcast-return",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 100,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "fieldglass-uk-return",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 101,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "copper-sky-northcast-return",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 12
+      }
+    },
+    {
+      "seq": 102,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "fieldglass-uk-return",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 103,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.advance_time",
+      "request_id": "dana-clock-2026-12-10T19:00:00-08:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 104,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.advance_time",
+      "request_id": "ines-clock-2026-12-10T19:00:00-08:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 105,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.notices.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 106,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/agent#4",
+      "tool": "kinodex.alerts.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 107,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.notices.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 108,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/agent#6",
+      "tool": "kinodex.alerts.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 109,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "copper-sky-northcast-4k",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 16
+      }
+    },
+    {
+      "seq": 110,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "copper-sky-northcast-4k",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 111,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 16
+      }
+    },
+    {
+      "seq": 112,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 16
+      }
+    },
+    {
+      "seq": 113,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 114,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.reset",
+      "request_id": null,
+      "event_id": null,
+      "status": "ready",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 115,
+      "run": "december",
+      "instance": "dana",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/dana/infra#3",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 116,
+      "run": "december",
+      "instance": "ines",
+      "account": "kinodex-ines",
+      "connection": "kinodex-ines/ines/infra#5",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 117,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 118,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.load_seed",
+      "request_id": "load-controls",
+      "event_id": null,
+      "status": "ready",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 119,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.diary.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 120,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.diary.update",
+      "request_id": "controls-w16",
+      "event_id": null,
+      "status": "permission_denied",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 121,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.diary.update",
+      "request_id": "controls-w17",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 122,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.diary.log",
+      "request_id": "controls-log-e1",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 123,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 124,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.diary.log",
+      "request_id": "controls-log-e1",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": true,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 125,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 126,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.diary.log",
+      "request_id": "controls-log-e1",
+      "event_id": null,
+      "status": "idempotency_conflict",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 127,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.watchlist.save",
+      "request_id": "controls-stale",
+      "event_id": null,
+      "status": "stale_version",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 128,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.watchlist.save",
+      "request_id": "controls-w18",
+      "event_id": null,
+      "status": "object_version_conflict",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 129,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.diary.log",
+      "request_id": "controls-w19",
+      "event_id": null,
+      "status": "invalid_date",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 130,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.diary.log",
+      "request_id": "controls-w20",
+      "event_id": null,
+      "status": "invalid_rating",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 131,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.diary.log",
+      "request_id": "controls-w21",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 132,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.titles.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 3
+      }
+    },
+    {
+      "seq": 133,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.diary.delete",
+      "request_id": "controls-w22",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 134,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.titles.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 135,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.episodes.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 136,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.episodes.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 137,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.alerts.create",
+      "request_id": "controls-w23",
+      "event_id": null,
+      "status": "already_true",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 138,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 4
+      }
+    },
+    {
+      "seq": 139,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.alerts.create",
+      "request_id": "controls-w24",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 140,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.alerts.create",
+      "request_id": "controls-w25",
+      "event_id": null,
+      "status": "duplicate_alert",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 141,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.alerts.create",
+      "request_id": "controls-w26",
+      "event_id": null,
+      "status": "invalid_threshold",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 5
+      }
+    },
+    {
+      "seq": 142,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.alerts.create",
+      "request_id": "controls-w27",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 6
+      }
+    },
+    {
+      "seq": 143,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.corrections.submit",
+      "request_id": "controls-w28",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 144,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.corrections.submit",
+      "request_id": "controls-w29",
+      "event_id": null,
+      "status": "no_change",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 145,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.corrections.submit",
+      "request_id": "controls-w30",
+      "event_id": null,
+      "status": "already_submitted",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 7
+      }
+    },
+    {
+      "seq": 146,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.corrections.submit",
+      "request_id": "controls-w31",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 147,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 8
+      }
+    },
+    {
+      "seq": 148,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.advance_time",
+      "request_id": "controls-clock-2026-12-03T10:00:00-08:00",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 149,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.offers.for_title",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 150,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.offers.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 151,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.alerts.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 152,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.offers.search",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 153,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 154,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.alerts.update",
+      "request_id": "controls-w32",
+      "event_id": null,
+      "status": "not_active",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 9
+      }
+    },
+    {
+      "seq": 155,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "ambervane-northcast-start",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 156,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.alerts.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 157,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.notices.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 158,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.alerts.update",
+      "request_id": "controls-w33",
+      "event_id": null,
+      "status": "not_active",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 10
+      }
+    },
+    {
+      "seq": 159,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "hl-storm-needs-info",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 11
+      }
+    },
+    {
+      "seq": 160,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.corrections.amend",
+      "request_id": "controls-w34",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 12
+      }
+    },
+    {
+      "seq": 161,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "hl-storm-approved",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 162,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.guide.get",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 163,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.notices.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 13
+      }
+    },
+    {
+      "seq": 164,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "salt-year-buy-drop",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 165,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.alerts.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 166,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 14
+      }
+    },
+    {
+      "seq": 167,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "salt-year-runtime-decision",
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 168,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.corrections.list",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 169,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/agent#8",
+      "tool": "kinodex.corrections.withdraw",
+      "request_id": "controls-w35",
+      "event_id": null,
+      "status": "already_decided",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 170,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 171,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.apply_event",
+      "request_id": null,
+      "event_id": "salt-year-runtime-decision-2",
+      "status": "target_not_found",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 172,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 173,
+      "run": "december",
+      "instance": "controls",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/controls/infra#7",
+      "tool": "env.event_status",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 15
+      }
+    },
+    {
+      "seq": 174,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 1,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 175,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.load_seed",
+      "request_id": "load-account-runs",
+      "event_id": null,
+      "status": "ready",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 176,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 177,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/agent#10",
+      "tool": "kinodex.alerts.create",
+      "request_id": "account-runs-w36",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 178,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 179,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/agent#10",
+      "tool": "kinodex.services.update",
+      "request_id": "account-add-plumvale",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 180,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 181,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/agent#10",
+      "tool": "kinodex.services.update",
+      "request_id": "account-add-plumvale",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": true,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 182,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 183,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 184,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 185,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/agent#10",
+      "tool": "kinodex.services.update",
+      "request_id": "account-stale",
+      "event_id": null,
+      "status": "stale_version",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 186,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 2,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 187,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.reset",
+      "request_id": null,
+      "event_id": null,
+      "status": "ready",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 188,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 0
+      }
+    },
+    {
+      "seq": 189,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/agent#10",
+      "tool": "kinodex.alerts.create",
+      "request_id": "account-runs-w37",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 190,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 1
+      }
+    },
+    {
+      "seq": 191,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/agent#10",
+      "tool": "kinodex.services.update",
+      "request_id": "account-switch-uk",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 192,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 193,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/agent#10",
+      "tool": "kinodex.services.update",
+      "request_id": "account-switch-uk",
+      "event_id": null,
+      "status": "committed",
+      "duplicate": true,
+      "version": {
+        "epoch": 3,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 194,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 195,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 196,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 197,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/agent#10",
+      "tool": "kinodex.services.update",
+      "request_id": "account-runs-w38",
+      "event_id": null,
+      "status": "not_found",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 2
+      }
+    },
+    {
+      "seq": 198,
+      "run": "december",
+      "instance": "account-runs",
+      "account": "kinodex-dana",
+      "connection": "kinodex-dana/account-runs/infra#9",
+      "tool": "env.snapshot",
+      "request_id": null,
+      "event_id": null,
+      "status": "ok",
+      "duplicate": false,
+      "version": {
+        "epoch": 3,
+        "revision": 2
+      }
+    }
+  ]
+}

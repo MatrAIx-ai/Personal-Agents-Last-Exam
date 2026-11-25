@@ -1,0 +1,139 @@
+{
+  "schema": "kinodex.v1-evidence-index",
+  "recorded_at": "2026-11-25T18:30:47Z",
+  "app_id": "kinodex",
+  "app_version": "1.0.0",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "proposal": "proposals/environment/kinodex.md",
+  "proposal_commit": "907cc505306baeca5250f4fadbf50cbed2024659",
+  "proposal_blob_sha": "7eb7aef8ce1cdad0096fa8436e6512c37b65d16c",
+  "proposal_status": "plan approved for implementation by the reviewer Chenngzz (/approve-plan for this commit at 2026-11-24T07:08:04Z); the proposal file is unchanged since",
+  "public_runtime_base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
+  "app_package_commit": "e2f9debc657a2554612a73f4148853aa63669e04",
+  "app_package_sha256": "8a75a977bf41e1a39113083e966cc9a61f04ae65f42d1fb37c87807ab5c474f0",
+  "app_package_git_tree": "962e8509ae6999e3942499306687a98cb842b4d9",
+  "package_hash_agrees_in": [
+    "public-runtime.node22.json",
+    "public-runtime.node18.json",
+    "base-runtime.json",
+    "mcp-walkthrough.node22.json",
+    "mcp-walkthrough.node18.json"
+  ],
+  "tested_node": {
+    "18": "v18.20.8",
+    "22": "v22.23.2"
+  },
+  "tested_os": "Darwin 27.2.0 arm64 (macOS 27.2.1)",
+  "interface": {
+    "operations": 32,
+    "read": 18,
+    "write": 14,
+    "events": 4
+  },
+  "checks": {
+    "standalone_business": {
+      "node22": {
+        "tests": 31,
+        "pass": 31,
+        "fail": 0,
+        "skipped": 0
+      },
+      "node18": {
+        "tests": 31,
+        "pass": 31,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    "standalone_event_example": "examples/run.cjs passed from a copy of apps/kinodex alone, with only PATH and LANG set, on both Node versions",
+    "generators_reproduce_committed_files": "dev/build-fixtures.cjs and dev/build-contracts.cjs, run in a copy, left every file byte-identical on both Node versions",
+    "public_app_verifier": {
+      "node22": 52,
+      "node18": 52,
+      "passed": true
+    },
+    "ci_submission_verifier": {
+      "command": "node runtime/ci/verify-submissions.cjs . <out> a4bce023953061483c41de5a287ba5e43f4a5648",
+      "selection": {
+        "full": false,
+        "ids": [
+          "kinodex"
+        ]
+      },
+      "node22": "kinodex: PASS",
+      "node18": "kinodex: PASS"
+    },
+    "mcp_walkthrough": {
+      "node22": {
+        "checks": 119,
+        "calls": 198,
+        "passed": true
+      },
+      "node18": {
+        "checks": 119,
+        "calls": 198,
+        "passed": true
+      },
+      "trace_outcomes": {
+        "permission_denied": 7,
+        "ok": 111,
+        "ready": 6,
+        "committed": 50,
+        "duplicate_replay": 5,
+        "idempotency_conflict": 2,
+        "stale_version": 4,
+        "object_version_conflict": 1,
+        "invalid_date": 1,
+        "invalid_rating": 1,
+        "already_true": 1,
+        "duplicate_alert": 1,
+        "invalid_threshold": 1,
+        "no_change": 1,
+        "already_submitted": 1,
+        "not_active": 2,
+        "already_decided": 1,
+        "target_not_found": 1,
+        "not_found": 1
+      }
+    },
+    "reference_suite": {
+      "node22": {
+        "stages": 22,
+        "passed": 22
+      },
+      "node18": {
+        "stages": 22,
+        "passed": 22
+      }
+    },
+    "base_runtime_verifier": {
+      "checks": 52,
+      "passed": true,
+      "node": "v22.23.2",
+      "selection": {
+        "full": false,
+        "ids": [
+          "kinodex"
+        ]
+      }
+    }
+  },
+  "reports": [
+    "base-runtime.json",
+    "mcp-walkthrough.node18.json",
+    "mcp-walkthrough.node22.json",
+    "public-runtime.node18.json",
+    "public-runtime.node22.json",
+    "reference-suite.node18.json",
+    "reference-suite.node22.json"
+  ],
+  "report_edits": "In reference-suite.node*.json, report paths inside stage commands were rewritten from a local temporary directory to .artifacts/. No other report was edited.",
+  "not_claimed": [
+    "model-agent runs (deferred for v1)",
+    "GUI or reviewer console",
+    "production deployment",
+    "official PR CI on the implementation commit (awaits maintainer approval of the fork workflow run)",
+    "human review of realism and invented names"
+  ]
+}
