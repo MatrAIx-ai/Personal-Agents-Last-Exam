@@ -1,0 +1,44 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "kinodex-december",
+  "version": "1.0.0",
+  "description": "Hand-authored and seeded-generator synthetic film and TV catalog (titles, editions, episodes, people, credits, regional certifications, versioned parental guides, six services and their offers in three regions) plus one viewer account with a watchlist, diary, lists, alerts, corrections and notices, for a December 2026 scenario. expected_counts.records counts titles (plugin.records); the seed holds about 5,400 catalog records in all. Not a benchmark task.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Original fictional text authored for this package by @byshail. All titles, people, services, prices, reviews and guide text are invented; no external film, TV, streaming or review data were collected, translated or adapted.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "dev/build-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20261201,
+        "parameters": {}
+      }
+    }
+  ],
+  "transformations": [
+    "Bulk catalog records are expanded from hand-written word lists by the deterministic script dev/build-fixtures.cjs; the named proposal titles, offers, guides and account histories are written by hand in the same script. Both account seeds share one catalog."
+  ],
+  "expected_counts": {
+    "records": 184,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation, name collisions and reuse permissions."
+  }
+}
