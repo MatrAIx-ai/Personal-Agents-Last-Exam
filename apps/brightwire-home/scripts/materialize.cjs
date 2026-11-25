@@ -1097,8 +1097,7 @@ function images() {
       width: 320,
       height: 176,
       alt: title + ' camera snapshot',
-      subjects: [{app_id: 'brightwire-home', account_id: 'bw-household-morales', object_type: 'household', object_id: 'bw-household-morales'}],
-      access: {audience: ['agent', 'reviewer'], rule: 'parent_object'}
+      subjects: [{app_id: 'brightwire-home', account_id: 'bw-household-morales', object_type: 'household', object_id: 'bw-household-morales'}]
     });
   }
   return made;

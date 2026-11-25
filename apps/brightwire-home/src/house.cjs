@@ -1415,19 +1415,13 @@ function applySensor(ctx, data, payload) {
   considerDeviceTriggers(ctx, data, device, {at: stamp(ctx), event_id: ctx.event_id, actor_kind: 'manual', actor_id: 'sensor'}, 0);
 }
 
-function snapshotReady(ctx, data, assetId) {
+function snapshotReady(data, assetId) {
   if (!assetId) return null;
   const listed = Array.isArray(data.available_snapshots) ? data.available_snapshots : [];
   if (!listed.includes(assetId)) return 'asset_missing';
-  if (!ctx || !ctx.assets || typeof ctx.assets.read !== 'function') return 'ready';
-  try {
-    ctx.assets.read(assetId);
-    return 'ready';
-  } catch (error) {
-    if (error && error.code === 'unavailable') return 'asset_missing';
-    if (error && error.code === 'not_available') return 'ready';
-    throw error;
-  }
+  const model = require('./model.cjs');
+  if (!model.committedSnapshotReady(data, assetId)) return 'asset_missing';
+  return 'ready';
 }
 
 function automationSnap(record, kind) {
@@ -1472,7 +1466,7 @@ function reads(ctx, data, name, args) {
   if (name === 'devices.get') {
     const device = requireDevice(data, args.device_id);
     const view = presentDevice(data, device, nowMs);
-    view.snapshot_status = snapshotReady(ctx, data, device.snapshot_asset_id);
+    view.snapshot_status = snapshotReady(data, device.snapshot_asset_id);
     return {device: view};
   }
   if (name === 'devices.history') {

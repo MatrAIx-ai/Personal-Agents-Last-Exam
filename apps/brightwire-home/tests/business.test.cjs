@@ -1349,6 +1349,52 @@ test('task 73 flags every routine and scene change and keeps call arguments', ()
   assert.equal(crossed.calls.find(call => call.seq === 1).target, null);
   assert.equal(crossed.calls.find(call => call.seq === 2).target, 'light-hallway');
   assert.equal(crossed.calls.filter(call => call.tool === 'brightwire-home.devices.get').length, 2);
+  const deniedRead = exportEvidence({
+    snapshot: {
+      data: house.data,
+      audit: [
+        {seq: 1, actor: 'agent', tool: 'brightwire-home.devices.get', decision: 'deny', connection_id: 'conn-a', client_name: 'reader-a'},
+        {seq: 2, actor: 'agent', tool: 'brightwire-home.devices.get', decision: 'deny', connection_id: 'conn-b', client_name: 'reader-b'}
+      ]
+    },
+    agent_executions: [
+      {tool: 'brightwire-home.devices.get', status: 'permission_denied', args: {device_id: 'light-hallway'}, connection_id: 'conn-b', client_name: 'reader-b'}
+    ]
+  });
+  assert.equal(deniedRead.calls.find(call => call.seq === 1).target, null);
+  assert.equal(deniedRead.calls.find(call => call.seq === 2).target, 'light-hallway');
+  assert.equal(deniedRead.calls.filter(call => call.tool === 'brightwire-home.devices.get').length, 2);
+  const partial = exportEvidence({
+    snapshot: {
+      data: house.data,
+      audit: [
+        {seq: 1, actor: 'agent', tool: 'brightwire-home.devices.get', decision: 'allow', connection_id: 'conn-a', client_name: 'reader-a'},
+        {seq: 2, actor: 'agent', tool: 'brightwire-home.devices.get', decision: 'allow', connection_id: 'conn-b', client_name: 'reader-b'}
+      ]
+    },
+    agent_executions: [
+      {tool: 'brightwire-home.devices.get', status: 'ok', args: {device_id: 'light-living'}}
+    ]
+  });
+  assert.equal(partial.calls.find(call => call.seq === 1).target, null);
+  assert.equal(partial.calls.find(call => call.seq === 2).target, null);
+  assert.equal(partial.calls.filter(call => call.tool === 'brightwire-home.devices.get').length, 2);
+  const pairedClient = exportEvidence({
+    snapshot: {
+      data: house.data,
+      audit: [
+        {seq: 1, actor: 'agent', tool: 'brightwire-home.devices.get', decision: 'allow', connection_id: 'conn-b', client_name: 'reader-b'},
+        {seq: 2, actor: 'agent', tool: 'brightwire-home.devices.get', decision: 'allow', connection_id: 'conn-b', client_name: 'reader-b'}
+      ]
+    },
+    agent_executions: [
+      {tool: 'brightwire-home.devices.get', status: 'ok', args: {device_id: 'light-living'}, connection_id: 'conn-b', client_name: 'reader-b'},
+      {tool: 'brightwire-home.devices.get', status: 'ok', args: {device_id: 'light-hallway'}, connection_id: 'conn-b', client_name: 'reader-b'}
+    ]
+  });
+  assert.equal(pairedClient.calls.find(call => call.seq === 1).target, 'light-living');
+  assert.equal(pairedClient.calls.find(call => call.seq === 2).target, 'light-hallway');
+  assert.equal(pairedClient.calls.filter(call => call.tool === 'brightwire-home.devices.get').length, 2);
   const failed = exportEvidence({
     snapshot: {
       data: {

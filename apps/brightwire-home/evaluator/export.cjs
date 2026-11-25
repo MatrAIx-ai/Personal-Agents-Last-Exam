@@ -204,19 +204,44 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
     deniedQueues.get(key).push(item);
   }
   const usedExecutions = new Set();
-  function nextDenied(tool, requestId) {
-    const queue = deniedQueues.get((tool || '') + '\n' + (requestId || ''));
+  function named(item) {
+    return Boolean(item && (item.connection_id || item.client_name));
+  }
+  function identityConflict(row, item) {
+    if (!named(row) || !named(item)) return false;
+    if (row.connection_id && item.connection_id && row.client_name && item.client_name) {
+      return row.connection_id !== item.connection_id || row.client_name !== item.client_name;
+    }
+    if (row.connection_id && item.connection_id && row.connection_id !== item.connection_id) return true;
+    if (row.client_name && item.client_name && row.client_name !== item.client_name) return true;
+    return false;
+  }
+  function identityAgrees(row, item) {
+    if (named(row) !== named(item)) return false;
+    return !identityConflict(row, item);
+  }
+  function partyKey(item) {
+    if (item.connection_id && item.client_name) return item.connection_id + '\n' + item.client_name;
+    if (item.connection_id) return item.connection_id;
+    if (item.client_name) return item.client_name;
+    return '';
+  }
+  function takeDenied(row) {
+    const tool = row.tool || '';
+    const requestId = row.input && row.input.request_id ? String(row.input.request_id) : '';
+    const queue = deniedQueues.get(tool + '\n' + requestId);
     if (!queue || !queue.length) return null;
-    const item = queue.shift();
+    const index = queue.findIndex(item => requestId ? !identityConflict(row, item) : identityAgrees(row, item));
+    if (index < 0) return null;
+    const [item] = queue.splice(index, 1);
     usedExecutions.add(item);
     return item;
   }
-  const pairedReads = new Set();
   for (const row of audit) {
     const requestId = row.input ? row.input.request_id || null : null;
     const candidate = row.decision === 'allow' && row.actor === 'agent' ? receiptCall(state, requestId) : null;
     const stored = candidate && candidate.tool === row.tool ? candidate : null;
-    const execution = stored ? null : (row.decision === 'deny' ? nextDenied(row.tool, requestId) : null);
+    const execution = stored ? null : (row.decision === 'deny' ? takeDenied(row) : null);
     const denied = row.decision === 'deny';
     const args = denied ? (execution && execution.args) : (stored ? stored.args : null);
     const linked = !denied && row.actor === 'agent'
@@ -239,31 +264,56 @@ function exportEvidence({snapshot, agent_executions = [], baseline, actor_kind} 
       client_name: row.client_name || null
     });
   }
+  for (const [key, queue] of deniedQueues) {
+    if (!queue.length) continue;
+    const split = key.indexOf('\n');
+    const tool = key.slice(0, split);
+    const requestId = key.slice(split + 1);
+    const rows = audit.filter(row => row.decision === 'deny' && (row.tool || '') === tool && String((row.input && row.input.request_id) || '') === requestId);
+    if (rows.length) for (const item of queue) usedExecutions.add(item);
+  }
+  const openGroups = new Map();
+  for (const call of calls) {
+    if (call.seq == null || call.decision !== 'allow' || call.request_id) continue;
+    const key = partyKey(call);
+    if (!openGroups.has(key)) openGroups.set(key, []);
+    openGroups.get(key).push(call);
+  }
+  const execGroups = new Map();
+  const readExecs = [];
+  agent_executions.forEach(item => {
+    if (usedExecutions.has(item)) return;
+    if (!['ok', 'committed', 'ready'].includes(item.status) || item.request_id) return;
+    readExecs.push(item);
+    const key = partyKey(item);
+    if (!execGroups.has(key)) execGroups.set(key, []);
+    execGroups.get(key).push(item);
+  });
+  for (const [key, rows] of openGroups) {
+    const execs = execGroups.get(key) || [];
+    if (rows.length && execs.length === rows.length) {
+      execs.forEach((item, index) => {
+        const open = rows[index];
+        if (!open.target) open.target = callTarget(null, null, item);
+        if (!open.command) open.command = callCommand(null, null, item);
+        if (!Object.keys(open.arguments || {}).length) open.arguments = allowArguments(item.args);
+        usedExecutions.add(item);
+      });
+    } else {
+      for (const item of execs) usedExecutions.add(item);
+    }
+  }
+  for (const item of readExecs) {
+    if (usedExecutions.has(item)) continue;
+    const tool = item.tool || item.name || null;
+    const sameTool = calls.some(call => call.seq != null && call.decision === 'allow' && !call.request_id && call.tool === tool);
+    if (sameTool) usedExecutions.add(item);
+  }
   agent_executions.forEach((item, index) => {
     if (usedExecutions.has(item)) return;
     const tool = item.tool || item.name || null;
     const decision = ['ok', 'committed', 'ready'].includes(item.status) ? 'allow' : 'deny';
     if (decision === 'allow' && item.request_id && calls.some(call => call.seq != null && call.decision === 'allow' && call.request_id && call.request_id === item.request_id && call.tool === tool)) return;
-    if (decision === 'allow' && !item.request_id) {
-      const openRows = calls.filter(call => call.seq != null && call.decision === 'allow' && call.tool === tool && !call.request_id && !pairedReads.has(call.seq));
-      let open = null;
-      if (item.connection_id || item.client_name) {
-        const named = openRows.filter(call => {
-          const connection = item.connection_id && call.connection_id && item.connection_id === call.connection_id;
-          const client = item.client_name && call.client_name && item.client_name === call.client_name;
-          if (item.connection_id && item.client_name && call.connection_id && call.client_name) return connection && client;
-          return Boolean(connection || client);
-        });
-        if (named.length === 1) open = named[0];
-      } else if (openRows.length) open = openRows[0];
-      if (open) {
-        pairedReads.add(open.seq);
-        if (!open.target) open.target = callTarget(null, null, item);
-        if (!open.command) open.command = callCommand(null, null, item);
-        if (!Object.keys(open.arguments || {}).length) open.arguments = allowArguments(item.args);
-        return;
-      }
-    }
     pushCall({
       index,
       tool,

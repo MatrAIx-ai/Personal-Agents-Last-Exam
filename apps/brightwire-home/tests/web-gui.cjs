@@ -111,6 +111,29 @@ async function main() {
       'refreshed brightness'
     );
     notes.push('MCP brightness 55 appeared after Refresh');
+    const live = await reader.call('brightwire-home.devices.get', {device_id: 'light-living'});
+    await reader.call('brightwire-home.devices.command', {
+      device_id: 'light-living',
+      command: 'set_brightness',
+      args: {brightness: 63},
+      expected_version: live.version,
+      request_id: 'mcp-brightness-63'
+    });
+    await page.locator('[data-field="brightness"]').fill('42');
+    await page.locator('[data-action="set-brightness"]').click();
+    await settled(page, text => text.includes('stale_version'), 'stale brightness');
+    await page.locator('[data-action="refresh"]').click();
+    await until(
+      () => page.locator('[data-device-state="light-living"]').innerText(),
+      text => text.includes('brightness 63'),
+      'refreshed brightness 63'
+    );
+    await page.locator('[data-field="brightness"]').fill('42');
+    await page.locator('[data-action="set-brightness"]').click();
+    await settled(page, text => text.includes('applied'), 'brightness 42 after stale');
+    const retried = await reader.call('brightwire-home.devices.get', {device_id: 'light-living'});
+    if (retried.device.observed.brightness !== 42) throw new Error('stale retry brightness ' + retried.device.observed.brightness);
+    notes.push('a stale brightness submit used a fresh request after Refresh and applied 42');
 
     await page.locator('[data-section="routines"]').click();
     await page.locator('[data-run-routine="rt-front-0700"]').click();
@@ -119,6 +142,8 @@ async function main() {
     if (routineError !== 'true') throw new Error('routine confirmation was shown as success');
     const routineRow = await page.locator('[data-outcome="confirmation_required"]').innerText();
     if (!routineRow.includes('lock-front') || !routineRow.includes('cf-1')) throw new Error('routine row ' + routineRow);
+    const routineClass = await page.locator('[data-outcome="confirmation_required"]').getAttribute('class');
+    if (!routineClass || !routineClass.includes('form-error')) throw new Error('result row class ' + routineClass);
     notes.push('run now showed confirmation_required cf-1');
 
     await page.locator('[data-section="home"]').click();
@@ -136,23 +161,31 @@ async function main() {
     if (!guest || !guest.locks.includes('lock-front')) throw new Error('MCP guest code ' + JSON.stringify(guest));
     notes.push('Home mode and guest code used lock-front');
 
+    await page.locator('[data-section="rooms"]').click();
+    await page.locator('button[data-device-id="lock-front"]').click();
+    await page.locator('[data-action="unlock"]').click();
+    await settled(page, text => text.includes('confirmation_required') && text.includes('cf-2'), 'first unlock');
     const before = await infra.call('env.snapshot');
     const beforeConfirmations = before.snapshot.data.confirmations.length;
     const beforeNotices = before.snapshot.data.notices.length;
-    await page.locator('[data-section="rooms"]').click();
-    await page.locator('button[data-device-id="lock-front"]').click();
     failLists = 1;
     unlockCalls = 0;
     await page.locator('[data-action="unlock"]').click();
-    await settled(page, text => text.includes('confirmation_required') && text.includes('could not be refreshed'), 'unlock status');
+    await settled(page, text => text.includes('confirmation_required') && text.includes('cf-3') && text.includes('could not be refreshed'), 'unlock status');
     const marked = await page.locator('#status').getAttribute('data-error');
     if (marked !== 'true') throw new Error('confirmation_required was shown as success');
     const lock = await reader.call('brightwire-home.devices.get', {device_id: 'lock-front'});
     if (lock.device.observed.lock !== 'locked') throw new Error('Unlock was applied without approval');
     notes.push('unlock showed confirmation_required and the lock stayed locked');
     await page.screenshot({path: path.join(shots, 'gui-confirmation.png')});
+    await page.locator('button[data-device-id="light-living"]').click();
+    await page.locator('[data-action="turn-off"]').click();
+    await settled(page, text => text.includes('applied'), 'lamp off between retries');
+    await page.locator('button[data-device-id="lock-front"]').click();
     await page.locator('[data-action="unlock"]').click();
-    await settled(page, text => text.includes('confirmation_required') && !text.includes('could not be refreshed'), 'unlock retry');
+    await settled(page, text => text.includes('confirmation_required') && text.includes('cf-3') && !text.includes('could not be refreshed'), 'unlock retry');
+    const retryError = await page.locator('#status').getAttribute('data-error');
+    if (retryError !== 'true') throw new Error('unlock retry showed another action as success');
     if (unlockCalls !== 1) throw new Error('unlock was sent ' + unlockCalls + ' times');
     const after = await infra.call('env.snapshot');
     const addedConfirmations = after.snapshot.data.confirmations.length - beforeConfirmations;

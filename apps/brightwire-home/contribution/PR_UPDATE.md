@@ -46,7 +46,7 @@ npm run app:verify -- --app apps/brightwire-home
 npm test
 ```
 
-Validation evidence for implementation commit `31dc5b6775c0c65bf8e85ad784521cac6db6c8a8` is in [https://github.com/suraj-ranganath/Personal-Agents-Last-Exam/blob/31dc5b6775c0c65bf8e85ad784521cac6db6c8a8/apps/brightwire-home/contribution/evidence.md](https://github.com/suraj-ranganath/Personal-Agents-Last-Exam/blob/31dc5b6775c0c65bf8e85ad784521cac6db6c8a8/apps/brightwire-home/contribution/evidence.md). `package_sha256` for that commit is `9b3da08888ad6f88353468b1fab6e9c2bef210695b8b9156ce240d1a5cd8ffe9`.
+Validation evidence is in [contribution/evidence.md](apps/brightwire-home/contribution/evidence.md). `npm run app:verify -- --app apps/brightwire-home` prints `package_sha256`. That hash is reported in the PR body.
 
 The candidate suite and the App validator are reported separately.
 
@@ -60,10 +60,10 @@ Candidate suite (`npm test`):
 
 App validator (`npm run app:verify -- --app apps/brightwire-home`): 49 checks passed on Node v22.23.4, Node v18.20.8 and Node v24.22.3.
 
-App tests on Node v22.23.4, Node v18.20.8 and Node v24.22.3: 65 passed, 0 failed (`tests/business.test.cjs` 49, `tests/images.test.cjs` 2, `tests/mail-integration.test.cjs` 3, `tests/runtime.test.cjs` 11). The business page check is `node apps/brightwire-home/tests/web-gui.cjs` and is separate from those four files. It writes screenshots to a temporary directory unless `--update-screenshots` is passed.
+App tests on Node v22.23.4, Node v18.20.8 and Node v24.22.3: 68 passed, 0 failed (`tests/business.test.cjs` 49, `tests/images.test.cjs` 2, `tests/mail-integration.test.cjs` 3, `tests/runtime.test.cjs` 14). The business page check is `node apps/brightwire-home/tests/web-gui.cjs` and is separate from those four files. It writes screenshots to a temporary directory unless `--update-screenshots` is passed.
 
 - Example: `{"app":"brightwire-home","contact":"open","alerts":0,"committed_through":"2026-11-17T12:05:00-06:00"}`.
-- Runtime tests: 11 passed. Replay, stale version, reset, catch-up rollback, a task 73 load with the package bundle, `env.load_seed` rejecting `snap-made-up`, a camera read of a snapshot the bundle marks missing, an MCP join of two clients, the task 73 hallway brightness receipt, a clock advance that reuses the living-room request id and stays `env.advance_time`, and an approved confirmation joined to its Infra event.
+- Runtime tests: 14 passed. Replay, stale version, reset, catch-up rollback, a task 73 load with the package bundle, `env.load_seed` rejecting `snap-made-up`, a camera read of a snapshot the bundle marks missing, household C reading a missing porch snapshot as not ready, a nursery snapshot relabelled as an icon reading as not ready, agent resource discovery listing no images, an MCP join of two clients, the task 73 hallway brightness receipt, a clock advance that reuses the living-room request id and stays `env.advance_time`, and an approved confirmation joined to its Infra event.
 - Mail integration: 3 passed. A confirmation request and a camera share each produce one Mail message. A second publish of the same request id returns `duplicate: true`. A publisher with no grant returns `recipient_not_authorized`, leaves the granted inbox the same length, and stores no Brightwire message on the denied run. A dropped acknowledgement is reconciled from the stopped attempt. A real `env.snapshot` supplies the run id, and a lost acknowledgement confirms with one publish. A receiver rejection after Mail accepts the dispatch stays unresolved, with one publish.
 
 ## Implementation progress
@@ -82,7 +82,6 @@ Files outside the App, with the reason each one stays:
 - `apps.registry.json`: registers the Brightwire package so the runtime can load it.
 - `runtime/tests/clock.test.cjs`: the clock test counts Apps in `apps.registry.json`.
 - `runtime/tests/run.cjs`: `npm test` runs the Brightwire verifier plus the runtime, Mail and image tests.
-- `runtime/registrations/brightwire-home.json`: lets `brightwire-home.devices.get` read the household snapshot, so a camera read can see that the committed bundle marks it missing.
 
 `runtime/core` matches upstream `a4bce023953061483c41de5a287ba5e43f4a5648`. `docs/personal-apps.md`, `docs/runtime-time.md`, `examples/workflows/session-time/README.md`, `runtime/README.md` and `runtime/web/README.md` match that revision as well.
 
@@ -120,4 +119,4 @@ Every Agent tool is prefixed with `brightwire-home.`. The proposal file was not 
 
 ## Comment draft
 
-@Jasonya The follow-up is on `environment-proposal/brightwire-home-devices`. Implementation commit `31dc5b6775c0c65bf8e85ad784521cac6db6c8a8` has `package_sha256` `9b3da08888ad6f88353468b1fab6e9c2bef210695b8b9156ce240d1a5cd8ffe9`. `runtime/core` matches upstream again. Snapshot ids are checked against the package catalog, and a bundle that drops a listed snapshot does not commit. The business page is `node runtime/web/server.cjs --registry apps.registry.json --app brightwire-home`. `npm run app:verify -- --app apps/brightwire-home` passed 49 checks. `npm test` passed 24/24 on Node 22.23.4, Node 18.20.8 and Node 24.22.3. The proposal file is unchanged (`cfddc0d8f33af729322817b56620876474509d9d`). The validation record is [https://github.com/suraj-ranganath/Personal-Agents-Last-Exam/blob/31dc5b6775c0c65bf8e85ad784521cac6db6c8a8/apps/brightwire-home/contribution/evidence.md](https://github.com/suraj-ranganath/Personal-Agents-Last-Exam/blob/31dc5b6775c0c65bf8e85ad784521cac6db6c8a8/apps/brightwire-home/contribution/evidence.md).
+@Jasonya The follow-up is on `environment-proposal/brightwire-home-devices`. `runtime/core` matches upstream again. Snapshot ids are checked against the package catalog. Icons, floor plans and snapshots stay on the reviewer surface. A bundle that drops a listed snapshot does not commit. A camera read reports `asset_missing` when the committed descriptor is missing or is not a `ui.snapshot`. The business page is `node runtime/web/server.cjs --registry apps.registry.json --app brightwire-home`. `npm run app:verify -- --app apps/brightwire-home` prints `package_sha256`, and that hash is reported in the PR body. `npm test` passed 24/24 on Node 22.23.4, Node 18.20.8 and Node 24.22.3. The proposal file is unchanged (`cfddc0d8f33af729322817b56620876474509d9d`). The validation record is `apps/brightwire-home/contribution/evidence.md`.

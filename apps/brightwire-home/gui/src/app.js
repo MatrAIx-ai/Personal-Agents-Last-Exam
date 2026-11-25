@@ -91,7 +91,7 @@ function showReceipt() {
   box.replaceChildren(...receipt.rows.map(row => el('p', {
     'data-result': row.device_id || 'action',
     'data-outcome': row.outcome,
-    ...(row.bad ? {'data-error': 'true'} : {})
+    ...(row.bad ? {'data-error': 'true', class: 'form-error'} : {})
   }, row.text)));
 }
 
@@ -126,10 +126,11 @@ async function write(name, args) {
   let pending = writes.get(key);
   try {
     if (pending && pending.done) {
+      receipt = pending.receipt;
       try {
         await refresh(selected && selected.device_id);
       } catch (error) {
-        showStatus(pending.message + ' The list could not be refreshed.', pending.error);
+        showStatus(pending.receipt.message + ' The list could not be refreshed.', pending.receipt.error);
         throw error;
       }
       showReceipt();
@@ -150,7 +151,8 @@ async function write(name, args) {
     pending.result = result;
     pending.message = describe(result);
     pending.error = receiptError(result);
-    receipt = {message: pending.message, error: pending.error, rows: actionRows(result)};
+    pending.receipt = {message: pending.message, error: pending.error, rows: actionRows(result)};
+    receipt = pending.receipt;
     showReceipt();
     try {
       await refresh(selected && selected.device_id);
@@ -162,7 +164,8 @@ async function write(name, args) {
     writes.delete(key);
     return result;
   } catch (error) {
-    if (!pending || !pending.done) showStatus(error.message, true);
+    if (pending && !pending.done && error && error.code) writes.delete(key);
+    if (!pending || !pending.done) showStatus(error && error.code ? error.code : error.message, true);
     throw error;
   } finally {
     busy = false;
