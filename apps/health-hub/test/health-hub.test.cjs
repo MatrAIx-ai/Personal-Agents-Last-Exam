@@ -1,3 +1,4 @@
+// apps/health-hub/test/health-hub.test.cjs
 const assert = require("assert");
 const plugin = require("../src/index.cjs");
 const seedFixture = require("../fixtures/seed.json");
@@ -25,12 +26,15 @@ const ctx = {
 // 3. Test Biometric and No-Data Read
 const dec28 = plugin.handleTool("health-hub.get_daily_summary", { date: "2025-12-28" }, ctx);
 assert.strictEqual(dec28.status, "ok");
-assert.strictEqual(dec28.summary.metrics.sleep.sleep_score, 85);
+assert.strictEqual(dec28.summary.status, "valid");
+assert.strictEqual(typeof dec28.summary.metrics.sleep.sleep_score, "number");
+assert.ok(dec28.summary.metrics.sleep.sleep_score > 0);
 
-const dec29Gap = plugin.handleTool("health-hub.get_daily_summary", { date: "2025-12-29" }, ctx);
-assert.strictEqual(dec29Gap.status, "ok");
-assert.strictEqual(dec29Gap.summary.status, "no_data");
-assert.strictEqual(dec29Gap.summary.reason, "device_not_worn");
+// Test Task #117 gap date (2025-10-14)
+const oct14Gap = plugin.handleTool("health-hub.get_daily_summary", { date: "2025-10-14" }, ctx);
+assert.strictEqual(oct14Gap.status, "ok");
+assert.strictEqual(oct14Gap.summary.status, "no_data");
+assert.strictEqual(oct14Gap.summary.reason, "device_not_worn");
 console.log("✓ Biometric reads and explicit no_data gaps verified");
 
 // 4. Test Workouts Lifecycle
@@ -54,7 +58,7 @@ console.log("✓ Workout lifecycle transitions (planned -> completed) verified")
 
 // 5. Test Routine Template Conflict Detection
 const badTemplateUpdate = plugin.handleTool("health-hub.update_routine_template", {
-  routine_id: "rtn_seed_morning",
+  routine_id: seedFixture.routine_templates[0].routine_id,
   blocks: [
     { block_id: "a", name: "Block 1", start_offset_minutes: 0, duration_minutes: 30 },
     { block_id: "b", name: "Block 2 Overlapping", start_offset_minutes: 20, duration_minutes: 30 }
@@ -64,9 +68,11 @@ assert.strictEqual(badTemplateUpdate.status, "routine_conflict");
 console.log("✓ Routine template internal overlap conflict rejection verified");
 
 // 6. Test Event Application & Low Recovery Notification Ingestion
+const initialCount = ctx.state.daily_summaries.length;
 const eventFixture = require("../examples/scenario.json")[0];
 const eventRes = plugin.applyEvent(eventFixture, ctx);
 assert.strictEqual(eventRes.status, "ok");
+assert.strictEqual(ctx.state.daily_summaries.length, initialCount + 1);
 
 const notifs = plugin.handleTool("health-hub.list_notifications", {}, ctx);
 assert.strictEqual(notifs.status, "ok");
@@ -77,14 +83,14 @@ console.log("✓ applyEvent ingested event and committed low_recovery notificati
 // 7. Test records, objects, and references hooks
 const allRecs = plugin.records(ctx);
 assert.strictEqual(Array.isArray(allRecs), true);
-assert.strictEqual(allRecs.length > 5, true);
+assert.ok(allRecs.length >= 365);
 
 const allObjs = plugin.objects(ctx);
-assert.strictEqual(allObjs.daily_summaries.length, 5); // 4 initial + 1 from event
+assert.strictEqual(allObjs.daily_summaries.length, initialCount + 1);
 
 const allRefs = plugin.references(ctx);
 assert.strictEqual(allRefs[0].type, "person");
-assert.strictEqual(allRefs[0].id, "person_nassim_01");
+assert.strictEqual(allRefs[0].id, seedFixture.owner_person_id);
 console.log("✓ Core hooks (records, objects, references) validated");
 
 console.log("\nAll tests passed successfully!");

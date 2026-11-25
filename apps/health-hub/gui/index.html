@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health & Life Hub</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="logo">
+        <span class="icon">❤️</span>
+        <h2>Health Hub</h2>
+      </div>
+      <nav>
+        <button class="nav-btn active" data-tab="tab-overview">Overview</button>
+        <button class="nav-btn" data-tab="tab-recovery">Recovery & Sleep</button>
+        <button class="nav-btn" data-tab="tab-workouts">Workouts</button>
+        <button class="nav-btn" data-tab="tab-goals">Goals</button>
+        <button class="nav-btn" data-tab="tab-routines">Routines</button>
+      </nav>
+      <div class="user-badge" id="user-badge">User: Loading...</div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <h1 id="page-title">Dashboard Overview</h1>
+        <div class="clock-display" id="virtual-clock">Clock: 2026-01-01</div>
+      </header>
+
+      <!-- Overview Tab -->
+      <section id="tab-overview" class="view-panel active">
+        <div class="metrics-grid">
+          <div class="card metric-card">
+            <h3>Recovery Score</h3>
+            <div class="metric-val" id="val-recovery">--%</div>
+            <p class="subtext" id="val-rhr">RHR: -- bpm | HRV: -- ms</p>
+          </div>
+          <div class="card metric-card">
+            <h3>Sleep Quality</h3>
+            <div class="metric-val" id="val-sleep">--h --m</div>
+            <p class="subtext" id="val-sleep-score">Sleep Score: --</p>
+          </div>
+          <div class="card metric-card">
+            <h3>Day Strain</h3>
+            <div class="metric-val" id="val-strain">--</div>
+            <p class="subtext">Scale: 0.0 - 21.0</p>
+          </div>
+          <div class="card metric-card">
+            <h3>Body Weight</h3>
+            <div class="metric-val" id="val-weight">-- kg</div>
+            <p class="subtext">Target: Maintained</p>
+          </div>
+        </div>
+
+        <div class="content-split">
+          <div class="card section-card">
+            <h3>Recent Notifications</h3>
+            <ul id="notification-list" class="styled-list">
+              <li class="empty-state">No active notifications</li>
+            </ul>
+          </div>
+          <div class="card section-card">
+            <h3>Upcoming Planned Workouts</h3>
+            <ul id="recent-workouts-list" class="styled-list">
+              <li class="empty-state">Loading workouts...</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recovery Tab -->
+      <section id="tab-recovery" class="view-panel">
+        <div class="card">
+          <h3>Historical Biometric Trends (Past 7 Days)</h3>
+          <div id="biometrics-table-container">
+            <table class="data-table" id="biometrics-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Recovery</th>
+                  <th>Sleep</th>
+                  <th>RHR</th>
+                  <th>HRV</th>
+                  <th>Strain</th>
+                </tr>
+              </thead>
+              <tbody id="biometrics-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Workouts Tab -->
+      <section id="tab-workouts" class="view-panel">
+        <div class="card">
+          <div class="card-header">
+            <h3>Workout History & Planned Sessions</h3>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Workout ID</th>
+                <th>Activity</th>
+                <th>Status</th>
+                <th>Scheduled / Completed</th>
+                <th>Duration</th>
+                <th>Avg HR</th>
+              </tr>
+            </thead>
+            <tbody id="workouts-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Goals Tab -->
+      <section id="tab-goals" class="view-panel">
+        <div class="card">
+          <h3>Active Wellness Goals & Habits</h3>
+          <ul id="goals-list" class="styled-list"></ul>
+        </div>
+      </section>
+
+      <!-- Routines Tab -->
+      <section id="tab-routines" class="view-panel">
+        <div class="card">
+          <h3>Routine Templates</h3>
+          <div id="routines-container" class="cards-flow"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
