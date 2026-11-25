@@ -259,6 +259,12 @@ test('a schedule change that breaks a connection opens a change with alternative
   assert.match(notice.body, /connection no longer works/);
   assert.match(notice.body, /before 2027-09-01 23:59 -05:00/);
   assert.equal(booking(f, 'booking-1').change, null); // other bookings are untouched
+  // A UTC deadline is shown as UTC, and the outbound Mail body carries the same text.
+  const g = fixture(); fund(g); g.ctx.virtual_now = '2027-08-25T09:05:00-05:00'; bookReturn(g);
+  g.event(delay({deadline:'2027-09-09T04:59:00Z'}));
+  const z = g.data.notices.at(-1);
+  assert.match(z.body, /before 2027-09-09 04:59 UTC\./);
+  assert.match(JSON.stringify(g.call('skyline.notices.outbound', {id:z.id}).message), /2027-09-09 04:59 UTC/);
   unchanged(f, () => f.event(delay({}, '2027-08-26T08:00:00-05:00', 'schedule-2')), code('already_exists'));
 });
 
@@ -370,16 +376,22 @@ test('saver seats pushed out by protected seats come back the same whichever boo
     for (const who of ['daniel', 'mei']) f.call('skyline.manage', {booking_id:ids[who], action:'accept_alternative', alternative_id:'alt-next-day'});
     assert.deepEqual([cabin(f, 'PC12-2027-10-22').saver_seats, free(f, 'PC12-2027-10-22').length], [0, 0]);
     assert.deepEqual([booking(f, ids.daniel).saver_reductions, booking(f, ids.mei).saver_reductions], [[], [{flight_id:'PC12-2027-10-22', seats:1}]]);
+    const stamps = [];
     const results = order.map(who => {
       f.call('skyline.manage', {booking_id:ids[who], action:'cancel'});
+      // Another booking whose reduction this cancel repaid is stamped at the cancel time.
+      stamps.push(Object.entries(ids).filter(([k]) => k !== who).map(([k, id]) => booking(f, id))
+        .filter(x => x.history.at(-1).action === 'saver_reduction_repaid').map(x => [x.id, x.updated_at === f.ctx.virtual_now]));
       const view = NEXT_DAY(f).map(o => ({option_id:o.option_id, seats_left:o.seats_left,
         segments:o.segments.map(s => [s.flight_id, s.saver_seats, s.free_seats.length])}));
       return {saver:cabin(f, 'PC12-2027-10-22').saver_seats, free:free(f, 'PC12-2027-10-22').length, view,
         reductions:Object.values(ids).flatMap(id => booking(f, id).saver_reductions)};
     });
-    return {results, last:NEXT_DAY(f)};
+    return {results, last:NEXT_DAY(f), stamps, ids};
   };
   const a = run(['daniel', 'mei']), b = run(['mei', 'daniel']);
+  assert.deepEqual(a.stamps, [[[a.ids.mei, true]], []]); // cancelling Daniel repays Mei's record
+  assert.deepEqual(b.stamps, [[], []]); // cancelling Mei repays her own record
   assert.deepEqual(a.results.map(r => [r.saver, r.free, r.reductions]), [[1, 1, []], [1, 2, []]]);
   assert.ok(a.results[0].view.some(o => o.segments[0][0] === 'PC12-2027-10-22')); // the award is offered after the first cancel
   assert.deepEqual(a.results, b.results);

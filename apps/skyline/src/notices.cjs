@@ -4,7 +4,9 @@
 const crypto = require('node:crypto');
 const c = require('./common.cjs');
 
-const when = iso => iso.slice(0, 16).replace('T', ' ') + ' ' + iso.slice(-6).replace(/^z$/i, 'UTC');
+// The suffix is Z (shown as UTC) or a numeric offset; seconds before it are dropped.
+const zone = iso => { const z = /(Z|[+-]\d\d:\d\d)$/i.exec(iso)[1]; return /^z$/i.test(z) ? 'UTC' : z; };
+const when = iso => iso.slice(0, 16).replace('T', ' ') + ' ' + zone(iso);
 const points = n => n.toLocaleString('en-US');
 const dollars = cents => '$' + (cents / 100).toFixed(2);
 const leg = f => f.flight_number + ' ' + f.origin + ' ' + when(f.departs_at) + ' to ' + f.dest + ' ' + when(f.arrives_at);

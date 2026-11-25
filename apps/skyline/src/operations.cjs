@@ -120,7 +120,7 @@ function acceptAlternative(ctx, data, b, args) {
   // Two passengers sat together if they had an adjacent pair on every replaced segment.
   const together = pax === 2 && ch.replaces.every(id => { const [a, z] = seatsOn(id); return inv.isPair(inv.flight(data, id).cabins[b.cabin], a.seat, z.seat); });
   const seats = b.seats.filter(s => !ch.replaces.includes(s.flight_id) || alt.flight_ids.includes(s.flight_id));
-  for (const id of ch.replaces.filter(id => !alt.flight_ids.includes(id))) releaseSegment(data, b, id);
+  for (const id of ch.replaces.filter(id => !alt.flight_ids.includes(id))) releaseSegment(ctx, data, b, id);
   const changed = [], reassigned = [];
   for (const f of fresh.filter(f => !b.segments.includes(f.id))) {
     const map = f.cabins[b.cabin];
@@ -151,8 +151,9 @@ function acceptAlternative(ctx, data, b, args) {
 // A reduction is owed by the cabin, not by the booking that happened to trigger the clamp, so the
 // freed seats repay outstanding reductions up to the new free seats (saver never exceeds free):
 // this booking's records first, then other bookings' in booking order. A record paid in full is
-// removed. The result does not depend on which protected booking is released first.
-function releaseSegment(data, b, id) {
+// removed. The result does not depend on which protected booking is released first. Another
+// booking whose record changes is stamped; the caller stamps this one.
+function releaseSegment(ctx, data, b, id) {
   const map = inv.flight(data, id).cabins[b.cabin];
   for (const s of b.seats.filter(s => s.flight_id === id)) inv.release(map, s.seat);
   if (b.saver_flight_ids.includes(id)) map.saver_seats += b.passenger_ids.length;
@@ -164,6 +165,7 @@ function releaseSegment(data, b, id) {
     map.saver_seats += back;
     r.seats -= back;
     if (!r.seats) o.saver_reductions = o.saver_reductions.filter(x => x !== r);
+    if (o !== b) c.stamp(ctx, o, 'saver_reduction_repaid', {flight_id:id, seats:back, by_booking_id:b.id});
   }
   // Released seats always cover this booking's own reduction; drop any remainder so it never outlives the seats.
   b.saver_reductions = b.saver_reductions.filter(r => r.flight_id !== id);
@@ -178,7 +180,7 @@ function cancel(ctx, data, b) {
   const fee = waived ? b.partner_fee_cents : 0, amount = b.taxes_cents + fee;
   const chargeId = amount > 0 ? ledger.charge(ctx, data, b.payment_label, -amount, 'Award refund, booking ' + b.locator, {booking_id:b.id}) : null;
   if (chargeId) b.charge_ids.push(chargeId);
-  for (const id of b.segments) releaseSegment(data, b, id);
+  for (const id of b.segments) releaseSegment(ctx, data, b, id);
   b.status = 'cancelled';
   data.inventory_revision++;
   c.stamp(ctx, b, 'cancelled', {fee_waived:waived});
