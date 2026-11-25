@@ -31,11 +31,15 @@ export const config={
 };
 
 async function manage(ui,args){try{await ui.perform('skyline.manage',args);}catch(e){ui.error(e);}}
+// Each passenger may pick their own seat, a fellow traveler's seat on this booking (a swap, sent as
+// both changes together) or a free seat; the App releases all requested seats before assigning them.
 function seatPicker(t,f,ui){
- const selects=t.passenger_ids.map(p=>{
-  const current=t.seats.find(s=>s.flight_id===f.flight_id&&s.passenger_id===p).seat;
+ const own=t.passenger_ids.map(p=>({p,seat:t.seats.find(s=>s.flight_id===f.flight_id&&s.passenger_id===p).seat}));
+ const selects=own.map(({p,seat:current})=>{
   const s=el('select',{'aria-label':'Seat for '+p+' on '+f.flight_number,disabled:t.status!=='ticketed'});
-  for(const seat of [current,...f.free_seats])s.append(el('option',{value:seat},seat));
+  s.append(el('option',{value:current},current));
+  for(const o of own)if(o.p!==p)s.append(el('option',{value:o.seat},o.seat+' ('+o.p.replace(/^pax-/,'')+'\u2019s now)'));
+  for(const seat of f.free_seats)s.append(el('option',{value:seat},seat));
   return {p,current,s};
  });
  const save=el('button',{type:'button',disabled:t.status!=='ticketed'||!ui.has('skyline.manage')},'Save seats');
