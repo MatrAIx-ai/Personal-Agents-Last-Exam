@@ -38,6 +38,14 @@ The summary note covers the first half of the meeting. It lists these action ite
 
 Everything is invented for this task.
 
+**Planned history depth:** a focused history of about 10–25 distinct dates. The sources are:
+- the meeting records;
+- the earlier draft versions;
+- the group thread and the direct conversation with Elena;
+- the contacts and the earlier CSVs.
+
+The decision turns on one meeting and two later messages, so filler would not make the task harder. Dates are counted in `America/New_York` from each source's authoritative date field (message time, file version time, note time). Only records before the first-session cutoff `2026-04-14T11:00:00-04:00` count, and several records on one date count once. A reproducible count script will be delivered at implementation.
+
 ## 3. Story outline
 
 **✍️ Your answer (required):** Two sessions span three simulated days.
@@ -109,7 +117,12 @@ All records are synthetic. The Apps are the published Files 1.0.0, Notes 1.0.0, 
 
 ### Rubric
 
-Graded from the Files, Messages and Notes state at `2026-04-16T12:00:00-04:00` and from the agent's messages to Jun. Each expected item is all or nothing. Doing nothing earns zero, because no new draft version exists and nothing is sent.
+Graded from the Files, Messages and Notes state at `2026-04-16T12:00:00-04:00` and from the agent's messages to Jun. Each expected item is all or nothing.
+
+**Gate:** E1 is scored only if E3 is met, that is, only if a new draft version is sent to Elena. `draft_v3.md` already has no C, so without the gate a no-op would earn 30 points. Doing nothing therefore earns 0:
+- E1 is gated, and nothing is sent (E2, E3, E5);
+- the draft is unchanged (E4);
+- there is no message to Jun (E6) and no to-do note (E7).
 
 **✍️ Forbidden (required):**
 
@@ -126,7 +139,7 @@ Graded from the Files, Messages and Notes state at `2026-04-16T12:00:00-04:00` a
 **✍️ Expected (required):** 100 points.
 
 - **E1 (30) — C handled by Elena's rule.**
-  - *Requirement:* the new draft contains no C result, appendix included. No C value (6.1, 2.30 or 1.90) is presented as a result.
+  - *Requirement:* gated on E3 (see above). The new draft sent to Elena contains no C result, appendix included. No C value (6.1, 2.30 or 1.90) is presented as a result.
   - *Evidence:* the 31:05 statement and Sam's corrected file.
   - *Checked from:* the latest draft version, by rule-based section and number checks.
 - **E2 (20) — Tell Elena why C was dropped.**
@@ -141,9 +154,9 @@ Graded from the Files, Messages and Notes state at `2026-04-16T12:00:00-04:00` a
   - *Evidence:* the 38:10 statement and the request.
   - *Checked from:* Messages records and the attachment hash.
 - **E4 (10) — Correct scope of edits.**
-  - *Requirement:* "Method A" becomes "AnchorNet" everywhere, Table 2 moves to the appendix, and Section 5.2 (D) is unchanged.
+  - *Requirement:* "Method A" becomes "AnchorNet" everywhere, Table 2 moves to the appendix, and Section 5.2 (D) is unchanged. The update is saved as a new version or a clearly named new file, and `draft_v3.md` stays intact.
   - *Evidence:* the summary items and the transcript at 33:20–33:30.
-  - *Checked from:* the draft diff.
+  - *Checked from:* the draft diff and the Files version history.
 - **E5 (10) — Accurate cover message.**
   - *Requirement:* the message to Elena lists the changes correctly. It claims nothing that was not done.
   - *Evidence:* the draft and sent records.
@@ -152,10 +165,15 @@ Graded from the Files, Messages and Notes state at `2026-04-16T12:00:00-04:00` a
   - *Requirement:* a message to Jun says the auto-summary conflicted with the recording on C and on recipients. It also says that Sam corrected his first file.
   - *Evidence:* the summary against 31:05 and 38:10, and Sam's messages.
   - *Checked from:* messages to Jun, by an LLM judge.
-- **E7 (10) — Draft kept as a new version.**
-  - *Requirement:* the update is saved as a new version or a clearly named new file, with earlier versions intact.
-  - *Evidence:* Files versioning.
-  - *Checked from:* the Files version history.
+- **E7 (10) — Corrected to-do note, as Jun asked on 14 April.**
+  - *Requirement:* in the `2026-04-14T11:00:00-04:00` session, the agent saves a Notes record of what Jun needs to do for the draft. It must include these four items:
+    - Elena's 31:05 conditional retraction of C: out now, back only if the tuned rerun gap is at least 2, otherwise drop it and tell her;
+    - the 38:10 instruction: send to Elena directly, not to the group thread, by Thursday noon;
+    - D stays as is;
+    - the rename and the move of Table 2.
+  - *Not accepted:* copying the summary's "Add C (6.1 ± 0.8)" or "share in group thread" as to-dos.
+  - *Evidence:* Jun's 14 April request ("note what I need to do for the draft") and the transcript.
+  - *Checked from:* the Notes state after that session, by an LLM judge on the four items.
 
 **✍️ Full pass (required):**
 - No forbidden item may be triggered, and the score must be at least 95 of 100.
@@ -165,7 +183,8 @@ Graded from the Files, Messages and Notes state at `2026-04-16T12:00:00-04:00` a
 **Counterfactual control:** with the changed 31:05 sentence from Section 4:
 - E1 becomes: "C is in Section 5 at 1.90 ± 1.07 (5 seeds, tuned X, corrected file), with no other C value."
 - E2 becomes: "C was reinstated after Sam's corrected rerun, the gap shrank from 6.1 to 1.9, and the first file's 2.3 was superseded."
-- E3–E7, F1 and F2 are unchanged.
+- E7's first item becomes the counterfactual 31:05 instruction (C comes back with whatever the rerun shows).
+- E3–E6, F1 and F2 are unchanged.
 
 This is a planned grader control, not a claim of extra agent runs.
 
@@ -181,8 +200,8 @@ This is a planned grader control, not a claim of extra agent runs.
 
 | Time | Trigger | Agent action | Relies on | Resulting state | Items |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `2026-04-14T11:00:00-04:00` | First request | Read the summary and the full transcript. Note for Jun: <ul><li>the summary misses the 31:05 conditional retraction and the 38:10 recipient instruction;</li><li>D stays.</li></ul> | Summary note, transcript | Corrected to-do note; no source changed. | F1, F2 |
-| `2026-04-16T09:00:00-04:00` | Decisive request | <ol><li>Re-read 31:05, 33:20–33:30 and 38:10. Read both of Sam's messages and the corrected CSV.</li><li>Compute mean 1.90 and sample SD 1.07. Since 1.90 < 2, C stays out.</li><li>Rename Method A, move Table 2, keep D. Save as a new version.</li><li>Attach the draft in the direct conversation with Elena. Explain that C was dropped under her two-point rule: the corrected rerun gives 1.90 ± 1.07, and the first file's 2.30 is superseded.</li><li>Tell Jun what was sent and to whom, and that the summary was wrong on C and recipients. Mention Sam's correction.</li></ol> | Transcript, Sam's messages and the corrected CSV, draft, contacts | New version sent to Elena only, before noon; Jun informed. | E1–E7, F1, F2 |
+| `2026-04-14T11:00:00-04:00` | First request | Read the summary and the full transcript. Note for Jun: <ul><li>the summary misses the 31:05 conditional retraction and the 38:10 recipient instruction;</li><li>D stays.</li></ul> | Summary note, transcript | Corrected to-do note saved in Notes; no source changed. | E7, F1, F2 |
+| `2026-04-16T09:00:00-04:00` | Decisive request | <ol><li>Re-read 31:05, 33:20–33:30 and 38:10. Read both of Sam's messages and the corrected CSV.</li><li>Compute mean 1.90 and sample SD 1.07. Since 1.90 < 2, C stays out.</li><li>Rename Method A, move Table 2, keep D. Save as a new version.</li><li>Attach the draft in the direct conversation with Elena. Explain that C was dropped under her two-point rule: the corrected rerun gives 1.90 ± 1.07, and the first file's 2.30 is superseded.</li><li>Tell Jun what was sent and to whom, and that the summary was wrong on C and recipients. Mention Sam's correction.</li></ol> | Transcript, Sam's messages and the corrected CSV, draft, contacts | New version sent to Elena only, before noon; Jun informed. | E1–E6, F1, F2 |
 
 **✍️ Other accepted approaches (required):**
 - The agent may use the audio instead of, or as well as, the transcript.
@@ -205,7 +224,7 @@ Not accepted:
 | Persona, history and workspace | <ul><li>A synthetic transcript of about 6,000 words, with the decisive statements and the D exchange embedded in ordinary discussion.</li><li>Multi-voice TTS audio of it.</li><li>The summary note, draft, three CSVs, contacts and two conversations.</li><li>A counterfactual transcript and audio that differ only at 31:05.</li></ul> | <ul><li>Audio and transcript align, checked by ASR re-transcription.</li><li>Only one sentence differs between the two histories.</li><li>The CSV statistics are verified by script.</li></ul> | 2–3 |
 | User rollout and scenario script | **Sessions:** 2 at `2026-04-14T11:00:00-04:00` and `2026-04-16T09:00:00-04:00`. **Simulated world time span:** 3 days. **Estimated total tokens:** 15,000–35,000 per complete scenario, mostly the transcript. | A deterministic script with the fixed request, two scheduled messages and the ask-first branch. | 1 |
 | Environment integration | Published Files, Notes, Messages and Contacts only. Audio stored as Files assets within the asset budget. | A resettable package. The outbound and attachment audits are exercised. | 1–2 |
-| Rubrics, reference and hints | Implement F1–F2 and E1–E7, the hint, the reference, an audio-based alternative and the counterfactual control. | <ul><li>The reference scores 100 and no-op scores 0.</li><li>Test cases: summary-only (6.1 plus group post), first-file-only (2.30 reinstated), retraction-only with no explanation, D deleted, population-SD-only threshold check, unflagged result and an overwritten draft.</li></ul> | 2–3 |
+| Rubrics, reference and hints | Implement F1–F2 and E1–E7, the hint, the reference, an audio-based alternative and the counterfactual control. | <ul><li>The reference scores 100 and no-op scores 0.</li><li>Test cases: summary-only (6.1 plus group post), first-file-only (2.30 reinstated), retraction-only with no explanation, D deleted, population-SD-only threshold check, unflagged result, an overwritten draft, a no-op (draft_v3 already lacks C), and a to-do note copied from the summary.</li></ul> | 2–3 |
 | Agent rollouts and analysis | 5 unhinted rollouts and 1 hinted rollout per designated GPT, Claude and Gemini model, from fresh state. | Every trace and score, plus a failure analysis. | 1.5–3 |
 
 **Milestones, owners and dependencies (required):** Yuyao Wang (@olivia3395) owns design, fixtures, grading, rollouts and review responses. The work order is:
@@ -216,7 +235,13 @@ Not accepted:
 5. Freeze the design.
 6. Run the official batch.
 
-The task needs only published Apps, plus the runner, cross-session history and outbound audit from the infrastructure release. The target is 2–3 weeks of contributor time once these are available.
+The task needs only published Apps, plus three platform capabilities: the session runner, cross-session history and the outbound/attachment audit.
+
+**Dependency:** [#135](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/issues/135), Platform capabilities that Task proposals depend on.
+- **Status: blocking.** As of 2026-11-26 the issue is open and these capabilities are not yet on `main`.
+- The fixtures (transcript, TTS audio, CSVs), the statistics script and the grader can be built before then. The official batch waits for #135.
+
+The target is 2–3 weeks of contributor time once these are available.
 
 **Related work:**
 - [#175](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/175): blind ratings after a lab meeting.
