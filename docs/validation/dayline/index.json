@@ -1,6 +1,6 @@
 {
   "schema": "dayline.v1-evidence-index",
-  "recorded_at": "2026-11-26T19:13:34Z",
+  "recorded_at": "2026-11-26T19:58:49Z",
   "app_id": "dayline",
   "app_version": "1.0.0",
   "runtime_version": "1.6.0",
@@ -10,9 +10,9 @@
   "proposal_blob_sha": "3d8e6c04a099a460b7864fd6759af78b54f54edd",
   "proposal_status": "plan approved for implementation by the assigned Track reviewer (/approve-plan for this commit); the proposal file is unchanged since",
   "public_runtime_base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
-  "app_package_commit": "b95b7b255a243c186ecef819b7d001a09b6233a1",
-  "app_package_sha256": "b38724c8508ea0b3cacc925bb166eeb5823d8f29150c9d97c0ecccb531a146df",
-  "app_package_git_tree": "65bb8a3d5a5205da7e135476be9283c4e0de732a",
+  "app_package_commit": "d13ee468038ffab81bceaac7bdf465326836910a",
+  "app_package_sha256": "170b95f41a1aac478ee3d21d7fda19e4b5e4086e8175bab6c36b7406459809f2",
+  "app_package_git_tree": "92c98edb9a9793f8011fd57a9dd45b7caae7e4ee",
   "package_hash_agrees_in": [
     "public-runtime.node22.json",
     "public-runtime.node18.json",
@@ -49,7 +49,7 @@
       }
     },
     "standalone_event_example": "examples/run.cjs passed from a copy of apps/dayline alone, with only PATH and LANG set, on both Node versions",
-    "generators_reproduce_committed_files": "dev/build-fixtures.cjs, dev/build-contracts.cjs and dev/build-dataset.cjs, run in a copy, left every file byte-identical on both Node versions",
+    "generators_reproduce_committed_files": "Every dev/build-*.cjs generator, including dev/build-dataset.cjs, run in a copy, left every committed file byte-identical on both Node versions",
     "public_app_verifier": {
       "node22": 42,
       "node18": 42,
@@ -120,11 +120,22 @@
         "2026-12-31"
       ],
       "dataset_clock": "2026-10-14T07:00:00-07:00",
-      "records_counted": 1356,
-      "global_distinct_dates": 523,
-      "months_with_records": 24,
-      "distinct_dates_on_or_before_clock": 477,
-      "longest_gap_days": 5,
+      "totals": {
+        "records": 1356,
+        "counted": 1356,
+        "excluded": 0,
+        "invalid": 0,
+        "global_distinct_dates": 523,
+        "earliest": "2025-01-01",
+        "latest": "2026-12-31",
+        "distinct_dates_on_or_before_clock": 477,
+        "months_with_records": 24,
+        "longest_gap": {
+          "days": 5,
+          "from": "2025-12-12",
+          "to": "2025-12-16"
+        }
+      },
       "real_records": 0,
       "content": {
         "editions": 969,
@@ -136,12 +147,12 @@
       },
       "real_mcp_demo": {
         "node22": {
-          "checks": 19,
-          "load_request_bytes": 610570
+          "checks": 20,
+          "load_request_bytes": 611581
         },
         "node18": {
-          "checks": 19,
-          "load_request_bytes": 610570
+          "checks": 20,
+          "load_request_bytes": 611581
         }
       }
     }
@@ -166,17 +177,38 @@
     "official PR CI on the implementation commit",
     "human review of realism and invented names"
   ],
-  "previous_submission": {
+  "added_scope_after_plan_approval": {
+    "reason": "#260 (docs/submission-evidence.md section 3) merged 2026-11-25, after plan approval; v1 review round of 2026-11-26",
+    "items": [
+      "evaluation dataset in apps/dayline/data/evaluation/ with dev/build-dataset.cjs, dev/coverage-report.cjs and examples/dataset-demo.cjs",
+      "clock cutoff: tools show only records dated at or before the run clock",
+      "package size 988,313 bytes of tracked files (253,604 at the first submission, c4b8fa7)"
+    ]
+  },
+  "first_submission": {
     "head": "2eb62d924bebe207d08f004fbd5ee749be113528",
     "app_package_commit": "c4b8fa7cbecacfceeaa3e5a0814217fedc5d2682",
     "app_package_sha256": "5f5c19df1164cd72d6bc39ff956dd1e25fe023636a0b86a9fd46113ac89e5803"
   },
-  "added_scope_after_plan_approval": {
-    "reason": "#260 (docs/submission-evidence.md section 3) merged 2026-11-25, after the 2026-11-24 plan approval; v1 review of 2026-11-26",
-    "items": [
-      "evaluation dataset in data/evaluation/ with dev/build-dataset.cjs, dev/coverage-report.cjs and examples/dataset-demo.cjs",
-      "clock cutoff for every read and write, replacing the write-only invalid_state check",
-      "package size 987,523 bytes of tracked files (was 253,604)"
-    ]
-  }
+  "previous_submission": {
+    "head": "5ac38e0205c38cdfc6ffc3a2a4743571fc1564c9",
+    "app_package_commit": "b95b7b255a243c186ecef819b7d001a09b6233a1",
+    "app_package_sha256": "b38724c8508ea0b3cacc925bb166eeb5823d8f29150c9d97c0ecccb531a146df"
+  },
+  "revisions": [
+    {
+      "head": "2eb62d924bebe207d08f004fbd5ee749be113528",
+      "package": "c4b8fa7cbecacfceeaa3e5a0814217fedc5d2682",
+      "note": "first v1 submission"
+    },
+    {
+      "head": "5ac38e0205c38cdfc6ffc3a2a4743571fc1564c9",
+      "package": "b95b7b255a243c186ecef819b7d001a09b6233a1",
+      "note": "clock cutoff and evaluation dataset"
+    },
+    {
+      "package": "d13ee468038ffab81bceaac7bdf465326836910a",
+      "note": "dataset.json hash moved to a schema-valid field; demo loads the dataset with its own dataset.json"
+    }
+  ]
 }
