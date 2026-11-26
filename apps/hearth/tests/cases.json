@@ -1,45 +1,13 @@
 {
-  "cases": [
-    {
-      "name": "read_property_and_rooms",
-      "tool": "hearth.get_property",
-      "params": {},
-      "expected_result": {
-        "property": {
-          "address": "42 Pine Street, Apt 3B"
-        }
-      }
-    },
-    {
-      "name": "list_active_furniture",
-      "tool": "hearth.list_inventory",
-      "params": {
-        "category": "furniture",
-        "status": "active"
-      },
-      "expected_result": {
-        "items": [
-          { "id": "item_armchair_01", "name": "Grandfather's Mid-Century Leather Armchair" }
-        ]
-      }
-    },
-    {
-      "name": "store_item_in_basement",
-      "tool": "hearth.store_item",
-      "params": {
-        "item_id": "item_desk_01",
-        "storage_room_id": "room_basement_storage",
-        "expected_version": { "epoch": 1, "revision": 1 },
-        "request_id": "verify_req_store_01"
-      },
-      "expected_result": {
-        "success": true,
-        "item": {
-          "id": "item_desk_01",
-          "status": "stored",
-          "room_id": "room_basement_storage"
-        }
-      }
+  "read": {
+    "name": "hearth.get_property",
+    "args": {}
+  },
+  "write": {
+    "name": "hearth.store_item",
+    "args": {
+      "item_id": "item_desk_01",
+      "storage_room_id": "room_basement_storage"
     }
-  ]
+  }
 }

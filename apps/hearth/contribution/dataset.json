@@ -1,14 +1,63 @@
 {
-  "dataset_version": "1.0.0",
-  "provenance": "100% synthetically generated fixture data for PALE benchmark.",
-  "contains_pii": false,
-  "license": "MIT",
-  "historical_timeline_start": "2025-01-01",
-  "active_timeline_start": "2026-01-01",
-  "entities": {
-    "households": 1,
-    "rooms": 4,
-    "residents": 2,
-    "inventory_items": 3
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "hearth-pine-apt",
+  "version": "1.0.0",
+  "description": "100% synthetically generated household fixture data (42 Pine Street, Apt 3B) for PALE benchmark.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-authored synthetic household records dated from 2025-01-01 onward; no external collection.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.6.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "floorplan-gen",
+      "kind": "synthetic",
+      "description": "Algorithmically generated 2D vector floor plan rendered as PNG.",
+      "uri": null,
+      "license": "CC0-1.0",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "script",
+        "tool": "Node.js PNG generator",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "width": 640,
+          "height": 480
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized timestamps from 2025-01-01 onward and household IDs; records and assets declared separately."
+  ],
+  "expected_counts": {
+    "records": 32,
+    "assets": 1
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
   }
 }

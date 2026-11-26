@@ -1,73 +1,65 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:pale:hearth:events:1",
-  "title": "HearthEvents",
-  "type": "object",
-  "required": ["event_id", "at", "operation", "payload"],
-  "properties": {
-    "event_id": { "type": "string" },
-    "at": { "type": "string", "format": "date-time" },
-    "operation": {
-      "type": "string",
-      "enum": [
-        "hearth.appliance_breakdown",
-        "hearth.cancel_maintenance_issue",
-        "hearth.purchase_approval"
-      ]
-    },
-    "payload": {
-      "type": "object"
-    }
-  },
-  "allOf": [
+  "oneOf": [
     {
-      "if": { "properties": { "operation": { "const": "hearth.appliance_breakdown" } } },
-      "then": {
-        "properties": {
-          "payload": {
-            "type": "object",
-            "required": ["item_id", "fault_type", "severity", "reported_by_person_id"],
-            "properties": {
-              "item_id": { "type": "string" },
-              "fault_type": { "type": "string" },
-              "severity": { "type": "string", "enum": ["minor", "critical"] },
-              "reported_by_person_id": { "type": "string" }
-            }
-          }
+      "type": "object",
+      "required": ["event_id", "at", "operation", "payload"],
+      "properties": {
+        "event_id": { "type": "string", "minLength": 1 },
+        "at": { "type": "string", "format": "date-time" },
+        "operation": { "const": "hearth.appliance_breakdown" },
+        "payload": {
+          "type": "object",
+          "required": ["item_id", "fault_type", "severity", "reported_by_person_id"],
+          "properties": {
+            "item_id": { "type": "string", "minLength": 1 },
+            "fault_type": { "type": "string", "minLength": 1 },
+            "severity": { "type": "string", "enum": ["minor", "critical"] },
+            "reported_by_person_id": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
         }
-      }
+      },
+      "additionalProperties": false
     },
     {
-      "if": { "properties": { "operation": { "const": "hearth.cancel_maintenance_issue" } } },
-      "then": {
-        "properties": {
-          "payload": {
-            "type": "object",
-            "required": ["issue_id", "reason", "cancelled_by_person_id"],
-            "properties": {
-              "issue_id": { "type": "string" },
-              "reason": { "type": "string" },
-              "cancelled_by_person_id": { "type": "string" }
-            }
-          }
+      "type": "object",
+      "required": ["event_id", "at", "operation", "payload"],
+      "properties": {
+        "event_id": { "type": "string", "minLength": 1 },
+        "at": { "type": "string", "format": "date-time" },
+        "operation": { "const": "hearth.cancel_maintenance_issue" },
+        "payload": {
+          "type": "object",
+          "required": ["issue_id", "reason", "cancelled_by_person_id"],
+          "properties": {
+            "issue_id": { "type": "string", "minLength": 1 },
+            "reason": { "type": "string", "minLength": 1 },
+            "cancelled_by_person_id": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
         }
-      }
+      },
+      "additionalProperties": false
     },
     {
-      "if": { "properties": { "operation": { "const": "hearth.purchase_approval" } } },
-      "then": {
-        "properties": {
-          "payload": {
-            "type": "object",
-            "required": ["purchase_id", "decision", "decided_by_person_id"],
-            "properties": {
-              "purchase_id": { "type": "string" },
-              "decision": { "type": "string", "enum": ["approved", "denied"] },
-              "decided_by_person_id": { "type": "string" }
-            }
-          }
+      "type": "object",
+      "required": ["event_id", "at", "operation", "payload"],
+      "properties": {
+        "event_id": { "type": "string", "minLength": 1 },
+        "at": { "type": "string", "format": "date-time" },
+        "operation": { "const": "hearth.purchase_approval" },
+        "payload": {
+          "type": "object",
+          "required": ["purchase_id", "decision", "decided_by_person_id"],
+          "properties": {
+            "purchase_id": { "type": "string", "minLength": 1 },
+            "decision": { "type": "string", "enum": ["approved", "denied"] },
+            "decided_by_person_id": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
         }
-      }
+      },
+      "additionalProperties": false
     }
   ]
 }

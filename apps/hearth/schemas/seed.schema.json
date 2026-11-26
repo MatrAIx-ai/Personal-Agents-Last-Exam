@@ -93,8 +93,15 @@
             "items": { "type": "integer" }
           },
           "coordinates": {
-            "type": ["array", "null"],
-            "items": { "type": "integer" }
+            "oneOf": [
+              {
+                "type": "array",
+                "items": { "type": "integer" }
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "is_heirloom": { "type": "boolean" },
           "condition": { "type": "string", "enum": ["operational", "degraded", "broken"] },
