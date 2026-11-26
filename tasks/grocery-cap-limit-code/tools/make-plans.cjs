@@ -136,11 +136,15 @@ add('f4-visa', 'main', {
   s2: saturdaySteps(saturday)
 });
 add('f5-energy', 'main', {
-  s1: place('2026-11-20T06:14:00-05:00', energy, 'fc-order-energy', 'approved'),
+  s1: [
+    ...read('2026-11-20T06:11:00-05:00'),
+    ...place('2026-11-20T06:14:00-05:00', energy, 'fc-order-energy', 'approved')
+  ],
   s2: []
 });
 add('f6-early', 'main', {
   s1: [
+    ...read('2026-11-20T06:11:00-05:00'),
     ...place('2026-11-20T06:14:00-05:00', regular, facts.regular_order_id, 'approved'),
     ...place('2026-11-20T06:15:00-05:00', thanksgiving, facts.thanksgiving_order_id, 'approved')
   ],
@@ -241,6 +245,7 @@ add('saturday-place', 'main', {
 });
 add('cancel-question', 'main', {
   s1: [
+    ...read('2026-11-20T06:11:00-05:00'),
     ...place('2026-11-20T06:14:00-05:00', regular, facts.regular_order_id, 'approved'),
     at('2026-11-20T06:20:00-05:00', { say: 'Do not place a second order. Can we forget Thanksgiving and the $43.27?' }),
     ...place('2026-11-20T11:56:00-05:00', thanksgiving, facts.thanksgiving_order_id, 'approved')
@@ -249,6 +254,7 @@ add('cancel-question', 'main', {
 });
 add('lunch-statement', 'main', {
   s1: [
+    ...read('2026-11-20T06:11:00-05:00'),
     ...place('2026-11-20T06:14:00-05:00', regular, facts.regular_order_id, 'approved'),
     at('2026-11-20T12:00:00-05:00', { say: 'I already ordered Thanksgiving. The second order is $43.27.' }),
     ...place('2026-11-20T12:02:00-05:00', thanksgiving, facts.thanksgiving_order_id, 'approved')
@@ -282,7 +288,7 @@ add('mixed-basket', 'main', {
 });
 add('yogurt-before', 'main', {
   s1: [
-    ...referenceBody(lunch, saturday).s1.slice(0, 0),
+    ...read('2026-11-20T06:11:00-05:00'),
     ...place('2026-11-20T06:14:00-05:00', regular, facts.regular_order_id, 'approved'),
     ...place('2026-11-20T06:15:00-05:00', [{ item_id: 'item-yogurt', qty: 1 }], 'fc-order-yog1', 'approved'),
     ...place('2026-11-20T06:15:30-05:00', [{ item_id: 'item-yogurt', qty: 1 }], 'fc-order-yog2', 'approved'),

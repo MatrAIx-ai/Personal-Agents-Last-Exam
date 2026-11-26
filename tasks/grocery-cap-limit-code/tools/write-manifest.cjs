@@ -10,7 +10,7 @@ const skip = new Set(['manifest.json']);
 function filesUnder(dir, prefix) {
   const out = [];
   for (const name of fs.readdirSync(dir)) {
-    if (name === '.deps' || name === 'node_modules') continue;
+    if (name === '.deps' || name === 'node_modules' || name === '.runs' || name === '.runs-staging' || name.startsWith('.runs-staging') || name.endsWith('.previous')) continue;
     const abs = path.join(dir, name);
     const rel = prefix ? prefix + '/' + name : name;
     const stat = fs.statSync(abs);

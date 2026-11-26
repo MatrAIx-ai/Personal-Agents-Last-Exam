@@ -320,7 +320,11 @@ async function runScenario(options) {
       const follow = world.followUp(rules, transcript, text, clock, variant);
       if (follow) sayLine({ at: clock, role: 'user', text: follow, session: ctx.currentSession, cause: 'lunch-follow-up' });
     },
-    async advance(at) { await deliverDue(at); },
+    async advance(at) {
+      const mark = transcript.length;
+      await deliverDue(at);
+      return { at: clock, messages: transcript.slice(mark).map(row => ({ ...row })) };
+    },
     async openSession(session) {
       ctx.currentSession = session.id;
       await deliverDue(session.start);

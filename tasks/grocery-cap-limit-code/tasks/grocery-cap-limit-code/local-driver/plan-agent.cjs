@@ -128,7 +128,8 @@ async function runPlan(ctx, plan) {
     const steps = (plan.sessions && plan.sessions[session.id]) || [];
     await ctx.openSession(session);
     for (const step of steps) {
-      await ctx.advance(step.at || session.start);
+      const arrived = await ctx.advance(step.at || session.start);
+      if (!arrived || !Array.isArray(arrived.messages)) throw new Error('advance did not report delivered messages');
       serial += 1;
       await runStep(ctx, step, serial);
     }

@@ -21,6 +21,10 @@ function copyFile(from, to) {
 const staging = path.join(path.dirname(runsDir), '.runs-staging');
 fs.rmSync(staging, { recursive: true, force: true });
 fs.mkdirSync(staging, { recursive: true });
+function stop(message) {
+  fs.rmSync(staging, { recursive: true, force: true });
+  stop(message);
+}
 const runs = [];
 const names = fs.readdirSync(source).filter(item => {
   const dir = path.join(source, item);
@@ -38,34 +42,34 @@ for (const name of names) {
     try {
       reward = JSON.parse(fs.readFileSync(path.join(dest, 'reward.json'), 'utf8'));
     } catch (error) {
-      throw new Error(name + ' reward is not valid JSON');
+      stop(name + ' reward is not valid JSON');
     }
   }
   const want = expected[name];
   if (reward && reward.official_score !== false) {
     const statePath = path.join(dest, 'state.json');
     const runPath = path.join(dest, 'run.json');
-    if (!fs.existsSync(statePath) || !fs.existsSync(runPath)) throw new Error(name + ' scored artifact missing');
+    if (!fs.existsSync(statePath) || !fs.existsSync(runPath)) stop(name + ' scored artifact missing');
     let stateDoc;
     let runDoc;
     try {
       stateDoc = JSON.parse(fs.readFileSync(statePath, 'utf8'));
     } catch (error) {
-      throw new Error(name + ' state is not valid JSON');
+      stop(name + ' state is not valid JSON');
     }
     try {
       runDoc = JSON.parse(fs.readFileSync(runPath, 'utf8'));
     } catch (error) {
-      throw new Error(name + ' run is not valid JSON');
+      stop(name + ' run is not valid JSON');
     }
     const apps = stateDoc && stateDoc.apps;
     const ready = stateDoc && stateDoc.schema === 'grocery-cap-limit-code.run.v1' && apps && runDoc && runDoc.run_id;
     const appsReady = ready && ['freshcart', 'keelcard', 'mail', 'webstub'].every(app => apps[app] && typeof apps[app] === 'object');
-    if (!appsReady) throw new Error(name + ' state is incomplete');
+    if (!appsReady) stop(name + ' state is incomplete');
   }
   const status = !reward ? 'incomplete' : (reward.official_score === false ? 'ineligible' : 'scored');
-  if (want && !reward) throw new Error(name + ' reward missing');
-  if (!want && status === 'scored') throw new Error('unexpected run ' + name);
+  if (want && !reward) stop(name + ' reward missing');
+  if (!want && status === 'scored') stop('unexpected run ' + name);
   if (!want) {
     const run = present.includes('run.json') ? JSON.parse(fs.readFileSync(path.join(dest, 'run.json'), 'utf8')) : {};
     const state = present.includes('state.json') ? JSON.parse(fs.readFileSync(path.join(dest, 'state.json'), 'utf8')) : {};
@@ -79,15 +83,15 @@ for (const name of names) {
     });
     continue;
   }
-  if (reward.rubric_points !== want.points) throw new Error(name + ' points ' + reward.rubric_points + ' expected ' + want.points);
-  if (want.full_pass !== undefined && reward.full_pass !== want.full_pass) throw new Error(name + ' full_pass');
+  if (reward.rubric_points !== want.points) stop(name + ' points ' + reward.rubric_points + ' expected ' + want.points);
+  if (want.full_pass !== undefined && reward.full_pass !== want.full_pass) stop(name + ' full_pass');
   const got = Object.keys(reward.forbidden).filter(key => reward.forbidden[key]).sort();
   const need = [...(want.forbidden || [])].sort();
-  if (JSON.stringify(got) !== JSON.stringify(need)) throw new Error(name + ' forbidden ' + got.join(','));
+  if (JSON.stringify(got) !== JSON.stringify(need)) stop(name + ' forbidden ' + got.join(','));
   if (want.earned_before_gate !== undefined && reward.earned_before_gate !== want.earned_before_gate) {
-    throw new Error(name + ' earned ' + reward.earned_before_gate);
+    stop(name + ' earned ' + reward.earned_before_gate);
   }
-  if (want.control_pass !== undefined && reward.control.pass !== want.control_pass) throw new Error(name + ' control');
+  if (want.control_pass !== undefined && reward.control.pass !== want.control_pass) stop(name + ' control');
   const run = JSON.parse(fs.readFileSync(path.join(dest, 'run.json'), 'utf8'));
   runs.push({
     run_id: run.run_id,
@@ -111,7 +115,7 @@ for (const name of names) {
 }
 runs.sort((a, b) => a.plan_id.localeCompare(b.plan_id));
 const missing = Object.keys(expected).filter(name => !runs.some(run => run.directory === name));
-if (missing.length) throw new Error('missing runs ' + missing.join(','));
+if (missing.length) stop('missing runs ' + missing.join(','));
 
 const reference = JSON.parse(fs.readFileSync(path.join(staging, 'reference/state.json'), 'utf8'));
 const orders = reference.apps.freshcart.orders.filter(row => !row.historical);
