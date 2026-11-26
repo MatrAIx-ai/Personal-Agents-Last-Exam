@@ -1,7 +1,7 @@
 'use strict';
 // Account-side helpers: who is calling, member authority, time-derived download state, activity rows
 // and notices. Derived states are functions of stored due times and the instant passed in.
-const {fail, instant, shift, DAY} = require('./domain-utils.cjs');
+const {fail, instant, shift, DAY, hiddenIds} = require('./domain-utils.cjs');
 const billing = require('./billing.cjs');
 
 const OFFLINE_DAYS = 30;
@@ -112,7 +112,7 @@ function playlistRole(data, p, memberId) {
 
 function newId(data, prefix, taken) {
   let id;
-  do {id = prefix + '-' + data.next_seq; data.next_seq++;} while (taken(id));
+  do {id = prefix + '-' + data.next_seq; data.next_seq++;} while (taken(id) || hiddenIds(data).has(id));
   return id;
 }
 // One activity row per committed write or applied event; none for replays, rejections or time passing.

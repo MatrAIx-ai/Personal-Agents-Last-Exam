@@ -1,7 +1,9 @@
 'use strict';
 // Infra-applied incoming events. Core deduplicates event IDs, sets ctx.virtual_now to event.at and
-// rolls back any failure. Each applied event appends one activity row with actor "event".
-const {fail, copy, instant} = require('./domain-utils.cjs');
+// rolls back any failure. Each applied event appends one activity row with actor "event". Handlers see
+// the data as of event.at (src/visible.cjs): lookups, "newest n" and positions count visible records.
+const {fail, copy, instant, hiddenIds} = require('./domain-utils.cjs');
+const cutoff = require('./visible.cjs');
 const {log} = require('./diagnostics.cjs');
 const c = require('./catalog.cjs');
 const a = require('./account.cjs');
@@ -22,7 +24,7 @@ const money = cents => '$' + (cents / 100).toFixed(2);
 // episode counts as played when the session ends at or past its end-of-content marker.
 function listening(ctx, data, event) {
   const p = event.payload, now = event.at, idx = c.index(data);
-  if (data.sessions.some(s => s.session_id === p.session_id)) fail('invalid_event', 'Session ' + p.session_id + ' is already recorded.');
+  if (data.sessions.some(s => s.session_id === p.session_id) || hiddenIds(data).has(p.session_id)) fail('invalid_event', 'Session ' + p.session_id + ' is already recorded.');
   activeMember(data, p.member_id, 'member');
   const session = {...copy(p), ended_at: now, speaker_hint: p.speaker_hint ?? null};
   const item = checkSession(idx, session, 'invalid_event');
@@ -53,7 +55,8 @@ function listening(ctx, data, event) {
 // released to make room; if it still does not fit, the device records storage_full in the notice.
 function publish(ctx, data, event) {
   const p = event.payload, now = event.at, idx = c.index(data);
-  if (c.find(idx, p.episode_id)) fail('invalid_event', 'Catalog ID ' + p.episode_id + ' already exists.');
+  // A seeded episode dated later still owns its ID, as in Dayline: publishing it again is refused.
+  if (c.find(idx, p.episode_id) || hiddenIds(data).has(p.episode_id)) fail('invalid_event', 'Catalog ID ' + p.episode_id + ' already exists.');
   const show = idx.shows.get(p.show_id);
   checkEpisode(idx, p, 'invalid_event');
   if (show.availability !== 'available') fail('invalid_event', 'Show ' + p.show_id + ' has been removed.');
@@ -190,14 +193,22 @@ function inviteResponse(ctx, data, event) {
 const HANDLERS = {'listening.record': listening, 'episode.publish': publish, 'catalog.update': catalogUpdate, 'playlist.edit': playlistEdit,
   'device.checkin': checkin, 'billing.payment_result': payment, 'family.invite_response': inviteResponse};
 
-function applyEvent(ctx, data, event) {
+const CATALOG_EVENTS = new Set(['episode.publish', 'catalog.update']);
+
+function applyEvent(ctx, stored, event) {
   const handler = HANDLERS[event.operation];
   if (!handler) fail('invalid_event', 'Unsupported operation.');
-  a.settle(data, event.at);
-  const row = handler(ctx, data, event);
-  a.activity(data, {...row, at: event.at, actor: 'event', action: event.operation, event_id: event.event_id});
-  log(ctx, 'tidepool.event_applied', {operation: event.operation, object_id: row.object_id});
-  return data;
+  const out = cutoff.commit(ctx, stored, event.at, data => {
+    if (!CATALOG_EVENTS.has(event.operation) && !data.members.some(m => m.role === 'manager')) {
+      fail('invalid_event', 'The family account does not exist yet at ' + event.at + '.');
+    }
+    a.settle(data, event.at);
+    const row = handler(ctx, data, event);
+    a.activity(data, {...row, at: event.at, actor: 'event', action: event.operation, event_id: event.event_id});
+    return row;
+  });
+  log(ctx, 'tidepool.event_applied', {operation: event.operation, object_id: out.result.object_id});
+  return out.data;
 }
 
 module.exports = {applyEvent};

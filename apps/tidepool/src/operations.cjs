@@ -1,12 +1,14 @@
 'use strict';
-// Agent business tools. Reads compute on a settled copy and return the data unchanged; each committed
-// write changes only the bound family's records and appends one activity row.
+// Agent business tools. Reads and writes see the data as of the run clock (src/visible.cjs). Reads
+// compute on a settled copy and return the data unchanged; each committed write changes only the bound
+// family's records and appends one activity row.
 const {fail, copy, instant, newestFirst, text, inOffsetOf} = require('./domain-utils.cjs');
 const {log} = require('./diagnostics.cjs');
 const c = require('./catalog.cjs');
 const a = require('./account.cjs');
 const billing = require('./billing.cjs');
 const rules = require('./rules.cjs');
+const cutoff = require('./visible.cjs');
 
 const PREFIX = 'tidepool.';
 const READS = new Set(['catalog.search', 'catalog.get_item', 'shows.get_episodes', 'family.get', 'members.list', 'devices.list',
@@ -379,14 +381,27 @@ function write(ctx, data, name, args, now) {
   fail('unknown_tool', 'Unknown Tidepool operation.');
 }
 
+// Before the bound member has joined (for example, a seed loaded before the account starts), no tool has a caller.
+function signedIn(data, account, now) {
+  if (!a.caller(data)) fail('not_found', 'Tidepool account ' + account + ' has no family membership at ' + now + '.');
+}
+
 function handleTool(ctx, data, name, args) {
   const op = name.startsWith(PREFIX) ? name.slice(PREFIX.length) : name, now = ctx.virtual_now;
-  if (READS.has(op)) return {data, result: read(ctx, a.settle(copy(data), now), op, args, now)};
-  a.settle(data, now);
-  const {result, row} = write(ctx, data, op, args, now);
-  a.activity(data, {...row, at: now, actor: 'agent', action: name, request_id: args.request_id});
-  log(ctx, name, {object_id: row.object_id, member_id: row.member_id});
-  return {data, result};
+  if (READS.has(op)) {
+    const seen = cutoff.view(data, now).data;
+    signedIn(seen, data.account_id, now);
+    return {data, result: read(ctx, a.settle(seen, now), op, args, now)};
+  }
+  const out = cutoff.commit(ctx, data, now, view => {
+    signedIn(view, data.account_id, now);
+    a.settle(view, now);
+    const done = write(ctx, view, op, args, now);
+    a.activity(view, {...done.row, at: now, actor: 'agent', action: name, request_id: args.request_id});
+    return done;
+  });
+  log(ctx, name, {object_id: out.result.row.object_id, member_id: out.result.row.member_id});
+  return {data: out.data, result: out.result.result};
 }
 
 module.exports = {handleTool};

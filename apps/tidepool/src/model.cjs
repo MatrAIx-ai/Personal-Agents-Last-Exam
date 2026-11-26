@@ -1,7 +1,9 @@
 'use strict';
 // Record consistency for the catalog, the family account and its history. validateSeed runs on every
 // loaded seed and after every committed call, so it holds only invariants that every write and event
-// preserves; it never compares record dates with the run clock.
+// preserves; it never compares record dates with the run clock (Core validates package fixtures at
+// registration under its own clock). Tools show only records dated at or before the clock
+// (src/visible.cjs), so a multi-period seed can load at any point in its window.
 const {fail, text, references, instant} = require('./domain-utils.cjs');
 const {index, itemBytes} = require('./catalog.cjs');
 const billing = require('./billing.cjs');

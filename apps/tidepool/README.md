@@ -142,7 +142,40 @@ The other two approved examples are `examples/events/roadtrip-noor-add-1.json` a
 - **Activity rows.** `seq`, `at`, `actor` (`agent` or `event`), `action` (tool name or event operation), object, member, `replaced`, and `request_id` or `event_id`. There is one row per committed write or applied event, and none for a replay, a rejected call or time passing.
 - **Evaluator join.** `request_id` joins an activity row to Core's receipt `request:<id>` and the audit row's `input.request_id`. `event_id` joins it to receipt `event:<id>` and the audit `trace.event_id`. The receipts and audit carry the version.
 - **Reset.** `reset_scope` is `app_instance`. Reset restores the loaded catalog, family, history and clock of that instance only. The walkthrough snapshots before reset.
-- **Seed checks.** `validateSeed` never compares record dates with the run clock, so the fixture registers under a 2026-01-01 registry clock. Load a seed at or after its latest record.
+- **Seed checks.** `validateSeed` never compares record dates with the run clock, so the fixture registers under a 2026-01-01 registry clock.
+- **Clock cutoff.** Tools and events see the data as of `ctx.virtual_now` (`src/visible.cjs`). A record exists in Tidepool from the moment it happened (table below). Before then it is `not_found` by ID and absent from lists, counts, search and "newest" lookups. State a record gained after the clock reads as it was before that change, when the stored data determines it. Nothing is stored for this: when `env.advance_time` or an event moves the clock, later records appear and no record changes. A seed that runs past the clock, such as the evaluation dataset, can therefore load at any point in its window.
+  - A write or event on a record dated after the clock fails and changes nothing. Tools return `not_found`. Events return `invalid_event`, or `target_not_found` for a `playlist.edit` or `family.invite_response` lookup.
+  - Writes and events run on the view, and each record they change replaces its stored form. That includes a stored record dated later with the same key: the same member and episode, show, library item or Up Next list, the same device and item for an active download, or the same person for an open invitation. Untouched records keep their stored form, so later records still appear on time.
+  - **Fallback.** Sometimes keeping the later family records would leave the family inconsistent with the change, for example a device over its cap or more members than the plan allows. Then Tidepool stores the family as it reads at the clock, plus the change, and drops the later family records, because they described a future without the change; later albums, tracks and episodes stay. Derived values are stored as shown, so a device keeps the check-in derived from its latest session (below).
+  - IDs the App creates skip the IDs of hidden records. An `episode.publish` or `listening.record` that reuses one is `invalid_event`.
+  - Events count visible records: playlist positions, the newest *n* episodes for auto-download, and the followers who get a notice. An event or write that changes a playlist replaces the whole record, so entries the seed adds to it later are dropped.
+  - Before the bound member's `joined_at`, every tool returns `not_found`. Before the plan manager's `joined_at`, family events (all but `episode.publish` and `catalog.update`) return `invalid_event`.
+  - An episode seeded after the clock appears at its `published_at` without an event, so followers get no notice or auto-download for it. A task that needs those effects publishes the episode with `episode.publish`.
+
+| Record | Field | Class | Before the clock reaches it |
+| --- | --- | --- | --- |
+| `episodes` | `published_at` | happened | Hidden. Episodes have no other dated state; `availability` and `explicit` changes are not dated and read as stored. |
+| `albums` | `released` (a date) | happened | Hidden with its tracks until the start of that day in the family's calendar offset (the billing anchor's: -08:00 for the Raman-Ellis family, -05:00 for Leila). The offset is fixed, so in summer a Pacific release appears at 01:00 PDT. A hidden album or track is `not_found` and absent from search, artist pages, library, playlists and downloads. |
+| `members` | `joined_at` / `removed_at` | happened | Hidden / reads `active`. |
+| `invitations` | `invited_at` / `responded_at` | happened | Hidden / reads `open`. |
+| `billing.timeline` | `set_at` | happened | Hidden (the first entry, the account start, always stays). |
+| `billing.timeline` | `from` | scheduled | A visible entry whose `from` is later is the scheduled change. |
+| `billing.adjustments`, `billing.payments` | `created_at`, `at` | happened | Hidden, so invoices read `pending` or `upcoming` and `payment_due` follows the visible results. |
+| `devices` | `registered_at` | happened | Hidden. |
+| `devices` | `last_checkin_at` | happened (latest only) | Only the latest check-in is stored. Before it, the device reads as checked in at the end of its latest visible session (a device checks in when it plays), or at `registered_at` if it has played nothing. Downloads read `needs_check` only when that time is more than 30 days old. |
+| `sessions` | `ended_at` | happened | Hidden until it ends (a session is recorded when it ends). `started_at` is part of the record. |
+| `progress` | `updated_at`, `played_at` | happened | Recomputed from the latest visible session (none: unplayed). |
+| `plays` | `last_played_at` | happened | The count less the later sessions, with the latest visible session's end (none: no play). |
+| `follows` | `followed_at` | happened | Hidden. Settings changes are not dated. |
+| `upnext` | `updated_at` | happened | Hidden: the member has an empty list at version 1. |
+| `downloads` | `requested_at` / `removed_at` | happened | Hidden / reads not removed. |
+| `downloads` | `completes_at` | scheduled | `queued` before it, `downloaded` from it. |
+| `downloads` | `auto_delete_at` | scheduled | Shown once the member's visible progress on the episode is `played`; `removed` from it. |
+| `library` | `saved_at` | happened | Hidden. |
+| `playlists` | `created_at`, track `added_at` | happened | Hidden. `updated_at` reads the latest visible change. `track_version`, name, visibility and collaborators are not dated and read as stored. |
+| `notifications` | `created_at` | happened | Hidden. |
+| `family`, `billing` | `created_at`, `anchor` | descriptive | The account start and the billing calendar's origin. |
+| `activity` | `at` | App-written | No tool reads it, so it is not filtered; new rows follow the stored ones. |
 - **Times in results.** Derived times keep the UTC offset of the timestamp they come from (period boundaries keep the anchor's; auto-delete times their base's). The exception is `devices.list` `offline_check_due_at`, shown in the current clock's offset. Priya's check-in was in PDT, but her due time reads `2026-11-30T19:00:00-08:00`.
 
 ### Billing
@@ -159,7 +192,7 @@ The other two approved examples are `examples/events/roadtrip-noor-add-1.json` a
 
 ## Fixtures
 
-All names, text and prices are original and fictional (see `contribution/dataset.json`). History runs from 2026-01-03, when the family plan started, to 2026-11-24. A task can load the seed at any clock at or after its records. It can also supply its own history in the same schema.
+All names, text and prices are original and fictional (see `contribution/dataset.json`). History runs from 2026-01-03, when the family plan started, to 2026-11-24. A task can load the seed at any clock; tools show the records dated by then (see the clock cutoff under State and time). It can also supply its own history in the same schema.
 
 - **`fixtures/minimal.json`** (326 KB): the Raman-Ellis family at Tuesday, Nov. 24, 2026, 19:00 Pacific (`fixtures/clock.json`).
   - People: Priya (plan manager), her partner Sam, Noor (teen) and Kai (child, explicit filter on).
@@ -180,6 +213,36 @@ All names, text and prices are original and fictional (see `contribution/dataset
 
 Expected answers for a real task belong in that task's evaluator, not in this package.
 
+## Evaluation dataset, 2025-01-01 to 2026-12-31
+
+`data/evaluation/` is the delivered evaluation data for the coverage window in [submission evidence, section 3](../../docs/submission-evidence.md#3-environment-dataset-coverage). The fixtures above stay small smoke data. This dataset was added after the plan was approved, when that section was published; it is recorded as added scope in the validation report.
+
+- **`seed.json`** (version 1.0.0, 0.43 MB, one record per line): the Raman-Ellis family, loadable for any of the four member accounts with `binding.json`. `policies.json` (reads only), `clock.json` and `dataset.json` sit beside it; `dataset.json` records the sources, the record count (826, counted as for the fixture) and, under the generated source's `generation.parameters.outputs`, the seed's size and sha256. It validates against `schemas/dataset.schema.json`, so a task can pass it to `env.load_seed` as the bundle's `dataset` unchanged; the dataset demo does.
+- **2025.** Priya opens her account on the Individual plan on Jan. 3, 2025 and streams on her old phone (`dev-priya-oldphone`, no Tidepool downloads):
+  - Harbor Hours on the commute and Kettle Theory while cooking;
+  - Overtime Almanac at lunch and Static & Signal on Sunday evenings;
+  - albums on Saturday mornings, including each new album she likes on its release weekend.
+  She takes two weeks off in August. Twelve $10.99 invoices are paid; the July charge is declined and paid two days later, with its notice.
+- **2026.** The fixture, verbatim: the Family upgrade at the Jan. 3 renewal, when Sam, Noor and Kai join, and the family's history to Nov. 24.
+- **Episodes.** Every show keeps its fixture cadence and weekday from Jan. 2025 (Lantern Ledger and Bedtime Bramble start in 2026, Overtime Almanac and Static & Signal break from October to January) and continues to Dec. 28, 2026. Field Notes stops at 114, because the shipped example `examples/events/fieldnotes-115-publish.json` publishes 115 on Nov. 28 and must still apply to the dataset unchanged.
+- **Fixture records.** Three fixture records change, so that the 2025 story holds; everything else is copied verbatim (tested):
+  - `family.created_at` and Priya's `joined_at` move to 2025-01-03.
+  - `billing` gains an Individual start on 2025-01-03 before the fixture's Family entry, which becomes an `upgrade` at the Jan. 3, 2026 renewal.
+  The billing calendar and every 2026 invoice are unchanged. The seeded upgrade carries no proration, matching the fixture's paid $17.99 February invoice. `plan.confirm_change` at exactly 00:00 on Jan. 3 would add 700 cents to that invoice, because it prorates the whole new period; one minute earlier it adds 0. At the dataset clock the family, Up Next, downloads, library, playlists, follows and 2026 history read as in the fixture for Priya and Sam (tested). Priya's account also lists the old phone, and her history and notices run back to 2025.
+- **Clock.** The dataset clock is the fixture clock, 19:00 Pacific on Nov. 24, 2026, where the family's history ends. Episodes dated later appear as the run clock reaches them (see the clock cutoff), so they are never pre-session history. Before Jan. 3, 2026 only Priya's account has a membership; Sam's, Noor's and Kai's return `not_found`.
+- **Provenance.** Every record is synthetic: 512 counted records copied from the authored fixture, 2 fixture records changed as above, and 337 written by `dev/build-dataset.cjs` from templates and a fixed random seed. Shows, artists, albums and tracks are the fixture's, and guests and narrators are invented personal names. The approved design uses an invented service and catalogue, so there is no real November 2026 source to anchor to, and nothing was collected from real services.
+- **Coverage**, counted in America/Los_Angeles on each record's own date field (`published_at`, album `released`, `started_at`, payment `at`, `requested_at`, `saved_at` and the rest; see the report):
+  - 454 distinct dates in all 24 months, 444 of them on or before the dataset clock. The seven albums released in 2022-2024 are excluded as earlier than the window.
+  - The longest stretch without a record is 8 days (Dec. 12-19, 2026). Family records fall on 282 dates, with a 16-day gap for the August 2025 vacation.
+  - No two episodes share their title and notes, and no pair shares 80% or more of its word 5-grams.
+
+```sh
+node dev/build-dataset.cjs          # rebuild data/evaluation/ (byte-identical on rerun)
+node dev/coverage-report.cjs        # coverage by source and month, provenance, gaps, content checks
+node dev/coverage-report.cjs --json
+node examples/dataset-demo.cjs      # load it over real MCP and query it at three clocks
+```
+
 ## Commands
 
 From this directory:
@@ -188,7 +251,9 @@ From this directory:
 npm test              # App-only business tests (no runtime needed)
 npm run example       # App-only run of the approved listening.record example
 npm run walkthrough   # Real MCP evidence report (JSON on stdout); needs the public runtime
+npm run dataset:demo  # Real MCP load and query of the evaluation dataset (JSON on stdout)
 npm run build:contracts && npm run build:fixtures   # maintainers: regenerate tools, schemas, fixtures and counts
+npm run build:dataset && npm run dataset:coverage   # maintainers: rebuild the evaluation dataset and report its coverage
 ```
 
 From the repository root:
@@ -229,6 +294,7 @@ These replies are reference evidence for the data and tools, not model-agent tri
 | Review close check: `env.advance_time` past a download's completion, the 30-day check, an auto-delete window, the grace period and a period end, with no event | Walkthrough `timeOnly` steps "Download completion", "Auto-delete window", "30-day offline check", "Billing period end", "Payment grace period end", "Period end with a downgrade". Each checks `env.advance_time` committed, business data and activity rows unchanged, only an `env.advance_time` audit row, and `family.get` counts equal to `downloads.list`. Tests *T06*, *T07b*, *T11*. |
 | Review close check: a kitchen-speaker `listening.record` updates only Priya's progress | Test *T03*; walkthrough snapshot diff, plus Sam's own account. |
 | Review close check: `members.remove` counts match `family.get` beforehand | Test *T13* (Sam and Noor; each has one collaboration ended and one shared playlist hidden). Walkthrough: "members.remove returns the counts family.get showed beforehand (all six fields)", "Noor's removal ends 2 collaborations and hides her shared playlist from the family", "Her shared playlist has left Priya's view". |
+| Clock cutoff and evaluation dataset (added after plan approval, #260) | Tests *a seed loaded before its latest record shows only what existed at the clock* (Leila's task data at Oct. 1), *a write before a seeded later record with the same key replaces it …*, *a write that the later family records cannot coexist with drops them …*, *before the account exists every tool returns not_found …*, *events count only visible records …*, *at a mid-2026 clock a device that played recently …*, and the three *evaluation dataset* tests (counts and sha256, fixture records kept, nothing used before its album's release, fixture facts at the dataset clock, nothing later visible at four clocks). `examples/dataset-demo.cjs` loads the dataset over real MCP and queries it at three clocks; `dev/coverage-report.cjs` recomputes the coverage. |
 
 ## Review items resolved
 
@@ -255,7 +321,7 @@ The W5 billing row above gives a worked example of each.
 - A filtered member's explicit track stays in the playlist and is skipped for that member (`skipped_for_you`).
 - `speaker_hint` is stored but not trusted.
 - Fixtures are MIT.
-- The suggestion to cover history from 2026-01-01 is followed. Sessions, progress, follows, device registrations and billing periods start in January 2026.
+- The suggestion to cover history from 2026-01-01 is followed. Sessions, progress, follows, device registrations and billing periods start in January 2026. The evaluation dataset adds Priya's 2025 on the Individual plan (see Evaluation dataset).
 
 ## Additions beyond the approved text
 
@@ -271,6 +337,7 @@ These are implementation choices the proposal leaves open. They are listed so th
 8. **Played progress, albums and auto-delete.** Played progress is stored at position 0. A fresh download of an already-played episode gets the full auto-delete window from the download time. A new follow's auto-delete applies to already-played downloads, as a settings change does. An album download is one download covering all its tracks. Devices with no Tidepool storage (earbuds, the speaker) return `unavailable` for downloads.
 9. **Keeping the current plan.** `plan.preview_change` reports blocks as `allowed: false` with `blocked_by`. Confirming the plan already in effect revokes a scheduled change (`revoked_change`), so "keep Family" really keeps it. With nothing scheduled, that confirmation fails with `invalid_arguments`, as does repeating a downgrade already scheduled; neither writes an activity row.
 10. **Example data.** `examples/events/` holds one example per remaining event type plus `train-fieldnotes-112-end`, `kitchen-fieldnotes-114` carries a `speaker_hint`, and `examples/policies/narrow-members.json` shows per-member narrowing. Kai has no devices of his own: he listens on the kitchen speaker and in the car, under his parents' accounts.
+11. **Clock cutoff and evaluation dataset** (added after plan approval, #260). Tools and events see only records dated at or before the clock (see State and time), and `data/evaluation/` delivers the 2025-2026 dataset. Before this change a seed loaded before its latest record showed its later records. Tool schemas and error codes are unchanged.
 
 ## Package map
 
@@ -283,15 +350,17 @@ These are implementation choices the proposal leaves open. They are listed so th
 | `src/account.cjs` | Caller identity, member authority, derived download state, `settle`, activity rows and notices |
 | `src/billing.cjs` | Periods, invoices, payment-due state, slots, and the shared preview/confirm rules |
 | `src/rules.cjs` | Transitions shared by tools and events (playlist operations, collaborators, download reservation) |
+| `src/visible.cjs` | Clock cutoff: the data as of the run clock, and the record-by-record merge of writes and events |
 | `src/operations.cjs` | Agent tool handlers |
 | `src/events.cjs` | The seven event handlers |
 | `src/domain-utils.cjs`, `src/diagnostics.cjs` | Shared helpers (errors, time arithmetic) and the optional ID-only diagnostics adapter |
 | `schemas/` | Seed, event and state schemas plus the shared dataset/catalog contracts |
 | `contribution/` | Contribution declaration, dataset provenance, empty asset catalog |
 | `fixtures/` | Minimal seed (Priya), binding with all four family accounts, policies, clock |
-| `examples/` | App-only example, the approved event, event examples, a narrowing policy, task data for Leila, real-MCP walkthrough |
+| `data/evaluation/` | The 2025-2026 evaluation dataset: seed, binding, policies, clock and its own `dataset.json` |
+| `examples/` | App-only example, the approved event, event examples, a narrowing policy, task data for Leila, real-MCP walkthrough, real-MCP dataset demo |
 | `tests/` | Business tests, App-only harness, verifier cases, schema validator |
-| `dev/` | Maintainer scripts that regenerate the schemas, `tools.json`, fixtures, task data and dataset counts byte for byte (`npm run build:contracts`, `npm run build:fixtures`). Not run by tests or the verifier. |
+| `dev/` | Maintainer scripts. They regenerate the schemas, `tools.json`, fixtures, task data and dataset counts byte for byte (`npm run build:contracts`, `npm run build:fixtures`), build the evaluation dataset (`npm run build:dataset`) and report its coverage (`npm run dataset:coverage`). The verifier does not run them; the business tests check the dataset's counts and hash. |
 
 ## Limitations
 

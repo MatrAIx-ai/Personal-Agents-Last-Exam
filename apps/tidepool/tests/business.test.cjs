@@ -685,3 +685,270 @@ test('T14: one activity row per committed write or event, none for failures; eve
   assert.ok(examples.includes('billing.payment_result'));
   assert.throws(() => plugin.applyEvent({...f.ctx, role: 'infra'}, f.data, {...scenario, operation: 'tidepool.reset'}), e => e.code === 'invalid_event');
 });
+
+// ---------------------------------------------------------------- clock cutoff (src/visible.cjs)
+const later = (list, key, at) => list.filter(x => Date.parse(x[key]) > Date.parse(at));
+test('a seed loaded before its latest record shows only what existed at the clock', () => {
+  // Leila's seed runs to Nov. 24. At noon Eastern on Oct. 1, Harbor Hours 86-88 and their downloads, the October and
+  // November charges, the declined-payment notice and her Up Next (set Nov. 20) do not exist yet.
+  const at = '2026-10-01T12:00:00-04:00', f = fixture({seed: solo, binding: soloBinding, virtual_now: at}), before = f.data, id = 'mem-leila';
+  const now = Date.parse(at), shown = list => list.filter(x => Date.parse(x) <= now);
+  const hh = f.call('tidepool.shows.get_episodes', {show_id: 'show-harborhours', limit: 100});
+  assert.equal(hh.total, shown(solo.episodes.filter(e => e.show_id === 'show-harborhours').map(e => e.published_at)).length);
+  assert.equal(hh.show.latest_episode_id, 'ep-harborhours-084');
+  assert.equal(f.call('tidepool.catalog.search', {query: 'welders union'}).total, 0, 'Harbor Hours 86 is not searchable yet');
+  unchanged(f, () => f.call('tidepool.catalog.get_item', {item_id: 'ep-harborhours-086'}), 'not_found');
+  assert.deepEqual(f.call('tidepool.downloads.list', {id, include_removed: true}).downloads.map(d => d.download_id), ['dl-leila-album']);
+  const family = f.call('tidepool.family.get', {});
+  assert.deepEqual([family.billing.status, family.billing.current_invoice.invoice_id, family.billing.current_invoice.status, family.billing.payment_due],
+    ['active', 'inv-2026-09-15', 'paid', null]);
+  assert.deepEqual(f.call('tidepool.notifications.list', {id}).notifications, []);
+  assert.deepEqual(f.call('tidepool.upnext.get', {id}), {list_version: 1, updated_at: null, total_remaining_s: 0, entries: []});
+  const sessions = f.call('tidepool.history.list', {id}).sessions;
+  assert.equal(sessions.length, shown(solo.sessions.map(s => s.ended_at)).length);
+  assert.ok(f.call('tidepool.progress.get', {id}).progress.every(p => Date.parse(p.updated_at) <= now));
+  // Only the latest check-in (Nov. 22) is stored; before it the phone reads as checked in when it last played,
+  // at the end of her Sept. 18 session, so the album she downloaded in September is still downloaded.
+  assert.equal(f.call('tidepool.devices.list', {id}).devices[0].last_checkin_at, '2026-09-18T12:54:36-04:00');
+  assert.equal(f.call('tidepool.downloads.list', {id}).downloads[0].status, 'downloaded');
+  // Writes on later records fail not_found and change nothing.
+  unchanged(f, () => f.call('tidepool.downloads.remove', {id, download_id: 'dl-leila-086'}), 'not_found');
+  unchanged(f, () => f.call('tidepool.progress.set', {id, episode_id: 'ep-harborhours-087', state: 'played'}), 'not_found');
+  unchanged(f, () => f.call('tidepool.upnext.set', {id, expected_list_version: 1, episode_ids: ['ep-harborhours-086']}), 'not_found');
+  unchanged(f, () => f.call('tidepool.downloads.add', {id, device_id: 'dev-leila-phone', item_type: 'episode', item_id: 'ep-harborhours-088'}), 'not_found');
+  assert.deepEqual(f.data, before);
+  // Time passing writes nothing; the later records appear because the clock reached them.
+  f.advance('2026-11-24T19:00:00-08:00');
+  assert.deepEqual(f.data, before);
+  assert.equal(f.call('tidepool.downloads.list', {id}).downloads.length, 4);
+  assert.equal(f.call('tidepool.family.get', {}).billing.payment_due.invoice_id, 'inv-2026-11-15');
+  assert.equal(f.call('tidepool.notifications.list', {id}).notifications.length, 1);
+  assert.deepEqual(f.call('tidepool.upnext.get', {id}).entries.map(e => e.episode_id), ['ep-harborhours-087', 'ep-harborhours-088']);
+  assert.equal(f.call('tidepool.devices.list', {id}).devices[0].last_checkin_at, solo.devices[0].last_checkin_at);
+  // An album exists from the start of its release day (in the billing anchor's offset). On Feb. 1 Saltline Arcade's
+  // "Low Ceiling Weather" (Feb. 20) and its tracks are not in Tidepool yet.
+  const g = fixture({seed: solo, binding: soloBinding, virtual_now: '2026-02-01T12:00:00-05:00'}), early = g.data;
+  unchanged(g, () => g.call('tidepool.catalog.get_item', {item_id: 'alb-saltline-2'}), 'not_found');
+  unchanged(g, () => g.call('tidepool.catalog.get_item', {item_id: 'tr-saltline-09'}), 'not_found');
+  assert.equal(g.call('tidepool.catalog.search', {query: 'low ceiling weather'}).total, 0);
+  assert.equal(g.call('tidepool.catalog.get_item', {item_id: 'art-saltline'}).item.albums.length, 1);
+  assert.ok(!g.call('tidepool.catalog.search', {query: 'saltline', item_type: 'track', limit: 50}).results.some(t => t.album_id === 'alb-saltline-2'));
+  unchanged(g, () => g.call('tidepool.library.save', {id, item_type: 'album', item_id: 'alb-saltline-2'}), 'not_found');
+  unchanged(g, () => g.call('tidepool.downloads.add', {id, device_id: 'dev-leila-phone', item_type: 'track', item_id: 'tr-saltline-09'}), 'not_found');
+  unchanged(g, () => g.call('tidepool.playlists.create', {id, name: 'Rainy', visibility: 'private', track_ids: ['tr-saltline-09']}), 'not_found');
+  g.advance('2026-02-20T00:00:00-05:00');
+  assert.deepEqual(g.data, early);
+  assert.equal(g.call('tidepool.catalog.get_item', {item_id: 'alb-saltline-2'}).item.released, '2026-02-20');
+  assert.equal(g.call('tidepool.library.save', {id, item_type: 'album', item_id: 'alb-saltline-2'}).changed, true);
+});
+
+test('at a mid-2026 clock a device that played recently reads as checked in then and keeps its downloads', () => {
+  // On June 15 every stored check-in is later (October and November). Priya's phone last played on June 11 and
+  // Sam's car on June 11, so neither is 30 days without a check-in and their downloads read downloaded.
+  const at = '2026-06-15T12:00:00-07:00', f = fixture({virtual_now: at}), before = f.data;
+  const phone = f.call('tidepool.devices.list', {id: 'mem-priya'}).devices.find(d => d.device_id === 'dev-priya-phone');
+  assert.deepEqual([phone.last_checkin_at, phone.offline_check_overdue], ['2026-06-11T13:02:23-07:00', false]);
+  const priya = f.call('tidepool.downloads.list', {id: 'mem-priya'}).downloads;
+  assert.ok(priya.length >= 5 && priya.every(d => d.status === 'downloaded'));
+  const sam = fixture({seed: as('sam'), virtual_now: at});
+  assert.equal(sam.call('tidepool.devices.list', {id: 'mem-sam'}).devices.find(d => d.device_id === 'dev-family-car').last_checkin_at, '2026-06-11T17:38:14-07:00');
+  assert.deepEqual(statuses(sam, 'mem-sam', {device_id: 'dev-family-car'}), {'alb-copperleaf-2': 'downloaded', 'alb-kestrel-1': 'downloaded'});
+  // Nothing is stored for this: the stored check-ins read again once the clock passes them.
+  f.advance(require('../fixtures/clock.json').initial_time);
+  assert.deepEqual(f.data, before);
+  assert.equal(f.call('tidepool.devices.list', {id: 'mem-priya'}).devices.find(d => d.device_id === 'dev-priya-phone').last_checkin_at, '2026-10-31T20:00:00-07:00');
+});
+
+test('a write before a seeded later record with the same key replaces it; other later records stay', () => {
+  // On Oct. 1 Leila has no Up Next yet (the seed sets one on Nov. 20); the agent's list replaces the later one.
+  const f = fixture({seed: solo, binding: soloBinding, virtual_now: '2026-10-01T12:00:00-04:00'}), id = 'mem-leila';
+  assert.equal(f.call('tidepool.upnext.set', {id, expected_list_version: 1, episode_ids: ['ep-kettletheory-050']}).list_version, 2);
+  assert.deepEqual(f.data.upnext, [{member_id: id, list_version: 2, updated_at: '2026-10-01T12:00:00-04:00', episode_ids: ['ep-kettletheory-050']}]);
+  // Saving the album already saved changes nothing; the later downloads, charges and notice are still stored.
+  assert.equal(f.call('tidepool.library.save', {id, item_type: 'album', item_id: 'alb-juno-2'}).changed, false);
+  assert.equal(f.data.downloads.length, 4);
+  assert.equal(f.data.billing.payments.length, solo.billing.payments.length);
+  f.advance('2026-11-24T19:00:00-08:00');
+  assert.deepEqual(f.call('tidepool.upnext.get', {id}).entries.map(e => e.episode_id), ['ep-kettletheory-050']);
+  assert.equal(f.call('tidepool.family.get', {}).billing.payment_due.invoice_id, 'inv-2026-11-15');
+});
+
+test('a write that the later family records cannot coexist with drops them and keeps later episodes', () => {
+  // On April 1 Priya's phone has room for many albums, but at the fixture clock it holds 702.4 MB of later downloads.
+  // While the albums still fit beside them the later records stay; the album that would overfill the phone in the
+  // stored future drops the family records dated after April 1 (they described a future without these downloads).
+  const at = '2026-04-01T12:00:00-07:00', f = fixture({virtual_now: at});
+  const download = album => f.call('tidepool.downloads.add', {id: 'mem-priya', device_id: 'dev-priya-phone', item_type: 'album', item_id: album});
+  let kept = 0;
+  for (const album of minimal.albums.map(a => a.album_id)) {
+    assert.equal(download(album).changed, true);
+    if (!later(f.data.sessions, 'ended_at', at).length) break;
+    kept++;
+  }
+  assert.ok(kept >= 6 && kept < minimal.albums.length, 'several albums fit beside the later downloads before one does not');
+  const data = f.data;
+  for (const [list, key] of [[data.sessions, 'ended_at'], [data.downloads, 'requested_at'], [data.playlists, 'created_at'], [data.notifications, 'created_at'],
+    [data.library, 'saved_at'], [data.billing.payments, 'at']]) assert.deepEqual(later(list, key, at), []);
+  assert.equal(data.episodes.length, minimal.episodes.length, 'later episodes stay');
+  // The family is stored as it read on April 1: each device's last check-in is the end of its latest session by
+  // then (or its registration), so Priya's phone downloads still read downloaded or queued.
+  for (const d of data.devices) {
+    const played = minimal.sessions.filter(s => s.device_id === d.device_id && Date.parse(s.ended_at) <= Date.parse(at)).map(s => s.ended_at)
+      .sort((x, y) => Date.parse(x) - Date.parse(y)).at(-1);
+    assert.equal(d.last_checkin_at, played ?? d.registered_at, d.device_id);
+  }
+  assert.equal(data.devices.find(d => d.device_id === 'dev-priya-phone').last_checkin_at, '2026-04-01T08:07:40-07:00');
+  const phone = f.call('tidepool.downloads.list', {id: 'mem-priya', device_id: 'dev-priya-phone'}).downloads;
+  assert.ok(phone.every(d => d.status === 'downloaded' || d.status === 'queued'));
+  f.advance('2026-11-24T19:00:00-08:00');
+  assert.equal(f.call('tidepool.shows.get_episodes', {show_id: 'show-harborhours', limit: 1}).episodes[0].episode_id, 'ep-harborhours-088');
+  assert.equal(f.call('tidepool.downloads.list', {id: 'mem-priya', device_id: 'dev-priya-phone'}).downloads.length, kept + 1 + 5);
+});
+
+test('before the account exists every tool returns not_found and family events are refused; catalog events apply', () => {
+  const f = fixture({seed: solo, binding: soloBinding, virtual_now: '2026-01-10T12:00:00-05:00'}), id = 'mem-leila';
+  unchanged(f, () => f.call('tidepool.catalog.search', {query: 'harbor'}), 'not_found');
+  unchanged(f, () => f.call('tidepool.family.get', {}), 'not_found');
+  unchanged(f, () => f.call('tidepool.library.save', {id, item_type: 'album', item_id: 'alb-juno-2'}), 'not_found');
+  unchanged(f, () => f.event({event_id: 'early-checkin', at: '2026-01-10T13:00:00-05:00', operation: 'device.checkin', payload: {device_id: 'dev-leila-phone'}}), 'invalid_event');
+  // Static & Signal 51 is published on Jan. 14, so on Jan. 10 it is not in the catalog yet; Harbor Hours 65 is.
+  unchanged(f, () => f.event(event('catalog-remove-staticsignal-071', {at: '2026-01-10T13:00:00-05:00'}, {item_id: 'ep-staticsignal-051'})), 'invalid_event');
+  f.event(event('catalog-remove-staticsignal-071', {at: '2026-01-10T13:00:00-05:00'}, {item_id: 'ep-harborhours-065'}));
+  assert.equal(f.data.episodes.find(e => e.episode_id === 'ep-harborhours-065').availability, 'removed');
+});
+
+test('events count only visible records: playlist positions, newest-n auto-downloads and seeded later IDs', () => {
+  // On May 1 "Family car songs" shows Priya's three tracks and Sam's two; Kai adds one on June 21.
+  const f = fixture({virtual_now: '2026-05-01T12:00:00-07:00'});
+  const tracks = () => f.call('tidepool.playlists.get', {id: 'mem-priya', playlist_id: 'pl-family-car'}).playlist.tracks.map(t => t.track_id);
+  assert.deepEqual(tracks(), ['tr-kestrel-01', 'tr-marrow-02', 'tr-tamsin-01', 'tr-halcyon-03', 'tr-kestrel-05']);
+  f.event(event('family-car-noor-add', {at: '2026-05-01T18:00:00-07:00'}, {operations: [{op: 'add', track_id: 'tr-gutterglow-04c', position: 6}]}));
+  assert.deepEqual(tracks(), ['tr-kestrel-01', 'tr-marrow-02', 'tr-tamsin-01', 'tr-halcyon-03', 'tr-kestrel-05', 'tr-gutterglow-04c']);
+  // The edit replaces the playlist record as a whole, so Kai's later addition is no longer part of it.
+  f.advance('2026-11-24T19:00:00-08:00');
+  assert.ok(!tracks().includes('tr-juno-02'));
+  // Publishing an ID the seed holds for a later episode is refused, as for any existing catalog ID.
+  const g = fixture({virtual_now: '2026-11-01T12:00:00-08:00'});
+  unchanged(g, () => g.event(event('fieldnotes-115-publish', {at: '2026-11-01T12:00:00-08:00'}, {episode_id: 'ep-fieldnotes-112', number: 112,
+    published_at: '2026-11-01T12:00:00-08:00'})), 'invalid_event');
+  // Noor auto-downloads the two newest Loud Library episodes. On Oct. 20 the newest she can see are 31 and the new one,
+  // so 31 stays; 32 (Nov. 13) does not count before it exists.
+  const noor = fixture({seed: as('noor'), virtual_now: '2026-10-20T12:00:00-07:00'});
+  noor.event(event('fieldnotes-115-publish', {event_id: 'loudlibrary-099', at: '2026-10-20T12:00:00-07:00'}, {episode_id: 'ep-loudlibrary-099',
+    show_id: 'show-loudlibrary', number: 99, published_at: '2026-10-20T12:00:00-07:00', explicit: true}));
+  // 31 is not released (auto_download_limit). The phone last played on Oct. 7, so its downloads read downloaded.
+  assert.deepEqual(statuses(noor, 'mem-noor', {device_id: 'dev-noor-phone'}),
+    {'ep-loudlibrary-099': 'queued', 'ep-loudlibrary-031': 'downloaded', 'alb-gutterglow-2': 'downloaded'});
+});
+
+// ---------------------------------------------------------------- evaluation dataset (data/evaluation, dev/build-dataset.cjs)
+const evalSeed = require('../data/evaluation/seed.json'), evalBinding = require('../data/evaluation/binding.json');
+const evalMeta = require('../data/evaluation/dataset.json'), evalClock = require('../data/evaluation/clock.json').initial_time;
+const evalAs = key => ({...structuredClone(evalSeed), account_id: 'tidepool-' + key, owner_person_id: 'person-' + key});
+const ACCOUNT_START = '2025-01-03T00:00:00-08:00';
+
+test('the evaluation dataset matches its dataset.json and keeps every fixture record except the three its 2025 story extends', () => {
+  const file = path.join(root, 'data/evaluation/seed.json');
+  assert.equal(evalMeta.expected_counts.records, plugin.records(evalSeed).length);
+  const output = evalMeta.sources.find(x => x.source_id === 'generated').generation.parameters.outputs['seed.json'];
+  assert.deepEqual(output, {bytes: fs.statSync(file).size, sha256: require('node:crypto').createHash('sha256').update(fs.readFileSync(file)).digest('hex')});
+  // dataset.json is a valid bundle dataset, so a task can pass it to env.load_seed unchanged.
+  assert.ok(compile(require('../schemas/dataset.schema.json'), path.join(root, 'schemas'))(evalMeta), 'dataset.json matches schemas/dataset.schema.json');
+  assert.ok(Buffer.byteLength(JSON.stringify(evalSeed)) < 1.5e6, 'one env.load_seed request');
+  assert.equal(evalClock, require('../fixtures/clock.json').initial_time);
+  const keys = {members: x => x.member_id, invitations: x => x.invitation_id, plans: x => x.plan_id, artists: x => x.artist_id, albums: x => x.album_id,
+    tracks: x => x.track_id, shows: x => x.show_id, episodes: x => x.episode_id, devices: x => x.device_id, sessions: x => x.session_id,
+    progress: x => x.member_id + '/' + x.episode_id, plays: x => x.member_id + '/' + x.track_id, follows: x => x.member_id + '/' + x.show_id,
+    upnext: x => x.member_id, downloads: x => x.download_id, library: x => x.member_id + '/' + x.item_id, playlists: x => x.playlist_id,
+    notifications: x => x.notice_id};
+  const changed = [];
+  for (const [name, key] of Object.entries(keys)) {
+    const stored = new Map(evalSeed[name].map(x => [key(x), JSON.stringify(x)]));
+    for (const x of minimal[name]) if (stored.get(key(x)) !== JSON.stringify(x)) changed.push(name + ':' + key(x));
+  }
+  assert.deepEqual(changed, ['members:mem-priya']);
+  assert.deepEqual(evalSeed.members[0], {...minimal.members[0], joined_at: ACCOUNT_START});
+  assert.deepEqual(evalSeed.family, {...minimal.family, created_at: ACCOUNT_START});
+  assert.deepEqual({...evalSeed.billing, anchor: null, timeline: null, payments: null}, {...minimal.billing, anchor: null, timeline: null, payments: null});
+  assert.equal(evalSeed.billing.anchor, ACCOUNT_START);
+  assert.deepEqual(evalSeed.billing.timeline, [{plan_id: 'individual', from: ACCOUNT_START, set_at: ACCOUNT_START, change: 'start'},
+    {...minimal.billing.timeline[0], change: 'upgrade'}]);
+  for (const p of minimal.billing.payments) assert.ok(evalSeed.billing.payments.some(x => JSON.stringify(x) === JSON.stringify(p)));
+  for (const k of ['account_id', 'owner_person_id', 'activity', 'next_seq']) assert.deepEqual(evalSeed[k], minimal[k]);
+  // State that only changes during the family's 2026 (follows, Up Next, downloads, library, playlists) is the fixture's.
+  for (const k of ['invitations', 'follows', 'upnext', 'downloads', 'library', 'playlists']) assert.deepEqual(evalSeed[k], minimal[k], k);
+  // Family records end at the dataset clock; only episodes run on to Dec. 31, and Field Notes stops at 114 so its example publish applies.
+  const clock = Date.parse(evalClock);
+  for (const s of evalSeed.sessions) assert.ok(Date.parse(s.ended_at) <= clock);
+  assert.ok(evalSeed.billing.payments.every(p => Date.parse(p.at) <= clock) && evalSeed.notifications.every(n => Date.parse(n.created_at) <= clock));
+  assert.ok(!evalSeed.episodes.some(e => e.show_id === 'show-fieldnotes' && e.number > 114));
+  // Nothing is played, saved, downloaded or added to a playlist before its album's release day starts (00:00 -08:00).
+  const release = new Map(evalSeed.albums.map(x => [x.album_id, Date.parse(x.released + 'T00:00:00-08:00')]));
+  const albumOf = (type, id) => type === 'album' ? id : type === 'track' ? evalSeed.tracks.find(x => x.track_id === id).album_id : null;
+  for (const [type, id, at] of [...evalSeed.sessions.map(x => [x.item_type, x.item_id, x.started_at]), ...evalSeed.library.map(x => [x.item_type, x.item_id, x.saved_at]),
+    ...evalSeed.downloads.map(x => [x.item_type, x.item_id, x.requested_at]), ...evalSeed.playlists.flatMap(p => p.tracks.map(x => ['track', x.track_id, x.added_at]))]) {
+    const album = albumOf(type, id);
+    if (album) assert.ok(Date.parse(at) >= release.get(album), id + ' at ' + at + ' is after its release');
+  }
+  const f = fixture({seed: evalSeed, binding: evalBinding, logging: false});
+  f.event(ev('fieldnotes-115-publish'));
+  assert.ok(f.data.downloads.some(d => d.item_id === 'ep-fieldnotes-115' && d.device_id === 'dev-sam-phone'));
+});
+
+test('at the dataset clock the fixture facts read the same for Priya and Sam', () => {
+  const priyaJoined = r => {for (const m of r.members ?? []) if (m.member_id === 'mem-priya') m.joined_at = minimal.members[0].joined_at; return r;};
+  for (const key of ['priya', 'sam']) {
+    const a = fixture({seed: as(key), logging: false}), b = fixture({seed: evalAs(key), binding: evalBinding, logging: false}), id = 'mem-' + key;
+    const same = (name, args, shape = r => r) => assert.deepEqual(shape(b.call(name, args)), shape(a.call(name, args)), key + ' ' + name);
+    same('tidepool.family.get', {}, priyaJoined);
+    same('tidepool.members.list', {}, priyaJoined);
+    same('tidepool.plan.preview_change', {plan_id: 'duo'});
+    for (const name of ['tidepool.upnext.get', 'tidepool.library.list', 'tidepool.playlists.list']) same(name, {id});
+    same('tidepool.downloads.list', {id}, r => ({...r, devices: r.devices.filter(d => d.device_id !== 'dev-priya-oldphone')}));
+    same('tidepool.playlists.get', {id, playlist_id: 'pl-family-car'});
+    same('tidepool.progress.get', {id, episode_ids: ['ep-fieldnotes-112', 'ep-fieldnotes-113', 'ep-harborhours-088', 'ep-kettletheory-053']});
+    same('tidepool.follows.list', {id}, r => r.follows.map(({unplayed_count, ...rest}) => rest));
+    same('tidepool.history.list', {id, since: '2026-01-01T00:00:00-08:00', limit: 200});
+    same('tidepool.catalog.get_item', {item_id: 'ep-fieldnotes-112'});
+  }
+  // Priya's account also lists the old phone she streamed on in 2025, and her history and notices run back to 2025.
+  const p = fixture({seed: evalSeed, binding: evalBinding, logging: false});
+  assert.deepEqual(p.call('tidepool.devices.list', {id: 'mem-priya'}).devices.map(d => d.device_id),
+    ['dev-priya-oldphone', 'dev-priya-phone', 'dev-priya-earbuds', 'dev-kitchen-speaker']);
+  assert.equal(p.call('tidepool.history.list', {id: 'mem-priya', until: '2025-12-31T23:59:59-08:00'}).total,
+    evalSeed.sessions.filter(s => s.started_at < '2026').length);
+});
+
+test('the evaluation dataset loads at any clock in its window and shows nothing dated later', () => {
+  const sessionsOf = (at, member) => evalSeed.sessions.filter(s => s.member_id === member && Date.parse(s.ended_at) <= Date.parse(at));
+  for (const [at, plan, members] of [['2025-03-15T12:00:00-07:00', 'individual', 1], ['2025-12-31T23:59:00-08:00', 'individual', 1],
+    [evalClock, 'family', 4], ['2026-12-31T23:59:00-08:00', 'family', 4]]) {
+    const f = fixture({seed: evalSeed, binding: evalBinding, virtual_now: at, logging: false}), before = f.data, now = Date.parse(at), id = 'mem-priya';
+    for (const show of evalSeed.shows) {
+      const r = f.call('tidepool.shows.get_episodes', {show_id: show.show_id, limit: 200});
+      assert.equal(r.total, evalSeed.episodes.filter(e => e.show_id === show.show_id && Date.parse(e.published_at) <= now).length, show.show_id + ' at ' + at);
+      assert.ok(r.episodes.every(e => Date.parse(e.published_at) <= now));
+    }
+    const next = evalSeed.episodes.filter(e => Date.parse(e.published_at) > now).sort((x, y) => Date.parse(x.published_at) - Date.parse(y.published_at))[0];
+    if (next) unchanged(f, () => f.call('tidepool.catalog.get_item', {item_id: next.episode_id}), 'not_found');
+    const history = f.call('tidepool.history.list', {id, limit: 200});
+    assert.equal(history.total, sessionsOf(at, id).length, 'sessions at ' + at);
+    assert.ok(history.sessions.every(s => Date.parse(s.ended_at) <= now));
+    assert.ok(f.call('tidepool.progress.get', {id}).progress.every(p => Date.parse(p.updated_at) <= now));
+    assert.ok(f.call('tidepool.downloads.list', {id, include_removed: true}).downloads.every(d => Date.parse(d.requested_at) <= now));
+    assert.ok(f.call('tidepool.notifications.list', {id, limit: 200}).notifications.every(n => Date.parse(n.created_at) <= now));
+    assert.ok(f.call('tidepool.devices.list', {id}).devices.every(d => Date.parse(d.last_checkin_at) <= now));
+    const family = f.call('tidepool.family.get', {});
+    assert.deepEqual([family.plan.plan_id, family.members.length], [plan, members], 'family at ' + at);
+    assert.equal(family.billing.payment_due, null);
+    assert.deepEqual(f.data, before, 'reads change nothing');
+  }
+  // Sam joins on Jan. 3, 2026: his account has no Tidepool membership before then.
+  const sam = fixture({seed: evalAs('sam'), binding: evalBinding, virtual_now: '2025-06-01T12:00:00-07:00', logging: false});
+  unchanged(sam, () => sam.call('tidepool.family.get', {}), 'not_found');
+  // Priya's declined July 2025 charge was paid two days later; the notice stays.
+  const july = fixture({seed: evalSeed, binding: evalBinding, virtual_now: '2025-07-04T12:00:00-07:00', logging: false});
+  assert.equal(july.call('tidepool.family.get', {}).billing.payment_due.invoice_id, 'inv-2025-07-03');
+  july.advance('2025-07-06T12:00:00-07:00');
+  assert.equal(july.call('tidepool.family.get', {}).billing.payment_due, null);
+});

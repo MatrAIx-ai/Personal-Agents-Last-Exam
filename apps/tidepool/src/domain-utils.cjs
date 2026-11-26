@@ -42,5 +42,8 @@ const newestFirst = (list, key) => list.map((entry, i) => [entry, i])
   .sort(([a, ia], [b, ib]) => instant(b[key]) - instant(a[key]) || ib - ia).map(([entry]) => entry);
 const fold = value => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const words = value => fold(value).split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+// IDs of stored records that the clock cutoff hides (src/visible.cjs), so IDs the App creates never reuse one.
+const HIDDEN = Symbol('tidepool.hidden_ids');
+const hiddenIds = data => data[HIDDEN] || new Set();
 
-module.exports = {fail, copy, text, references, MINUTE, DAY, instant, offsetOf, format, shift, inOffsetOf, addMonths, localDate, newestFirst, fold, words};
+module.exports = {fail, copy, text, references, MINUTE, DAY, instant, offsetOf, format, shift, inOffsetOf, addMonths, localDate, newestFirst, fold, words, HIDDEN, hiddenIds};

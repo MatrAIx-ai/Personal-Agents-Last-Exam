@@ -1,0 +1,77 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "tidepool-evaluation-2025-2026",
+  "version": "1.0.0",
+  "description": "Synthetic evaluation seed for the Raman-Ellis family covering 2025-01-01 through 2026-12-31 (America/Los_Angeles): Priya's year on the Individual plan, the family's 2026 on the Family plan (the fixture history, verbatim), and the shows' episodes on their schedules through December 2026. Loadable with env.load_seed at any clock in the window; Tidepool shows only records dated at or before the clock.",
+  "record_source_ids": [
+    "authored",
+    "generated"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Original fictional text authored for this package by @byshail. All artists, albums, tracks, shows, episodes, people, devices and prices are invented; no external catalogs, recordings, show notes or listening data were collected, translated or adapted.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.1.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "generated",
+      "kind": "synthetic",
+      "description": "Template-generated fictional episodes, listening sessions, payments and one notice written by dev/build-dataset.cjs on the fixture schedules. Shows, artists, albums, tracks and people are the fixture's; guests and narrators are invented personal names; nothing was collected from real services.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "template",
+        "tool": "dev/build-dataset.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20250103,
+        "parameters": {
+          "window": [
+            "2025-01-01",
+            "2026-12-31"
+          ],
+          "time_zone": "America/Los_Angeles",
+          "clock": "2026-11-24T19:00:00-08:00",
+          "account_start": "2025-01-03T00:00:00-08:00",
+          "outputs": {
+            "seed.json": {
+              "bytes": 434728,
+              "sha256": "88a0c16c916f7c557c6bc109b2363078c662c4647a0a82e193f3555e234f22e8"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Every fixture record is copied verbatim except three that the 2025 story extends: family.created_at and Priya's joined_at move to 2025-01-03 (the account opens on the Individual plan), and billing gains an Individual start on 2025-01-03 before the fixture's Family entry, which becomes an upgrade at the Jan. 3, 2026 renewal. The billing calendar (the 3rd of each month, 00:00 PST) and every 2026 invoice are unchanged. The upgrade carries no proration, as the fixture's paid 1799-cent February invoice requires; plan.confirm_change at exactly 00:00 on Jan. 3 would add 700 cents (it prorates the whole new period), one minute earlier 0.",
+    "Priya's 2025 sessions are expanded from weekly routines with a fixed random seed; her 2025 progress and play counts are derived from them and share no key with the fixture's.",
+    "Episodes extend each show's fixture cadence backwards to 2025-01-01 and forwards to 2026-12-31; Field Notes stops at 114 so that examples/events/fieldnotes-115-publish.json still applies."
+  ],
+  "expected_counts": {
+    "records": 826,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation, name collisions with real products and reuse permissions."
+  }
+}
