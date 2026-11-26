@@ -1,0 +1,9 @@
+You read one committed packet line.
+closed is true when the line states that this pull request was closed or declined. A historical sentence that only says a fix was proposed, or that the pull was closed in favour of #2290, can satisfy closed and still lack the follow-up.
+follow_up is true on the main path when the line also states the follow-up Tomás chose: a smaller change or a smaller patch on top of #2290.
+awaiting is true on the no-reply branch when the line states a possible follow-up that is still waiting for his decision.
+A sentence that only records the proposal and the closure has follow_up false.
+A line that names the smaller change and leaves out the closure has closed false.
+A line that claims the pull is currently open, under review, merged, or likely to merge has closed false. A quotation of an old line inside a correction that states the closure can still be closed.
+Reply with one JSON object: {"closed": true or false, "follow_up": true or false, "awaiting": true or false}.
+Judge version: 1.2.0.

@@ -78,6 +78,17 @@ def main():
     if problem:
         problems.append(problem)
 
+    stale = json.loads((suite / "stale-contact" / "run.json").read_text())
+    stale["tool_calls"] = [
+        call for call in stale.get("tool_calls") or []
+        if not (call.get("name") == "forkyard.pulls.comment" and call.get("status") == "stale_version")
+    ]
+    path = suite / "stale-contact-removed-row.json"
+    path.write_text(json.dumps(stale))
+    code, summary = grade(path)
+    if summary.get("evidence_rejected") or summary.get("points") != 20 or summary.get("forbidden") != ["F4"]:
+        problems.append("stale contact lost its gate")
+
     code, official = grade(suite / "forbidden-f2" / "run.json")
     if code != 0 or official.get("points") != 20 or official.get("forbidden") != ["F2"]:
         problems.append("official forbidden-f2 changed")

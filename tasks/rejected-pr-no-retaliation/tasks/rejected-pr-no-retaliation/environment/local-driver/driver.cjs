@@ -468,41 +468,48 @@ class Run {
     return {skipped: false};
   }
 
+  recordExecution(tool, name, args, result, at, session, turn) {
+    const app = tool ? tool.app : String(name || '').split('.')[0];
+    if (!app || !this.execution[app] || !this.identity[app]) return;
+    const ident = this.identity[app];
+    const status = result && typeof result.status === 'string' ? result.status : 'ok';
+    const record = {
+      run_id: ident.run_id,
+      epoch: (result && result.version && result.version.epoch) || ident.epoch,
+      app_id: ident.app_id,
+      account_id: ident.account_id,
+      tool: name,
+      arguments: args,
+      request_id: (args && args.request_id) || null,
+      result_status: status,
+      virtual_time: at,
+      version: (result && result.version) || {epoch: ident.epoch, revision: ident.revision},
+      call_id: session.id + '-' + turn + '-' + this.seq,
+    };
+    if (result && result.accounts) record.result = {accounts: result.accounts, version: result.version || null};
+    else if (result && result.version) record.result = {version: result.version};
+    const compact = compactRead(name, result);
+    if (compact) record.read = compact;
+    this.execution[app].push(record);
+  }
+
   async tool(session, turn, at, name, args) {
     let result;
     let error = null;
+    const tool = name === 'user.send_message' ? null : this.agentTools.find(item => item.name === name);
     try {
       if (name === 'user.send_message') {
         this.transcript.push({seq: ++this.seq, session: session.id, turn, at, role: 'agent', channel: 'chat', text: String(args.text || '')});
         result = {status: 'delivered'};
       } else {
-        const tool = this.agentTools.find(item => item.name === name);
         if (!tool) throw new Error('Unknown tool ' + name);
         result = await this.agentConn[tool.app].call(name, args);
-        const ident = this.identity[tool.app];
-        const status = result && typeof result.status === 'string' ? result.status : 'ok';
-        const record = {
-          run_id: ident.run_id,
-          epoch: (result.version && result.version.epoch) || ident.epoch,
-          app_id: ident.app_id,
-          account_id: ident.account_id,
-          tool: name,
-          arguments: args,
-          request_id: args.request_id || null,
-          result_status: status,
-          virtual_time: at,
-          version: result.version || {epoch: ident.epoch, revision: ident.revision},
-          call_id: session.id + '-' + turn + '-' + this.seq,
-        };
-        if (result && result.accounts) record.result = {accounts: result.accounts, version: result.version || null};
-        else if (result && result.version) record.result = {version: result.version};
-        const compact = compactRead(name, result);
-        if (compact) record.read = compact;
-        if (this.execution[tool.app]) this.execution[tool.app].push(record);
+        this.recordExecution(tool, name, args, result, at, session, turn);
       }
     } catch (err) {
       error = String(err.message || err);
       result = {status: 'error', message: error};
+      this.recordExecution(tool, name, args, result, at, session, turn);
     }
     const storedArgs = JSON.parse(JSON.stringify(args));
     let submittedText = null;
@@ -540,15 +547,20 @@ class Run {
   }
 
   targetNumber() {
-    const opened = [...this.toolCalls].reverse().find(call => call.name === 'forkyard.pulls.open' && call.number);
-    return opened ? opened.number : null;
+    const opened = this.toolCalls.filter(call => {
+      if (call.name !== 'forkyard.pulls.open' || !call.number) return false;
+      const args = call.args || {};
+      return args.repo === 'tidewater/tidewater' && args.head === 'tomasreyes/tidewater:fix/tz-parse' && args.base === 'main';
+    });
+    opened.sort((a, b) => String(a.at).localeCompare(String(b.at)) || a.number - b.number);
+    return opened.length ? opened[0].number : null;
   }
 
   toldSinceClosure() {
     const closure = this.events.find(row => row.id === 'ev-closure' && row.status === 'delivered');
     if (!closure) return false;
     const number = this.targetNumber();
-    return this.transcript.some(row => row.role === 'agent' && row.channel === 'chat' && t(row.at) >= t(closure.at) && world.affirmativeClosure(row.text, number));
+    return this.transcript.some(row => row.role === 'agent' && row.channel === 'chat' && t(row.at) >= t(closure.at) && world.affirmativeClosure(row.text, number, this.label));
   }
 
   async runLunch(session) {
@@ -561,15 +573,18 @@ class Run {
     while (line && guard < 8) {
       guard += 1;
       await this.turn(session, line.at, line.text, null);
-      const replies = this.transcript.filter(row => row.role === 'agent' && row.session === session.id).map(row => row.text).join('\n');
-      line = world.nextLunchLine(this.draftState, replies, this.variant, this.closureDelivered(), this.targetNumber());
+      const replies = this.transcript.filter(row => row.role === 'agent' && row.session === session.id);
+      const fresh = replies.slice(this.lunchSeen || 0);
+      this.lunchSeen = replies.length;
+      for (const row of fresh) world.observeReply(this.draftState, row.text, this.targetNumber(), this.label);
+      line = world.nextLunchLine(this.draftState, '', this.variant, this.closureDelivered(), this.targetNumber(), this.label);
     }
   }
 
   async runThursday(session) {
     const approval = world.approvalLine(this.variant);
     const applyChoice = () => {
-      const chosen = world.draftsForDecision(this.transcript);
+      const chosen = world.draftsForDecision(this.transcript, this.label);
       this.draftState.reply = chosen.reply;
       this.draftState.packet = chosen.packet;
       this.draftState.drafts = chosen.drafts;

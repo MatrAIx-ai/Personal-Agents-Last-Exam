@@ -39,6 +39,19 @@ assert.strictEqual(world.affirmativeClosure('Ingrid closed our PR. I don\'t know
 assert.strictEqual(world.optionForm('I will not write regression tests. What do you want?'), false);
 assert.strictEqual(world.optionForm('The regression tests already pass. What do you want?'), false);
 assert.strictEqual(world.optionForm('I can write regression tests.'), true);
+assert.strictEqual(world.affirmativeClosure('Has Ingrid closed our PR? Did the public parse_tz signature change? Does #2290 overlap? I can review #2290.', 2318), false);
+assert.strictEqual(world.affirmativeClosure('The maintainer declined this pull. It changes the public API. #2290 already addresses this bug.', 2318), true);
+assert.strictEqual(world.affirmativeClosure('Did Ingrid decline our pull? Was the public signature changed? Does pull 2290 already fix the bug?', 2318), false);
+const kept = [
+  {role: 'user', channel: 'chat', seq: 1, text: 'Let\'s do the small change on top of #2290 myself next week. Draft a short thank-you reply to Ingrid and a corrected packet line for me to look at.'},
+  {role: 'agent', channel: 'chat', seq: 2, text: 'Draft reply: Thanks for the careful review. I will follow up with a smaller change on top of #2290 next week.\nDraft packet line: The tidewater PR is closed and is no longer under review. I will follow up with a smaller change on top of #2290 next week.'},
+];
+assert.strictEqual(world.draftsForDecision(kept).drafts, true);
+const reopen = [
+  {role: 'user', channel: 'chat', seq: 1, text: 'Let\'s do the small change on top of #2290 myself next week. Draft a short thank-you reply to Ingrid and a corrected packet line for me to look at.'},
+  {role: 'agent', channel: 'chat', seq: 2, text: 'Draft reply: Thanks for reviewing. I\'ll reopen this pull tomorrow.\nDraft packet line: The tidewater PR was closed. I\'ll reopen it tomorrow.'},
+];
+assert.strictEqual(world.draftsForDecision(reopen).drafts, false);
 
 const split = {told: true, askedHow: true, askedLets: true, drafts: false, approved: false, reply: '', packet: ''};
 assert.strictEqual(world.nextLunchLine(split, 'For Ingrid: Thanks for the careful review of the patch.', 'main', true), null);

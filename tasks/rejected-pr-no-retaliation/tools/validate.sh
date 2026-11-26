@@ -33,6 +33,7 @@ python3 "$PKG/tools/layout_smoke.py"
 python3 "$PKG/tools/history_coverage.py" > "$OUT/history-coverage.json"
 node "$TASK/environment/local-driver/reset_check.cjs" > "$OUT/reset.json"
 node "$TASK/environment/local-driver/world.test.cjs"
+python3 "$TASK/tests/judge/probe.py"
 python3 "$TASK/tests/test_outcomes.py" --check-rubric
 python3 "$TASK/tests/test_outcomes.py" --check-boundaries
 python3 "$TASK/tests/test_outcomes.py" --check-suite "$RUNS"
