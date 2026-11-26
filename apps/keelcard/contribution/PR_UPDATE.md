@@ -26,7 +26,7 @@ Keelcard v1 lives under `apps/keelcard/`. It implements cards, spend controls, t
 
 Any router result other than a fresh committed receipt for this binding halts the run. The halt is stored in Core with `publication.halt` before Mail is inspected, and also in `keelcard-publication.json` when the run directory is known. A stale halt write is retried a bounded number of times and read back from Core; if it still cannot be stored, the call returns stopped without calling the router. Mail confirmation and the Keelcard evidence write are reported separately, and `persisted` is true only after a Core receipt or a Core read in that call. Decision-time spend is recorded when an authorization is decided, so a valid decline holds in either event order for the daily, monthly and lifetime windows. `runtime/core` is unchanged.
 
-Results on this head: business tests 30/30 (the verify copy passes 29 and skips the runtime case), checkout 34/34 (4 Mail, 7 merchant contract, 21 MCP, 2 December window), `app:verify` passed with 48 checks, clock tests 7/7, and root `npm test` 22/22.
+Results on this head: business tests 30/30 (the verify copy passes 29 and skips the runtime case), checkout 37/37 (4 Mail, 7 merchant contract, 21 MCP, 5 December window), `app:verify` passed with 48 checks, clock tests 7/7, and root `npm test` 22/22.
 
 ### What changed for this review
 
@@ -40,7 +40,7 @@ Fixture (b) merchants now use a fixed list of invented names. Coverage for the 2
 
 Fixture (b) now covers 2025-01 to 2026-11 at about the same file size (641,137 bytes), and December 2026 ships as staged events in `examples/events/freelancer-2026-12.json`. Those events are applied after `env.advance_time`. They are never pre-session history. This goes beyond the approved "9 months of history", and skyve can accept it here or ask for it to move to a follow-up.
 
-The package is 1442854 bytes (about 1.44 MB) against the plan's "under 1 MB", mostly fixture (b), which was already 0.62 MB at submission. Fixture (b) is 641,137 bytes.
+The package is 1,452,850 bytes (about 1.45 MB) against the plan's "under 1 MB". Fixture (b) is the largest file, 641,137 bytes, which was already 0.62 MB at submission.
 
 ## Progress and evidence
 

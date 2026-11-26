@@ -366,7 +366,17 @@ test('captures, reversals, holds and expiry follow the ledger rules', () => {
   f.advance(expiring.expires_at);
   const viewed = f.call('keelcard.transactions.get', { authorization_id: expiring.authorization_id }).transaction;
   assert.equal(viewed.effective_status, 'expired');
+  assert.equal(viewed.hold_cents, 0);
   assert.equal(f.data.authorizations.find(row => row.authorization_id === expiring.authorization_id).status, 'pending');
+  const view = require('../gui/src/view.js');
+  const listed = f.call('keelcard.transactions.list', {}).transactions.find(row => row.authorization_id === expiring.authorization_id);
+  const expiredPage = view.renderTransactions([listed]);
+  assert.equal(listed.effective_status, 'expired');
+  assert.equal(listed.status, 'pending');
+  assert.equal(expiredPage.includes('expired'), true);
+  assert.equal(expiredPage.includes('pending'), false);
+  assert.equal(expiredPage.includes(GROCERY), false);
+  assert.equal(view.render([{ ...listed, payload: { card: { number: GROCERY, security_code: '317' } } }]).includes(GROCERY), false);
   f.event({ event_id: 'settle-expire', at: expiring.expires_at, operation: 'ledger.settle_due', payload: {} });
   assert.equal(f.data.authorizations.find(row => row.authorization_id === expiring.authorization_id).status, 'expired');
   assert.equal(boom(() => f.event({

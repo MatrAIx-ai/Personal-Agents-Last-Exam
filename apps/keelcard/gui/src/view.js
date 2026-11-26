@@ -6,7 +6,7 @@
   'use strict';
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const PUBLIC_KEYS = new Set([
-    'event_id', 'operation', 'nickname', 'card_id', 'id', 'authorization_id', 'last_four', 'status',
+    'event_id', 'operation', 'nickname', 'card_id', 'id', 'authorization_id', 'last_four', 'status', 'effective_status',
     'merchant_name', 'name', 'category', 'merchant_id', 'amount_cents', 'decision', 'decline_code',
     'type', 'currency', 'limits', 'per_transaction', 'per_day', 'per_month', 'lifetime',
     'merchant', 'payload', 'card'
@@ -55,8 +55,9 @@
     return '<section aria-label="transactions"><table><thead><tr><th>When</th><th>Merchant</th><th>Amount</th><th>Status</th></tr></thead><tbody>' +
       rows.map(row => {
         const view = publicFields(row);
+        const shown = view.effective_status || view.status || view.decision;
         return '<tr><td>' + escape(row.decided_at || row.at) + '</td><td>' + escape(view.merchant_name) +
-          '</td><td>' + cents(view.amount_cents) + '</td><td>' + escape(view.status || view.decision) + '</td></tr>';
+          '</td><td>' + cents(view.amount_cents) + '</td><td>' + escape(shown) + '</td></tr>';
       }).join('') + '</tbody></table></section>';
   }
   return { render, renderCardList, renderCardDetail, renderTransactions };

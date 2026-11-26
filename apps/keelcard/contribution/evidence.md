@@ -27,7 +27,7 @@ The copied package used by `app:verify` skips that runtime case because the runt
 npm --prefix apps/keelcard run test:checkout
 ```
 
-That command is `node --test tests/mail-integration.cjs tests/merchant-receive.cjs tests/mcp-regression.cjs tests/december-window.cjs` from `apps/keelcard`. It passed 34 tests, 0 failed: 4 Mail, 7 merchant contract, 21 MCP, and 2 December window. One December test loads fixture (b), applies `examples/events/freelancer-2026-12.json` with `env.advance_time` and `env.apply_event`, and checks that the statements end at `stmt-2026-12`. The other checks that a mutated December file fails the committed load check, and that the loaded snapshot keeps the partition source from `contribution/dataset.json`.
+That command is `node --test tests/mail-integration.cjs tests/merchant-receive.cjs tests/mcp-regression.cjs tests/december-window.cjs` from `apps/keelcard`. It passed 37 tests, 0 failed: 4 Mail, 7 merchant contract, 21 MCP, and 5 December window. One December test loads fixture (b), applies `examples/events/freelancer-2026-12.json` with `env.advance_time` and `env.apply_event`, and checks that the statements end at `stmt-2026-12`. The others check that a one-cent over-capture fails and keeps the denial in the audit, that dropping only the settle fails, that a duplicate receipt and a reused authorization payload fail, and that a denied list read fails. The loaded snapshot keeps the partition source from `contribution/dataset.json`.
 
 The task session is also started on its own:
 
@@ -38,7 +38,7 @@ node apps/keelcard/examples/task-session.cjs
 This run printed:
 
 ```json
-{"card_limit":7500,"reveal_status":"permission_denied","decline_code":"exceeds_transaction_limit","hold_cents":0,"opened":"committed","mail_ids_match":true,"mail_clock":"2026-11-20T06:14:00-05:00","keelcard_clock":"2026-11-20T06:14:00-05:00","notices_committed":true,"confirmed":"applied","second_opened":"committed","rejection":"rejected","rejection_code":"recipient_not_authorized","rejection_cloud_id":"keelcard-kc-adeyemi-notice-cr-0001-code-50856fb2","rejection_publish_id":"notice-notice-cr-0001-code-50856fb2","rejection_ids_unchanged":true,"lost_ack":"confirmed","lost_status":"committed","second_send":0}
+{"card_limit":7500,"reveal_status":"permission_denied","decline_code":"exceeds_transaction_limit","hold_cents":0,"opened":"committed","mail_ids_match":true,"mail_clock":"2026-11-20T06:14:00-05:00","keelcard_clock":"2026-11-20T06:14:00-05:00","notices_committed":true,"confirmed":"applied","second_opened":"committed","rejection":"rejected","rejection_code":"recipient_not_authorized","rejection_cloud_id":"keelcard-kc-adeyemi-notice-cr-0001-code-c769095b","rejection_publish_id":"notice-notice-cr-0001-code-c769095b","rejection_ids_unchanged":true,"lost_ack":"confirmed","lost_status":"committed","second_send":0}
 ```
 
 The token inside `notice_id` is chosen when the notice is created, so a later run prints a different token. The CloudEvents id is `keelcard-<account_id>-<notice_id>` and the publish request id is `notice-<notice_id>`. The session loads `examples/task-data/policies.json` through Infra `env.load_seed`, reads the grocery card and the $124.38 decline through the Agent, and binds Mail to person-grace on `mail-maya`. Both App clocks are `2026-11-20T06:14:00-05:00` at delivery. The confirmation code is the code in the Mail message. The delivery payload stores the Mail event id, and reopening both Apps confirms it with Mail `env.event_status`. The empty-grant route uses a real router whose recipient list is empty. It returns `recipient_not_authorized`, keeps the original publication ids, and stores no new Mail message. The acknowledgement-loss route uses a real router. After Mail commits the message, the receiver process exits before the router reads the reply. The notice is then confirmed from Mail, the saved event id matches `env.event_status`, and the next publish sends nothing.
@@ -83,7 +83,7 @@ Seeds alone have 424 distinct dates from 2025-01-01 to 2026-11-18. Seeds plus th
 
 ## Reviewer renderer
 
-`gui/src/view.js` renders escaped, read-only views for human reviewers. It has no controls and is not an interactive GUI. The approved plan lists only this optional read-only renderer, so no GUI is claimed. Agents use the MCP tools. The views are `renderCardList`, `renderCardDetail` and `renderTransactions`. `render` remains for compatibility. A business test checks escaping and checks that a full card number and a security code stay out of every view.
+`gui/src/view.js` renders escaped, read-only views for human reviewers. It has no controls and is not an interactive GUI. The approved plan lists only this optional read-only renderer, so no GUI is claimed. Agents use the MCP tools. The views are `renderCardList`, `renderCardDetail` and `renderTransactions`. `render` remains for compatibility. A business test checks escaping and checks that a full card number and a security code stay out of every view. The transaction status cell uses `effective_status` when the list provides it. The same business test advances an authorization past its seven-day expiry and, before settlement, checks that the view shows expired.
 
 ## App verification
 
