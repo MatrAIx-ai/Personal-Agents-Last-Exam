@@ -2,6 +2,23 @@
 // Read-side helpers: lookups, agent-facing summaries and search. No business mutations here.
 const {fail, copy} = require('./domain-utils.cjs');
 
+const instant = value => Date.parse(value);
+
+// What the reader can see at the run clock. An edition exists in Dayline from its added_at, and a
+// private entry from its read_at or saved_at, so a seed loaded before its latest record shows only
+// the earlier part. Nothing is stored for this: later records appear as the clock reaches them.
+function visible(data, now) {
+  const t = instant(now);
+  const editions = data.editions.filter(e => instant(e.added_at) <= t);
+  const shown = new Set(editions.map(e => e.edition_id));
+  return {
+    ...data, editions,
+    front_pages: data.front_pages.map(p => ({...p, entries: p.entries.filter(id => shown.has(id))})),
+    reading_history: data.reading_history.filter(h => instant(h.read_at) <= t),
+    reading_list: data.reading_list.filter(s => instant(s.saved_at) <= t),
+  };
+}
+
 function index(data) {
   return {
     outlets: new Map(data.outlets.map(o => [o.outlet_id, o])),
@@ -46,7 +63,6 @@ function full(idx, e) {
 
 // Case- and accent-insensitive matching so "Bahia" finds "Bahía".
 const fold = value => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-const instant = value => Date.parse(value);
 const newestFirst = (a, b) => instant(b.published_at) - instant(a.published_at) || a.edition_id.localeCompare(b.edition_id);
 const oldestFirst = (a, b) => instant(a.published_at) - instant(b.published_at) || a.edition_id.localeCompare(b.edition_id);
 
@@ -69,4 +85,4 @@ function search(idx, data, args) {
   return {total: matches.length, editions: matches.slice(0, args.limit ?? 20).map(e => summary(idx, e))};
 }
 
-module.exports = {index, edition, visibleStory, summary, full, search, fold, instant, newestFirst, oldestFirst};
+module.exports = {visible, index, edition, visibleStory, summary, full, search, fold, instant, newestFirst, oldestFirst};

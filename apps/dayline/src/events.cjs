@@ -2,7 +2,7 @@
 // Infra-applied incoming event: edition.publish. Core deduplicates event IDs and rolls back failures.
 const {fail, copy} = require('./domain-utils.cjs');
 const {log} = require('./diagnostics.cjs');
-const {index} = require('./catalog.cjs');
+const {index, instant} = require('./catalog.cjs');
 const {checkEdition} = require('./model.cjs');
 
 function applyEvent(ctx, data, event) {
@@ -29,8 +29,12 @@ function applyEvent(ctx, data, event) {
   if (p.front_page !== undefined) {
     const page = idx.frontPages.get(p.front_page);
     if (!page) fail('invalid_event', 'Unknown front page ' + p.front_page + '.');
-    if (p.position > page.entries.length + 1) fail('invalid_event', 'Position is past the end of front page ' + p.front_page + '.');
-    page.entries.splice(p.position - 1, 0, p.edition_id);
+    // Positions count the entries a reader sees at the event time; entries added later keep their place.
+    const shown = page.entries.filter(id => instant(idx.editions.get(id).added_at) <= instant(event.at));
+    if (p.position > shown.length + 1) fail('invalid_event', 'Position is past the end of front page ' + p.front_page + '.');
+    const at = p.position <= shown.length ? page.entries.indexOf(shown[p.position - 1])
+      : shown.length ? page.entries.indexOf(shown[shown.length - 1]) + 1 : 0;
+    page.entries.splice(at, 0, p.edition_id);
   }
   log(ctx, 'dayline.edition_published', {edition_id: p.edition_id, story_id: p.story_id,
     front_page: p.front_page ?? null, position: p.position ?? null});

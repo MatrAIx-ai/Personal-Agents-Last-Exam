@@ -89,7 +89,9 @@ Infra applies one event type. Its payload is a complete edition plus optional `f
 - Infra loads a run's catalog and the bound reader's history with `env.load_seed`, applies events with `env.apply_event`, advances the clock with `env.advance_time`, and restores the loaded baseline with `env.reset`. None of these are available on the Agent connection.
 - Reset restores the loaded editions, front pages, history, bookmarks and clock of that instance only.
 - `ctx.virtual_now` is the reader's "now". Agent reads and writes do not advance it; `read_at` and `saved_at` take its value.
-- Load a seed at or after its latest record. Dayline does not compare seed dates with the clock, because a run may start before an App's sample fixture and Core validates package fixtures when it registers them. A private write on an edition dated after the clock fails with `invalid_state` and changes nothing.
+- **Clock cutoff.** Tools show only records dated at or before `ctx.virtual_now`: an edition from its `added_at`, a reading-history entry from its `read_at` and a bookmark from its `saved_at`. A later edition is `not_found` to every read and write, front pages and `entry_count` skip it, and a story group with no visible edition is `not_found`. Nothing is stored for this: when `env.advance_time` or an event moves the clock, the later records appear and no record changes. A seed that runs past the clock, such as the evaluation dataset, can therefore load at any point in its window. Seed validation still does not compare dates with the clock, because Core validates package fixtures when it registers them.
+- If the agent marks read or saves an edition that the seed records as read or saved later than the clock, the agent's entry replaces the later one, so each edition keeps one entry.
+- `edition.publish` positions count the front-page entries visible at the event time; entries dated later keep their place.
 - `fixtures/clock.json` sets the App-only example time (Wednesday, Oct. 14, 2026, 07:00 Pacific).
 
 ## Fixtures
@@ -108,6 +110,22 @@ All text is original and fictional (see `contribution/dataset.json`).
 
 Expected answers and spoiler checks for a real task belong in that task's evaluator, not in this package.
 
+## Evaluation dataset, 2025-01-01 to 2026-12-31
+
+`data/evaluation/` is the delivered evaluation data for the coverage window in [submission evidence, section 3](../../docs/submission-evidence.md#3-environment-dataset-coverage). The fixtures above stay small smoke data. This dataset was added after the plan was approved, when that section was published; it is recorded as added scope in the validation report.
+
+- `seed.json` (version 1.0.0, about 0.6 MB): 969 editions from the six outlets in 415 story groups, in English and Spanish, and reader Ana Torres's history (381 reads, 6 saves). It contains the 25 fixture editions, the fixture front pages and Ana's fixture reads and save verbatim. Story groups the fixture shares run over months: the April 2026 flood behind the October rail vote, the Calder budget from the January proposal to the October 15 signing, the Velmora race from 2025 to the Dec. 1 inauguration, and two Gulls seasons. `binding.json`, `policies.json`, `clock.json` and `dataset.json` sit beside it; `dataset.json` records the sources, counts and the seed's sha256.
+- The dataset clock is the fixture clock, 07:00 Pacific on Oct. 14, 2026. Ana's history ends there. Catalog editions continue to Dec. 31, 2026 and appear as the run clock reaches them (see the clock cutoff above), so they are never pre-session history.
+- Every record is synthetic: 30 copied from the authored fixture and the rest written by `dev/build-dataset.cjs` from templates and a fixed random seed. All outlets, people, places, teams and events are invented, as in the approved design, so there is no real source to anchor in November 2026 and nothing was collected from real websites.
+- Coverage, counted in America/Los_Angeles on each record's own date field (`published_at`, `read_at`, `saved_at`): 523 distinct dates in all 24 months, 477 of them on or before the dataset clock, with no stretch longer than 5 days without a record. Credited wire reprints are the only identical texts; no other pair of editions shares 80% or more of its word 5-grams.
+
+```sh
+node dev/build-dataset.cjs          # rebuild data/evaluation/ (byte-identical on rerun)
+node dev/coverage-report.cjs        # coverage by source and month, provenance, gaps, content checks
+node dev/coverage-report.cjs --json
+node examples/dataset-demo.cjs      # load it over real MCP and query it at three clocks
+```
+
 ## Commands
 
 From this directory:
@@ -116,6 +134,7 @@ From this directory:
 npm test              # App-only business tests (no runtime needed)
 npm run example       # App-only edition.publish walkthrough
 npm run walkthrough   # Real MCP evidence report (JSON on stdout); needs the public runtime
+npm run dataset:demo  # Real MCP load and query of the evaluation dataset (JSON on stdout)
 ```
 
 From the repository root:
@@ -163,9 +182,10 @@ These replies are reference evidence for the data and tools, not model-agent tri
 | `schemas/` | Seed, event and state schemas plus the shared dataset/catalog contracts |
 | `contribution/` | Contribution declaration, dataset provenance, empty asset catalog |
 | `fixtures/` | Minimal seed (Ana), binding, policies, clock |
-| `examples/` | App-only example, approved event, task-data for Ben, real-MCP walkthrough |
+| `data/evaluation/` | The 2025-2026 evaluation dataset: seed, binding, policies, clock and its own `dataset.json` |
+| `examples/` | App-only example, approved event, task-data for Ben, real-MCP walkthrough, real-MCP dataset demo |
 | `tests/` | Business tests, App-only harness, verifier cases, schema validator |
-| `dev/` | Maintainer scripts that regenerate the schemas, `tools.json`, fixtures, task data and dataset counts (`npm run build:contracts`, `npm run build:fixtures`). Not run by tests or the verifier. |
+| `dev/` | Maintainer scripts that regenerate the schemas, `tools.json`, fixtures, task data and dataset counts (`npm run build:contracts`, `npm run build:fixtures`), build the evaluation dataset (`npm run build:dataset`) and report its coverage (`npm run dataset:coverage`). Not run by the verifier; the business tests check the dataset's counts and hash. |
 
 ## Limitations
 

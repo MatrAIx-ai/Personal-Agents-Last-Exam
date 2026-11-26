@@ -1,5 +1,6 @@
 'use strict';
 // Agent business tools. Reads return the unchanged working copy; writes touch only private reader state.
+// Both see only records dated at or before the run clock (catalog.visible).
 const {fail, copy} = require('./domain-utils.cjs');
 const {log} = require('./diagnostics.cjs');
 const c = require('./catalog.cjs');
@@ -9,8 +10,8 @@ const recentFirst = (list, key) => list.map((entry, i) => [entry, i])
   .sort(([a, ia], [b, ib]) => c.instant(b[key]) - c.instant(a[key]) || ib - ia).map(([entry]) => entry);
 const WRITES = new Set(['dayline.history.mark_read', 'dayline.saved.add', 'dayline.saved.remove']);
 
-function read(ctx, data, name, args) {
-  const idx = c.index(data);
+function read(ctx, stored, name, args) {
+  const data = c.visible(stored, ctx.virtual_now), idx = c.index(data);
   switch (name) {
     case 'dayline.outlets.list':
       return {outlets: copy(data.outlets)};
@@ -46,20 +47,19 @@ function read(ctx, data, name, args) {
 
 function write(ctx, data, name, args) {
   if (!WRITES.has(name)) fail('unknown_tool', 'Unknown Dayline operation.');
-  const idx = c.index(data);
+  // An edition added after the run clock is not in Dayline yet, so it is not_found here too.
+  const idx = c.index(c.visible(data, ctx.virtual_now));
   const e = c.edition(idx, args.edition_id), id = e.edition_id;
-  if (c.instant(ctx.virtual_now) < c.instant(e.added_at)) {
-    fail('invalid_state', 'The run clock is earlier than this edition; load seeds at or after their latest record.');
-  }
   if (name === 'dayline.history.mark_read') {
     const changed = !idx.read.has(id);
-    if (changed) data.reading_history.push({edition_id: id, read_at: ctx.virtual_now});
+    // A seeded read dated after the clock is replaced: the reader has now read it.
+    if (changed) data.reading_history = [...data.reading_history.filter(h => h.edition_id !== id), {edition_id: id, read_at: ctx.virtual_now}];
     log(ctx, 'dayline.history.mark_read', {edition_id: id, changed});
     return {edition_id: id, read: true, changed};
   }
   if (name === 'dayline.saved.add') {
     const changed = !idx.saved.has(id);
-    if (changed) data.reading_list.push({edition_id: id, saved_at: ctx.virtual_now});
+    if (changed) data.reading_list = [...data.reading_list.filter(s => s.edition_id !== id), {edition_id: id, saved_at: ctx.virtual_now}];
     log(ctx, 'dayline.saved.add', {edition_id: id, changed});
     return {edition_id: id, saved: true, changed};
   }

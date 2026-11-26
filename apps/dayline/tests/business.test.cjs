@@ -246,12 +246,51 @@ test('search matches the start of words, not substrings', () => {
   assert.deepEqual(ids(f.call('dayline.search', {query: 'puerto-claro'}).editions), ids(f.call('dayline.search', {query: 'Puerto Claro'}).editions));
 });
 
-test('a seed loaded before its latest record still loads, but writes on later editions fail clearly', () => {
-  // Core validates package fixtures at registration, so seed dates are not compared with an earlier run clock.
-  const early = fixture({seed: benSeed, binding: benBinding, virtual_now: '2026-01-01T00:00:00Z'});
-  unchanged(early, () => early.call('dayline.saved.add', {edition_id: 'rail-local-2'}), /run clock is earlier than this edition/);
-  const ben = fixture({seed: benSeed, binding: benBinding, virtual_now: '2026-10-14T07:20:00-07:00'});
-  assert.equal(ben.call('dayline.saved.add', {edition_id: 'rail-local-2'}).changed, true);
+test('a seed loaded before its latest record shows only what existed at the clock', () => {
+  // Ben's seed runs to 07:20 on Oct. 14. At 18:00 on Oct. 13 the vote dispatch (added 18:42) is not in Dayline yet.
+  const f = fixture({seed: benSeed, binding: benBinding, virtual_now: '2026-10-13T18:00:00-07:00'}), before = f.data;
+  const now = Date.parse(f.ctx.virtual_now);
+  const found = f.call('dayline.search', {limit: 50}).editions;
+  assert.deepEqual(ids(found).sort(), benSeed.editions.filter(e => Date.parse(e.added_at) <= now).map(e => e.edition_id).sort());
+  for (const e of found) assert.ok(Date.parse(f.call('dayline.edition.get', {edition_id: e.edition_id}).edition.added_at) <= now);
+  assert.deepEqual(local(f), []);
+  assert.equal(f.call('dayline.front_pages.list', {}).front_pages.find(p => p.front_page_id === 'local').entry_count, 0);
+  assert.deepEqual(ids(f.call('dayline.front_page.get', {front_page_id: 'national'}).entries), ['postal-standard-1', 'postal-wire-1']);
+  assert.deepEqual(ids(f.call('dayline.story.get', {story_id: 'rail-funding'}).editions), ['rail-wire-0']);
+  assert.throws(() => f.call('dayline.story.get', {story_id: 'library-hours'}), {code: 'not_found'});
+  assert.throws(() => f.call('dayline.edition.get', {edition_id: 'rail-wire-1'}), {code: 'not_found'});
+  assert.deepEqual(ids(f.call('dayline.history.list', {}).entries.map(e => e.edition)), ['budget-courier-0']);
+  unchanged(f, () => f.call('dayline.saved.add', {edition_id: 'rail-wire-1'}), {code: 'not_found'});
+  unchanged(f, () => f.call('dayline.history.mark_read', {edition_id: 'rail-local-2'}), {code: 'not_found'});
+  assert.deepEqual(f.data, before);
+  // Time passing writes nothing; the later records appear because the clock reached them.
+  f.ctx.virtual_now = '2026-10-14T07:20:00-07:00';
+  assert.deepEqual(f.data, before);
+  assert.equal(f.call('dayline.edition.get', {edition_id: 'rail-wire-1'}).edition.read, true);
+  assert.deepEqual(local(f), ['rail-local-2', 'library-1', 'rail-local-1', 'burnban-valley-1', 'rail-harbor-1', 'gulls-valley-1']);
+  assert.deepEqual(ids(f.call('dayline.history.list', {}).entries.map(e => e.edition)), ['rail-local-2', 'rail-wire-1', 'budget-courier-0']);
+});
+
+test('marking read before a seeded later read keeps one entry, dated now', () => {
+  // Ben's seed says he read the vote dispatch at 21:40; at 19:00 he has not, so the agent's read replaces it.
+  const f = fixture({seed: benSeed, binding: benBinding, virtual_now: '2026-10-13T19:00:00-07:00'});
+  assert.equal(f.call('dayline.edition.get', {edition_id: 'rail-wire-1'}).edition.read, false);
+  assert.equal(f.call('dayline.history.mark_read', {edition_id: 'rail-wire-1'}).changed, true);
+  assert.deepEqual(f.data.reading_history.filter(h => h.edition_id === 'rail-wire-1'),
+    [{edition_id: 'rail-wire-1', read_at: '2026-10-13T19:00:00-07:00'}]);
+  assert.equal(f.call('dayline.history.mark_read', {edition_id: 'rail-wire-1'}).changed, false);
+});
+
+test('edition.publish positions count only the front-page entries visible at the event time', () => {
+  // At 06:05 the local page shows rail-local-1 (05:31) and rail-harbor-1 (06:01); the other three come later.
+  const f = fixture({virtual_now: '2026-10-14T06:02:00-07:00'});
+  assert.deepEqual(local(f), ['rail-local-1', 'rail-harbor-1']);
+  f.event(event({at: '2026-10-14T06:05:00-07:00'}, {published_at: '2026-10-14T06:04:00-07:00', position: 2}));
+  assert.deepEqual(local(f), ['rail-local-1', 'rail-local-2', 'rail-harbor-1']);
+  unchanged(f, () => f.event(event({event_id: 'past-end', at: '2026-10-14T06:06:00-07:00'},
+    {edition_id: 'rail-local-3', published_at: '2026-10-14T06:04:00-07:00', position: 5})), {code: 'invalid_event'});
+  f.ctx.virtual_now = '2026-10-14T07:00:00-07:00';
+  assert.deepEqual(local(f), ['library-1', 'rail-local-1', 'burnban-valley-1', 'rail-local-2', 'rail-harbor-1', 'gulls-valley-1']);
 });
 
 test('edition.publish rejects inconsistent timing and content with invalid_event', () => {
@@ -268,4 +307,35 @@ test('task data ships a dataset whose record count matches its seed', () => {
   assert.equal(pkg.expected_counts.records, require('../fixtures/minimal.json').editions.length);
   assert.equal(ben.expected_counts.records, benSeed.editions.length);
   assert.deepEqual({...ben, dataset_id: pkg.dataset_id, expected_counts: pkg.expected_counts}, pkg, 'Only the ID and counts differ');
+});
+
+test('the evaluation dataset loads at any clock in its window and shows nothing dated later', () => {
+  const evalSeed = require('../data/evaluation/seed.json'), evalBinding = require('../data/evaluation/binding.json');
+  const meta = require('../data/evaluation/dataset.json');
+  assert.equal(meta.expected_counts.records, evalSeed.editions.length);
+  assert.equal(meta.sha256['seed.json'], require('node:crypto').createHash('sha256')
+    .update(require('node:fs').readFileSync(require.resolve('../data/evaluation/seed.json'))).digest('hex'));
+  const shown = at => evalSeed.editions.filter(e => Date.parse(e.added_at) <= Date.parse(at));
+  for (const at of ['2025-03-15T12:00:00-07:00', '2025-12-31T23:59:00-08:00', require('../data/evaluation/clock.json').initial_time, '2026-12-31T23:59:00-08:00']) {
+    const f = fixture({seed: evalSeed, binding: evalBinding, virtual_now: at, logging: false}), before = f.data, now = Date.parse(at);
+    const found = f.call('dayline.search', {limit: 50});
+    assert.equal(found.total, shown(at).length, 'search total at ' + at);
+    for (const e of found.editions) assert.ok(Date.parse(f.call('dayline.edition.get', {edition_id: e.edition_id}).edition.added_at) <= now);
+    const later = evalSeed.editions.find(e => Date.parse(e.added_at) > now);
+    if (later) assert.throws(() => f.call('dayline.edition.get', {edition_id: later.edition_id}), {code: 'not_found'});
+    const history = f.call('dayline.history.list', {limit: 200}).entries;
+    assert.equal(history.length, Math.min(200, evalSeed.reading_history.filter(h => Date.parse(h.read_at) <= now).length));
+    for (const h of history) assert.ok(Date.parse(h.read_at) <= now);
+    for (const page of f.call('dayline.front_pages.list', {}).front_pages) {
+      for (const entry of f.call('dayline.front_page.get', {front_page_id: page.front_page_id}).entries) {
+        assert.ok(Date.parse(f.call('dayline.edition.get', {edition_id: entry.edition_id}).edition.added_at) <= now);
+      }
+    }
+    assert.deepEqual(f.data, before, 'reads change nothing');
+  }
+  // At the dataset clock the reader sees the fixture's front pages and history.
+  const atClock = fixture({seed: evalSeed, binding: evalBinding, logging: false});
+  assert.deepEqual(local(atClock), require('../fixtures/minimal.json').front_pages[0].entries);
+  assert.deepEqual(ids(atClock.call('dayline.history.list', {limit: 4}).entries.map(e => e.edition)),
+    ['rail-wire-1', 'strike-standard-1', 'gulls-preview-1', 'budget-courier-0']);
 });

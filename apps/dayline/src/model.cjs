@@ -45,7 +45,8 @@ function validateSeed(ctx, data) {
   unique(data.editions, 'edition_id', 'edition');
   unique(data.front_pages, 'front_page_id', 'front page');
   // Seed dates are not compared with the run clock: a run may start before an App's sample fixture
-  // (Core validates package fixtures at registration). Tasks load seeds at or after their latest record.
+  // (Core validates package fixtures at registration). Tools show only records dated at or before
+  // the clock (catalog.visible), so a multi-period seed can load at any point in its window.
   const idx = index(data);
   for (const outlet of data.outlets) {
     if (!text(outlet.name, 200)) fail('invalid_seed', 'Outlet names cannot be blank.');
