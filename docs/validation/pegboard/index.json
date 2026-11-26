@@ -1,6 +1,6 @@
 {
   "schema": "pegboard.v1-evidence-index",
-  "recorded_at": "2026-11-24T20:09:29Z",
+  "recorded_at": "2026-11-26T19:42:04Z",
   "app_id": "pegboard",
   "app_version": "1.0.0",
   "runtime_version": "1.6.0",
@@ -8,10 +8,10 @@
   "mail_version": "1.3.0",
   "proposal_commit": "aa98311bef207f31440e1d67082580b519d5f752",
   "proposal_status": "plan approved for implementation (/approve-plan on PR #173); the proposal file is unchanged since that commit",
-  "public_runtime_base_commit": "ae889d2cbbfc72242fc5e70b877f3f2a2f029618",
-  "app_package_commit": "d047d9c96f4f141c8aba7b679a14d92da68024da",
-  "app_package_sha256": "d5c4b6dcc1a4b4910b09b6647713ee919dfa96dbd2a7bea6ad4c05d8839bde39",
-  "app_package_git_tree": "cc3d4b80178a45e713b6f47ce0330410fea11508",
+  "public_runtime_base_commit": "6933c430942c64f94874083815829e4a4b20920a",
+  "app_package_commit": "4e5b5ff8087cb57722639860e146f9ebe97ee7c7",
+  "app_package_sha256": "1d137d961993c9fea8c081a338608362babc09b8fcbd1dac4e9e463cdf3a3372",
+  "app_package_git_tree": "a8fef4737a109b4da45f2268c17e15d46349e2ca",
   "package_hash_agrees_in": [
     "public-runtime.node22.json",
     "public-runtime.node18.json",
@@ -23,7 +23,7 @@
     "22": "v22.23.4",
     "18": "v18.20.8"
   },
-  "tested_os": "Linux 6.18.44-fc-v819 x86_64",
+  "tested_os": "Linux 6.18.44-fc-v880 x86_64",
   "interface": {
     "operations": 22,
     "read": 12,
@@ -33,28 +33,28 @@
   "checks": {
     "standalone_business": {
       "node22": {
-        "tests": 25,
-        "pass": 23,
+        "tests": 26,
+        "pass": 24,
         "fail": 0,
         "skipped": 2
       },
       "node18": {
-        "tests": 25,
-        "pass": 23,
+        "tests": 26,
+        "pass": 24,
         "fail": 0,
         "skipped": 2
       }
     },
     "business_with_runtime": {
       "node22": {
-        "tests": 25,
-        "pass": 25,
+        "tests": 26,
+        "pass": 26,
         "fail": 0,
         "skipped": 0
       },
       "node18": {
-        "tests": 25,
-        "pass": 25,
+        "tests": 26,
+        "pass": 26,
         "fail": 0,
         "skipped": 0
       }
@@ -101,13 +101,20 @@
     },
     "shared_contract_copies": "runtime/sdk/sync.cjs --check and runtime/build-contracts.cjs --check passed on both Node versions",
     "web_pages_in_browser": {
-      "node22": 57,
-      "node18": 57
+      "node22": 65,
+      "node18": 65
+    },
+    "dataset_regeneration": "dev/dataset.cjs --check and dev/coverage.cjs --check passed from the package alone on both Node versions",
+    "dataset_integration": {
+      "node22": 20,
+      "node18": 20
     },
     "browser": "153.0.8010.12"
   },
   "reports": [
     "base-runtime.json",
+    "dataset-integration.node18.json",
+    "dataset-integration.node22.json",
     "mail-integration.node18.json",
     "mail-integration.node22.json",
     "mcp-integration.node18.json",
@@ -132,5 +139,35 @@
     "Independent maintainer reproduction and acceptance.",
     "Official PR CI (public-runtime 18 and 22, base-runtime-compatibility) on the implementation commit.",
     "Human review of realism and of the invented workplace and names."
-  ]
+  ],
+  "evaluation_dataset": {
+    "path": "apps/pegboard/datasets/full-window",
+    "dataset_id": "pegboard-full-window",
+    "version": "1.0.0",
+    "clock": "2026-12-31T20:00:00-08:00",
+    "seed_sha256": "aa84c05745f94b0d1c767e097875a931103cfe0c97966b4d7a2b3978026abefa",
+    "seed_bytes": 1608682,
+    "records_loaded": 3799,
+    "time_zone": "America/Los_Angeles",
+    "window": {
+      "start": "2025-01-01",
+      "end": "2026-12-31",
+      "days": 730
+    },
+    "distinct_dates": {
+      "actions_only": 333,
+      "all_history": 725
+    },
+    "provenance": "synthetic",
+    "coverage_report": "datasets/full-window/coverage.json"
+  },
+  "web_evidence": {
+    "index": "apps/pegboard/evidence/README.md",
+    "steps": 36,
+    "sequences": 14,
+    "browser_checks": 65,
+    "package_sha256_without_evidence": "ba557e8d42c6adbb40fffe375d5d9482371e87aa8a23149d58463f2ed89c3ae0",
+    "browser": "Chrome 153.0.8010.12, headless",
+    "node": "v22.23.4"
+  }
 }
