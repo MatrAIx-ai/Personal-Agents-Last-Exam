@@ -423,9 +423,30 @@ test('evidence keeps text, subjects, links, attempts and attention', () => {
   const joined = exportEvidence({snapshot, execution, batch, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [faithful]});
   assert.equal(joined.subjects.some(item => item.revision_id === comment.revision_id && item.match === 'linked_post' && item.person_id === 'person-ingrid'), true);
   const mismatched = structuredClone(faithful);
+  mismatched.person_id = 'person-other';
   mismatched.revisions[0].person_id = 'person-other';
   const missed = exportEvidence({snapshot, execution, batch, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [mismatched]});
   assert.equal(missed.subjects.some(item => item.revision_id === comment.revision_id && item.match === 'linked_post'), false);
+  const sameAccount = structuredClone(recorded);
+  sameAccount.person_id = 'person-tomas';
+  sameAccount.revisions[0].actor_account_id = 'fy-tomasreyes';
+  sameAccount.revisions[0].person_id = 'person-tomas';
+  const sameJoined = exportEvidence({snapshot, execution, batch, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [sameAccount]});
+  assert.equal(sameJoined.subjects.some(item => item.revision_id === comment.revision_id && item.match === 'linked_post' && item.person_id === 'person-ingrid'), true);
+  const accountConflict = structuredClone(sameAccount);
+  accountConflict.person_id = 'person-other';
+  accountConflict.revisions[0].person_id = 'person-other';
+  const accountMissed = exportEvidence({snapshot, execution, batch, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [accountConflict]});
+  assert.equal(accountMissed.subjects.some(item => item.revision_id === comment.revision_id && item.match === 'linked_post'), false);
+  const otherApp = structuredClone(sameAccount);
+  otherApp.app_id = 'notes';
+  const otherMissed = exportEvidence({snapshot, execution, batch, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [otherApp]});
+  assert.equal(otherMissed.subjects.some(item => item.revision_id === comment.revision_id && item.match === 'linked_post'), false);
+  const splitPerson = structuredClone(sameAccount);
+  splitPerson.person_id = 'person-other';
+  splitPerson.revisions[0].person_id = 'person-tomas';
+  const splitMissed = exportEvidence({snapshot, execution, batch, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [splitPerson]});
+  assert.equal(splitMissed.subjects.some(item => item.revision_id === comment.revision_id && item.match === 'linked_post'), false);
   const first = evidence.attempts.find(item => item.request_id === 'reopen-1');
   assert.equal(first.deny_count, 2);
   assert.equal(first.transport_retries, 1);
@@ -484,6 +505,18 @@ test('reviewer views escape text and show pull, profile and evidence fields', ()
   const dumped = render([{repo: 'tomasreyes/fieldbook', title: nasty}]);
   assert.equal(dumped.includes('<script>'), false);
   assert.match(dumped, /tomasreyes\/fieldbook/);
+  const malformed = renderEvidenceSummary({
+    schema: 'urn:pale:public-speech-evidence:1',
+    revisions: {length: nasty},
+    subjects: {length: 'subjects-length'},
+    links: {length: 'links-length'}
+  });
+  assert.equal(malformed.includes('<script>'), false);
+  assert.equal(malformed.includes('subjects-length'), false);
+  assert.equal(malformed.includes('links-length'), false);
+  assert.match(malformed, /revisions 0/);
+  assert.match(malformed, /subjects 0/);
+  assert.match(malformed, /links 0/);
 });
 
 test('coverage report counts the delivered window', () => {
@@ -508,6 +541,8 @@ test('coverage report counts the delivered window', () => {
   assert.equal(report.global.excluded_before_2025, 75);
   assert.equal(report.global_with_december.distinct_dates_in_window, 325);
   assert.equal(report.global_with_december.window_months_with_activity, 24);
+  assert.equal(report.problems.length, 0);
+  assert.equal(report.owner_library_with_december.distinct_dates_in_window, 295);
   const library = report.seeds.c_owner_library;
   assert.equal(library.by_kind_all.commit, 293);
   assert.equal(library.by_kind_all.pull_opened, 33);
@@ -518,4 +553,31 @@ test('coverage report counts the delivered window', () => {
   assert.equal(library.by_kind_all.check, 40);
   assert.ok(library.by_repo['tomasreyes/notebook']);
   assert.ok(library.by_repo['tomasreyes/fieldbook']);
+});
+
+test('fieldbook pull requests describe the notes their reviews read', () => {
+  const seed = require('../examples/task-data/owner-library/seed.json');
+  const pulls = seed.pulls.filter(item => item.repo === 'tomasreyes/fieldbook');
+  assert.equal(pulls.length, 30);
+  assert.equal(new Set(pulls.map(item => item.body)).size, 30);
+  assert.equal(new Set(pulls.map(item => item.title)).size, 30);
+  assert.equal(pulls.some(item => item.body === 'Adds notes from the latest trip.'), false);
+  for (const pull of pulls) {
+    const head = seed.commits.find(item => item.sha === pull.head_sha);
+    const notes = head.files.find(item => item.path === 'docs/notes.md').content;
+    const miles = notes.match(/(\d+(?:\.\d+)?) miles/);
+    assert.ok(miles, pull.number);
+    assert.equal(notes.includes('The second switchback was dry'), true);
+    assert.equal(pull.body.includes('entry ' + notes.match(/entry (\d+)/)[1]), true);
+    assert.equal(pull.body.includes(miles[1] + ' miles'), true);
+    assert.equal(pull.body.includes('second switchback was dry'), true);
+    const place = notes.match(/from ([^,]+), entry/)[1];
+    const reviews = seed.reviews.filter(item => item.repo === pull.repo && item.number === pull.number);
+    assert.equal(reviews.every(item => item.body.includes(miles[1]) || item.body.includes(place)), true);
+    const asked = reviews.find(item => item.state === 'changes_requested');
+    if (!asked) continue;
+    const approved = reviews.find(item => item.state === 'approved');
+    assert.equal(asked.body.includes('second switchback was dry'), true);
+    assert.equal(approved.body.includes('as written'), true);
+  }
 });

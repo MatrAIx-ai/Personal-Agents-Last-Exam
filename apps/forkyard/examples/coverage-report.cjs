@@ -25,25 +25,38 @@ const seeds = {
 const PRIMARY = new Set(['commit', 'pull_opened', 'pull_merged', 'pull_closed', 'review', 'review_comment', 'release']);
 const DECEMBER = 'examples/events/owner-library-2026-12/events.json';
 
-function rowsOf(data) {
+function dateProblem(source, kind, id, at) {
+  if (at === null || at === undefined || at === '') return {source, kind, id, reason: 'missing', value: null};
+  if (Number.isNaN(Date.parse(at))) return {source, kind, id, reason: 'malformed', value: at};
+  return null;
+}
+
+function rowsOf(data, source, problems) {
   const rows = [];
-  const add = (kind, id, at, repo) => { if (at) rows.push({kind, id, at, repo}); };
-  for (const commit of data.commits || []) add('commit', commit.sha, commit.committed_at, commit.repo);
+  const add = (kind, id, at, repo, required) => {
+    const problem = dateProblem(source, kind, id, at);
+    if (problem && (required || problem.reason === 'malformed')) problems.push(problem);
+    if (!problem && at) rows.push({kind, id, at, repo});
+  };
+  for (const commit of data.commits || []) add('commit', commit.sha, commit.committed_at, commit.repo, true);
   for (const pull of data.pulls || []) {
-    add('pull_opened', pull.repo + '#' + pull.number, pull.created_at, pull.repo);
-    add('pull_merged', pull.repo + '#' + pull.number, pull.merged_at, pull.repo);
-    if (!pull.merged_at) add('pull_closed', pull.repo + '#' + pull.number, pull.closed_at, pull.repo);
+    add('pull_opened', pull.repo + '#' + pull.number, pull.created_at, pull.repo, true);
+    add('pull_merged', pull.repo + '#' + pull.number, pull.merged_at, pull.repo, false);
+    if (!pull.merged_at) add('pull_closed', pull.repo + '#' + pull.number, pull.closed_at, pull.repo, false);
   }
-  for (const review of data.reviews || []) add('review', review.review_id, review.submitted_at || review.created_at, review.repo);
-  for (const comment of data.comments || []) add(comment.review_id ? 'review_comment' : 'comment', comment.comment_id, comment.created_at, comment.repo);
-  for (const release of data.releases || []) add(release.status === 'draft' || !release.published_at ? 'release_draft' : 'release', release.release_id, release.published_at || release.created_at, release.repo);
-  for (const tag of data.tags || []) add('tag', tag.repo + '@' + tag.name, tag.created_at, tag.repo);
+  for (const review of data.reviews || []) add('review', review.review_id, review.submitted_at || review.created_at, review.repo, true);
+  for (const comment of data.comments || []) add(comment.review_id ? 'review_comment' : 'comment', comment.comment_id, comment.created_at, comment.repo, false);
+  for (const release of data.releases || []) {
+    if (release.status === 'published') add('release', release.release_id, release.published_at, release.repo, true);
+    else add('release_draft', release.release_id, release.created_at, release.repo, false);
+  }
+  for (const tag of data.tags || []) add('tag', tag.repo + '@' + tag.name, tag.created_at, tag.repo, false);
   for (const issue of data.issues || []) {
-    add('issue_opened', issue.repo + '#' + issue.number, issue.created_at, issue.repo);
-    add('issue_closed', issue.repo + '#' + issue.number, issue.closed_at, issue.repo);
+    add('issue_opened', issue.repo + '#' + issue.number, issue.created_at, issue.repo, false);
+    add('issue_closed', issue.repo + '#' + issue.number, issue.closed_at, issue.repo, false);
   }
-  for (const check of data.checks || []) add('check', check.sha + ':' + check.name, check.completed_at, check.repo);
-  for (const entry of data.timeline || []) add('timeline', entry.entry_id, entry.at, entry.repo);
+  for (const check of data.checks || []) add('check', check.sha + ':' + check.name, check.completed_at, check.repo, false);
+  for (const entry of data.timeline || []) add('timeline', entry.entry_id, entry.at, entry.repo, false);
   return rows;
 }
 
@@ -109,18 +122,20 @@ function summarize(rows, primaryOf) {
 }
 
 function buildCoverage(dir) {
-  const out = {zone: ZONE, window: [START, END], primary_fields: ['commits.committed_at', 'pulls.created_at', 'pulls.merged_at', 'pulls.closed_at', 'reviews.created_at', 'review comments created_at', 'releases.published_at'], seeds: {}};
+  const out = {zone: ZONE, window: [START, END], primary_fields: ['commits.committed_at', 'pulls.created_at', 'pulls.merged_at', 'pulls.closed_at', 'reviews.created_at', 'review comments created_at', 'releases.published_at'], seeds: {}, problems: []};
   const globalAll = new Set();
   const globalPrim = new Set();
   let excluded = 0;
+  let libraryDates = new Set();
   for (const [label, rel] of Object.entries(seeds)) {
     const buf = fs.readFileSync(path.join(dir, rel));
     const data = JSON.parse(buf);
-    const rows = rowsOf(data);
+    const rows = rowsOf(data, rel, out.problems);
     const summary = summarize(rows, row => PRIMARY.has(row.kind));
     for (const date of summary.datesAll) globalAll.add(date);
     for (const date of summary.datesPrim) globalPrim.add(date);
     excluded += summary.excluded_before_2025;
+    if (label === 'c_owner_library') libraryDates = summary.datesAll;
     const {datesAll, datesPrim, ...rest} = summary;
     out.seeds[label] = {
       file: rel,
@@ -141,7 +156,11 @@ function buildCoverage(dir) {
   }
   const decemberBuf = fs.readFileSync(path.join(dir, DECEMBER));
   const december = JSON.parse(decemberBuf);
-  const decemberSummary = summarize(eventRows(december), row => row.primary);
+  for (const event of december) {
+    const problem = dateProblem(DECEMBER, event.operation || 'event', event.event_id, event.at);
+    if (problem) out.problems.push(problem);
+  }
+  const decemberSummary = summarize(eventRows(december.filter(event => !dateProblem(DECEMBER, event.operation || 'event', event.event_id, event.at))), row => row.primary);
   const {datesAll: decDates, datesPrim: decPrim, ...decRest} = decemberSummary;
   out.december_events = {
     file: DECEMBER,
@@ -149,6 +168,11 @@ function buildCoverage(dir) {
     events: december.length,
     note: 'Staged scenario events. They are applied after env.advance_time and are not seed history.',
     ...decRest
+  };
+  const libraryWithDecember = new Set([...libraryDates, ...decDates]);
+  out.owner_library_with_december = {
+    distinct_dates_in_window: libraryWithDecember.size,
+    note: 'Dates from the owner library seed plus the December staged events.'
   };
   const withAll = new Set([...globalAll, ...decDates]);
   const withPrim = new Set([...globalPrim, ...decPrim]);
@@ -199,7 +223,9 @@ function printReport(out) {
   console.log('\ndecember: ' + december.file + ' events ' + december.events + ' dates ' + december.distinct_dates_in_window + ' (primary ' + december.distinct_dates_primary_in_window + ') excluded pre-2025 ' + december.excluded_before_2025);
   console.log('kinds ' + JSON.stringify(december.by_kind_all));
   console.log('\nglobal', JSON.stringify(out.global));
+  console.log('owner_library_with_december', JSON.stringify(out.owner_library_with_december));
   console.log('global_with_december', JSON.stringify(out.global_with_december));
+  if (out.problems.length) console.error('malformed or missing required dates\n' + JSON.stringify(out.problems, null, 2));
 }
 
 async function loadOwnerLibrary(repoRoot, dir) {
@@ -218,12 +244,14 @@ async function loadOwnerLibrary(repoRoot, dir) {
   state = step.state;
   const call = (name, args) => model.execute(state, 'agent', name, args).result;
   const out = {load: 'ready'};
+  let ok = true;
   for (const repo of ['tomasreyes/notebook', 'tomasreyes/fieldbook']) {
     const commits = [];
     let cursor = null;
     let page;
     do {
       page = call('forkyard.commits.list', {repo, ref: 'main', limit: 100, ...(cursor ? {cursor} : {})});
+      if (!page || page.status !== 'ok') { ok = false; break; }
       commits.push(...((page && (page.items || page.commits)) || []));
       cursor = page && page.next_cursor;
     } while (cursor);
@@ -233,13 +261,16 @@ async function loadOwnerLibrary(repoRoot, dir) {
     const releaseRows = (releases && (releases.releases || releases.items)) || [];
     const states = {};
     for (const pull of pullRows) states[pull.state] = (states[pull.state] || 0) + 1;
+    if (!page || page.status !== 'ok') ok = false;
+    if (!pulls || pulls.status !== 'ok') ok = false;
+    if (!releases || releases.status !== 'ok') ok = false;
     out[repo] = {
-      commits_status: page.status,
+      commits_status: page && page.status,
       commits_on_main: commits.length,
-      pulls_status: pulls.status,
+      pulls_status: pulls && pulls.status,
       pulls: pullRows.length,
       pull_states: states,
-      releases_status: releases.status,
+      releases_status: releases && releases.status,
       releases: releaseRows.length
     };
   }
@@ -247,16 +278,22 @@ async function loadOwnerLibrary(repoRoot, dir) {
   const applied = [];
   let index = 0;
   for (const event of events) {
-    step = model.execute(state, 'infra', 'env.advance_time', {expected_version: model.version(state), request_id: 'adv-' + index, virtual_now: event.at});
-    if (step.result.status !== 'committed') throw new Error('advance failed: ' + JSON.stringify(step.result));
-    state = step.state;
-    step = model.execute(state, 'infra', 'env.apply_event', {expected_version: model.version(state), event});
-    applied.push({event_id: event.event_id, operation: event.operation, status: step.result.status, message: step.result.message || null});
-    if (step.state) state = step.state;
+    const moved = model.execute(state, 'infra', 'env.advance_time', {expected_version: model.version(state), request_id: 'adv-' + index, virtual_now: event.at});
+    if (moved.result.status !== 'committed') {
+      ok = false;
+      applied.push({event_id: event.event_id, operation: event.operation, status: moved.result.status, advance_status: moved.result.status, message: moved.result.message || null});
+      index += 1;
+      continue;
+    }
+    state = moved.state;
+    const appliedEvent = model.execute(state, 'infra', 'env.apply_event', {expected_version: model.version(state), event});
+    if (appliedEvent.result.status !== 'committed') ok = false;
+    applied.push({event_id: event.event_id, operation: event.operation, status: appliedEvent.result.status, message: appliedEvent.result.message || null});
+    if (appliedEvent.state) state = appliedEvent.state;
     index += 1;
   }
   out.december = applied;
-  return out;
+  return {report: out, ok};
 }
 
 module.exports = {buildCoverage, loadOwnerLibrary};
@@ -266,14 +303,16 @@ if (require.main === module) {
   const report = buildCoverage(dir);
   if (process.argv.includes('--json')) console.log(JSON.stringify(report, null, 2));
   else printReport(report);
+  const datesBroken = report.problems.length > 0;
   if (process.argv.includes('--load')) {
     const repoRoot = path.resolve(dir, '../..');
     loadOwnerLibrary(repoRoot, dir).then(result => {
       console.log('\n--load');
-      console.log(JSON.stringify(result, null, 2));
+      console.log(JSON.stringify(result.report, null, 2));
+      if (datesBroken || !result.ok) process.exit(1);
     }).catch(error => {
       console.error(error);
       process.exit(1);
     });
-  }
+  } else if (datesBroken) process.exit(1);
 }

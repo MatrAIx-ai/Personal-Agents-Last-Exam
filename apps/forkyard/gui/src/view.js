@@ -23,11 +23,11 @@
     const rows = (activity || []).map(item => '<li>' + escape(item.type || item.kind || '') + ' ' + escape(item.title || item.message || item.text || '') + '</li>').join('');
     return '<article data-view="profile"><h2>' + escape(account && (account.display_name || account.handle)) + '</h2><p>' + escape(account && account.handle) + '</p><p>' + escape(account && account.bio) + '</p><h3>Links</h3><ul>' + linkRows + '</ul><h3>Recent public activity</h3><ol>' + rows + '</ol></article>';
   }
+  function countOf(value) {
+    return Array.isArray(value) ? value.length : 0;
+  }
   function renderEvidenceSummary(doc) {
-    const revisions = (doc && doc.revisions) || [];
-    const subjects = (doc && doc.subjects) || [];
-    const links = (doc && doc.links) || [];
-    return '<article data-view="evidence-summary"><p>' + escape(doc && doc.schema) + '</p><p>revisions ' + revisions.length + '</p><p>subjects ' + subjects.length + '</p><p>links ' + links.length + '</p><p>run ' + escape(doc && doc.run_id) + '</p></article>';
+    return '<article data-view="evidence-summary"><p>' + escape(doc && doc.schema) + '</p><p>revisions ' + countOf(doc && doc.revisions) + '</p><p>subjects ' + countOf(doc && doc.subjects) + '</p><p>links ' + countOf(doc && doc.links) + '</p><p>run ' + escape(doc && doc.run_id) + '</p></article>';
   }
   return {render, renderPullThread, renderProfile, renderEvidenceSummary};
 });

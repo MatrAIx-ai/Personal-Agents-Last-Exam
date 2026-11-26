@@ -11,7 +11,7 @@ cd apps/forkyard
 npm test
 ```
 
-10 tests, 10 passed, 0 failed. `tests/business.test.cjs` covers the tools, committed and thrown outcomes, the 15 event fixtures, the rejected-pull-request seed, the release seed, the evidence export, unified diffs, the three reviewer views, and the coverage totals. The diff test applies a reorder, a final-newline removal, a file deletion, an empty file, a one-newline file, and those files together with an ordinary addition. `git apply` runs on each patch, and the test compares the resulting file bytes. An empty file also opens as a pull request.
+11 tests, 11 passed, 0 failed. `tests/business.test.cjs` covers the tools, committed and thrown outcomes, the 15 event fixtures, the rejected-pull-request seed, the release seed, the evidence export, unified diffs, the three reviewer views, the coverage totals, and the fieldbook pull-request text. The diff test applies a reorder, a final-newline removal, a file deletion, an empty file, a one-newline file, and those files together with an ordinary addition. `git apply` runs on each patch, and the test compares the resulting file bytes. An empty file also opens as a pull request.
 
 ## Public MCP regressions
 
@@ -52,7 +52,7 @@ cd apps/forkyard
 npm run evidence:mail
 ```
 
-The command writes [`contribution/mail-run.json`](mail-run.json). Run id `fy-mail-record`. Forkyard applies `examples/scenario.json` (`pull.closed` on tidewater/tidewater#2318) at `2026-11-18T09:00:00-08:00`, then advances the Mail clock to `2026-11-18T09:05:00-08:00` before publish. The sender request is `notice-notice-1`. The router status is `committed`. The event id is `router-dc772a9d2c43cb3ff2c1d22f72d43149`. The publisher outcome is `confirmed`, with `correlated: true`.
+The command writes [`contribution/mail-run.json`](mail-run.json). Run id `fy-mail-record`. The seed loads at `2026-11-18T09:00:00-08:00`. The closure event `fy-021` (`pull.closed` on tidewater/tidewater#2318) is applied at `2026-11-18T09:05:00-08:00`. Mail's clock is then moved to that same instant before publish. The sender request is `notice-notice-1`. The router status is `committed`. The Mail event id is `router-dc772a9d2c43cb3ff2c1d22f72d43149`. The publisher outcome is `confirmed`, with `correlated: true`.
 
 The receiver record is Mail account `mail-maya`, address `maya.main@example.com`, epoch 1, receipt version `{epoch: 1, revision: 2}`, receipt run `fy-mail-record`. The stored message is thread `forkyard-fy-tomasreyes-notice-1`, from `forkyard@pale.example`, to `maya.main@example.com`, subject `[tidewater/tidewater] PR #2318 closed by @ihalvorsen`, `received_at` `2026-11-18T09:05:00-08:00`. Mail held 2 messages before the publish, 3 after it, and 3 after the replay.
 
