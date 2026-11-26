@@ -108,7 +108,7 @@ const OPPONENTS = [
 ];
 const HITS = ['a two-run double', 'a solo homer', 'a bases-loaded single', 'a sacrifice fly', 'a three-run homer',
   'an RBI triple', 'a two-out single', 'a run-scoring groundout'];
-function gullsSeason(year, open, close, playoffs) {
+function gullsSeason(year, open, close, playoffs, tail) {
   let wins = 0, losses = 0;
   const schedule = [];
   let d = open, series = 0;
@@ -118,8 +118,11 @@ function gullsSeason(year, open, close, playoffs) {
     // A day off after every second series.
     d = addDays(d, series % 2 === 1 ? 4 : 3); series++;
   }
+  // The fixture fixes the end of the 2026 season; replace the generated games from that point.
+  if (tail) schedule.splice(0, schedule.length, ...schedule.filter(g => g.date < tail.from), ...tail.games);
   const weeks = new Set();
   for (const g of schedule) {
+    if (g.fixture) {g.won ? wins++ : losses++; continue;} // played in the fixture's own editions
     if (Date.parse(la(g.date, '23:00')) >= FIXTURE_START && Date.parse(la(g.date, '00:00')) <= Date.parse(CLOCK) + DAY) continue;
     const us = int(0, 8), them = int(0, 7) === us ? int(0, 7) : int(0, 7);
     const extra = us === them; const ours = extra ? us + 1 : us;
@@ -192,7 +195,13 @@ function gulls() {
       headline: 'Gulls keep Ferrante for 2026, add pitching coach',
       text: 'The Harbor City Gulls extended manager Tom Ferrante through the 2026 season and hired former reliever Dale Whitcomb as pitching coach, general manager Rhea Song said Tuesday. Pier Park will get new lights before opening day.'});
   });
-  gullsSeason(2026, '2026-04-10', '2026-10-27', () => {
+  // Fixture facts: Oct. 13 home makeup win over Ridgeview, off Oct. 14-15, three games at Lakeport Oct. 16-18,
+  // 11 games left after Oct. 13.
+  const [owls, herons, pelicans, foxes] = OPPONENTS;
+  const series = (from, opp, home, n = 3) => Array.from({length: n}, (_, game) => ({date: addDays(from, game), opp, home, game}));
+  const tail2026 = {from: '2026-10-12', games: [{date: '2026-10-13', opp: owls, home: true, game: 0, fixture: true, won: true},
+    ...series('2026-10-16', herons, false), ...series('2026-10-20', foxes, true), ...series('2026-10-23', pelicans, false), ...series('2026-10-27', owls, true, 2)]};
+  gullsSeason(2026, '2026-04-10', '2026-10-28', () => {
     const sid = story('gulls-2026-postseason', 'Gulls 2026 postseason');
     add({id: 'gulls-20261030-clinch', story_id: sid, outlet: 'harbor-ledger', section: 'sports', geography: 'harbor-city', date: '2026-10-30', time: '07:30', byline: 'Nate Alvarez',
       headline: 'Gulls open division series at Pier Park on Monday',
@@ -206,7 +215,7 @@ function gulls() {
     add({id: 'gulls-20261210-offseason', story_id: sid, outlet: 'harbor-ledger', section: 'sports', geography: 'harbor-city', date: '2026-12-10', time: '10:05', byline: 'Celia Hart',
       headline: 'Ortega signs two-year extension with Gulls',
       text: 'Shortstop Leo Ortega, the Eastbank High graduate whose extra-inning double beat Ridgeview in October, signed a two-year contract extension with the Harbor City Gulls on Thursday. Terms were not disclosed.'});
-  });
+  }, tail2026);
 }
 
 // ---------- beat: Valley Line and Valley Regional Transit ----------
@@ -341,9 +350,14 @@ function environment() {
   }
   // Seasonal weather briefs.
   const wx = story('valley-weather', 'Valley weather');
+  for (const [d, h, t] of [
+    ['2026-10-05', 'First fall storm to bring up to an inch of rain', 'The first Pacific storm of the fall will reach Valley County on Tuesday night, Oct. 6, with up to an inch of rain in Millbrook and more in the foothills by Thursday. It would be the first significant rain since May.'],
+    ['2026-10-08', 'Storms soak the valley; second system due Friday', 'Valley County picked up 0.6 to 1.4 inches of rain from Tuesday night through Thursday morning, Oct. 8, and a second, weaker storm is due Friday. The county air district lifted its no-burn advisory for wood stoves, but the state burn ban on outdoor fires stays in place.'],
+  ]) add({id: `wx-${d.replace(/-/g, '')}`, story_id: wx, outlet: 'valley-daily', section: 'weather', geography: 'valley', date: d, time: '05:30', byline: 'Teresa Quill', headline: h, text: t});
   for (const d of days('2025-01-01', '2026-12-31')) {
     const m = Number(d.slice(5, 7));
     if (!chance([0.11, 0.1, 0.09, 0.08, 0.05, 0.07, 0.1, 0.1, 0.07, 0.07, 0.09, 0.11][m - 1])) continue;
+    if (d >= '2026-09-25' && d <= '2026-10-13') continue; // pinned below: the fixture's first fall storms
     const winter = [11, 12, 1, 2, 3].includes(m), summer = [6, 7, 8, 9].includes(m);
     const hi = winter ? int(48, 62) : summer ? int(88, 107) : int(64, 82);
     const when = `${dayName(d)}, ${ap(d)}`;
@@ -456,7 +470,7 @@ function national() {
       const jobs = int(-40, 260) * 1000, month = monthName(((Number(d.slice(5, 7)) + 10) % 12) + 1);
       const e = add({id: `jobs-${d.replace(/-/g, '')}`, story_id: story(`jobs-${d.slice(0, 7)}`, `Jobs report, ${month} ${month === 'December' ? Number(d.slice(0, 4)) - 1 : d.slice(0, 4)}`),
         outlet: 'national-standard', section: 'economy', geography: 'national', date: d, time: '06:' + pad(int(35, 55)), byline: pick(['Ruth Adeyemi', 'Daniel Osei']),
-        headline: jobs < 0 ? `Employers cut ${money(-jobs)} jobs in ${month}` : `Employers added ${money(jobs)} jobs in ${month}; unemployment ${change > 0 ? 'rises' : change < 0 ? 'falls' : 'holds'} at ${rate}%`,
+        headline: jobs < 0 ? `Employers cut ${money(-jobs)} jobs in ${month}` : `Employers added ${money(jobs)} jobs in ${month}; unemployment ${change > 0 ? 'rises to' : change < 0 ? 'falls to' : 'holds at'} ${rate}%`,
         text: `Employers ${jobs < 0 ? 'cut' : 'added'} ${money(Math.abs(jobs))} jobs in ${month}, the National Labor Office said ${dayName(d)}, and the unemployment rate ${change > 0 ? 'rose to' : change < 0 ? 'fell to' : 'held at'} ${rate}%. ${pick(['Health care and construction led the gains.', 'Manufacturing lost jobs for a third month.', 'Average hourly pay rose 0.3% from the month before.', 'Revisions lowered the previous two months by a combined 31,000.'])} ${pick(['Economists had expected a smaller change.', 'The report comes two weeks before the Reserve Council meets.', 'Part-time work accounted for most of the change.'])}`});
       if (e && chance(0.5)) reprint(e, 'tallywire', int(15, 40), `Unemployment ${change > 0 ? 'up' : change < 0 ? 'down' : 'steady'} at ${rate}% in ${month}`, 'The National Standard');
     }
@@ -470,8 +484,9 @@ function national() {
     }
   }
   const post = [
-    ['2025-01-07', 'postal-rates-2025-jan', 'Postage increase, Jan. 2025', 'Stamp price rises to 73 cents on Jan. 19', 'A first-class stamp will cost 73 cents starting Jan. 19, up from 70 cents, the Postal Service reminded customers Tuesday. Forever stamps bought earlier remain valid.'],
-    ['2025-04-09', 'postal-rates-2025-jul', 'Postage proposal, July 2025', 'Postal Service proposes no stamp increase in July', 'The Postal Service said Wednesday it would not raise the price of a first-class stamp in July, the first skipped increase in four years, but will raise package rates by 6%.'],
+    ['2025-01-07', 'postal-rates-2025-jan', 'Postage increase, Jan. 2025', 'Stamp price rises to 71 cents on Jan. 19', 'A first-class stamp will cost 71 cents starting Jan. 19, up from 68 cents, the Postal Service reminded customers Tuesday. Forever stamps bought earlier remain valid.'],
+    ['2025-04-09', 'postal-rates-2025-jul', 'Postage increase, July 2025', 'Stamp price to rise to 73 cents in July', 'A first-class stamp will cost 73 cents starting July 13, up from 71 cents, the Postal Service said Wednesday, its second increase this year. Package rates will rise 6%.'],
+    ['2025-07-11', 'postal-rates-2025-jul', 'Postage increase, July 2025', '73-cent stamps take effect Sunday', 'The first-class stamp rises to 73 cents on Sunday, July 13. Postcards go to 56 cents. Forever stamps bought earlier remain valid.'],
     ['2026-07-14', 'postal-rates', 'Postage rate increase', 'Postal Service files notice of January rate change', 'The Postal Service filed notice Tuesday that it plans a January stamp price change and will announce the amount in October, after a regulatory review.'],
   ];
   for (const [d, sid, title, h, t] of post) add({id: `postal-${d.replace(/-/g, '')}`, story_id: story(sid, title), outlet: 'national-standard', section: 'national', geography: 'national', date: d, time: '10:' + pad(int(0, 50)), byline: 'Ruth Adeyemi', headline: h, text: t});
@@ -644,7 +659,9 @@ function holidays() {
 }
 
 // ---------- assemble ----------
-gulls(); transit(); calder(); calderAgencies(); environment(); community(); national(); nationalMore(); world(); elFaro(); holidays();
+// Each beat draws from its own random stream, so changing one beat leaves the others' records unchanged.
+for (const [i, beat] of [gulls, transit, calder, calderAgencies, environment, community, national, nationalMore, world, elFaro, holidays].entries()) {state = 20250101 + 7919 * (i + 1); beat();}
+state = 20261014; // reading history
 for (const e of fixture.editions) {if (ids.has(e.edition_id)) throw Error('generated ID collides with fixture ' + e.edition_id); editions.push(structuredClone(e)); ids.add(e.edition_id);}
 for (const s of fixture.stories) if (!stories.has(s.story_id)) stories.set(s.story_id, {...s});
 // A story group exists from ten minutes before its first edition (or its fixture time, if earlier).
