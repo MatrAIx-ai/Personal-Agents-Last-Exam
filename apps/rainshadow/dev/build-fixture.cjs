@@ -236,7 +236,7 @@ function print(value, indent = '') {
 
 const COUNT = { zones: 8, places: 6, sources: 3, issuances: 111, observations: 39, alerts: 52, saved_places: 3, acknowledgements: 23, watches: 30, notices: 66 };
 
-module.exports = { build, print, CLOCK, START, COUNT, MODEL_VERSION, sample, dailyRow, P, REV };
+module.exports = { build, print, CLOCK, START, COUNT, MODEL_VERSION, sample, dailyRow, P, REV, steps, base, binding, message, zones, places, sources };
 if (require.main === module) {
   const file = path.join(__dirname, '../fixtures/minimal.json'), text = print(build()) + '\n';
   if (process.argv.includes('--check')) {

@@ -129,7 +129,11 @@ function spoken(date, hhmm) {
   return day + ' ' + (h % 12 === 0 ? 12 : h % 12) + (min ? ':' + String(min).padStart(2, '0') : '') + (h < 12 ? ' AM' : ' PM');
 }
 
-module.exports = function history({ P, step, event, agent, message }) {
+module.exports = history;
+// The archive model and the alert wording, for dev/dataset.cjs.
+Object.assign(module.exports, { archSample, archDaily, archIssuance, archAir, archObservation, WORDING, spoken });
+
+function history({ P, step, event, agent, message }) {
   const issue = (key, sourceId, date, hhmm, sys) => event(at(date, hhmm, P[key].tz), P[key].tz, 'forecast.issued', archIssuance(P, key, sourceId, date, hhmm, sys));
   const air = (key, date, values) => event(at(date, '10:00', P[key].tz), P[key].tz, 'forecast.issued', archAir(P, key, date, values));
   const observe = (key, date, hhmm, sys, change) => event(at(date, hhmm, P[key].tz), P[key].tz, 'observation.recorded', archObservation(P, key, date, hhmm, sys, change));
@@ -390,4 +394,4 @@ module.exports = function history({ P, step, event, agent, message }) {
   thread('al-20261006-1', B, ['2026-10-06', '05:00'], 'Dense Fog Advisory', COAST, ['2026-10-06', '05:00'], ['2026-10-06', '10:00'], { urgency: 'immediate', certainty: 'observed' });
   thread('al-20261027-1', A, ['2026-10-27', '14:00'], 'Winter Weather Advisory', PASS, ['2026-10-28', '00:00'], ['2026-10-28', '12:00'], { description: 'The first snow of the season is expected over the pass.' });
   thread('al-20261105-1', B, ['2026-11-05', '09:00'], 'Coastal Flood Advisory', BAY, ['2026-11-06', '08:00'], ['2026-11-06', '14:00'], { acks: [['2026-11-05', '12:10', 1]] });
-};
+}
