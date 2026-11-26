@@ -61,7 +61,7 @@ async function main() {
       // the viewport is made tall enough for the whole form first, and restored afterwards.
       const before = p.viewportSize();
       const tall = await p.evaluate(() => { const d = document.querySelector('dialog[open]'); return d ? d.scrollHeight : 0; });
-      if (tall) { await p.setViewportSize({width: before.width, height: Math.min(1800, Math.max(before.height, tall + 240))}); await p.evaluate(() => { const d = document.querySelector('dialog[open]'); if (d) d.scrollTop = 0; }); await p.waitForTimeout(100); }
+      if (tall) { await p.setViewportSize({width: before.width, height: Math.min(2400, Math.max(before.height, tall + 240))}); await p.evaluate(() => { const d = document.querySelector('dialog[open]'); if (d) d.scrollTop = 0; }); await p.waitForTimeout(100); }
       const form = tall ? await p.locator('dialog[open]').boundingBox().catch(() => null) : null;
       const viewport = p.viewportSize();
       const clip = form && {x: Math.max(0, Math.floor(form.x) - 8), y: Math.max(0, Math.floor(form.y) - 8)};
@@ -116,19 +116,22 @@ async function main() {
     await frame('planned', {action: 'Submit “Save meal”.', expected: 'The form closes; the meal is on Tuesday and selected, with its guest; a dish wrong for her is planned and flagged, not refused.',
       observed: `MCP plan.get: ${breakfast.id} ${breakfast.state}, guest Priya, flags ${breakfast.flags.join('; ') || 'none'}; App version ${JSON.stringify(v0)} → ${JSON.stringify(seq.confirmations.at(-1).app_version)}`});
     await reload('the planned Tuesday breakfast', async () => { await page.click('button[aria-label="Next week"]'); await idle(); return await page.locator('[data-slot-id="2026-11-10:breakfast"]').count() === 1; });
-    // Edit: change a planned meal (Thursday's dinner, which has no guests: see evidence/README.md on
-    // changing a meal whose guest has a need).
-    await page.click('[data-slot-id="2026-11-12:dinner"]'); await idle();
+    // Edit: change Saturday's dinner, whose guests Ines (vegetarian) and Maya (strict tree-nut allergy)
+    // have recorded needs; the form re-sends the guests as read and switches the curry to its nut-free variant.
+    await page.click('[data-slot-id="2026-11-14:dinner"]'); await idle();
     await page.click('.pw-actions button:has-text("Change meal")');
     const change = dialog('plan.slot.set'); await change.waitFor(WAIT);
-    await change.locator('button:has-text("+ Add a dish")').click();
-    await change.locator('select[aria-label="Recipe"]').last().selectOption('rec-greek-salad');
-    await frame('change-form', {action: 'After a reload, select Thursday 12 Nov dinner (Spaghetti bolognese), “Change meal”, “+ Add a dish”: Greek salad.', expected: 'The form opens with the saved dish and people; a second dish is added.', observed: 'Second dish added in the form'});
+    await change.locator('select[aria-label="Recipe"]').first().selectOption('rec-nut-free-green-curry');
+    await frame('change-form', {action: 'After a reload, select Saturday 14 Nov dinner (Sweet potato green curry; guests Ines, vegetarian, and Maya, strict tree-nut allergy), “Change meal”, Recipe: Nut-free green curry.',
+      expected: 'The form opens with the saved dish, the people at the table and each guest with her needs; the dish is switched to the variant.', observed: 'Dish switched in the form; guests and needs as saved'});
     await submit('plan.slot.set'); await closed('plan.slot.set'); await idle();
-    const changed = await confirm('Thursday dinner changed', 'plan.get', {start: '2026-11-12', end: '2026-11-12'},
-      r => { const s = r.slots.find(x => x.id === '2026-11-12:dinner'); return {id: s.id, state: s.state, dishes: s.dishes.map(d => d.recipe_id), history: s.history.map(h => h.action)}; });
-    if (changed.dishes.length !== 2) fail('change', changed);
-    await frame('changed', {action: 'Submit “Save meal”.', expected: 'Two dishes; the history shows the earlier plan and the change.', observed: `MCP: dishes ${changed.dishes.join(', ')}; history ${changed.history.join(', ')}`});
+    const changed = await confirm('Saturday dinner changed', 'plan.get', {start: '2026-11-14', end: '2026-11-14'},
+      r => { const s = r.slots.find(x => x.id === '2026-11-14:dinner'); return {id: s.id, state: s.state, dishes: s.dishes.map(d => d.recipe_id),
+        guests: s.guests.map(g => g.name + (g.constraints.length ? ' (' + g.constraints.map(c => c.diet || (c.strict ? 'strict ' : '') + c.allergen.replace(/_/g, ' ')).join(', ') + ')' : '')),
+        flags: s.flags.filter(f => f.type === 'person').map(f => f.name + ': ' + f.verdict), history: s.history.map(h => h.action)}; });
+    if (changed.dishes.join() !== 'rec-nut-free-green-curry' || changed.flags.some(f => f.startsWith('Maya')) || !changed.guests.includes('Maya (strict tree nut)') || changed.history.at(-1) !== 'replaced') fail('change', changed);
+    await frame('changed', {action: 'Submit “Save meal”.', expected: 'The guests and their needs are kept; Maya is no longer flagged; the history shows the earlier plan and the change.',
+      observed: `MCP: dishes ${changed.dishes.join(', ')}; guests ${changed.guests.join(', ')}; flags ${changed.flags.join('; ')}; history ${changed.history.join(', ')}`});
     // Invalid: a guest name longer than the tool's schema allows is stopped in the form.
     await page.click('.pw-actions button:has-text("Change meal")');
     const long = dialog('plan.slot.set'); await long.waitFor(WAIT);
@@ -150,7 +153,7 @@ async function main() {
     seq.confirmations.push({what: 'Independent MCP write while the form is open (pantry: 7 limes)', tool: P + 'pantry.set', record: {id: other.id, status: other.status}, app_version: other.version});
     await submit('plan.slot.set');
     const staleErr = await formError('plan.slot.set');
-    const still = (await mcp.call(P + 'plan.get', {start: '2026-11-12', end: '2026-11-12'})).slots.find(x => x.id === '2026-11-12:dinner');
+    const still = (await mcp.call(P + 'plan.get', {start: '2026-11-14', end: '2026-11-14'})).slots.find(x => x.id === '2026-11-14:dinner');
     if (staleErr.code !== 'stale_version' || still.note !== null) fail('stale', [staleErr, still.note]);
     await frame('stale', {action: '“Change meal”, type a note; meanwhile another connection commits a pantry write; submit.', expected: 'The form says the record changed and writes nothing.',
       observed: `“${staleErr.message}” (data-code stale_version); MCP: the meal has no note`});
@@ -319,9 +322,12 @@ async function main() {
     await submit('shopping.item.set'); await closed('shopping.item.set'); await idle();
     const napkins = await confirm('Item added by hand', 'shopping.get', {}, r => r.list.lines.filter(x => x.text === 'Paper napkins').map(x => ({id: x.id, state: x.state, kind: x.kind})));
     if (napkins.length !== 1) fail('add', napkins);
-    await page.click(`.pw-row[data-line-id="${napkins[0].id}"]`); await idle();
-    await page.locator(`.pw-row[data-line-id="${napkins[0].id}"]`).scrollIntoViewIfNeeded();
-    await frame('added', {action: '“Add item”: Paper napkins, 1 each, “Add”; select it.', expected: 'An item added by hand, selected, with Edit and Remove.', observed: `MCP: ${napkins[0].kind} line, ${napkins[0].state}`});
+    // The line just added is the one shown, not the line selected before.
+    const shown = await text('.detail h2'), pressed = await page.getAttribute(`.pw-row[data-line-id="${napkins[0].id}"]`, 'aria-pressed');
+    if (shown !== 'Paper napkins' || pressed !== 'true') fail('added item shown', [shown, pressed]);
+    await page.locator('.detail h2').scrollIntoViewIfNeeded();
+    await frame('added', {action: '“Add item”: Paper napkins, 1 each, “Add”.', expected: 'The item added by hand is selected and shown in the detail, with Edit and Remove.',
+      observed: `Detail shows “${shown}”; MCP: ${napkins[0].kind} line, ${napkins[0].state}`});
     await page.click('.pw-actions button:has-text("Remove")');
     await dialog('shopping.item.remove').waitFor(WAIT);
     await submit('shopping.item.remove'); await closed('shopping.item.remove'); await idle();

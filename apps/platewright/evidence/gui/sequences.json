@@ -48,22 +48,22 @@
         },
         {
           "file": "w4-05-change-form.png",
-          "viewport": "1280x1219",
+          "viewport": "1280x1936",
           "cropped_to": "open form",
-          "action": "After a reload, select Thursday 12 Nov dinner (Spaghetti bolognese), “Change meal”, “+ Add a dish”: Greek salad.",
-          "expected": "The form opens with the saved dish and people; a second dish is added.",
-          "observed": "Second dish added in the form"
+          "action": "After a reload, select Saturday 14 Nov dinner (Sweet potato green curry; guests Ines, vegetarian, and Maya, strict tree-nut allergy), “Change meal”, Recipe: Nut-free green curry.",
+          "expected": "The form opens with the saved dish, the people at the table and each guest with her needs; the dish is switched to the variant.",
+          "observed": "Dish switched in the form; guests and needs as saved"
         },
         {
           "file": "w4-06-changed.png",
           "viewport": "1280x800",
           "action": "Submit “Save meal”.",
-          "expected": "Two dishes; the history shows the earlier plan and the change.",
-          "observed": "MCP: dishes rec-spaghetti-bolognese, rec-greek-salad; history set, replaced"
+          "expected": "The guests and their needs are kept; Maya is no longer flagged; the history shows the earlier plan and the change.",
+          "observed": "MCP: dishes rec-nut-free-green-curry; guests Ines (vegetarian), Kofi, Lea, Maya (strict tree nut); flags Ines: unsuitable; history set, guest_added, replaced"
         },
         {
           "file": "w4-07-invalid.png",
-          "viewport": "1280x1439",
+          "viewport": "1280x2156",
           "cropped_to": "open form",
           "action": "“Change meal”, “+ Add a guest” with a 121-character name, submit.",
           "expected": "The form names the limit in words and sends nothing.",
@@ -71,7 +71,7 @@
         },
         {
           "file": "w4-08-stale.png",
-          "viewport": "1280x1237",
+          "viewport": "1280x1954",
           "cropped_to": "open form",
           "action": "“Change meal”, type a note; meanwhile another connection commits a pantry write; submit.",
           "expected": "The form says the record changed and writes nothing.",
@@ -140,21 +140,30 @@
           "record": true
         },
         {
-          "what": "Thursday dinner changed",
+          "what": "Saturday dinner changed",
           "tool": "platewright.plan.get",
           "arguments": {
-            "start": "2026-11-12",
-            "end": "2026-11-12"
+            "start": "2026-11-14",
+            "end": "2026-11-14"
           },
           "record": {
-            "id": "2026-11-12:dinner",
+            "id": "2026-11-14:dinner",
             "state": "planned",
             "dishes": [
-              "rec-spaghetti-bolognese",
-              "rec-greek-salad"
+              "rec-nut-free-green-curry"
+            ],
+            "guests": [
+              "Ines (vegetarian)",
+              "Kofi",
+              "Lea",
+              "Maya (strict tree nut)"
+            ],
+            "flags": [
+              "Ines: unsuitable"
             ],
             "history": [
               "set",
+              "guest_added",
               "replaced"
             ]
           },
@@ -554,9 +563,9 @@
         {
           "file": "w5-05-added.png",
           "viewport": "1280x800",
-          "action": "“Add item”: Paper napkins, 1 each, “Add”; select it.",
-          "expected": "An item added by hand, selected, with Edit and Remove.",
-          "observed": "MCP: manual line, needed"
+          "action": "“Add item”: Paper napkins, 1 each, “Add”.",
+          "expected": "The item added by hand is selected and shown in the detail, with Edit and Remove.",
+          "observed": "Detail shows “Paper napkins”; MCP: manual line, needed"
         },
         {
           "file": "w5-06-regenerate-confirm.png",
@@ -571,7 +580,7 @@
           "viewport": "1280x800",
           "action": "“Update the list”.",
           "expected": "The notice is gone; ticks and the exclusion are kept on lines still needed.",
-          "observed": "MCP: stale false, 43 lines, exclusion kept"
+          "observed": "MCP: stale false, 39 lines, exclusion kept"
         },
         {
           "file": "w5-08-stock-form.png",
@@ -664,7 +673,7 @@
           "arguments": {},
           "record": {
             "stale": false,
-            "lines": 43,
+            "lines": 39,
             "ticked": 3,
             "excluded": [
               "sl-0001",
