@@ -26,8 +26,33 @@ const PRIMARY = new Set(['commit', 'pull_opened', 'pull_merged', 'pull_closed', 
 const DECEMBER = 'examples/events/owner-library-2026-12/events.json';
 
 function dateProblem(source, kind, id, at) {
-  if (at === null || at === undefined || at === '') return {source, kind, id, reason: 'missing', value: null};
-  if (Number.isNaN(Date.parse(at))) return {source, kind, id, reason: 'malformed', value: at};
+  if (at === null || at === undefined || at === '') return {source, kind, id, reason: 'missing', value: at == null ? null : at};
+  if (typeof at !== 'string') return {source, kind, id, reason: 'malformed', value: at};
+  const match = at.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(Z|[+-]\d{2}:\d{2})$/);
+  if (!match) return {source, kind, id, reason: 'malformed', value: at};
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const hour = Number(match[4]);
+  const minute = Number(match[5]);
+  const second = Number(match[6]);
+  if (month < 1 || month > 12 || hour > 23 || minute > 59 || second > 59) return {source, kind, id, reason: 'malformed', value: at};
+  const probe = new Date(Date.UTC(year, month - 1, day));
+  if (probe.getUTCFullYear() !== year || probe.getUTCMonth() !== month - 1 || probe.getUTCDate() !== day) return {source, kind, id, reason: 'malformed', value: at};
+  const offset = match[7];
+  let offsetMinutes = 0;
+  if (offset !== 'Z') {
+    const sign = offset[0] === '-' ? -1 : 1;
+    const offsetHour = Number(offset.slice(1, 3));
+    const offsetMinute = Number(offset.slice(4, 6));
+    if (offsetHour > 14 || offsetMinute > 59) return {source, kind, id, reason: 'malformed', value: at};
+    offsetMinutes = sign * (offsetHour * 60 + offsetMinute);
+  }
+  const instant = Date.UTC(year, month - 1, day, hour, minute, second) - offsetMinutes * 60000;
+  const local = new Date(instant + offsetMinutes * 60000);
+  if (local.getUTCFullYear() !== year || local.getUTCMonth() !== month - 1 || local.getUTCDate() !== day || local.getUTCHours() !== hour || local.getUTCMinutes() !== minute || local.getUTCSeconds() !== second) {
+    return {source, kind, id, reason: 'malformed', value: at};
+  }
   return null;
 }
 
@@ -41,8 +66,9 @@ function rowsOf(data, source, problems) {
   for (const commit of data.commits || []) add('commit', commit.sha, commit.committed_at, commit.repo, true);
   for (const pull of data.pulls || []) {
     add('pull_opened', pull.repo + '#' + pull.number, pull.created_at, pull.repo, true);
-    add('pull_merged', pull.repo + '#' + pull.number, pull.merged_at, pull.repo, false);
-    if (!pull.merged_at) add('pull_closed', pull.repo + '#' + pull.number, pull.closed_at, pull.repo, false);
+    add('pull_merged', pull.repo + '#' + pull.number, pull.merged_at, pull.repo, pull.state === 'merged');
+    if (pull.state === 'closed' && !pull.merged_at) add('pull_closed', pull.repo + '#' + pull.number, pull.closed_at, pull.repo, true);
+    else if (pull.state !== 'merged' && !pull.merged_at) add('pull_closed', pull.repo + '#' + pull.number, pull.closed_at, pull.repo, false);
   }
   for (const review of data.reviews || []) add('review', review.review_id, review.submitted_at || review.created_at, review.repo, true);
   for (const comment of data.comments || []) add(comment.review_id ? 'review_comment' : 'comment', comment.comment_id, comment.created_at, comment.repo, false);
@@ -296,7 +322,7 @@ async function loadOwnerLibrary(repoRoot, dir) {
   return {report: out, ok};
 }
 
-module.exports = {buildCoverage, loadOwnerLibrary};
+module.exports = {buildCoverage, loadOwnerLibrary, dateProblem, rowsOf};
 
 if (require.main === module) {
   const dir = path.join(__dirname, '..');
