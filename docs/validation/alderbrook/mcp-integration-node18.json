@@ -1,0 +1,505 @@
+{
+  "schema": "alderbrook.mcp-integration.v1",
+  "runtime_version": "1.6.0",
+  "app_version": "1.0.0",
+  "node": "v18.20.8",
+  "checks": [
+    {
+      "name": "Before the load, the clock of the fresh instance stands at 5 January 2027",
+      "status": "passed"
+    },
+    {
+      "name": "env.load_seed loads the task seed with its binding, its policies and its own virtual_now",
+      "status": "passed"
+    },
+    {
+      "name": "The snapshot holds the loaded seed",
+      "status": "passed"
+    },
+    {
+      "name": "The clock is the loaded virtual_now, not the time that the instance had before",
+      "status": "passed"
+    },
+    {
+      "name": "The task seed has a claim and an estimate to read",
+      "status": "passed"
+    },
+    {
+      "name": "policies.list reads now as 2026-12-02T09:00:00-05:00, with the -05:00 offset",
+      "status": "passed"
+    },
+    {
+      "name": "policies.get reads now as 2026-12-02T09:00:00-05:00, with the -05:00 offset",
+      "status": "passed"
+    },
+    {
+      "name": "coverage.check reads now as 2026-12-02T09:00:00-05:00, with the -05:00 offset",
+      "status": "passed"
+    },
+    {
+      "name": "claims.list reads now as 2026-12-02T09:00:00-05:00, with the -05:00 offset",
+      "status": "passed"
+    },
+    {
+      "name": "claims.get reads now as 2026-12-02T09:00:00-05:00, with the -05:00 offset",
+      "status": "passed"
+    },
+    {
+      "name": "estimates.get reads now as 2026-12-02T09:00:00-05:00, with the -05:00 offset",
+      "status": "passed"
+    },
+    {
+      "name": "payments.list reads now as 2026-12-02T09:00:00-05:00, with the -05:00 offset",
+      "status": "passed"
+    },
+    {
+      "name": "notifications.list reads now as 2026-12-02T09:00:00-05:00, with the -05:00 offset",
+      "status": "passed"
+    },
+    {
+      "name": "preferences.get reads now as 2026-12-02T09:00:00-05:00, with the -05:00 offset",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent connection lists exactly the 22 tools of the plan",
+      "status": "passed"
+    },
+    {
+      "name": "9 of them are read tools",
+      "status": "passed"
+    },
+    {
+      "name": "13 of them are write tools",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent connection lists no env.* operation",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.apply_event gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.reset gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.advance_time gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.load_seed gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.snapshot gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The denied calls changed no business data",
+      "status": "passed"
+    },
+    {
+      "name": "W1: on 2 December a loss on 1 December is covered, with a deductible of 500 and 31 December as the last day to file",
+      "status": "passed"
+    },
+    {
+      "name": "W1: with an estimated amount of 420 the expected payment is 0 and the flag is under_deductible",
+      "status": "passed"
+    },
+    {
+      "name": "W1 control: a loss on 15 June, before the term began, is not covered and lists not_in_force and too_late",
+      "status": "passed"
+    },
+    {
+      "name": "W1 control: a loss on 20 October, checked 43 days later, lists too_late alone",
+      "status": "passed"
+    },
+    {
+      "name": "W2: claims.file on 2 December with no driver named gives an open claim on the repair path, with a deductible of 500 and driver null",
+      "status": "passed"
+    },
+    {
+      "name": "W2 control: a second claim for the same policy, coverage, vehicle and loss day returns duplicate_claim",
+      "status": "passed"
+    },
+    {
+      "name": "Core returns invalid_arguments for an estimate with no lines, before any App error",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call changes nothing: after one App error and one Core error the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call changes nothing: the version is the same",
+      "status": "passed"
+    },
+    {
+      "name": "The audit has one deny row for each failed call",
+      "status": "passed"
+    },
+    {
+      "name": "W2 control: the same loss day on the other vehicle of the policy is accepted",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the same request_id with the same input returns the stored result with duplicate true",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: it files no second claim, writes no audit row and keeps the version",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the same request_id with changed input returns idempotency_conflict",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: a write with a stale expected_version returns stale_version and names the current version",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the conflict and the stale write changed no business data",
+      "status": "passed"
+    },
+    {
+      "name": "W2: request.issued asks for photos and for the driver, due on 12 December, and the request is open",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: an identical event_id returns the stored receipt with duplicate true",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the repeated event adds no request, no notification and no audit row",
+      "status": "passed"
+    },
+    {
+      "name": "W2: after claims.add_evidence twice and an answer to the ask photos the request is still open",
+      "status": "passed"
+    },
+    {
+      "name": "W2: claims.update sets the driver, and the answer to the ask driver makes the request answered",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: a replayed env.advance_time returns the stored receipt with duplicate true",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the replayed env.advance_time adds no audit row and moves nothing",
+      "status": "passed"
+    },
+    {
+      "name": "W4 control: a second rental while one is active returns already_active",
+      "status": "passed"
+    },
+    {
+      "name": "W3: three lines of 2,000 in total, all approved: approved_total 2,000, insurer_owes 1,500, my_share 500 and still_due 1,500",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: once env.advance_time reaches the due time, the open request reads request_overdue",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: the move ran no App code, so the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "W2 control: the overdue request can still be answered",
+      "status": "passed"
+    },
+    {
+      "name": "W3: payee.set to the shop, then a payment of 1,500 with no payee named, is paid to the shop and leaves still_due 0",
+      "status": "passed"
+    },
+    {
+      "name": "W3: a supplement of two lines and 1,500: both pending, flag lines_pending, not_approved_total 1,500 and insurer_owes still 1,500",
+      "status": "passed"
+    },
+    {
+      "name": "W3: a second determination approves both: approved_total 3,500, insurer_owes 3,000 and still_due 1,500",
+      "status": "passed"
+    },
+    {
+      "name": "W3: a second payment of 1,500 leaves still_due 0 and my_share 500",
+      "status": "passed"
+    },
+    {
+      "name": "W3: both payments went to the shop, and each one stores the shop as the direction on file at that moment, so the claim does not read payee_mismatch",
+      "status": "passed"
+    },
+    {
+      "name": "W3 control: determinations.dispute on a line approved in full returns nothing_to_dispute",
+      "status": "passed"
+    },
+    {
+      "name": "W3 control: a third payment of 200 that names the policyholder is applied and reads payee_mismatch and overpaid 200",
+      "status": "passed"
+    },
+    {
+      "name": "W2 control: claims.withdraw after a payment returns invalid_state",
+      "status": "passed"
+    },
+    {
+      "name": "W4: an offer of 14,200 with a payoff of 15,100 and a deductible of 500: open, total_loss path, net 13,700, to_lienholder 13,700, to_me 0, shortfall 1,400, flag below_payoff",
+      "status": "passed"
+    },
+    {
+      "name": "W4: offers.reject with a reason and two evidence items makes the offer rejected",
+      "status": "passed"
+    },
+    {
+      "name": "W4 control: offers.accept on the rejected offer returns invalid_state",
+      "status": "passed"
+    },
+    {
+      "name": "W4 control: estimates.submit after the first offer returns invalid_state",
+      "status": "passed"
+    },
+    {
+      "name": "W4: a new offer with a valuation of 15,900: net 15,400, to_lienholder 15,100 and to_me 300",
+      "status": "passed"
+    },
+    {
+      "name": "W4: offers.accept makes the offer accepted, and its two amounts are now owed",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: once env.advance_time reaches respond_by, the offer with no answer reads expired and the claim reads offer_expired",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: nothing is rewritten when the due time passes, and the offer is still stored as open",
+      "status": "passed"
+    },
+    {
+      "name": "W4 control: offers.accept on the expired offer returns too_late",
+      "status": "passed"
+    },
+    {
+      "name": "W4: a rental started on 3 December at 45 a day, read on 18 December: 12 covered days, 3 uncovered days, my_cost 195 and the flag rental_uncovered",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: an event dated before the clock returns invalid_event",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an event dated before the clock the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an event dated before the clock the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an event dated before the clock the audit has one deny row",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: an estimate with no lines returns invalid_event",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an estimate with no lines the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an estimate with no lines the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an estimate with no lines the audit has one deny row",
+      "status": "passed"
+    },
+    {
+      "name": "The same request is applied when its time is not before the clock",
+      "status": "passed"
+    },
+    {
+      "name": "env.apply_event with a due_at that has no UTC offset returns invalid_arguments",
+      "status": "passed"
+    },
+    {
+      "name": "env.apply_event with a due_at that has no UTC offset: the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "env.apply_event with a due_at that has no UTC offset: the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "env.load_seed with a filed_at that has no UTC offset returns invalid_arguments",
+      "status": "passed"
+    },
+    {
+      "name": "env.load_seed with a filed_at that has no UTC offset: the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "env.load_seed with a filed_at that has no UTC offset: the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "env.apply_event with a due_at in the year 3000 returns invalid_arguments",
+      "status": "passed"
+    },
+    {
+      "name": "env.apply_event with a due_at in the year 3000: the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "env.apply_event with a due_at in the year 3000: the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "env.load_seed with an unknown field in a claim returns invalid_arguments",
+      "status": "passed"
+    },
+    {
+      "name": "env.load_seed with an unknown field in a claim: the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "env.load_seed with an unknown field in a claim: the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "The same request is applied when its due_at has the UTC offset",
+      "status": "passed"
+    },
+    {
+      "name": "The business data in env.snapshot is byte-identical before and after all nine reads",
+      "status": "passed"
+    },
+    {
+      "name": "Each of the nine reads has one allow row in the audit, with no state change",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of a read carries input.id",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of a windowed read carries input.start and input.end",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of a write carries input.id, the request_id, the observed version and the ID of the object it wrote",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of the refused determinations.dispute shows the line as input.id. The claim_id of the call is in the trace of the Agent, not in the audit",
+      "status": "passed"
+    },
+    {
+      "name": "Every committed write has one activity row with its request_id (14 writes)",
+      "status": "passed"
+    },
+    {
+      "name": "Every applied event has one activity row with its event_id (14 events)",
+      "status": "passed"
+    },
+    {
+      "name": "There is no other activity row, apart from the rows of effects",
+      "status": "passed"
+    },
+    {
+      "name": "Each applied event wrote one notification",
+      "status": "passed"
+    },
+    {
+      "name": "A refused call has a deny row in the audit and no activity row (8 refusals)",
+      "status": "passed"
+    },
+    {
+      "name": "The audit has one row for each env.advance_time that is not a replay",
+      "status": "passed"
+    },
+    {
+      "name": "The audit rows of claims.list, payments.list and notifications.list with their filter carry input.id",
+      "status": "passed"
+    },
+    {
+      "name": "The filter selects the claims of that policy, and the payments and the notifications of that claim",
+      "status": "passed"
+    },
+    {
+      "name": "env.reset returns ready",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded seed",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded virtual_now",
+      "status": "passed"
+    },
+    {
+      "name": "Reset clears the audit and the receipts: only the row of the reset itself is left",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances the epoch",
+      "status": "passed"
+    },
+    {
+      "name": "A second seed with another virtual_now is loaded in the same run",
+      "status": "passed"
+    },
+    {
+      "name": "A start time spelled in UTC is read with the -05:00 offset",
+      "status": "passed"
+    },
+    {
+      "name": "Reset goes back to the virtual_now of the loaded seed, not to the package clock",
+      "status": "passed"
+    },
+    {
+      "name": "A seed with two offers stored as open is loaded on 2 December, before both: the earlier offer reads expired and the later one reads open",
+      "status": "passed"
+    },
+    {
+      "name": "offers.accept on the earlier offer returns too_late, not invalid_seed, and changes nothing",
+      "status": "passed"
+    },
+    {
+      "name": "offers.accept on the later offer is committed",
+      "status": "passed"
+    },
+    {
+      "name": "The task seed is loaded at the clock 3000-01-01T00:00:00Z, and all nine reads work and read now as 2999-12-31T19:00:00-05:00",
+      "status": "passed"
+    },
+    {
+      "name": "At the clock 3000-01-01T00:00:00Z a write is refused with invalid_event by the seed schema check of Core, and it changes nothing",
+      "status": "passed"
+    },
+    {
+      "name": "The task seed is loaded at the clock 1969-12-31T23:59:59Z, and all nine reads work and read now as 1969-12-31T18:59:59-05:00",
+      "status": "passed"
+    },
+    {
+      "name": "At the clock 1969-12-31T23:59:59Z a write is refused with invalid_event by the seed schema check of Core, and it changes nothing",
+      "status": "passed"
+    },
+    {
+      "name": "The second run other-run is not affected: its whole state is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "The second run still holds the package fixture at the package clock, at its first version, with an empty audit",
+      "status": "passed"
+    },
+    {
+      "name": "On a fresh instance of a registry with no initial_time, the clock is the default of Core, 1970-01-01T00:00:00Z, and all nine reads work and read now as 1969-12-31T19:00:00-05:00",
+      "status": "passed"
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,1535 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:alderbrook:seed:1",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "insurer": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "rules": {
+          "type": "object",
+          "properties": {
+            "notice_days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 366
+            },
+            "request_response_days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 366
+            },
+            "dispute_window_days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 366
+            },
+            "offer_response_days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 366
+            },
+            "rental_grace_days": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 366
+            }
+          },
+          "required": [
+            "notice_days",
+            "request_response_days",
+            "dispute_window_days",
+            "offer_response_days",
+            "rental_grace_days"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "name",
+        "timezone",
+        "rules"
+      ],
+      "additionalProperties": false
+    },
+    "preferences": {
+      "type": "object",
+      "properties": {
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "email_notices": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "timezone",
+        "email_notices"
+      ],
+      "additionalProperties": false
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "auto",
+              "renters"
+            ]
+          },
+          "number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "term": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ],
+            "additionalProperties": false
+          },
+          "named_insured": {
+            "type": "object",
+            "properties": {
+              "person_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "person_id",
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          "listed_people": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "person_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "role": {
+                  "enum": [
+                    "named_insured",
+                    "driver",
+                    "household_member"
+                  ]
+                }
+              },
+              "required": [
+                "person_id",
+                "name",
+                "role"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 20
+          },
+          "vehicles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "year": {
+                  "type": "integer",
+                  "minimum": 1950,
+                  "maximum": 2100
+                },
+                "make": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "model": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "lienholder": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "year",
+                "make",
+                "model",
+                "lienholder"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 10
+          },
+          "insured_address": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "line": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "id",
+                  "line"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "coverages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "enum": [
+                    "collision",
+                    "comprehensive",
+                    "personal_property"
+                  ]
+                },
+                "deductible": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "limit": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 100000000
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "deductible",
+                "limit"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 3
+          },
+          "rental_benefit": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "daily_cap": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100000000
+                  },
+                  "max_days": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 366
+                  }
+                },
+                "required": [
+                  "daily_cap",
+                  "max_days"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "number",
+          "term",
+          "named_insured",
+          "listed_people",
+          "vehicles",
+          "insured_address",
+          "coverages",
+          "rental_benefit"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "policy_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "coverage": {
+            "enum": [
+              "collision",
+              "comprehensive",
+              "personal_property"
+            ]
+          },
+          "subject_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "loss_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(19[7-9]\\d|2\\d{3})-"
+          },
+          "filed_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(19[7-9]\\d|2\\d{3})-"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "police_report_number": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            ]
+          },
+          "driver": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "listed"
+                      },
+                      "person_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "person_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "other"
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "name"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            ]
+          },
+          "state": {
+            "enum": [
+              "open",
+              "withdrawn",
+              "closed"
+            ]
+          },
+          "path": {
+            "enum": [
+              "repair",
+              "total_loss"
+            ]
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "enum": [
+                  "paid",
+                  "denied",
+                  "no_response"
+                ]
+              }
+            ]
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              }
+            ]
+          },
+          "withdrawn_at": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              }
+            ]
+          },
+          "repair_completed_at": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              }
+            ]
+          },
+          "repair_reported_by": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            ]
+          },
+          "final_invoice_total": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100000000
+              }
+            ]
+          },
+          "payee": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "policyholder"
+                      }
+                    },
+                    "required": [
+                      "kind"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "shop"
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "name"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "kind": {
+                  "enum": [
+                    "photo",
+                    "receipt",
+                    "report",
+                    "statement",
+                    "other"
+                  ]
+                },
+                "dated": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "reference": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  ]
+                },
+                "added_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "dated",
+                "description",
+                "reference",
+                "added_at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "requests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "issued_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "due_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "issued_by": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "state": {
+                  "enum": [
+                    "open",
+                    "answered",
+                    "void"
+                  ]
+                },
+                "asks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "pattern": "^[a-z][a-z0-9_]{0,39}$"
+                      },
+                      "text": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2000
+                      },
+                      "answer": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "text": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 2000
+                              },
+                              "evidence_ids": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                },
+                                "uniqueItems": true,
+                                "maxItems": 50
+                              },
+                              "answered_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                              }
+                            },
+                            "required": [
+                              "text",
+                              "evidence_ids",
+                              "answered_at"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "key",
+                      "text",
+                      "answer"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 20
+                }
+              },
+              "required": [
+                "id",
+                "issued_at",
+                "due_at",
+                "issued_by",
+                "state",
+                "asks"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "estimates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "kind": {
+                  "enum": [
+                    "initial",
+                    "supplement"
+                  ]
+                },
+                "source": {
+                  "enum": [
+                    "shop",
+                    "adjuster",
+                    "policyholder"
+                  ]
+                },
+                "shop_name": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  ]
+                },
+                "submitted_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "lines": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "text": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 300
+                      },
+                      "amount": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 100000000
+                      },
+                      "decisions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "enum": [
+                                "approved",
+                                "denied"
+                              ]
+                            },
+                            "amount": {
+                              "anyOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 100000000
+                                }
+                              ]
+                            },
+                            "reason": {
+                              "anyOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 2000
+                                }
+                              ]
+                            },
+                            "decided_at": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                            },
+                            "source": {
+                              "enum": [
+                                "determination",
+                                "dispute"
+                              ]
+                            },
+                            "source_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            }
+                          },
+                          "required": [
+                            "status",
+                            "amount",
+                            "reason",
+                            "decided_at",
+                            "source",
+                            "source_id"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "text",
+                      "amount",
+                      "decisions"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 60
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "source",
+                "shop_name",
+                "submitted_at",
+                "lines"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "determinations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "issued_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "issued_by": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "note": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    }
+                  ]
+                },
+                "line_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "uniqueItems": true,
+                  "maxItems": 60
+                }
+              },
+              "required": [
+                "id",
+                "issued_at",
+                "issued_by",
+                "note",
+                "line_ids"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "disputes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "line_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "decision_index": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "evidence_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "uniqueItems": true,
+                  "maxItems": 50
+                },
+                "opened_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "state": {
+                  "enum": [
+                    "open",
+                    "upheld",
+                    "changed",
+                    "void"
+                  ]
+                },
+                "decided_at": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                    }
+                  ]
+                },
+                "decided_by": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  ]
+                },
+                "note": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "line_id",
+                "decision_index",
+                "reason",
+                "evidence_ids",
+                "opened_at",
+                "state",
+                "decided_at",
+                "decided_by",
+                "note"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "offers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "issued_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "valuation": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 100000000
+                },
+                "lienholder_payoff": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    }
+                  ]
+                },
+                "respond_by": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "issued_by": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "basis": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    }
+                  ]
+                },
+                "state": {
+                  "enum": [
+                    "open",
+                    "accepted",
+                    "rejected",
+                    "superseded"
+                  ]
+                },
+                "answered_at": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                    }
+                  ]
+                },
+                "reason": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    }
+                  ]
+                },
+                "evidence_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "uniqueItems": true,
+                  "maxItems": 50
+                }
+              },
+              "required": [
+                "id",
+                "issued_at",
+                "valuation",
+                "lienholder_payoff",
+                "respond_by",
+                "issued_by",
+                "basis",
+                "state",
+                "answered_at",
+                "reason",
+                "evidence_ids"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "rentals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "start_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "daily_rate": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 100000000
+                },
+                "state": {
+                  "enum": [
+                    "active",
+                    "ended"
+                  ]
+                },
+                "end_at": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                    }
+                  ]
+                },
+                "ended_by": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "enum": [
+                        "agent",
+                        "claim_withdrawn",
+                        "claim_closed"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "start_at",
+                "daily_rate",
+                "state",
+                "end_at",
+                "ended_by"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "payments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "kind": {
+                  "enum": [
+                    "repair",
+                    "settlement",
+                    "rental"
+                  ]
+                },
+                "amount": {
+                  "type": "number",
+                  "maximum": 100000000
+                },
+                "payee": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "policyholder",
+                        "shop",
+                        "lienholder"
+                      ]
+                    },
+                    "name": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                },
+                "direction_on_file": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "const": "policyholder"
+                            }
+                          },
+                          "required": [
+                            "kind"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "const": "shop"
+                            },
+                            "name": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 200
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "name"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "payee_named": {
+                  "type": "boolean"
+                },
+                "reference": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  ]
+                },
+                "issued_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "state": {
+                  "const": "issued"
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "amount",
+                "payee",
+                "direction_on_file",
+                "payee_named",
+                "reference",
+                "issued_at",
+                "state"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "actor": {
+                  "enum": [
+                    "agent",
+                    "event"
+                  ]
+                },
+                "ref": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              },
+              "required": [
+                "at",
+                "action",
+                "actor",
+                "ref"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "policy_id",
+          "coverage",
+          "subject_id",
+          "loss_at",
+          "filed_at",
+          "description",
+          "police_report_number",
+          "driver",
+          "state",
+          "path",
+          "outcome",
+          "closed_at",
+          "withdrawn_at",
+          "repair_completed_at",
+          "repair_reported_by",
+          "final_invoice_total",
+          "payee",
+          "evidence",
+          "requests",
+          "estimates",
+          "determinations",
+          "disputes",
+          "offers",
+          "rentals",
+          "payments",
+          "history"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "notifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(19[7-9]\\d|2\\d{3})-"
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "claim_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "event_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "at",
+          "kind",
+          "claim_id",
+          "event_id",
+          "title",
+          "text",
+          "email"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "activity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(19[7-9]\\d|2\\d{3})-"
+          },
+          "actor": {
+            "enum": [
+              "agent",
+              "event"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "object_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            ]
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            ]
+          },
+          "effect": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "seq",
+          "at",
+          "actor",
+          "action",
+          "object_id",
+          "request_id",
+          "event_id",
+          "effect"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "insurer",
+    "preferences",
+    "policies",
+    "claims",
+    "notifications",
+    "activity"
+  ],
+  "additionalProperties": false
+}

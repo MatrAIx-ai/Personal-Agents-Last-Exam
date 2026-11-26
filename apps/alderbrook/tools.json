@@ -1,0 +1,4577 @@
+[
+  {
+    "name": "alderbrook.policies.list",
+    "description": "List the policies of the account. Returns the current virtual time as `now`.",
+    "read_only": true,
+    "scope": "alderbrook.policies.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "auto",
+                  "renters"
+                ]
+              },
+              "number": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "term": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "end": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                },
+                "required": [
+                  "start",
+                  "end"
+                ],
+                "additionalProperties": false
+              },
+              "named_insured": {
+                "type": "object",
+                "properties": {
+                  "person_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "person_id",
+                  "name"
+                ],
+                "additionalProperties": false
+              },
+              "listed_people": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "person_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "role": {
+                      "enum": [
+                        "named_insured",
+                        "driver",
+                        "household_member"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "person_id",
+                    "name",
+                    "role"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 20
+              },
+              "vehicles": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "year": {
+                      "type": "integer",
+                      "minimum": 1950,
+                      "maximum": 2100
+                    },
+                    "make": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "model": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "lienholder": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 200
+                            }
+                          },
+                          "required": [
+                            "name"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "year",
+                    "make",
+                    "model",
+                    "lienholder"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10
+              },
+              "insured_address": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "line": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 300
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "line"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "coverages": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "enum": [
+                        "collision",
+                        "comprehensive",
+                        "personal_property"
+                      ]
+                    },
+                    "deductible": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    "limit": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "number",
+                          "minimum": 0.01,
+                          "maximum": 100000000
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "deductible",
+                    "limit"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 3
+              },
+              "rental_benefit": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "daily_cap": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 100000000
+                      },
+                      "max_days": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 366
+                      }
+                    },
+                    "required": [
+                      "daily_cap",
+                      "max_days"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "in_force": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "number",
+              "term",
+              "named_insured",
+              "listed_people",
+              "vehicles",
+              "insured_address",
+              "coverages",
+              "rental_benefit",
+              "in_force"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.policies.get",
+    "description": "Read one policy with its coverages, people, vehicles or insured address, rental benefit and lienholder.",
+    "read_only": true,
+    "scope": "alderbrook.policies.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "policy": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "kind": {
+              "enum": [
+                "auto",
+                "renters"
+              ]
+            },
+            "number": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "term": {
+              "type": "object",
+              "properties": {
+                "start": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                },
+                "end": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              },
+              "required": [
+                "start",
+                "end"
+              ],
+              "additionalProperties": false
+            },
+            "named_insured": {
+              "type": "object",
+              "properties": {
+                "person_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "person_id",
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "listed_people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "person_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "role": {
+                    "enum": [
+                      "named_insured",
+                      "driver",
+                      "household_member"
+                    ]
+                  }
+                },
+                "required": [
+                  "person_id",
+                  "name",
+                  "role"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 20
+            },
+            "vehicles": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "year": {
+                    "type": "integer",
+                    "minimum": 1950,
+                    "maximum": 2100
+                  },
+                  "make": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "lienholder": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          }
+                        },
+                        "required": [
+                          "name"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "year",
+                  "make",
+                  "model",
+                  "lienholder"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 10
+            },
+            "insured_address": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "line": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "line"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "coverages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "collision",
+                      "comprehensive",
+                      "personal_property"
+                    ]
+                  },
+                  "deductible": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100000000
+                  },
+                  "limit": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 100000000
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "deductible",
+                  "limit"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 3
+            },
+            "rental_benefit": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "daily_cap": {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 100000000
+                    },
+                    "max_days": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 366
+                    }
+                  },
+                  "required": [
+                    "daily_cap",
+                    "max_days"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "in_force": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "kind",
+            "number",
+            "term",
+            "named_insured",
+            "listed_people",
+            "vehicles",
+            "insured_address",
+            "coverages",
+            "rental_benefit",
+            "in_force"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "policy",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.coverage.check",
+    "description": "Check in advance whether a loss can be claimed. Writes nothing. `id` is the policy. `subject_id` is a vehicle of the policy or its insured address. Lists every rule that a filing would break, and the last day to file.",
+    "read_only": true,
+    "scope": "alderbrook.coverage.check",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "coverage": {
+          "enum": [
+            "collision",
+            "comprehensive",
+            "personal_property"
+          ]
+        },
+        "subject_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "loss_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "estimated_amount": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 100000000
+        }
+      },
+      "required": [
+        "id",
+        "coverage",
+        "subject_id",
+        "loss_at"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "covered": {
+          "type": "boolean"
+        },
+        "coverage": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "enum": [
+                    "collision",
+                    "comprehensive",
+                    "personal_property"
+                  ]
+                },
+                "deductible": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100000000
+                },
+                "limit": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 100000000
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "deductible",
+                "limit"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "failures": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "invalid_window",
+              "not_in_force",
+              "not_covered",
+              "too_late",
+              "duplicate_claim"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "last_day_to_file": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "expected_payment": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number",
+              "minimum": 0
+            }
+          ]
+        },
+        "flags": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "request_overdue",
+              "lines_pending",
+              "lines_denied",
+              "under_deductible",
+              "overpaid",
+              "payee_mismatch",
+              "offer_expired",
+              "below_payoff",
+              "rental_uncovered"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "covered",
+        "coverage",
+        "failures",
+        "last_day_to_file",
+        "expected_payment",
+        "flags",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.claims.list",
+    "description": "List claims by state, policy or coverage, in a window of filing time (`start` to `end`, both included). `id` is a policy. Sorted by filing time.",
+    "read_only": true,
+    "scope": "alderbrook.claims.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "enum": [
+            "open",
+            "withdrawn",
+            "closed"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "coverage": {
+          "enum": [
+            "collision",
+            "comprehensive",
+            "personal_property"
+          ]
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "policy_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "coverage": {
+                "enum": [
+                  "collision",
+                  "comprehensive",
+                  "personal_property"
+                ]
+              },
+              "subject_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "loss_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "filed_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "state": {
+                "enum": [
+                  "open",
+                  "withdrawn",
+                  "closed"
+                ]
+              },
+              "path": {
+                "enum": [
+                  "repair",
+                  "total_loss"
+                ]
+              },
+              "outcome": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "enum": [
+                      "paid",
+                      "denied",
+                      "no_response"
+                    ]
+                  }
+                ]
+              },
+              "flags": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "request_overdue",
+                    "lines_pending",
+                    "lines_denied",
+                    "under_deductible",
+                    "overpaid",
+                    "payee_mismatch",
+                    "offer_expired",
+                    "below_payoff",
+                    "rental_uncovered"
+                  ]
+                },
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "id",
+              "policy_id",
+              "coverage",
+              "subject_id",
+              "loss_at",
+              "filed_at",
+              "state",
+              "path",
+              "outcome",
+              "flags"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.claims.get",
+    "description": "Read one claim with its history, evidence, requests, estimates, standing decisions, disputes, offers, rental periods, payee direction, money summary and flags.",
+    "read_only": true,
+    "scope": "alderbrook.claims.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "claim": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "policy_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "coverage": {
+              "enum": [
+                "collision",
+                "comprehensive",
+                "personal_property"
+              ]
+            },
+            "subject_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "loss_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "filed_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "police_report_number": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              ]
+            },
+            "driver": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "listed"
+                        },
+                        "person_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "person_id"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "other"
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              ]
+            },
+            "state": {
+              "enum": [
+                "open",
+                "withdrawn",
+                "closed"
+              ]
+            },
+            "path": {
+              "enum": [
+                "repair",
+                "total_loss"
+              ]
+            },
+            "outcome": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "enum": [
+                    "paid",
+                    "denied",
+                    "no_response"
+                  ]
+                }
+              ]
+            },
+            "closed_at": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              ]
+            },
+            "withdrawn_at": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              ]
+            },
+            "repair_completed_at": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              ]
+            },
+            "repair_reported_by": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              ]
+            },
+            "final_invoice_total": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              ]
+            },
+            "payee": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "policyholder"
+                        }
+                      },
+                      "required": [
+                        "kind"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "shop"
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              ]
+            },
+            "evidence": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "kind": {
+                    "enum": [
+                      "photo",
+                      "receipt",
+                      "report",
+                      "statement",
+                      "other"
+                    ]
+                  },
+                  "dated": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "reference": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    ]
+                  },
+                  "added_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "dated",
+                  "description",
+                  "reference",
+                  "added_at"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "requests": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "issued_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "due_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "issued_by": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "state": {
+                    "enum": [
+                      "open",
+                      "answered",
+                      "void"
+                    ]
+                  },
+                  "asks": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "type": "string",
+                          "pattern": "^[a-z][a-z0-9_]{0,39}$"
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2000
+                        },
+                        "answer": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "text": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 2000
+                                },
+                                "evidence_ids": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                  },
+                                  "uniqueItems": true,
+                                  "maxItems": 50
+                                },
+                                "answered_at": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                                }
+                              },
+                              "required": [
+                                "text",
+                                "evidence_ids",
+                                "answered_at"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "key",
+                        "text",
+                        "answer"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 20
+                  },
+                  "overdue": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "issued_at",
+                  "due_at",
+                  "issued_by",
+                  "state",
+                  "asks",
+                  "overdue"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "estimates": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "kind": {
+                    "enum": [
+                      "initial",
+                      "supplement"
+                    ]
+                  },
+                  "source": {
+                    "enum": [
+                      "shop",
+                      "adjuster",
+                      "policyholder"
+                    ]
+                  },
+                  "shop_name": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    ]
+                  },
+                  "submitted_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        "amount": {
+                          "type": "number",
+                          "minimum": 0.01,
+                          "maximum": 100000000
+                        },
+                        "decisions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "enum": [
+                                  "approved",
+                                  "denied"
+                                ]
+                              },
+                              "amount": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 100000000
+                                  }
+                                ]
+                              },
+                              "reason": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 2000
+                                  }
+                                ]
+                              },
+                              "decided_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                              },
+                              "source": {
+                                "enum": [
+                                  "determination",
+                                  "dispute"
+                                ]
+                              },
+                              "source_id": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "amount",
+                              "reason",
+                              "decided_at",
+                              "source",
+                              "source_id"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "standing": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "enum": [
+                                "pending",
+                                "approved",
+                                "denied"
+                              ]
+                            },
+                            "approved_amount": {
+                              "anyOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 100000000
+                                }
+                              ]
+                            },
+                            "reason": {
+                              "anyOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 2000
+                                }
+                              ]
+                            },
+                            "decided_at": {
+                              "anyOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                                }
+                              ]
+                            },
+                            "dispute_by": {
+                              "anyOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "string",
+                                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                                }
+                              ]
+                            },
+                            "disputable": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "status",
+                            "approved_amount",
+                            "reason",
+                            "decided_at",
+                            "dispute_by",
+                            "disputable"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "text",
+                        "amount",
+                        "decisions",
+                        "standing"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 60
+                  },
+                  "claim_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "source",
+                  "shop_name",
+                  "submitted_at",
+                  "lines",
+                  "claim_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "determinations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "issued_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "issued_by": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "note": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2000
+                      }
+                    ]
+                  },
+                  "line_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "uniqueItems": true,
+                    "maxItems": 60
+                  }
+                },
+                "required": [
+                  "id",
+                  "issued_at",
+                  "issued_by",
+                  "note",
+                  "line_ids"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "disputes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "line_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "decision_index": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "uniqueItems": true,
+                    "maxItems": 50
+                  },
+                  "opened_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "state": {
+                    "enum": [
+                      "open",
+                      "upheld",
+                      "changed",
+                      "void"
+                    ]
+                  },
+                  "decided_at": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                      }
+                    ]
+                  },
+                  "decided_by": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    ]
+                  },
+                  "note": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2000
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "line_id",
+                  "decision_index",
+                  "reason",
+                  "evidence_ids",
+                  "opened_at",
+                  "state",
+                  "decided_at",
+                  "decided_by",
+                  "note"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "offers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "issued_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "valuation": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100000000
+                  },
+                  "lienholder_payoff": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100000000
+                      }
+                    ]
+                  },
+                  "respond_by": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "issued_by": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "basis": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2000
+                      }
+                    ]
+                  },
+                  "state": {
+                    "enum": [
+                      "open",
+                      "accepted",
+                      "rejected",
+                      "expired",
+                      "superseded"
+                    ]
+                  },
+                  "answered_at": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                      }
+                    ]
+                  },
+                  "reason": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2000
+                      }
+                    ]
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "uniqueItems": true,
+                    "maxItems": 50
+                  }
+                },
+                "required": [
+                  "id",
+                  "issued_at",
+                  "valuation",
+                  "lienholder_payoff",
+                  "respond_by",
+                  "issued_by",
+                  "basis",
+                  "state",
+                  "answered_at",
+                  "reason",
+                  "evidence_ids"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "rentals": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "start_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "daily_rate": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100000000
+                  },
+                  "state": {
+                    "enum": [
+                      "active",
+                      "ended"
+                    ]
+                  },
+                  "end_at": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                      }
+                    ]
+                  },
+                  "ended_by": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "enum": [
+                          "agent",
+                          "claim_withdrawn",
+                          "claim_closed"
+                        ]
+                      }
+                    ]
+                  },
+                  "rental_days": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "covered_days": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "uncovered_days": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "my_cost": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "start_at",
+                  "daily_rate",
+                  "state",
+                  "end_at",
+                  "ended_by",
+                  "rental_days",
+                  "covered_days",
+                  "uncovered_days",
+                  "my_cost"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "payments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "kind": {
+                    "enum": [
+                      "repair",
+                      "settlement",
+                      "rental"
+                    ]
+                  },
+                  "amount": {
+                    "type": "number",
+                    "maximum": 100000000
+                  },
+                  "payee": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "policyholder",
+                          "shop",
+                          "lienholder"
+                        ]
+                      },
+                      "name": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "name"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "direction_on_file": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "const": "policyholder"
+                              }
+                            },
+                            "required": [
+                              "kind"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "const": "shop"
+                              },
+                              "name": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 200
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "name"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "payee_named": {
+                    "type": "boolean"
+                  },
+                  "reference": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    ]
+                  },
+                  "issued_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "state": {
+                    "const": "issued"
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "amount",
+                  "payee",
+                  "direction_on_file",
+                  "payee_named",
+                  "reference",
+                  "issued_at",
+                  "state"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "actor": {
+                    "enum": [
+                      "agent",
+                      "event"
+                    ]
+                  },
+                  "ref": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                },
+                "required": [
+                  "at",
+                  "action",
+                  "actor",
+                  "ref"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "deductible": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "limit": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 100000000
+                }
+              ]
+            },
+            "lienholder": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "rental_stops_on": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                }
+              ]
+            },
+            "summary": {
+              "type": "object",
+              "properties": {
+                "approved_total": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  ]
+                },
+                "insurer_owes": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  ]
+                },
+                "over_limit": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  ]
+                },
+                "paid": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "still_due": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  ]
+                },
+                "overpaid": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "my_share": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  ]
+                },
+                "not_approved_total": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  ]
+                },
+                "settlement": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "offer_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "offer_state": {
+                          "enum": [
+                            "open",
+                            "accepted",
+                            "rejected",
+                            "expired",
+                            "superseded"
+                          ]
+                        },
+                        "valuation": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 100000000
+                        },
+                        "lienholder_payoff": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100000000
+                            }
+                          ]
+                        },
+                        "net": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "to_lienholder": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "to_me": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "shortfall": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "number",
+                              "minimum": 0
+                            }
+                          ]
+                        },
+                        "paid_to_lienholder": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "paid_to_me": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "still_due_to_lienholder": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "still_due_to_me": {
+                          "type": "number",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "offer_id",
+                        "offer_state",
+                        "valuation",
+                        "lienholder_payoff",
+                        "net",
+                        "to_lienholder",
+                        "to_me",
+                        "shortfall",
+                        "paid_to_lienholder",
+                        "paid_to_me",
+                        "still_due_to_lienholder",
+                        "still_due_to_me"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "approved_total",
+                "insurer_owes",
+                "over_limit",
+                "paid",
+                "still_due",
+                "overpaid",
+                "my_share",
+                "not_approved_total",
+                "settlement"
+              ],
+              "additionalProperties": false
+            },
+            "flags": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "request_overdue",
+                  "lines_pending",
+                  "lines_denied",
+                  "under_deductible",
+                  "overpaid",
+                  "payee_mismatch",
+                  "offer_expired",
+                  "below_payoff",
+                  "rental_uncovered"
+                ]
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "id",
+            "policy_id",
+            "coverage",
+            "subject_id",
+            "loss_at",
+            "filed_at",
+            "description",
+            "police_report_number",
+            "driver",
+            "state",
+            "path",
+            "outcome",
+            "closed_at",
+            "withdrawn_at",
+            "repair_completed_at",
+            "repair_reported_by",
+            "final_invoice_total",
+            "payee",
+            "evidence",
+            "requests",
+            "estimates",
+            "determinations",
+            "disputes",
+            "offers",
+            "rentals",
+            "payments",
+            "history",
+            "deductible",
+            "limit",
+            "lienholder",
+            "rental_stops_on",
+            "summary",
+            "flags"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "claim",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.estimates.get",
+    "description": "Read one estimate with its lines and the standing decision of each line.",
+    "read_only": true,
+    "scope": "alderbrook.estimates.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "estimate": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "kind": {
+              "enum": [
+                "initial",
+                "supplement"
+              ]
+            },
+            "source": {
+              "enum": [
+                "shop",
+                "adjuster",
+                "policyholder"
+              ]
+            },
+            "shop_name": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              ]
+            },
+            "submitted_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100000000
+                  },
+                  "decisions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "approved",
+                            "denied"
+                          ]
+                        },
+                        "amount": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100000000
+                            }
+                          ]
+                        },
+                        "reason": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 2000
+                            }
+                          ]
+                        },
+                        "decided_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                        },
+                        "source": {
+                          "enum": [
+                            "determination",
+                            "dispute"
+                          ]
+                        },
+                        "source_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "amount",
+                        "reason",
+                        "decided_at",
+                        "source",
+                        "source_id"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "standing": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "enum": [
+                          "pending",
+                          "approved",
+                          "denied"
+                        ]
+                      },
+                      "approved_amount": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100000000
+                          }
+                        ]
+                      },
+                      "reason": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 2000
+                          }
+                        ]
+                      },
+                      "decided_at": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                          }
+                        ]
+                      },
+                      "dispute_by": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "string",
+                            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                          }
+                        ]
+                      },
+                      "disputable": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "status",
+                      "approved_amount",
+                      "reason",
+                      "decided_at",
+                      "dispute_by",
+                      "disputable"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "text",
+                  "amount",
+                  "decisions",
+                  "standing"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 60
+            },
+            "claim_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "id",
+            "kind",
+            "source",
+            "shop_name",
+            "submitted_at",
+            "lines",
+            "claim_id"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "estimate",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.payments.list",
+    "description": "List payment records in a window of issue time (`start` to `end`, both included), for one claim or for all. `id` is a claim.",
+    "read_only": true,
+    "scope": "alderbrook.payments.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "kind": {
+          "enum": [
+            "repair",
+            "settlement",
+            "rental"
+          ]
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "kind": {
+                "enum": [
+                  "repair",
+                  "settlement",
+                  "rental"
+                ]
+              },
+              "amount": {
+                "type": "number",
+                "maximum": 100000000
+              },
+              "payee": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "policyholder",
+                      "shop",
+                      "lienholder"
+                    ]
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "kind",
+                  "name"
+                ],
+                "additionalProperties": false
+              },
+              "direction_on_file": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "policyholder"
+                          }
+                        },
+                        "required": [
+                          "kind"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "shop"
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "name"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "payee_named": {
+                "type": "boolean"
+              },
+              "reference": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                ]
+              },
+              "issued_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "state": {
+                "const": "issued"
+              },
+              "claim_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "amount",
+              "payee",
+              "direction_on_file",
+              "payee_named",
+              "reference",
+              "issued_at",
+              "state",
+              "claim_id"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.notifications.list",
+    "description": "List notifications in a window of their time (`start` to `end`, both included), for one claim or for all. `id` is a claim.",
+    "read_only": true,
+    "scope": "alderbrook.notifications.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "kind": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "claim_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              "emailed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "at",
+              "kind",
+              "claim_id",
+              "title",
+              "text",
+              "emailed"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.preferences.get",
+    "description": "Read the notification preferences of the account.",
+    "read_only": true,
+    "scope": "alderbrook.preferences.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "email_notices": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "timezone",
+            "email_notices"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preferences",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.claims.file",
+    "description": "File a claim. `id` is the policy. `subject_id` is a vehicle of the policy or its insured address. Returns the `id` of the new claim.",
+    "read_only": false,
+    "scope": "alderbrook.claims.file",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "coverage": {
+          "enum": [
+            "collision",
+            "comprehensive",
+            "personal_property"
+          ]
+        },
+        "subject_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "loss_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "police_report_number": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "driver": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "listed"
+                    },
+                    "person_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "person_id"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "other"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "coverage",
+        "subject_id",
+        "loss_at",
+        "description",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.claims.update",
+    "description": "Correct the description, the police report number or the driver of an open claim. Give at least one of them.",
+    "read_only": false,
+    "scope": "alderbrook.claims.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "police_report_number": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          ]
+        },
+        "driver": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "listed"
+                    },
+                    "person_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "person_id"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "other"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.claims.add_evidence",
+    "description": "Add evidence items to an open claim. An item is a record with a kind, a date and a description. It has no file bytes.",
+    "read_only": false,
+    "scope": "alderbrook.claims.add_evidence",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "enum": [
+                  "photo",
+                  "receipt",
+                  "report",
+                  "statement",
+                  "other"
+                ]
+              },
+              "dated": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "reference": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "kind",
+              "dated",
+              "description"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 20
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "items",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "evidence_ids"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.claims.withdraw",
+    "description": "Withdraw an open claim that has no payment and no accepted offer.",
+    "read_only": false,
+    "scope": "alderbrook.claims.withdraw",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.requests.respond",
+    "description": "Answer asks of an open information request, by key. An answer is given once and is not edited.",
+    "read_only": false,
+    "scope": "alderbrook.requests.respond",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "answers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,39}$"
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "evidence_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "uniqueItems": true,
+                "maxItems": 20
+              }
+            },
+            "required": [
+              "key",
+              "text"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 20
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "answers",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.estimates.submit",
+    "description": "Submit an estimate that a shop gave the policyholder. `id` is the claim. Returns the `id` of the new estimate.",
+    "read_only": false,
+    "scope": "alderbrook.estimates.submit",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "kind": {
+          "enum": [
+            "initial",
+            "supplement"
+          ]
+        },
+        "shop_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "amount": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 100000000
+              }
+            },
+            "required": [
+              "text",
+              "amount"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 60
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "shop_name",
+        "lines",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.determinations.dispute",
+    "description": "Dispute one estimate line that was denied, or approved for less than its estimate. `id` is the line and `claim_id` is its claim. Returns the `id` of the new dispute.",
+    "read_only": false,
+    "scope": "alderbrook.determinations.dispute",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "claim_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "uniqueItems": true,
+          "maxItems": 20
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "claim_id",
+        "reason",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.payee.set",
+    "description": "Say who is paid for repairs: the policyholder or a named shop. `id` is the claim. Applies to later repair payments only.",
+    "read_only": false,
+    "scope": "alderbrook.payee.set",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "payee": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "policyholder"
+                }
+              },
+              "required": [
+                "kind"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "shop"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "kind",
+                "name"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "payee",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.offers.accept",
+    "description": "Accept an open settlement offer. The acceptance is final for the amount of the claim.",
+    "read_only": false,
+    "scope": "alderbrook.offers.accept",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.offers.reject",
+    "description": "Reject an open settlement offer, with a reason and evidence items.",
+    "read_only": false,
+    "scope": "alderbrook.offers.reject",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "uniqueItems": true,
+          "maxItems": 20
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "reason",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.rental.start",
+    "description": "Start a rental period under the policy's rental benefit. `id` is the claim. Returns the `id` of the new rental period.",
+    "read_only": false,
+    "scope": "alderbrook.rental.start",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "start_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "daily_rate": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 100000000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "start_at",
+        "daily_rate",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.rental.end",
+    "description": "End an active rental period. `id` is the rental period.",
+    "read_only": false,
+    "scope": "alderbrook.rental.end",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "end_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "end_at",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "alderbrook.preferences.update",
+    "description": "Set the time zone used in notification text, or `email_notices`. Give at least one of them.",
+    "read_only": false,
+    "scope": "alderbrook.preferences.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "email_notices": {
+          "type": "boolean"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "alderbrook"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

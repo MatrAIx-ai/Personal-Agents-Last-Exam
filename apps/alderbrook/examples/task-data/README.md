@@ -1,0 +1,3 @@
+# Task data
+
+`seed.json`, `binding.json` and `policies.json` are input examples: a small history of one account, the people and accounts of the run, and the tools that the Agent may call. A task replaces all three through `env.load_seed`, with its own `virtual_now`. Loading is an Infra operation, so the Agent cannot do it. Edit the three files together, because the account and the owner in the seed must exist in the binding. This seed is built so that the eight example events of the approved plan apply to it in time order. A seed may hold any part of the history, for example only the newest notifications, as long as it passes `validateSeed`.

@@ -1,0 +1,206 @@
+{
+  "schema": "pale.app-verification.v1",
+  "runtime_version": "1.6.0",
+  "core_api_version": "1.2.0",
+  "app_id": "alderbrook",
+  "app_version": "1.0.0",
+  "package_sha256": "9d88a561cf3e9605b97cfbab5ec363522e1b26dbc4e3efcde400da1fede59a14",
+  "node": "v22.23.5",
+  "verified_at": "2026-11-26T21:47:32.840Z",
+  "checks": [
+    {
+      "name": "Manifest, schemas, seed, references, media and declarations load",
+      "status": "passed"
+    },
+    {
+      "name": "business standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "event-example standalone command succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "Agent discovery excludes administrative tools",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for alderbrook.policies.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for alderbrook.policies.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for alderbrook.coverage.check",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for alderbrook.claims.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for alderbrook.claims.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for alderbrook.estimates.get",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for alderbrook.payments.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for alderbrook.notifications.list",
+      "status": "passed"
+    },
+    {
+      "name": "Published input/output for alderbrook.preferences.get",
+      "status": "passed"
+    },
+    {
+      "name": "Infra exposes the lifecycle interface and host clock operation",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.advance_time",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.apply_event",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.event_status",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.load_seed",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.reset",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.snapshot",
+      "status": "passed"
+    },
+    {
+      "name": "Agent cannot call env.validate_bundle",
+      "status": "passed"
+    },
+    {
+      "name": "Real MCP business read succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "MCP content and structured result agree",
+      "status": "passed"
+    },
+    {
+      "name": "MCP envelope remains unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Read does not change business data",
+      "status": "passed"
+    },
+    {
+      "name": "Caller cannot override run or role",
+      "status": "passed"
+    },
+    {
+      "name": "Infra loads history, relationships and assets",
+      "status": "passed"
+    },
+    {
+      "name": "Loaded historical records match input",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid history is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Rejected history leaves business state unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Declared incoming event commits",
+      "status": "passed"
+    },
+    {
+      "name": "Event changes business data",
+      "status": "passed"
+    },
+    {
+      "name": "Committed event is queryable",
+      "status": "passed"
+    },
+    {
+      "name": "Identical event retry is deduplicated",
+      "status": "passed"
+    },
+    {
+      "name": "Duplicate has no additional state change",
+      "status": "passed"
+    },
+    {
+      "name": "Same event ID with changed content is rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Old version cannot reset a changed App",
+      "status": "passed"
+    },
+    {
+      "name": "A separate run retains its own initial data",
+      "status": "passed"
+    },
+    {
+      "name": "Reset returns ready",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded business baseline",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances epoch",
+      "status": "passed"
+    },
+    {
+      "name": "New MCP process reads persisted App state",
+      "status": "passed"
+    },
+    {
+      "name": "Submitted package remains unchanged",
+      "status": "passed"
+    }
+  ],
+  "stages": [
+    {
+      "name": "business",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "TAP version 13\n# Subtest: T01 [W1] policies: list and get show the coverages, people, vehicles or address, rental benefit and lienholder\nok 1 - T01 [W1] policies: list and get show the coverages, people, vehicles or address, rental benefit and lienholder\n  ---\n  duration_ms: 17.352041\n  type: 'test'\n  ...\n# Subtest: T02 [W1] coverage.check: a loss on 1 December is covered, with a deductible of 500 and 31 December as the last day to file\nok 2 - T02 [W1] coverage.check: a loss on 1 December is covered, with a deductible of 500 and 31 December as the last day to file\n  ---\n  duration_ms: 4.075\n  type: 'test'\n  ...\n# Subtest: T03 [W1] claim reads: the list uses the filing time for its window and its order, and one claim shows all its parts\nok 3 - T03 [W1] claim reads: the list uses the filing time for its window and its order, and one claim shows all its parts\n  ---\n  duration_ms: 9.105166\n  type: 'test'\n  ...\n# Subtest: T03b [W1] claim reads: every read returns now with the UTC offset of the insurer and leaves the data byte-identical\nok 4 - T03b [W1] claim reads: every read returns now with the UTC offset of the insurer and leaves the data byte-identical\n  ---\n  duration_ms: 23.188083\n  type: 'test'\n  ...\n# Subtest: T03c [W1] claim reads: the package fixture has the counts of the plan, and every read leaves it byte-identical\nok 5 - T03c [W1] claim reads: the package fixture has the counts of the plan, and every read leaves it byte-identical\n  ---\n  duration_ms: 96.12225\n  type: 'test'\n  ...\n# Subtest: T04 [W1] repair summary: three lines approved for 2,000 read approved_total 2,000, insurer_owes 1,500, my_share 500 and still_due 1,500\nok 6 - T04 [W1] repair summary: three lines approved for 2,000 read approved_total 2,000, insurer_owes 1,500, my_share 500 and still_due 1,500\n  ---\n  duration_ms: 1.998208\n  type: 'test'\n  ...\n# Subtest: T04b [W1] repair summary: a limit, a line approved for less, an approved total under the deductible, and cents\nok 7 - T04b [W1] repair summary: a limit, a line approved for less, an approved total under the deductible, and cents\n  ---\n  duration_ms: 11.913125\n  type: 'test'\n  ...\n# Subtest: T04c [W1] money summary: a sum above the largest single amount is still read\nok 8 - T04c [W1] money summary: a sum above the largest single amount is still read\n  ---\n  duration_ms: 10.207125\n  type: 'test'\n  ...\n# Subtest: T04d [W1] amounts: 10.001 and 10.000000001 are refused in a call, in an event and in a seed, a payment of 0.000000001 is refused, and 1234.56 is returned exactly\nok 9 - T04d [W1] amounts: 10.001 and 10.000000001 are refused in a call, in an event and in a seed, a payment of 0.000000001 is refused, and 1234.56 is returned exactly\n  ---\n  duration_ms: 14.822708\n  type: 'test'\n  ...\n# Subtest: T05 [W2] filing: a claim filed on 2 December is open on the repair path, with a deductible of 500 and no driver\nok 10 - T05 [W2] filing: a claim filed on 2 December is open on the repair path, with a deductible of 500 and no driver\n  ---\n  duration_ms: 4.331958\n  type: 'test'\n  ...\n# Subtest: T05b [W2] filing: claims.file returns the first error of the table, and coverage.check lists every one that fits\nok 11 - T05b [W2] filing: claims.file returns the first error of the table, and coverage.check lists every one that fits\n  ---\n  duration_ms: 7.719375\n  type: 'test'\n  ...\n# Subtest: T05c [W2] filing: the loss time can be the current instant, and the term of a policy has its first instant and not its last\nok 12 - T05c [W2] filing: the loss time can be the current instant, and the term of a policy has its first instant and not its last\n  ---\n  duration_ms: 4.086709\n  type: 'test'\n  ...\n# Subtest: T06 [W2] updates: an open claim takes a new description, police report number, driver and evidence items\nok 13 - T06 [W2] updates: an open claim takes a new description, police report number, driver and evidence items\n  ---\n  duration_ms: 5.399584\n  type: 'test'\n  ...\n# Subtest: T06b [W2] argument checks: a third decimal, a call with no field and the same ask twice are refused with invalid_arguments before any App error\nok 14 - T06b [W2] argument checks: a third decimal, a call with no field and the same ask twice are refused with invalid_arguments before any App error\n  ---\n  duration_ms: 5.474208\n  type: 'test'\n  ...\n# Subtest: T07 [W2] requests: the request stays open after the ask photos and is answered after the ask driver\nok 15 - T07 [W2] requests: the request stays open after the ask photos and is answered after the ask driver\n  ---\n  duration_ms: 6.40725\n  type: 'test'\n  ...\n# Subtest: T07b [W2] requests: an unanswered request reads request_overdue at its due time, with no App event, and can still be answered\nok 16 - T07b [W2] requests: an unanswered request reads request_overdue at its due time, with no App event, and can still be answered\n  ---\n  duration_ms: 5.112958\n  type: 'test'\n  ...\n# Subtest: T08 [W2] withdrawal: it ends the open request, dispute, offer and rental period of the claim, and no write follows it\nok 17 - T08 [W2] withdrawal: it ends the open request, dispute, offer and rental period of the claim, and no write follows it\n  ---\n  duration_ms: 11.513959\n  type: 'test'\n  ...\n# Subtest: T08b [W2] withdrawal: a claim with a payment or an accepted offer cannot be withdrawn\nok 18 - T08b [W2] withdrawal: a claim with a payment or an accepted offer cannot be withdrawn\n  ---\n  duration_ms: 9.126708\n  type: 'test'\n  ...\n# Subtest: T08c [W2] preferences: the time zone of notification text, and email_notices\nok 19 - T08c [W2] preferences: the time zone of notification text, and email_notices\n  ---\n  duration_ms: 3.536083\n  type: 'test'\n  ...\n# Subtest: T08d [W2] preferences: a time zone is an IANA name, so a bare offset such as +05:00 is refused on every Node version\nok 20 - T08d [W2] preferences: a time zone is an IANA name, so a bare offset such as +05:00 is refused on every Node version\n  ---\n  duration_ms: 2.590167\n  type: 'test'\n  ...\n# Subtest: T09 [W3] estimates: three lines of 2,000, a supplement of 1,500 and two payments of 1,500 end with still_due 0 and my_share 500\nok 21 - T09 [W3] estimates: three lines of 2,000, a supplement of 1,500 and two payments of 1,500 end with still_due 0 and my_share 500\n  ---\n  duration_ms: 9.756209\n  type: 'test'\n  ...\n# Subtest: T09b [W3] estimates: the Agent submits an estimate first, then the task's scripted estimate arrives, and both are kept under their own IDs\nok 22 - T09b [W3] estimates: the Agent submits an estimate first, then the task's scripted estimate arrives, and both are kept under their own IDs\n  ---\n  duration_ms: 3.345791\n  type: 'test'\n  ...\n# Subtest: T10 [W3] determinations: each named line takes the decision, and the standing decision of a line is its latest one\nok 23 - T10 [W3] determinations: each named line takes the decision, and the standing decision of a line is its latest one\n  ---\n  duration_ms: 5.301958\n  type: 'test'\n  ...\n# Subtest: T11 [W3] disputes: a line that is denied, or approved for less, is disputed once for each decision\nok 24 - T11 [W3] disputes: a line that is denied, or approved for less, is disputed once for each decision\n  ---\n  duration_ms: 11.327292\n  type: 'test'\n  ...\n# Subtest: T11b [W3] disputes: the window ends with the 30th day after the decision, and the first error of the table wins\nok 25 - T11b [W3] disputes: the window ends with the 30th day after the decision, and the first error of the table wins\n  ---\n  duration_ms: 7.054542\n  type: 'test'\n  ...\n# Subtest: T11c [W3] disputes: a line reads disputable only while determinations.dispute can still be made on its decision\nok 26 - T11c [W3] disputes: a line reads disputable only while determinations.dispute can still be made on its decision\n  ---\n  duration_ms: 7.7345\n  type: 'test'\n  ...\n# Subtest: T12 [W3] the payee: a repair payment that names no payee goes to the direction on file at that moment\nok 27 - T12 [W3] the payee: a repair payment that names no payee goes to the direction on file at that moment\n  ---\n  duration_ms: 8.930625\n  type: 'test'\n  ...\n# Subtest: T13 [W3] payments: a third payment of 200 that names the policyholder is applied and reads payee_mismatch and overpaid 200\nok 28 - T13 [W3] payments: a third payment of 200 that names the policyholder is applied and reads payee_mismatch and overpaid 200\n  ---\n  duration_ms: 11.420834\n  type: 'test'\n  ...\n# Subtest: T14 [W4] offers: an offer of 14,200 against a payoff of 15,100 reads net 13,700 and shortfall 1,400, and the next offer of 15,900 is accepted\nok 29 - T14 [W4] offers: an offer of 14,200 against a payoff of 15,100 reads net 13,700 and shortfall 1,400, and the next offer of 15,900 is accepted\n  ---\n  duration_ms: 7.720584\n  type: 'test'\n  ...\n# Subtest: T15 [W4] offers: an offer that is not open keeps its state, and nothing replaces an accepted offer\nok 30 - T15 [W4] offers: an offer that is not open keeps its state, and nothing replaces an accepted offer\n  ---\n  duration_ms: 8.794334\n  type: 'test'\n  ...\n# Subtest: T15b [W4] total_loss summary: the repair fields are null, paid is kept, and only an accepted offer is owed\nok 31 - T15b [W4] total_loss summary: the repair fields are null, paid is kept, and only an accepted offer is owed\n  ---\n  duration_ms: 8.01275\n  type: 'test'\n  ...\n# Subtest: T15c [W4] total_loss path: the flags lines_pending and lines_denied are still read after the first offer\nok 32 - T15c [W4] total_loss path: the flags lines_pending and lines_denied are still read after the first offer\n  ---\n  duration_ms: 7.39275\n  type: 'test'\n  ...\n# Subtest: T16 [W4] rental benefit: a rental from 3 December at 45 a day reads 12 covered days, 3 uncovered days and my_cost 195 on 18 December\nok 33 - T16 [W4] rental benefit: a rental from 3 December at 45 a day reads 12 covered days, 3 uncovered days and my_cost 195 on 18 December\n  ---\n  duration_ms: 6.711583\n  type: 'test'\n  ...\n# Subtest: T16b [W4] rental benefit: an active period, the repair completion day, and the limit of 30 days across two periods\nok 34 - T16b [W4] rental benefit: an active period, the repair completion day, and the limit of 30 days across two periods\n  ---\n  duration_ms: 5.468959\n  type: 'test'\n  ...\n# Subtest: T16c [W4] rental benefit: the times of a rental period are checked, and the first error of the table wins\nok 35 - T16c [W4] rental benefit: the times of a rental period are checked, and the first error of the table wins\n  ---\n  duration_ms: 3.75175\n  type: 'test'\n  ...\n# Subtest: T16d [W4] rental benefit: a claim takes a 31st rental period, because a stored list that a call can grow has no upper bound\nok 36 - T16d [W4] rental benefit: a claim takes a 31st rental period, because a stored list that a call can grow has no upper bound\n  ---\n  duration_ms: 26.804958\n  type: 'test'\n  ...\n# Subtest: T17 [W4] platform clock: an offer reads expired once the clock reaches its respond_by, with no App event\nok 37 - T17 [W4] platform clock: an offer reads expired once the clock reaches its respond_by, with no App event\n  ---\n  duration_ms: 4.684459\n  type: 'test'\n  ...\n# Subtest: T17b [W4] platform clock: a claim can be filed until the end of its last day, and not one instant later\nok 38 - T17b [W4] platform clock: a claim can be filed until the end of its last day, and not one instant later\n  ---\n  duration_ms: 1.369583\n  type: 'test'\n  ...\n# Subtest: T17c [W4] platform clock: a day is a calendar day in the time zone of the insurer\nok 39 - T17c [W4] platform clock: a day is a calendar day in the time zone of the insurer\n  ---\n  duration_ms: 3.551334\n  type: 'test'\n  ...\n# Subtest: T17d [W4] platform clock: day limits follow the calendar across the end of daylight saving time on 1 November 2026\nok 40 - T17d [W4] platform clock: day limits follow the calendar across the end of daylight saving time on 1 November 2026\n  ---\n  duration_ms: 1.999459\n  type: 'test'\n  ...\n# Subtest: T17e [W4] platform clock: a day limit ends with its last day where the clocks change at midnight (America/Havana, 8 March 2026)\nok 41 - T17e [W4] platform clock: a day limit ends with its last day where the clocks change at midnight (America/Havana, 8 March 2026)\n  ---\n  duration_ms: 1.737208\n  type: 'test'\n  ...\n# Subtest: T17f [W4] platform clock: a timestamp has a year from 1970 to 2999, and the schemas refuse every other year\nok 42 - T17f [W4] platform clock: a timestamp has a year from 1970 to 2999, and the schemas refuse every other year\n  ---\n  duration_ms: 2.153917\n  type: 'test'\n  ...\n# Subtest: T17g [W4] platform clock: day limits in a time zone east of UTC, across the end of daylight saving time (Australia/Sydney, 4 April 2027)\nok 43 - T17g [W4] platform clock: day limits in a time zone east of UTC, across the end of daylight saving time (Australia/Sydney, 4 April 2027)\n  ---\n  duration_ms: 2.118167\n  type: 'test'\n  ...\n# Subtest: T17h [W4] platform clock: a day limit ends at the first midnight of a day that has two (Asia/Amman, 29 October 2021)\nok 44 - T17h [W4] platform clock: a day limit ends at the first midnight of a day that has two (Asia/Amman, 29 October 2021)\n  ---\n  duration_ms: 1.2795\n  type: 'test'\n  ...\n# Subtest: T17i [W4] platform clock: every read works at the default clock of Core, and now and a default due time are written in UTC where the UTC offset of the insurer has seconds\nok 45 - T17i [W4] platform clock: every read works at the default clock of Core, and now and a default due time are written in UTC where the UTC offset of the insurer has seconds\n  ---\n  duration_ms: 9.500208\n  type: 'test'\n  ...\n# Subtest: T17j [W4] platform clock: at a clock outside the years 1970 to 2999 every read works, and a write is refused and changes nothing (the real host answers invalid_event, from the seed schema check of Core)\nok 46 - T17j [W4] platform clock: at a clock outside the years 1970 to 2999 every read works, and a write is refused and changes nothing (the real host answers invalid_event, from the seed schema check of Core)\n  ---\n  duration_ms: 11.057417\n  type: 'test'\n  ...\n# Subtest: T17k [W4] platform clock: a day limit ends at the exact first instant of the next day where the clocks change by an amount that is not a multiple of 15 minutes (Africa/Monrovia 1972, Pacific/Kiritimati 1979)\nok 47 - T17k [W4] platform clock: a day limit ends at the exact first instant of the next day where the clocks change by an amount that is not a multiple of 15 minutes (Africa/Monrovia 1972, Pacific/Kiritimati 1979)\n  ---\n  duration_ms: 2.593\n  type: 'test'\n  ...\n# Subtest: T17l [W4] platform clock: at the default clock of Core, before all its history, the package fixture reads no open offer beside an accepted one or on a claim that is not open\nok 48 - T17l [W4] platform clock: at the default clock of Core, before all its history, the package fixture reads no open offer beside an accepted one or on a claim that is not open\n  ---\n  duration_ms: 31.398083\n  type: 'test'\n  ...\n# Subtest: T18 [All] invalid events: each event of the plan's list that can occur is rejected with invalid_event, and the data does not change\nok 49 - T18 [All] invalid events: each event of the plan's list that can occur is rejected with invalid_event, and the data does not change\n  ---\n  duration_ms: 20.014125\n  type: 'test'\n  ...\n# Subtest: T18b [All] seed rules: validateSeed rejects each seed of the plan's list, and each seed that breaks a rule that the package adds, with invalid_seed\nok 50 - T18b [All] seed rules: validateSeed rejects each seed of the plan's list, and each seed that breaks a rule that the package adds, with invalid_seed\n  ---\n  duration_ms: 55.266208\n  type: 'test'\n  ...\n# Subtest: T18c [All] notifications: one for each applied event, and none for a write of the policyholder or for a change of time\nok 51 - T18c [All] notifications: one for each applied event, and none for a write of the policyholder or for a change of time\n  ---\n  duration_ms: 9.585667\n  type: 'test'\n  ...\n# Subtest: T18d [All] notifications: a supplement of 2 lines and 1,500.00 from Corner Auto Body is the example wire message of the plan\nok 52 - T18d [All] notifications: a supplement of 2 lines and 1,500.00 from Corner Auto Body is the example wire message of the plan\n  ---\n  duration_ms: 3.870959\n  type: 'test'\n  ...\n# Subtest: T18e [All] activity rows: one for each committed write, each applied event and each effect, and none for a refused call. One notification for each applied event, and none for any of the 13 writes\nok 53 - T18e [All] activity rows: one for each committed write, each applied event and each effect, and none for a refused call. One notification for each applied event, and none for any of the 13 writes\n  ---\n  duration_ms: 19.619458\n  type: 'test'\n  ...\n# Subtest: T18f [All] the eight example events of the plan apply to the small seed in time order\nok 54 - T18f [All] the eight example events of the plan apply to the small seed in time order\n  ---\n  duration_ms: 5.579958\n  type: 'test'\n  ...\n# Subtest: T18g [All] invalid events: each event check that the package adds to the plan's list is rejected with invalid_event, and the data does not change\nok 55 - T18g [All] invalid events: each event check that the package adds to the plan's list is rejected with invalid_event, and the data does not change\n  ---\n  duration_ms: 6.916334\n  type: 'test'\n  ...\n# Subtest: T18h [All] closure: claim.closed gives the outcome paid, denied or no_response and ends what is open on the claim\nok 56 - T18h [All] closure: claim.closed gives the outcome paid, denied or no_response and ends what is open on the claim\n  ---\n  duration_ms: 5.338542\n  type: 'test'\n  ...\n# Subtest: T18i [All] IDs: a new claim ID and a new notification ID never collide with an ID of another kind\nok 57 - T18i [All] IDs: a new claim ID and a new notification ID never collide with an ID of another kind\n  ---\n  duration_ms: 2.67025\n  type: 'test'\n  ...\n# Subtest: T18j [All] notification text: an estimate with no shop name says who sent it, and a long text is cut to the limits of the schema\nok 58 - T18j [All] notification text: an estimate with no shop name says who sent it, and a long text is cut to the limits of the schema\n  ---\n  duration_ms: 2.639792\n  type: 'test'\n  ...\n# Subtest: T18k [All] seed history: a claim with an active rental period that starts after the clock can be withdrawn or closed, and the period ends at its own start\nok 59 - T18k [All] seed history: a claim with an active rental period that starts after the clock can be withdrawn or closed, and the period ends at its own start\n  ---\n  duration_ms: 2.233875\n  type: 'test'\n  ...\n# Subtest: T18l [All] seed history: in a seed that is loaded before its own offer times, an offer stored as open reads expired when its claim has a later offer or is not open, and offers.accept on it returns too_late\nok 60 - T18l [All] seed history: in a seed that is loaded before its own offer times, an offer stored as open reads expired when its claim has a later offer or is not open, and offers.accept on it returns too_late\n  ---\n  duration_ms: 2.576208\n  type: 'test'\n  ...\n# Subtest: T18m [All] IDs: a new ID has the number after the highest one in use with that form, also when a lower number is free or when another kind of object has that number\nok 61 - T18m [All] IDs: a new ID has the number after the highest one in use with that form, also when a lower number is free or when another kind of object has that number\n  ---\n  duration_ms: 4.495625\n  type: 'test'\n  ...\n# Subtest: T18n [All] lists: a line takes a 51st decision, because no stored list that calls can grow has an upper bound, and one call is limited by its input schema\nok 62 - T18n [All] lists: a line takes a 51st decision, because no stored list that calls can grow has an upper bound, and one call is limited by its input schema\n  ---\n  duration_ms: 68.395916\n  type: 'test'\n  ...\n# Subtest: T19 [All] Core contracts: tests/mcp.integration.cjs passes on the real runtime (replay, idempotency_conflict, stale_version, permission_denied, reset)\nok 63 - T19 [All] Core contracts: tests/mcp.integration.cjs passes on the real runtime (replay, idempotency_conflict, stale_version, permission_denied, reset) # SKIP Set PALE_RUNTIME_ROOT to the runtime folder of a PALE checkout to run tests/mcp.integration.cjs.\n  ---\n  duration_ms: 0.043292\n  type: 'test'\n  ...\n# Subtest: T19b [All] Mail delivery: tests/mail.integration.cjs passes on the real runtime\nok 64 - T19b [All] Mail delivery: tests/mail.integration.cjs passes on the real runtime # SKIP Set PALE_RUNTIME_ROOT to the runtime folder of a PALE checkout to run tests/mail.integration.cjs.\n  ---\n  duration_ms: 0.030042\n  type: 'test'\n  ...\n# Subtest: T19c [All] Mail sender: a notification is delivered once, under its ID in the first lifecycle and as <id>.e<epoch> after a reset\nok 65 - T19c [All] Mail sender: a notification is delivered once, under its ID in the first lifecycle and as <id>.e<epoch> after a reset\n  ---\n  duration_ms: 2.318833\n  type: 'test'\n  ...\n# Subtest: T19d [All] Mail sender: what the loaded seed held is never sent, and a notification with no wire message is skipped\nok 66 - T19d [All] Mail sender: what the loaded seed held is never sent, and a notification with no wire message is skipped\n  ---\n  duration_ms: 4.051459\n  type: 'test'\n  ...\n# Subtest: T19e [All] Mail sender: a refusal for lack of a route is final, and the sender goes on to the next notification\nok 67 - T19e [All] Mail sender: a refusal for lack of a route is final, and the sender goes on to the next notification\n  ---\n  duration_ms: 2.13675\n  type: 'test'\n  ...\n# Subtest: T19f [All] Mail sender: every other answer stops the sender, nothing more is published, and the next call tries that notification again\nok 68 - T19f [All] Mail sender: every other answer stops the sender, nothing more is published, and the next call tries that notification again\n  ---\n  duration_ms: 3.136708\n  type: 'test'\n  ...\n# Subtest: T19g [All] Mail sender: it throws when it cannot read Alderbrook, and it publishes nothing\nok 69 - T19g [All] Mail sender: it throws when it cannot read Alderbrook, and it publishes nothing\n  ---\n  duration_ms: 0.137667\n  type: 'test'\n  ...\n# Subtest: T19h [All] Mail sender: after a reset a second sender publishes as <id>.e<epoch> only when it gets the first epoch, so Infra keeps one sender for the run\nok 70 - T19h [All] Mail sender: after a reset a second sender publishes as <id>.e<epoch> only when it gets the first epoch, so Infra keeps one sender for the run\n  ---\n  duration_ms: 1.32\n  type: 'test'\n  ...\n# Subtest: DATA01 [All] Evaluation data: every account seed passes the seed schema and the App seed rules with its own binding and clock, is synthetic, and matches its hash in manifest.json\nok 71 - DATA01 [All] Evaluation data: every account seed passes the seed schema and the App seed rules with its own binding and clock, is synthetic, and matches its hash in manifest.json\n  ---\n  duration_ms: 63.681667\n  type: 'test'\n  ...\n# Subtest: DATA02 [All] Evaluation data: the generator with its fixed seed gives the committed files byte for byte (--check)\nok 72 - DATA02 [All] Evaluation data: the generator with its fixed seed gives the committed files byte for byte (--check)\n  ---\n  duration_ms: 246.452583\n  type: 'test'\n  ...\n# Subtest: DATA03 [All] Evaluation data: the coverage report is up to date with the seeds (--check), and the cross-record checks pass on every seed\nok 73 - DATA03 [All] Evaluation data: the coverage report is up to date with the seeds (--check), and the cross-record checks pass on every seed\n  ---\n  duration_ms: 253.373709\n  type: 'test'\n  ...\n# Subtest: DATA04 [All] Evaluation data: a seed selected as of a time holds only the steps before it, each record in its state then, and at the seed clock it is the delivered seed\nok 74 - DATA04 [All] Evaluation data: a seed selected as of a time holds only the steps before it, each record in its state then, and at the seed clock it is the delivered seed\n  ---\n  duration_ms: 4758.851625\n  type: 'test'\n  ...\n# Subtest: DATA05 [All] Evaluation data: the story rules find a claim that does not hold together\nok 75 - DATA05 [All] Evaluation data: the story rules find a claim that does not hold together\n  ---\n  duration_ms: 102.665125\n  type: 'test'\n  ...\n# Subtest: PKG diagnostics on, off and broken give the same data\nok 76 - PKG diagnostics on, off and broken give the same data\n  ---\n  duration_ms: 17.137667\n  type: 'test'\n  ...\n# Subtest: PKG the text of src, infra and plugin.cjs has no host clock, timer or random source, no process, fetch, performance or crypto, and no require of a Node module\nok 77 - PKG the text of src, infra and plugin.cjs has no host clock, timer or random source, no process, fetch, performance or crypto, and no require of a Node module\n  ---\n  duration_ms: 1.434833\n  type: 'test'\n  ...\n# Subtest: PKG no require in src, infra, plugin.cjs, tests/business.test.cjs, tests/harness.cjs, tests/schema-validator.cjs or examples/run.cjs leaves the package, and the last four load only the host modules that they need\nok 78 - PKG no require in src, infra, plugin.cjs, tests/business.test.cjs, tests/harness.cjs, tests/schema-validator.cjs or examples/run.cjs leaves the package, and the last four load only the host modules that they need\n  ---\n  duration_ms: 1.124541\n  type: 'test'\n  ...\n# Subtest: PKG contribution.json declares one publish entry for channel.email, no receiver and no required App, so Mail is optional and send-only\nok 79 - PKG contribution.json declares one publish entry for channel.email, no receiver and no required App, so Mail is optional and send-only\n  ---\n  duration_ms: 0.234\n  type: 'test'\n  ...\n# Subtest: PKG tools.json has exactly the 9 read and 13 write operations of the plan, and app.json declares the eight events\nok 80 - PKG tools.json has exactly the 9 read and 13 write operations of the plan, and app.json declares the eight events\n  ---\n  duration_ms: 0.123125\n  type: 'test'\n  ...\n1..80\n# tests 80\n# suites 0\n# pass 78\n# fail 0\n# cancelled 0\n# skipped 2\n# todo 0\n# duration_ms 6205.883833\n",
+      "errors": ""
+    },
+    {
+      "name": "event-example",
+      "status": "passed",
+      "exit_code": 0,
+      "output": "{\n  \"app\": \"alderbrook\",\n  \"event\": {\n    \"event_id\": \"ev-ab-110\",\n    \"at\": \"2026-12-04T10:00:00-05:00\",\n    \"operation\": \"alderbrook.estimate.submitted\",\n    \"payload\": {\n      \"estimate_id\": \"est-0031\",\n      \"claim_id\": \"clm-0007\",\n      \"kind\": \"initial\",\n      \"source\": \"shop\",\n      \"shop_name\": \"Corner Auto Body\",\n      \"lines\": [\n        {\n          \"line_id\": \"ln-01\",\n          \"text\": \"Rear bumper cover, replace\",\n          \"amount\": 900\n        },\n        {\n          \"line_id\": \"ln-02\",\n          \"text\": \"Tail lamp, left\",\n          \"amount\": 350\n        },\n        {\n          \"line_id\": \"ln-03\",\n          \"text\": \"Paint and labor\",\n          \"amount\": 750\n        }\n      ]\n    }\n  },\n  \"before\": {\n    \"claim\": {\n      \"id\": \"clm-0007\",\n      \"policy_id\": \"pol-auto-01\",\n      \"coverage\": \"collision\",\n      \"subject_id\": \"veh-01\",\n      \"loss_at\": \"2026-11-28T16:40:00-05:00\",\n      \"filed_at\": \"2026-11-30T09:15:00-05:00\",\n      \"description\": \"Rear-ended at a stop light on Monroe Avenue. Damage to the rear bumper and the left tail lamp.\",\n      \"police_report_number\": \"RPD-26-118842\",\n      \"driver\": {\n        \"kind\": \"listed\",\n        \"person_id\": \"person-jordan\"\n      },\n      \"state\": \"open\",\n      \"path\": \"repair\",\n      \"outcome\": null,\n      \"closed_at\": null,\n      \"withdrawn_at\": null,\n      \"repair_completed_at\": null,\n      \"repair_reported_by\": null,\n      \"final_invoice_total\": null,\n      \"payee\": null,\n      \"evidence\": [\n        {\n          \"id\": \"evd-0053\",\n          \"kind\": \"photo\",\n          \"dated\": \"2026-11-28T16:50:00-05:00\",\n          \"description\": \"Rear bumper, pushed in on the left side.\",\n          \"reference\": null,\n          \"added_at\": \"2026-11-30T09:22:00-05:00\"\n        },\n        {\n          \"id\": \"evd-0054\",\n          \"kind\": \"photo\",\n          \"dated\": \"2026-11-28T16:51:00-05:00\",\n          \"description\": \"Broken left tail lamp.\",\n          \"reference\": null,\n          \"added_at\": \"2026-11-30T09:22:00-05:00\"\n        },\n        {\n          \"id\": \"evd-0055\",\n          \"kind\": \"photo\",\n          \"dated\": \"2026-11-28T16:55:00-05:00\",\n          \"description\": \"The other car, its plate and the insurance card of its driver.\",\n          \"reference\": null,\n          \"added_at\": \"2026-11-30T09:22:00-05:00\"\n        }\n      ],\n      \"requests\": [],\n      \"estimates\": [],\n      \"determinations\": [],\n      \"disputes\": [],\n      \"offers\": [],\n      \"rentals\": [],\n      \"payments\": [],\n      \"history\": [\n        {\n          \"at\": \"2026-11-30T09:15:00-05:00\",\n          \"action\": \"claims.file\",\n          \"actor\": \"agent\",\n          \"ref\": \"seed-0067\"\n        },\n        {\n          \"at\": \"2026-11-30T09:22:00-05:00\",\n          \"action\": \"claims.add_evidence\",\n          \"actor\": \"agent\",\n          \"ref\": \"seed-0068\"\n        }\n      ]\n    }\n  },\n  \"after\": {\n    \"claim\": {\n      \"id\": \"clm-0007\",\n      \"policy_id\": \"pol-auto-01\",\n      \"coverage\": \"collision\",\n      \"subject_id\": \"veh-01\",\n      \"loss_at\": \"2026-11-28T16:40:00-05:00\",\n      \"filed_at\": \"2026-11-30T09:15:00-05:00\",\n      \"description\": \"Rear-ended at a stop light on Monroe Avenue. Damage to the rear bumper and the left tail lamp.\",\n      \"police_report_number\": \"RPD-26-118842\",\n      \"driver\": {\n        \"kind\": \"listed\",\n        \"person_id\": \"person-jordan\"\n      },\n      \"state\": \"open\",\n      \"path\": \"repair\",\n      \"outcome\": null,\n      \"closed_at\": null,\n      \"withdrawn_at\": null,\n      \"repair_completed_at\": null,\n      \"repair_reported_by\": null,\n      \"final_invoice_total\": null,\n      \"payee\": null,\n      \"evidence\": [\n        {\n          \"id\": \"evd-0053\",\n          \"kind\": \"photo\",\n          \"dated\": \"2026-11-28T16:50:00-05:00\",\n          \"description\": \"Rear bumper, pushed in on the left side.\",\n          \"reference\": null,\n          \"added_at\": \"2026-11-30T09:22:00-05:00\"\n        },\n        {\n          \"id\": \"evd-0054\",\n          \"kind\": \"photo\",\n          \"dated\": \"2026-11-28T16:51:00-05:00\",\n          \"description\": \"Broken left tail lamp.\",\n          \"reference\": null,\n          \"added_at\": \"2026-11-30T09:22:00-05:00\"\n        },\n        {\n          \"id\": \"evd-0055\",\n          \"kind\": \"photo\",\n          \"dated\": \"2026-11-28T16:55:00-05:00\",\n          \"description\": \"The other car, its plate and the insurance card of its driver.\",\n          \"reference\": null,\n          \"added_at\": \"2026-11-30T09:22:00-05:00\"\n        }\n      ],\n      \"requests\": [],\n      \"estimates\": [\n        {\n          \"id\": \"est-0031\",\n          \"kind\": \"initial\",\n          \"source\": \"shop\",\n          \"shop_name\": \"Corner Auto Body\",\n          \"submitted_at\": \"2026-12-04T10:00:00-05:00\",\n          \"lines\": [\n            {\n              \"id\": \"ln-01\",\n              \"text\": \"Rear bumper cover, replace\",\n              \"amount\": 900,\n              \"decisions\": []\n            },\n            {\n              \"id\": \"ln-02\",\n              \"text\": \"Tail lamp, left\",\n              \"amount\": 350,\n              \"decisions\": []\n            },\n            {\n              \"id\": \"ln-03\",\n              \"text\": \"Paint and labor\",\n              \"amount\": 750,\n              \"decisions\": []\n            }\n          ]\n        }\n      ],\n      \"determinations\": [],\n      \"disputes\": [],\n      \"offers\": [],\n      \"rentals\": [],\n      \"payments\": [],\n      \"history\": [\n        {\n          \"at\": \"2026-11-30T09:15:00-05:00\",\n          \"action\": \"claims.file\",\n          \"actor\": \"agent\",\n          \"ref\": \"seed-0067\"\n        },\n        {\n          \"at\": \"2026-11-30T09:22:00-05:00\",\n          \"action\": \"claims.add_evidence\",\n          \"actor\": \"agent\",\n          \"ref\": \"seed-0068\"\n        },\n        {\n          \"at\": \"2026-12-04T10:00:00-05:00\",\n          \"action\": \"estimate.submitted\",\n          \"actor\": \"event\",\n          \"ref\": \"ev-ab-110\"\n        }\n      ]\n    },\n    \"notification\": {\n      \"id\": \"ntf-0061\",\n      \"at\": \"2026-12-04T10:00:00-05:00\",\n      \"kind\": \"estimate.submitted\",\n      \"claim_id\": \"clm-0007\",\n      \"event_id\": \"ev-ab-110\",\n      \"title\": \"An estimate of 3 repair lines was added to claim clm-0007\",\n      \"text\": \"Corner Auto Body sent an estimate for claim clm-0007: 3 repair lines, 2,000.00 in total. Alderbrook Mutual has received it and has not decided on these lines yet. Open your claim to see each line and its written decision.\",\n      \"email\": {\n        \"specversion\": \"1.0\",\n        \"id\": \"ntf-0061\",\n        \"source\": \"urn:pale:app:alderbrook:account:alderbrook-jordan\",\n        \"type\": \"org.pale.mail.notification.v1\",\n        \"time\": \"2026-12-04T10:00:00-05:00\",\n        \"datacontenttype\": \"application/json\",\n        \"dataschema\": \"urn:pale:email-payload:1\",\n        \"data\": {\n          \"channel\": \"channel.email\",\n          \"recipient\": {\n            \"kind\": \"person_ref\",\n            \"id\": \"person-jordan\"\n          },\n          \"source_object\": {\n            \"app_id\": \"alderbrook\",\n            \"account_id\": \"alderbrook-jordan\",\n            \"object_type\": \"claim\",\n            \"object_id\": \"clm-0007\"\n          },\n          \"content\": {\n            \"title\": \"An estimate of 3 repair lines was added to claim clm-0007\",\n            \"body\": {\n              \"format\": \"text/plain\",\n              \"text\": \"Corner Auto Body sent an estimate for claim clm-0007: 3 repair lines, 2,000.00 in total. Alderbrook Mutual has received it and has not decided on these lines yet. Open your claim to see each line and its written decision.\"\n            },\n            \"asset_ids\": []\n          },\n          \"subscription_ref\": \"alderbrook-jordan:claim-updates\",\n          \"extensions\": []\n        }\n      }\n    }\n  }\n}\n",
+      "errors": ""
+    }
+  ],
+  "passed": true,
+  "remaining": [
+    "App-specific approved workflow coverage",
+    "Human data/media/provenance review",
+    "Production remote authentication and deployment checks when applicable"
+  ]
+}

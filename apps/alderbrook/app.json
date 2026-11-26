@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "app_id": "alderbrook",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:alderbrook; author GitHub handle dipta007"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "alderbrook.request.issued",
+    "alderbrook.estimate.submitted",
+    "alderbrook.determination.issued",
+    "alderbrook.dispute.decided",
+    "alderbrook.offer.issued",
+    "alderbrook.payment.issued",
+    "alderbrook.repair.completed",
+    "alderbrook.claim.closed"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "One policyholder account at one synthetic insurer per App instance. The adjuster, the repair shop and the lender are not accounts: what they do arrives as events.",
+    "First-party property claims only: collision, comprehensive and renters personal property. No injury, liability, fault, premiums, bills or quotes.",
+    "MCP only: no GUI and no console for the adjuster or the shop.",
+    "The App has no timer and no scheduler. Deadlines, expired offers, overdue requests and rental days are computed from the supplied virtual time.",
+    "Amounts are task data. The App computes only the sums of its money summary, and a payment is a record: no money moves.",
+    "Evidence items are records with no file bytes: resources are not used.",
+    "Notifications reach Mail only through the Infra-run sender and Messaging. The App itself delivers nothing."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}
