@@ -1,7 +1,8 @@
 'use strict';
 // Agent business tools. Reads return derived views of the unchanged working copy (status, availability
 // and spoiler boundaries come from ctx.virtual_now and the diary at read time). Writes validate first
-// and then change only the bound account's state, adding one activity row each.
+// and then change only the bound account's state, adding one activity row each. Both see only the
+// records that exist at the run clock (catalog.visible); writes change the stored data.
 const {fail, copy, text} = require('./domain-utils.cjs');
 const {log} = require('./diagnostics.cjs');
 const c = require('./catalog.cjs');
@@ -11,8 +12,8 @@ const {checkDiaryEntry} = require('./model.cjs');
 const WRITE_CODES = {missing: 'not_found', date: 'invalid_date', rating: 'invalid_rating', args: 'invalid_arguments'};
 const limit = (list, n, d) => list.slice(0, n ?? d);
 
-function read(ctx, data, name, args) {
-  const idx = c.index(data), nowMs = c.instant(ctx.virtual_now);
+function read(ctx, stored, name, args) {
+  const data = c.visible(stored, ctx.virtual_now), idx = c.index(data), nowMs = c.instant(ctx.virtual_now);
   switch (name) {
     case 'kinodex.titles.search': {
       const terms = c.words(args.query || '');
@@ -167,7 +168,10 @@ function correctionById(data, id) {
 }
 
 function write(ctx, data, name, args) {
-  const idx = c.index(data), now = ctx.virtual_now, nowMs = c.instant(now), seq = r.nextSeq(data), req = {request_id: args.request_id};
+  // Lookups use the records that exist at the clock (a later one is not_found); new IDs avoid every
+  // stored ID; changes go to the stored data.
+  const now = ctx.virtual_now, nowMs = c.instant(now), view = c.visible(data, now), idx = c.index(view), all = c.index(data);
+  const seq = r.nextSeq(data), req = {request_id: args.request_id};
   switch (name) {
     case 'kinodex.services.update': {
       const patch = args.patch, before = {region: data.account.region, service_ids: copy(data.account.service_ids), settings_version: data.account.settings_version};
@@ -197,7 +201,7 @@ function write(ctx, data, name, args) {
       return {data, result: {id: 'watchlist', watchlist_version: data.watchlist.version, count: args.title_ids.length}};
     }
     case 'kinodex.diary.log': {
-      const entry = {entry_id: r.newId('diary', seq, idx.diary), title_id: args.title_id, episode_ids: copy(args.episode_ids || []), edition_id: args.edition_id ?? null,
+      const entry = {entry_id: r.newId('diary', seq, all.diary), title_id: args.title_id, episode_ids: copy(args.episode_ids || []), edition_id: args.edition_id ?? null,
         watched_on: args.watched_on, rewatch: args.rewatch === true, watched_with: copy(args.watched_with || []), rating: args.rating ?? null,
         review: copy(args.review ?? null), logged_at: now, updated_at: now};
       diaryEntry(ctx, data, idx, entry);
@@ -209,7 +213,6 @@ function write(ctx, data, name, args) {
     case 'kinodex.diary.update': {
       const entry = idx.diary.get(args.id);
       if (!entry) fail('not_found', 'Diary entry ' + args.id + ' does not exist.');
-      if (nowMs < c.instant(entry.logged_at)) fail('invalid_date', 'The clock (' + now + ') is earlier than when this entry was logged (' + entry.logged_at + '); load history at or after its latest record.');
       const next = {...copy(entry), ...copy(args.patch)}, changed = Object.keys(args.patch).filter(k => JSON.stringify(args.patch[k]) !== JSON.stringify(entry[k]));
       if (!changed.length) fail('no_change', 'The patch matches the entry as it is.');
       diaryEntry(ctx, data, idx, next);
@@ -231,7 +234,7 @@ function write(ctx, data, name, args) {
     case 'kinodex.lists.create': {
       if (!text(args.name, 120)) fail('invalid_arguments', 'List names cannot be blank.');
       titlesExist(idx, args.title_ids || []);
-      const list = {list_id: r.newId('list', seq, idx.lists), name: args.name, description: args.description ?? '', visibility: args.visibility ?? 'private',
+      const list = {list_id: r.newId('list', seq, all.lists), name: args.name, description: args.description ?? '', visibility: args.visibility ?? 'private',
         version: 1, title_ids: copy(args.title_ids || []), created_at: now, updated_at: now};
       data.lists.push(list);
       r.record(ctx, data, {action: name, ...req, object_type: 'list', object_id: list.list_id});
@@ -263,15 +266,16 @@ function write(ctx, data, name, args) {
     case 'kinodex.alerts.create': {
       const t = c.title(idx, args.title_id);
       if (args.kind === 'new_season' && t.kind !== 'series') fail('invalid_arguments', 'new_season rules need a series; ' + t.name + ' is a film.');
-      const rule = {alert_id: r.newId('alert', seq, idx.alerts), kind: args.kind, title_id: t.title_id, offer_type: args.offer_type ?? null,
+      const rule = {alert_id: r.newId('alert', seq, all.alerts), kind: args.kind, title_id: t.title_id, offer_type: args.offer_type ?? null,
         threshold: args.threshold ?? null, expires_at: args.expires_at ?? null, status: 'active', created_at: now, updated_at: now,
         known_seasons: args.kind === 'new_season' ? t.seasons.map(s => s.season_number) : [], trigger: null};
       r.checkThreshold(idx, data, rule, nowMs);
       if (rule.expires_at !== null && c.instant(rule.expires_at) <= nowMs) fail('invalid_date', 'expires_at must be after the current time.');
-      if (data.alerts.some(a => a.kind === rule.kind && a.title_id === rule.title_id && c.alertStatus(a, nowMs) === 'active')) {
+      if (view.alerts.some(a => a.kind === rule.kind && a.title_id === rule.title_id && c.alertStatus(a, nowMs) === 'active')) {
         fail('duplicate_alert', 'An active ' + rule.kind + ' rule already exists for ' + t.name + '.');
       }
       r.checkAlreadyTrue(idx, data, rule, nowMs);
+      r.dropLater(data, 'alerts', 'alert_id', 'created_at', a => a.kind === rule.kind && a.title_id === rule.title_id, nowMs);
       data.alerts.push(rule);
       r.record(ctx, data, {action: name, ...req, object_type: 'alert', object_id: rule.alert_id});
       log(ctx, name, {alert_id: rule.alert_id, kind: rule.kind});
@@ -279,20 +283,21 @@ function write(ctx, data, name, args) {
     }
     case 'kinodex.alerts.update':
     case 'kinodex.alerts.delete': {
-      const a = alertById(data, args.id), status = c.alertStatus(a, nowMs);
-      if (status !== 'active') fail('not_active', 'Alert ' + a.alert_id + ' is ' + status + '; only active, unexpired rules can change.');
-      const before = copy(a);
-      if (name === 'kinodex.alerts.delete') {
-        a.status = 'deleted'; a.updated_at = now;
-      } else {
-        const next = {...copy(a), ...copy(args.patch)};
-        if (args.patch.threshold !== undefined && a.kind !== 'price_below') fail('invalid_threshold', 'Only price_below rules take a threshold.');
+      const seen = alertById(view, args.id), status = c.alertStatus(seen, nowMs);
+      if (status !== 'active') fail('not_active', 'Alert ' + seen.alert_id + ' is ' + status + '; only active, unexpired rules can change.');
+      const before = copy(seen);
+      if (name === 'kinodex.alerts.update') {
+        const next = {...copy(seen), ...copy(args.patch)};
+        if (args.patch.threshold !== undefined && seen.kind !== 'price_below') fail('invalid_threshold', 'Only price_below rules take a threshold.');
         if (next.expires_at !== null && c.instant(next.expires_at) <= nowMs) fail('invalid_date', 'expires_at must be after the current time.');
-        if (!Object.keys(args.patch).some(k => JSON.stringify(args.patch[k]) !== JSON.stringify(a[k]))) fail('no_change', 'The patch matches the rule as it is.');
+        if (!Object.keys(args.patch).some(k => JSON.stringify(args.patch[k]) !== JSON.stringify(seen[k]))) fail('no_change', 'The patch matches the rule as it is.');
         r.checkThreshold(idx, data, next, nowMs);
         r.checkAlreadyTrue(idx, data, next, nowMs, false);
-        Object.assign(a, copy(args.patch)); a.updated_at = now;
       }
+      // A rule that the seed triggers or deletes after the clock loses that later history (see rules.adopt).
+      const a = r.adopt(data, 'alerts', 'alert_id', seen, nowMs);
+      if (name === 'kinodex.alerts.delete') {a.status = 'deleted'; a.updated_at = now;}
+      else {Object.assign(a, copy(args.patch)); a.updated_at = now;}
       r.record(ctx, data, {action: name, ...req, object_type: 'alert', object_id: a.alert_id, replaced: before});
       log(ctx, name, {alert_id: a.alert_id});
       return {data, result: {id: a.alert_id, alert: c.alertView(idx, a, nowMs)}};
@@ -302,11 +307,13 @@ function write(ctx, data, name, args) {
       const current = r.currentValue(idx, t.title_id, args.field, args.target);
       r.checkProposed(args.field, args.target, args.proposed_value);
       if (!text(args.evidence, 2000)) fail('invalid_arguments', 'An evidence note is required.');
-      if (data.corrections.some(co => r.isOpen(co) && co.title_id === t.title_id && co.field === args.field && r.sameTarget(co.target, args.target))) {
+      const sameKey = co => co.title_id === t.title_id && co.field === args.field && r.sameTarget(co.target, args.target);
+      if (view.corrections.some(co => r.isOpen(co) && sameKey(co))) {
         fail('already_submitted', 'An open ' + args.field + ' correction already exists for this target of ' + t.name + '.');
       }
       if (r.sameValue(current, args.proposed_value)) fail('no_change', 'The proposed value equals the current value (' + JSON.stringify(current) + ').');
-      const co = {correction_id: r.newId('corr', seq, idx.corrections), title_id: t.title_id, field: args.field, target: copy(args.target),
+      r.dropLater(data, 'corrections', 'correction_id', 'submitted_at', sameKey, nowMs);
+      const co = {correction_id: r.newId('corr', seq, all.corrections), title_id: t.title_id, field: args.field, target: copy(args.target),
         proposed_value: copy(args.proposed_value), current_value: copy(current), evidence: args.evidence, status: 'submitted', submitted_at: now,
         updated_at: now, amended_at: null, withdrawn_at: null, decisions: []};
       data.corrections.push(co);
@@ -315,7 +322,7 @@ function write(ctx, data, name, args) {
       return {data, result: {id: co.correction_id, correction: {...copy(co), title_name: t.name}}};
     }
     case 'kinodex.corrections.amend': {
-      const co = correctionById(data, args.id);
+      const seen = correctionById(view, args.id), co = seen;
       if (co.status === 'submitted') fail('already_submitted', 'Correction ' + co.correction_id + ' is already submitted and awaiting a decision.');
       if (co.status !== 'needs_info') fail('already_decided', 'Correction ' + co.correction_id + ' is ' + co.status + '.');
       if (co.amended_at !== null) fail('already_decided', 'Correction ' + co.correction_id + ' was already amended once.');
@@ -323,17 +330,18 @@ function write(ctx, data, name, args) {
       r.checkProposed(co.field, co.target, proposed);
       if (args.patch.evidence !== undefined && !text(args.patch.evidence, 2000)) fail('invalid_arguments', 'An evidence note is required.');
       if (r.sameValue(current, proposed)) fail('no_change', 'The proposed value equals the current value (' + JSON.stringify(current) + ').');
-      if (!Object.keys(args.patch).some(k => JSON.stringify(args.patch[k]) !== JSON.stringify(co[k]))) fail('no_change', 'The amendment changes nothing.');
-      const before = copy(co);
-      Object.assign(co, copy(args.patch)); co.current_value = copy(current); co.status = 'submitted'; co.amended_at = now; co.updated_at = now;
-      r.record(ctx, data, {action: name, ...req, object_type: 'correction', object_id: co.correction_id, replaced: before});
-      log(ctx, name, {correction_id: co.correction_id});
-      return {data, result: {id: co.correction_id, correction: {...copy(co), title_name: idx.titles.get(co.title_id).name}}};
+      if (!Object.keys(args.patch).some(k => JSON.stringify(args.patch[k]) !== JSON.stringify(seen[k]))) fail('no_change', 'The amendment changes nothing.');
+      const before = copy(seen), stored = r.adopt(data, 'corrections', 'correction_id', seen, nowMs);
+      Object.assign(stored, copy(args.patch)); stored.current_value = copy(current); stored.status = 'submitted'; stored.amended_at = now; stored.updated_at = now;
+      r.record(ctx, data, {action: name, ...req, object_type: 'correction', object_id: stored.correction_id, replaced: before});
+      log(ctx, name, {correction_id: stored.correction_id});
+      return {data, result: {id: stored.correction_id, correction: {...copy(stored), title_name: idx.titles.get(stored.title_id).name}}};
     }
     case 'kinodex.corrections.withdraw': {
-      const co = correctionById(data, args.id);
-      if (!r.isOpen(co)) fail('already_decided', 'Correction ' + co.correction_id + ' is ' + co.status + ' and can no longer be withdrawn.');
-      const before = copy(co);
+      const seen = correctionById(view, args.id);
+      if (!r.isOpen(seen)) fail('already_decided', 'Correction ' + seen.correction_id + ' is ' + seen.status + ' and can no longer be withdrawn.');
+      // A correction that the seed decides after the clock loses those later decisions (see rules.adopt).
+      const before = copy(seen), co = r.adopt(data, 'corrections', 'correction_id', seen, nowMs);
       co.status = 'withdrawn'; co.withdrawn_at = now; co.updated_at = now;
       r.record(ctx, data, {action: name, ...req, object_type: 'correction', object_id: co.correction_id, replaced: before});
       log(ctx, name, {correction_id: co.correction_id});

@@ -3,6 +3,9 @@
 // event IDs, rejects a reused ID with different content and rolls back failures (data and clock).
 // During applyEvent, ctx.virtual_now equals event.at. A missing target fails with target_not_found;
 // any other inconsistency fails with invalid_event, checked here before Core's re-validation.
+// Targets and rule evaluation use the records that exist at the event time (catalog.visible);
+// consistency checks (season and episode numbers, guide version order, diary dates against release
+// dates) use every stored record, so an event that collides with a later seeded record is invalid_event.
 const {fail, copy} = require('./domain-utils.cjs');
 const {log} = require('./diagnostics.cjs');
 const c = require('./catalog.cjs');
@@ -109,11 +112,13 @@ function correctionDecision(ctx, data, event) {
   const p = event.payload, ref = p.correction_ref, idx = c.index(data);
   // The full key is {title_id, field, target}. The approved proposal's example omits target; that
   // short form is accepted only when exactly one open correction matches the title and field.
-  const open = data.corrections.filter(co => r.isOpen(co) && co.title_id === ref.title_id && co.field === ref.field
+  // Only corrections submitted by the event time count, each in its state as of then.
+  const open = c.visible(data, event.at).corrections.filter(co => r.isOpen(co) && co.title_id === ref.title_id && co.field === ref.field
     && (ref.target === undefined || r.sameTarget(co.target, ref.target)));
   if (!open.length) fail('target_not_found', 'No open ' + ref.field + ' correction matches ' + JSON.stringify(ref) + '.');
   if (open.length > 1) fail('target_not_found', open.length + ' open ' + ref.field + ' corrections match ' + ref.title_id + '; name the target to choose one.');
-  const co = open[0], before = copy(co);
+  // A correction that the seed decides after the event time loses those later decisions (see rules.adopt).
+  const before = copy(open[0]), co = r.adopt(data, 'corrections', 'correction_id', open[0], c.instant(event.at));
   if (p.decision === 'needs_info' && (co.status === 'needs_info' || co.amended_at !== null)) {
     fail('invalid_event', 'Correction ' + co.correction_id + ' already ' + (co.status === 'needs_info' ? 'awaits information' : 'used its one amendment') + '; decide approved or declined.');
   }

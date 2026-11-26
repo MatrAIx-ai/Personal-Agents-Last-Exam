@@ -96,7 +96,8 @@ const SEED_CODES = {missing: 'invalid_seed', date: 'invalid_seed', rating: 'inva
 function validateSeed(ctx, data) {
   references(ctx, data);
   // Seed dates are never compared with the run clock: Core validates package fixtures at registration
-  // under the registry's initial time, and tasks may load history for any date.
+  // under the registry's initial time. Tools show only the records that exist at the clock
+  // (catalog.visible), so a seed that runs past the clock loads at any point in its window.
   unique(data.services, 'service_id', 'service');
   unique(data.titles, 'title_id', 'title');
   const editions = new Set();

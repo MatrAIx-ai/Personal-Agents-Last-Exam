@@ -496,18 +496,131 @@ test('T13 events: each operation validates its payload; failures leave data and 
 });
 
 test('T13 writes and events on history dated after the clock fail with clear App errors, never invalid_seed', () => {
-  // A diary entry watched "today" but logged later that evening, with the clock in between.
+  // A diary entry watched "today" but logged later that evening, with the clock in between: it is not in Kinodex yet.
   const last = seed.diary.at(-1);
   const early = fixture({virtual_now: last.watched_on + 'T12:00:00-08:00'});
   assert.ok(Date.parse(early.ctx.virtual_now) < Date.parse(last.logged_at));
-  unchanged(early, () => early.call('kinodex.diary.update', {id: last.entry_id, patch: {rating: 3}}), /earlier than when this entry was logged/);
-  // A guide correction decided before the title's current guide version was published.
+  unchanged(early, () => early.call('kinodex.diary.update', {id: last.entry_id, patch: {rating: 3}}), code('not_found'));
+  // A guide correction decided before the title's current guide version was published: the event's
+  // consistency check uses every stored version, so the later seeded version makes it invalid_event.
   const g = seed.guides.find(x => x.versions.length > 1 && x.versions.at(-1).published_at.startsWith('2026-09'));
   const item = Object.values(g.versions.at(-1).categories).flatMap(x => x.items).find(i => !i.spoiler);
   const f = fixture({virtual_now: '2026-09-01T00:00:00Z'});
   f.call('kinodex.corrections.submit', {title_id: g.title_id, field: 'guide_item', target: {item_id: item.item_id}, proposed_value: {spoiler: true}, evidence: 'It gives away the ending.'});
   unchanged(f, () => f.event({event_id: 'early-approval', at: '2026-09-02T00:00:00Z', operation: 'correction.decision',
     payload: {correction_ref: {title_id: g.title_id, field: 'guide_item', target: {item_id: item.item_id}}, decision: 'approved'}}), code('invalid_event'));
+});
+
+// ---- Clock cutoff (added after plan approval) ---------------------------------------------
+// Tools show only the records that exist at the clock (src/catalog.cjs visible); nothing is stored for it.
+const catalogView = require('../src/catalog.cjs').visible;
+const PDT = (date, time) => date + 'T' + time + ':00-07:00';
+const after = (list, field, at) => list.filter(x => Date.parse(x[field]) > Date.parse(at));
+
+test('Cutoff: at the fixture clock both shipped seeds show every stored record', () => {
+  assert.deepEqual(catalogView(seed, clock), seed);
+  assert.deepEqual(catalogView(inesSeed, clock), inesSeed);
+});
+
+test('Cutoff: Ines\'s seed loaded before its latest records shows only what existed at the clock', () => {
+  // Ines's history runs to Nov 2026. On March 1, 2026 her later diary entries, her list (March 7), Harbor Lights
+  // season 2 (added Sept 1) and the later guide versions and public reviews are not in Kinodex yet.
+  const at = '2026-03-01T12:00:00Z', now = Date.parse(at);
+  const f = fixture({seed: inesSeed, binding: inesBinding, virtual_now: at}), before = f.text;
+  const shown = (list, field) => list.filter(x => Date.parse(x[field]) <= now);
+  const diary = f.call('kinodex.diary.list', {limit: 500});
+  assert.equal(diary.total, shown(inesSeed.diary, 'logged_at').length);
+  assert.ok(diary.total > 0 && diary.total < inesSeed.diary.length);
+  assert.ok(diary.entries.every(e => Date.parse(e.logged_at) <= now));
+  assert.equal(f.call('kinodex.account.get').people[0].diary_entries, diary.total);
+  assert.deepEqual(f.call('kinodex.lists.list').lists, []);
+  assert.throws(() => f.call('kinodex.lists.get', {list_id: 'ls-01'}), code('not_found'));
+  const reviews = f.call('kinodex.reviews.list', {source: 'public', limit: 200}).reviews;
+  assert.equal(reviews.length, shown(inesSeed.public_reviews, 'posted_at').length);
+  assert.ok(reviews.every(r => Date.parse(r.posted_at) <= now));
+  const harbor = f.call('kinodex.titles.get', {title_id: 'tt-harbor-lights'}).title;
+  assert.deepEqual([harbor.seasons.map(s => s.season_number), [...new Set(harbor.episodes.map(e => e.season_number))]], [[1], [1]]);
+  assert.throws(() => f.call('kinodex.episodes.list', {title_id: 'tt-harbor-lights', season_number: 2}), code('not_found'));
+  const g = inesSeed.guides.find(x => x.versions.length > 1 && Date.parse(x.versions[1].published_at) > now);
+  assert.deepEqual(f.call('kinodex.guide.get', {title_id: g.title_id}).guide.versions.map(v => v.version), [1]);
+  assert.throws(() => f.call('kinodex.guide.get', {title_id: g.title_id, version: 2}), code('not_found'));
+  // Writes on later records are not_found and change nothing.
+  const next = inesSeed.diary.find(e => Date.parse(e.logged_at) > now);
+  unchanged(f, () => f.call('kinodex.diary.update', {id: next.entry_id, patch: {rating: 2}}), code('not_found'));
+  unchanged(f, () => f.call('kinodex.diary.delete', {id: next.entry_id}), code('not_found'));
+  unchanged(f, () => f.call('kinodex.lists.save', {id: 'ls-01', patch: {name: 'Renamed'}}), code('not_found'));
+  unchanged(f, () => f.call('kinodex.diary.log', {title_id: 'tt-harbor-lights', episode_ids: ['ep-harbor-lights-s2e1'], watched_on: '2026-02-28'}), code('not_found'));
+  assert.equal(f.text, before, 'Reads and rejected writes change nothing');
+  // Time passing writes nothing; the later records appear because the clock reached them.
+  f.advance(clock);
+  assert.equal(f.text, before);
+  assert.equal(f.call('kinodex.diary.list', {limit: 500}).total, inesSeed.diary.length);
+  assert.equal(f.call('kinodex.lists.get', {list_id: 'ls-01'}).list.list_id, 'ls-01');
+  assert.deepEqual(f.call('kinodex.titles.get', {title_id: 'tt-harbor-lights'}).title.seasons.map(s => s.season_number), [1, 2]);
+  assert.equal(f.call('kinodex.guide.get', {title_id: g.title_id}).guide.current_version, g.versions.length);
+  assert.deepEqual(f.call('kinodex.diary.update', {id: next.entry_id, patch: {rating: next.rating === 2 ? 3 : 2}}).changed_fields, ['rating']);
+});
+
+test('Cutoff: an early write changes only what exists at the clock; later seeded records stay byte-identical', () => {
+  const at = PT('2026-01-20', '12:00');
+  const f = fixture({virtual_now: at});
+  const hidden = d => JSON.stringify([after(d.diary, 'logged_at', at), after(d.lists, 'created_at', at), after(d.alerts, 'created_at', at),
+    after(d.corrections, 'submitted_at', at), after(d.notices, 'at', at), after(d.public_reviews, 'posted_at', at)]);
+  const before = hidden(f.data);
+  const logged = f.call('kinodex.diary.log', {title_id: 'tt-salt-year', watched_on: '2026-01-18', rating: 3.5});
+  const list = f.call('kinodex.lists.create', {name: 'January catch-up', title_ids: ['tt-salt-year']});
+  assert.equal(hidden(f.data), before);
+  assert.ok(!seed.diary.some(e => e.entry_id === logged.id) && !seed.lists.some(l => l.list_id === list.id), 'New IDs avoid hidden records');
+  f.advance(clock);
+  assert.equal(f.call('kinodex.diary.list', {limit: 500}).total, seed.diary.length + 1);
+  assert.equal(f.call('kinodex.lists.list').lists.length, seed.lists.length + 1);
+});
+
+test('Cutoff: rules and corrections read as of the clock; a write or event on them replaces their later seeded history', () => {
+  // On March 15, 2026 al-01 (created Feb 10) has not fired yet (Apr 14) and co-01 (submitted Mar 11) is undecided (Mar 20).
+  const f = fixture({virtual_now: PDT('2026-03-15', '12:00')});
+  const alerts = Object.fromEntries(f.call('kinodex.alerts.list').alerts.map(a => [a.alert_id, a]));
+  assert.deepEqual(Object.keys(alerts).sort(), ['al-01', 'al-02']);
+  assert.deepEqual([alerts['al-01'].status, alerts['al-01'].trigger, alerts['al-01'].updated_at], ['active', null, seed.alerts[0].created_at]);
+  assert.deepEqual(f.call('kinodex.corrections.list').corrections.map(x => [x.correction_id, x.status, x.decisions.length, x.updated_at]),
+    [['co-01', 'submitted', 0, seed.corrections[0].submitted_at]]);
+  assert.deepEqual(f.call('kinodex.notices.list').notices, []);
+  unchanged(f, () => f.call('kinodex.alerts.delete', {id: 'al-03'}), code('not_found'));
+  unchanged(f, () => f.call('kinodex.corrections.withdraw', {id: 'co-03'}), code('not_found'));
+  // The agent withdraws co-01 before its seeded approval: the approval and its notice are replaced.
+  f.call('kinodex.corrections.withdraw', {id: 'co-01'});
+  const co01 = f.data.corrections.find(x => x.correction_id === 'co-01');
+  assert.deepEqual([co01.status, co01.decisions, co01.withdrawn_at], ['withdrawn', [], f.ctx.virtual_now]);
+  assert.ok(!f.data.notices.some(n => n.correction_id === 'co-01'));
+  // An event while al-01 is active fires it at the event time; the seeded April trigger and notice are replaced.
+  const ruskford = seed.offers.find(o => o.offer_id === seed.alerts[0].trigger.offer.offer_id), at = PDT('2026-03-20', '09:00');
+  f.event({event_id: 'ruskford-early', at, operation: 'offer.publish', payload: {...structuredClone(ruskford), available_from: at}});
+  const al01 = f.data.alerts.find(a => a.alert_id === 'al-01');
+  assert.deepEqual([al01.status, al01.trigger.at, al01.trigger.event_id], ['triggered', at, 'ruskford-early']);
+  assert.deepEqual(f.data.notices.filter(n => n.alert_id === 'al-01').map(n => n.at), [at]);
+  // Events reach only what exists at their time: co-03 is submitted on Nov 20.
+  unchanged(f, () => f.event({event_id: 'co-03-early', at: PDT('2026-03-21', '09:00'), operation: 'correction.decision',
+    payload: {correction_ref: {title_id: 'tt-pellmoor-junction', field: 'credit'}, decision: 'approved'}}), code('target_not_found'));
+});
+
+test('Cutoff: an event before a rule was created does not fire it', () => {
+  const f = fixture({virtual_now: '2026-01-31T00:00:00Z'}), before = f.data.alerts.find(a => a.alert_id === 'al-01');
+  const ruskford = seed.offers.find(o => o.offer_id === before.trigger.offer.offer_id), at = '2026-02-01T00:00:00Z';
+  f.event({event_id: 'ruskford-before-rule', at, operation: 'offer.publish', payload: {...structuredClone(ruskford), available_from: at}});
+  assert.deepEqual(f.data.alerts.find(a => a.alert_id === 'al-01'), before);
+  assert.deepEqual(f.data.activity[0].effects, {alert_ids: [], notice_ids: []});
+});
+
+test('Cutoff: a new rule or correction replaces a seeded one on the same key that is created after the clock', () => {
+  // al-04 (price_below rent on Marrow Bay) is created on Nov 2 and co-03 (Pellmoor Junction credit) on Nov 20.
+  const f = fixture({virtual_now: PDT('2026-10-01', '12:00')});
+  const rule = f.call('kinodex.alerts.create', {kind: 'price_below', title_id: 'tt-marrow-bay', offer_type: 'rent', threshold: 2.5});
+  assert.deepEqual(f.data.alerts.filter(a => a.title_id === 'tt-marrow-bay').map(a => a.alert_id), [rule.id]);
+  const co = f.call('kinodex.corrections.submit', {title_id: 'tt-pellmoor-junction', field: 'credit', target: {credit_id: 'cr-00083'},
+    proposed_value: {character: 'Marta Kessling'}, evidence: 'The end credits spell it with a double s.'});
+  assert.deepEqual(f.data.corrections.filter(x => x.title_id === 'tt-pellmoor-junction').map(x => x.correction_id), [co.id]);
+  f.advance(clock);
+  assert.deepEqual(f.call('kinodex.alerts.list', {title_id: 'tt-marrow-bay'}).alerts.map(a => a.alert_id), [rule.id]);
 });
 
 test('T13 the guide update for a watchlist title writes one guide notice; Lantern Hill (not on the watchlist) writes none', () => {
@@ -633,4 +746,78 @@ test('T13 diagnostics carry IDs only and cannot change business results', () => 
   assert.deepEqual(on.logs.map(l => l.step), ['kinodex.event.title.update', 'kinodex.diary.log']);
   assert.equal(off.logs.length, 0);
   assert.doesNotMatch(JSON.stringify(on.logs), /Salt Year|Lantern|barn|review/);
+});
+
+// ---- Evaluation dataset, 2025-01-01 to 2026-12-31 (added after plan approval) ----------------
+test('Evaluation dataset: counts and sha256 match the file; at four clocks nothing dated later is visible and reads change nothing', () => {
+  const fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto');
+  const text = fs.readFileSync(path.resolve(__dirname, '../data/evaluation/seed.json'), 'utf8'), evalSeed = JSON.parse(text);
+  const meta = require('../data/evaluation/dataset.json'), evalBinding = require('../data/evaluation/binding.json');
+  const evalClock = require('../data/evaluation/clock.json').initial_time, end = '2026-12-31T23:59:00-08:00';
+  assert.equal(meta.expected_counts.records, plugin.records(evalSeed).length);
+  assert.equal(meta.sources.find(s => s.source_id === 'generated').generation.parameters.outputs['seed.json'].sha256, crypto.createHash('sha256').update(text).digest('hex'));
+  assert.ok(require('./schema-validator.cjs').compile(require('../schemas/dataset.schema.json'), path.resolve(__dirname, '../schemas'))(meta), 'dataset.json is a valid bundle dataset');
+  assert.ok(Buffer.byteLength(JSON.stringify(evalSeed)) < 1.5e6, 'Compact seed under 1.5 MB, one env.load_seed request');
+  assert.equal(evalClock, clock, 'The dataset clock is the fixture clock');
+  // Dana's private records all exist by the dataset clock; only catalog records come later.
+  const before = (list, field) => list.every(x => Date.parse(x[field]) <= Date.parse(evalClock));
+  assert.ok(before(evalSeed.diary, 'logged_at') && before(evalSeed.alerts, 'created_at') && before(evalSeed.corrections, 'submitted_at') && before(evalSeed.notices, 'at') && before(evalSeed.lists, 'created_at'));
+  // Fields that record when something happened; a later value must never reach the agent. updated_at is checked on
+  // diary entries, rules and corrections; the watchlist, list and account stamps are current state (see README).
+  const HAPPENED = new Set(['logged_at', 'posted_at', 'created_at', 'submitted_at', 'decided_at', 'amended_at', 'withdrawn_at', 'at']);
+  function walk(value, now, where, extra = []) {
+    if (Array.isArray(value)) {value.forEach(x => walk(x, now, where, extra)); return;}
+    if (!value || typeof value !== 'object') return;
+    for (const [k, v] of Object.entries(value)) {
+      if ((HAPPENED.has(k) || extra.includes(k)) && typeof v === 'string') assert.ok(Date.parse(v) <= now, where + ': ' + k + ' ' + v);
+      else walk(v, now, where, extra);
+    }
+  }
+  const series = evalSeed.titles.filter(t => t.kind === 'series'), versioned = evalSeed.guides.filter(g => g.versions.length > 1);
+  for (const at of ['2025-03-15T12:00:00-07:00', '2025-12-31T23:59:00-08:00', evalClock, end]) {
+    const now = Date.parse(at), shown = (list, field) => list.filter(x => Date.parse(x[field]) <= now);
+    const data = JSON.parse(text), ctx = {app_id: 'kinodex', role: 'agent', virtual_now: at, binding: evalBinding};
+    const call = (name, args = {}) => plugin.handleTool(ctx, data, name, args).result;
+    const diary = call('kinodex.diary.list', {limit: 500});
+    assert.equal(diary.total, shown(evalSeed.diary, 'logged_at').length, 'diary at ' + at);
+    walk(diary, now, 'diary.list', ['updated_at']);
+    assert.equal(call('kinodex.account.get').people[0].diary_entries, diary.total);
+    const reviews = call('kinodex.reviews.list', {source: 'public', limit: 200}).reviews;
+    assert.equal(reviews.length, Math.min(200, shown(evalSeed.public_reviews, 'posted_at').length));
+    walk(reviews, now, 'reviews.list');
+    const notices = call('kinodex.notices.list', {limit: 500}).notices;
+    assert.equal(notices.length, shown(evalSeed.notices, 'at').length);
+    walk(notices, now, 'notices.list');
+    const alerts = call('kinodex.alerts.list').alerts;
+    assert.equal(alerts.length, shown(evalSeed.alerts, 'created_at').length);
+    walk(alerts, now, 'alerts.list', ['updated_at']);
+    const corrections = call('kinodex.corrections.list').corrections;
+    assert.equal(corrections.length, shown(evalSeed.corrections, 'submitted_at').length);
+    walk(corrections, now, 'corrections.list', ['updated_at']);
+    const lists = call('kinodex.lists.list').lists;
+    assert.equal(lists.length, shown(evalSeed.lists, 'created_at').length);
+    for (const l of lists) walk(call('kinodex.lists.get', {list_id: l.list_id}), now, 'lists.get');
+    for (const t of series) {
+      const view = call('kinodex.titles.get', {title_id: t.title_id}).title, seasons = shown(t.seasons, 'added_at').map(s => s.season_number);
+      assert.deepEqual(view.seasons.map(s => s.season_number), seasons, t.title_id + ' seasons at ' + at);
+      assert.ok(view.episodes.every(e => seasons.includes(e.season_number)));
+    }
+    for (const g of versioned) {
+      const guide = call('kinodex.guide.get', {title_id: g.title_id}).guide;
+      assert.equal(guide.current_version, Math.max(1, ...shown(g.versions, 'published_at').map(v => v.version)), g.title_id + ' guide at ' + at);
+      assert.ok(guide.versions.every(v => v.version === 1 || Date.parse(v.published_at) <= now));
+    }
+    assert.equal(JSON.stringify(data), JSON.stringify(evalSeed), 'Reads change nothing');
+  }
+  // By the end of 2026 every record is visible.
+  assert.deepEqual(catalogView(evalSeed, end), evalSeed);
+  // At the dataset clock the December requests see what they see in the fixture.
+  const answers = s => {
+    const f = fixture({seed: s, logging: false}), ids = f.call('kinodex.watchlist.get').items.map(i => i.title_id);
+    const named = ['tt-lantern-hill', 'tt-fieldglass', 'tt-copper-sky', 'tt-quiet-harbour', 'tt-salt-year', 'tt-wrenfield-clock', 'tt-pellmoor-junction', 'tt-ambervane', 'tt-marrow-bay', 'tt-harbor-lights', 'tt-pocket-comets'];
+    return {leaving: f.call('kinodex.offers.search', {title_ids: ids, on_my_services: true}).results.map(x => [x.name, x.my_subscriptions]),
+      titles: named.map(id => [f.call('kinodex.titles.get', {title_id: id}).title, f.call('kinodex.offers.for_title', {title_id: id}).result]),
+      wrenfield: f.call('kinodex.diary.list', {title_id: 'tt-wrenfield-clock'}).entries, comets: f.call('kinodex.episodes.list', {title_id: 'tt-pocket-comets', hide_spoilers: true})};
+  };
+  assert.deepEqual(answers(evalSeed), answers(seed));
 });

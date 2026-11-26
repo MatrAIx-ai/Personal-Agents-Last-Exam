@@ -1,0 +1,76 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "kinodex-evaluation-2025-2026",
+  "version": "1.0.0",
+  "description": "Synthetic evaluation catalog and one viewer account (Dana Marsh, US) covering 2025-01-01 through 2026-12-31 (America/Los_Angeles): the fixture catalog and account with one review or synopsis text per record, plus parental-guide updates, new seasons, public reviews to Dec. 30, 2026, and two years of alerts, corrections, notices and lists. Dana's history ends at the fixture clock (2026-12-01 09:00 -08:00). Loadable with env.load_seed at any clock in the window; Kinodex shows only the records that exist at the clock. expected_counts.records counts titles (plugin.records).",
+  "record_source_ids": [
+    "authored",
+    "generated"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Original fictional text authored for this package by @byshail. All titles, people, services, prices, reviews and guide text are invented; no external film, TV, streaming or review data were collected, translated or adapted.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "dev/build-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20261201,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "generated",
+      "kind": "synthetic",
+      "description": "Template-generated fictional review texts, episode synopses, guide updates, seasons and account history written by dev/build-dataset.cjs from the fixture's titles, people and word lists. All titles, people, services and reviews are invented; nothing was collected from real websites.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "template",
+        "tool": "dev/build-dataset.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20250101,
+        "parameters": {
+          "window": [
+            "2025-01-01",
+            "2026-12-31"
+          ],
+          "time_zone": "America/Los_Angeles",
+          "clock": "2026-12-01T09:00:00-08:00",
+          "base": "fixtures/minimal.json",
+          "outputs": {
+            "seed.json": {
+              "sha256": "95aa56ff242038af932c8332b9bd4a6efb866ccb8759c069f46603f2e7cbbd55",
+              "bytes": 1347301
+            }
+          }
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Every fixture record is kept with its ID, dates, ratings and flags. Public review texts (except rv-lh-01), Dana's diary review texts (except her Wrenfield Clock review) and the synopses of the generated series' episodes are rewritten, one text per record, because the fixture draws them from short phrase lists; repeated episode names within a series are renamed.",
+    "Added records: guide versions, two seasons with their episodes, public reviews from 2026-10-15 to 2026-12-30, and Dana's alerts, corrections, notices and lists. Alert triggers, decision notices and guide versions are written as the App's events would write them."
+  ],
+  "expected_counts": {
+    "records": 184,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation, name collisions and reuse permissions."
+  }
+}

@@ -24,7 +24,7 @@ One App instance holds the public catalog and one bound account. A second accoun
 | `watchlist` | account | One ordered list of titles with `version` (App field, read as `watchlist_version`). |
 | `diary` | account | Entries for a title, or for episodes of a series. Each has an optional edition, `watched_on` date, `rewatch`, `watched_with` (`person_id`s from the binding), an optional half-star rating and an optional review (`contains_spoilers`, visibility `private`, `friends` or `public`). |
 | `lists` | account | Custom lists with name, description, visibility, ordered titles and `version` (App field, read as `list_version`). |
-| `alerts` | account | Alert rules. Stored status is `active`, `triggered` or `deleted`; reads derive `expired` from the clock. A triggered rule keeps its `trigger`. |
+| `alerts` | account | Alert rules. Stored status is `active`, `triggered` or `deleted`; reads derive `expired` from the clock, and read a trigger or deletion dated after the clock as `active` (see [Clock cutoff](#clock-cutoff)). A triggered rule keeps its `trigger`. |
 | `corrections` | account | Corrections the account submitted, with target, proposed and current value, evidence, status and every decision. |
 | `notices` | account | In-app notices written by events. |
 | `activity` | account | One row per committed write or applied event (see [State and time](#state-and-time)). |
@@ -96,8 +96,8 @@ All errors leave data and every version unchanged. Core adds `invalid_arguments`
 
 | Code | When |
 | --- | --- |
-| `not_found` | Unknown title, episode, edition, credit, guide item, person, service, region, list, alert or correction; an episode outside the named series; `as_of_person` outside the diary's history. Region arguments are plain strings so that an unknown region reaches the App |
-| `invalid_date` | `watched_on` after today (in the account's time zone) or before the title's earliest release in any region (or the episode's air date); an `expires_at` that is not in the future; an impossible date; editing a diary entry while the clock is earlier than when it was logged (history loaded under an earlier clock) |
+| `not_found` | Unknown title, episode, edition, credit, guide item, guide version, person, service, region, list, alert, correction or diary entry, including one dated after the clock ([Clock cutoff](#clock-cutoff)); an episode outside the named series; `as_of_person` outside the diary's history. Region arguments are plain strings so that an unknown region reaches the App |
+| `invalid_date` | `watched_on` after today (in the account's time zone) or before the title's earliest release in any region (or the episode's air date); an `expires_at` that is not in the future; an impossible date |
 | `invalid_rating` | A rating that is not a half-star step from 0.5 to 5 (3.3, 0, 5.5) |
 | `invalid_threshold` | `price_below` without `offer_type` and a positive threshold; a threshold on another kind; a title with no rent or buy offer of that type (current or upcoming) in the account's region, for example subscription-only *Fieldglass* in the US |
 | `already_true` | A new or updated offer rule already matches. The message names the matching offer (ID, service, type, region, price, end); no rule is stored or changed |
@@ -126,12 +126,12 @@ Infra applies four event types. The runner controls their timing; Kinodex has no
 | `title.update` | `title_id` plus any of `add_seasons`, `add_episodes`, `release_dates`, `guide_version` | Adds seasons or episodes, changes release dates or certifications, or publishes the next guide version. `guide_version` is a delta over the current version: per category `severity`, `summary`, `add_items` and `remove_items` |
 | `correction.decision` | `correction_ref`, `decision` (`approved`, `declined` or `needs_info`), optional `note` | Decides the account's matching open correction; an approval changes the catalog |
 
-After `offer.publish`, `offer.end` or `title.update` commits, Kinodex evaluates the active, unexpired rules for that title at the event time. Each match becomes `triggered` once and gets one notice. Every decision writes one `correction_decided` notice, which names the new guide version when an approval adds one. Any new guide version for a title on the watchlist also writes a `guide_updated` notice, whether a `title.update` published it or an approved correction added it.
+After `offer.publish`, `offer.end` or `title.update` commits, Kinodex evaluates the active, unexpired rules for that title at the event time (rules created by then, in their state as of then). Each match becomes `triggered` once and gets one notice. Every decision writes one `correction_decided` notice, which names the new guide version when an approval adds one. Any new guide version for a title on the watchlist also writes a `guide_updated` notice, whether a `title.update` published it or an approved correction added it.
 
 Failures change nothing, and Core returns `applied: false`, records a `deny` audit row with the reason and stores no receipt:
 
 - **`target_not_found`**: the event's target does not exist (title, offer), or no single open correction matches `correction_ref`.
-- **`invalid_event`**: any other inconsistency. Examples are an unknown service, a region or type the service lacks, a price on a subscription, a reversed window, an edition of another title, a guide version that is not the next number, a season that already exists, release dates that would put diary entries before the release, or an approval dated before the title's current guide version. Handlers run the same checks as seed validation, with this code, so a bad event never surfaces as `invalid_seed` from Core's re-validation.
+- **`invalid_event`**: any other inconsistency. Examples are an unknown service, a region or type the service lacks, a price on a subscription, a reversed window, an edition of another title, a guide version that is not the next number, a season that already exists, release dates that would put diary entries before the release, an approval dated before the title's current guide version, or a season or guide version that collides with a later one already in the seed (see [Clock cutoff](#clock-cutoff)). Handlers run the same checks as seed validation, with this code, so a bad event never surfaces as `invalid_seed` from Core's re-validation.
 
 A failed event can be retried with the same `event_id`, the current version and an `at` at or after the current clock.
 
@@ -179,7 +179,7 @@ A failed event can be retried with the same `event_id`, the current version and 
 
 - **Versions.** Core's `{epoch, revision}` is the version of the whole instance. Every write, event and `env.advance_time` increments `revision`. The App versions are separate fields, described in [item 1](#1-versions).
 - **Receipts and retries.** Each write returns `id` (the object it changed) and the new Core version. Repeating a committed `request_id` with identical arguments returns the stored receipt marked `duplicate`.
-- **Clock-derived state.** `ctx.virtual_now` is the account's "now"; agent reads and writes do not move it. Offer availability, `leaving_soon`, `my_subscriptions` and alert expiry are stored as due times and derived when read or checked. Time passing alone writes nothing: no activity row, no notice and no stored status.
+- **Clock-derived state.** `ctx.virtual_now` is the account's "now"; agent reads and writes do not move it. Offer availability, `leaving_soon`, `my_subscriptions` and alert expiry are stored as due times and derived when read or checked. Which records exist at all is derived the same way ([Clock cutoff](#clock-cutoff)). Time passing alone writes nothing: no activity row, no notice and no stored status.
 - **Today.** `watched_on` is compared with the calendar date of the clock's instant in the account's `time_zone` (an IANA name in the seed: Dana `America/Los_Angeles`, Ines `Europe/London`). The same instant gives the same answer however Infra spells the clock: at `2026-12-02T03:00:00Z` it is still Dec 1 for Dana and already Dec 2 for Ines (test T06 *"today"…*). `time_zone` is not returned by any tool, so the approved tool contracts are unchanged; the task's user context gives the agent the person's time zone.
 - **Alert evaluation.** Rules are evaluated only by an event that affects the rule's title, and by `kinodex.services.update` (see [item 2](#2-offers-that-start-by-the-clock-alone)).
 - **Activity rows.** There is one row per committed write or applied event, and none for a duplicate replay, a rejected call, a read or a clock change. Each row records:
@@ -192,8 +192,37 @@ A failed event can be retried with the same `event_id`, the current version and 
 
   An evaluator joins activity rows to Core receipts (`request:<request_id>`, `event:<event_id>`, each holding the version) and to the audit and the agent trace.
 - **Reset.** `env.reset` (`reset_scope: app_instance`) restores the loaded catalog, account and clock of that instance only. Infra takes the snapshot before reset.
-- **Seed dates.** Seeds are never compared with the clock. Core validates package fixtures at registration under the registry's initial time, and the package registers under a `2026-01-01T00:00:00Z` registry clock. A task loads history for its own dates. A write that would put a diary date after "today" fails with `invalid_date`.
-- **Example clock.** `fixtures/clock.json` sets the App-only example time: Tuesday Dec 1, 2026, 09:00 −08:00.
+- **Seed dates.** Seed validation never compares dates with the clock. Core validates package fixtures at registration under the registry's initial time, and the package registers under a `2026-01-01T00:00:00Z` registry clock. A seed may therefore run past its load clock; the clock cutoff below decides what the tools show. A write that would put a diary date after "today" fails with `invalid_date`.
+- **Example clock.** `fixtures/clock.json` sets the App-only example time: Tuesday Dec 1, 2026, 09:00 −08:00. Every fixture and task-data record is dated on or before it, so the cutoff hides nothing at that clock (test *Cutoff: at the fixture clock…*).
+
+### Clock cutoff
+
+Added after plan approval, together with the [evaluation dataset](#evaluation-dataset-2025-01-01-to-2026-12-31). Tools show only the records that exist at `ctx.virtual_now`. Nothing is stored for this: `visible` in `src/catalog.cjs` filters the stored data on every read and write, and later records appear when `env.advance_time` or an event moves the clock. A seed that runs past its clock can therefore load at any point in its window. Each date field in the seed has one of these classes:
+
+| Field | Class | Before the clock reaches it |
+| --- | --- | --- |
+| `diary[].logged_at` | happened | The entry is `not_found` to `diary.update` and `diary.delete`, and absent from `diary.list`, own reviews, `account.get` counts, `as_of_person` and spoiler boundaries |
+| `public_reviews[].posted_at` | happened | Absent from `reviews.list` |
+| `lists[].created_at` | happened | `not_found`; absent from `lists.list` |
+| `alerts[].created_at` | happened | `not_found`; absent from `alerts.list`; events and `services.update` do not evaluate it |
+| `alerts[].trigger.at`; `updated_at` of a `deleted` rule | happened (transition) | The rule reads `active` with no trigger, and `updated_at` reads as `created_at` |
+| `corrections[].submitted_at` | happened | `not_found`; absent from `corrections.list`; no `correction.decision` reaches it |
+| `corrections[].decisions[].decided_at`, `amended_at`, `withdrawn_at` | happened (transition) | Hidden; `status` and `updated_at` come from the transitions dated by the clock |
+| `notices[].at` | happened | Absent from `notices.list` |
+| `titles[].seasons[].added_at` | happened | The season and its episodes are absent; `episodes.list` on it is `not_found`; `new_season` rules do not see it |
+| `guides[].versions[].published_at`, version 2 and later | happened | `guide.get` on it is `not_found`; the current guide is the latest one published |
+| `guides[].versions[0].published_at` | descriptive | Version 1 is the title's listing guide, dated 30 days before release; always shown |
+| `titles[].year`, `titles[].releases[].date` | descriptive | Always shown, including releases still to come |
+| `episodes[].air_date` | scheduled | Always shown for an episode of a visible season |
+| `offers[].available_from`, `offers[].available_until` | scheduled | Always shown; availability is derived ([Where to watch](#where-to-watch)) |
+| `alerts[].expires_at` | scheduled | Always shown; `expired` is derived |
+| `account.updated_at`, `watchlist.updated_at`, `lists[].updated_at`, `diary[].updated_at`, and the settings, order, contents and versions they stamp; the `updated_at` and fields of a rule edited later (and still active); a correction's `proposed_value`, `evidence` and `current_value` after a later amendment; catalog values that an approved runtime, release-date, certification or credit correction changed | current state | Shown as stored: a seed holds only the current state of these objects, so there is no earlier state to show. A task that starts before one of these stamps supplies that object's earlier state in its own seed. In the shipped seeds and the evaluation dataset every stamp is on or before the fixture clock |
+| `activity[].at` | run record | Written by the App during a run; no tool reads it |
+
+- **Writes on hidden records** fail with `not_found` and change nothing. New IDs avoid every stored ID, hidden ones included.
+- **The agent's write replaces a seeded future.** A write on a rule or correction whose seeded history continues after the clock (a later trigger, deletion or decision) stores the record as of the clock, applies the write and drops the later notices about it. A new rule replaces a seeded rule of the same kind and title created after the clock, and a new correction replaces a seeded one for the same title, field and target, with their notices. An event that fires a rule or decides a correction does the same (`adopt` and `dropLater` in `src/rules.cjs`).
+- **Events** find their targets and evaluate rules among the records that exist at the event time. Their consistency checks use every stored record, so a season, episode ID or guide version that collides with a later one in the seed fails with `invalid_event` and changes nothing; publish later catalog changes as events instead.
+- Tests: *Cutoff: …* in `tests/business.test.cjs` (Ines's task data at March 1, 2026; writes on hidden records; rules and corrections with a later seeded history; events before a rule exists; same-key replacement) and *Evaluation dataset: …* (four clocks).
 
 ## Review items resolved
 
@@ -301,7 +330,7 @@ All text is original and fictional (see `contribution/dataset.json`). The catalo
 | Seed size (UTF-8) | `fixtures/minimal.json` 1,247,667 bytes; `examples/task-data/seed.json` 1,186,276 bytes; 2,433,943 combined. Compact JSON is 1,219,059 and 1,158,697 bytes, under the runtime's 2 MiB MCP request line used by `env.load_seed` |
 
 - **Dana's rating style.** Half stars, never 5, mean exactly 3.4 over 250 ratings: 1.5 ×5, 2 ×12, 2.5 ×24, 3 ×55, 3.5 ×67, 4 ×65, 4.5 ×22. Ines rates in whole stars, gives 5s and averages 3.82.
-- **Time coverage.** The data covers 2026 onward. Offers start, end and change price throughout 2026, and some windows run into 2027. Every later guide version, alert and correction is dated in 2026. Generated offers never start or end between 2026-11-15 and 2026-12-31, so only the named titles change availability during the December scenario.
+- **Time coverage.** The data covers 2026 onward. Offers start, end and change price throughout 2026, and some windows run into 2027. Every later guide version, alert and correction is dated in 2026. Generated offers never start or end between 2026-11-15 and 2026-12-31, so only the named titles change availability during the December scenario. The 2025–2026 evaluation coverage is in [Evaluation dataset](#evaluation-dataset-2025-01-01-to-2026-12-31).
 - **Consistency.** No offer starts before the title's release in its region, and every title certified R, NC-17 or TV-MA in the US rates at least one guide category `moderate` or higher (test T13 *fixture checks…*).
 
 | Request / workflow | Data a task can use |
@@ -315,6 +344,28 @@ All text is original and fictional (see `contribution/dataset.json`). The catalo
 
 Expected answers for a real task belong in that task's evaluator, not in this package. Task authors can replace either account's history, or load history for other 2026 dates. The seed schema accepts any history, and `examples/task-data/README.md` describes the second account.
 
+## Evaluation dataset, 2025-01-01 to 2026-12-31
+
+`data/evaluation/` is the delivered evaluation data for the coverage window in [submission evidence, section 3](../../docs/submission-evidence.md#3-environment-dataset-coverage). It was added after the plan was approved, when that section was published, and the validation report records it as added scope. `fixtures/minimal.json` and `examples/task-data/` are unchanged.
+
+- **`seed.json`** (version 1.0.0; 1,347,301 bytes, 1,318,218 as compact JSON, so one `env.load_seed` request carries it). It holds the fixture catalog and Dana's account with every fixture record, ID and date, plus dated records:
+  - 16 guide versions: one a month from February to December 2025, three in December 2026, and two from Dana's approved guide corrections;
+  - two seasons: Sallowstead General season 3 (added Nov. 8, episodes weekly from Nov. 13 to Dec. 18) and Inspector Junivergate season 3 (added Dec. 4, episodes Dec. 9 to Dec. 30);
+  - 41 public reviews from Oct. 15 to Dec. 30, 2026;
+  - Dana's account across both years: 17 more alert rules (12 fired by the offer or season that matched them, 2 expired, 2 deleted, 1 still waiting at the clock), 6 more corrections (declined, approved, withdrawn, and one that needed more information), 18 more notices and 3 more lists.
+- **Texts.** The fixture draws its public and diary review texts and its generated episode synopses from short phrase lists (smoke data). The dataset rewrites them, one text per record, for that title, rating and date, and renames repeated episode names within a series. IDs, dates, ratings and spoiler flags are unchanged. The Lantern Hill barn review (`rv-lh-01`), Dana's Wrenfield Clock review and the named series' synopses stay verbatim.
+- **Clock.** The dataset clock is the fixture clock, 09:00 −08:00 on Dec. 1, 2026. Dana's history ends there, and at that clock the December requests see what they see in the fixture (test *Evaluation dataset: …*). Catalog records continue through December (the last on Dec. 30) and appear as the run clock reaches them ([Clock cutoff](#clock-cutoff)), so they are never pre-session history. No offers were added, so availability in December is the fixture's.
+- **Provenance.** Every record is synthetic. The approved design uses an invented catalog, services and people, so there is no real source to anchor in November 2026, and nothing was collected from real websites. New records reuse the fixture's titles, people, services and word lists; no new title, place, service or company names were coined.
+- **Files.** `binding.json`, `policies.json` and `clock.json` sit beside the seed. `dataset.json` is a valid bundle dataset (its `expected_counts.records` is the 184 titles) and records the sources, transformations and the seed's sha256 under the `generated` source's `generation.parameters.outputs`.
+- **Coverage**, counted in America/Los_Angeles on each record's own date field: 606 distinct dates from 2025-01-02 to 2026-12-30 in all 24 months (no record falls on the endpoints 2025-01-01 and 2026-12-31), 585 of them on or before the dataset clock, with no stretch longer than 3 days without a record. Without offer windows, air dates and release dates: 459 distinct dates, longest gap 6 days. Dana's own history (diary and account records) covers 286 distinct dates. There are 0 identical texts among 822 prose texts and no pair of different texts shares 80% or more of its word 5-grams (highest 0.765, two fixture title synopses).
+
+```sh
+node dev/build-dataset.cjs          # rebuild data/evaluation/ (byte-identical on rerun)
+node dev/coverage-report.cjs        # coverage by source and month, provenance, gaps, exclusions, text checks
+node dev/coverage-report.cjs --json
+node examples/dataset-demo.cjs      # load it over real MCP and query it at three clocks
+```
+
 ## Commands
 
 From this directory:
@@ -323,7 +374,9 @@ From this directory:
 npm test              # App-only business tests (no runtime needed)
 npm run example       # App-only example: the approved title.update event and Lantern Hill's offers
 npm run walkthrough   # Real MCP evidence report (JSON on stdout); needs the public runtime
+npm run dataset:demo  # Real MCP load and query of the evaluation dataset (JSON on stdout)
 npm run build:contracts && npm run build:fixtures   # maintainer generators; reproduce the committed files byte for byte
+npm run build:dataset && npm run dataset:coverage   # rebuild the evaluation dataset; print its coverage report
 ```
 
 From the repository root:
@@ -381,7 +434,8 @@ node runtime/build-contracts.cjs --check
 | `hide_spoilers` boundary moves back after a diary entry is deleted | T02; walkthrough 76 |
 | The clock alone (an offer's end time, the seven-day window, an alert's `expires_at`, an offer's start) changes `offers.search` and `alerts.list` consistently with no activity row or notice | T03 *clock-only changes…*, T08 *item 2…*; walkthrough 85–87 |
 | "Today" for `watched_on` follows the account's time zone, not the clock's spelling | T06 *"today" is the date of the clock instant…* |
-| Writes and events on history dated after the clock fail with App errors, never `invalid_seed` | T13 *writes and events on history dated after the clock…*, T13 *seed validation…* |
+| Records dated after the clock are `not_found` to reads and writes; events that collide with later seeded records fail with `invalid_event`, never `invalid_seed` (clock cutoff, added after approval) | T13 *writes and events on history dated after the clock…*, T13 *seed validation…*, *Cutoff: …* tests |
+| Evaluation dataset loads at any clock in 2025–2026 and shows nothing dated later (added after approval) | *Evaluation dataset: …* test; `npm run dataset:demo` |
 
 ## Acceptance criteria
 
@@ -411,7 +465,8 @@ These are listed so they are not read as drift.
 - **Correction `current_value`.** It is stored at submission.
 - **`already_true` on updates.** `alerts.update` returns `already_true` when the updated rule would already match, and leaves the rule unchanged. The proposal states `already_true` only for creation. One consequence: the agent cannot extend the expiry of a rule whose offer has meanwhile started by the clock; it should tell the person instead (test T08 *item 2…*).
 - **`already_submitted` on amend.** Amending a correction that is already `submitted` returns `already_submitted`. The proposal uses that code only for a second open correction.
-- **`invalid_date` beyond `watched_on`.** It also covers an `expires_at` that is not in the future, and editing a diary entry while the clock is earlier than when the entry was logged (history loaded under an earlier clock).
+- **`invalid_date` beyond `watched_on`.** It also covers an `expires_at` that is not in the future.
+- **Clock cutoff and evaluation dataset.** Added after plan approval for the environment data rule (2025–2026 coverage); see [Clock cutoff](#clock-cutoff) and [Evaluation dataset](#evaluation-dataset-2025-01-01-to-2026-12-31). It replaced the earlier `invalid_date` for editing a diary entry logged after the clock, which is now `not_found`. Tool schemas and error codes are unchanged.
 - **More App-level `invalid_arguments` cases.** `offers.search` with `on_my_services` and a different `region`, and whitespace-only list names.
 - **Account `time_zone`.** A required seed field (IANA name) used only to compute "today". It is not returned by any tool.
 - **`account.get` people.** It lists the people from the diary's `watched_with`, so the Agent can find valid `as_of_person` values.
@@ -438,17 +493,18 @@ These are listed so they are not read as drift.
 | `app.json`, `package.json`, `service.cjs`, `plugin.cjs` | Manifest, commands, provided launcher, hook exports |
 | `tools.json` | The 32 Agent tools with input/output schemas |
 | `src/model.cjs` | `validateSeed` and the shared checks (`checkOffer`, `checkRelease`, `checkEpisode`, `checkGuideVersion`, `checkDiaryEntry`) used with `invalid_seed`, `invalid_event` or the write errors |
-| `src/catalog.cjs` | Lookups, clock-derived availability and alert status, `my_subscriptions`, spoiler boundaries, agent-facing views |
-| `src/rules.cjs` | Alert matching and triggering, correction targets and values, activity rows and notices |
+| `src/catalog.cjs` | Lookups, the clock cutoff (`visible`), clock-derived availability and alert status, `my_subscriptions`, spoiler boundaries, agent-facing views |
+| `src/rules.cjs` | Alert matching and triggering, correction targets and values, activity rows and notices, replacing a seeded future (`adopt`, `dropLater`) |
 | `src/operations.cjs` | Agent tool handlers |
 | `src/events.cjs` | The four event handlers |
 | `src/domain-utils.cjs`, `src/diagnostics.cjs` | Shared helpers and the optional, ID-only diagnostics adapter |
 | `schemas/` | Seed, event and state schemas plus the shared dataset/catalog contracts |
 | `contribution/` | Contribution declaration, dataset provenance, empty asset catalog |
 | `fixtures/` | Dana's seed, binding, policies, clock |
-| `examples/` | App-only example, approved event (`scenario.json`), further events, task data for Ines, real-MCP walkthrough |
+| `data/evaluation/` | The 2025–2026 evaluation dataset: seed, binding, policies, clock and its own `dataset.json` |
+| `examples/` | App-only example, approved event (`scenario.json`), further events, task data for Ines, real-MCP walkthrough, real-MCP dataset demo |
 | `tests/` | Business tests, App-only harness, verifier cases, schema validator |
-| `dev/` | Maintainer generators for schemas and `tools.json` (`build-contracts.cjs`) and for fixtures, events, task data and dataset counts (`build-fixtures.cjs`). Not run by tests or the verifier. |
+| `dev/` | Maintainer generators for schemas and `tools.json` (`build-contracts.cjs`), for fixtures, events, task data and dataset counts (`build-fixtures.cjs`), and for the evaluation dataset (`build-dataset.cjs`) and its coverage report (`coverage-report.cjs`). Not run by the verifier; the business tests check the dataset's counts and hash. |
 
 ## Limitations
 
@@ -460,4 +516,5 @@ These are listed so they are not read as drift.
 - Rules are evaluated only by Infra events and `kinodex.services.update`. An upcoming offer that starts by the clock alone fires no alert until a task delivers it with `offer.publish`.
 - `already_true` names the matching offer in the error message only, because Core's error result carries a message and no structured fields.
 - Search matches the start of words; there is no ranking or stemming.
+- The clock cutoff cannot show an earlier version of current-state objects (account settings, watchlist, list contents, diary edits, catalog values changed by approved corrections), because a seed holds only their current state. A task that starts before such a stamp supplies that state in its own seed.
 - All titles, people, services, prices, reviews and guide text are synthetic; there is no live data.

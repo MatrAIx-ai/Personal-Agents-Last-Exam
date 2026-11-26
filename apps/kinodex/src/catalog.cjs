@@ -1,6 +1,6 @@
 'use strict';
-// Read-side helpers: lookups, clock-derived availability and alert status, spoiler boundaries and
-// agent-facing views. Nothing here mutates data.
+// Read-side helpers: lookups, the clock cutoff, clock-derived availability and alert status, spoiler
+// boundaries and agent-facing views. Nothing here mutates data.
 const {fail, copy} = require('./domain-utils.cjs');
 
 const DAY = 86400000, LEAVING_MS = 7 * DAY;
@@ -66,6 +66,50 @@ function title(idx, id) {
 }
 const earliestRelease = t => t.releases.reduce((min, r) => (r.date < min ? r.date : min), t.releases[0].date);
 const currentGuide = g => g.versions[g.versions.length - 1];
+
+// ---- Clock cutoff -------------------------------------------------------------------------
+// What the account sees at the run clock. A record that happens in Kinodex exists from its own time:
+// a diary entry from logged_at, a public review from posted_at, a list or alert from created_at, a
+// correction from submitted_at, a notice from at, a season (and its episodes) from added_at, and a
+// guide version after the first from published_at. Later transitions that keep their own time are read
+// as of the clock: a rule triggered or deleted later reads active, and a correction shows only the
+// decisions, amendment and withdrawal dated by then. Scheduled and descriptive dates (release and air
+// dates, offer windows, expires_at, guide version 1) are not filtered. Nothing is stored for this:
+// later records appear when the clock reaches them, and records with nothing hidden keep their identity.
+const by = (nowMs, value) => instant(value) <= nowMs;
+function alertAsOf(a, nowMs) {
+  if (a.status === 'triggered' && !by(nowMs, a.trigger.at)) return {...a, status: 'active', trigger: null, updated_at: a.created_at};
+  if (a.status === 'deleted' && !by(nowMs, a.updated_at)) return {...a, status: 'active', updated_at: a.created_at};
+  return a;
+}
+function correctionAsOf(co, nowMs) {
+  const decisions = co.decisions.filter(d => by(nowMs, d.decided_at));
+  const amended = co.amended_at !== null && by(nowMs, co.amended_at), withdrawn = co.withdrawn_at !== null && by(nowMs, co.withdrawn_at);
+  if (decisions.length === co.decisions.length && amended === (co.amended_at !== null) && withdrawn === (co.withdrawn_at !== null)) return co;
+  const steps = [...decisions.map(d => [d.decided_at, d.decision]), ...(amended ? [[co.amended_at, 'submitted']] : []),
+    ...(withdrawn ? [[co.withdrawn_at, 'withdrawn']] : [])].sort((x, y) => instant(x[0]) - instant(y[0]));
+  const last = steps[steps.length - 1];
+  return {...co, decisions, amended_at: amended ? co.amended_at : null, withdrawn_at: withdrawn ? co.withdrawn_at : null,
+    status: last ? last[1] : 'submitted', updated_at: last ? last[0] : co.submitted_at};
+}
+function visible(data, now) {
+  const nowMs = instant(now), shown = value => by(nowMs, value), laterSeasons = new Set();
+  const titles = data.titles.map(t => {
+    if (t.seasons.every(s => shown(s.added_at))) return t;
+    for (const s of t.seasons) if (!shown(s.added_at)) laterSeasons.add(t.title_id + ':' + s.season_number);
+    return {...t, seasons: t.seasons.filter(s => shown(s.added_at))};
+  });
+  const firstAndShown = (v, i) => i === 0 || shown(v.published_at);
+  return {...data, titles,
+    episodes: laterSeasons.size ? data.episodes.filter(e => !laterSeasons.has(e.title_id + ':' + e.season_number)) : data.episodes,
+    guides: data.guides.map(g => (g.versions.every(firstAndShown) ? g : {...g, versions: g.versions.filter(firstAndShown)})),
+    public_reviews: data.public_reviews.filter(r => shown(r.posted_at)),
+    diary: data.diary.filter(e => shown(e.logged_at)),
+    lists: data.lists.filter(l => shown(l.created_at)),
+    alerts: data.alerts.filter(a => shown(a.created_at)).map(a => alertAsOf(a, nowMs)),
+    corrections: data.corrections.filter(co => shown(co.submitted_at)).map(co => correctionAsOf(co, nowMs)),
+    notices: data.notices.filter(n => shown(n.at))};
+}
 
 // ---- Offers -------------------------------------------------------------------------------
 function availability(offer, nowMs) {
@@ -183,5 +227,5 @@ const latestInstantFirst = (list, key) => list.map((x, i) => [x, i]).sort(([a, i
   instant(b[key]) - instant(a[key]) || ib - ia).map(([x]) => x);
 
 module.exports = {DAY, LEAVING_MS, CATEGORIES, CURRENCY, REGIONS, region, CERTIFICATIONS, ID, instant, isDate, today, validZone, halfStar, index, title, earliestRelease,
-  currentGuide, availability, isCurrent, mine, mySubscriptions, offerView, alertStatus, alertView, spoilerPerson, boundary, episodeView,
+  currentGuide, alertAsOf, correctionAsOf, visible, availability, isCurrent, mine, mySubscriptions, offerView, alertStatus, alertView, spoilerPerson, boundary, episodeView,
   byEpisode, guideView, summary, fold, words, matches, byName, listItem, diaryView, latestFirst, latestInstantFirst, later};

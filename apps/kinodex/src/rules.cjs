@@ -52,16 +52,41 @@ function noticeText(idx, alert, offer, season) {
   if (alert.kind === 'available_on_my_services') return t + ' is now included with your ' + service + ' subscription in the ' + offer.region + '.';
   return t + ' can now be ' + (offer.type === 'rent' ? 'rented' : 'bought') + ' for ' + money(offer) + ' on ' + service + ' (below your ' + money({...offer, price: alert.threshold}) + ' alert).';
 }
-// Evaluate the active, unexpired rules selected by `which` at ctx.virtual_now. Each match becomes
+// ---- Records with a seeded future -----------------------------------------------------------
+// A write or event on a rule or correction whose stored history continues after the clock replaces that
+// later history: the stored record takes its state as of the clock (catalog.alertAsOf / correctionAsOf)
+// and the later notices about it are dropped. Returns the stored record to change.
+function adopt(data, list, key, asOf, nowMs) {
+  const i = data[list].findIndex(x => x[key] === asOf[key]);
+  if (data[list][i] !== asOf) {
+    data[list][i] = copy(asOf);
+    data.notices = data.notices.filter(n => !(n[key] === asOf[key] && c.instant(n.at) > nowMs));
+  }
+  return data[list][i];
+}
+// A new rule or correction replaces seeded ones on the same key that were created after the clock, with
+// their notices: active rule kind and title; correction title, field and target.
+function dropLater(data, list, key, created, same, nowMs) {
+  const gone = new Set(data[list].filter(x => c.instant(x[created]) > nowMs && same(x)).map(x => x[key]));
+  if (!gone.size) return;
+  data[list] = data[list].filter(x => !gone.has(x[key]));
+  data.notices = data.notices.filter(n => !gone.has(n[key]));
+}
+
+// Evaluate the active, unexpired rules selected by `which` at ctx.virtual_now. Only rules created by
+// then count, with their state as of then, and only the seasons added by then. Each match becomes
 // triggered once and keeps the matching offer or season and the cause; event triggers also write a
 // notice. Rules are never evaluated by reads or by time passing alone.
 function evaluate(ctx, data, which, cause) {
-  const idx = c.index(data), nowMs = c.instant(ctx.virtual_now), fired = [];
-  for (const alert of data.alerts) {
-    if (c.alertStatus(alert, nowMs) !== 'active' || !which(alert)) continue;
-    const offer = alert.kind === 'new_season' ? null : matchOffer(idx, data, alert, nowMs);
-    const season = alert.kind === 'new_season' ? matchSeason(idx, alert) : null;
+  const idx = c.index(c.visible(data, ctx.virtual_now)), nowMs = c.instant(ctx.virtual_now), fired = [];
+  for (const stored of [...data.alerts]) {
+    if (c.instant(stored.created_at) > nowMs) continue;
+    const asOf = c.alertAsOf(stored, nowMs);
+    if (c.alertStatus(asOf, nowMs) !== 'active' || !which(asOf)) continue;
+    const offer = asOf.kind === 'new_season' ? null : matchOffer(idx, data, asOf, nowMs);
+    const season = asOf.kind === 'new_season' ? matchSeason(idx, asOf) : null;
     if (!offer && season === null) continue;
+    const alert = adopt(data, 'alerts', 'alert_id', asOf, nowMs);
     alert.status = 'triggered'; alert.updated_at = ctx.virtual_now;
     alert.trigger = {at: ctx.virtual_now, cause: cause.event_id ? 'event' : 'services.update', event_id: cause.event_id ?? null,
       operation: cause.operation ?? null, request_id: cause.request_id ?? null, offer: offer && snapshot(offer), season_number: season, notice_id: null};
@@ -167,5 +192,5 @@ function applyCorrection(ctx, data, idx, co) {
   return next.version;
 }
 
-module.exports = {nextSeq, newId, record, notice, matchOffer, matchSeason, evaluate, noticeText, checkThreshold, checkAlreadyTrue,
+module.exports = {nextSeq, newId, record, notice, adopt, dropLater, matchOffer, matchSeason, evaluate, noticeText, checkThreshold, checkAlreadyTrue,
   TARGET_KEY, sameTarget, isOpen, currentValue, checkProposed, sameValue, applyCorrection};
