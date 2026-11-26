@@ -10,3 +10,4 @@ require('./fixtures.test.cjs');
 require('./rules.test.cjs');
 require('./wording.test.cjs');
 require('./schema-equivalence.test.cjs');
+require('./coverage.test.cjs');

@@ -3,7 +3,7 @@
 Bellnote is a resettable school–family portal, seen from one guardian's account. The school accepts whatever a permitted guardian submits before its cut-off, so an action the portal accepts can still be wrong for the family; Bellnote records enough to check that: which children, rights, lists, forms, menus and balances were read; what was reported, signed, declined, withdrawn, paid or changed, for which child and how long before each cut-off; what the office, the cafeteria and the other guardian did; and what the account was told.
 
 - App ID `bellnote`, version 1.0.0, Core API 1.2.0, public runtime 1.6.0. Node.js 18+ built-ins only; nothing to install.
-- Approved scope: [`proposals/environment/bellnote.md`](../../proposals/environment/bellnote.md). Validation, workflow-to-test mapping and the acceptance self-review: [VALIDATION.md](VALIDATION.md).
+- Approved scope: [`proposals/environment/bellnote.md`](../../proposals/environment/bellnote.md). Validation, workflow-to-test mapping and the acceptance self-review: [VALIDATION.md](VALIDATION.md). Delivery evidence index (GUI workflow sequences, reference-product comparison, Bellnote → Mail delivery transcript, dataset coverage): [evidence/README.md](evidence/README.md).
 - A guardian web GUI (`gui/`) served by the repository's shared Web Host, added after plan approval at the maintainers' request (the approved plan said MCP-only); see [Web GUI](#web-gui). There is no staff or reviewer console: staff, the cafeteria and the other guardian act only through events.
 - Everything is fictional: the Merrow Vale Unified School District, Alder Elementary, Kestrel Ridge Middle School, the families and staff. Phone numbers use the 555-01xx range. Workflow shapes were informed by public product pages of ParentSquare and the PowerSchool parent portal; no data, text, branding or icons were taken from them.
 
@@ -44,6 +44,8 @@ What the generated history respects: school-day records fall only on school days
 
 `scripts/check-fixtures.cjs` checks both fixtures beyond `validateSeed`: ledgers, payments, restrictions, form versions, school days for every dated record, allergen tags, fictional phone numbers, every date on or after 2025-01-01, the size budget (under 1 MiB pretty-printed and 384 KiB compact), the declared record count and the builder match. It also applies the App's own rules to every record of both fixtures, hand-written and generated alike: reports, pickup people and dismissal changes only by guardians with custodial rights and before their cut-offs; answers only by guardians who can sign, and a fee only by a guardian who can pay; collectors approved at the time and never restricted; top-ups inside the school's range; one notification for every event the records imply (none of a non-custodial child's pickup list); notification text with names and long dates, never a record ID, an ISO date or a field name. For the reference it also runs the generator's own checks (earlier calendars and enrollment, purchases from that day's menu, ledger rollovers, low-balance notices against the crossings of the whole ledger) and reports the size of the reads that take no window. A task supplies its own seed with `env.load_seed`; `validateSeed` rejects duplicate IDs, dangling references, a child without a guardian link for the account holder, a person both listed and restricted for the same child, two active dismissal changes for one child and day, a response whose version the form never had, a balance that does not equal the sum of its transactions, timestamps without a UTC offset and an account the binding does not declare.
 
+**Coverage of 2025-01-01 to 2026-12-31.** [evidence/dataset-coverage.md](evidence/dataset-coverage.md) is computed from this fixture by `scripts/dataset-coverage.cjs` (and checked by `npm test`). In America/Los_Angeles it counts 851 history records on 213 distinct dates, from 2025-01-02 to 2026-11-16, with history in 21 of the 24 months, all synthetic. July 2025 and July 2026 (summer breaks) and December 2026 have none. After the clock (2026-11-17 07:00) the fixture holds only scheduled items, which are listed separately. [evidence/dataset-retrieval.md](evidence/dataset-retrieval.md) loads the fixture into real Core and reads each record family back through the Agent tools. The menus of earlier school years are stored but not returned by `menu.list`, which lists only days of the current term's calendar.
+
 **Reads with two years of rows.** Windowed reads keep their defaults (`attendance.list` and `lunch.account_get` the last 14 days, `notifications.list` 30, `payments.list` 60, `pickup.get` and `schools.get` the next 14, `menu.list` the next 6; at most 120 days), so a read without a window returns the current period. Two reads have no window in the approved plan and now list the earlier years too: `absences.list` (20 reports, 14.7 KB) and `forms.list` (28 forms, 25.1 KB). Reports and forms of earlier years read as they ended (reviewed, cancelled, closed); a report day before the current term is not `moot`. The GUI shows the current school year by default and folds earlier reports and closed forms under "Earlier school years".
 
 `tools.json`, `schemas/seed.schema.json`, `schemas/events.schema.json` and `schemas/state.schema.json` are generated from `scripts/build-contracts.cjs` (`npm run contracts:check` in this folder detects drift). The record definitions are written once in the builder as `$defs`; the published seed schema has them inlined, because Core validates the whole seed several times per call and resolves a file reference (`seed.schema.json#/$defs/...`) on the file system for every record it checks. `tests/schema-equivalence.test.cjs` checks that the published schema equals the `$defs` form with its references resolved and that Core's validator gives the same answer for both on the fixtures and on 1,560 mutated copies of them. The other schema files are copies of the public shared contracts kept in sync by the repository's `npm run contracts:check`; `schemas/router-message.schema.json` is a byte-identical copy of Mail 1.3.0's generated wire schema.
@@ -69,12 +71,13 @@ Bellnote declares one `messaging.publishes` entry (`channel.email`, `urn:pale:em
 From this folder (the package alone, no runtime needed):
 
 ```sh
-npm test                      # 52 business tests: T01–T19 (App-side), rules, wording, fixtures and history, contracts, seed schema equivalence, diagnostics
+npm test                      # 53 business tests: T01–T19 (App-side), rules, wording, fixtures and history, contracts, seed schema equivalence, diagnostics, coverage report
 npm run example               # walkthrough: report, two marks, one notification
 npm run contracts:check       # generated tools/schemas match their source
 npm run fixtures:check        # consistency of both fixtures, generated history, size, builder match
 npm run fixtures:history      # rebuild the generated history and compare with the committed fixture
 npm run fixtures:build        # rewrite fixtures/reference.json from its builder
+npm run coverage:check        # evidence/dataset-coverage.{json,md} match the reference fixture (coverage:build rewrites them)
 ```
 
 Web GUI checks (pinned public runtime as below; the browser check also needs Playwright and Chromium installed at the repository root with `npm ci && npx playwright install chromium`):
@@ -88,7 +91,10 @@ With the pinned public runtime (found automatically in a full checkout, or `--ru
 
 ```sh
 node scripts/real-mcp.cjs  [--runtime DIR] [--output FILE]               # 54 real MCP checks
-node scripts/mail-flow.cjs [--runtime DIR] [--mail DIR] [--output FILE]  # 17 Bellnote → Mail checks with Mail 1.3.0
+node scripts/mail-flow.cjs [--runtime DIR] [--mail DIR] [--output FILE] [--transcript DIR]  # 29 Bellnote → Mail checks with Mail 1.3.0
+npm run coverage:retrieval    # load the reference fixture into real Core and read every record family back through the Agent tools
+npm run evidence:mail         # mail-flow.cjs, writing evidence/mail-delivery.{json,md}
+npm run evidence:gui          # GUI workflow sequences in Chromium, writing evidence/gui/ (needs Playwright, as web:browser)
 ```
 
 From the repository root:

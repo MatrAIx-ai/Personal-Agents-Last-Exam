@@ -1,0 +1,717 @@
+{
+  "schema": "bellnote.gui-evidence.v1",
+  "node": "v22.23.1",
+  "browser": "Chromium 141.0.7390.37 (headless, Playwright)",
+  "host": "runtime/web/server.cjs 1.6.0",
+  "run": "bellnote-evidence",
+  "profile": "sandbox",
+  "account": "bellnote-maya (Maya Chen, synthetic)",
+  "checkout_head": "9f1bf99fcdc6047b1ec947ae7e360cca325c3047",
+  "app_files_sha256": "73bb390f45aa19a778f05fdf1ca66e706e17802e134aa7e216a2e3bbe0432b78",
+  "app_files": [
+    "gui/index.html",
+    "gui/src/app.js",
+    "tools.json",
+    "fixtures/reference.json",
+    "src/account.cjs",
+    "src/attendance.cjs",
+    "src/common.cjs",
+    "src/diagnostics.cjs",
+    "src/events.cjs",
+    "src/forms.cjs",
+    "src/lunch.cjs",
+    "src/model.cjs",
+    "src/notify.cjs",
+    "src/operations.cjs",
+    "src/pickup.cjs",
+    "src/publisher.cjs",
+    "src/time.cjs"
+  ],
+  "viewports": {
+    "desktop": "1280x720",
+    "phone": "390x844"
+  },
+  "checks": 76,
+  "frames": [
+    {
+      "file": "home-01-start.png",
+      "viewport": "1280x720",
+      "workflow": "Home",
+      "step": "start",
+      "action": "Open the access link the Host prints",
+      "expected": "Three children with attendance today, way home and lunch balance; what needs attention",
+      "observed": "3 children, 3 items need attention",
+      "browser_test": [
+        "Host serves the App-owned page and Home lists three children",
+        "Home shows what needs attention (changed form, unanswered form, low balance)"
+      ],
+      "bytes": 79884
+    },
+    {
+      "file": "w1-01-start.png",
+      "viewport": "1280x720",
+      "workflow": "W1 Attendance",
+      "step": "start",
+      "action": "Attendance, Theo",
+      "expected": "Theo's marks, reports and coming school days with their cut-offs",
+      "observed": "shown",
+      "mcp": {
+        "tool": "bellnote.absences.list",
+        "args": {
+          "child_id": "child-theo"
+        },
+        "observed": "11 reports"
+      },
+      "bytes": 71663
+    },
+    {
+      "file": "w1-02-report-form.png",
+      "viewport": "1280x720",
+      "workflow": "W1 Attendance",
+      "step": "action",
+      "action": "Report absence or late arrival: absent, Wednesday, November 18, reason \"Dentist appointment\", then Send report",
+      "expected": "The form offers only school days still before their cut-off",
+      "observed": "Wed 18 selected",
+      "browser_test": [
+        "W1 browser report commits; MCP reads it with the exact reason"
+      ],
+      "bytes": 109185
+    },
+    {
+      "file": "w1-03-reported.png",
+      "viewport": "1280x720",
+      "workflow": "W1 Attendance",
+      "step": "outcome",
+      "action": "Send report",
+      "expected": "Status line \"Report sent to the school.\"; the report is listed as sent for Wed, Nov 18",
+      "observed": "status \"Report sent to the school.\"; report listed",
+      "mcp": {
+        "tool": "bellnote.absences.list",
+        "args": {
+          "id": "rep-0007"
+        },
+        "record": "rep-0007",
+        "state": "submitted",
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        }
+      },
+      "bytes": 64495
+    },
+    {
+      "file": "w1-04-overlap-refused.png",
+      "viewport": "1280x720",
+      "workflow": "W1 Attendance",
+      "step": "invalid",
+      "action": "Report the same day again, Send report",
+      "expected": "Refused (conflict); the App's message stays in the form; nothing written",
+      "observed": "\"A report sent on Tuesday, November 17 at 07:00 already covers Wednesday, November 18; cancel it first or report other days.\"; version unchanged",
+      "mcp": {
+        "tool": "env.snapshot (Infra)",
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "observed": "unchanged"
+      },
+      "bytes": 118043
+    },
+    {
+      "file": "w1-05-cancel-confirm.png",
+      "viewport": "1280x720",
+      "workflow": "W1 Attendance",
+      "step": "cancel: confirmation",
+      "action": "Cancel report",
+      "expected": "A confirmation naming the report before anything is sent",
+      "observed": "confirmation shown",
+      "browser_test": [
+        "W1 cancel through the confirmation commits; MCP reads cancelled"
+      ],
+      "bytes": 116957
+    },
+    {
+      "file": "w1-06-cancelled-after-reload.png",
+      "viewport": "1280x720",
+      "workflow": "W1 Attendance",
+      "step": "outcome after reload",
+      "action": "Confirm, then reload the page",
+      "expected": "The report reads cancelled and still names its day",
+      "observed": "cancelled, Wed, Nov 18; kept after reload",
+      "reload": "kept",
+      "mcp": {
+        "tool": "bellnote.absences.list",
+        "args": {
+          "id": "rep-0007"
+        },
+        "record": "rep-0007",
+        "state": "cancelled",
+        "version": {
+          "epoch": 1,
+          "revision": 2
+        }
+      },
+      "browser_test": [
+        "A fully cancelled report still names its day"
+      ],
+      "bytes": 64671
+    },
+    {
+      "file": "w2-01-start.png",
+      "viewport": "1280x720",
+      "workflow": "W2 Forms",
+      "step": "start",
+      "action": "Forms",
+      "expected": "The first form to do is the changed aquarium trip: Theo's answer needs review on version 2",
+      "observed": "aquarium trip open, needs review",
+      "mcp": {
+        "tool": "bellnote.forms.get",
+        "args": {
+          "id": "form-aquarium"
+        },
+        "observed": "needs_review"
+      },
+      "bytes": 95098
+    },
+    {
+      "file": "w2-02-answer-sheet.png",
+      "viewport": "1280x720",
+      "workflow": "W2 Forms",
+      "step": "action",
+      "action": "Review and sign again: the sheet is prefilled with the earlier answers; change Lunch to \"Bring own\", then Send answer",
+      "expected": "Questions of version 2 with the earlier answers",
+      "observed": "prefilled; emergency phone 555-0100",
+      "browser_test": [
+        "Answer sheet prefills the earlier answers"
+      ],
+      "bytes": 144573
+    },
+    {
+      "file": "w2-03-signed-v2.png",
+      "viewport": "1280x720",
+      "workflow": "W2 Forms",
+      "step": "outcome",
+      "action": "Send answer",
+      "expected": "Theo's answer reads signed on version 2; the fee already paid is not charged again",
+      "observed": "signed",
+      "mcp": {
+        "tool": "bellnote.forms.get",
+        "args": {
+          "id": "form-aquarium"
+        },
+        "record": "fr-0007",
+        "state": "signed",
+        "form_version": 2,
+        "payments": 1,
+        "version": {
+          "epoch": 1,
+          "revision": 3
+        }
+      },
+      "browser_test": [
+        "W2 browser signature on version 2 commits; MCP reads signed, no second payment"
+      ],
+      "bytes": 79507
+    },
+    {
+      "file": "w2-04-withdraw-confirm.png",
+      "viewport": "1280x720",
+      "workflow": "W2 Forms",
+      "step": "cancel: confirmation",
+      "action": "Winter concert evening → Withdraw answer (Theo)",
+      "expected": "A confirmation that the $5.00 fee is refunded",
+      "observed": "confirmation shown",
+      "bytes": 140068
+    },
+    {
+      "file": "w2-05-withdrawn.png",
+      "viewport": "1280x720",
+      "workflow": "W2 Forms",
+      "step": "outcome",
+      "action": "Withdraw answer",
+      "expected": "Theo's answer reads withdrawn and Answer is offered again; the payment reads refunded (MCP here, Account → Payments in frame account-03)",
+      "observed": "withdrawn, Answer offered",
+      "mcp": {
+        "tool": "bellnote.forms.get + bellnote.payments.list",
+        "record": "fr-0013",
+        "state": "withdrawn",
+        "payment": "pay-0005",
+        "payment_status": "refunded",
+        "version": {
+          "epoch": 1,
+          "revision": 4
+        }
+      },
+      "browser_test": [
+        "W2 browser withdrawal commits; MCP reads withdrawn and the fee refunded"
+      ],
+      "bytes": 76138
+    },
+    {
+      "file": "w2-06-stale-sheet.png",
+      "viewport": "1280x720",
+      "workflow": "W2 Forms",
+      "step": "stale",
+      "action": "Answer (Ines), size Youth S; meanwhile the school changes the form (Infra form.changed event); Send answer",
+      "expected": "Refused as stale: the form changed since the page read it; nothing is signed or charged",
+      "observed": "\"This record changed. Close this form and refresh before trying again.\"",
+      "mcp": {
+        "tool": "env.apply_event (Infra)",
+        "event": "ev-evidence-form-change",
+        "version": {
+          "epoch": 1,
+          "revision": 5
+        }
+      },
+      "bytes": 127165
+    },
+    {
+      "file": "w2-07-signed-after-refresh.png",
+      "viewport": "1280x720",
+      "workflow": "W2 Forms",
+      "step": "outcome after reload",
+      "action": "Close, Refresh, Answer again, Send answer; reload the page",
+      "expected": "Ines's answer reads signed on version 2, fee $5.00 paid once",
+      "observed": "signed; kept after reload",
+      "reload": "kept",
+      "mcp": {
+        "tool": "bellnote.forms.get",
+        "args": {
+          "id": "form-winter-concert"
+        },
+        "record": "fr-0014",
+        "state": "signed",
+        "form_version": 2,
+        "paid_cents": 500,
+        "version": {
+          "epoch": 1,
+          "revision": 6
+        }
+      },
+      "bytes": 78406
+    },
+    {
+      "file": "w2-08-denied-nico.png",
+      "viewport": "1280x720",
+      "workflow": "W2 Forms",
+      "step": "denied",
+      "action": "Open Band festival (Nico)",
+      "expected": "No Answer control: Maya cannot sign for Nico; the page says who can",
+      "observed": "\"Signing for Nico is with Sam Reyes\"",
+      "browser_test": [
+        "Signing is not offered where the right belongs to another guardian"
+      ],
+      "bytes": 71999
+    },
+    {
+      "file": "w3-01-start.png",
+      "viewport": "1280x720",
+      "workflow": "W3 Pickup",
+      "step": "start",
+      "action": "Pickup & dismissal, Theo",
+      "expected": "Way home for the next two weeks with cut-offs, people who may collect Theo, restriction on file",
+      "observed": "shown",
+      "bytes": 75092
+    },
+    {
+      "file": "w3-02-restricted-refused.png",
+      "viewport": "1280x720",
+      "workflow": "W3 Pickup",
+      "step": "denied",
+      "action": "Add pickup person \"R. Halvorsen\", family friend, 555-0191 (the number of the person on file with the office), Add person",
+      "expected": "Refused (restricted_person): matched by the school-held person, not by name; nothing written",
+      "observed": "\"The school office holds a restriction for this person and Theo Okafor.\"; version unchanged",
+      "mcp": {
+        "tool": "env.snapshot (Infra)",
+        "version": {
+          "epoch": 1,
+          "revision": 6
+        },
+        "observed": "unchanged"
+      },
+      "bytes": 112995
+    },
+    {
+      "file": "w3-03-added-pending.png",
+      "viewport": "1280x720",
+      "workflow": "W3 Pickup",
+      "step": "outcome",
+      "action": "Change the entry to \"June Park\", neighbor, 555-0166, Add person",
+      "expected": "June Park listed as waiting for the office",
+      "observed": "waiting for the office",
+      "mcp": {
+        "tool": "bellnote.pickup.get",
+        "args": {
+          "id": "child-theo"
+        },
+        "record": "pp-0007",
+        "state": "pending_review",
+        "version": {
+          "epoch": 1,
+          "revision": 7
+        }
+      },
+      "browser_test": [
+        "W3 browser add commits; MCP reads the person waiting for review"
+      ],
+      "bytes": 48166
+    },
+    {
+      "file": "w3-04-change-form.png",
+      "viewport": "1280x720",
+      "workflow": "W3 Pickup",
+      "step": "action",
+      "action": "Wednesday, November 18 → Change: Pickup, collected by Rosa Delgado, note, Save change",
+      "expected": "Only approved collectors are offered",
+      "observed": "Rosa Delgado selected",
+      "bytes": 112005
+    },
+    {
+      "file": "w3-05-changed.png",
+      "viewport": "1280x720",
+      "workflow": "W3 Pickup",
+      "step": "outcome",
+      "action": "Save change",
+      "expected": "Wednesday reads \"Picked up by Rosa Delgado\"",
+      "observed": "Picked up by Rosa Delgado",
+      "mcp": {
+        "tool": "bellnote.pickup.get",
+        "args": {
+          "id": "child-theo"
+        },
+        "record": "dc-0006",
+        "state": "active",
+        "version": {
+          "epoch": 1,
+          "revision": 8
+        }
+      },
+      "browser_test": [
+        "W3 browser way-home change commits; MCP plan names Rosa"
+      ],
+      "bytes": 79198
+    },
+    {
+      "file": "w3-06-cancel-confirm.png",
+      "viewport": "1280x720",
+      "workflow": "W3 Pickup",
+      "step": "cancel: confirmation",
+      "action": "Cancel change",
+      "expected": "A confirmation before anything is sent",
+      "observed": "confirmation shown",
+      "bytes": 126223
+    },
+    {
+      "file": "w3-07-cancelled-after-reload.png",
+      "viewport": "1280x720",
+      "workflow": "W3 Pickup",
+      "step": "outcome after reload",
+      "action": "Confirm, then reload the page",
+      "expected": "Wednesday is back to the usual way home (bus)",
+      "observed": "usual way home; kept after reload",
+      "reload": "kept",
+      "mcp": {
+        "tool": "bellnote.pickup.get",
+        "args": {
+          "id": "child-theo"
+        },
+        "observed": "plan default",
+        "version": {
+          "epoch": 1,
+          "revision": 9
+        }
+      },
+      "browser_test": [
+        "W3 browser cancel commits; MCP plan is the default again"
+      ],
+      "bytes": 75881
+    },
+    {
+      "file": "w3-08-denied-nico.png",
+      "viewport": "1280x720",
+      "workflow": "W3 Pickup",
+      "step": "denied",
+      "action": "Choose Nico",
+      "expected": "No pickup list and no controls: Maya is not custodial for Nico",
+      "observed": "list not shown",
+      "mcp": {
+        "tool": "bellnote.pickup.get",
+        "args": {
+          "id": "child-nico"
+        },
+        "observed": "not_permitted"
+      },
+      "browser_test": [
+        "Non-custodial child: no pickup list and no controls"
+      ],
+      "bytes": 47118
+    },
+    {
+      "file": "w4-01-start.png",
+      "viewport": "1280x720",
+      "workflow": "W4 Lunch",
+      "step": "start",
+      "action": "Lunch, Ines",
+      "expected": "Balance $3.10 under the $5.00 alert; meal restrictions; purchases; this week's menu",
+      "observed": "balance 310 cents",
+      "bytes": 59592
+    },
+    {
+      "file": "w4-02-amount-refused.png",
+      "viewport": "1280x720",
+      "workflow": "W4 Lunch",
+      "step": "invalid",
+      "action": "Add money $2.00, Pay",
+      "expected": "Refused (amount_out_of_range) with the school's range; nothing charged",
+      "observed": "\"A top-up must be between $5.00 and $200.00.\"",
+      "browser_test": [
+        "A refusal stays in the form with the App message (no protocol code shown)",
+        "No false success after a refusal"
+      ],
+      "bytes": 105400
+    },
+    {
+      "file": "w4-03-stale-refused.png",
+      "viewport": "1280x720",
+      "workflow": "W4 Lunch",
+      "step": "stale",
+      "action": "Another Agent connection changes the account (preferences.update); then $20.00, Pay",
+      "expected": "Refused as stale; the balance stays $3.10",
+      "observed": "\"This record changed. Close this form and refresh before trying again.\"",
+      "mcp": {
+        "tool": "bellnote.preferences.update (other client)",
+        "state": "committed",
+        "version": {
+          "epoch": 1,
+          "revision": 10
+        }
+      },
+      "browser_test": [
+        "A stale form shows the conflict instead of overwriting",
+        "Nothing was charged by the stale form"
+      ],
+      "bytes": 105814
+    },
+    {
+      "file": "w4-04-topup-form.png",
+      "viewport": "1280x720",
+      "workflow": "W4 Lunch",
+      "step": "action",
+      "action": "Cancel, Refresh, Add money $20.00 with the card ending 4417, Pay",
+      "expected": "Amount typed in dollars, card chosen from the usable payment methods",
+      "observed": "filled",
+      "bytes": 105584
+    },
+    {
+      "file": "w4-05-topped-up.png",
+      "viewport": "1280x720",
+      "workflow": "W4 Lunch",
+      "step": "outcome",
+      "action": "Pay",
+      "expected": "Balance $23.10 and a top-up row",
+      "observed": "balance 2310 cents",
+      "mcp": {
+        "tool": "bellnote.lunch.account_get",
+        "args": {
+          "id": "lunch-ines"
+        },
+        "record": "tx-0085",
+        "payment": "pay-0010",
+        "balance_cents": 2310,
+        "version": {
+          "epoch": 1,
+          "revision": 11
+        }
+      },
+      "bytes": 60443
+    },
+    {
+      "file": "w4-06-settings-form.png",
+      "viewport": "1280x720",
+      "workflow": "W4 Lunch",
+      "step": "edit",
+      "action": "Alerts and limits: alert under $8.00, no daily limit, Save",
+      "expected": "Prefilled with the current values",
+      "observed": "filled",
+      "bytes": 105586
+    },
+    {
+      "file": "w4-07-charge-after-reload.png",
+      "viewport": "1280x720",
+      "workflow": "W4 Lunch",
+      "step": "independent update, after reload",
+      "action": "Infra applies a cafeteria charge (lunch.charged, peanut item); Refresh, then reload",
+      "expected": "Balance $18.85; the purchase flagged as restricted for Ines; alert $8.00 kept",
+      "observed": "flagged; balance 1885 cents; kept after reload",
+      "reload": "kept",
+      "mcp": {
+        "tool": "bellnote.lunch.account_get",
+        "args": {
+          "id": "lunch-ines"
+        },
+        "record": "tx-evidence-1",
+        "restricted_item": true,
+        "balance_cents": 1885,
+        "threshold_cents": 800,
+        "version": {
+          "epoch": 1,
+          "revision": 13
+        }
+      },
+      "browser_test": [
+        "Refresh shows the cafeteria charge, flagged as restricted",
+        "Reload keeps the view and the committed balance"
+      ],
+      "bytes": 63291
+    },
+    {
+      "file": "w4-08-menu.png",
+      "viewport": "1280x720",
+      "workflow": "W4 Lunch",
+      "step": "read",
+      "action": "Scroll to the week's menu",
+      "expected": "Each day's items with allergen tags; items Ines's restrictions exclude are marked for her",
+      "observed": "2 items marked for Ines this week",
+      "mcp": {
+        "tool": "bellnote.menu.list",
+        "args": {
+          "id": "school-alder"
+        },
+        "observed": "excluded_for Ines: 2026-11-17 Peanut noodle bowl; 2026-11-18 Almond oat bar",
+        "version": {
+          "epoch": 1,
+          "revision": 13
+        }
+      },
+      "bytes": 50445
+    },
+    {
+      "file": "account-01-preferences-form.png",
+      "viewport": "1280x720",
+      "workflow": "Account",
+      "step": "edit",
+      "action": "Account → Edit: the form opens with email copies on (set by the other client during W4); change the default card to the one ending 2291, Save",
+      "expected": "Prefilled with the current values",
+      "observed": "email copies Yes, card ending 2291 chosen",
+      "browser_test": [
+        "The preferences form is prefilled with the current value"
+      ],
+      "bytes": 105153
+    },
+    {
+      "file": "account-02-saved-after-reload.png",
+      "viewport": "1280x720",
+      "workflow": "Account",
+      "step": "outcome after reload",
+      "action": "Save; reload the page",
+      "expected": "\"Email copies on\" (each later notification also stores its Mail message, see mail-delivery.md); the card ending 2291 is the default",
+      "observed": "email copies on, card ending 2291 default; kept after reload",
+      "reload": "kept",
+      "mcp": {
+        "tool": "bellnote.preferences.get",
+        "observed": "email_notices true, default pm-0002",
+        "version": {
+          "epoch": 1,
+          "revision": 14
+        }
+      },
+      "browser_test": [
+        "Preferences commit; MCP reads them"
+      ],
+      "bytes": 66335
+    },
+    {
+      "file": "account-03-payments.png",
+      "viewport": "1280x720",
+      "workflow": "Account",
+      "step": "read",
+      "action": "Scroll to Payments",
+      "expected": "Today's form fee and top-up paid; Theo's winter concert fee refunded (W2)",
+      "observed": "2 refunded, 8 paid in the last 60 days",
+      "mcp": {
+        "tool": "bellnote.payments.list",
+        "observed": "pay-0001 lunch_topup paid; pay-0002 lunch_topup paid; pay-0003 form_fee paid"
+      },
+      "bytes": 72819
+    },
+    {
+      "file": "notifications-01-read.png",
+      "viewport": "1280x720",
+      "workflow": "Notifications",
+      "step": "read",
+      "action": "Notifications → the latest one",
+      "expected": "What the school, cafeteria or other guardian did, in names and dates; a link to the related view",
+      "observed": "31 notifications listed",
+      "browser_test": [
+        "Notifications list and reader render"
+      ],
+      "bytes": 71899
+    },
+    {
+      "file": "phone-home.png",
+      "viewport": "390x844",
+      "workflow": "Phone width",
+      "step": "Home",
+      "action": "Open Home at 390 px",
+      "expected": "Single column, no horizontal page scroll",
+      "observed": "no horizontal overflow",
+      "browser_test": [
+        "390px home has no horizontal overflow"
+      ],
+      "bytes": 36722
+    },
+    {
+      "file": "phone-attendance.png",
+      "viewport": "390x844",
+      "workflow": "Phone width",
+      "step": "Attendance",
+      "action": "Open Attendance at 390 px",
+      "expected": "Single column, no horizontal page scroll",
+      "observed": "no horizontal overflow",
+      "browser_test": [
+        "390px attendance has no horizontal overflow"
+      ],
+      "bytes": 33814
+    },
+    {
+      "file": "phone-forms.png",
+      "viewport": "390x844",
+      "workflow": "Phone width",
+      "step": "Forms",
+      "action": "Open Forms at 390 px",
+      "expected": "Single column, no horizontal page scroll",
+      "observed": "no horizontal overflow",
+      "browser_test": [
+        "390px forms has no horizontal overflow"
+      ],
+      "bytes": 37248
+    },
+    {
+      "file": "phone-lunch.png",
+      "viewport": "390x844",
+      "workflow": "Phone width",
+      "step": "Lunch",
+      "action": "Open Lunch at 390 px",
+      "expected": "Single column, no horizontal page scroll",
+      "observed": "no horizontal overflow",
+      "browser_test": [
+        "390px lunch has no horizontal overflow"
+      ],
+      "bytes": 31849
+    },
+    {
+      "file": "restricted-01-view-only.png",
+      "viewport": "1280x720",
+      "workflow": "Read-only profile",
+      "step": "denied",
+      "action": "Host started with --profile scenario; Lunch",
+      "expected": "\"View only\" in the toolbar and no write controls",
+      "observed": "view only, no Add money",
+      "browser_test": [
+        "Restricted profile says the session is view only",
+        "Restricted profile renders no write controls"
+      ],
+      "bytes": 58299
+    }
+  ]
+}

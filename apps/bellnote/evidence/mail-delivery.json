@@ -1,0 +1,714 @@
+{
+  "schema": "bellnote.mail-delivery.v1",
+  "revisions": {
+    "bellnote": {
+      "app_id": "bellnote",
+      "version": "1.0.0",
+      "core_api": "1.2.0",
+      "contribution_sha256": "4a9efdfc476be7af62153a01c6861e464d4fb8b8a003c0f436eb5701ce189757"
+    },
+    "mail": {
+      "app_id": "mail",
+      "version": "1.3.0",
+      "core_api": "1.2.0",
+      "contribution_sha256": "618bf5870e8350f7792de8b730e60e3104b796c5e013e9720d5d6e5d06060e86"
+    },
+    "runtime": "1.6.0"
+  },
+  "contract": {
+    "channel": "channel.email",
+    "schema_id": "urn:pale:email-message:2",
+    "event_type": "org.pale.mail.notification.v1",
+    "payload_schema_id": "urn:pale:email-payload:1",
+    "receiver_operation": "mail.receive_notification",
+    "bellnote_schema_sha256": "74d5a4b4406b7ac1870dbecc114cae3f8978846a6e9999b46d33b7470598b4f0",
+    "mail_schema_sha256": "74d5a4b4406b7ac1870dbecc114cae3f8978846a6e9999b46d33b7470598b4f0"
+  },
+  "direction": "Bellnote publishes, Mail receives; the caller is the Infra-run sender src/publisher.cjs with Bellnote's Infra connection and a router publisher connection fixed to bellnote-maya",
+  "binding": {
+    "bellnote": {
+      "account_id": "bellnote-maya",
+      "owner_person_id": "person-maya"
+    },
+    "mail": {
+      "account_id": "mail-maya",
+      "owner_person_id": "person-maya"
+    },
+    "recipient": {
+      "kind": "person_ref",
+      "id": "person-maya"
+    },
+    "grant": {
+      "app_id": "mail",
+      "account_id": "mail-maya",
+      "channel": "channel.email"
+    }
+  },
+  "cases": [
+    {
+      "case": "delivered",
+      "meaning": "receiver delivery/commit",
+      "run": "flow-granted",
+      "router_config": {
+        "grants": [
+          {
+            "app_id": "mail",
+            "account_id": "mail-maya",
+            "channel": "channel.email"
+          }
+        ]
+      },
+      "local": {
+        "mail_clock": {
+          "tool": "env.advance_time",
+          "virtual_now": "2026-11-18T13:05:00-08:00",
+          "status": "committed"
+        },
+        "preferences_update": {
+          "tool": "bellnote.preferences.update",
+          "arguments": {
+            "request_id": "notices-flow-granted",
+            "email_notices": true
+          },
+          "status": "committed",
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          }
+        },
+        "event": {
+          "request": {
+            "event_id": "ev-bn-160",
+            "at": "2026-11-18T13:05:00-08:00",
+            "operation": "bellnote.school.day_changed",
+            "payload": {
+              "school_id": "school-alder",
+              "date": "2026-11-20",
+              "kind": "early_dismissal",
+              "dismissal_local": "12:30",
+              "reason": "Staff training"
+            }
+          },
+          "status": "committed",
+          "version": {
+            "epoch": 2,
+            "revision": 2
+          }
+        },
+        "notification_id": "ntf-0035",
+        "bellnote_version": {
+          "epoch": 2,
+          "revision": 2
+        }
+      },
+      "initial": {
+        "bellnote": {
+          "version": {
+            "epoch": 2,
+            "revision": 2
+          },
+          "notifications": 123
+        },
+        "mail": {
+          "version": {
+            "epoch": 1,
+            "revision": 1
+          },
+          "messages": 2,
+          "inbox": 2
+        }
+      },
+      "request": {
+        "tool": "router.publish",
+        "request_id": "bellnote-2-ntf-0035",
+        "cloud_event_id": "ntf-0035",
+        "source": "urn:pale:app:bellnote:account:bellnote-maya",
+        "type": "org.pale.mail.notification.v1",
+        "recipient": {
+          "kind": "person_ref",
+          "id": "person-maya"
+        },
+        "source_object": {
+          "app_id": "bellnote",
+          "account_id": "bellnote-maya",
+          "object_type": "school_day",
+          "object_id": "day-alder-2026-11-20"
+        },
+        "title": "Alder Elementary: early dismissal at 12:30 on Friday, November 20"
+      },
+      "result": {
+        "received_at": "<wall-clock>",
+        "status": "committed",
+        "run_id": "flow-granted",
+        "source_app": "bellnote",
+        "channel": "channel.email",
+        "target": {
+          "app_id": "mail",
+          "account_id": "mail-maya"
+        },
+        "cloud_event": {
+          "source": "urn:pale:app:bellnote:account:bellnote-maya",
+          "id": "ntf-0035",
+          "type": "org.pale.mail.notification.v1",
+          "time": "2026-11-18T13:05:00-08:00"
+        },
+        "event_id": "router-278e1a661e6098fec780e6e79f7b5289",
+        "version": {
+          "epoch": 1,
+          "revision": 2
+        },
+        "applied_at": "2026-11-18T13:05:00-08:00",
+        "committed_at": "<wall-clock>",
+        "receiver_trace": {
+          "run_id": "flow-granted",
+          "app_id": "mail",
+          "event_id": "router-278e1a661e6098fec780e6e79f7b5289",
+          "cloud_event": {
+            "source": "urn:pale:app:bellnote:account:bellnote-maya",
+            "id": "ntf-0035",
+            "type": "org.pale.mail.notification.v1",
+            "time": "2026-11-18T13:05:00-08:00"
+          },
+          "received_at": "<wall-clock>",
+          "virtual_received_at": "2026-11-18T13:05:00-08:00",
+          "applied_at": "2026-11-18T13:05:00-08:00",
+          "processed_at": "<wall-clock>"
+        }
+      },
+      "receiver_event_status": {
+        "status": "committed",
+        "event_id": "router-278e1a661e6098fec780e6e79f7b5289",
+        "trace": {
+          "run_id": "flow-granted",
+          "app_id": "mail",
+          "event_id": "router-278e1a661e6098fec780e6e79f7b5289",
+          "cloud_event": {
+            "source": "urn:pale:app:bellnote:account:bellnote-maya",
+            "id": "ntf-0035",
+            "type": "org.pale.mail.notification.v1",
+            "time": "2026-11-18T13:05:00-08:00"
+          },
+          "received_at": "<wall-clock>",
+          "virtual_received_at": "2026-11-18T13:05:00-08:00",
+          "applied_at": "2026-11-18T13:05:00-08:00",
+          "processed_at": "<wall-clock>"
+        },
+        "app_id": "mail",
+        "version": {
+          "epoch": 1,
+          "revision": 2
+        }
+      },
+      "in_mail": {
+        "tool": "mail.get",
+        "id": "router-278e1a661e6098fec780e6e79f7b5289",
+        "account": "mail-maya",
+        "message": {
+          "id": "router-278e1a661e6098fec780e6e79f7b5289",
+          "thread_id": "ntf-0035",
+          "account_id": "mail-maya",
+          "from": "bellnote@pale.example",
+          "to": [
+            "maya.main@example.com"
+          ],
+          "subject": "Alder Elementary: early dismissal at 12:30 on Friday, November 20",
+          "body": "Alder Elementary will dismiss at 12:30 on Friday, November 20 (usually 15:10). Reason given: Staff training. Theo Okafor's way home that day is still collected by Dana Okafor. Ines Okafor's way home that day is still the usual one (going to after-care). Changes for that day can be made until 11:00 that day.",
+          "received_at": "2026-11-18T13:05:00-08:00",
+          "folder": "inbox",
+          "read": false,
+          "attachments": []
+        }
+      },
+      "after": {
+        "bellnote": {
+          "version": {
+            "epoch": 2,
+            "revision": 2
+          },
+          "notifications": 123,
+          "activity": 3
+        },
+        "mail": {
+          "version": {
+            "epoch": 1,
+            "revision": 2
+          },
+          "messages": 3,
+          "inbox": 3
+        }
+      },
+      "retry": {
+        "request_id": "bellnote-2-ntf-0035",
+        "result": {
+          "received_at": "<wall-clock>",
+          "status": "committed",
+          "run_id": "flow-granted",
+          "source_app": "bellnote",
+          "channel": "channel.email",
+          "target": {
+            "app_id": "mail",
+            "account_id": "mail-maya"
+          },
+          "cloud_event": {
+            "source": "urn:pale:app:bellnote:account:bellnote-maya",
+            "id": "ntf-0035",
+            "type": "org.pale.mail.notification.v1",
+            "time": "2026-11-18T13:05:00-08:00"
+          },
+          "event_id": "router-278e1a661e6098fec780e6e79f7b5289",
+          "version": {
+            "epoch": 1,
+            "revision": 2
+          },
+          "applied_at": "2026-11-18T13:05:00-08:00",
+          "committed_at": "<wall-clock>",
+          "receiver_trace": {
+            "run_id": "flow-granted",
+            "app_id": "mail",
+            "event_id": "router-278e1a661e6098fec780e6e79f7b5289",
+            "cloud_event": {
+              "source": "urn:pale:app:bellnote:account:bellnote-maya",
+              "id": "ntf-0035",
+              "type": "org.pale.mail.notification.v1",
+              "time": "2026-11-18T13:05:00-08:00"
+            },
+            "received_at": "<wall-clock>",
+            "virtual_received_at": "2026-11-18T13:05:00-08:00",
+            "applied_at": "2026-11-18T13:05:00-08:00",
+            "processed_at": "<wall-clock>"
+          },
+          "duplicate": true
+        },
+        "mail_after": {
+          "version": {
+            "epoch": 1,
+            "revision": 2
+          },
+          "messages": 3,
+          "inbox": 3
+        }
+      },
+      "changed_retry": {
+        "request_id": "bellnote-2-ntf-0035",
+        "changed": "content.title",
+        "result": {
+          "received_at": "<wall-clock>",
+          "status": "rejected",
+          "code": "idempotency_conflict"
+        },
+        "mail_after": {
+          "version": {
+            "epoch": 1,
+            "revision": 2
+          },
+          "messages": 3,
+          "inbox": 3
+        }
+      }
+    },
+    {
+      "case": "email_notices_off",
+      "meaning": "no local wire message, nothing sent",
+      "run": "flow-off",
+      "local": {
+        "mail_clock": {
+          "tool": "env.advance_time",
+          "virtual_now": "2026-11-18T13:05:00-08:00",
+          "status": "committed"
+        },
+        "preferences_update": {
+          "tool": "bellnote.preferences.update",
+          "arguments": {
+            "request_id": "notices-flow-off",
+            "email_notices": false
+          },
+          "status": "committed",
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          }
+        },
+        "event": {
+          "request": {
+            "event_id": "ev-bn-160",
+            "at": "2026-11-18T13:05:00-08:00",
+            "operation": "bellnote.school.day_changed",
+            "payload": {
+              "school_id": "school-alder",
+              "date": "2026-11-20",
+              "kind": "early_dismissal",
+              "dismissal_local": "12:30",
+              "reason": "Staff training"
+            }
+          },
+          "status": "committed",
+          "version": {
+            "epoch": 2,
+            "revision": 2
+          }
+        },
+        "notification_id": "ntf-0035",
+        "bellnote_version": {
+          "epoch": 2,
+          "revision": 2
+        }
+      },
+      "result": {
+        "stage": "email_notices_off",
+        "notification_id": "ntf-0035"
+      },
+      "mail_before": {
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "messages": 2,
+        "inbox": 2
+      },
+      "mail_after": {
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "messages": 2,
+        "inbox": 2
+      }
+    },
+    {
+      "case": "denied",
+      "meaning": "refused before dispatch",
+      "run": "flow-no-grant",
+      "router_config": {
+        "grants": []
+      },
+      "local": {
+        "mail_clock": {
+          "tool": "env.advance_time",
+          "virtual_now": "2026-11-18T13:05:00-08:00",
+          "status": "committed"
+        },
+        "preferences_update": {
+          "tool": "bellnote.preferences.update",
+          "arguments": {
+            "request_id": "notices-flow-no-grant",
+            "email_notices": true
+          },
+          "status": "committed",
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          }
+        },
+        "event": {
+          "request": {
+            "event_id": "ev-bn-160",
+            "at": "2026-11-18T13:05:00-08:00",
+            "operation": "bellnote.school.day_changed",
+            "payload": {
+              "school_id": "school-alder",
+              "date": "2026-11-20",
+              "kind": "early_dismissal",
+              "dismissal_local": "12:30",
+              "reason": "Staff training"
+            }
+          },
+          "status": "committed",
+          "version": {
+            "epoch": 2,
+            "revision": 2
+          }
+        },
+        "notification_id": "ntf-0035",
+        "bellnote_version": {
+          "epoch": 2,
+          "revision": 2
+        }
+      },
+      "request_id": "bellnote-2-ntf-0035",
+      "result": {
+        "received_at": "<wall-clock>",
+        "status": "rejected",
+        "code": "recipient_not_authorized"
+      },
+      "mail_before": {
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "messages": 2,
+        "inbox": 2
+      },
+      "mail_after": {
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "messages": 2,
+        "inbox": 2
+      },
+      "bellnote_unchanged": true
+    },
+    {
+      "case": "mail_missing",
+      "meaning": "refused before dispatch",
+      "run": "flow-no-mail",
+      "registry_apps": [
+        "bellnote"
+      ],
+      "local": {
+        "mail_clock": null,
+        "preferences_update": {
+          "tool": "bellnote.preferences.update",
+          "arguments": {
+            "request_id": "notices-flow-no-mail",
+            "email_notices": true
+          },
+          "status": "committed",
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          }
+        },
+        "event": {
+          "request": {
+            "event_id": "ev-bn-160",
+            "at": "2026-11-18T13:05:00-08:00",
+            "operation": "bellnote.school.day_changed",
+            "payload": {
+              "school_id": "school-alder",
+              "date": "2026-11-20",
+              "kind": "early_dismissal",
+              "dismissal_local": "12:30",
+              "reason": "Staff training"
+            }
+          },
+          "status": "committed",
+          "version": {
+            "epoch": 2,
+            "revision": 2
+          }
+        },
+        "notification_id": "ntf-0035",
+        "bellnote_version": {
+          "epoch": 2,
+          "revision": 2
+        }
+      },
+      "request_id": "bellnote-2-ntf-0035",
+      "result": {
+        "received_at": "<wall-clock>",
+        "status": "rejected",
+        "code": "recipient_unavailable"
+      },
+      "bellnote_unchanged": true
+    },
+    {
+      "case": "incompatible_contract",
+      "meaning": "refused before dispatch",
+      "run": "flow-other-wire",
+      "publisher_schema_sha256": "b41b7fdb708a311c711256fbc5c667e08b6ebda9080b1ac4daad1968a85a5fb3",
+      "receiver_schema_sha256": "74d5a4b4406b7ac1870dbecc114cae3f8978846a6e9999b46d33b7470598b4f0",
+      "local": {
+        "mail_clock": {
+          "tool": "env.advance_time",
+          "virtual_now": "2026-11-18T13:05:00-08:00",
+          "status": "committed"
+        },
+        "preferences_update": {
+          "tool": "bellnote.preferences.update",
+          "arguments": {
+            "request_id": "notices-flow-other-wire",
+            "email_notices": true
+          },
+          "status": "committed",
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          }
+        },
+        "event": {
+          "request": {
+            "event_id": "ev-bn-160",
+            "at": "2026-11-18T13:05:00-08:00",
+            "operation": "bellnote.school.day_changed",
+            "payload": {
+              "school_id": "school-alder",
+              "date": "2026-11-20",
+              "kind": "early_dismissal",
+              "dismissal_local": "12:30",
+              "reason": "Staff training"
+            }
+          },
+          "status": "committed",
+          "version": {
+            "epoch": 2,
+            "revision": 2
+          }
+        },
+        "notification_id": "ntf-0035",
+        "bellnote_version": {
+          "epoch": 2,
+          "revision": 2
+        }
+      },
+      "request_id": "bellnote-2-ntf-0035",
+      "result": {
+        "received_at": "<wall-clock>",
+        "status": "rejected",
+        "code": "incompatible_contract"
+      },
+      "mail_before": {
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "messages": 2,
+        "inbox": 2
+      },
+      "mail_after": {
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "messages": 2,
+        "inbox": 2
+      }
+    },
+    {
+      "case": "unknown_outcome",
+      "meaning": "receiver committed, acknowledgement lost",
+      "run": "flow-lost-ack",
+      "simulated": "the router's receiver connection throws after Mail's env.apply_event returns",
+      "local": {
+        "mail_clock": {
+          "tool": "env.advance_time",
+          "virtual_now": "2026-11-18T13:05:00-08:00",
+          "status": "committed"
+        },
+        "preferences_update": {
+          "tool": "bellnote.preferences.update",
+          "arguments": {
+            "request_id": "notices-flow-lost-ack",
+            "email_notices": true
+          },
+          "status": "committed",
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          }
+        },
+        "event": {
+          "request": {
+            "event_id": "ev-bn-160",
+            "at": "2026-11-18T13:05:00-08:00",
+            "operation": "bellnote.school.day_changed",
+            "payload": {
+              "school_id": "school-alder",
+              "date": "2026-11-20",
+              "kind": "early_dismissal",
+              "dismissal_local": "12:30",
+              "reason": "Staff training"
+            }
+          },
+          "status": "committed",
+          "version": {
+            "epoch": 2,
+            "revision": 2
+          }
+        },
+        "notification_id": "ntf-0035",
+        "bellnote_version": {
+          "epoch": 2,
+          "revision": 2
+        }
+      },
+      "request_id": "bellnote-2-ntf-0035",
+      "result": {
+        "received_at": "<wall-clock>",
+        "status": "unknown",
+        "code": "receiver_unconfirmed",
+        "run_id": "flow-lost-ack",
+        "stop_run": true,
+        "event_id": "router-d82f422ed651daa2d10ea8c93216355b"
+      },
+      "receiver_event_status": {
+        "status": "committed",
+        "event_id": "router-d82f422ed651daa2d10ea8c93216355b",
+        "trace": {
+          "run_id": "flow-lost-ack",
+          "app_id": "mail",
+          "event_id": "router-d82f422ed651daa2d10ea8c93216355b",
+          "cloud_event": {
+            "source": "urn:pale:app:bellnote:account:bellnote-maya",
+            "id": "ntf-0035",
+            "type": "org.pale.mail.notification.v1",
+            "time": "2026-11-18T13:05:00-08:00"
+          },
+          "received_at": "<wall-clock>",
+          "virtual_received_at": "2026-11-18T13:05:00-08:00",
+          "applied_at": "2026-11-18T13:05:00-08:00",
+          "processed_at": "<wall-clock>"
+        },
+        "app_id": "mail",
+        "version": {
+          "epoch": 1,
+          "revision": 2
+        }
+      },
+      "mail_before": {
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "messages": 2,
+        "inbox": 2
+      },
+      "mail_after": {
+        "version": {
+          "epoch": 1,
+          "revision": 2
+        },
+        "messages": 3,
+        "inbox": 3
+      },
+      "retry_after_unknown": {
+        "received_at": "<wall-clock>",
+        "status": "halted",
+        "code": "run_halted",
+        "stop_run": true
+      },
+      "bellnote_unchanged": true
+    }
+  ],
+  "checks": [
+    "Mail is the pinned 1.3.0 package",
+    "Bellnote publishes the exact wire schema Mail receives",
+    "Notification stored its wire message while email notices were on",
+    "Router lists channel.email from Bellnote's publish declaration",
+    "Snapshot lists the notification as deliverable",
+    "Router commits the delivery to Mail",
+    "Receipt names the Mail account",
+    "Mail holds the notification as a received message",
+    "Exactly one new inbox record",
+    "Mail's own receipt for the delivery event is committed",
+    "Bellnote state is identical before and after dispatch",
+    "An identical retry returns the first receipt",
+    "The retry leaves one inbox record",
+    "The same request ID with changed content is refused as idempotency_conflict",
+    "The refused retry leaves Mail and Bellnote unchanged",
+    "With email notices off the notification has no wire message",
+    "The sender publishes nothing and Mail is unchanged",
+    "Delivery without a grant is rejected",
+    "Rejected delivery creates no Mail record",
+    "Rejected delivery leaves Bellnote unchanged",
+    "Without Mail in the run the delivery is refused as recipient_unavailable",
+    "Bellnote runs and stays unchanged without Mail",
+    "A publisher wire schema that differs from Mail's is refused as incompatible_contract",
+    "The incompatible delivery creates no Mail record and leaves Bellnote unchanged",
+    "A lost acknowledgement is reported as unknown with the attempted event ID and no commit time",
+    "Mail's own receipt shows the delivery committed",
+    "Mail holds exactly one new message for the unknown attempt",
+    "The router halts the run: a retry is not sent again until reconciled",
+    "Bellnote is unchanged by the unknown delivery"
+  ]
+}
