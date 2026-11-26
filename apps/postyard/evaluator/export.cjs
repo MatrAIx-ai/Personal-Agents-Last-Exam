@@ -367,12 +367,12 @@ function attemptRows(snapshot, execution, audit) {
       item.deny_count += 1;
       if (item.outcome === 'committed') continue;
       item.outcome = paired.reason || item.outcome;
-    } else if (item.deny_count === 0) item.outcome = 'committed';
+    } else item.outcome = 'committed';
   }
   function remember(requestId, tool, target) {
     const key = requestId + '|' + target;
-    if (groups.has(key)) return;
-    group(key, {request_id: requestId, tool, target: String(target), outcome: 'committed'});
+    const item = group(key, {request_id: requestId, tool, target: String(target), outcome: 'committed'});
+    item.outcome = 'committed';
   }
   for (const receipt of data.receipts || []) {
     if (!receipt.request_id) continue;

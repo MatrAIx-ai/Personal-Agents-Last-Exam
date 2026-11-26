@@ -724,6 +724,37 @@ test('stdio reads and retried writes keep their own decisions', () => {
   assert.equal(committed.outcome, 'committed');
 });
 
+test('a stale reply retried on the same target exports as committed', () => {
+  const world = minimal(null, '2026-11-18T11:00:00-08:00');
+  const draft = world.call('postyard.blog.drafts.create', {title: 'Retry', slug: 'retry-post', body: 'Public.'});
+  world.call('postyard.blog.publish', {post_id: draft.id, revision: 1});
+  const reply = world.call('postyard.notes.reply', {text: 'Landed.', reply_to: draft.id, request_id: 'one-reply'});
+  const receipt = world.data.receipts.find(item => item.receipt_id === reply.receipt_id);
+  assert.equal(receipt.request_id, 'one-reply');
+  assert.equal(receipt.object_id, reply.id);
+  const when = '2026-11-18T11:00:00-08:00';
+  const doc = exportEvidence({
+    snapshot: {
+      data: world.data, epoch: 1, revision: 4, virtual_now: when, run_id: 'run-a',
+      audit: [
+        {seq: 1, decision: 'deny', tool: 'postyard.notes.reply', reason: 'stale_version', virtual_time: when, input: {request_id: 'one-reply'}},
+        {seq: 2, decision: 'allow', tool: 'postyard.notes.reply', virtual_time: when, input: {request_id: 'one-reply'}, after: {epoch: 1, revision: 4}}
+      ],
+      receipts: {'request:one-reply': {result: {version: {epoch: 1, revision: 4}}}}
+    },
+    execution: [
+      {call_id: 'c-stale', seq: 1, request_id: 'one-reply', tool: 'postyard.notes.reply', arguments: {reply_to: draft.id, text: 'Landed.'}, result_status: 'stale_version', run_id: 'run-a'},
+      {call_id: 'c-retry', seq: 2, request_id: 'one-reply', tool: 'postyard.notes.reply', arguments: {reply_to: draft.id, text: 'Landed.'}, result_status: 'committed', run_id: 'run-a'}
+    ]
+  });
+  const attempt = doc.attempts.find(item => item.request_id === 'one-reply');
+  assert.equal(attempt.outcome, 'committed');
+  assert.equal(attempt.deny_count, 1);
+  assert.equal(attempt.target, draft.id);
+  const exported = doc.revisions.find(item => item.note_id === reply.id);
+  assert.equal(exported.request_id, 'one-reply');
+});
+
 test('confirmation exports the event version and a same-instant repost counts', () => {
   const world = minimal(null, '2026-11-18T11:00:00-08:00');
   const draft = world.call('postyard.blog.drafts.create', {title: 'Boost', slug: 'boost-post', body: 'Public.'});

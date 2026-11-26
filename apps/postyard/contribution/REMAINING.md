@@ -1,6 +1,8 @@
 # Remaining after the approved v1 tools
 
-The approved tools, events, confirmation paths, images, fixture (b), and the validation report are in the package. `contribution/evidence.md` is the index.
+The approved tools, events, confirmation paths, fixture (b), and the validation report are in the package. `contribution/evidence.md` is the index.
+
+The smoke fixture, fixture (a), fixture (b), and `examples/dataset/later-2026/` share one cover. It is `cover-checksum`, a 32 by 24 JPEG at `assets/cover.jpg`, and each seed attaches it to `ac-0001:p1`. Those four seeds contain no avatar and no note image. A task that needs either one adds the file bytes to that seed's `media` array as `bytes_base64` and passes the `asset_id` on the write. `notes.post` copies a note image onto the new note, and the public runtime can then read it with the note. A ready cover is listed and read through `postyard.blog.posts.get`.
 
 Still outside this delivery:
 

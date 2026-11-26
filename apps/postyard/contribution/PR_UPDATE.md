@@ -60,7 +60,7 @@ node --test runtime/tests/clock.test.cjs
 npm test
 ```
 
-Observed: Node v18.20.8, v22.23.5, v22.23.4, and v24.22.3 each passed the 46-test package suite. `tests/business.test.cjs` is 16 of those tests. The host suite passed 2 tests on each version. An independent checkout reported the same package and host counts on v24.22.1. `examples/run.cjs` printed `{"app":"postyard","notes":1,"id":"ac-0007:n1"}`. `app:verify` passed 43 checks on each version (runtime 1.6.0, Core API 1.2.0), `package_sha256` `2355c24fcbf41387c7c8a125a608cf2ab97f43355234f3b413f83b51b36244eb`. The clock test passed 7 tests, including the eight-app check. The repository suite passed 22 stages. Coverage counted 121 included rows, 95 Los Angeles dates, `excluded_count` 2, and no empty month from 2025-01 through 2026-12.
+Observed: Node v18.20.8, v22.23.5, v22.23.4, and v24.22.3 each passed the 47-test package suite. `tests/business.test.cjs` is 16 of those tests. The host suite passed 2 tests on each version. An independent checkout reported the same package and host counts on v24.22.1. `examples/run.cjs` printed `{"app":"postyard","notes":1,"id":"ac-0007:n1"}`. `app:verify` passed 43 checks on each version (runtime 1.6.0, Core API 1.2.0), `package_sha256` `2355c24fcbf41387c7c8a125a608cf2ab97f43355234f3b413f83b51b36244eb`. The clock test passed 7 tests, including the eight-app check. The repository suite passed 22 stages. Coverage counted 121 included rows, 95 Los Angeles dates, `excluded_count` 2, and no empty month from 2025-01 through 2026-12.
 
 ### Reviewer items
 
@@ -71,7 +71,9 @@ Observed: Node v18.20.8, v22.23.5, v22.23.4, and v24.22.3 each passed the 46-tes
 - Package tests read files under `apps/postyard/` only. The host suite is `tests/runtime.test.cjs`.
 - Replaying a `request_id`, or repeating `publication.release_due` with the same event id, does not add a second receipt. A confirmation replay returns the original receipt with `duplicate: true`.
 - Reach stays at 2300 after unpublish in the 11:00 to 11:40 example (2,100 followers, rate 300). A repost removed after unpublish does not change that frozen figure.
-- The subject index matches a complete handle and a URL by handle and object together. A public correction note and a reply target are present on the exported rows.
+- The subject index matches a complete handle and a URL by handle and object together. A public correction note and a reply target are present on the exported rows. `https://postyard.example/@tomasreyes/ingrid` exports no subject.
+- A same-request retry of one publication target exports `committed` and keeps the earlier `deny_count`. A retry that names a different target keeps a separate row.
+- The smoke fixture, fixture (a), fixture (b), and the later-2026 seed share the 32 by 24 cover `cover-checksum`. They contain no avatar and no note image. A task adds those bytes to its own seed.
 - `publication.release_due` keeps an empty payload. `env.advance_time` calls no App handler. Between `publish_at` and the release, reads show `due: true`.
 - `urn:pale:public-speech-evidence:1` stays inside the package. The repository-level schema comparison waits for Forkyard.
 
