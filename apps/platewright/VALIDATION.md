@@ -8,12 +8,15 @@ Every command below was run on Node.js 22.23.1 and 18.20.8 on the final package,
 
 | Command (repository root unless noted) | Node 22 | Node 18 |
 | --- | --- | --- |
-| `npm test` in `apps/platewright` | 38 of 38 tests pass | 38 of 38 |
+| `npm test` in `apps/platewright` | 39 of 39 tests pass | 39 of 39 |
 | `npm run example` in `apps/platewright` | passes; prints the walkthrough state | passes |
 | `npm run contracts:check` in `apps/platewright` | generated contracts match | match |
 | `npm run fixtures:check` in `apps/platewright` | both fixtures pass; reference: 1361 records, 1,018,433 bytes on disk, 1,010,944 compact, history from 2025-01-01; all fixture files 1,072,879 bytes | both pass, 1361 records |
 | `node apps/platewright/scripts/real-mcp.cjs` | 63 of 63 checks pass | 63 of 63 |
-| `node apps/platewright/scripts/notes-calendar-walkthrough.cjs` | 16 of 16 checks pass (Notes 1.0.0, Calendar 1.3.0) | 16 of 16 |
+| `node apps/platewright/scripts/notes-calendar-walkthrough.cjs` | 37 of 37 checks pass (Notes 1.0.0, Calendar 1.3.0); transcript identical to `evidence/notes-calendar-walkthrough.json` | 37 of 37; identical |
+| `npm run coverage:check` in `apps/platewright` | the committed coverage report matches the fixture | matches |
+| `node apps/platewright/scripts/dataset-query.cjs` | every counted record family read back over MCP; identical to `evidence/dataset-query.json` | identical |
+| `node apps/platewright/scripts/capture-gui-evidence.cjs` | 47 frames in 8 sequences, every step confirmed | 47 frames |
 | `npm run test:web` in `apps/platewright` (`tests/web-smoke.cjs`, shared Web Host) | passes | passes |
 | `npm run test:web:browser` in `apps/platewright` (`tests/web-browser.cjs`, Chromium 141.0.7390.37 headless) | 51 of 51 checks pass | 51 of 51 |
 | `npm run app:verify -- --app apps/platewright` | passed, 45 checks (declarations, including `contribution/gui.json`, load) | passed, 45 checks |
@@ -46,7 +49,7 @@ Local business tests are in `tests/` (one module per workflow, `events.test.cjs`
 | T01–T15 | See the test names in `tests/w1-…`–`tests/w5-…`; each asserts values and states, including less common states (`ok_if_omitted`, `unchecked` limits, `surplus`, `stock_not_counted`, `leftover_expired`, recipes restored, constraints ended today) | `npm test` |
 | T16 | Each of the six events with one notification and one activity row; 26 invalid events (unknown member, recipe, ingredient, slot or line; cooked or past slot; duplicate recipe ID; invalid constraint; all-or-nothing pantry items; ticking a ticked line) leave data, notifications, activity and clock unchanged; no notification for own writes or reads | `events.test.cjs`; real MCP rejected events |
 | T17 | Repeated `request_id` → stored receipt, no second object; changed input → `idempotency_conflict`; stale version → `stale_version`; Agent calling `env.apply_event`, `env.reset`, `env.advance_time`, `env.load_seed`, `env.snapshot`, `env.event_status` → `permission_denied`; event before the current time → `invalid_event`; `env.advance_time` with no App event changes derived states and not the data; seed validation failures; reset restores the loaded seed and time | `scripts/real-mcp.cjs` (Core side), `events.test.cjs` T17 (App side), `package.test.cjs` seed validation |
-| Integration walkthrough | `notes.get` → `platewright.recipes.create` (+ check and plan) → `calendar.create`, each with its version; Platewright state unchanged by the Notes and Calendar calls; Notes unchanged | `scripts/notes-calendar-walkthrough.cjs` |
+| Integration walkthrough | `notes.get` → `platewright.recipes.create` (+ check and plan) → `calendar.create`, each with its version; Platewright state unchanged by the Notes and Calendar calls; Notes unchanged; refused arguments, stale version, unreceived response resolved by the same request ID, idempotency conflict, denied policy, Platewright alone, another Calendar version refused before any call | `scripts/notes-calendar-walkthrough.cjs`, `evidence/notes-calendar-walkthrough.json` |
 | Fixture consistency | Lines convert to grams or are listed; diet tags follow from lines; distinct titles and ingredient lists; constraint and slot states agree with the loaded time; dates ≥ 2025-01-01; only intended flags; every record of both fixtures, hand-written or generated, obeys the App's rules as of its date, and every slot's history replays under the App's transitions; notification text names things in words; counts and size. Deliberately broken copies of both fixtures (19 of them) are each refused | `scripts/check-fixtures.cjs`, `fixtures.test.cjs` |
 | Input handling | Every one of the 22 tools, given each schema-valid input from a table built from its input schema (impossible calendar dates, unknown and wrong-kind IDs, blank text, zero, negative, fractional, tiny and huge numbers up to 1e300, empty, duplicate and over-long lists, optional fields alone), answers with a result that passes its output schema, the seed schema and `validateSeed`, or with a refusal carrying one of the App's documented codes; anything else (an error without a code, a harness assertion, another code) fails the test. A second table sends ratios, quantities, portions and limits from 1e-300 to 1e300 to records of the reference household and reads the scaled results back; a ratio of 1e300 and a pantry quantity of 1,000,001 are `invalid_quantity`. The tables are what is checked, not every possible input | `inputs.test.cjs` |
 | Refusal wording | 54 refusals provoked on the reference household return their code. The 52 a person can meet in the web interface name records in words (no record ID, slot ID, ISO date or vocabulary key); the two about a guest ID the caller sent, which the page cannot send, repeat that ID next to the guests' names, and two guests sent with one ID read "Two guests, A and B, have the same guest ID g1; give each guest an ID of their own." | `refusals.test.cjs` |
@@ -128,7 +131,7 @@ Verdicts: passed / failed / not run / not applicable.
 | 1.2 Versions, paths, schemas, tools, hooks, events, dependencies match files | passed | registry load in the verifier; `contracts:check`; `package.test.cjs` checks tools against handlers |
 | 1.3 Startup/tests from a clean checkout with public Host only | passed | verifier copies the package alone and runs its tests and example; `service.cjs` uses the public launcher |
 | 1.4 Required receiving Apps at compatible versions | not applicable | none required; the walkthrough uses Notes 1.0.0 and Calendar 1.3.0 through their own tools only |
-| 2.1 App-only tests with real functions, invalid transitions, missing objects, read-only behaviour | passed | 38 tests; refusals asserted decided-before-change; every tool on a table of schema-valid inputs |
+| 2.1 App-only tests with real functions, invalid transitions, missing objects, read-only behaviour | passed | 39 tests; refusals asserted decided-before-change; every tool on a table of schema-valid inputs |
 | 2.2 Create/read/update/cancel produce state and history; invalid operations preserve data | passed | T04, T07, T11–T15; real MCP atomicity checks |
 | 2.3 Data references and provenance valid | passed (automated) | `check-fixtures.cjs`; `dataset.json`; human review of realism still pending |
 | 2.4 Optional diagnostics do not change results | passed | `package.test.cjs` diagnostics test |
@@ -143,7 +146,7 @@ Verdicts: passed / failed / not run / not applicable.
 | GUI: failure behaviour | passed | refusal shown with the App's message (code `invalid_window` on the element); stale form shows `stale_version` and writes nothing; a dropped response retried with the same request ID commits once |
 | GUI: business-only access | passed | no management controls; direct `env.*` calls, hidden paths, fixture/state downloads, foreign origins and missing CSRF refused (smoke); restricted profile shows no write controls and the Host refuses a forged write (browser) |
 | GUI: files and content | passed (text) / not applicable (files) | hostile guest name rendered as text, no element created; the App has no attachments (`capabilities.resources: false`) |
-| GUI: evidence | passed | commands, versions, browser version and screenshots below; browser automation is not a model-agent evaluation |
+| GUI: evidence | passed | commands, versions, browser version and screenshots below; ordered sequences with reference comparison in `evidence/README.md`; browser automation is not a model-agent evaluation |
 | 4.1 Essential workflows have evidence; human review of realism | automated evidence passed; human review not run | remaining manual review below |
 | 4.2 Modes reported separately | passed | this file |
 | 4.3 Remaining gaps listed | passed | below |
@@ -156,6 +159,15 @@ Verdicts: passed / failed / not run / not applicable.
 - Write results report the object's state under `state`.
 - Error messages name the rule they report; refusal messages a person can meet and notification text name meals, dates, recipes, ingredients, people, constraints and shopping lines in words, and a refusal about a guest ID the caller sent names that ID and the guests (`refusals.test.cjs`, `w4-plan.test.cjs`, `events.test.cjs`, `check-fixtures.cjs`, browser test).
 - Inputs: every tool answers each input of the two tables in `inputs.test.cjs` with a result that passes the output schema, the seed schema and `validateSeed`, or with a documented refusal code. Each date is checked before it is used, so `plan.get {start: "2026-13-01"}` without `end` is `invalid_arguments`, and numbers the plan leaves open are bounded ("Choices where the plan is silent"), so a scaled quantity cannot overflow.
+
+## Delivery evidence added for the submission evidence contract
+
+The repository's submission evidence contract ([`docs/submission-evidence.md`](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/blob/main/docs/submission-evidence.md) on `main`) was added after this plan was approved. The evidence it asks for is recorded in [evidence/README.md](evidence/README.md) as added delivery work; the approved scope and the App are unchanged.
+
+- GUI: 47 ordered frames of every workflow with edit, cancel, invalid, denied and stale cases, each step confirmed by an independent MCP read with the App version and by reloads (`scripts/capture-gui-evidence.cjs`); a reference-product comparison with Paprika, Plan to Eat and Mealime public pages, referenced by URL (no image is redistributed).
+- Dependencies: the Notes → Platewright → Calendar walkthrough now records pinned versions and contract hashes, every request and result, each App's state after every step, and the failure paths; transcript in `evidence/notes-calendar-walkthrough.json`. No messaging is in scope.
+- Dataset: `evidence/dataset-coverage.md` (by month and record family, America/New_York, provenance, hashes), checked by `npm test`; `evidence/dataset-query.json` reads every counted family back over MCP.
+- Gaps: no record after 2026-11-15 and no history after 2026-11-07 (December 2026 is empty; post-clock activity is not invented); all data are synthetic; changing a meal in the page whose guest has a recorded need stops with "The note must be text." because `plan.get` returns the need's `note` as `null` and `plan.slot.set` accepts it only as text.
 
 ## Remaining manual review
 

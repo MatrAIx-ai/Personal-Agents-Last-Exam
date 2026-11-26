@@ -89,3 +89,14 @@ test('the fixture check replays each slot\'s history and refuses histories the A
     }
   }
 });
+
+test('the committed dataset coverage report matches the fixture as the App loads it', () => {
+  const fs = require('node:fs'), path = require('node:path');
+  const {outputs} = require('../scripts/dataset-coverage.cjs');
+  for (const [file, text] of Object.entries(outputs())) {
+    assert.equal(fs.readFileSync(path.join(__dirname, '..', file), 'utf8'), text, file + ' is out of date: run node scripts/dataset-coverage.cjs');
+  }
+  const report = JSON.parse(outputs()['evidence/dataset-coverage.json']);
+  assert.equal(report.totals.records_core_counts, require('../contribution/dataset.json').expected_counts.records);
+  assert.equal(report.totals.earliest_date, '2025-01-01');
+});

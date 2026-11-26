@@ -390,7 +390,7 @@ function build({check = false} = {}) {
   }
   return drift;
 }
-module.exports = {build};
+module.exports = {build, PANTRY, WEEKS_START};
 if (require.main === module) {
   const drift = build({check: process.argv.includes('--check')});
   if (drift.length) { console.error('Fixture drift: ' + drift.join(', ')); process.exitCode = 1; }
