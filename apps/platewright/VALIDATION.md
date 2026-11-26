@@ -20,7 +20,7 @@ Every command below was run on Node.js 22.23.1 and 18.20.8 on the final package,
 | `node apps/platewright/scripts/dataset-query.cjs` | every counted record family read back over MCP; identical to `evidence/dataset-query.json` | identical |
 | `node apps/platewright/scripts/capture-gui-evidence.cjs` | 47 frames in 8 sequences, every step confirmed | 47 frames |
 | `npm run test:web` in `apps/platewright` (`tests/web-smoke.cjs`, shared Web Host) | passes | passes |
-| `npm run test:web:browser` in `apps/platewright` (`tests/web-browser.cjs`, Chromium 141.0.7390.37 headless) | 54 of 54 checks pass | 54 of 54 |
+| `npm run test:web:browser` in `apps/platewright` (`tests/web-browser.cjs`, Chromium 141.0.7390.37 headless) | 58 of 58 checks pass | 58 of 58 |
 | `npm run app:verify -- --app apps/platewright` | passed, 45 checks (declarations, including `contribution/gui.json`, load) | passed, 45 checks |
 | `node runtime/ci/select-apps.cjs . a4bce02` | `{"full":false,"ids":["platewright"]}` | same |
 | `node runtime/ci/verify-submissions.cjs . <out> a4bce02` | `platewright: PASS` | `platewright: PASS` |

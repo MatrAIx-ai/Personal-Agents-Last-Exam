@@ -24,7 +24,9 @@ const VERDICT={unsafe:'Unsafe',may_contain:'May contain',unsuitable:'Unsuitable'
 
 // App-owned layout rules. The Host serves one shared stylesheet and its CSP allows no inline
 // style element, so the controller adopts a constructed stylesheet built from this constant text.
+// Its first rule makes the hidden attribute win over any display a later rule gives an element.
 const CSS=`
+[hidden]{display:none!important}
 body[data-app=platewright]{--accent:#2f7d5b;--soft:#eaf5ef}
 body[data-app=platewright] .sidebar{background:#f3f6f2}
 body[data-app=platewright] .workspace{grid-template-columns:minmax(0,1.3fr) minmax(320px,1fr)}

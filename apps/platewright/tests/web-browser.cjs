@@ -44,6 +44,16 @@ async function main() {
       const bad = lines.map(unreadable).filter(Boolean);
       check(`${where}: the page shows names, dates and words, not IDs or keys`, !bad.length, bad.slice(0, 5));
     };
+    // What a person can see and reach: an element is shown when it is rendered with a box (computed
+    // display, client rects, width and height), and reachable when its control takes focus.
+    const shown = loc => loc.evaluate(e => { const r = e.getBoundingClientRect(); return getComputedStyle(e).display !== 'none' && e.getClientRects().length > 0 && r.width > 0 && r.height > 0; });
+    const reachable = loc => loc.evaluate(e => { const c = e.matches('input,select,textarea,button') ? e : e.querySelector('input,select,textarea,button'); if (!c) return false; c.focus(); const ok = document.activeElement === c; c.blur(); return ok; });
+    // Elements a form hides with the hidden attribute that are still rendered or take focus.
+    const hiddenLeaks = form => form.evaluate(d => [...d.querySelectorAll('[hidden]')].filter(e => {
+      if (e.getClientRects().length || getComputedStyle(e).display !== 'none') return true;
+      return [...e.querySelectorAll('input,select,textarea,button')].some(c => { c.focus(); const got = document.activeElement === c; c.blur(); return got; });
+    }).map(e => e.textContent.trim().slice(0, 40) || e.tagName));
+    const seen = async locs => Promise.all(locs.map(async l => [await shown(l), await reachable(l)]));
 
     await page.goto(host.accessUrl);
     await page.waitForSelector('.pw-day', WAIT); await idle();
@@ -92,15 +102,29 @@ async function main() {
     // W4: plan Tuesday's breakfast with a guest whose name is hostile text.
     await page.click('button[aria-label^="Plan a meal on Tuesday"]');
     const plan = dialog(P + 'plan.slot.set'); await plan.waitFor(WAIT);
+    // A dish shows the fields of its kind only: Recipe and Servings for a recipe, From and Portions for
+    // leftovers; the other kind's fields are not rendered, cannot take focus and are not sent.
+    const dish = plan.locator('[data-dish]').first();
+    const recipeFields = [dish.locator('label.r').nth(0), dish.locator('label.r').nth(1)], leftoverFields = [dish.locator('label.l').nth(0), dish.locator('label.l').nth(1)];
+    const asRecipe = [await seen(recipeFields), await seen(leftoverFields), await hiddenLeaks(plan)];
+    check('A recipe dish shows Recipe and Servings; From and Portions are not rendered and cannot take focus',
+      JSON.stringify(asRecipe) === JSON.stringify([[[true, true], [true, true]], [[false, false], [false, false]], []]), asRecipe);
+    await dish.locator('select[aria-label="Dish kind"]').selectOption('leftovers');
+    const asLeftovers = [await seen(recipeFields), await seen(leftoverFields), await hiddenLeaks(plan)];
+    check('A leftovers dish shows From and Portions; Recipe and Servings are not rendered and cannot take focus',
+      JSON.stringify(asLeftovers) === JSON.stringify([[[false, false], [false, false]], [[true, true], [true, true]], []]), asLeftovers);
+    await dish.locator('select[aria-label="Dish kind"]').selectOption('recipe');
     await plan.locator('select').nth(0).selectOption('breakfast');
     await plan.locator('select[aria-label="Recipe"]').first().selectOption('rec-banana-pancakes');
     await plan.locator('button:has-text("+ Add a guest")').click();
     await plan.locator('input[aria-label="Guest name"]').fill(HOSTILE);
     await plan.locator('select[aria-label="Guest need"]').selectOption('allergy');
+    const needValue = plan.locator('[data-guest] select').last();
+    check('A guest need of kind allergy shows its allergen choice', (await seen([needValue]))[0].join() === 'true,true');
     await plan.locator('button:has-text("Add need")').click();
     await submit(P + 'plan.slot.set'); await closed(P + 'plan.slot.set'); await idle();
     let slot = (await mcp.call(P + 'plan.get', {start: '2026-11-10', end: '2026-11-10'})).slots.find(s => s.id === '2026-11-10:breakfast');
-    check('Planning a meal in the page commits the slot (MCP read)', slot && slot.state === 'planned' && slot.dishes[0].recipe_id === 'rec-banana-pancakes' && slot.guests[0].name === HOSTILE, slot);
+    check('Planning a meal in the page commits the slot (MCP read)', slot && slot.state === 'planned' && slot.dishes.length === 1 && slot.dishes[0].kind === 'recipe' && slot.dishes[0].recipe_id === 'rec-banana-pancakes' && slot.dishes[0].leftovers_of === undefined && slot.guests[0].name === HOSTILE, slot);
     check('Hostile text is shown as text, never as markup', await page.locator('.pw-slot-detail').innerText().then(t => t.includes(HOSTILE)) && await page.locator('#app img').count() === 0 && !(await page.evaluate(() => window.__pwned)));
     await shot('03-planned-with-guest-1280');
 
@@ -223,6 +247,19 @@ async function main() {
     await readable('Household with a member selected');
     await page.click('.pw-actions button:has-text("Add a need")');
     const need = dialog(P + 'members.constraint.set'); await need.waitFor(WAIT);
+    // Each kind of need shows its own fields, and only those.
+    const KIND_FIELDS = {allergy: ['Allergen', 'Strict (may-contain is unsafe too)'], medical: ['Must not have'], diet: ['Diet'], limit: ['Nutrient', 'At most per meal'], dislike: ['Ingredient', 'Tag']};
+    const kindFields = {};
+    for (const kind of Object.keys(KIND_FIELDS)) {
+      await need.locator('select[aria-label="Kind"]').selectOption(kind);
+      const labels = need.locator('.pw-inline').first().locator('label');
+      kindFields[kind] = [];
+      for (let i = 0; i < await labels.count(); i++) {
+        const [vis, focus] = (await seen([labels.nth(i)]))[0];
+        kindFields[kind].push((await labels.nth(i).innerText()).split('\n')[0].trim() + (vis && focus ? '' : ' (not shown)'));
+      }
+    }
+    check('Each kind of need shows its own fields, and only those', JSON.stringify(kindFields) === JSON.stringify(KIND_FIELDS) && !(await hiddenLeaks(need)).length, kindFields);
     await need.locator('select[aria-label="Kind"]').selectOption('dislike');
     await need.locator('input[placeholder^="or a tag"]').fill('spicy');
     const [from, until] = [need.locator('input[type=date]').nth(0), need.locator('input[type=date]').nth(1)];
