@@ -1,0 +1,648 @@
+{
+  "schema": "belltower.web-evidence.v1",
+  "app_version": "1.0.0",
+  "package_sha256_without_evidence": "287dc6fb98c8e10f9006407f232a0ad851aa62b1aca4679d213bbfb29e217d05",
+  "runtime": "1.6.0",
+  "node": "v22.23.4",
+  "browser": "Chrome 153.0.8010.12, headless",
+  "viewport": "1360x960 (narrow checks at 390x844)",
+  "browser_time_zone": "Asia/Tokyo",
+  "account_time_zone": "America/Chicago",
+  "runs": {
+    "browser": "sandbox profile, fixtures/minimal.json, account belltower-dana (Dana Reyes), clock 2026-11-17T17:00:00-06:00",
+    "restricted": "scenario profile, same fixture",
+    "full-window": "sandbox profile, datasets/full-window loaded by Infra at its clock"
+  },
+  "test": "tests/web.browser.cjs",
+  "checks": 79,
+  "steps": [
+    {
+      "sequence": "read-mark",
+      "title": "Reading a corrected item and marking it read",
+      "step": 1,
+      "caption": "The bridge notice opens at its correction, with the publisher's note",
+      "file": "read-mark-01.jpg",
+      "action": "News: open “Kestrel Bridge closed for deck repairs from Wednesday” (it-roads-0031).",
+      "expected": "Revision 2 (a correction) with the publisher's note; times in America/Chicago although the browser runs in Asia/Tokyo; the list row says Changed since read.",
+      "observed": "Kestrel Bridge closed for deck repairs from Wednesday Halden Public Works (Official body) · public notice · Millbrook, Ferry Hill · Roads · Corrected Important Upcoming · Correction from the publisher: An earlier version gave the wrong start day. The closure begins on Wednesday 18 November at 07:00, not Thursday 19 November. · Kestrel Bridge closed for deck repairs from Wednesday Halden Public Works · Tue, Nov 17, 4:30 PM · revision 2 Upcoming Corrected Important Changed since read",
+      "state": {
+        "items.get": "it-roads-0031 latest revision 2 (correction), last read revision 1"
+      },
+      "check": "an item opens at its latest revision with the publisher's correction note"
+    },
+    {
+      "sequence": "read-mark",
+      "title": "Reading a corrected item and marking it read",
+      "step": 2,
+      "caption": "Revision 1 is shown as an earlier revision, with its own text",
+      "file": "read-mark-02.jpg",
+      "action": "Click revision 1 in the list of revisions.",
+      "expected": "The page says it shows revision 1 of 2 and shows that revision's headline and text.",
+      "observed": "You are reading revision 1 of 2. The latest is revision 2 (correction, received Tue, Nov 17, 4:30 PM). Show the latest revision · Kestrel Bridge closed for deck repairs from Thursday",
+      "state": {
+        "items.get": "it-roads-0031 revision 1: “Kestrel Bridge closed for deck repairs from Thursday”"
+      },
+      "check": "an earlier revision is shown as such, with its own text"
+    },
+    {
+      "sequence": "read-mark",
+      "title": "Reading a corrected item and marking it read",
+      "step": 3,
+      "caption": "Marked as read: the App records revision 2 and the list stops saying changed",
+      "file": "read-mark-03.jpg",
+      "action": "Show the latest revision, then Mark revision 2 as read. (Opening three items before marked nothing.)",
+      "expected": "belltower.reading.mark records revision 2; the list row no longer says Changed since read.",
+      "observed": "Revision 2 marked as read. · Kestrel Bridge closed for deck repairs from Wednesday Halden Public Works · Tue, Nov 17, 4:30 PM · revision 2 Upcoming Corrected Important",
+      "state": {
+        "reading.list": "it-roads-0031@2",
+        "receipt": "request web-3d9187a1-8eba-4c7f-9d2f-0731e62d90e0",
+        "version": "epoch 1, revision 1"
+      },
+      "check": "the read mark is the App's record and the list no longer says changed since read"
+    },
+    {
+      "sequence": "clipping",
+      "title": "Clipping: refused, saved, moved, edited, cancelled, watched, removed",
+      "step": 1,
+      "caption": "A link without its object ID is refused in the form",
+      "file": "clipping-01.jpg",
+      "action": "News: open “Old Quay Library to stay open later on weekdays” (it-ledg-0431), Clip this item: a note, calendar · event with no object ID, Watch; send.",
+      "expected": "The form names the missing part and keeps its input; no clipping is written.",
+      "observed": "Give the app, the object type and the object ID, or leave all three empty.",
+      "state": {
+        "clippings.list": "4 clippings",
+        "version": "epoch 1, revision 1"
+      },
+      "check": "a half-filled link is refused in the form and nothing is written"
+    },
+    {
+      "sequence": "clipping",
+      "title": "Clipping: refused, saved, moved, edited, cancelled, watched, removed",
+      "step": 2,
+      "caption": "Completed and sent: the clipping is the App's record",
+      "file": "clipping-02.jpg",
+      "action": "Give the object ID evt-web-1 and send again.",
+      "expected": "belltower.clippings.add writes one clipping at revision 1 with the note, the link and Watch on; the list row says Clipped.",
+      "observed": "Clipped at revision 1. · Old Quay Library to stay open later on weekdays Old Quay Ledger · Tue, Nov 17, 8:40 AM Clipped",
+      "state": {
+        "clippings.list": "clp-0005 revision 1, note “Check the new hours before Tuesday.”, linked calendar · event · evt-web-1, watch true",
+        "receipt": "request web-4c66cda2-d6f5-498c-967b-21759755a1df",
+        "version": "epoch 1, revision 2"
+      },
+      "check": "a clipping made in the browser is the App's record at the latest revision"
+    },
+    {
+      "sequence": "clipping",
+      "title": "Clipping: refused, saved, moved, edited, cancelled, watched, removed",
+      "step": 3,
+      "caption": "A clipping behind its item: the page says a newer revision arrived",
+      "file": "clipping-03.jpg",
+      "action": "Clippings: open clp-0004.",
+      "expected": "The clipping holds revision 1 of 2 and says that revision 2 (a correction) arrived, with the publisher's note.",
+      "observed": "Old Quay Library open until 21:00 on weekdays City of Halden · revision 1 (original) · Behind · The item has a newer revision. Revision 2 (correction) was received Tue, Nov 17, 11:20 AM. Publisher’s note: An earlier version gave the wrong closing time. On weekdays the library closes at 19:00, not 21:00.",
+      "state": {
+        "clippings.list": "clp-0004 revision 1, state behind",
+        "items.get": "it-city-0207 latest revision 2"
+      }
+    },
+    {
+      "sequence": "clipping",
+      "title": "Clipping: refused, saved, moved, edited, cancelled, watched, removed",
+      "step": 4,
+      "caption": "Moved: it holds revision 2 and keeps revision 1 in its history",
+      "file": "clipping-04.jpg",
+      "action": "Move to revision 2.",
+      "expected": "belltower.clippings.update sends only the revision; the clipping is current and its history keeps revision 1 with its note.",
+      "observed": "Old Quay Library open until 19:00 on weekdays City of Halden · revision 2 (correction) · Current · Earlier versions of this clipping (1) Until Tue, Nov 17, 5:00 PM: revision 1 Note: Study group on Tuesday, 19:30 at Old Quay Library. Not watching · linked to calendar · event · evt-study-group-1117",
+      "state": {
+        "clippings.list": "clp-0004 revision 2, history: revision 1",
+        "receipt": "request web-b9f092e3-72d9-4c7b-91e4-6c3dc9942ff1",
+        "version": "epoch 1, revision 3"
+      },
+      "check": "the clipping holds the newer revision and keeps the old one in its history"
+    },
+    {
+      "sequence": "clipping",
+      "title": "Clipping: refused, saved, moved, edited, cancelled, watched, removed",
+      "step": 5,
+      "caption": "Edit, then Cancel: nothing is written",
+      "file": "clipping-05.jpg",
+      "action": "Edit clipping, type a new note, Cancel.",
+      "expected": "The dialog closes; the page and the App keep the old note; the version is unchanged.",
+      "observed": "Holds Revision 2 of 2 Note Study group on Tuesday, 19:30 at Old Quay Library. Relied on by calendar · event · evt-study-group-1117 (stored as given, not opened) Watching No Clipped Mon, Nov 16, 7:45 PM Changed Tue, Nov 17, 5:00 PM Clipping ID clp-0004",
+      "state": {
+        "clippings.list": "clp-0004 note “Study group on Tuesday, 19:30 at Old Quay Library.”",
+        "version": "epoch 1, revision 3"
+      },
+      "check": "cancelling an edit writes nothing"
+    },
+    {
+      "sequence": "clipping",
+      "title": "Clipping: refused, saved, moved, edited, cancelled, watched, removed",
+      "step": 6,
+      "caption": "Edited: only the note changed",
+      "file": "clipping-06.jpg",
+      "action": "Edit clipping, note “Study group moved to the corrected hours.”, Save clipping.",
+      "expected": "belltower.clippings.update sends only the note.",
+      "observed": "Holds Revision 2 of 2 Note Study group moved to the corrected hours. Relied on by calendar · event · evt-study-group-1117 (stored as given, not opened) Watching No Clipped Mon, Nov 16, 7:45 PM Changed Tue, Nov 17, 5:00 PM Clipping ID clp-0004",
+      "state": {
+        "clippings.list": "clp-0004 note “Study group moved to the corrected hours.”",
+        "receipt": "request web-a7f7b446-9b0f-4d97-ae19-77441759f4bc",
+        "version": "epoch 1, revision 4"
+      },
+      "check": "editing a clipping sends only the changed note"
+    },
+    {
+      "sequence": "clipping",
+      "title": "Clipping: refused, saved, moved, edited, cancelled, watched, removed",
+      "step": 7,
+      "caption": "Watching: every later revision of the item will notify",
+      "file": "clipping-07.jpg",
+      "action": "Watch.",
+      "expected": "belltower.clippings.update sends only watch: true; the page says Watching.",
+      "observed": "Old Quay Library open until 19:00 on weekdays City of Halden · revision 2 (correction) · Current Watching",
+      "state": {
+        "clippings.list": "clp-0004 watch true",
+        "receipt": "request web-14db5a6b-fda5-4f82-b9b5-0b531933a2fb",
+        "version": "epoch 1, revision 5"
+      },
+      "check": "watching sends only the watch flag and the App now watches the clipping"
+    },
+    {
+      "sequence": "clipping",
+      "title": "Clipping: refused, saved, moved, edited, cancelled, watched, removed",
+      "step": 8,
+      "caption": "Remove asks first",
+      "file": "clipping-08.jpg",
+      "action": "Clippings: open clp-0005, Remove clipping.",
+      "expected": "A confirmation names the item and says the item and the read marks stay.",
+      "observed": "Remove this clipping? “Old Quay Library to stay open later on weekdays” The clipping and its history are removed. The item and your read marks stay. Cancel Remove clipping",
+      "state": {
+        "clippings.list": "clp-0005 still present"
+      }
+    },
+    {
+      "sequence": "clipping",
+      "title": "Clipping: refused, saved, moved, edited, cancelled, watched, removed",
+      "step": 9,
+      "caption": "Removed: the clipping is gone, the item stays",
+      "file": "clipping-09.jpg",
+      "action": "Confirm with Remove clipping.",
+      "expected": "belltower.clippings.remove deletes clp-0005; the item is still listed.",
+      "observed": "Clipping removed.",
+      "state": {
+        "clippings.list": "clp-0005 absent, 4 clippings",
+        "items.get": "it-ledg-0431 still listed",
+        "receipt": "request web-b7520026-6ca1-4fd6-878f-7adb4d203c2d",
+        "version": "epoch 1, revision 6"
+      },
+      "check": "removing a clipping takes it out of the App"
+    },
+    {
+      "sequence": "follow",
+      "title": "Following: saved, edited, stale, retried, refused, paused, removed",
+      "step": 1,
+      "caption": "A new rule, filled in before sending",
+      "file": "follow-01.jpg",
+      "action": "Following: New follow rule; topic transit, area Old Quay, Important or urgent, Immediate.",
+      "expected": "The form holds exactly these choices; nothing is written yet.",
+      "observed": "checked: ar-old-quay, transit · important · immediate",
+      "state": {
+        "follows.list": "5 rules"
+      }
+    },
+    {
+      "sequence": "follow",
+      "title": "Following: saved, edited, stale, retried, refused, paused, removed",
+      "step": 2,
+      "caption": "Sent, and still there after a reload",
+      "file": "follow-02.jpg",
+      "action": "Send; reload the page; open the new rule.",
+      "expected": "belltower.follows.create writes the rule with exactly these filters; after a reload the page reads it back from the App.",
+      "observed": "Transit in Old Quay Active: it matches revisions that arrive from now on. · Active Immediate",
+      "state": {
+        "follows.list": "fl-0006: topics transit, areas ar-old-quay, important, immediate, active",
+        "receipt": "request web-23ca2ec2-43de-4116-b8b1-6b067bd0caf3",
+        "version": "epoch 1, revision 7"
+      },
+      "check": "a reload keeps the committed rule"
+    },
+    {
+      "sequence": "follow",
+      "title": "Following: saved, edited, stale, retried, refused, paused, removed",
+      "step": 3,
+      "caption": "Edited: a daily digest instead of at once",
+      "file": "follow-03.jpg",
+      "action": "Edit rule, Delivery: Daily digest, Save.",
+      "expected": "belltower.follows.update sends only the delivery.",
+      "observed": "Transit in Old Quay Active: it matches revisions that arrive from now on. · Active Daily digest",
+      "state": {
+        "follows.list": "fl-0006 delivery digest",
+        "receipt": "request web-1c26b2c9-5d34-4584-a45e-ae486a0d20f4",
+        "version": "epoch 1, revision 8"
+      },
+      "check": "an edit sends only the edited field"
+    },
+    {
+      "sequence": "follow",
+      "title": "Following: saved, edited, stale, retried, refused, paused, removed",
+      "step": 4,
+      "caption": "A form that went stale: the conflict is shown and the other change stands",
+      "file": "follow-04.jpg",
+      "action": "Edit rule; meanwhile another session sets Urgent only through MCP (request outside-edit); choose Immediate and Save.",
+      "expected": "The App answers stale_version and the form says so; the rule keeps urgent and digest.",
+      "observed": "This record changed. Close this form and refresh before trying again.",
+      "state": {
+        "follows.list": "fl-0006 urgent, digest",
+        "receipt": "request outside-edit (the other session)",
+        "version": "epoch 1, revision 9"
+      },
+      "check": "a stale form shows the conflict and the concurrent change stands"
+    },
+    {
+      "sequence": "follow",
+      "title": "Following: saved, edited, stale, retried, refused, paused, removed",
+      "step": 5,
+      "caption": "The response is lost: the form says so and keeps its input",
+      "file": "follow-05.jpg",
+      "action": "New follow rule, topic weather, send. The test drops the response after the App has committed it.",
+      "expected": "The form reports the failure and offers to send again with the same request ID.",
+      "observed": "Failed to fetch",
+      "state": {
+        "follows.list": "weather rules: 1"
+      }
+    },
+    {
+      "sequence": "follow",
+      "title": "Following: saved, edited, stale, retried, refused, paused, removed",
+      "step": 6,
+      "caption": "Sent again: still one rule",
+      "file": "follow-06.jpg",
+      "action": "Send again.",
+      "expected": "The retry is the same write with the same request ID: one weather rule.",
+      "observed": "Follow rule created.",
+      "state": {
+        "follows.list": "weather rules: 1 (fl-0007)",
+        "receipt": "request web-931717a9-59f8-4880-a7da-b8833ce53977",
+        "version": "epoch 1, revision 10"
+      },
+      "check": "a retry after a lost response has one effect"
+    },
+    {
+      "sequence": "follow",
+      "title": "Following: saved, edited, stale, retried, refused, paused, removed",
+      "step": 7,
+      "caption": "The same rule twice is refused",
+      "file": "follow-07.jpg",
+      "action": "New follow rule with the filters of fl-0001 (community and business in Millbrook North); send.",
+      "expected": "belltower.follows.create answers already_following; nothing is written.",
+      "observed": "Follow rule fl-0001 already has these sources, areas, topics and minimum priority. Change it with follows.update.",
+      "state": {
+        "follows.list": "7 rules",
+        "version": "epoch 1, revision 10"
+      },
+      "check": "a rule that already exists is refused visibly and nothing is written"
+    },
+    {
+      "sequence": "follow",
+      "title": "Following: saved, edited, stale, retried, refused, paused, removed",
+      "step": 8,
+      "caption": "Paused",
+      "file": "follow-08.jpg",
+      "action": "Open fl-0006, Pause rule.",
+      "expected": "belltower.follows.update sends only paused: true; the page says Paused.",
+      "observed": "Transit in Old Quay Paused: it matches nothing until it is resumed. · Paused Daily digest",
+      "state": {
+        "follows.list": "fl-0006 paused",
+        "receipt": "request web-21c68f9c-ce83-4b26-b3ef-cc612cf96f5d",
+        "version": "epoch 1, revision 11"
+      },
+      "check": "the rule is paused in the App"
+    },
+    {
+      "sequence": "follow",
+      "title": "Following: saved, edited, stale, retried, refused, paused, removed",
+      "step": 9,
+      "caption": "Remove asks first",
+      "file": "follow-09.jpg",
+      "action": "Open fl-0007, Remove rule.",
+      "expected": "A confirmation names the rule and says what stays.",
+      "observed": "Remove this follow rule? Weather It brings no notification for new items from now on. Notifications already written stay, and later revisions of an item you were already told about still notify you. Cancel Remove rule",
+      "state": {
+        "follows.list": "fl-0007 still present"
+      }
+    },
+    {
+      "sequence": "follow",
+      "title": "Following: saved, edited, stale, retried, refused, paused, removed",
+      "step": 10,
+      "caption": "Removed",
+      "file": "follow-10.jpg",
+      "action": "Confirm with Remove rule.",
+      "expected": "belltower.follows.remove deletes fl-0007.",
+      "observed": "Follow rule removed.",
+      "state": {
+        "follows.list": "fl-0007 absent, 6 rules",
+        "receipt": "request web-6b247e69-899f-4acd-9ddc-1878e64016ee",
+        "version": "epoch 1, revision 12"
+      },
+      "check": "removing a rule takes it out of the App"
+    },
+    {
+      "sequence": "settings",
+      "title": "Settings: saved, refused",
+      "step": 1,
+      "caption": "Saved: corrections and retractions at once",
+      "file": "settings-01.jpg",
+      "action": "Settings: Corrections and retractions, Deliver them at once; Save settings.",
+      "expected": "belltower.preferences.update sends only corrections.",
+      "observed": "Settings saved.",
+      "state": {
+        "preferences.get": "corrections immediate",
+        "receipt": "request web-2771f1ea-c82c-4e9b-8685-b5d7f94e869b",
+        "version": "epoch 1, revision 13"
+      },
+      "check": "the App now delivers corrections at once"
+    },
+    {
+      "sequence": "settings",
+      "title": "Settings: saved, refused",
+      "step": 2,
+      "caption": "A digest time inside the quiet hours is refused",
+      "file": "settings-02.jpg",
+      "action": "Digest time 23:00 (quiet hours 22:00–07:00); Save settings.",
+      "expected": "The App answers invalid_arguments and the page says why; the digest time stays 18:00.",
+      "observed": "The digest time 23:00 lies inside the quiet hours (22:00 to 07:00).",
+      "state": {
+        "preferences.get": "digest_time 18:00",
+        "version": "epoch 1, revision 13"
+      },
+      "check": "a digest time inside the quiet hours is refused visibly and nothing changes"
+    },
+    {
+      "sequence": "correction",
+      "title": "A correction arrives on a watched clipping",
+      "step": 1,
+      "caption": "Start: a watched clipping with a personal note",
+      "file": "correction-01.jpg",
+      "action": "Clippings: open clp-0003 (“Riverside Clinic to close in December, board papers show”).",
+      "expected": "The clipping holds revision 1 of 1, is watched and keeps the note about Mum's appointment.",
+      "observed": "Riverside Clinic to close in December, board papers show The Halden Courier · revision 1 (original) · Current Watching · Note: Asked Riverside to move Mum's 3 December appointment to Northgate.",
+      "state": {
+        "clippings.list": "clp-0003 revision 1, watch true",
+        "items.get": "it-cour-0907 latest revision 1, last read revision 1"
+      },
+      "check": "the watched clipping holds the clinic article's only revision"
+    },
+    {
+      "sequence": "correction",
+      "title": "A correction arrives on a watched clipping",
+      "step": 2,
+      "caption": "The publisher corrects the article: the clipping says so",
+      "file": "correction-02.jpg",
+      "action": "Infra applies belltower.item.corrected (event web-correction: revision 2 with the publisher's note); Refresh.",
+      "expected": "The clipping still holds revision 1 and says that revision 2 (a correction) arrived, quoting the publisher's note.",
+      "observed": "Riverside Clinic to close in December, board papers show The Halden Courier · revision 1 (original) · Behind Watching · The item has a newer revision. Revision 2 (correction) was received Wed, Nov 18, 8:10 AM. Publisher’s note: Corrects the closing date: the clinic closes on 31 January, not 18 December.",
+      "state": {
+        "env.event_status": "web-correction committed",
+        "items.get": "it-cour-0907 latest revision 2 (correction)",
+        "version": "epoch 1, revision 17"
+      },
+      "check": "after Refresh the watched clipping says its item was corrected, with the publisher's note"
+    },
+    {
+      "sequence": "correction",
+      "title": "A correction arrives on a watched clipping",
+      "step": 3,
+      "caption": "The notification: released at once because the clipping is watched",
+      "file": "correction-03.jpg",
+      "action": "Notifications: open the newest notification.",
+      "expected": "A Corrected notification for revision 2, released at once, written because the clipping is watched.",
+      "observed": "Correction: Riverside Clinic to close at the end of January, board papers show Written Wed, Nov 18, 8:10 AM · Corrected Released Immediate · Why: Written because you watch a clipping of it.",
+      "state": {
+        "notifications.list": "ntf-0014 item.corrected, released, immediate, reasons watched_clipping"
+      },
+      "check": "the correction is released at once because the clipping is watched"
+    },
+    {
+      "sequence": "correction",
+      "title": "A correction arrives on a watched clipping",
+      "step": 4,
+      "caption": "Opened from the notification and marked as read",
+      "file": "correction-04.jpg",
+      "action": "Open revision 2, then Mark revision 2 as read.",
+      "expected": "The article at revision 2 under the publisher's correction note; belltower.reading.mark records revision 2.",
+      "observed": "Riverside Clinic to close at the end of January, board papers show The Halden Courier (Newsroom) · article · Millbrook South · Health · Corrected Important · Correction from the publisher: Corrects the closing date: the clinic closes on 31 January, not 18 December. · Revision 2 marked as read.",
+      "state": {
+        "reading.list": "it-cour-0907@2",
+        "receipt": "request web-638a8fe0-a9de-4b9c-9aa3-659c9391898f",
+        "version": "epoch 1, revision 18"
+      },
+      "check": "the corrected revision is marked as read from the page the notification opened"
+    },
+    {
+      "sequence": "correction",
+      "title": "A correction arrives on a watched clipping",
+      "step": 5,
+      "caption": "Edit the clipping: take the corrected revision and rewrite the note",
+      "file": "correction-05.jpg",
+      "action": "Clippings: open clp-0003, Edit clipping; Revision: Move to revision 2 (correction); a new note.",
+      "expected": "The form offers only newer revisions; nothing is written until it is saved.",
+      "observed": "Move to revision 2 (correction) · Closing moved to 31 January: Mum's 3 December appointment can stay at Riverside.",
+      "state": {
+        "clippings.list": "clp-0003 revision 1"
+      }
+    },
+    {
+      "sequence": "correction",
+      "title": "A correction arrives on a watched clipping",
+      "step": 6,
+      "caption": "Saved: revision 2 with the new note; revision 1 and the old note stay in its history",
+      "file": "correction-06.jpg",
+      "action": "Save clipping.",
+      "expected": "belltower.clippings.update sends the revision and the note together; the clipping is current; its history keeps revision 1 with the old note.",
+      "observed": "Riverside Clinic to close at the end of January, board papers show The Halden Courier · revision 2 (correction) · Current Watching · Earlier versions of this clipping (1) Until Wed, Nov 18, 8:10 AM: revision 1 Note: Asked Riverside to move Mum's 3 December appointment to Northgate. Watching · linked to tasks · task · task-0412",
+      "state": {
+        "clippings.list": "clp-0003 revision 2, note “Closing moved to 31 January: Mum's 3 December appointment can stay at Riverside.”, history: revision 1",
+        "receipt": "request web-9864b745-6278-4729-9d2b-3d9d4a1d058d",
+        "version": "epoch 1, revision 19"
+      },
+      "check": "the clipping holds the corrected revision with the new note and keeps revision 1 and its note in its history"
+    },
+    {
+      "sequence": "correction",
+      "title": "A correction arrives on a watched clipping",
+      "step": 7,
+      "caption": "After a reload: read back from the App",
+      "file": "correction-07.jpg",
+      "action": "Reload the page; open clp-0003.",
+      "expected": "The clipping holds revision 2 of 2 with the new note.",
+      "observed": "Holds Revision 2 of 2 Note Closing moved to 31 January: Mum's 3 December appointment can stay at Riverside. Relied on by tasks · task · task-0412 (stored as given, not opened) Watching Yes: every later revision notifies you Clipped Mon, Nov 16, 12:15 PM Changed Wed, Nov 18, 8:10 AM Clipping ID clp-0",
+      "state": {
+        "clippings.list": "clp-0003 revision 2"
+      },
+      "check": "after a reload the clipping still holds the corrected revision"
+    },
+    {
+      "sequence": "retraction",
+      "title": "A retraction arrives on a clipped item",
+      "step": 1,
+      "caption": "Start: a clipping of the market list, not watched",
+      "file": "retraction-01.jpg",
+      "action": "Clippings: open clp-0002 (“Saturday market: who is trading this week”).",
+      "expected": "The clipping holds revision 1 of 1 with its note; it is not watched.",
+      "observed": "Saturday market: who is trading this week Old Quay Ledger · revision 1 (original) · Current · Note: Cheese stall is back. Go before 11.",
+      "state": {
+        "clippings.list": "clp-0002 revision 1, watch false",
+        "items.get": "it-ledg-0427 latest revision 1"
+      }
+    },
+    {
+      "sequence": "retraction",
+      "title": "A retraction arrives on a clipped item",
+      "step": 2,
+      "caption": "The publisher retracts it: the clipping keeps the text it held",
+      "file": "retraction-02.jpg",
+      "action": "Infra applies belltower.item.retracted (event web-retraction, with the publisher's note); Refresh.",
+      "expected": "The clipping still holds revision 1 and its text, and says that revision 2 (a retraction) arrived, quoting the note. No notification is written: no rule matches the item and the clipping is not watched.",
+      "observed": "Saturday market: who is trading this week Old Quay Ledger · revision 1 (original) · Behind · The item has a newer revision. Revision 2 (retraction) was received Wed, Nov 18, 8:20 AM. Publisher’s note: This list was last month's and was published in error; this week's traders have not been announced yet.",
+      "state": {
+        "env.event_status": "web-retraction committed",
+        "items.get": "it-ledg-0427 latest revision 2, retracted",
+        "notifications.list": "for it-ledg-0427: 0 (before: 0)",
+        "version": "epoch 1, revision 20"
+      },
+      "check": "after Refresh the clipping of a retracted item keeps the text it held and quotes the retraction"
+    },
+    {
+      "sequence": "retraction",
+      "title": "A retraction arrives on a clipped item",
+      "step": 3,
+      "caption": "The item: retracted, with the note and no text of its own",
+      "file": "retraction-03.jpg",
+      "action": "News: open “Saturday market: who is trading this week”.",
+      "expected": "The list row says Retracted; the page shows the publisher's note and no text for revision 2.",
+      "observed": "Saturday market: who is trading this week Old Quay Ledger (Newsroom) · article · Old Quay · Community, Business · Retracted · Retracted by the publisher: This list was last month's and was published in error; this week's traders have not been announced yet. A retraction has no text of its own. The earlier revisions stay readable below. · Saturday market: who is trading this week Old Quay Ledger · Wed, Nov 18, 8:20 AM · revision 2 Retracted Clipped",
+      "state": {
+        "items.get": "it-ledg-0427 revision 2 (retraction)"
+      },
+      "check": "the retracted item shows the publisher's note and no text of its own"
+    },
+    {
+      "sequence": "retraction",
+      "title": "A retraction arrives on a clipped item",
+      "step": 4,
+      "caption": "Revision 1 stays readable",
+      "file": "retraction-04.jpg",
+      "action": "Click revision 1.",
+      "expected": "The page says it shows revision 1 of 2 and shows that revision's text.",
+      "observed": "You are reading revision 1 of 2. The latest is revision 2 (retraction, received Wed, Nov 18, 8:20 AM). Show the latest revision · Revision 1 · Original Published Sat, Nov 14, 7:00 AM (as the publisher states) Received Sat, Nov 14, 8:00 AM Priority Routine Twenty-two stalls trade in the fish market hall this S",
+      "state": {
+        "items.get": "it-ledg-0427 revision 1: “Saturday market: who is trading this week”"
+      },
+      "check": "revision 1 of the retracted item stays readable"
+    },
+    {
+      "sequence": "retraction",
+      "title": "A retraction arrives on a clipped item",
+      "step": 5,
+      "caption": "Remove the clipping: the dialog asks first",
+      "file": "retraction-05.jpg",
+      "action": "Clippings: open clp-0002, Remove clipping.",
+      "expected": "A confirmation names the item and says the item and the read marks stay.",
+      "observed": "Remove this clipping? “Saturday market: who is trading this week” The clipping and its history are removed. The item and your read marks stay. Cancel Remove clipping",
+      "state": {
+        "clippings.list": "clp-0002 still present"
+      }
+    },
+    {
+      "sequence": "retraction",
+      "title": "A retraction arrives on a clipped item",
+      "step": 6,
+      "caption": "Removed: the clipping is gone; the retracted item keeps both revisions",
+      "file": "retraction-06.jpg",
+      "action": "Confirm with Remove clipping.",
+      "expected": "belltower.clippings.remove deletes clp-0002; the item keeps both revisions.",
+      "observed": "Clipping removed.",
+      "state": {
+        "clippings.list": "clp-0002 absent",
+        "items.get": "it-ledg-0427 2 revisions, retracted",
+        "receipt": "request web-22614052-202b-4de8-935d-0865f7e44647",
+        "version": "epoch 1, revision 21"
+      },
+      "check": "removing the clipping of a retracted item leaves the item and its revisions"
+    },
+    {
+      "sequence": "restricted-policy",
+      "title": "A Task-like policy",
+      "step": 1,
+      "caption": "Under a Task-like policy a refused write says so",
+      "file": "restricted-policy-01.jpg",
+      "action": "A second run with the scenario profile: open it-bull-0312, Mark revision 1 as read.",
+      "expected": "The policy does not allow this item: the page says the action is not allowed; nothing is written.",
+      "observed": "This operation is not allowed for the current account and policy.",
+      "state": {
+        "reading.list": "marks for it-bull-0312: 0"
+      },
+      "check": "a write the policy refuses is shown as refused and changes nothing"
+    },
+    {
+      "sequence": "restricted-policy",
+      "title": "A Task-like policy",
+      "step": 2,
+      "caption": "A change outside the allowed fields is refused",
+      "file": "restricted-policy-02.jpg",
+      "action": "Following: open fl-0004 (pausing it is allowed and was done), Edit rule, add the topic health, send.",
+      "expected": "The App answers permission_denied and the form says so; the rule keeps its topics.",
+      "observed": "This operation is not allowed for the current account and policy.",
+      "state": {
+        "follows.list": "fl-0004 topics libraries, schools, paused true"
+      },
+      "check": "a change outside the allowed fields is refused"
+    },
+    {
+      "sequence": "full-window",
+      "title": "The full-window dataset in the web pages",
+      "step": 1,
+      "caption": "Two years of news: the list opens on the newest items at the dataset clock",
+      "file": "full-window-01.jpg",
+      "action": "A third run: Infra loads datasets/full-window with env.load_seed at its clock (2026-12-31T20:00:00-06:00); open the access link and the first item.",
+      "expected": "The news list starts with the newest items, it-cour-26099 first.",
+      "observed": "School board debates a new lunch provider The Halden Courier (Newsroom) · article · Halden · Schools · Current",
+      "state": {
+        "env.load_seed": "ready, 1209 records",
+        "items.list": "first it-cour-26099, it-cour-26098, it-works-26078"
+      },
+      "check": "on the full-window dataset the news list opens on the newest items at the dataset clock"
+    },
+    {
+      "sequence": "full-window",
+      "title": "The full-window dataset in the web pages",
+      "step": 2,
+      "caption": "The oldest item, from 1 January 2025, with its year shown",
+      "file": "full-window-02.jpg",
+      "action": "Search “Mill Road”; open it-city-25001.",
+      "expected": "The item received 2025-01-01T18:30:00-06:00; a date outside the clock's year shows its year.",
+      "observed": "Planning application: 38 homes on Mill Road City of Halden (Official body) · article · Millbrook North · Government · Current · Revision 1 · Original Published Wed, Jan 1, 2025, 6:05 PM (as the publisher states) Received Wed, Jan 1, 2025, 6:30 PM Priority Routine A de",
+      "state": {
+        "items.get": "it-city-25001 received 2025-01-01T18:30:00-06:00"
+      },
+      "check": "the oldest item of the dataset opens with its year shown"
+    },
+    {
+      "sequence": "full-window",
+      "title": "The full-window dataset in the web pages",
+      "step": 3,
+      "caption": "A closure that starts after the clock: upcoming, not history",
+      "file": "full-window-03.jpg",
+      "action": "Search “Riverside Drive”; open it-works-26078.",
+      "expected": "The notice is Upcoming: its period starts 2026-12-31T21:00:00-06:00, after the clock. The coverage report counts the date it was received, not the dates it announces.",
+      "observed": "Overnight lane closure on Riverside Drive Halden Public Works (Official body) · public notice · Millbrook South · Roads · Current Upcoming",
+      "state": {
+        "items.get": "it-works-26078 received 2026-12-28T18:30:00-06:00, effective 2026-12-31T21:00:00-06:00 to 2027-01-01T05:00:00-06:00, upcoming",
+        "coverage.json": "2 notices start after the clock; effective periods are excluded from every count"
+      },
+      "check": "a closure that starts after the dataset clock is shown as upcoming"
+    }
+  ]
+}

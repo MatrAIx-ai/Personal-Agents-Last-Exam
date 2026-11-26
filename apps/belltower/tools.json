@@ -1,0 +1,4711 @@
+[
+  {
+    "name": "belltower.sources.list",
+    "description": "List the sources Belltower carries, with their kind: official (a public body that issues notices), newsroom, or aggregator (it republishes other sources). items is the number of items from that source. Belltower does not rank sources and does not say which one is right. No side effects.",
+    "scope": "belltower.read",
+    "resource_target": "sources",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "official",
+            "newsroom",
+            "aggregator"
+          ],
+          "description": "Only sources of this kind."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "kind": {
+                    "enum": [
+                      "official",
+                      "newsroom",
+                      "aggregator"
+                    ]
+                  },
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "kind",
+                  "items"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "sources"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.areas.list",
+    "description": "List the areas items are tagged with. Areas form a tree of three levels: city, district, neighbourhood. path is the chain from the city down to the area. With id, only that area and the areas inside it are returned. Errors: not_found. No side effects.",
+    "scope": "belltower.read",
+    "resource_target": "areas",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Area ID: return this area and every area inside it."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "areas": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "level": {
+                    "enum": [
+                      "city",
+                      "district",
+                      "neighbourhood"
+                    ]
+                  },
+                  "parent_id": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    ]
+                  },
+                  "path": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "level",
+                  "parent_id",
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "areas"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.items.list",
+    "description": "List or search items (articles and public notices), newest first. Each entry shows the item as it stands now: its latest revision number, type (original, update, correction or retraction), headline, topics, areas, priority and times, with status current, corrected or retracted. The filters start/end, area_id, topic, min_priority and query are checked against every revision, earlier ones included, and an item is listed when at least one of its revisions passes all of them; matched_revisions names those revisions, so a claim that was later corrected can still be found and is shown as belonging to an earlier revision. Without such a filter matched_revisions lists every revision. start and end select revisions by received_at, the time they reached Belltower. query is plain word matching in headline and body: every word of the query must appear as a whole word, in any letter case. Belltower does not group copies into one story and does not label anything as outdated: a copy names what it copied in based_on. Reading or listing an item never marks it as read. Errors: not_found (an unknown source or area), invalid_window (end is not after start). No match returns an empty list. No side effects.",
+    "scope": "belltower.read",
+    "resource_target": "items",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Only revisions received at or after this time, ISO 8601 with a UTC offset."
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Only revisions received before this time, ISO 8601 with a UTC offset."
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Only items from this source."
+        },
+        "area_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Only revisions tagged with this area, with an area inside it or with an area that contains it."
+        },
+        "topic": {
+          "enum": [
+            "water",
+            "power",
+            "roads",
+            "transit",
+            "schools",
+            "libraries",
+            "health",
+            "safety",
+            "weather",
+            "government",
+            "community",
+            "business"
+          ],
+          "description": "Only revisions with this topic."
+        },
+        "kind": {
+          "enum": [
+            "article",
+            "notice"
+          ],
+          "description": "Only articles or only public notices."
+        },
+        "min_priority": {
+          "enum": [
+            "routine",
+            "important",
+            "urgent"
+          ],
+          "description": "Only revisions with at least this priority."
+        },
+        "status": {
+          "enum": [
+            "current",
+            "corrected",
+            "retracted"
+          ],
+          "description": "Only items with this status."
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Words to look for in the headline and body of every revision."
+        },
+        "changed_since_read": {
+          "type": "boolean",
+          "description": "true: only items with a revision newer than the newest one marked as read. false: only items without one (never read, or read at the latest revision)."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Page size; 20 by default."
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Opaque value from next_cursor of the previous page."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "kind": {
+                    "enum": [
+                      "article",
+                      "notice"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "current",
+                      "corrected",
+                      "retracted"
+                    ]
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 999
+                  },
+                  "type": {
+                    "enum": [
+                      "original",
+                      "update",
+                      "correction",
+                      "retraction"
+                    ]
+                  },
+                  "headline": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 180
+                  },
+                  "topics": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "water",
+                        "power",
+                        "roads",
+                        "transit",
+                        "schools",
+                        "libraries",
+                        "health",
+                        "safety",
+                        "weather",
+                        "government",
+                        "community",
+                        "business"
+                      ]
+                    },
+                    "minItems": 1,
+                    "maxItems": 12,
+                    "uniqueItems": true
+                  },
+                  "area_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "minItems": 1,
+                    "maxItems": 20,
+                    "uniqueItems": true
+                  },
+                  "priority": {
+                    "enum": [
+                      "routine",
+                      "important",
+                      "urgent"
+                    ]
+                  },
+                  "note": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    ]
+                  },
+                  "published_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "received_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "effective": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "start": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "end": {
+                            "anyOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "start",
+                          "end"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "effect": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "enum": [
+                          "upcoming",
+                          "in_effect",
+                          "ended"
+                        ]
+                      }
+                    ]
+                  },
+                  "based_on": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "item_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "revision": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 999
+                          },
+                          "relation": {
+                            "enum": [
+                              "copy",
+                              "report"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "item_id",
+                          "revision",
+                          "relation"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "matched_revisions": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 999
+                    },
+                    "minItems": 1,
+                    "uniqueItems": true
+                  },
+                  "last_read_revision": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 999
+                      }
+                    ]
+                  },
+                  "changed_since_read": {
+                    "type": "boolean"
+                  },
+                  "clipping_id": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "source_id",
+                  "kind",
+                  "status",
+                  "revision",
+                  "type",
+                  "headline",
+                  "topics",
+                  "area_ids",
+                  "priority",
+                  "note",
+                  "published_at",
+                  "received_at",
+                  "effective",
+                  "effect",
+                  "based_on",
+                  "matched_revisions",
+                  "last_read_revision",
+                  "changed_since_read",
+                  "clipping_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "next_cursor": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              ]
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "items",
+            "next_cursor"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.items.get",
+    "description": "Read one item. Returns its latest revision unless revision is given, and always names what was returned: revision, type and is_latest. revisions lists every revision of the item with its number, type, times and, for a correction or a retraction, the publisher's note. Every revision has published_at (as its publisher states it) and received_at (when it reached Belltower); a public notice also has the effective period it announces, and effect (upcoming, in_effect or ended) follows that period and the current time. A retraction has no body: it carries the publisher's note, and the earlier revisions stay readable by number. based_on is the publisher's own statement of which revision of which other item this revision copied or reported on; referenced_by lists every revision of other items that names this item as its basis, each with the revision it used (used_revision) and its own times. Belltower states these links and draws no conclusion from them. last_read_revision, read_revisions and changed_since_read come from the account's read marks; reading an item here does not create one (use reading.mark). Errors: not_found (an unknown item, or a revision number the item does not have). No side effects.",
+    "scope": "belltower.read",
+    "resource_target": "item",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Item ID."
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 999,
+          "description": "Revision number to return; the latest when left out."
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "item": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "source_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "source_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "source_kind": {
+                  "enum": [
+                    "official",
+                    "newsroom",
+                    "aggregator"
+                  ]
+                },
+                "kind": {
+                  "enum": [
+                    "article",
+                    "notice"
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "current",
+                    "corrected",
+                    "retracted"
+                  ]
+                },
+                "latest_revision": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999
+                },
+                "type": {
+                  "enum": [
+                    "original",
+                    "update",
+                    "correction",
+                    "retraction"
+                  ]
+                },
+                "headline": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 180
+                },
+                "topics": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "water",
+                      "power",
+                      "roads",
+                      "transit",
+                      "schools",
+                      "libraries",
+                      "health",
+                      "safety",
+                      "weather",
+                      "government",
+                      "community",
+                      "business"
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 12,
+                  "uniqueItems": true
+                },
+                "area_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "uniqueItems": true
+                },
+                "priority": {
+                  "enum": [
+                    "routine",
+                    "important",
+                    "urgent"
+                  ]
+                },
+                "note": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  ]
+                },
+                "published_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "received_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "effective": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "end": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "start",
+                        "end"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "effect": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "enum": [
+                        "upcoming",
+                        "in_effect",
+                        "ended"
+                      ]
+                    }
+                  ]
+                },
+                "based_on": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "item_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "revision": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 999
+                        },
+                        "relation": {
+                          "enum": [
+                            "copy",
+                            "report"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "item_id",
+                        "revision",
+                        "relation"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "is_latest": {
+                  "type": "boolean"
+                },
+                "body": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8000
+                    }
+                  ]
+                },
+                "revisions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "revision": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 999
+                      },
+                      "type": {
+                        "enum": [
+                          "original",
+                          "update",
+                          "correction",
+                          "retraction"
+                        ]
+                      },
+                      "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "received_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "note": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000
+                          }
+                        ]
+                      },
+                      "effective": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "start": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "end": {
+                                "anyOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "string",
+                                    "format": "date-time"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "start",
+                              "end"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "revision",
+                      "type",
+                      "published_at",
+                      "received_at",
+                      "note",
+                      "effective"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                },
+                "referenced_by": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "item_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "source_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "revision": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 999
+                      },
+                      "relation": {
+                        "enum": [
+                          "copy",
+                          "report"
+                        ]
+                      },
+                      "used_revision": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 999
+                      },
+                      "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "received_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "item_id",
+                      "source_id",
+                      "revision",
+                      "relation",
+                      "used_revision",
+                      "published_at",
+                      "received_at"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "read_revisions": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 999
+                  },
+                  "uniqueItems": true
+                },
+                "last_read_revision": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 999
+                    }
+                  ]
+                },
+                "changed_since_read": {
+                  "type": "boolean"
+                },
+                "clipping_id": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "source_id",
+                "source_name",
+                "source_kind",
+                "kind",
+                "status",
+                "latest_revision",
+                "revision",
+                "type",
+                "headline",
+                "topics",
+                "area_ids",
+                "priority",
+                "note",
+                "published_at",
+                "received_at",
+                "effective",
+                "effect",
+                "based_on",
+                "is_latest",
+                "body",
+                "revisions",
+                "referenced_by",
+                "read_revisions",
+                "last_read_revision",
+                "changed_since_read",
+                "clipping_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "item"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.follows.list",
+    "description": "List the account's follow rules. A rule matches a revision when every filter it has is met: the item's source is one of its sources, one of the revision's topics is one of its topics, the priority is at least min_priority, and one of the revision's areas overlaps one of its areas (the same area, or one contains the other). A paused rule matches nothing. No side effects.",
+    "scope": "belltower.read",
+    "resource_target": "current account",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "enum": [
+            "active",
+            "paused"
+          ],
+          "description": "Only active or only paused rules."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "follows": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "state": {
+                    "enum": [
+                      "active",
+                      "paused"
+                    ]
+                  },
+                  "source_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "maxItems": 20,
+                    "uniqueItems": true
+                  },
+                  "area_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "maxItems": 20,
+                    "uniqueItems": true
+                  },
+                  "topics": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "water",
+                        "power",
+                        "roads",
+                        "transit",
+                        "schools",
+                        "libraries",
+                        "health",
+                        "safety",
+                        "weather",
+                        "government",
+                        "community",
+                        "business"
+                      ]
+                    },
+                    "maxItems": 12,
+                    "uniqueItems": true
+                  },
+                  "min_priority": {
+                    "enum": [
+                      "routine",
+                      "important",
+                      "urgent"
+                    ]
+                  },
+                  "delivery": {
+                    "enum": [
+                      "immediate",
+                      "digest"
+                    ]
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated_at": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "state",
+                  "source_ids",
+                  "area_ids",
+                  "topics",
+                  "min_priority",
+                  "delivery",
+                  "created_at",
+                  "updated_at"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "follows"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.reading.list",
+    "description": "List the account's read marks, newest first: which revision of which item the person was shown, and when. is_latest says whether that revision is still the item's latest. A read mark exists only when reading.mark was called or the loaded history had it; reading items does not create marks. id filters by item. Errors: not_found. No side effects.",
+    "scope": "belltower.read",
+    "resource_target": "current account",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Item ID: only marks of this item."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Page size; 20 by default."
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Opaque value from next_cursor of the previous page."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "marks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "item_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 999
+                  },
+                  "read_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "is_latest": {
+                    "type": "boolean"
+                  },
+                  "latest_revision": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 999
+                  }
+                },
+                "required": [
+                  "item_id",
+                  "revision",
+                  "read_at",
+                  "is_latest",
+                  "latest_revision"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "next_cursor": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              ]
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "marks",
+            "next_cursor"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.clippings.list",
+    "description": "List the account's clippings, newest first. A clipping holds one revision of an item with a note, an optional reference to what relies on it (linked_object) and a watch setting. is_current is false (state behind) when the item has a newer revision than the one the clipping holds. history lists the earlier versions of the clipping: the revision, note, reference and watch setting it held until replaced_at. id filters by item. Errors: not_found. No side effects.",
+    "scope": "belltower.read",
+    "resource_target": "current account",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Item ID: only the clipping of this item."
+        },
+        "state": {
+          "enum": [
+            "current",
+            "behind"
+          ],
+          "description": "Only clippings in this state."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "clippings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "item_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 999
+                  },
+                  "latest_revision": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 999
+                  },
+                  "is_current": {
+                    "type": "boolean"
+                  },
+                  "state": {
+                    "enum": [
+                      "current",
+                      "behind"
+                    ]
+                  },
+                  "note": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    ]
+                  },
+                  "linked_object": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "app_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "object_type": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "object_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 150
+                          }
+                        },
+                        "required": [
+                          "app_id",
+                          "object_type",
+                          "object_id"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "watch": {
+                    "type": "boolean"
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated_at": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    ]
+                  },
+                  "history": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "replaced_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "revision": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 999
+                        },
+                        "note": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1000
+                        },
+                        "linked_object": {
+                          "type": "object",
+                          "properties": {
+                            "app_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100
+                            },
+                            "object_type": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100
+                            },
+                            "object_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 150
+                            }
+                          },
+                          "required": [
+                            "app_id",
+                            "object_type",
+                            "object_id"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "watch": {
+                          "type": "boolean"
+                        },
+                        "request_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      },
+                      "required": [
+                        "replaced_at",
+                        "revision",
+                        "watch"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 200
+                  }
+                },
+                "required": [
+                  "id",
+                  "item_id",
+                  "revision",
+                  "latest_revision",
+                  "is_current",
+                  "state",
+                  "note",
+                  "linked_object",
+                  "watch",
+                  "created_at",
+                  "updated_at",
+                  "history"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "clippings"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.notifications.list",
+    "description": "List the notifications Belltower wrote for this account, newest first. One is written when a revision arrives (a new item included) and an active follow rule matches it, or the account was already notified about that item, or it watches a clipping of it. kind follows the revision: item.published, item.updated, item.corrected or item.retracted. reasons says why it was written (follow, earlier_notification, watched_clipping) and matched_follow_ids names the rules that match this revision, possibly none. Every notification has a release time. State is held before that time, released from then on, and superseded when a later revision of the same item arrived while it was still held: a superseded notification was never released, and superseded_by names the one that replaced it. id filters by item; start and end select by the time a notification was created. Errors: not_found, invalid_window (end is not after start). No side effects.",
+    "scope": "belltower.read",
+    "resource_target": "current account",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Item ID: only notifications about this item."
+        },
+        "kind": {
+          "enum": [
+            "item.published",
+            "item.updated",
+            "item.corrected",
+            "item.retracted"
+          ],
+          "description": "Only notifications of this kind."
+        },
+        "state": {
+          "enum": [
+            "held",
+            "released",
+            "superseded"
+          ],
+          "description": "Only notifications in this state, as of now."
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Only notifications created at or after this time, ISO 8601 with a UTC offset."
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Only notifications created before this time, ISO 8601 with a UTC offset."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Page size; 20 by default."
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Opaque value from next_cursor of the previous page."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "notifications": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "kind": {
+                    "enum": [
+                      "item.published",
+                      "item.updated",
+                      "item.corrected",
+                      "item.retracted"
+                    ]
+                  },
+                  "state": {
+                    "enum": [
+                      "held",
+                      "released",
+                      "superseded"
+                    ]
+                  },
+                  "item_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 999
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "release_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "delivery": {
+                    "enum": [
+                      "immediate",
+                      "digest"
+                    ]
+                  },
+                  "reasons": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "follow",
+                        "earlier_notification",
+                        "watched_clipping"
+                      ]
+                    },
+                    "minItems": 1,
+                    "maxItems": 3,
+                    "uniqueItems": true
+                  },
+                  "matched_follow_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "maxItems": 20,
+                    "uniqueItems": true
+                  },
+                  "supersedes": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    ]
+                  },
+                  "superseded_by": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    ]
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "body": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "email_prepared": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "state",
+                  "item_id",
+                  "revision",
+                  "created_at",
+                  "release_at",
+                  "delivery",
+                  "reasons",
+                  "matched_follow_ids",
+                  "supersedes",
+                  "superseded_by",
+                  "title",
+                  "body",
+                  "email_prepared"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "next_cursor": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              ]
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "notifications",
+            "next_cursor"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.preferences.get",
+    "description": "Read the account preferences: time zone, quiet hours, the daily digest time, how corrections and retractions are delivered (as_item: like the item's other notifications; immediate: at once) and whether notifications are also prepared as email. in_quiet_hours and next_digest_at are worked out for the current time. No side effects.",
+    "scope": "belltower.read",
+    "resource_target": "current account",
+    "read_only": true,
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "preferences": {
+              "type": "object",
+              "properties": {
+                "timezone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "quiet_hours": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "start": {
+                      "type": "string",
+                      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                    },
+                    "end": {
+                      "type": "string",
+                      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                    }
+                  },
+                  "required": [
+                    "enabled",
+                    "start",
+                    "end"
+                  ],
+                  "additionalProperties": false
+                },
+                "digest_time": {
+                  "type": "string",
+                  "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                },
+                "corrections": {
+                  "enum": [
+                    "as_item",
+                    "immediate"
+                  ]
+                },
+                "email_notices": {
+                  "type": "boolean"
+                },
+                "in_quiet_hours": {
+                  "type": "boolean"
+                },
+                "next_digest_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "timezone",
+                "quiet_hours",
+                "digest_time",
+                "corrections",
+                "email_notices",
+                "in_quiet_hours",
+                "next_digest_at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "preferences"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.follows.create",
+    "description": "Create a follow rule from any of a list of sources, a list of areas and a list of topics, with a minimum priority and a delivery. At least one source, area or topic is needed. The rule applies to revisions that arrive from now on; nothing is notified for what was already published. The result id is the new rule. Errors: not_found (an unknown source or area), already_following (a rule with the same sources, areas, topics and minimum priority exists: change that one with follows.update), limit_exceeded (the account already has 20 rules), invalid_arguments (no source, area or topic).",
+    "scope": "belltower.write",
+    "resource_target": "current account",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 20,
+          "uniqueItems": true,
+          "description": "Sources to follow; leave out or empty for any source."
+        },
+        "area_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 20,
+          "uniqueItems": true,
+          "description": "Areas to follow. A revision matches when one of its areas is one of these, lies inside one of them or contains one of them. Leave out or empty for any area."
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "water",
+              "power",
+              "roads",
+              "transit",
+              "schools",
+              "libraries",
+              "health",
+              "safety",
+              "weather",
+              "government",
+              "community",
+              "business"
+            ]
+          },
+          "maxItems": 12,
+          "uniqueItems": true,
+          "description": "Topics to follow; leave out or empty for any topic."
+        },
+        "min_priority": {
+          "enum": [
+            "routine",
+            "important",
+            "urgent"
+          ],
+          "description": "Lowest priority that matches: routine (everything), important, or urgent."
+        },
+        "delivery": {
+          "enum": [
+            "immediate",
+            "digest"
+          ],
+          "description": "immediate: notify when the revision arrives (held over quiet hours unless it is urgent). digest: notify at the next daily digest time."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "Version from the latest result you read. A stale version is rejected with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Unique ID for this write. Repeating it with the same input returns the stored result. This is Core's idempotency key, not a record ID."
+        }
+      },
+      "required": [
+        "delivery",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "follow": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "state": {
+                  "enum": [
+                    "active",
+                    "paused"
+                  ]
+                },
+                "source_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 20,
+                  "uniqueItems": true
+                },
+                "area_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 20,
+                  "uniqueItems": true
+                },
+                "topics": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "water",
+                      "power",
+                      "roads",
+                      "transit",
+                      "schools",
+                      "libraries",
+                      "health",
+                      "safety",
+                      "weather",
+                      "government",
+                      "community",
+                      "business"
+                    ]
+                  },
+                  "maxItems": 12,
+                  "uniqueItems": true
+                },
+                "min_priority": {
+                  "enum": [
+                    "routine",
+                    "important",
+                    "urgent"
+                  ]
+                },
+                "delivery": {
+                  "enum": [
+                    "immediate",
+                    "digest"
+                  ]
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updated_at": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "state",
+                "source_ids",
+                "area_ids",
+                "topics",
+                "min_priority",
+                "delivery",
+                "created_at",
+                "updated_at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "follow"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.follows.update",
+    "description": "Change a follow rule: its filters, its delivery, or paused (true pauses it, false resumes it). Only the fields present in patch change; a list replaces the old list. Later notifications follow the change; notifications already written keep their release time. Pausing a rule stops discovery through it. It does not withdraw notifications already written, and a later revision of an item the account was already notified about still notifies. id is the rule ID. Errors: not_found (the rule, or an unknown source or area), already_following (the change would make it the same as another rule), invalid_arguments (an empty patch, or a rule left with no source, area or topic).",
+    "scope": "belltower.write",
+    "resource_target": "follow rule",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Follow rule ID."
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "source_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 20,
+              "uniqueItems": true,
+              "description": "Sources to follow; leave out or empty for any source."
+            },
+            "area_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 20,
+              "uniqueItems": true,
+              "description": "Areas to follow. A revision matches when one of its areas is one of these, lies inside one of them or contains one of them. Leave out or empty for any area."
+            },
+            "topics": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "water",
+                  "power",
+                  "roads",
+                  "transit",
+                  "schools",
+                  "libraries",
+                  "health",
+                  "safety",
+                  "weather",
+                  "government",
+                  "community",
+                  "business"
+                ]
+              },
+              "maxItems": 12,
+              "uniqueItems": true,
+              "description": "Topics to follow; leave out or empty for any topic."
+            },
+            "min_priority": {
+              "enum": [
+                "routine",
+                "important",
+                "urgent"
+              ],
+              "description": "Lowest priority that matches: routine (everything), important, or urgent."
+            },
+            "delivery": {
+              "enum": [
+                "immediate",
+                "digest"
+              ],
+              "description": "immediate: notify when the revision arrives (held over quiet hours unless it is urgent). digest: notify at the next daily digest time."
+            },
+            "paused": {
+              "type": "boolean",
+              "description": "true pauses the rule; false resumes it."
+            }
+          },
+          "required": [],
+          "additionalProperties": false,
+          "description": "The fields to change."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "Version from the latest result you read. A stale version is rejected with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Unique ID for this write. Repeating it with the same input returns the stored result. This is Core's idempotency key, not a record ID."
+        }
+      },
+      "required": [
+        "id",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "follow": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "state": {
+                  "enum": [
+                    "active",
+                    "paused"
+                  ]
+                },
+                "source_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 20,
+                  "uniqueItems": true
+                },
+                "area_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 20,
+                  "uniqueItems": true
+                },
+                "topics": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "water",
+                      "power",
+                      "roads",
+                      "transit",
+                      "schools",
+                      "libraries",
+                      "health",
+                      "safety",
+                      "weather",
+                      "government",
+                      "community",
+                      "business"
+                    ]
+                  },
+                  "maxItems": 12,
+                  "uniqueItems": true
+                },
+                "min_priority": {
+                  "enum": [
+                    "routine",
+                    "important",
+                    "urgent"
+                  ]
+                },
+                "delivery": {
+                  "enum": [
+                    "immediate",
+                    "digest"
+                  ]
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updated_at": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "state",
+                "source_ids",
+                "area_ids",
+                "topics",
+                "min_priority",
+                "delivery",
+                "created_at",
+                "updated_at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "follow"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.follows.remove",
+    "description": "Remove a follow rule. From then on it brings no notification for a new item or for an item the account was not notified about before. Notifications already written stay, and a later revision of an item the account was already notified about still notifies. id is the rule ID. Errors: not_found.",
+    "scope": "belltower.write",
+    "resource_target": "follow rule",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Follow rule ID."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "Version from the latest result you read. A stale version is rejected with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Unique ID for this write. Repeating it with the same input returns the stored result. This is Core's idempotency key, not a record ID."
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "remaining": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "remaining"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.preferences.update",
+    "description": "Change account preferences. Only the fields present in patch change. Quiet hours hold a new immediate notification until they end, unless the revision is urgent; a digest notification is released at the next daily digest time. Notifications already written keep their release time. Turning email_notices off stops new email copies; the notification log is still written. Errors: invalid_timezone, invalid_arguments (an empty patch, quiet hours that start and end at the same time, or a digest time inside the quiet hours).",
+    "scope": "belltower.write",
+    "resource_target": "current account",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "patch": {
+          "type": "object",
+          "properties": {
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "IANA time zone, for example America/Chicago."
+            },
+            "quiet_hours": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "start": {
+                  "type": "string",
+                  "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                },
+                "end": {
+                  "type": "string",
+                  "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "description": "Any of enabled, start and end (HH:MM in the account time zone); fields left out keep their value."
+            },
+            "digest_time": {
+              "type": "string",
+              "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+              "description": "Daily digest time, HH:MM in the account time zone. It cannot lie inside the quiet hours."
+            },
+            "corrections": {
+              "enum": [
+                "as_item",
+                "immediate"
+              ],
+              "description": "as_item: a correction or retraction is delivered like the item's other notifications. immediate: it is delivered at once."
+            },
+            "email_notices": {
+              "type": "boolean",
+              "description": "Whether a new notification is also prepared as an email message for Mail."
+            }
+          },
+          "required": [],
+          "additionalProperties": false,
+          "description": "The fields to change."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "Version from the latest result you read. A stale version is rejected with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Unique ID for this write. Repeating it with the same input returns the stored result. This is Core's idempotency key, not a record ID."
+        }
+      },
+      "required": [
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "preferences": {
+              "type": "object",
+              "properties": {
+                "timezone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "quiet_hours": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "start": {
+                      "type": "string",
+                      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                    },
+                    "end": {
+                      "type": "string",
+                      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                    }
+                  },
+                  "required": [
+                    "enabled",
+                    "start",
+                    "end"
+                  ],
+                  "additionalProperties": false
+                },
+                "digest_time": {
+                  "type": "string",
+                  "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                },
+                "corrections": {
+                  "enum": [
+                    "as_item",
+                    "immediate"
+                  ]
+                },
+                "email_notices": {
+                  "type": "boolean"
+                },
+                "in_quiet_hours": {
+                  "type": "boolean"
+                },
+                "next_digest_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "timezone",
+                "quiet_hours",
+                "digest_time",
+                "corrections",
+                "email_notices",
+                "in_quiet_hours",
+                "next_digest_at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "preferences"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.reading.mark",
+    "description": "Record that the person was shown an item at one revision. Without revision the item's latest revision is marked. The mark keeps the revision and the current time, and items then show changed_since_read when a newer revision exists. id is the item ID. Errors: not_found (an unknown item, or a revision the item does not have), already_read (that revision is already marked).",
+    "scope": "belltower.write",
+    "resource_target": "item",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Item ID."
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 999,
+          "description": "The revision that was read; the latest when left out."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "Version from the latest result you read. A stale version is rejected with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Unique ID for this write. Repeating it with the same input returns the stored result. This is Core's idempotency key, not a record ID."
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "mark": {
+              "type": "object",
+              "properties": {
+                "item_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999
+                },
+                "read_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "is_latest": {
+                  "type": "boolean"
+                },
+                "latest_revision": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999
+                }
+              },
+              "required": [
+                "item_id",
+                "revision",
+                "read_at",
+                "is_latest",
+                "latest_revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "mark"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.clippings.add",
+    "description": "Clip an item at its latest revision, with an optional note, an optional reference to what relies on it and a choice to watch it. A watched clipping brings a notification with immediate delivery for every later revision of that item, also when no follow rule matches. id is the item ID; the result id is the new clipping. Errors: not_found, already_clipped (the item already has a clipping: change it with clippings.update), limit_exceeded (the account already has 100 clippings).",
+    "scope": "belltower.write",
+    "resource_target": "item",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Item ID."
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "description": "Why this item was kept."
+        },
+        "linked_object": {
+          "type": "object",
+          "properties": {
+            "app_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "object_type": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "object_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 150
+            }
+          },
+          "required": [
+            "app_id",
+            "object_type",
+            "object_id"
+          ],
+          "additionalProperties": false,
+          "description": "A reference to what relies on this item, for example { app_id: \"calendar\", object_type: \"event\", object_id: \"...\" }. Stored as given and never opened."
+        },
+        "watch": {
+          "type": "boolean",
+          "description": "Whether later revisions of the item notify the account; false when left out."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "Version from the latest result you read. A stale version is rejected with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Unique ID for this write. Repeating it with the same input returns the stored result. This is Core's idempotency key, not a record ID."
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "clipping": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "item_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999
+                },
+                "latest_revision": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999
+                },
+                "is_current": {
+                  "type": "boolean"
+                },
+                "state": {
+                  "enum": [
+                    "current",
+                    "behind"
+                  ]
+                },
+                "note": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  ]
+                },
+                "linked_object": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "app_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "object_type": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "object_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 150
+                        }
+                      },
+                      "required": [
+                        "app_id",
+                        "object_type",
+                        "object_id"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "watch": {
+                  "type": "boolean"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updated_at": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  ]
+                },
+                "history": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "replaced_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "revision": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 999
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      },
+                      "linked_object": {
+                        "type": "object",
+                        "properties": {
+                          "app_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "object_type": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "object_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 150
+                          }
+                        },
+                        "required": [
+                          "app_id",
+                          "object_type",
+                          "object_id"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "watch": {
+                        "type": "boolean"
+                      },
+                      "request_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      }
+                    },
+                    "required": [
+                      "replaced_at",
+                      "revision",
+                      "watch"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 200
+                }
+              },
+              "required": [
+                "id",
+                "item_id",
+                "revision",
+                "latest_revision",
+                "is_current",
+                "state",
+                "note",
+                "linked_object",
+                "watch",
+                "created_at",
+                "updated_at",
+                "history"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "clipping"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.clippings.update",
+    "description": "Change a clipping: move it to a newer revision of its item, change its note or its reference, or turn watching on or off. Only the fields present in patch change; note or linked_object set to null removes it. The version it held before is kept in its history. Ending a watch stops the notifications that depended on the watch alone; it does not stop later revisions of an item the account was already notified about. id is the clipping ID. Errors: not_found (the clipping, or a revision the item does not have), invalid_revision (the revision is not newer than the one the clipping holds), invalid_arguments (an empty patch).",
+    "scope": "belltower.write",
+    "resource_target": "clipping",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Clipping ID."
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "revision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 999,
+              "description": "A newer revision of the item for the clipping to hold."
+            },
+            "note": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                }
+              ],
+              "description": "New note, or null to remove it."
+            },
+            "linked_object": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "app_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "object_type": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "object_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 150
+                    }
+                  },
+                  "required": [
+                    "app_id",
+                    "object_type",
+                    "object_id"
+                  ],
+                  "additionalProperties": false
+                }
+              ],
+              "description": "New reference, or null to remove it."
+            },
+            "watch": {
+              "type": "boolean",
+              "description": "Whether later revisions of the item notify the account."
+            }
+          },
+          "required": [],
+          "additionalProperties": false,
+          "description": "The fields to change."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "Version from the latest result you read. A stale version is rejected with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Unique ID for this write. Repeating it with the same input returns the stored result. This is Core's idempotency key, not a record ID."
+        }
+      },
+      "required": [
+        "id",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "clipping": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "item_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999
+                },
+                "latest_revision": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999
+                },
+                "is_current": {
+                  "type": "boolean"
+                },
+                "state": {
+                  "enum": [
+                    "current",
+                    "behind"
+                  ]
+                },
+                "note": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  ]
+                },
+                "linked_object": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "app_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "object_type": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "object_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 150
+                        }
+                      },
+                      "required": [
+                        "app_id",
+                        "object_type",
+                        "object_id"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "watch": {
+                  "type": "boolean"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updated_at": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  ]
+                },
+                "history": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "replaced_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "revision": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 999
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      },
+                      "linked_object": {
+                        "type": "object",
+                        "properties": {
+                          "app_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "object_type": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "object_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 150
+                          }
+                        },
+                        "required": [
+                          "app_id",
+                          "object_type",
+                          "object_id"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "watch": {
+                        "type": "boolean"
+                      },
+                      "request_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      }
+                    },
+                    "required": [
+                      "replaced_at",
+                      "revision",
+                      "watch"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 200
+                }
+              },
+              "required": [
+                "id",
+                "item_id",
+                "revision",
+                "latest_revision",
+                "is_current",
+                "state",
+                "note",
+                "linked_object",
+                "watch",
+                "created_at",
+                "updated_at",
+                "history"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "clipping"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "belltower.clippings.remove",
+    "description": "Remove a clipping with its history. The item and its read marks are not touched. id is the clipping ID. Errors: not_found.",
+    "scope": "belltower.write",
+    "resource_target": "clipping",
+    "read_only": false,
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Clipping ID."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "description": "Version from the latest result you read. A stale version is rejected with stale_version."
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Unique ID for this write. Repeating it with the same input returns the stored result. This is Core's idempotency key, not a record ID."
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "committed"
+              ]
+            },
+            "app_id": {
+              "const": "belltower"
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "duplicate": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "remaining": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "status",
+            "app_id",
+            "version",
+            "id",
+            "remaining"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "applied": {
+              "const": false
+            },
+            "version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            "current_version": {
+              "type": "object",
+              "properties": {
+                "epoch": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "epoch",
+                "revision"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status",
+            "message",
+            "applied",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,575 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Belltower incoming events",
+  "description": "Events Infra may apply with env.apply_event: what sources publish. Each is handled at its own `at`, which becomes the revision's received_at. There is no clock event: Infra moves time with an event or with Core's env.advance_time, which runs no App code.",
+  "type": "object",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "belltower.item.published"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "source_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "kind": {
+              "enum": [
+                "article",
+                "notice"
+              ]
+            },
+            "revision": {
+              "type": "object",
+              "properties": {
+                "number": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999
+                },
+                "published_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "headline": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 180
+                },
+                "body": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8000
+                },
+                "topics": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "water",
+                      "power",
+                      "roads",
+                      "transit",
+                      "schools",
+                      "libraries",
+                      "health",
+                      "safety",
+                      "weather",
+                      "government",
+                      "community",
+                      "business"
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 12,
+                  "uniqueItems": true
+                },
+                "area_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "uniqueItems": true
+                },
+                "priority": {
+                  "enum": [
+                    "routine",
+                    "important",
+                    "urgent"
+                  ]
+                },
+                "effective": {
+                  "type": "object",
+                  "properties": {
+                    "start": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "end": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "start",
+                    "end"
+                  ],
+                  "additionalProperties": false
+                },
+                "based_on": {
+                  "type": "object",
+                  "properties": {
+                    "item_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 999
+                    },
+                    "relation": {
+                      "enum": [
+                        "copy",
+                        "report"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "item_id",
+                    "revision",
+                    "relation"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "number",
+                "published_at",
+                "headline",
+                "body",
+                "topics",
+                "area_ids",
+                "priority"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "item_id",
+            "source_id",
+            "kind",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "belltower.item.updated"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "revision": {
+              "type": "object",
+              "properties": {
+                "number": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999
+                },
+                "published_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "headline": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 180
+                },
+                "body": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8000
+                },
+                "topics": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "water",
+                      "power",
+                      "roads",
+                      "transit",
+                      "schools",
+                      "libraries",
+                      "health",
+                      "safety",
+                      "weather",
+                      "government",
+                      "community",
+                      "business"
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 12,
+                  "uniqueItems": true
+                },
+                "area_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "uniqueItems": true
+                },
+                "priority": {
+                  "enum": [
+                    "routine",
+                    "important",
+                    "urgent"
+                  ]
+                },
+                "effective": {
+                  "type": "object",
+                  "properties": {
+                    "start": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "end": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "start",
+                    "end"
+                  ],
+                  "additionalProperties": false
+                },
+                "based_on": {
+                  "type": "object",
+                  "properties": {
+                    "item_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 999
+                    },
+                    "relation": {
+                      "enum": [
+                        "copy",
+                        "report"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "item_id",
+                    "revision",
+                    "relation"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "number",
+                "published_at",
+                "headline",
+                "body",
+                "topics",
+                "area_ids",
+                "priority"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "item_id",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "belltower.item.corrected"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "revision": {
+              "type": "object",
+              "properties": {
+                "number": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999
+                },
+                "published_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "headline": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 180
+                },
+                "body": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8000
+                },
+                "topics": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "water",
+                      "power",
+                      "roads",
+                      "transit",
+                      "schools",
+                      "libraries",
+                      "health",
+                      "safety",
+                      "weather",
+                      "government",
+                      "community",
+                      "business"
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 12,
+                  "uniqueItems": true
+                },
+                "area_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "uniqueItems": true
+                },
+                "priority": {
+                  "enum": [
+                    "routine",
+                    "important",
+                    "urgent"
+                  ]
+                },
+                "effective": {
+                  "type": "object",
+                  "properties": {
+                    "start": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "end": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "start",
+                    "end"
+                  ],
+                  "additionalProperties": false
+                },
+                "based_on": {
+                  "type": "object",
+                  "properties": {
+                    "item_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 999
+                    },
+                    "relation": {
+                      "enum": [
+                        "copy",
+                        "report"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "item_id",
+                    "revision",
+                    "relation"
+                  ],
+                  "additionalProperties": false
+                },
+                "note": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                }
+              },
+              "required": [
+                "number",
+                "published_at",
+                "headline",
+                "body",
+                "topics",
+                "area_ids",
+                "priority",
+                "note"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "item_id",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "operation": {
+          "const": "belltower.item.retracted"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "revision": {
+              "type": "object",
+              "properties": {
+                "number": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999
+                },
+                "published_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "note": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                }
+              },
+              "required": [
+                "number",
+                "published_at",
+                "note"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "item_id",
+            "revision"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}
