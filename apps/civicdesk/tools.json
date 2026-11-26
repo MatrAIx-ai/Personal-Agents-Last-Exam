@@ -1,0 +1,2210 @@
+[
+  {
+    "name": "civicdesk.dockets.search",
+    "description": "Search proposed rules (dockets) by keyword, agency, period status and closing date. Each result carries the agency, the comment period with its closing time in the agency's time zone, whether it closes soon, and the member's own comments and draft on it.",
+    "read_only": true,
+    "scope": "civicdesk.dockets.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "agency_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "status": {
+          "enum": [
+            "open",
+            "extended",
+            "closed",
+            "all"
+          ]
+        },
+        "closing_after": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "closing_before": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "civicdesk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "dockets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "docket_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "agency": {
+                "type": "object",
+                "properties": {
+                  "agency_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "acronym": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 12
+                  },
+                  "timezone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  }
+                },
+                "required": [
+                  "agency_id",
+                  "name",
+                  "acronym",
+                  "timezone"
+                ],
+                "additionalProperties": false
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "extended",
+                  "closed"
+                ]
+              },
+              "opened_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "closes_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "closes_at_local": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "extended_from": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "closing_soon": {
+                "type": "boolean"
+              },
+              "days_left": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3660
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "corrections": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "document_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "public_comment_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "my_comment_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "maxItems": 50
+              },
+              "my_draft_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "docket_id",
+              "title",
+              "agency",
+              "status",
+              "opened_at",
+              "closes_at",
+              "closes_at_local",
+              "extended_from",
+              "closing_soon",
+              "days_left",
+              "corrections",
+              "document_count",
+              "public_comment_count",
+              "my_comment_ids",
+              "my_draft_id"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "dockets"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "civicdesk.dockets.get",
+    "description": "Read one docket: the rule summary and supplementary information, the comment period with its opening and closing instants in the agency's time zone, extensions and corrections with their dates, the supporting documents, and the member's comments and draft on it.",
+    "read_only": true,
+    "scope": "civicdesk.dockets.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "civicdesk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "docket": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "docket_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "agency_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 6000
+            },
+            "supplementary_information": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 6000
+            },
+            "opened_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closes_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "extended_from": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "corrections": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "at",
+                  "text"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 20
+            },
+            "document_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 20,
+              "uniqueItems": true
+            },
+            "public_comment_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "detail": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 1000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 1000
+            },
+            "agency": {
+              "type": "object",
+              "properties": {
+                "agency_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "acronym": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12
+                },
+                "timezone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                }
+              },
+              "required": [
+                "agency_id",
+                "name",
+                "acronym",
+                "timezone"
+              ],
+              "additionalProperties": false
+            },
+            "status": {
+              "enum": [
+                "open",
+                "extended",
+                "closed"
+              ]
+            },
+            "closes_at_local": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "closing_soon": {
+              "type": "boolean"
+            },
+            "days_left": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 3660
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "documents": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "document_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "docket_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  "kind": {
+                    "enum": [
+                      "notice",
+                      "supporting",
+                      "analysis"
+                    ]
+                  },
+                  "mime_type": {
+                    "enum": [
+                      "text/plain",
+                      "application/pdf"
+                    ]
+                  },
+                  "asset_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000000
+                  },
+                  "published_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "id",
+                  "document_id",
+                  "docket_id",
+                  "title",
+                  "kind",
+                  "mime_type",
+                  "asset_id",
+                  "bytes",
+                  "published_at"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 20
+            },
+            "my_comment_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 50
+            },
+            "my_draft_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "docket_id",
+            "agency_id",
+            "title",
+            "summary",
+            "supplementary_information",
+            "opened_at",
+            "closes_at",
+            "extended_from",
+            "corrections",
+            "document_ids",
+            "public_comment_count",
+            "created_at",
+            "updated_at",
+            "history",
+            "agency",
+            "status",
+            "closes_at_local",
+            "closing_soon",
+            "days_left",
+            "documents",
+            "my_comment_ids",
+            "my_draft_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "docket"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "civicdesk.dockets.documents",
+    "description": "Read the supporting documents of one docket (id is the docket ID) with their bytes: filename, MIME type (UTF-8 text or text-based PDF), base64 and SHA-256, in the shape files.put and mail.attachment.add accept.",
+    "read_only": true,
+    "scope": "civicdesk.dockets.documents",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "civicdesk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "docket_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "document_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "docket_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "kind": {
+                "enum": [
+                  "notice",
+                  "supporting",
+                  "analysis"
+                ]
+              },
+              "mime_type": {
+                "enum": [
+                  "text/plain",
+                  "application/pdf"
+                ]
+              },
+              "asset_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "published_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "file": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160,
+                    "pattern": "^[^\\\\/\\u0000-\\u001f\\u007f]+$"
+                  },
+                  "mime_type": {
+                    "enum": [
+                      "text/plain",
+                      "application/pdf"
+                    ]
+                  },
+                  "base64": {
+                    "type": "string",
+                    "maxLength": 1398104
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "filename",
+                  "mime_type",
+                  "base64",
+                  "sha256"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "document_id",
+              "docket_id",
+              "title",
+              "kind",
+              "mime_type",
+              "asset_id",
+              "bytes",
+              "published_at",
+              "file"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "docket_id",
+        "documents"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "civicdesk.comments.validate",
+    "description": "Check a comment before drafting or submitting it, without changing anything: length limits, the name a named submission needs, whether the docket's period is open now, and whether it would be a possible duplicate of the member's own comment on that docket.",
+    "read_only": true,
+    "scope": "civicdesk.comments.validate",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "docket_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 50000
+        },
+        "submitter": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "named",
+                "anonymous"
+              ]
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "organization": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "name",
+            "organization"
+          ],
+          "additionalProperties": false
+        },
+        "supplemental": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "docket_id",
+        "text",
+        "submitter"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "civicdesk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "problems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "enum": [
+                  "too_short",
+                  "too_long",
+                  "name_required",
+                  "period_closed",
+                  "unknown_docket",
+                  "possible_duplicate"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 10
+        },
+        "docket_status": {
+          "enum": [
+            "open",
+            "extended",
+            "closed"
+          ]
+        },
+        "closes_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "closes_at_local": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "characters": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "ok",
+        "problems",
+        "docket_status",
+        "closes_at",
+        "closes_at_local",
+        "characters"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "civicdesk.comments.receipt",
+    "description": "Read the receipt of a submitted comment (id is the comment ID): tracking number, docket, agency, submission time in the agency's time zone, how the member appears on the public record, and the SHA-256 of the submitted text.",
+    "read_only": true,
+    "scope": "civicdesk.comments.receipt",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "civicdesk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "receipt": {
+          "type": "object",
+          "properties": {
+            "comment_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "tracking_number": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "docket_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "docket_title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "agency": {
+              "type": "object",
+              "properties": {
+                "agency_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "acronym": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12
+                },
+                "timezone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                }
+              },
+              "required": [
+                "agency_id",
+                "name",
+                "acronym",
+                "timezone"
+              ],
+              "additionalProperties": false
+            },
+            "submitted_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "submitted_at_local": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "submitter": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "named",
+                    "anonymous"
+                  ]
+                },
+                "name": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "organization": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "kind",
+                "name",
+                "organization"
+              ],
+              "additionalProperties": false
+            },
+            "supplemental": {
+              "type": "boolean"
+            },
+            "text_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "status": {
+              "enum": [
+                "received",
+                "posted",
+                "returned"
+              ]
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000
+            }
+          },
+          "required": [
+            "comment_id",
+            "tracking_number",
+            "docket_id",
+            "docket_title",
+            "agency",
+            "submitted_at",
+            "submitted_at_local",
+            "submitter",
+            "supplemental",
+            "text_sha256",
+            "status",
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "receipt"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "civicdesk.comments.status",
+    "description": "Read the current status of a submitted comment (id is the comment ID): received, posted, or returned with the agency's reason, with its history and the delivery outcomes of its notices.",
+    "read_only": true,
+    "scope": "civicdesk.comments.status",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "civicdesk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "comment": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "comment_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "docket_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "draft_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "tracking_number": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000
+            },
+            "text_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "submitter": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "named",
+                    "anonymous"
+                  ]
+                },
+                "name": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "organization": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "kind",
+                "name",
+                "organization"
+              ],
+              "additionalProperties": false
+            },
+            "supplemental": {
+              "type": "boolean"
+            },
+            "status": {
+              "enum": [
+                "received",
+                "posted",
+                "returned"
+              ]
+            },
+            "return_reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "submitted_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "notices": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "receipt",
+                      "status"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "delivered",
+                      "rejected",
+                      "unknown"
+                    ]
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "event_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "kind",
+                  "status",
+                  "at",
+                  "event_id"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 50
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "detail": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 1000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 1000
+            },
+            "docket_title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "agency": {
+              "type": "object",
+              "properties": {
+                "agency_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "acronym": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12
+                },
+                "timezone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                }
+              },
+              "required": [
+                "agency_id",
+                "name",
+                "acronym",
+                "timezone"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "id",
+            "comment_id",
+            "docket_id",
+            "draft_id",
+            "tracking_number",
+            "text",
+            "text_sha256",
+            "submitter",
+            "supplemental",
+            "status",
+            "return_reason",
+            "submitted_at",
+            "updated_at",
+            "notices",
+            "history",
+            "docket_title",
+            "agency"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "comment"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "civicdesk.comments.list_mine",
+    "description": "List the member's drafts and submitted comments with their status.",
+    "read_only": true,
+    "scope": "civicdesk.comments.list_mine",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "all",
+            "received",
+            "posted",
+            "returned"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "civicdesk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "drafts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "draft_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "docket_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "text": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 50000
+              },
+              "submitter": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "named",
+                      "anonymous"
+                    ]
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "organization": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "kind",
+                  "name",
+                  "organization"
+                ],
+                "additionalProperties": false
+              },
+              "supplemental": {
+                "type": "boolean"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "detail": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 0,
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 1000
+              },
+              "problems": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "enum": [
+                        "too_short",
+                        "too_long",
+                        "name_required",
+                        "period_closed",
+                        "unknown_docket",
+                        "possible_duplicate"
+                      ]
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10
+              },
+              "ready": {
+                "type": "boolean"
+              },
+              "docket_title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "docket_status": {
+                "enum": [
+                  "open",
+                  "extended",
+                  "closed"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "draft_id",
+              "docket_id",
+              "text",
+              "submitter",
+              "supplemental",
+              "created_at",
+              "updated_at",
+              "history",
+              "problems",
+              "ready",
+              "docket_title",
+              "docket_status"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 100
+        },
+        "comments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "comment_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "docket_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "draft_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "tracking_number": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 50000
+              },
+              "text_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "submitter": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "named",
+                      "anonymous"
+                    ]
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "organization": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "kind",
+                  "name",
+                  "organization"
+                ],
+                "additionalProperties": false
+              },
+              "supplemental": {
+                "type": "boolean"
+              },
+              "status": {
+                "enum": [
+                  "received",
+                  "posted",
+                  "returned"
+                ]
+              },
+              "return_reason": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "submitted_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "notices": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "receipt",
+                        "status"
+                      ]
+                    },
+                    "status": {
+                      "enum": [
+                        "delivered",
+                        "rejected",
+                        "unknown"
+                      ]
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "event_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "status",
+                    "at",
+                    "event_id"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 50
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "detail": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 0,
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 1000
+              },
+              "docket_title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "agency": {
+                "type": "object",
+                "properties": {
+                  "agency_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "acronym": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 12
+                  },
+                  "timezone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  }
+                },
+                "required": [
+                  "agency_id",
+                  "name",
+                  "acronym",
+                  "timezone"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "comment_id",
+              "docket_id",
+              "draft_id",
+              "tracking_number",
+              "text",
+              "text_sha256",
+              "submitter",
+              "supplemental",
+              "status",
+              "return_reason",
+              "submitted_at",
+              "updated_at",
+              "notices",
+              "history",
+              "docket_title",
+              "agency"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "drafts",
+        "comments"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "civicdesk.comments.draft",
+    "description": "Save a comment draft on a docket, or update the draft named by id. The draft is stored even with problems; the problems are returned so they can be fixed before submitting. Named submissions need a name; anonymous ones carry none. Errors: unknown_docket, invalid_state (a draft already submitted).",
+    "read_only": false,
+    "scope": "civicdesk.comments.draft",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "docket_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 50000
+        },
+        "submitter": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "named",
+                "anonymous"
+              ]
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "organization": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "name",
+            "organization"
+          ],
+          "additionalProperties": false
+        },
+        "supplemental": {
+          "type": "boolean"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "docket_id",
+        "text",
+        "submitter",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "civicdesk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "docket_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "problems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "enum": [
+                  "too_short",
+                  "too_long",
+                  "name_required",
+                  "period_closed",
+                  "unknown_docket",
+                  "possible_duplicate"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 10
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "characters": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "docket_id",
+        "problems",
+        "ready",
+        "characters"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "civicdesk.comments.submit",
+    "description": "Submit the draft named by id to the agency. Requires acknowledged: true, the member's acknowledgment that a submitted comment is public and cannot be withdrawn. Errors: acknowledgment_required, period_closed (with the closing instant and time zone), invalid_draft (with the problems), possible_duplicate (a second non-supplemental submission on the same docket). Submitting the same draft again returns the existing receipt.",
+    "read_only": false,
+    "scope": "civicdesk.comments.submit",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "acknowledged": {
+          "type": "boolean"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "acknowledged",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "civicdesk"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "draft_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "docket_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "tracking_number": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "submitted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "outcome": {
+          "enum": [
+            "received",
+            "already_submitted"
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "draft_id",
+        "docket_id",
+        "tracking_number",
+        "submitted_at",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

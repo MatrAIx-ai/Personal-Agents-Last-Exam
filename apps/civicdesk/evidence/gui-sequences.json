@@ -1,0 +1,208 @@
+{
+  "schema": "pale.gui-sequences.v1",
+  "app_id": "civicdesk",
+  "captured_at": "2026-11-26T08:36:11.814Z",
+  "node": "v24.16.0",
+  "browser": "Chrome/158.0.8127.37",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "hosts": [
+    {
+      "run": "capture-sandbox",
+      "profile": "sandbox",
+      "url": "http://127.0.0.1:51231"
+    }
+  ],
+  "passed": true,
+  "steps": [
+    {
+      "id": "01-dockets",
+      "file": "screenshots/01-dockets.png",
+      "workflow": "dockets",
+      "state": "start",
+      "description": "Dockets open for comment, soonest deadline first, with days left, extensions, corrections and the member's own comments flagged",
+      "control": null,
+      "checks": [
+        {
+          "label": "Target docket listed first with days left",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "02-docket",
+      "file": "screenshots/02-docket.png",
+      "workflow": "dockets",
+      "state": "intermediate",
+      "description": "Docket page: summary, supplementary information, the deadline in the agency's time zone (Eastern), documents and the comment control",
+      "control": "Docket row",
+      "checks": [
+        {
+          "label": "Deadline shown in Eastern time",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "03-document-downloaded",
+      "file": "screenshots/03-document-downloaded.png",
+      "workflow": "dockets",
+      "state": "result",
+      "description": "Downloading the notice saves the document; its bytes match dockets.documents byte for byte",
+      "control": "Document button",
+      "checks": [
+        {
+          "label": "Browser download has the SHA-256 the App reports",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "04-draft-problems",
+      "file": "screenshots/04-draft-problems.png",
+      "workflow": "comments",
+      "state": "error",
+      "description": "A short, named draft without a name is saved but reported: too short and name required; nothing can be submitted yet",
+      "control": "Review and submit",
+      "checks": [
+        {
+          "label": "Both problems listed",
+          "passed": true
+        },
+        {
+          "label": "MCP state: draft stored, no comment",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "05-review",
+      "file": "screenshots/05-review.png",
+      "workflow": "comments",
+      "state": "intermediate",
+      "description": "Review step: the final text, how the member appears (anonymous), the deadline, and the acknowledgment that the comment is public and permanent",
+      "control": "Review and submit",
+      "checks": [
+        {
+          "label": "Acknowledgment shown",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "06-submit-unacknowledged",
+      "file": "screenshots/06-submit-unacknowledged.png",
+      "workflow": "comments",
+      "state": "error",
+      "description": "Submitting without the acknowledgment is refused; nothing is submitted",
+      "control": "Submit comment (unticked)",
+      "checks": [
+        {
+          "label": "acknowledgment_required message",
+          "passed": true
+        },
+        {
+          "label": "MCP state: still no comment on the docket",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "07-receipt",
+      "file": "screenshots/07-receipt.png",
+      "workflow": "comments",
+      "state": "result",
+      "description": "Receipt: tracking number, anonymous submission, submission time in the agency's time zone, the text as submitted, history",
+      "control": "Submit comment (acknowledged)",
+      "checks": [
+        {
+          "label": "MCP state: comment received, draft consumed",
+          "passed": true
+        },
+        {
+          "label": "Receipt shows the tracking number",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "08-my-comments",
+      "file": "screenshots/08-my-comments.png",
+      "workflow": "comments",
+      "state": "intermediate",
+      "description": "My comments: the new submission as received, earlier comments posted",
+      "control": null,
+      "checks": []
+    },
+    {
+      "id": "09-duplicate-refused",
+      "file": "screenshots/09-duplicate-refused.png",
+      "workflow": "comments",
+      "state": "error",
+      "description": "A second non-supplemental comment on the same docket is a possible duplicate; the page offers the supplemental option instead",
+      "control": "Review and submit",
+      "checks": [
+        {
+          "label": "possible_duplicate names the earlier comment",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "10-closed-docket",
+      "file": "screenshots/10-closed-docket.png",
+      "workflow": "dockets",
+      "state": "error",
+      "description": "A closed docket offers no comment control; its closing date and the member's posted comment are shown",
+      "control": null,
+      "checks": [
+        {
+          "label": "No comment control",
+          "passed": true
+        },
+        {
+          "label": "Posted comment linked",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "11-extended",
+      "file": "screenshots/11-extended.png",
+      "workflow": "dockets",
+      "state": "result",
+      "description": "After Infra applied the extension event, the docket shows the new Eastern deadline and the date it was extended from; the member's comment stands",
+      "control": "env.apply_event docket.period_extended (Infra)",
+      "checks": [
+        {
+          "label": "Extension committed",
+          "passed": true
+        },
+        {
+          "label": "New deadline shown",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "12-posted",
+      "file": "screenshots/12-posted.png",
+      "workflow": "comments",
+      "state": "result",
+      "description": "After Infra applied the status event, the comment reads posted on its receipt page",
+      "control": "env.apply_event comment.status_changed (Infra)",
+      "checks": [
+        {
+          "label": "Status event committed",
+          "passed": true
+        },
+        {
+          "label": "MCP state: comment posted",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

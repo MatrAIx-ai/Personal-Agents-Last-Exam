@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "app_id": "civicdesk",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:civicdesk (environment PR #16, @ZichenYuan)"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "docket.period_extended",
+    "docket.correction_published",
+    "comment.status_changed",
+    "comment.notice_recorded"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": true,
+    "ui": "business web app (pale.web) plus reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "One member account per instance; no identity verification, attachments to comments or comment withdrawal (absent in the reference).",
+    "Notices to Mail are built and published by the host-run publisher after a commit; delivery outcomes reach the comment's notice history only through the comment.notice_recorded Infra event.",
+    "Dockets, periods and corrections are App state the task schedules; a period closes by the clock, not by an event, and nothing fires when the clock moves.",
+    "No real agency data: agencies, rules and documents are fictional, mirroring the structure of public-domain notices."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}
