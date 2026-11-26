@@ -161,9 +161,31 @@ function suppliedPersonAgrees(accountPerson, ...others) {
   return true;
 }
 
+function publicationHandle(entry) {
+  if (!entry) return null;
+  if (entry.handle) return entry.handle;
+  const match = String(entry.url || '').match(/^https:\/\/postyard\.example\/@([^/]+)\//);
+  return match ? match[1] : null;
+}
+
+function publicationAgrees(companion, revision, link) {
+  return (companion.links || []).some(item => {
+    if (item.revision_id && revision.revision_id && item.revision_id !== revision.revision_id) return false;
+    if (item.app_id !== 'postyard') return false;
+    if (item.object_id !== link.object_id) return false;
+    return publicationHandle(item) === link.handle;
+  });
+}
+
+function surfaceAgrees(revision, link) {
+  const kind = link.object_type || 'post';
+  if (kind === 'post' || kind === 'blog') return revision.surface === 'post' || revision.surface === 'blog';
+  return revision.surface === kind;
+}
+
 function postyardAuthor(data, companion, revision, handle) {
   if (!companion || companion.app_id !== 'postyard') return null;
-  if (companion.schema && companion.schema !== 'urn:pale:public-speech-evidence:1') return null;
+  if (Object.prototype.hasOwnProperty.call(companion, 'schema') && companion.schema !== 'urn:pale:public-speech-evidence:1') return null;
   if (!revision || revision.object_id === undefined) return null;
   const author = account(data, revision.actor_account_id);
   if (author) {
@@ -191,7 +213,7 @@ function subjectHits(data, row, companions) {
       if (link.handle && person && link.handle === person.handle) matches.push('profile_link');
       if (link.app_id === 'postyard' && link.handle) {
         for (const companion of companions || []) {
-          const revisions = (companion.revisions || []).filter(item => item.object_id === link.object_id && postyardAuthor(data, companion, item, link.handle));
+          const revisions = (companion.revisions || []).filter(item => item.object_id === link.object_id && surfaceAgrees(item, link) && publicationAgrees(companion, item, link) && postyardAuthor(data, companion, item, link.handle));
           const ids = new Set(revisions.map(item => item.revision_id));
           if ((companion.subjects || []).some(item => ids.has(item.revision_id) && item.person_id === subject.person_id)) matches.push('linked_post');
         }
