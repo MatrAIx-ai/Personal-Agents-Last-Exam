@@ -73,11 +73,19 @@ function pick(source, keys) {
     });
     assert.equal(loaded.result.status, 'ready');
     state = loaded.state;
+    const scenario = require(path.join(appRoot, 'examples/scenario.json'));
     const applied = model.execute(state, 'infra', 'env.apply_event', {
       expected_version: model.version(state),
-      event: require(path.join(appRoot, 'examples/scenario.json'))
+      event: scenario
     });
     assert.equal(applied.result.status, 'committed');
+    assert.equal(applied.result.event_id, scenario.event_id);
+    assert.equal(applied.result.trace && applied.result.trace.applied_at, scenario.at);
+    assert.equal(scenario.event_id, 'fy-021');
+    assert.equal(scenario.at, '2026-11-18T09:05:00-08:00');
+    assert.equal(scenario.operation, 'pull.closed');
+    assert.equal(scenario.payload.repo, 'tidewater/tidewater');
+    assert.equal(scenario.payload.number, 2318);
     const before = await snapMessages(dir, run);
     const router = new Client(null, null, null, null, 'forkyard-publisher', {
       commandArgs: [path.join(repoRoot, 'runtime/messaging/service.cjs'), '--config', config, '--publisher', 'forkyard', '--run', run, '--state-dir', dir]
@@ -91,7 +99,7 @@ function pick(source, keys) {
     const advanced = await mailbox.call('env.advance_time', {
       expected_version: mail.version,
       request_id: 'mail-clock-to-closure',
-      virtual_now: '2026-11-18T09:05:00-08:00'
+      virtual_now: scenario.at
     });
     assert.equal(advanced.status, 'committed', JSON.stringify(advanced));
     mail = await mailbox.call('env.snapshot');
@@ -124,7 +132,13 @@ function pick(source, keys) {
     const outcome = pick(attempt.outcome, ['delivery', 'correlated', 'duplicate_within_run', 'same_run_retry', 'event_id', 'reason']);
     const record = {
       run_id: run,
-      forkyard_event: {event_id: 'fy-scenario-close', operation: 'pull.closed', repo: 'tidewater/tidewater', number: 2318},
+      forkyard_event: {
+        event_id: applied.result.event_id,
+        operation: scenario.operation,
+        repo: scenario.payload.repo,
+        number: scenario.payload.number,
+        at: applied.result.trace.applied_at
+      },
       pull_state_after: applied.state.data.pulls.find(item => item.number === 2318).state,
       sender: {
         request_id: attempt.request_id,
