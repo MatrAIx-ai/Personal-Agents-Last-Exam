@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "app_id": "pricewatch",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {"contact": "Wanying Dou (@MdouNU), PriceWatch Environment PR #221"},
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": ["offer.quote_upsert", "offer.revoke", "offer.expire_due"],
+  "capabilities": {
+    "modes": ["synthetic"],
+    "resources": false,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "MCP-only synthetic quote/watch/candidate service; no live prices, purchases or device delivery.",
+    "No medical or personal-history fields; the agent selects neutral product and price rules.",
+    "Future-start quote publication is rejected; the runner releases each quote when its validity begins.",
+    "Expiry is effective at virtual time without read-side mutation; explicit Infra events persist due transitions."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

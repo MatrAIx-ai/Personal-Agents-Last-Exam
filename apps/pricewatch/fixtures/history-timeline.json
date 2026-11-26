@@ -1,0 +1,606 @@
+[
+  {
+    "at": "2026-01-01T08:00:00-08:00",
+    "kind": "business-call",
+    "name": "pricewatch.watch.upsert",
+    "args": {
+      "watch_key": "filter-backup",
+      "criteria": {
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "allowed_seller_ids": [
+          "seller-a"
+        ],
+        "currency": "USD",
+        "ceiling_minor": 3000
+      },
+      "state": "active",
+      "expected_version": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "request_id": "history-call-1"
+    }
+  },
+  {
+    "at": "2026-01-01T09:00:00-08:00",
+    "kind": "infra-event",
+    "event": {
+      "event_id": "history-quote-filter-jan",
+      "at": "2026-01-01T09:00:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "filter-jan",
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 2300,
+        "shipping_minor": 0,
+        "tax_minor": 200,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-01-01T09:00:00-08:00",
+        "valid_until": "2026-01-02T09:00:00-08:00",
+        "source_id": "source-filter-jan",
+        "product_url": "https://shop.example.invalid/offers/filter-jan",
+        "supersedes": []
+      }
+    }
+  },
+  {
+    "at": "2026-01-02T09:00:00-08:00",
+    "kind": "infra-event",
+    "event": {
+      "event_id": "history-expire-jan",
+      "at": "2026-01-02T09:00:00-08:00",
+      "operation": "offer.expire_due",
+      "payload": {
+        "account_id": "account-a"
+      }
+    }
+  },
+  {
+    "at": "2026-01-03T08:00:00-08:00",
+    "kind": "business-call",
+    "name": "pricewatch.watch.upsert",
+    "args": {
+      "watch_key": "filter-backup",
+      "criteria": {
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "allowed_seller_ids": [
+          "seller-a"
+        ],
+        "currency": "USD",
+        "ceiling_minor": 2800
+      },
+      "state": "active",
+      "expected_version": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "request_id": "history-call-4"
+    }
+  },
+  {
+    "at": "2026-01-04T08:00:00-08:00",
+    "kind": "business-call",
+    "name": "pricewatch.watch.upsert",
+    "args": {
+      "watch_key": "filter-backup",
+      "criteria": {
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "allowed_seller_ids": [
+          "seller-a"
+        ],
+        "currency": "USD",
+        "ceiling_minor": 2800
+      },
+      "state": "paused",
+      "expected_version": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "request_id": "history-call-5"
+    }
+  },
+  {
+    "at": "2026-01-05T08:00:00-08:00",
+    "kind": "business-call",
+    "name": "pricewatch.watch.upsert",
+    "args": {
+      "watch_key": "filter-backup",
+      "criteria": {
+        "product_family_id": "filter-family",
+        "variant_revision": "R2",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "allowed_seller_ids": [
+          "seller-a"
+        ],
+        "currency": "USD",
+        "ceiling_minor": 2800
+      },
+      "state": "paused",
+      "expected_version": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "request_id": "history-call-6"
+    }
+  },
+  {
+    "at": "2026-01-06T08:00:00-08:00",
+    "kind": "business-call",
+    "name": "pricewatch.watch.upsert",
+    "args": {
+      "watch_key": "filter-backup",
+      "criteria": {
+        "product_family_id": "filter-family",
+        "variant_revision": "R2",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "allowed_seller_ids": [
+          "seller-a"
+        ],
+        "currency": "USD",
+        "ceiling_minor": 2800
+      },
+      "state": "active",
+      "expected_version": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "request_id": "history-call-7"
+    }
+  },
+  {
+    "at": "2026-01-10T08:00:00-08:00",
+    "kind": "business-call",
+    "name": "pricewatch.watch.upsert",
+    "args": {
+      "watch_key": "care-backup",
+      "criteria": {
+        "product_family_id": "care-family",
+        "variant_revision": "F1",
+        "pack_amount": 50,
+        "pack_unit": "ml",
+        "quantity": 1,
+        "allowed_seller_ids": [
+          "seller-a"
+        ],
+        "currency": "USD",
+        "ceiling_minor": 3000
+      },
+      "state": "paused",
+      "expected_version": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "request_id": "history-call-8"
+    }
+  },
+  {
+    "at": "2026-01-11T08:00:00-08:00",
+    "kind": "business-call",
+    "name": "pricewatch.watch.upsert",
+    "args": {
+      "watch_key": "food-restock",
+      "criteria": {
+        "product_family_id": "food-family",
+        "variant_revision": "2",
+        "pack_amount": 2000,
+        "pack_unit": "g",
+        "quantity": 1,
+        "allowed_seller_ids": [
+          "seller-a"
+        ],
+        "currency": "USD",
+        "ceiling_minor": 6000
+      },
+      "state": "active",
+      "expected_version": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "request_id": "history-call-9"
+    }
+  },
+  {
+    "at": "2026-01-12T08:00:00-08:00",
+    "kind": "business-call",
+    "name": "pricewatch.watch.upsert",
+    "args": {
+      "watch_key": "filter-gift",
+      "criteria": {
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 2,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "allowed_seller_ids": [
+          "seller-a"
+        ],
+        "currency": "USD",
+        "ceiling_minor": 3000
+      },
+      "state": "paused",
+      "expected_version": {
+        "epoch": 1,
+        "revision": 0
+      },
+      "request_id": "history-call-10"
+    }
+  },
+  {
+    "at": "2026-03-01T09:00:00-08:00",
+    "kind": "infra-event",
+    "event": {
+      "event_id": "history-quote-care-mar",
+      "at": "2026-03-01T09:00:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "care-mar",
+        "product_family_id": "care-family",
+        "variant_revision": "F1",
+        "pack_amount": 50,
+        "pack_unit": "ml",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 3600,
+        "shipping_minor": 0,
+        "tax_minor": 288,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-03-01T09:00:00-08:00",
+        "valid_until": "2026-03-02T09:00:00-08:00",
+        "source_id": "source-care-mar",
+        "product_url": "https://shop.example.invalid/offers/care-mar",
+        "supersedes": []
+      }
+    }
+  },
+  {
+    "at": "2026-06-01T09:00:00-07:00",
+    "kind": "infra-event",
+    "event": {
+      "event_id": "history-quote-food-jun",
+      "at": "2026-06-01T09:00:00-07:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "food-jun",
+        "product_family_id": "food-family",
+        "variant_revision": "2",
+        "pack_amount": 2000,
+        "pack_unit": "g",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 4000,
+        "shipping_minor": 0,
+        "tax_minor": 320,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-06-01T09:00:00-07:00",
+        "valid_until": "2026-06-02T09:00:00-07:00",
+        "source_id": "source-food-jun",
+        "product_url": "https://shop.example.invalid/offers/food-jun",
+        "supersedes": []
+      }
+    }
+  },
+  {
+    "at": "2026-06-02T09:00:00-07:00",
+    "kind": "infra-event",
+    "event": {
+      "event_id": "history-expire-jun",
+      "at": "2026-06-02T09:00:00-07:00",
+      "operation": "offer.expire_due",
+      "payload": {
+        "account_id": "account-a"
+      }
+    }
+  },
+  {
+    "at": "2026-12-01T09:00:00-08:00",
+    "kind": "infra-event",
+    "event": {
+      "event_id": "history-quote-filter-high",
+      "at": "2026-12-01T09:00:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "filter-high",
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 3000,
+        "shipping_minor": 0,
+        "tax_minor": 300,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-12-01T09:00:00-08:00",
+        "valid_until": "2026-12-03T18:00:00-08:00",
+        "source_id": "source-filter-high",
+        "product_url": "https://shop.example.invalid/offers/filter-high",
+        "supersedes": []
+      }
+    }
+  },
+  {
+    "at": "2026-12-01T09:00:00-08:00",
+    "kind": "infra-event",
+    "event": {
+      "event_id": "history-quote-filter-revised",
+      "at": "2026-12-01T09:00:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "filter-revised",
+        "product_family_id": "filter-family",
+        "variant_revision": "R2",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 1800,
+        "shipping_minor": 0,
+        "tax_minor": 144,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-12-01T09:00:00-08:00",
+        "valid_until": "2026-12-03T18:00:00-08:00",
+        "source_id": "source-filter-revised",
+        "product_url": "https://shop.example.invalid/offers/filter-revised",
+        "supersedes": []
+      }
+    }
+  },
+  {
+    "at": "2026-12-01T09:00:00-08:00",
+    "kind": "infra-event",
+    "event": {
+      "event_id": "history-quote-filter-pack-two",
+      "at": "2026-12-01T09:00:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "filter-pack-two",
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 2,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 2000,
+        "shipping_minor": 0,
+        "tax_minor": 160,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-12-01T09:00:00-08:00",
+        "valid_until": "2026-12-03T18:00:00-08:00",
+        "source_id": "source-filter-pack-two",
+        "product_url": "https://shop.example.invalid/offers/filter-pack-two",
+        "supersedes": []
+      }
+    }
+  },
+  {
+    "at": "2026-12-01T09:00:00-08:00",
+    "kind": "infra-event",
+    "event": {
+      "event_id": "history-quote-care-high",
+      "at": "2026-12-01T09:00:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "care-high",
+        "product_family_id": "care-family",
+        "variant_revision": "F1",
+        "pack_amount": 50,
+        "pack_unit": "ml",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 2400,
+        "shipping_minor": 600,
+        "tax_minor": 192,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-12-01T09:00:00-08:00",
+        "valid_until": "2026-12-03T18:00:00-08:00",
+        "source_id": "source-care-high",
+        "product_url": "https://shop.example.invalid/offers/care-high",
+        "supersedes": []
+      }
+    }
+  },
+  {
+    "at": "2026-12-01T09:00:00-08:00",
+    "kind": "infra-event",
+    "event": {
+      "event_id": "history-quote-care-revised",
+      "at": "2026-12-01T09:00:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "care-revised",
+        "product_family_id": "care-family",
+        "variant_revision": "F2",
+        "pack_amount": 50,
+        "pack_unit": "ml",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 1800,
+        "shipping_minor": 0,
+        "tax_minor": 144,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-12-01T09:00:00-08:00",
+        "valid_until": "2026-12-03T18:00:00-08:00",
+        "source_id": "source-care-revised",
+        "product_url": "https://shop.example.invalid/offers/care-revised",
+        "supersedes": []
+      }
+    }
+  },
+  {
+    "at": "2026-12-01T09:00:00-08:00",
+    "kind": "infra-event",
+    "event": {
+      "event_id": "history-quote-care-small",
+      "at": "2026-12-01T09:00:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "care-small",
+        "product_family_id": "care-family",
+        "variant_revision": "F1",
+        "pack_amount": 15,
+        "pack_unit": "ml",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 1000,
+        "shipping_minor": 0,
+        "tax_minor": 80,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-12-01T09:00:00-08:00",
+        "valid_until": "2026-12-03T18:00:00-08:00",
+        "source_id": "source-care-small",
+        "product_url": "https://shop.example.invalid/offers/care-small",
+        "supersedes": []
+      }
+    }
+  },
+  {
+    "at": "2026-12-01T09:00:00-08:00",
+    "kind": "infra-event",
+    "event": {
+      "event_id": "history-quote-care-ineligible",
+      "at": "2026-12-01T09:00:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "care-ineligible",
+        "product_family_id": "care-family",
+        "variant_revision": "F1",
+        "pack_amount": 50,
+        "pack_unit": "ml",
+        "quantity": 1,
+        "seller_id": "seller-b",
+        "currency": "USD",
+        "item_total_minor": 3000,
+        "shipping_minor": 0,
+        "tax_minor": 240,
+        "eligible_discount_minor": 0,
+        "eligibility": "ineligible",
+        "eligibility_source_id": "terms-b-new",
+        "valid_from": "2026-12-01T09:00:00-08:00",
+        "valid_until": "2026-12-03T18:00:00-08:00",
+        "source_id": "source-care-ineligible",
+        "product_url": "https://shop.example.invalid/offers/care-ineligible",
+        "supersedes": []
+      }
+    }
+  },
+  {
+    "at": "2026-12-01T09:00:00-08:00",
+    "kind": "infra-event",
+    "event": {
+      "event_id": "history-quote-food-current",
+      "at": "2026-12-01T09:00:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "food-current",
+        "product_family_id": "food-family",
+        "variant_revision": "2",
+        "pack_amount": 2000,
+        "pack_unit": "g",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 4000,
+        "shipping_minor": 0,
+        "tax_minor": 320,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-12-01T09:00:00-08:00",
+        "valid_until": "2026-12-03T18:00:00-08:00",
+        "source_id": "source-food-current",
+        "product_url": "https://shop.example.invalid/offers/food-current",
+        "supersedes": []
+      }
+    }
+  },
+  {
+    "at": "2026-12-01T09:00:00-08:00",
+    "kind": "infra-event",
+    "event": {
+      "event_id": "history-quote-filter-incomplete",
+      "at": "2026-12-01T09:00:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "filter-incomplete",
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "seller_id": "seller-c",
+        "currency": "USD",
+        "item_total_minor": 2000,
+        "shipping_minor": 0,
+        "tax_minor": null,
+        "eligible_discount_minor": 0,
+        "eligibility": "unknown",
+        "eligibility_source_id": "terms-c-unknown",
+        "valid_from": "2026-12-01T09:00:00-08:00",
+        "valid_until": "2026-12-03T18:00:00-08:00",
+        "source_id": "source-filter-incomplete",
+        "product_url": "https://shop.example.invalid/offers/filter-incomplete",
+        "supersedes": []
+      }
+    }
+  }
+]

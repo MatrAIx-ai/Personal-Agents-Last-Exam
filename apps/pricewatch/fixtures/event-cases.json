@@ -1,0 +1,279 @@
+[
+  {
+    "case": "matching_quote",
+    "expected": "candidate_for_active_watch",
+    "event": {
+      "event_id": "quote-event-1",
+      "at": "2026-12-02T09:00:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "filter-drop",
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 2500,
+        "shipping_minor": 0,
+        "tax_minor": 200,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-12-02T09:00:00-08:00",
+        "valid_until": "2026-12-02T10:00:00-08:00",
+        "source_id": "source-filter-drop",
+        "product_url": "https://shop.example.invalid/offers/filter-drop",
+        "supersedes": [
+          "filter-high"
+        ]
+      }
+    }
+  },
+  {
+    "case": "same_event_replay",
+    "expected": "no_duplicate",
+    "event": {
+      "event_id": "quote-event-1",
+      "at": "2026-12-02T09:00:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "filter-drop",
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 2500,
+        "shipping_minor": 0,
+        "tax_minor": 200,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-12-02T09:00:00-08:00",
+        "valid_until": "2026-12-02T10:00:00-08:00",
+        "source_id": "source-filter-drop",
+        "product_url": "https://shop.example.invalid/offers/filter-drop",
+        "supersedes": [
+          "filter-high"
+        ]
+      }
+    }
+  },
+  {
+    "case": "same_episode_new_event",
+    "expected": "no_new_candidate",
+    "event": {
+      "event_id": "quote-event-same-episode",
+      "at": "2026-12-02T09:02:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "filter-drop",
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 2500,
+        "shipping_minor": 0,
+        "tax_minor": 200,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-12-02T09:00:00-08:00",
+        "valid_until": "2026-12-02T10:00:00-08:00",
+        "source_id": "source-filter-drop",
+        "product_url": "https://shop.example.invalid/offers/filter-drop",
+        "supersedes": [
+          "filter-high"
+        ]
+      }
+    }
+  },
+  {
+    "case": "conflicting_episode",
+    "expected": "rejected",
+    "event": {
+      "event_id": "quote-event-conflict",
+      "at": "2026-12-02T09:01:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "filter-drop",
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 2500,
+        "shipping_minor": 0,
+        "tax_minor": 201,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-12-02T09:00:00-08:00",
+        "valid_until": "2026-12-02T10:00:00-08:00",
+        "source_id": "source-filter-drop",
+        "product_url": "https://shop.example.invalid/offers/filter-drop",
+        "supersedes": [
+          "filter-high"
+        ]
+      }
+    }
+  },
+  {
+    "case": "revoke",
+    "expected": "withdraw_available",
+    "event": {
+      "event_id": "revoke-event-1",
+      "at": "2026-12-02T09:10:00-08:00",
+      "operation": "offer.revoke",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "filter-drop",
+        "reason": "seller_revoked"
+      }
+    }
+  },
+  {
+    "case": "unknown_revoke",
+    "expected": "rejected",
+    "event": {
+      "event_id": "revoke-missing",
+      "at": "2026-12-02T09:11:00-08:00",
+      "operation": "offer.revoke",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "missing-episode",
+        "reason": "seller_revoked"
+      }
+    }
+  },
+  {
+    "case": "distinct_lower_quote",
+    "expected": "active_matches_paused_suppresses",
+    "event": {
+      "event_id": "quote-event-lower",
+      "at": "2026-12-02T09:20:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "filter-lower",
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 1800,
+        "shipping_minor": 0,
+        "tax_minor": 144,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-12-02T09:20:00-08:00",
+        "valid_until": "2026-12-02T18:00:00-08:00",
+        "source_id": "source-filter-lower",
+        "product_url": "https://shop.example.invalid/offers/filter-lower",
+        "supersedes": []
+      }
+    }
+  },
+  {
+    "case": "future_start",
+    "expected": "rejected",
+    "event": {
+      "event_id": "quote-event-future",
+      "at": "2026-12-02T09:21:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-a",
+        "offer_episode_id": "future-quote",
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 1800,
+        "shipping_minor": 0,
+        "tax_minor": 144,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-12-02T12:00:00-08:00",
+        "valid_until": "2026-12-02T18:00:00-08:00",
+        "source_id": "source-filter-lower",
+        "product_url": "https://shop.example.invalid/offers/filter-lower",
+        "supersedes": []
+      }
+    }
+  },
+  {
+    "case": "foreign_account",
+    "expected": "rejected",
+    "event": {
+      "event_id": "quote-event-foreign",
+      "at": "2026-12-02T09:22:00-08:00",
+      "operation": "offer.quote_upsert",
+      "payload": {
+        "account_id": "account-b",
+        "offer_episode_id": "filter-lower",
+        "product_family_id": "filter-family",
+        "variant_revision": "R1",
+        "pack_amount": 1,
+        "pack_unit": "unit",
+        "quantity": 1,
+        "seller_id": "seller-a",
+        "currency": "USD",
+        "item_total_minor": 1800,
+        "shipping_minor": 0,
+        "tax_minor": 144,
+        "eligible_discount_minor": 0,
+        "eligibility": "eligible",
+        "eligibility_source_id": "terms-a-1",
+        "valid_from": "2026-12-02T09:20:00-08:00",
+        "valid_until": "2026-12-02T18:00:00-08:00",
+        "source_id": "source-filter-lower",
+        "product_url": "https://shop.example.invalid/offers/filter-lower",
+        "supersedes": []
+      }
+    }
+  },
+  {
+    "case": "expiry_independent",
+    "expected": "expire_due_without_read_write",
+    "event": {
+      "event_id": "expiry-event-1",
+      "at": "2026-12-02T10:00:00-08:00",
+      "operation": "offer.expire_due",
+      "payload": {
+        "account_id": "account-a"
+      }
+    }
+  },
+  {
+    "case": "expiry_replay",
+    "expected": "no_duplicate_transition",
+    "event": {
+      "event_id": "expiry-event-1",
+      "at": "2026-12-02T10:00:00-08:00",
+      "operation": "offer.expire_due",
+      "payload": {
+        "account_id": "account-a"
+      }
+    }
+  }
+]
