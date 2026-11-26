@@ -137,7 +137,7 @@ const tools = [
     obj({ status: { enum: COMMITMENT_STATUS } }, []), readOut({ commitments: arr(commitmentView), now: time })),
   tool('commitments.get', 'Read one commitment with its performance reports and history. Read-only.', true,
     obj({ commitment_id: id }), readOut({ commitment: commitmentView, now: time })),
-  tool('cases.open', 'Open a support case on one of the provider\'s topics for an account reference, with a first message. The representative answers with the topic greeting.', false,
+  tool('cases.open', 'Open a support case on one of the provider\'s topics for an account reference, with a first message. The representative answers with the topic greeting, then each request the message makes, as in send_message.', false,
     writeInput({ topic_id: id, account_ref: text(120), message: text() }, ['topic_id', 'account_ref', 'message']),
     writeOut({ case_id: id })),
   tool('cases.send_message', 'Write a plain-language message in a case. The representative answers every request it recognizes, in order; anything else gets an acknowledgement that lists the available actions. A message never accepts, declines or discloses anything.', false,

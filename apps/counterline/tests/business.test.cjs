@@ -118,9 +118,10 @@ const offerByTitle = (f, case_id, title) => get(f, case_id).offers.find(o => o.t
 
 test('T00 baseline: a plain status inquiry reports a pending refund, then a late one', () => {
   const f = fixture({ seed: ISP });
-  const { case_id } = f.call('counterline.cases.open', { topic_id: 'refund_status', account_ref: 'kestrel:acct-55120', message: 'Hi there.' });
-  f.call('counterline.cases.send_message', { case_id, text: 'Can you check on the refund you promised me?' });
+  // As in the approved plan: the customer opens the case with the question itself.
+  const { case_id } = f.call('counterline.cases.open', { topic_id: 'refund_status', account_ref: 'kestrel:acct-55120', message: 'Can you check on the refund you promised me?' });
   assert.match(lastRep(f, case_id), /still being processed and is due by 2026-12-10/);
+  assert.deepEqual(get(f, case_id).case.transcript[0].recognized, ['ask_status']);
   assert.equal(f.call('counterline.commitments.get', { commitment_id: 'cm-0101' }).commitment.status, 'pending');
   assert.equal(get(f, case_id).offers.length, 0);
   f.at('2026-12-11T09:00:00-05:00');

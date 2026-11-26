@@ -4,8 +4,12 @@
 // Cases: (1) with email copies on, a presented offer and a confirmed commitment reach Mail's inbox with
 // committed receipts, and Counterline records each outcome; (2) republishing a copy is a duplicate and Mail
 // is unchanged; (3) without a grant the copy is rejected, Mail is unchanged, the case is unchanged and the
-// copy becomes delivery_failed; (4) with copies off nothing is queued. Local commit, Mail delivery and
-// business confirmation are reported separately; a copy has no business confirmation.
+// copy becomes delivery_failed; (4) with copies off nothing is queued; (5) a message under a payload schema
+// Mail does not accept fails Messaging's input contract (invalid_arguments) and changes neither App; (6) an unknown result
+// (the receiver did not confirm) is recorded as delivery_unknown, not retried, and stops the run. Case 6 uses a
+// Messaging test double, because the real router returns "unknown" only when a receiver fails mid-commit.
+// Local commit, Mail delivery and business confirmation are reported separately; a copy has no business
+// confirmation.
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os'), assert = require('node:assert/strict');
 const {pkg, root, Client} = require('../lib/run.cjs');
 const publisher = require('../../src/publisher.cjs');
@@ -90,6 +94,13 @@ async function main() {
     assert.equal(again.duplicate, true);
     assert.equal((await w.inbox()).length, before + 2);
     report.case2_duplicate = {duplicate: again.duplicate, inbox_unchanged: true};
+    const counterlineBefore = JSON.stringify(await w.data());
+    const wrong = {...publisher.message(await w.data(), confirm), id: 'counterline-incompatible', dataschema: 'urn:pale:email-payload:999'};
+    const incompatible = await w.router.call('router.publish', {request_id: 'incompatible-1', message: wrong});
+    assert.equal(incompatible.status, 'rejected'); assert.equal(incompatible.code, 'invalid_arguments');
+    assert.equal((await w.inbox()).length, before + 2);
+    assert.equal(JSON.stringify(await w.data()), counterlineBefore);
+    report.case5_incompatible = {code: incompatible.code, inbox_unchanged: true, counterline_unchanged: true};
   } finally { await w.close(); }
 
   const u = await world({granted: false, copies: true});
@@ -114,9 +125,21 @@ async function main() {
     assert.equal((await publisher.deliver({infra: z.infra, router: z.router})).length, 0);
     report.case4_copies_off = {queued: 0};
   } finally { await z.close(); }
-  return report;
+
+  const x = await world({granted: true, copies: true});
+  try {
+    await acceptFirstOffer(x);
+    const calls = [];
+    const unknownRouter = {call: async (name, args) => { calls.push(args.request_id); return {status: 'unknown', code: 'receiver_unconfirmed', stop_run: true}; }};
+    const out = await publisher.deliver({infra: x.infra, router: unknownRouter});
+    assert.equal(calls.length, 1, 'the run stops after the first unknown result');
+    const box = (await x.data()).outbox;
+    assert.deepEqual(box.map(n => n.status), ['delivery_unknown', 'pending_delivery']);
+    report.case6_unknown = {messaging: 'test double', recorded: box.map(n => [n.kind, n.status]), publishes: calls.length, stop_run: out[0].receipt.stop_run};
+  } finally { await x.close(); }
+  return Object.fromEntries(Object.entries(report).sort());
 }
 
 module.exports = {main};
-if (require.main === module) main().then(r => { console.log(JSON.stringify(r, null, 2)); console.log('PASS: Counterline → Messaging → Mail, 4 cases.'); })
+if (require.main === module) main().then(r => { console.log(JSON.stringify(r, null, 2)); console.log('PASS: Counterline → Messaging → Mail, 6 cases.'); })
   .catch(e => { console.error(e); process.exitCode = 1; });

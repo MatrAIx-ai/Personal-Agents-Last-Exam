@@ -46,12 +46,12 @@ Seed `datasets/card-issuer/seed.json` (sha256 `2d87678721b3cae7…`), counted in
 
 ## internet-provider
 
-Seed `datasets/internet-provider/seed.json` (sha256 `3602db9c2be2def6…`), counted in America/New_York. 114 distinct dates; months without a case: none; records outside the window: 0.
+Seed `datasets/internet-provider/seed.json` (sha256 `4a10b6a7ecefe150…`), counted in America/New_York. 114 distinct dates; months without a case: none; records outside the window: 0.
 
 | Field | Records | Distinct dates | Earliest | Latest |
 | :--- | ---: | ---: | :--- | :--- |
 | case opened_at | 53 | 51 | 2025-01-07 | 2026-12-27 |
-| transcript turn at | 381 | 91 | 2025-01-07 | 2026-12-29 |
+| transcript turn at | 390 | 91 | 2025-01-07 | 2026-12-29 |
 | offer presented_at | 20 | 20 | 2025-01-14 | 2026-12-27 |
 | commitment accepted_at | 20 | 20 | 2025-01-14 | 2026-12-27 |
 | report at | 20 | 20 | 2025-01-18 | 2026-12-30 |
@@ -59,26 +59,26 @@ Seed `datasets/internet-provider/seed.json` (sha256 `3602db9c2be2def6…`), coun
 
 | Month | Cases | Turns | Offers | Commitments | Reports | Article revisions | Distinct dates |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 2025-01 | 3 | 21 | 1 | 1 | 1 | 0 | 5 |
+| 2025-01 | 3 | 22 | 1 | 1 | 1 | 0 | 5 |
 | 2025-02 | 2 | 15 | 1 | 1 | 0 | 0 | 2 |
 | 2025-03 | 1 | 8 | 0 | 0 | 1 | 0 | 4 |
 | 2025-04 | 3 | 23 | 1 | 1 | 0 | 1 | 6 |
-| 2025-05 | 3 | 21 | 1 | 1 | 2 | 0 | 6 |
+| 2025-05 | 3 | 22 | 1 | 1 | 2 | 0 | 6 |
 | 2025-06 | 2 | 13 | 1 | 1 | 1 | 0 | 4 |
-| 2025-07 | 2 | 11 | 0 | 0 | 0 | 1 | 4 |
+| 2025-07 | 2 | 12 | 0 | 0 | 0 | 1 | 4 |
 | 2025-08 | 2 | 15 | 1 | 1 | 2 | 0 | 7 |
 | 2025-09 | 3 | 18 | 1 | 1 | 0 | 1 | 5 |
 | 2025-10 | 2 | 14 | 1 | 1 | 1 | 1 | 5 |
 | 2025-11 | 1 | 5 | 0 | 0 | 0 | 0 | 2 |
 | 2025-12 | 2 | 16 | 1 | 1 | 1 | 0 | 7 |
-| 2026-01 | 3 | 20 | 1 | 1 | 1 | 0 | 6 |
-| 2026-02 | 1 | 8 | 0 | 0 | 0 | 0 | 3 |
+| 2026-01 | 3 | 21 | 1 | 1 | 1 | 0 | 6 |
+| 2026-02 | 1 | 9 | 0 | 0 | 0 | 0 | 3 |
 | 2026-03 | 2 | 14 | 1 | 1 | 1 | 1 | 6 |
-| 2026-04 | 3 | 21 | 1 | 1 | 1 | 0 | 5 |
+| 2026-04 | 3 | 22 | 1 | 1 | 1 | 0 | 5 |
 | 2026-05 | 2 | 16 | 1 | 1 | 1 | 0 | 4 |
 | 2026-06 | 1 | 5 | 0 | 0 | 0 | 1 | 2 |
-| 2026-07 | 3 | 22 | 1 | 1 | 2 | 0 | 6 |
-| 2026-08 | 3 | 20 | 1 | 1 | 0 | 0 | 5 |
+| 2026-07 | 3 | 24 | 1 | 1 | 2 | 0 | 6 |
+| 2026-08 | 3 | 21 | 1 | 1 | 0 | 0 | 5 |
 | 2026-09 | 2 | 16 | 1 | 1 | 0 | 0 | 4 |
 | 2026-10 | 1 | 7 | 0 | 0 | 1 | 0 | 3 |
 | 2026-11 | 2 | 17 | 1 | 1 | 2 | 0 | 7 |

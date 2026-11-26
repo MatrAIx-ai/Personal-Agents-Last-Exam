@@ -39,6 +39,18 @@ function read(ctx, data, name, args) {
   }
 }
 
+// Answer each recognized request in the order written. Returns the number of representative turns added.
+function answer(data, c, now, asks) {
+  let added = 0;
+  for (const a of asks) {
+    if (a.action === 'request_transfer' && !a.department) {
+      P.say(c, now, 'Which team would you like to talk to?', 'request_transfer:ask_department', [a.action]);
+      added++;
+    } else added += P.perform(data, c, now, a.action, a.department, [a.action]);
+  }
+  return added;
+}
+
 const writable = c => { if (c.status === 'closed') fail('invalid_state', `Case ${c.case_id} is closed.`); return c; };
 const FIELD_LABEL = { full_name: 'full name', last_four: 'last four digits', billing_zip: 'billing ZIP code', date_of_birth: 'date of birth',
   full_card_number: 'full card number', ssn: 'Social Security number', one_time_code: 'one-time code' };
@@ -53,9 +65,12 @@ const writes = {
     const c = { case_id, topic_id: topic.topic_id, account_ref: args.account_ref, status: 'open', tier: 'frontline', opened_at: now, closed_at: null,
       identity: { verified: false, disclosures: [] }, transcript: [] };
     data.cases.push(c);
-    P.turn(c, now, 'customer', args.message, 'text', [], null);
+    // The first message is read like any other: the greeting comes first, then each request it makes.
+    const asks = P.recognize(p, args.message);
+    P.turn(c, now, 'customer', args.message, 'text', asks.map(a => a.action), null);
     P.turn(c, now, 'representative', greeting.text, 'script', [], `topic:${topic.topic_id}:greeting`);
     P.presentStage(data, c, now, 'initial', P.line(data, 'lead-offers'));
+    answer(data, c, now, asks);
     return { case_id };
   },
 
@@ -65,13 +80,7 @@ const writes = {
     if (c.status === 'resolved') c.status = 'open';
     const asks = P.recognize(data.provider, args.text);
     P.turn(c, now, 'customer', args.text, 'text', asks.map(a => a.action), null);
-    let added = 0;
-    for (const a of asks) {
-      if (a.action === 'request_transfer' && !a.department) {
-        P.say(c, now, 'Which team would you like to talk to?', 'request_transfer:ask_department', [a.action]);
-        added++;
-      } else added += P.perform(data, c, now, a.action, a.department, [a.action]);
-    }
+    let added = answer(data, c, now, asks);
     if (!asks.length) {
       const labels = P.availableActions(data, c, now).map(x => x.label.toLowerCase());
       P.say(c, now, `Thanks for your message. I can help you with: ${list(labels)}.`, 'unrecognized');

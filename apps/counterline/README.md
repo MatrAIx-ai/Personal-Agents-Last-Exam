@@ -17,7 +17,7 @@ This package is built ahead of plan approval. It runs on the public runtime 1.6.
 | Read | `counterline.offers.get` | Read one presented offer with its terms and conditions. Read-only. |
 | Read | `counterline.commitments.list` | List the provider's commitments to this customer with status, reports and an overdue flag. Read-only. |
 | Read | `counterline.commitments.get` | Read one commitment with its performance reports and history. Read-only. |
-| Write | `counterline.cases.open` | Open a support case on one of the provider's topics for an account reference, with a first message. The representative answers with the topic greeting. |
+| Write | `counterline.cases.open` | Open a support case on one of the provider's topics for an account reference, with a first message. The representative answers with the topic greeting, then each request the message makes, as in send_message. |
 | Write | `counterline.cases.send_message` | Write a plain-language message in a case. The representative answers every request it recognizes, in order; anything else gets an acknowledgement that lists the available actions. A message never accepts, declines or discloses anything. |
 | Write | `counterline.cases.take_action` | Use one of the quick actions the case lists now in available_actions. request_transfer takes a department name. |
 | Write | `counterline.cases.close` | Close a case. A closed case takes no writes until it is reopened. |
@@ -38,7 +38,7 @@ Infra events (the plan named `offer.added`'s payload `offer_id` and `tier`; it t
 - **Identity** is checked against the provider's record. Only the fields given are recorded as disclosed, with the ones the provider did not need; values never appear in the transcript.
 - **A report is not settlement.** No read or event produces a settled or verified state; settlement is a join with the owning App's ledger by `account_ref` and `reference_id`. `examples/join/` shows it (T21): through real MCP reads, a report matched on a synthetic ledger file is settled, while a report with no ledger record, a different amount or another account is not, although Counterline reads `reported_performed` in every case. This is a contract test, not a delivered integration with #182.
 - **Wording never changes offers.** A provider's scripts can override the representative's greeting and lead lines (`lead-offers`, `lead-better`, `no-better`); which offers appear comes only from the catalog, the case and the request.
-- **Mail copies (optional).** While `email_copies` is on, a presented offer or a confirmed commitment queues a plain-text copy. `src/publisher.cjs` publishes pending copies as Mail's `channel.email` message (`urn:pale:email-message:2`, declared in `messaging.publishes`) with the copy's ID as `request_id`, and records each Messaging outcome with `counterline.notification.delivery_recorded`. `examples/mail-integration/` runs it against the real Mail App: copies reach the inbox with committed receipts, a republish is a duplicate, an ungranted recipient is refused with the case unchanged, and nothing is queued while copies are off.
+- **Mail copies (optional).** While `email_copies` is on, a presented offer or a confirmed commitment queues a plain-text copy. `src/publisher.cjs` publishes pending copies as Mail's `channel.email` message (`urn:pale:email-message:2`, declared in `messaging.publishes`) with the copy's ID as `request_id`, and records each Messaging outcome with `counterline.notification.delivery_recorded`. `examples/mail-integration/` runs it against the real Mail App: copies reach the inbox with committed receipts, a republish is a duplicate, an ungranted recipient is refused with the case unchanged, nothing is queued while copies are off, a message outside Mail's contract is refused with both Apps unchanged, and an unknown result (Messaging test double) is recorded as `delivery_unknown`, not retried, and stops the run. `tests/evidence.capture.cjs` shows the same path from a Counterline acceptance to Mail's own page.
 
 ## Web page
 
@@ -86,9 +86,14 @@ node apps/counterline/examples/runtime-check.cjs          # virtual_now, advance
 
 The scenario fixtures are smaller than the plan's estimate (about 20 articles, 10 cases, 18 offers and 8 commitments); the delivery dataset holds 112 cases and 42 commitments across every state. `fixtures/minimal.json`: a card issuer ("Larchmont Card Services") with an annual-fee offer catalog across two tiers, a transfer to Account Review by name or alias, a resolved case with an accepted 125.00 credit and a pending commitment. `fixtures/internet-provider.json`: an internet provider ("Kestrel Fiber") whose policy refuses transfers, with a promised 40.00 refund for the baseline status inquiry. No real people, providers or account numbers. Money is in integer minor units.
 
-## Not done yet (planned in #219)
+## Evidence
 
-The reference-product comparison screenshots and the evidence index.
+[evidence/README.md](evidence/README.md) is the delivery evidence index (`docs/submission-evidence.md`): screenshot sequences for every workflow with the App state read through MCP at each step, the dependency demonstrations (Mail copies, settlement join), runtime, dataset, fixture, diagnostic and verifier reports, and the comparison with Zendesk's public documentation (linked, not copied). Every number in it is generated:
+
+```sh
+npm run evidence:reference   # reference manifest (needs support.zendesk.com)
+npm run evidence             # sequences, reports and the index
+```
 
 ## Limitations
 
