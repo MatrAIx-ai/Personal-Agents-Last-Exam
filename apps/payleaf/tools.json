@@ -1,0 +1,6025 @@
+[
+  {
+    "name": "payleaf.employment.get",
+    "description": "Read the employment record, the employer with its rules and company holidays, and the account flags. Every read returns the current virtual time as `now`, with the employer's UTC offset.",
+    "read_only": true,
+    "scope": "payleaf.employment.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "account_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "employment": {
+          "type": "object",
+          "properties": {
+            "employee_number": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "job_title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "department": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "start_date": {
+              "type": "string",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+            },
+            "pay_type": {
+              "const": "salary"
+            },
+            "annual_salary": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 100000000
+            },
+            "manager": {
+              "type": "object",
+              "properties": {
+                "person_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "job_title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "person_id",
+                "name",
+                "job_title"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "employee_number",
+            "name",
+            "job_title",
+            "department",
+            "start_date",
+            "pay_type",
+            "annual_salary",
+            "manager"
+          ],
+          "additionalProperties": false
+        },
+        "employer": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "rules": {
+              "type": "object",
+              "properties": {
+                "leave_notice_days": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 366
+                },
+                "sick_backdate_days": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 366
+                },
+                "inquiry_window_days": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 366
+                },
+                "max_retirement_percent": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "pay_periods_per_year": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 53
+                }
+              },
+              "required": [
+                "leave_notice_days",
+                "sick_backdate_days",
+                "inquiry_window_days",
+                "max_retirement_percent",
+                "pay_periods_per_year"
+              ],
+              "additionalProperties": false
+            },
+            "holidays": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+              },
+              "uniqueItems": true,
+              "maxItems": 400
+            }
+          },
+          "required": [
+            "name",
+            "timezone",
+            "rules",
+            "holidays"
+          ],
+          "additionalProperties": false
+        },
+        "flags": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "change_waiting",
+              "deposit_returned",
+              "leave_expiring",
+              "enrollment_open",
+              "will_default"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "account_id",
+        "employment",
+        "employer",
+        "flags",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.calendar.list",
+    "description": "List pay calendar entries with a pay date in a window of days (`start` to `end`, both included). Each entry has its pay period, pay date, cut-off and state. A setting change made before the cut-off reaches that run.",
+    "read_only": true,
+    "scope": "payleaf.calendar.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "period_start": {
+                "type": "string",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+              },
+              "period_end": {
+                "type": "string",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+              },
+              "pay_date": {
+                "type": "string",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+              },
+              "cutoff_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "state": {
+                "enum": [
+                  "planned",
+                  "paid"
+                ]
+              },
+              "statement_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                    },
+                    "action": {
+                      "enum": [
+                        "added",
+                        "moved",
+                        "paid"
+                      ]
+                    },
+                    "event_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "from": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "pay_date": {
+                              "type": "string",
+                              "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                            },
+                            "cutoff_at": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                            }
+                          },
+                          "required": [
+                            "pay_date",
+                            "cutoff_at"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "to": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "pay_date": {
+                              "type": "string",
+                              "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                            },
+                            "cutoff_at": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                            }
+                          },
+                          "required": [
+                            "pay_date",
+                            "cutoff_at"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action",
+                    "event_id",
+                    "from",
+                    "to",
+                    "reason"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "cutoff_passed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "period_start",
+              "period_end",
+              "pay_date",
+              "cutoff_at",
+              "state",
+              "statement_id",
+              "history",
+              "cutoff_passed"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.pay_statements.list",
+    "description": "List pay statements with a pay date in a window of days (`start` to `end`, both included), with their totals and flags.",
+    "read_only": true,
+    "scope": "payleaf.pay_statements.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "entry_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "pay_date": {
+                "type": "string",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+              },
+              "period_start": {
+                "type": "string",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+              },
+              "period_end": {
+                "type": "string",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+              },
+              "posted_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "net_pay": {
+                "type": "number",
+                "minimum": 0
+              },
+              "earnings_total": {
+                "type": "number",
+                "minimum": 0
+              },
+              "taxes_total": {
+                "type": "number",
+                "minimum": 0
+              },
+              "deductions_total": {
+                "type": "number",
+                "minimum": 0
+              },
+              "flags": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "short_deposit",
+                    "deductions_cut"
+                  ]
+                },
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "id",
+              "entry_id",
+              "pay_date",
+              "period_start",
+              "period_end",
+              "posted_at",
+              "net_pay",
+              "earnings_total",
+              "taxes_total",
+              "deductions_total",
+              "flags"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.pay_statements.get",
+    "description": "Read one pay statement with its earnings, taxes, deductions, deposits, the settings it used, its flags and the last day to ask payroll about it.",
+    "read_only": true,
+    "scope": "payleaf.pay_statements.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "statement": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "entry_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "pay_date": {
+              "type": "string",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+            },
+            "period_start": {
+              "type": "string",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+            },
+            "period_end": {
+              "type": "string",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+            },
+            "posted_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "event_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "earnings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "line_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "kind": {
+                    "enum": [
+                      "salary",
+                      "reimbursement",
+                      "bonus",
+                      "other"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100000000
+                  },
+                  "inquiry_id": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "line_id",
+                  "kind",
+                  "text",
+                  "amount",
+                  "inquiry_id"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 50
+            },
+            "taxes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "line_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100000000
+                  }
+                },
+                "required": [
+                  "line_id",
+                  "text",
+                  "amount"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 50
+            },
+            "deductions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "line_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "kind": {
+                    "enum": [
+                      "benefit",
+                      "retirement"
+                    ]
+                  },
+                  "plan_id": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    ]
+                  },
+                  "option_id": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  "due": {
+                    "type": "number",
+                    "minimum": 0.01
+                  },
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "line_id",
+                  "kind",
+                  "plan_id",
+                  "option_id",
+                  "text",
+                  "due",
+                  "amount"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "net_pay": {
+              "type": "number",
+              "minimum": 0
+            },
+            "settings_used": {
+              "type": "object",
+              "properties": {
+                "deposit": {
+                  "type": "object",
+                  "properties": {
+                    "accounts": {
+                      "type": "array",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100
+                              },
+                              "kind": {
+                                "enum": [
+                                  "checking",
+                                  "savings"
+                                ]
+                              },
+                              "last4": {
+                                "type": "string",
+                                "pattern": "^\\d{4}$"
+                              },
+                              "amount": {
+                                "type": "number",
+                                "minimum": 0.01,
+                                "maximum": 100000000
+                              }
+                            },
+                            "required": [
+                              "label",
+                              "kind",
+                              "last4",
+                              "amount"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100
+                              },
+                              "kind": {
+                                "enum": [
+                                  "checking",
+                                  "savings"
+                                ]
+                              },
+                              "last4": {
+                                "type": "string",
+                                "pattern": "^\\d{4}$"
+                              },
+                              "percent": {
+                                "type": "number",
+                                "minimum": 0.1,
+                                "maximum": 100
+                              }
+                            },
+                            "required": [
+                              "label",
+                              "kind",
+                              "last4",
+                              "percent"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100
+                              },
+                              "kind": {
+                                "enum": [
+                                  "checking",
+                                  "savings"
+                                ]
+                              },
+                              "last4": {
+                                "type": "string",
+                                "pattern": "^\\d{4}$"
+                              },
+                              "remainder": {
+                                "const": true
+                              }
+                            },
+                            "required": [
+                              "label",
+                              "kind",
+                              "last4",
+                              "remainder"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      },
+                      "minItems": 1,
+                      "maxItems": 10
+                    }
+                  },
+                  "required": [
+                    "accounts"
+                  ],
+                  "additionalProperties": false
+                },
+                "withholding": {
+                  "type": "object",
+                  "properties": {
+                    "filing_status": {
+                      "enum": [
+                        "single",
+                        "married_jointly",
+                        "head_of_household"
+                      ]
+                    },
+                    "multiple_jobs": {
+                      "type": "boolean"
+                    },
+                    "dependents_amount": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    "other_income": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    "deductions": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    "extra_withholding": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    }
+                  },
+                  "required": [
+                    "filing_status",
+                    "multiple_jobs",
+                    "dependents_amount",
+                    "other_income",
+                    "deductions",
+                    "extra_withholding"
+                  ],
+                  "additionalProperties": false
+                },
+                "retirement": {
+                  "type": "object",
+                  "properties": {
+                    "percent": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100
+                    }
+                  },
+                  "required": [
+                    "percent"
+                  ],
+                  "additionalProperties": false
+                },
+                "election_set_id": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  ]
+                },
+                "change_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "uniqueItems": true,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "deposit",
+                "withholding",
+                "retirement",
+                "election_set_id",
+                "change_ids"
+              ],
+              "additionalProperties": false
+            },
+            "deposits": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "account": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "kind": {
+                        "enum": [
+                          "checking",
+                          "savings"
+                        ]
+                      },
+                      "last4": {
+                        "type": "string",
+                        "pattern": "^\\d{4}$"
+                      }
+                    },
+                    "required": [
+                      "label",
+                      "kind",
+                      "last4"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0.01
+                  },
+                  "state": {
+                    "enum": [
+                      "sent",
+                      "returned",
+                      "reissued"
+                    ]
+                  },
+                  "history": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                        },
+                        "state": {
+                          "enum": [
+                            "sent",
+                            "returned",
+                            "reissued"
+                          ]
+                        },
+                        "reason": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 500
+                            }
+                          ]
+                        },
+                        "event_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        }
+                      },
+                      "required": [
+                        "at",
+                        "state",
+                        "reason",
+                        "event_id"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "reissued_to": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "account",
+                              "check"
+                            ]
+                          },
+                          "label": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "last4": {
+                            "anyOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "string",
+                                "pattern": "^\\d{4}$"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "label",
+                          "last4"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "account",
+                  "amount",
+                  "state",
+                  "history",
+                  "reissued_to"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 10
+            },
+            "earnings_total": {
+              "type": "number",
+              "minimum": 0
+            },
+            "taxes_total": {
+              "type": "number",
+              "minimum": 0
+            },
+            "deductions_total": {
+              "type": "number",
+              "minimum": 0
+            },
+            "flags": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "short_deposit",
+                  "deductions_cut"
+                ]
+              },
+              "uniqueItems": true
+            },
+            "last_inquiry_day": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          },
+          "required": [
+            "id",
+            "entry_id",
+            "pay_date",
+            "period_start",
+            "period_end",
+            "posted_at",
+            "event_id",
+            "earnings",
+            "taxes",
+            "deductions",
+            "net_pay",
+            "settings_used",
+            "deposits",
+            "earnings_total",
+            "taxes_total",
+            "deductions_total",
+            "flags",
+            "last_inquiry_day"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "statement",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.settings.get",
+    "description": "Read the three pay settings: the deposit setup, the withholding form and the retirement percentage. Each one shows the value the last run used, and any change that is waiting or locked. `next_change_applies_to` is the pay run that a change made now would first apply to.",
+    "read_only": true,
+    "scope": "payleaf.settings.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "deposit": {
+              "type": "object",
+              "properties": {
+                "in_use": {
+                  "type": "object",
+                  "properties": {
+                    "accounts": {
+                      "type": "array",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100
+                              },
+                              "kind": {
+                                "enum": [
+                                  "checking",
+                                  "savings"
+                                ]
+                              },
+                              "last4": {
+                                "type": "string",
+                                "pattern": "^\\d{4}$"
+                              },
+                              "amount": {
+                                "type": "number",
+                                "minimum": 0.01,
+                                "maximum": 100000000
+                              }
+                            },
+                            "required": [
+                              "label",
+                              "kind",
+                              "last4",
+                              "amount"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100
+                              },
+                              "kind": {
+                                "enum": [
+                                  "checking",
+                                  "savings"
+                                ]
+                              },
+                              "last4": {
+                                "type": "string",
+                                "pattern": "^\\d{4}$"
+                              },
+                              "percent": {
+                                "type": "number",
+                                "minimum": 0.1,
+                                "maximum": 100
+                              }
+                            },
+                            "required": [
+                              "label",
+                              "kind",
+                              "last4",
+                              "percent"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100
+                              },
+                              "kind": {
+                                "enum": [
+                                  "checking",
+                                  "savings"
+                                ]
+                              },
+                              "last4": {
+                                "type": "string",
+                                "pattern": "^\\d{4}$"
+                              },
+                              "remainder": {
+                                "const": true
+                              }
+                            },
+                            "required": [
+                              "label",
+                              "kind",
+                              "last4",
+                              "remainder"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      },
+                      "minItems": 1,
+                      "maxItems": 10
+                    }
+                  },
+                  "required": [
+                    "accounts"
+                  ],
+                  "additionalProperties": false
+                },
+                "waiting": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "setting": {
+                          "const": "deposit"
+                        },
+                        "value": {
+                          "type": "object",
+                          "properties": {
+                            "accounts": {
+                              "type": "array",
+                              "items": {
+                                "oneOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "label": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 100
+                                      },
+                                      "kind": {
+                                        "enum": [
+                                          "checking",
+                                          "savings"
+                                        ]
+                                      },
+                                      "last4": {
+                                        "type": "string",
+                                        "pattern": "^\\d{4}$"
+                                      },
+                                      "amount": {
+                                        "type": "number",
+                                        "minimum": 0.01,
+                                        "maximum": 100000000
+                                      }
+                                    },
+                                    "required": [
+                                      "label",
+                                      "kind",
+                                      "last4",
+                                      "amount"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "label": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 100
+                                      },
+                                      "kind": {
+                                        "enum": [
+                                          "checking",
+                                          "savings"
+                                        ]
+                                      },
+                                      "last4": {
+                                        "type": "string",
+                                        "pattern": "^\\d{4}$"
+                                      },
+                                      "percent": {
+                                        "type": "number",
+                                        "minimum": 0.1,
+                                        "maximum": 100
+                                      }
+                                    },
+                                    "required": [
+                                      "label",
+                                      "kind",
+                                      "last4",
+                                      "percent"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "label": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 100
+                                      },
+                                      "kind": {
+                                        "enum": [
+                                          "checking",
+                                          "savings"
+                                        ]
+                                      },
+                                      "last4": {
+                                        "type": "string",
+                                        "pattern": "^\\d{4}$"
+                                      },
+                                      "remainder": {
+                                        "const": true
+                                      }
+                                    },
+                                    "required": [
+                                      "label",
+                                      "kind",
+                                      "last4",
+                                      "remainder"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                ]
+                              },
+                              "minItems": 1,
+                              "maxItems": 10
+                            }
+                          },
+                          "required": [
+                            "accounts"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "made_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                        },
+                        "request_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "state": {
+                          "enum": [
+                            "waiting",
+                            "replaced",
+                            "cancelled",
+                            "locked",
+                            "applied"
+                          ]
+                        },
+                        "applies_to": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "entry_id": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                },
+                                "pay_date": {
+                                  "type": "string",
+                                  "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                                },
+                                "cutoff_at": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                                }
+                              },
+                              "required": [
+                                "entry_id",
+                                "pay_date",
+                                "cutoff_at"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "cancelled_at": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                            }
+                          ]
+                        },
+                        "history": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                              },
+                              "action": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              },
+                              "actor": {
+                                "enum": [
+                                  "agent",
+                                  "event"
+                                ]
+                              },
+                              "ref": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              }
+                            },
+                            "required": [
+                              "at",
+                              "action",
+                              "actor",
+                              "ref"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "setting",
+                        "value",
+                        "made_at",
+                        "request_id",
+                        "state",
+                        "applies_to",
+                        "cancelled_at",
+                        "history"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "locked": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "setting": {
+                          "const": "deposit"
+                        },
+                        "value": {
+                          "type": "object",
+                          "properties": {
+                            "accounts": {
+                              "type": "array",
+                              "items": {
+                                "oneOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "label": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 100
+                                      },
+                                      "kind": {
+                                        "enum": [
+                                          "checking",
+                                          "savings"
+                                        ]
+                                      },
+                                      "last4": {
+                                        "type": "string",
+                                        "pattern": "^\\d{4}$"
+                                      },
+                                      "amount": {
+                                        "type": "number",
+                                        "minimum": 0.01,
+                                        "maximum": 100000000
+                                      }
+                                    },
+                                    "required": [
+                                      "label",
+                                      "kind",
+                                      "last4",
+                                      "amount"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "label": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 100
+                                      },
+                                      "kind": {
+                                        "enum": [
+                                          "checking",
+                                          "savings"
+                                        ]
+                                      },
+                                      "last4": {
+                                        "type": "string",
+                                        "pattern": "^\\d{4}$"
+                                      },
+                                      "percent": {
+                                        "type": "number",
+                                        "minimum": 0.1,
+                                        "maximum": 100
+                                      }
+                                    },
+                                    "required": [
+                                      "label",
+                                      "kind",
+                                      "last4",
+                                      "percent"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "label": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 100
+                                      },
+                                      "kind": {
+                                        "enum": [
+                                          "checking",
+                                          "savings"
+                                        ]
+                                      },
+                                      "last4": {
+                                        "type": "string",
+                                        "pattern": "^\\d{4}$"
+                                      },
+                                      "remainder": {
+                                        "const": true
+                                      }
+                                    },
+                                    "required": [
+                                      "label",
+                                      "kind",
+                                      "last4",
+                                      "remainder"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                ]
+                              },
+                              "minItems": 1,
+                              "maxItems": 10
+                            }
+                          },
+                          "required": [
+                            "accounts"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "made_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                        },
+                        "request_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "state": {
+                          "enum": [
+                            "waiting",
+                            "replaced",
+                            "cancelled",
+                            "locked",
+                            "applied"
+                          ]
+                        },
+                        "applies_to": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "entry_id": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                },
+                                "pay_date": {
+                                  "type": "string",
+                                  "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                                },
+                                "cutoff_at": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                                }
+                              },
+                              "required": [
+                                "entry_id",
+                                "pay_date",
+                                "cutoff_at"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "cancelled_at": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                            }
+                          ]
+                        },
+                        "history": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                              },
+                              "action": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              },
+                              "actor": {
+                                "enum": [
+                                  "agent",
+                                  "event"
+                                ]
+                              },
+                              "ref": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              }
+                            },
+                            "required": [
+                              "at",
+                              "action",
+                              "actor",
+                              "ref"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "setting",
+                        "value",
+                        "made_at",
+                        "request_id",
+                        "state",
+                        "applies_to",
+                        "cancelled_at",
+                        "history"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "in_use",
+                "waiting",
+                "locked"
+              ],
+              "additionalProperties": false
+            },
+            "withholding": {
+              "type": "object",
+              "properties": {
+                "in_use": {
+                  "type": "object",
+                  "properties": {
+                    "filing_status": {
+                      "enum": [
+                        "single",
+                        "married_jointly",
+                        "head_of_household"
+                      ]
+                    },
+                    "multiple_jobs": {
+                      "type": "boolean"
+                    },
+                    "dependents_amount": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    "other_income": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    "deductions": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    },
+                    "extra_withholding": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100000000
+                    }
+                  },
+                  "required": [
+                    "filing_status",
+                    "multiple_jobs",
+                    "dependents_amount",
+                    "other_income",
+                    "deductions",
+                    "extra_withholding"
+                  ],
+                  "additionalProperties": false
+                },
+                "waiting": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "setting": {
+                          "const": "withholding"
+                        },
+                        "value": {
+                          "type": "object",
+                          "properties": {
+                            "filing_status": {
+                              "enum": [
+                                "single",
+                                "married_jointly",
+                                "head_of_household"
+                              ]
+                            },
+                            "multiple_jobs": {
+                              "type": "boolean"
+                            },
+                            "dependents_amount": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100000000
+                            },
+                            "other_income": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100000000
+                            },
+                            "deductions": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100000000
+                            },
+                            "extra_withholding": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100000000
+                            }
+                          },
+                          "required": [
+                            "filing_status",
+                            "multiple_jobs",
+                            "dependents_amount",
+                            "other_income",
+                            "deductions",
+                            "extra_withholding"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "made_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                        },
+                        "request_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "state": {
+                          "enum": [
+                            "waiting",
+                            "replaced",
+                            "cancelled",
+                            "locked",
+                            "applied"
+                          ]
+                        },
+                        "applies_to": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "entry_id": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                },
+                                "pay_date": {
+                                  "type": "string",
+                                  "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                                },
+                                "cutoff_at": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                                }
+                              },
+                              "required": [
+                                "entry_id",
+                                "pay_date",
+                                "cutoff_at"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "cancelled_at": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                            }
+                          ]
+                        },
+                        "history": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                              },
+                              "action": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              },
+                              "actor": {
+                                "enum": [
+                                  "agent",
+                                  "event"
+                                ]
+                              },
+                              "ref": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              }
+                            },
+                            "required": [
+                              "at",
+                              "action",
+                              "actor",
+                              "ref"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "setting",
+                        "value",
+                        "made_at",
+                        "request_id",
+                        "state",
+                        "applies_to",
+                        "cancelled_at",
+                        "history"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "locked": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "setting": {
+                          "const": "withholding"
+                        },
+                        "value": {
+                          "type": "object",
+                          "properties": {
+                            "filing_status": {
+                              "enum": [
+                                "single",
+                                "married_jointly",
+                                "head_of_household"
+                              ]
+                            },
+                            "multiple_jobs": {
+                              "type": "boolean"
+                            },
+                            "dependents_amount": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100000000
+                            },
+                            "other_income": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100000000
+                            },
+                            "deductions": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100000000
+                            },
+                            "extra_withholding": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100000000
+                            }
+                          },
+                          "required": [
+                            "filing_status",
+                            "multiple_jobs",
+                            "dependents_amount",
+                            "other_income",
+                            "deductions",
+                            "extra_withholding"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "made_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                        },
+                        "request_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "state": {
+                          "enum": [
+                            "waiting",
+                            "replaced",
+                            "cancelled",
+                            "locked",
+                            "applied"
+                          ]
+                        },
+                        "applies_to": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "entry_id": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                },
+                                "pay_date": {
+                                  "type": "string",
+                                  "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                                },
+                                "cutoff_at": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                                }
+                              },
+                              "required": [
+                                "entry_id",
+                                "pay_date",
+                                "cutoff_at"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "cancelled_at": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                            }
+                          ]
+                        },
+                        "history": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                              },
+                              "action": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              },
+                              "actor": {
+                                "enum": [
+                                  "agent",
+                                  "event"
+                                ]
+                              },
+                              "ref": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              }
+                            },
+                            "required": [
+                              "at",
+                              "action",
+                              "actor",
+                              "ref"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "setting",
+                        "value",
+                        "made_at",
+                        "request_id",
+                        "state",
+                        "applies_to",
+                        "cancelled_at",
+                        "history"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "in_use",
+                "waiting",
+                "locked"
+              ],
+              "additionalProperties": false
+            },
+            "retirement": {
+              "type": "object",
+              "properties": {
+                "in_use": {
+                  "type": "object",
+                  "properties": {
+                    "percent": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100
+                    }
+                  },
+                  "required": [
+                    "percent"
+                  ],
+                  "additionalProperties": false
+                },
+                "waiting": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "setting": {
+                          "const": "retirement"
+                        },
+                        "value": {
+                          "type": "object",
+                          "properties": {
+                            "percent": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100
+                            }
+                          },
+                          "required": [
+                            "percent"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "made_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                        },
+                        "request_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "state": {
+                          "enum": [
+                            "waiting",
+                            "replaced",
+                            "cancelled",
+                            "locked",
+                            "applied"
+                          ]
+                        },
+                        "applies_to": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "entry_id": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                },
+                                "pay_date": {
+                                  "type": "string",
+                                  "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                                },
+                                "cutoff_at": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                                }
+                              },
+                              "required": [
+                                "entry_id",
+                                "pay_date",
+                                "cutoff_at"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "cancelled_at": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                            }
+                          ]
+                        },
+                        "history": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                              },
+                              "action": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              },
+                              "actor": {
+                                "enum": [
+                                  "agent",
+                                  "event"
+                                ]
+                              },
+                              "ref": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              }
+                            },
+                            "required": [
+                              "at",
+                              "action",
+                              "actor",
+                              "ref"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "setting",
+                        "value",
+                        "made_at",
+                        "request_id",
+                        "state",
+                        "applies_to",
+                        "cancelled_at",
+                        "history"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "locked": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "setting": {
+                          "const": "retirement"
+                        },
+                        "value": {
+                          "type": "object",
+                          "properties": {
+                            "percent": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100
+                            }
+                          },
+                          "required": [
+                            "percent"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "made_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                        },
+                        "request_id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "state": {
+                          "enum": [
+                            "waiting",
+                            "replaced",
+                            "cancelled",
+                            "locked",
+                            "applied"
+                          ]
+                        },
+                        "applies_to": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "entry_id": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                },
+                                "pay_date": {
+                                  "type": "string",
+                                  "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                                },
+                                "cutoff_at": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                                }
+                              },
+                              "required": [
+                                "entry_id",
+                                "pay_date",
+                                "cutoff_at"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "cancelled_at": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                            }
+                          ]
+                        },
+                        "history": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                              },
+                              "action": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              },
+                              "actor": {
+                                "enum": [
+                                  "agent",
+                                  "event"
+                                ]
+                              },
+                              "ref": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              }
+                            },
+                            "required": [
+                              "at",
+                              "action",
+                              "actor",
+                              "ref"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "setting",
+                        "value",
+                        "made_at",
+                        "request_id",
+                        "state",
+                        "applies_to",
+                        "cancelled_at",
+                        "history"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "in_use",
+                "waiting",
+                "locked"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "deposit",
+            "withholding",
+            "retirement"
+          ],
+          "additionalProperties": false
+        },
+        "next_change_applies_to": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "entry_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "pay_date": {
+                  "type": "string",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                },
+                "cutoff_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              },
+              "required": [
+                "entry_id",
+                "pay_date",
+                "cutoff_at"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "settings",
+        "next_change_applies_to",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.changes.list",
+    "description": "List setting changes by setting and state, made on a day in a window (`start` to `end`, both included). Each change shows the pay run it applies to.",
+    "read_only": true,
+    "scope": "payleaf.changes.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "setting": {
+          "enum": [
+            "deposit",
+            "withholding",
+            "retirement"
+          ]
+        },
+        "state": {
+          "enum": [
+            "waiting",
+            "replaced",
+            "cancelled",
+            "locked",
+            "applied"
+          ]
+        },
+        "start": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "setting": {
+                "enum": [
+                  "deposit",
+                  "withholding",
+                  "retirement"
+                ]
+              },
+              "value": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "accounts": {
+                        "type": "array",
+                        "items": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "label": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 100
+                                },
+                                "kind": {
+                                  "enum": [
+                                    "checking",
+                                    "savings"
+                                  ]
+                                },
+                                "last4": {
+                                  "type": "string",
+                                  "pattern": "^\\d{4}$"
+                                },
+                                "amount": {
+                                  "type": "number",
+                                  "minimum": 0.01,
+                                  "maximum": 100000000
+                                }
+                              },
+                              "required": [
+                                "label",
+                                "kind",
+                                "last4",
+                                "amount"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "label": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 100
+                                },
+                                "kind": {
+                                  "enum": [
+                                    "checking",
+                                    "savings"
+                                  ]
+                                },
+                                "last4": {
+                                  "type": "string",
+                                  "pattern": "^\\d{4}$"
+                                },
+                                "percent": {
+                                  "type": "number",
+                                  "minimum": 0.1,
+                                  "maximum": 100
+                                }
+                              },
+                              "required": [
+                                "label",
+                                "kind",
+                                "last4",
+                                "percent"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "label": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 100
+                                },
+                                "kind": {
+                                  "enum": [
+                                    "checking",
+                                    "savings"
+                                  ]
+                                },
+                                "last4": {
+                                  "type": "string",
+                                  "pattern": "^\\d{4}$"
+                                },
+                                "remainder": {
+                                  "const": true
+                                }
+                              },
+                              "required": [
+                                "label",
+                                "kind",
+                                "last4",
+                                "remainder"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        "minItems": 1,
+                        "maxItems": 10
+                      }
+                    },
+                    "required": [
+                      "accounts"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "filing_status": {
+                        "enum": [
+                          "single",
+                          "married_jointly",
+                          "head_of_household"
+                        ]
+                      },
+                      "multiple_jobs": {
+                        "type": "boolean"
+                      },
+                      "dependents_amount": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100000000
+                      },
+                      "other_income": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100000000
+                      },
+                      "deductions": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100000000
+                      },
+                      "extra_withholding": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100000000
+                      }
+                    },
+                    "required": [
+                      "filing_status",
+                      "multiple_jobs",
+                      "dependents_amount",
+                      "other_income",
+                      "deductions",
+                      "extra_withholding"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "percent": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "percent"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "made_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "request_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "state": {
+                "enum": [
+                  "waiting",
+                  "replaced",
+                  "cancelled",
+                  "locked",
+                  "applied"
+                ]
+              },
+              "applies_to": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "entry_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "pay_date": {
+                        "type": "string",
+                        "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                      },
+                      "cutoff_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                      }
+                    },
+                    "required": [
+                      "entry_id",
+                      "pay_date",
+                      "cutoff_at"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "cancelled_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "actor": {
+                      "enum": [
+                        "agent",
+                        "event"
+                      ]
+                    },
+                    "ref": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    }
+                  },
+                  "required": [
+                    "at",
+                    "action",
+                    "actor",
+                    "ref"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "setting",
+              "value",
+              "made_at",
+              "request_id",
+              "state",
+              "applies_to",
+              "cancelled_at",
+              "history"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.inquiries.list",
+    "description": "List pay inquiries by state, for one pay statement or for all. `id` is a pay statement.",
+    "read_only": true,
+    "scope": "payleaf.inquiries.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "enum": [
+            "open",
+            "withdrawn",
+            "answered"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "statement_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "line_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "amount": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 100000000
+              },
+              "note": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "opened_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "request_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "state": {
+                "enum": [
+                  "open",
+                  "withdrawn",
+                  "answered"
+                ]
+              },
+              "withdrawn_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "answer": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "outcome": {
+                        "enum": [
+                          "corrected",
+                          "no_change"
+                        ]
+                      },
+                      "correction_amount": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 100000000
+                          }
+                        ]
+                      },
+                      "answered_by": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "note": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 2000
+                          }
+                        ]
+                      },
+                      "answered_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                      },
+                      "event_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      }
+                    },
+                    "required": [
+                      "outcome",
+                      "correction_amount",
+                      "answered_by",
+                      "note",
+                      "answered_at",
+                      "event_id"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "statement_id",
+              "line_id",
+              "amount",
+              "note",
+              "opened_at",
+              "request_id",
+              "state",
+              "withdrawn_at",
+              "answer"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.leave.balances",
+    "description": "Read the leave balance of each leave type: the balance, the hours held by pending and approved requests, what is available, what will expire at the carryover date, and the entries behind the balance.",
+    "read_only": true,
+    "scope": "payleaf.leave.balances",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "leave_type_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "needs_notice": {
+                "type": "boolean"
+              },
+              "accrual_per_period": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 80
+              },
+              "carryover_cap": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  }
+                ]
+              },
+              "carryover_date": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+                  }
+                ]
+              },
+              "balance": {
+                "type": "number"
+              },
+              "pending_hours": {
+                "type": "number"
+              },
+              "approved_hours": {
+                "type": "number"
+              },
+              "available": {
+                "type": "number"
+              },
+              "expiring": {
+                "type": "number"
+              },
+              "next_carryover_date": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  }
+                ]
+              },
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "leave_type_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                    },
+                    "hours": {
+                      "type": "number",
+                      "minimum": -100000,
+                      "maximum": 100000
+                    },
+                    "reason": {
+                      "enum": [
+                        "accrual",
+                        "carryover",
+                        "forfeited",
+                        "correction",
+                        "grant"
+                      ]
+                    },
+                    "note": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2000
+                        }
+                      ]
+                    },
+                    "statement_id": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        }
+                      ]
+                    },
+                    "event_id": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "leave_type_id",
+                    "at",
+                    "hours",
+                    "reason",
+                    "note",
+                    "statement_id",
+                    "event_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "leave_type_id",
+              "name",
+              "needs_notice",
+              "accrual_per_period",
+              "carryover_cap",
+              "carryover_date",
+              "balance",
+              "pending_hours",
+              "approved_hours",
+              "available",
+              "expiring",
+              "next_carryover_date",
+              "entries"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.leave.list",
+    "description": "List leave requests by leave type and state, with a range that overlaps a window of days (`start` to `end`, both included). `id` is a leave type.",
+    "read_only": true,
+    "scope": "payleaf.leave.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "enum": [
+            "pending",
+            "approved",
+            "denied",
+            "cancelled",
+            "taken",
+            "lapsed"
+          ]
+        },
+        "start": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "leave_type_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "start": {
+                "type": "string",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+              },
+              "end": {
+                "type": "string",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+              },
+              "hours_per_day": {
+                "type": "number",
+                "minimum": 0.1,
+                "maximum": 8
+              },
+              "days": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                }
+              },
+              "hours": {
+                "type": "number",
+                "minimum": 0.1
+              },
+              "note": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                ]
+              },
+              "requested_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "request_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "decided_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "decided_by": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "decision_note": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                ]
+              },
+              "cancelled_at": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  }
+                ]
+              },
+              "cancel_reason": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                ]
+              },
+              "state": {
+                "enum": [
+                  "pending",
+                  "approved",
+                  "denied",
+                  "cancelled",
+                  "taken",
+                  "lapsed"
+                ]
+              },
+              "flags": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "lapsing"
+                  ]
+                },
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "id",
+              "leave_type_id",
+              "start",
+              "end",
+              "hours_per_day",
+              "days",
+              "hours",
+              "note",
+              "requested_at",
+              "request_id",
+              "decided_at",
+              "decided_by",
+              "decision_note",
+              "cancelled_at",
+              "cancel_reason",
+              "state",
+              "flags"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.leave.preview",
+    "description": "Check a leave request in advance. Writes nothing. `id` is the leave type, and `start` and `end` are the first and last day. Hours have at most one decimal. Returns the working days, the hours, the hours available before and after, and every rule that the request would break.",
+    "read_only": true,
+    "scope": "payleaf.leave.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "start": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "hours_per_day": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 8
+        }
+      },
+      "required": [
+        "id",
+        "start",
+        "end",
+        "hours_per_day"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "leave_type_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "start": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "hours_per_day": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 8
+        },
+        "days": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+          }
+        },
+        "working_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hours": {
+          "type": "number"
+        },
+        "available_before": {
+          "type": "number"
+        },
+        "available_after": {
+          "type": "number"
+        },
+        "allowed": {
+          "type": "boolean"
+        },
+        "failures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "enum": [
+                  "invalid_window",
+                  "too_late",
+                  "conflict",
+                  "insufficient_balance"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "leave_type_id",
+        "start",
+        "end",
+        "hours_per_day",
+        "days",
+        "working_days",
+        "hours",
+        "available_before",
+        "available_after",
+        "allowed",
+        "failures",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.benefits.windows",
+    "description": "List the benefits enrollment windows with their state and the state of their election set.",
+    "read_only": true,
+    "scope": "payleaf.benefits.windows",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "plan_year": {
+                "type": "integer",
+                "minimum": 1970,
+                "maximum": 2999
+              },
+              "state": {
+                "enum": [
+                  "upcoming",
+                  "open",
+                  "closed"
+                ]
+              },
+              "opens_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "closes_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "plan_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              },
+              "set_id": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                ]
+              },
+              "set_state": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "enum": [
+                      "submitted",
+                      "final",
+                      "defaulted"
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "plan_year",
+              "state",
+              "opens_at",
+              "closes_at",
+              "plan_ids",
+              "set_id",
+              "set_state"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.benefits.get",
+    "description": "Read one enrollment window: its plans with their options, the choice in force in the year before the plan year (`in_force`), the saved choice of each plan, every save, and the submitted, final or defaulted election set.",
+    "read_only": true,
+    "scope": "payleaf.benefits.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "window": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "plan_year": {
+              "type": "integer",
+              "minimum": 1970,
+              "maximum": 2999
+            },
+            "state": {
+              "enum": [
+                "upcoming",
+                "open",
+                "closed"
+              ]
+            },
+            "opens_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "closes_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "event_id": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              ]
+            },
+            "plans": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "kind": {
+                    "enum": [
+                      "options",
+                      "yearly_amount"
+                    ]
+                  },
+                  "rolls_over": {
+                    "type": "boolean"
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "per_pay_cost": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 100000000
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "per_pay_cost"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 20
+                  },
+                  "yearly_max": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 100000000
+                      }
+                    ]
+                  },
+                  "in_force": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "option_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          }
+                        },
+                        "required": [
+                          "option_id"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "yearly_amount": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 100000000
+                          }
+                        },
+                        "required": [
+                          "yearly_amount"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "no_coverage": {
+                            "const": true
+                          }
+                        },
+                        "required": [
+                          "no_coverage"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "saved": {
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "option_id": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              }
+                            },
+                            "required": [
+                              "option_id"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "yearly_amount": {
+                                "type": "number",
+                                "minimum": 0.01,
+                                "maximum": 100000000
+                              }
+                            },
+                            "required": [
+                              "yearly_amount"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "no_coverage": {
+                                "const": true
+                              }
+                            },
+                            "required": [
+                              "no_coverage"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "kind",
+                  "rolls_over",
+                  "options",
+                  "yearly_max",
+                  "in_force",
+                  "saved"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "saves": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "plan_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "choice": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "option_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          }
+                        },
+                        "required": [
+                          "option_id"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "yearly_amount": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 100000000
+                          }
+                        },
+                        "required": [
+                          "yearly_amount"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "no_coverage": {
+                            "const": true
+                          }
+                        },
+                        "required": [
+                          "no_coverage"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "saved_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                  },
+                  "request_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  }
+                },
+                "required": [
+                  "plan_id",
+                  "choice",
+                  "saved_at",
+                  "request_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "set": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        }
+                      ]
+                    },
+                    "state": {
+                      "enum": [
+                        "submitted",
+                        "final",
+                        "defaulted"
+                      ]
+                    },
+                    "submitted_at": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                        }
+                      ]
+                    },
+                    "request_id": {
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                        }
+                      ]
+                    },
+                    "choices": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "plan_id": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          "choice": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "option_id": {
+                                    "type": "string",
+                                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                  }
+                                },
+                                "required": [
+                                  "option_id"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "yearly_amount": {
+                                    "type": "number",
+                                    "minimum": 0.01,
+                                    "maximum": 100000000
+                                  }
+                                },
+                                "required": [
+                                  "yearly_amount"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "no_coverage": {
+                                    "const": true
+                                  }
+                                },
+                                "required": [
+                                  "no_coverage"
+                                ],
+                                "additionalProperties": false
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "plan_id",
+                          "choice"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "maxItems": 20
+                    },
+                    "history": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                          },
+                          "choices": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "plan_id": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                },
+                                "choice": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "option_id": {
+                                          "type": "string",
+                                          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                                        }
+                                      },
+                                      "required": [
+                                        "option_id"
+                                      ],
+                                      "additionalProperties": false
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "yearly_amount": {
+                                          "type": "number",
+                                          "minimum": 0.01,
+                                          "maximum": 100000000
+                                        }
+                                      },
+                                      "required": [
+                                        "yearly_amount"
+                                      ],
+                                      "additionalProperties": false
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "no_coverage": {
+                                          "const": true
+                                        }
+                                      },
+                                      "required": [
+                                        "no_coverage"
+                                      ],
+                                      "additionalProperties": false
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "plan_id",
+                                "choice"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "maxItems": 20
+                          },
+                          "request_id": {
+                            "anyOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "at",
+                          "choices",
+                          "request_id"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "state",
+                    "submitted_at",
+                    "request_id",
+                    "choices",
+                    "history"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "plan_year",
+            "state",
+            "opens_at",
+            "closes_at",
+            "event_id",
+            "plans",
+            "saves",
+            "set"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "window",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.notifications.list",
+    "description": "List notifications written on a day in a window (`start` to `end`, both included). `email_stored` means the App stored an email message for the Infra sender. It does not mean that Mail received it.",
+    "read_only": true,
+    "scope": "payleaf.notifications.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(19[7-9]\\d|2\\d{3})-"
+              },
+              "kind": {
+                "enum": [
+                  "payroll.run_posted",
+                  "calendar.changed",
+                  "deposit.updated",
+                  "inquiry.answered",
+                  "leave.decided",
+                  "leave.adjusted",
+                  "enrollment.opened"
+                ]
+              },
+              "event_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "object_type": {
+                "enum": [
+                  "pay_statement",
+                  "pay_date",
+                  "deposit",
+                  "inquiry",
+                  "leave_request",
+                  "leave_balance",
+                  "enrollment_window"
+                ]
+              },
+              "object_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              "email_stored": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "at",
+              "kind",
+              "event_id",
+              "object_type",
+              "object_id",
+              "title",
+              "text",
+              "email_stored"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.preferences.get",
+    "description": "Read the notification preferences of the account.",
+    "read_only": true,
+    "scope": "payleaf.preferences.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "email_notices": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "timezone",
+            "email_notices"
+          ],
+          "additionalProperties": false
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "preferences",
+        "now"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.deposit.update",
+    "description": "Replace the deposit setup: up to three accounts, with fixed amounts, percentages, and exactly one account that takes the remainder. Amounts have at most two decimals, and percentages at most one. `id` is the account. The change applies to the planned run with the earliest cut-off after now. Returns the change with its state and the run it applies to.",
+    "read_only": false,
+    "scope": "payleaf.deposit.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "accounts": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "kind": {
+                    "enum": [
+                      "checking",
+                      "savings"
+                    ]
+                  },
+                  "last4": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100000000
+                  }
+                },
+                "required": [
+                  "label",
+                  "kind",
+                  "last4",
+                  "amount"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "kind": {
+                    "enum": [
+                      "checking",
+                      "savings"
+                    ]
+                  },
+                  "last4": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "percent": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 100
+                  }
+                },
+                "required": [
+                  "label",
+                  "kind",
+                  "last4",
+                  "percent"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "kind": {
+                    "enum": [
+                      "checking",
+                      "savings"
+                    ]
+                  },
+                  "last4": {
+                    "type": "string",
+                    "pattern": "^\\d{4}$"
+                  },
+                  "remainder": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "label",
+                  "kind",
+                  "last4",
+                  "remainder"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 10
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "accounts",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "enum": [
+            "waiting",
+            "replaced",
+            "cancelled",
+            "locked",
+            "applied"
+          ]
+        },
+        "applies_to": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "entry_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "pay_date": {
+                  "type": "string",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                },
+                "cutoff_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              },
+              "required": [
+                "entry_id",
+                "pay_date",
+                "cutoff_at"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "state",
+        "applies_to"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.withholding.update",
+    "description": "Replace the withholding form. Payleaf stores the form and computes no tax. `id` is the account. Returns the change with its state and the run it applies to.",
+    "read_only": false,
+    "scope": "payleaf.withholding.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "form": {
+          "type": "object",
+          "properties": {
+            "filing_status": {
+              "enum": [
+                "single",
+                "married_jointly",
+                "head_of_household"
+              ]
+            },
+            "multiple_jobs": {
+              "type": "boolean"
+            },
+            "dependents_amount": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "other_income": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "deductions": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100000000
+            },
+            "extra_withholding": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100000000
+            }
+          },
+          "required": [
+            "filing_status",
+            "multiple_jobs",
+            "dependents_amount",
+            "other_income",
+            "deductions",
+            "extra_withholding"
+          ],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "form",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "enum": [
+            "waiting",
+            "replaced",
+            "cancelled",
+            "locked",
+            "applied"
+          ]
+        },
+        "applies_to": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "entry_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "pay_date": {
+                  "type": "string",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                },
+                "cutoff_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              },
+              "required": [
+                "entry_id",
+                "pay_date",
+                "cutoff_at"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "state",
+        "applies_to"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.retirement.set",
+    "description": "Set the retirement percentage of salary, up to the employer maximum, with at most one decimal. 0 stops saving. `id` is the account. Returns the change with its state and the run it applies to.",
+    "read_only": false,
+    "scope": "payleaf.retirement.set",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "percent",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "enum": [
+            "waiting",
+            "replaced",
+            "cancelled",
+            "locked",
+            "applied"
+          ]
+        },
+        "applies_to": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "entry_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "pay_date": {
+                  "type": "string",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+                },
+                "cutoff_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(19[7-9]\\d|2\\d{3})-"
+                }
+              },
+              "required": [
+                "entry_id",
+                "pay_date",
+                "cutoff_at"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "state",
+        "applies_to"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.changes.cancel",
+    "description": "Cancel a waiting setting change before the cut-off of its run. An older change of the same setting for the same run then applies again.",
+    "read_only": false,
+    "scope": "payleaf.changes.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.inquiries.open",
+    "description": "Ask payroll about a pay statement or one of its lines, with an amount and a note. `id` is the pay statement. Without `line_id` the question is about the whole statement. Returns the `id` of the new inquiry.",
+    "read_only": false,
+    "scope": "payleaf.inquiries.open",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "line_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 100000000
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "amount",
+        "note",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.inquiries.withdraw",
+    "description": "Withdraw an open pay inquiry. An inquiry is not edited: withdraw it and ask again.",
+    "read_only": false,
+    "scope": "payleaf.inquiries.withdraw",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.leave.request",
+    "description": "Ask for leave of one type, from a first day (`start`) to a last day (`end`), with the hours for each working day (at most one decimal). `id` is the leave type. Returns the `id` of the new request.",
+    "read_only": false,
+    "scope": "payleaf.leave.request",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "start": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-\\d{2}-\\d{2}$"
+        },
+        "hours_per_day": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 8
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "start",
+        "end",
+        "hours_per_day",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "const": "pending"
+        },
+        "hours": {
+          "type": "number",
+          "minimum": 0.1
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "state",
+        "hours"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.leave.cancel",
+    "description": "Cancel a pending leave request, or approved leave before its first day.",
+    "read_only": false,
+    "scope": "payleaf.leave.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.benefits.elect",
+    "description": "Save one choice for a plan in an open enrollment window: `option_id`, `yearly_amount` for a plan that takes one, or `no_coverage`. Give exactly one of them. `id` is the window. A saved choice changes nothing in force. A submitted set comes into force when the window closes.",
+    "read_only": false,
+    "scope": "payleaf.benefits.elect",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "option_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "yearly_amount": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 100000000
+        },
+        "no_coverage": {
+          "const": true
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "plan_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "option_id"
+          ]
+        },
+        {
+          "required": [
+            "yearly_amount"
+          ]
+        },
+        {
+          "required": [
+            "no_coverage"
+          ]
+        }
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.benefits.submit",
+    "description": "Submit the saved choices of an open enrollment window as the election set. Every plan of the window needs a saved choice. A submitted set can be changed and submitted again until the window closes. `id` is the window.",
+    "read_only": false,
+    "scope": "payleaf.benefits.submit",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "state": {
+          "const": "submitted"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "state"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "payleaf.preferences.update",
+    "description": "Set the time zone used in notification text, or `email_notices`. Give at least one of them.",
+    "read_only": false,
+    "scope": "payleaf.preferences.update",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "email_notices": {
+          "type": "boolean"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "payleaf"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

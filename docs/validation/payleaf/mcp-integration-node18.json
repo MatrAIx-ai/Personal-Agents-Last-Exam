@@ -1,0 +1,521 @@
+{
+  "schema": "payleaf.mcp-integration.v1",
+  "runtime_version": "1.6.0",
+  "app_version": "1.0.0",
+  "node": "v18.20.8",
+  "checks": [
+    {
+      "name": "Before the load, the clock of the fresh instance stands at 5 January 2027",
+      "status": "passed"
+    },
+    {
+      "name": "env.load_seed loads the task seed with its binding, its policies and its own virtual_now",
+      "status": "passed"
+    },
+    {
+      "name": "The snapshot holds the loaded seed",
+      "status": "passed"
+    },
+    {
+      "name": "The clock is the virtual_now of the seed: not the time that the instance had before, and not the package clock",
+      "status": "passed"
+    },
+    {
+      "name": "employment.get reads now as 2026-11-19T14:00:00-05:00, with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "calendar.list reads now as 2026-11-19T14:00:00-05:00, with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "pay_statements.list reads now as 2026-11-19T14:00:00-05:00, with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "pay_statements.get reads now as 2026-11-19T14:00:00-05:00, with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "settings.get reads now as 2026-11-19T14:00:00-05:00, with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "changes.list reads now as 2026-11-19T14:00:00-05:00, with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "inquiries.list reads now as 2026-11-19T14:00:00-05:00, with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "leave.balances reads now as 2026-11-19T14:00:00-05:00, with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "leave.list reads now as 2026-11-19T14:00:00-05:00, with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "leave.preview reads now as 2026-11-19T14:00:00-05:00, with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "benefits.windows reads now as 2026-11-19T14:00:00-05:00, with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "benefits.get reads now as 2026-11-19T14:00:00-05:00, with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "notifications.list reads now as 2026-11-19T14:00:00-05:00, with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "preferences.get reads now as 2026-11-19T14:00:00-05:00, with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent connection lists exactly the 25 tools of the plan",
+      "status": "passed"
+    },
+    {
+      "name": "14 of them are read tools",
+      "status": "passed"
+    },
+    {
+      "name": "11 of them are write tools",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent connection lists no env.* operation",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.apply_event gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.reset gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.advance_time gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.load_seed gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.snapshot gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.event_status gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.validate_bundle gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The denied calls changed no business data and no version",
+      "status": "passed"
+    },
+    {
+      "name": "Each denied call has one deny row in the audit, with the Agent as the actor",
+      "status": "passed"
+    },
+    {
+      "name": "W1: on 19 November calendar.list shows the cut-off of 20 November as passed, and Friday 4 December with its cut-off on Tuesday 1 December at 17:00",
+      "status": "passed"
+    },
+    {
+      "name": "W1: the statement of 6 November reads earnings 3,200.00, taxes 640.00, deductions 280.00 and net pay 2,280.00, with 300.00 to savings and 1,980.00 to checking",
+      "status": "passed"
+    },
+    {
+      "name": "W1: settings.get shows the withholding change of 16 November locked for 20 November, and a change made now would first apply to 4 December",
+      "status": "passed"
+    },
+    {
+      "name": "W1 control: an unknown statement returns not_found, and a window that ends before it starts returns invalid_window",
+      "status": "passed"
+    },
+    {
+      "name": "W1 control: both refused reads leave the business data and the version as they were",
+      "status": "passed"
+    },
+    {
+      "name": "W1 control: each refused read has one deny row in the audit",
+      "status": "passed"
+    },
+    {
+      "name": "W3 control: vacation that starts in 5 days, with 14 days of notice, returns too_late",
+      "status": "passed"
+    },
+    {
+      "name": "W3: leave.preview for 7 and 8 December reads 2 working days and 16.0 hours, and leave.request makes it pending and holds the 16 hours",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call: a deposit setup with no account for the remainder returns invalid_split",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call: a retirement percentage of 60 with a maximum of 50 returns over_limit",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call: 9 hours for one day breaks the input schema, so Core returns invalid_arguments before any App error",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call changes nothing: after two App errors and one Core error the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call changes nothing: the version and the notifications are the same",
+      "status": "passed"
+    },
+    {
+      "name": "The audit has one deny row for each failed call",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the same request_id with the same input returns the stored receipt with duplicate true",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: it makes no second leave request, writes no audit row and keeps the version",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the same request_id with changed input returns idempotency_conflict",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: a write with a stale expected_version returns stale_version and names the current version",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the conflict and the stale write changed no business data",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the conflict and the stale write each have one deny row in the audit",
+      "status": "passed"
+    },
+    {
+      "name": "W2: payroll.run_posted on 20 November writes ps-2026-24 with net pay 2,280.00 and applies the locked withholding change",
+      "status": "passed"
+    },
+    {
+      "name": "The run wrote one activity row for the event and one for each effect: the statement, the change applied, two leave accruals and the notification",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: an identical event_id returns the stored receipt with duplicate true",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the repeated event writes no second statement, no notification and no audit row",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the same event_id with other content returns idempotency_conflict",
+      "status": "passed"
+    },
+    {
+      "name": "W4: enrollment.opened adds the 2027 window. It reads upcoming, and the saved choices start as the medical and dental choices of 2026, with nothing for the spending account",
+      "status": "passed"
+    },
+    {
+      "name": "W4 control: a choice before the opening time returns window_closed",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-11-30T10:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: a replayed env.advance_time returns the stored receipt with duplicate true",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the replayed env.advance_time adds no audit row and moves nothing",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: on 30 November the window reads open, and the account reads enrollment_open",
+      "status": "passed"
+    },
+    {
+      "name": "W2 control: withholding.update on 30 November, before the cut-off, is waiting for the run of 4 December",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-12-01T17:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: when the clock reaches the cut-off of 1 December at 17:00, the change reads locked",
+      "status": "passed"
+    },
+    {
+      "name": "W2 control: changes.cancel on the locked change returns too_late",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-12-02T09:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "W2: deposit.update on Wednesday 2 December, after the cut-off, is waiting, and settings.get shows 18 December as the first pay date it applies to",
+      "status": "passed"
+    },
+    {
+      "name": "W3 control: sick leave for today is accepted and reads pending",
+      "status": "passed"
+    },
+    {
+      "name": "W3: leave.decided with approve makes the pending vacation of 21 to 25 December approved",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-12-03T12:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "W4 control: benefits.submit before a choice is saved for the spending account returns incomplete",
+      "status": "passed"
+    },
+    {
+      "name": "W4 control: a yearly amount of 3,500.00 with a maximum of 3,200.00 returns over_limit",
+      "status": "passed"
+    },
+    {
+      "name": "W4: on 3 December the medical option of 95.00 and 2,600.00 a year for the spending account are saved, and benefits.submit makes the set submitted",
+      "status": "passed"
+    },
+    {
+      "name": "W2: the run of 4 December still pays the old accounts and applies the withholding change of 30 November. The deposit change still waits",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-12-04T09:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "W2: inquiries.open on the statement of 4 December for a missing reimbursement of 412.50 is open, and a second inquiry on the same line returns already_open",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-12-07T09:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: the vacation request still pending on its first day reads lapsed, and its 16 hours are available again",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-12-10T09:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "W2: retirement.set to 8 on 10 December waits for the run of 18 December, and inquiry.answered with corrected makes the inquiry answered",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-12-12T00:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: after the closing time the window reads closed and the submitted set reads final",
+      "status": "passed"
+    },
+    {
+      "name": "W4 control: a choice on 12 December, after the closing time, returns window_closed",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-12-15T17:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: at the cut-off of 15 December at 17:00 the deposit change and the retirement change read locked",
+      "status": "passed"
+    },
+    {
+      "name": "W2: the run of 18 December pays the new account, takes deductions of 376.00 with retirement at 8 percent and carries the reimbursement of 412.50 that names the inquiry. Net pay is 2,596.50",
+      "status": "passed"
+    },
+    {
+      "name": "W2: the run applied the deposit change and the retirement change",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-12-26T09:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: after 25 December the approved vacation reads taken, and its 32 hours leave the balance, while the available hours stay the same",
+      "status": "passed"
+    },
+    {
+      "name": "W4: from the first pay date of 2027 the final set is in force: medical 95.00 and the spending account 100.00 for each pay, which is 2,600.00 over 26 pay periods",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: an event dated before the clock returns invalid_event",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an event dated before the clock the business data and the notifications are byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an event dated before the clock the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an event dated before the clock the audit has one deny row",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: a decision on a request that lapsed returns invalid_event",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a decision on a request that lapsed the business data and the notifications are byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a decision on a request that lapsed the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a decision on a request that lapsed the audit has one deny row",
+      "status": "passed"
+    },
+    {
+      "name": "The same forfeit is applied when its time is not before the clock",
+      "status": "passed"
+    },
+    {
+      "name": "The business data in env.snapshot is byte-identical before and after all 14 reads, leave.preview included",
+      "status": "passed"
+    },
+    {
+      "name": "Each of the 14 reads has one allow row in the audit, with no state change",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of a read carries input.id",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of a windowed read carries input.start and input.end, and leave.preview carries the leave type as input.id",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of a write carries input.id, the request_id, the observed version and the ID of the object it wrote: the leave request carries its first and last day too",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of each applied event carries its event_id",
+      "status": "passed"
+    },
+    {
+      "name": "Every committed write has one activity row with its request_id (9 writes)",
+      "status": "passed"
+    },
+    {
+      "name": "Every applied event has one activity row with its event_id (9 events)",
+      "status": "passed"
+    },
+    {
+      "name": "There is no other activity row, apart from the rows of effects",
+      "status": "passed"
+    },
+    {
+      "name": "Each applied event wrote one notification, and no write or clock move wrote one",
+      "status": "passed"
+    },
+    {
+      "name": "Each applied event has one effect row for its notification",
+      "status": "passed"
+    },
+    {
+      "name": "A refused call has a deny row in the audit and no activity row (10 refusals)",
+      "status": "passed"
+    },
+    {
+      "name": "The audit has one row for each env.advance_time that is not a replay",
+      "status": "passed"
+    },
+    {
+      "name": "env.reset returns ready for this App instance only",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded seed",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the time loaded with the seed",
+      "status": "passed"
+    },
+    {
+      "name": "Reset clears the audit and the receipts: only the row of the reset itself is left",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances the epoch",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 3, env.advance_time to 2026-12-03T12:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "W4: in the new lifecycle the window reads open and no set is submitted",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 3, env.advance_time to 2026-12-12T00:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: after the closing time with nothing submitted the set reads defaulted. Medical and dental keep the 2026 choice, and the spending account has no coverage",
+      "status": "passed"
+    },
+    {
+      "name": "A second seed with another virtual_now is loaded in the same run",
+      "status": "passed"
+    },
+    {
+      "name": "A start time spelled in UTC is read with the -05:00 offset of the employer",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 4, env.advance_time to 2026-11-21T09:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Reset goes back to the virtual_now of the seed loaded last, not to the first seed or the package clock",
+      "status": "passed"
+    },
+    {
+      "name": "The second run other-run is not affected: its whole state is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "The second run still holds the package fixture at the package clock, at its first version, with an empty audit",
+      "status": "passed"
+    }
+  ],
+  "passed": true
+}

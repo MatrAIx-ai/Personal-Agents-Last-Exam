@@ -1,0 +1,1291 @@
+{
+  "schema": "payleaf.evaluation-coverage.v1",
+  "scope": "Environment coverage of the delivered evaluation seed data/evaluation/seed.json, read at its clock. Only actual dated records count. Scheduled or future rows are listed apart.",
+  "reproduce": "node apps/payleaf/dev/coverage.cjs",
+  "reproduce_note": "Run it from the repository root. With --check it compares with the committed report.",
+  "timezone": "America/New_York",
+  "window": {
+    "first": "2025-01-01",
+    "last": "2026-12-31"
+  },
+  "clock": "2026-12-31T23:00:00-05:00",
+  "clock_day": "2026-12-31",
+  "date_rule": "A timestamp counts on its calendar day in America/New_York after normalizing its UTC offset. A date-only field is a day in America/New_York. A missing or invalid date is excluded and listed.",
+  "files": {
+    "apps/payleaf/data/evaluation/seed.json": {
+      "bytes": 596535,
+      "sha256": "37a2ca07bbfe3b7508064fb5e7e77c115785ae38942737985d74a0c5271bcb45"
+    },
+    "apps/payleaf/data/evaluation/clock.json": {
+      "bytes": 50,
+      "sha256": "4a0a17ea549f275a693b1f7728c04cc3c0d318462bfcc1b1ca16d07dd162debc"
+    },
+    "apps/payleaf/data/evaluation/dataset.json": {
+      "bytes": 1996,
+      "sha256": "6731b28e1729f38af91e1e3ec2cec32eba77d777f50dcd4f52671a5cf8d86d9e"
+    }
+  },
+  "generator": {
+    "tool": "apps/payleaf/dev/generate-evaluation-data.cjs",
+    "version": "1.0.0",
+    "prng": "mulberry32",
+    "prng_seed": 20250101
+  },
+  "provenance": {
+    "dataset_id": "payleaf-evaluation-2025-2026",
+    "source_ids": [
+      "evaluation-generator"
+    ],
+    "source_kinds": [
+      "synthetic"
+    ],
+    "real": 0,
+    "mixed": 0,
+    "synthetic": 905,
+    "note": "Counts are of the counted actual rows. Every record is synthetic: the product is fictional, so there is no real source to collect or to anchor."
+  },
+  "app_records": {
+    "count": 165,
+    "kinds": "calendar, statements, changes, inquiries, leave_requests, windows, election_sets",
+    "dataset_expected": 165
+  },
+  "actual": {
+    "total_rows": 906,
+    "counted_rows": 905,
+    "global": {
+      "records": 905,
+      "distinct_dates": 138,
+      "earliest": "2025-01-01",
+      "latest": "2026-12-29"
+    },
+    "kinds": [
+      {
+        "kind": "pay_statements",
+        "date_field": "statements[].posted_at",
+        "rows": 52,
+        "records": 52,
+        "distinct_dates": 52,
+        "earliest": "2025-01-03",
+        "latest": "2026-12-18",
+        "excluded": 0
+      },
+      {
+        "kind": "deposit_updates",
+        "date_field": "statements[].deposits[].history[].at (state returned or reissued)",
+        "rows": 2,
+        "records": 2,
+        "distinct_dates": 2,
+        "earliest": "2026-05-27",
+        "latest": "2026-05-29",
+        "excluded": 0
+      },
+      {
+        "kind": "setting_changes",
+        "date_field": "changes[].made_at",
+        "rows": 16,
+        "records": 16,
+        "distinct_dates": 14,
+        "earliest": "2025-02-10",
+        "latest": "2026-12-29",
+        "excluded": 0
+      },
+      {
+        "kind": "setting_cancellations",
+        "date_field": "changes[].cancelled_at",
+        "rows": 1,
+        "records": 1,
+        "distinct_dates": 1,
+        "earliest": "2026-08-04",
+        "latest": "2026-08-04",
+        "excluded": 0
+      },
+      {
+        "kind": "pay_inquiries",
+        "date_field": "inquiries[].opened_at",
+        "rows": 9,
+        "records": 9,
+        "distinct_dates": 9,
+        "earliest": "2025-03-04",
+        "latest": "2026-12-07",
+        "excluded": 0
+      },
+      {
+        "kind": "inquiry_withdrawals",
+        "date_field": "inquiries[].withdrawn_at",
+        "rows": 2,
+        "records": 2,
+        "distinct_dates": 2,
+        "earliest": "2025-05-28",
+        "latest": "2026-05-27",
+        "excluded": 0
+      },
+      {
+        "kind": "inquiry_answers",
+        "date_field": "inquiries[].answer.answered_at",
+        "rows": 7,
+        "records": 7,
+        "distinct_dates": 7,
+        "earliest": "2025-03-06",
+        "latest": "2026-12-09",
+        "excluded": 0
+      },
+      {
+        "kind": "leave_requests",
+        "date_field": "leave_requests[].requested_at",
+        "rows": 27,
+        "records": 27,
+        "distinct_dates": 27,
+        "earliest": "2025-01-24",
+        "latest": "2026-12-28",
+        "excluded": 0
+      },
+      {
+        "kind": "leave_decisions",
+        "date_field": "leave_requests[].decided_at",
+        "rows": 25,
+        "records": 25,
+        "distinct_dates": 25,
+        "earliest": "2025-01-24",
+        "latest": "2026-12-08",
+        "excluded": 0
+      },
+      {
+        "kind": "leave_cancellations",
+        "date_field": "leave_requests[].cancelled_at",
+        "rows": 2,
+        "records": 2,
+        "distinct_dates": 2,
+        "earliest": "2025-09-29",
+        "latest": "2026-05-04",
+        "excluded": 0
+      },
+      {
+        "kind": "leave_entries",
+        "date_field": "leave_entries[].at",
+        "rows": 161,
+        "records": 161,
+        "distinct_dates": 55,
+        "earliest": "2025-01-01",
+        "latest": "2026-12-18",
+        "excluded": 0
+      },
+      {
+        "kind": "benefit_choices",
+        "date_field": "windows[].saved[].saved_at",
+        "rows": 9,
+        "records": 9,
+        "distinct_dates": 4,
+        "earliest": "2025-11-05",
+        "latest": "2026-11-04",
+        "excluded": 0
+      },
+      {
+        "kind": "election_sets",
+        "date_field": "election_sets[].submitted_at",
+        "rows": 3,
+        "records": 2,
+        "distinct_dates": 2,
+        "earliest": "2025-11-10",
+        "latest": "2026-11-03",
+        "excluded": 1
+      },
+      {
+        "kind": "notifications",
+        "date_field": "notifications[].at",
+        "rows": 99,
+        "records": 99,
+        "distinct_dates": 92,
+        "earliest": "2025-01-01",
+        "latest": "2026-12-18",
+        "excluded": 0
+      },
+      {
+        "kind": "activity",
+        "date_field": "activity[].at",
+        "rows": 491,
+        "records": 491,
+        "distinct_dates": 138,
+        "earliest": "2025-01-01",
+        "latest": "2026-12-29",
+        "excluded": 0
+      }
+    ],
+    "monthly": [
+      {
+        "month": "2025-01",
+        "records": 47,
+        "distinct_dates": 5,
+        "by_kind": {
+          "pay_statements": 3,
+          "deposit_updates": 0,
+          "setting_changes": 0,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 1,
+          "leave_decisions": 1,
+          "leave_cancellations": 0,
+          "leave_entries": 11,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 6,
+          "activity": 25
+        }
+      },
+      {
+        "month": "2025-02",
+        "records": 31,
+        "distinct_dates": 5,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 1,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 1,
+          "leave_decisions": 1,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 3,
+          "activity": 17
+        }
+      },
+      {
+        "month": "2025-03",
+        "records": 43,
+        "distinct_dates": 8,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 1,
+          "setting_cancellations": 0,
+          "pay_inquiries": 2,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 2,
+          "leave_requests": 1,
+          "leave_decisions": 1,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 5,
+          "activity": 23
+        }
+      },
+      {
+        "month": "2025-04",
+        "records": 22,
+        "distinct_dates": 2,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 0,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 0,
+          "leave_decisions": 0,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 2,
+          "activity": 12
+        }
+      },
+      {
+        "month": "2025-05",
+        "records": 38,
+        "distinct_dates": 8,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 0,
+          "setting_cancellations": 0,
+          "pay_inquiries": 1,
+          "inquiry_withdrawals": 1,
+          "inquiry_answers": 0,
+          "leave_requests": 2,
+          "leave_decisions": 2,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 4,
+          "activity": 20
+        }
+      },
+      {
+        "month": "2025-06",
+        "records": 26,
+        "distinct_dates": 4,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 0,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 0,
+          "leave_decisions": 0,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 3,
+          "activity": 15
+        }
+      },
+      {
+        "month": "2025-07",
+        "records": 41,
+        "distinct_dates": 9,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 0,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 3,
+          "leave_decisions": 3,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 5,
+          "activity": 22
+        }
+      },
+      {
+        "month": "2025-08",
+        "records": 36,
+        "distinct_dates": 4,
+        "by_kind": {
+          "pay_statements": 3,
+          "deposit_updates": 0,
+          "setting_changes": 1,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 0,
+          "leave_decisions": 0,
+          "leave_cancellations": 0,
+          "leave_entries": 9,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 3,
+          "activity": 20
+        }
+      },
+      {
+        "month": "2025-09",
+        "records": 36,
+        "distinct_dates": 5,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 0,
+          "setting_cancellations": 0,
+          "pay_inquiries": 1,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 1,
+          "leave_requests": 1,
+          "leave_decisions": 1,
+          "leave_cancellations": 1,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 4,
+          "activity": 19
+        }
+      },
+      {
+        "month": "2025-10",
+        "records": 37,
+        "distinct_dates": 6,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 0,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 2,
+          "leave_decisions": 2,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 5,
+          "activity": 20
+        }
+      },
+      {
+        "month": "2025-11",
+        "records": 34,
+        "distinct_dates": 4,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 0,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 0,
+          "leave_decisions": 0,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 5,
+          "election_sets": 1,
+          "notifications": 2,
+          "activity": 18
+        }
+      },
+      {
+        "month": "2025-12",
+        "records": 34,
+        "distinct_dates": 5,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 2,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 1,
+          "leave_decisions": 1,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 3,
+          "activity": 19
+        }
+      },
+      {
+        "month": "2026-01",
+        "records": 44,
+        "distinct_dates": 5,
+        "by_kind": {
+          "pay_statements": 3,
+          "deposit_updates": 0,
+          "setting_changes": 1,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 0,
+          "leave_decisions": 0,
+          "leave_cancellations": 0,
+          "leave_entries": 11,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 5,
+          "activity": 24
+        }
+      },
+      {
+        "month": "2026-02",
+        "records": 43,
+        "distinct_dates": 7,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 1,
+          "setting_cancellations": 0,
+          "pay_inquiries": 1,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 1,
+          "leave_requests": 2,
+          "leave_decisions": 2,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 5,
+          "activity": 23
+        }
+      },
+      {
+        "month": "2026-03",
+        "records": 28,
+        "distinct_dates": 4,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 0,
+          "setting_cancellations": 0,
+          "pay_inquiries": 1,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 1,
+          "leave_requests": 0,
+          "leave_decisions": 0,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 3,
+          "activity": 15
+        }
+      },
+      {
+        "month": "2026-04",
+        "records": 40,
+        "distinct_dates": 7,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 0,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 3,
+          "leave_decisions": 3,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 5,
+          "activity": 21
+        }
+      },
+      {
+        "month": "2026-05",
+        "records": 43,
+        "distinct_dates": 7,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 2,
+          "setting_changes": 2,
+          "setting_cancellations": 0,
+          "pay_inquiries": 1,
+          "inquiry_withdrawals": 1,
+          "inquiry_answers": 0,
+          "leave_requests": 0,
+          "leave_decisions": 0,
+          "leave_cancellations": 1,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 5,
+          "activity": 23
+        }
+      },
+      {
+        "month": "2026-06",
+        "records": 30,
+        "distinct_dates": 4,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 0,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 1,
+          "leave_decisions": 1,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 3,
+          "activity": 17
+        }
+      },
+      {
+        "month": "2026-07",
+        "records": 47,
+        "distinct_dates": 8,
+        "by_kind": {
+          "pay_statements": 3,
+          "deposit_updates": 0,
+          "setting_changes": 0,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 3,
+          "leave_decisions": 2,
+          "leave_cancellations": 0,
+          "leave_entries": 9,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 5,
+          "activity": 25
+        }
+      },
+      {
+        "month": "2026-08",
+        "records": 26,
+        "distinct_dates": 4,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 1,
+          "setting_cancellations": 1,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 0,
+          "leave_decisions": 0,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 2,
+          "activity": 14
+        }
+      },
+      {
+        "month": "2026-09",
+        "records": 37,
+        "distinct_dates": 7,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 1,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 1,
+          "leave_decisions": 1,
+          "leave_cancellations": 0,
+          "leave_entries": 7,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 4,
+          "activity": 21
+        }
+      },
+      {
+        "month": "2026-10",
+        "records": 47,
+        "distinct_dates": 5,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 0,
+          "setting_cancellations": 0,
+          "pay_inquiries": 1,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 0,
+          "leave_requests": 2,
+          "leave_decisions": 1,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 8,
+          "activity": 27
+        }
+      },
+      {
+        "month": "2026-11",
+        "records": 55,
+        "distinct_dates": 8,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 3,
+          "setting_cancellations": 0,
+          "pay_inquiries": 0,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 1,
+          "leave_requests": 1,
+          "leave_decisions": 2,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 4,
+          "election_sets": 1,
+          "notifications": 5,
+          "activity": 30
+        }
+      },
+      {
+        "month": "2026-12",
+        "records": 40,
+        "distinct_dates": 7,
+        "by_kind": {
+          "pay_statements": 2,
+          "deposit_updates": 0,
+          "setting_changes": 2,
+          "setting_cancellations": 0,
+          "pay_inquiries": 1,
+          "inquiry_withdrawals": 0,
+          "inquiry_answers": 1,
+          "leave_requests": 2,
+          "leave_decisions": 1,
+          "leave_cancellations": 0,
+          "leave_entries": 6,
+          "benefit_choices": 0,
+          "election_sets": 0,
+          "notifications": 4,
+          "activity": 21
+        }
+      }
+    ],
+    "gaps": {
+      "months_without_actual_records": [],
+      "days_in_window": 730,
+      "active_days": 138,
+      "inactive_days": 592,
+      "working_days_in_window": 500,
+      "active_working_days": 134,
+      "active_weekend_or_holiday_days": 4,
+      "longest_quiet_spans": [
+        {
+          "from": "2026-06-19",
+          "to": "2026-07-02",
+          "days": 14
+        },
+        {
+          "from": "2025-01-04",
+          "to": "2025-01-16",
+          "days": 13
+        },
+        {
+          "from": "2025-03-29",
+          "to": "2025-04-10",
+          "days": 13
+        },
+        {
+          "from": "2025-04-12",
+          "to": "2025-04-24",
+          "days": 13
+        },
+        {
+          "from": "2025-06-07",
+          "to": "2025-06-19",
+          "days": 13
+        },
+        {
+          "from": "2025-08-16",
+          "to": "2025-08-28",
+          "days": 13
+        },
+        {
+          "from": "2025-09-13",
+          "to": "2025-09-25",
+          "days": 13
+        },
+        {
+          "from": "2025-10-11",
+          "to": "2025-10-23",
+          "days": 13
+        },
+        {
+          "from": "2026-01-17",
+          "to": "2026-01-29",
+          "days": 13
+        },
+        {
+          "from": "2026-01-31",
+          "to": "2026-02-12",
+          "days": 13
+        }
+      ]
+    },
+    "exclusions": [
+      {
+        "kind": "election_sets",
+        "id": "els-0001",
+        "value": "2024-11-12T19:40:00-05:00",
+        "reason": "before 2025-01-01"
+      }
+    ]
+  },
+  "scheduled": {
+    "note": "Not counted. Pay calendar entries, cut-offs, enrollment windows, leave days and holidays are schedules. Rows after the clock day are future rows.",
+    "total_rows": 206,
+    "kinds": [
+      {
+        "kind": "pay_calendar",
+        "date_field": "calendar[].pay_date",
+        "rows": 56,
+        "records": 52,
+        "distinct_dates": 52,
+        "earliest": "2025-01-03",
+        "latest": "2026-12-18",
+        "excluded": 4,
+        "after_clock": 4
+      },
+      {
+        "kind": "pay_cutoffs",
+        "date_field": "calendar[].cutoff_at",
+        "rows": 56,
+        "records": 52,
+        "distinct_dates": 52,
+        "earliest": "2025-01-14",
+        "latest": "2026-12-29",
+        "excluded": 4,
+        "after_clock": 3
+      },
+      {
+        "kind": "enrollment_windows",
+        "date_field": "windows[].opens_at",
+        "rows": 2,
+        "records": 2,
+        "distinct_dates": 2,
+        "earliest": "2025-11-03",
+        "latest": "2026-11-02",
+        "excluded": 0,
+        "after_clock": 0
+      },
+      {
+        "kind": "leave_days",
+        "date_field": "leave_requests[].days[]",
+        "rows": 69,
+        "records": 67,
+        "distinct_dates": 67,
+        "earliest": "2025-01-24",
+        "latest": "2026-12-31",
+        "excluded": 2,
+        "after_clock": 2
+      },
+      {
+        "kind": "company_holidays",
+        "date_field": "employer.holidays[]",
+        "rows": 23,
+        "records": 22,
+        "distinct_dates": 22,
+        "earliest": "2025-01-01",
+        "latest": "2026-12-25",
+        "excluded": 1,
+        "after_clock": 1
+      }
+    ],
+    "monthly": [
+      {
+        "month": "2025-01",
+        "records": 8,
+        "distinct_dates": 8,
+        "by_kind": {
+          "pay_calendar": 3,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 1,
+          "company_holidays": 2
+        }
+      },
+      {
+        "month": "2025-02",
+        "records": 5,
+        "distinct_dates": 5,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 0,
+          "company_holidays": 1
+        }
+      },
+      {
+        "month": "2025-03",
+        "records": 6,
+        "distinct_dates": 5,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 2,
+          "company_holidays": 0
+        }
+      },
+      {
+        "month": "2025-04",
+        "records": 9,
+        "distinct_dates": 9,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 5,
+          "company_holidays": 0
+        }
+      },
+      {
+        "month": "2025-05",
+        "records": 6,
+        "distinct_dates": 6,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 1,
+          "company_holidays": 1
+        }
+      },
+      {
+        "month": "2025-06",
+        "records": 6,
+        "distinct_dates": 6,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 1,
+          "company_holidays": 1
+        }
+      },
+      {
+        "month": "2025-07",
+        "records": 9,
+        "distinct_dates": 7,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 3,
+          "enrollment_windows": 0,
+          "leave_days": 3,
+          "company_holidays": 1
+        }
+      },
+      {
+        "month": "2025-08",
+        "records": 11,
+        "distinct_dates": 11,
+        "by_kind": {
+          "pay_calendar": 3,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 6,
+          "company_holidays": 0
+        }
+      },
+      {
+        "month": "2025-09",
+        "records": 6,
+        "distinct_dates": 5,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 1,
+          "company_holidays": 1
+        }
+      },
+      {
+        "month": "2025-10",
+        "records": 10,
+        "distinct_dates": 10,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 6,
+          "company_holidays": 0
+        }
+      },
+      {
+        "month": "2025-11",
+        "records": 11,
+        "distinct_dates": 11,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 1,
+          "leave_days": 3,
+          "company_holidays": 3
+        }
+      },
+      {
+        "month": "2025-12",
+        "records": 7,
+        "distinct_dates": 7,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 3,
+          "enrollment_windows": 0,
+          "leave_days": 1,
+          "company_holidays": 1
+        }
+      },
+      {
+        "month": "2026-01",
+        "records": 7,
+        "distinct_dates": 7,
+        "by_kind": {
+          "pay_calendar": 3,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 0,
+          "company_holidays": 2
+        }
+      },
+      {
+        "month": "2026-02",
+        "records": 7,
+        "distinct_dates": 6,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 2,
+          "company_holidays": 1
+        }
+      },
+      {
+        "month": "2026-03",
+        "records": 7,
+        "distinct_dates": 6,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 3,
+          "company_holidays": 0
+        }
+      },
+      {
+        "month": "2026-04",
+        "records": 5,
+        "distinct_dates": 5,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 1,
+          "company_holidays": 0
+        }
+      },
+      {
+        "month": "2026-05",
+        "records": 10,
+        "distinct_dates": 10,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 5,
+          "company_holidays": 1
+        }
+      },
+      {
+        "month": "2026-06",
+        "records": 6,
+        "distinct_dates": 6,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 3,
+          "enrollment_windows": 0,
+          "leave_days": 0,
+          "company_holidays": 1
+        }
+      },
+      {
+        "month": "2026-07",
+        "records": 11,
+        "distinct_dates": 10,
+        "by_kind": {
+          "pay_calendar": 3,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 5,
+          "company_holidays": 1
+        }
+      },
+      {
+        "month": "2026-08",
+        "records": 10,
+        "distinct_dates": 7,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 6,
+          "company_holidays": 0
+        }
+      },
+      {
+        "month": "2026-09",
+        "records": 10,
+        "distinct_dates": 10,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 5,
+          "company_holidays": 1
+        }
+      },
+      {
+        "month": "2026-10",
+        "records": 5,
+        "distinct_dates": 4,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 0,
+          "leave_days": 1,
+          "company_holidays": 0
+        }
+      },
+      {
+        "month": "2026-11",
+        "records": 12,
+        "distinct_dates": 12,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 2,
+          "enrollment_windows": 1,
+          "leave_days": 4,
+          "company_holidays": 3
+        }
+      },
+      {
+        "month": "2026-12",
+        "records": 11,
+        "distinct_dates": 10,
+        "by_kind": {
+          "pay_calendar": 2,
+          "pay_cutoffs": 3,
+          "enrollment_windows": 0,
+          "leave_days": 5,
+          "company_holidays": 1
+        }
+      }
+    ],
+    "outside_window": [
+      {
+        "kind": "pay_calendar",
+        "id": "pd-2027-01",
+        "value": "2027-01-04",
+        "reason": "after 2026-12-31"
+      },
+      {
+        "kind": "pay_calendar",
+        "id": "pd-2027-02",
+        "value": "2027-01-15",
+        "reason": "after 2026-12-31"
+      },
+      {
+        "kind": "pay_calendar",
+        "id": "pd-2027-03",
+        "value": "2027-01-29",
+        "reason": "after 2026-12-31"
+      },
+      {
+        "kind": "pay_calendar",
+        "id": "pd-2027-04",
+        "value": "2027-02-12",
+        "reason": "after 2026-12-31"
+      },
+      {
+        "kind": "pay_cutoffs",
+        "id": "pd-2025-01",
+        "value": "2024-12-31T17:00:00-05:00",
+        "reason": "before 2025-01-01"
+      },
+      {
+        "kind": "pay_cutoffs",
+        "id": "pd-2027-02",
+        "value": "2027-01-12T17:00:00-05:00",
+        "reason": "after 2026-12-31"
+      },
+      {
+        "kind": "pay_cutoffs",
+        "id": "pd-2027-03",
+        "value": "2027-01-26T17:00:00-05:00",
+        "reason": "after 2026-12-31"
+      },
+      {
+        "kind": "pay_cutoffs",
+        "id": "pd-2027-04",
+        "value": "2027-02-09T17:00:00-05:00",
+        "reason": "after 2026-12-31"
+      },
+      {
+        "kind": "leave_days",
+        "id": "lv-0027:2027-01-25",
+        "value": "2027-01-25",
+        "reason": "after 2026-12-31"
+      },
+      {
+        "kind": "leave_days",
+        "id": "lv-0027:2027-01-26",
+        "value": "2027-01-26",
+        "reason": "after 2026-12-31"
+      },
+      {
+        "kind": "company_holidays",
+        "id": "holiday:2027-01-01",
+        "value": "2027-01-01",
+        "reason": "after 2026-12-31"
+      }
+    ],
+    "future_rows": [
+      {
+        "kind": "pay_calendar",
+        "id": "pd-2027-01",
+        "value": "2027-01-04",
+        "note": "planned"
+      },
+      {
+        "kind": "pay_calendar",
+        "id": "pd-2027-02",
+        "value": "2027-01-15",
+        "note": "planned"
+      },
+      {
+        "kind": "pay_calendar",
+        "id": "pd-2027-03",
+        "value": "2027-01-29",
+        "note": "planned"
+      },
+      {
+        "kind": "pay_calendar",
+        "id": "pd-2027-04",
+        "value": "2027-02-12",
+        "note": "planned"
+      },
+      {
+        "kind": "pay_cutoffs",
+        "id": "pd-2027-02",
+        "value": "2027-01-12T17:00:00-05:00",
+        "note": "planned"
+      },
+      {
+        "kind": "pay_cutoffs",
+        "id": "pd-2027-03",
+        "value": "2027-01-26T17:00:00-05:00",
+        "note": "planned"
+      },
+      {
+        "kind": "pay_cutoffs",
+        "id": "pd-2027-04",
+        "value": "2027-02-09T17:00:00-05:00",
+        "note": "planned"
+      },
+      {
+        "kind": "leave_days",
+        "id": "lv-0027:2027-01-25",
+        "value": "2027-01-25"
+      },
+      {
+        "kind": "leave_days",
+        "id": "lv-0027:2027-01-26",
+        "value": "2027-01-26"
+      },
+      {
+        "kind": "company_holidays",
+        "id": "holiday:2027-01-01",
+        "value": "2027-01-01"
+      }
+    ]
+  }
+}

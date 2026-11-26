@@ -1,0 +1,64 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "payleaf-minimal",
+  "version": "1.0.0",
+  "description": "Authored synthetic history of one salaried employee at a fictional employer, for reproducible acceptance: 30 pay calendar entries (26 for 2026 and 4 for 2027), 22 pay statements with 150 lines and 44 deposits, 9 setting changes, 4 pay inquiries, 12 leave requests with 70 leave entries, 2 enrollment windows and 2 election sets. A development script replays the authored history from November 2025 to November 2026 once through the App, so the App's own pay run computed every deduction, net pay and deposit. The fixture keeps the 26 newest notifications and the activity rows from the time of the oldest one on. It is not a benchmark task.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Authored synthetic records; no external collection. The employer, people, bank accounts and benefit plans are fictional. Three public pages were read only for the shape of the workflows, and no text, data, form or brand was copied: the page of the Internal Revenue Service on Form W-4 (https://www.irs.gov/forms-pubs/about-form-w-4), its Publication 969 on flexible spending arrangements (https://www.irs.gov/publications/p969) and the page of Nacha on Direct Deposit (https://www.nacha.org/content/direct-deposit).",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/payleaf/dev/build-fixture.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "evaluation-generator",
+      "kind": "synthetic",
+      "description": "The source of the separate evaluation dataset in data/evaluation/ (dataset payleaf-evaluation-2025-2026). Its own dataset.json, passed to env.load_seed, names this same source ID in its record_source_ids, so every record of data/evaluation/seed.json comes from it. The records of this file's fixture come only from authored, so this source is declared here but not listed in record_source_ids above. Every record is synthetic: a scripted history of 1 January 2025 to 31 December 2026, with sick days and mileage lines from a seeded PRNG, replayed through the App. It is not part of the package fixture.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted replay with a seeded PRNG (mulberry32)",
+        "tool": "apps/payleaf/dev/generate-evaluation-data.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20250101,
+        "parameters": {
+          "start": "2025-01-01T00:00:00-05:00",
+          "clock": "2026-12-31T23:00:00-05:00",
+          "timezone": "America/New_York"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized timestamps and account IDs. Records are pay calendar entries, pay statements, setting changes, pay inquiries, leave requests, enrollment windows and election sets; a statement holds its lines and deposits."
+  ],
+  "expected_counts": {
+    "records": 81,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}

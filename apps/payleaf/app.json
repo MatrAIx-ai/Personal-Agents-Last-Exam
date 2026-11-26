@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "app_id": "payleaf",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:payleaf; author GitHub handle dipta007"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "payleaf.payroll.run_posted",
+    "payleaf.calendar.changed",
+    "payleaf.deposit.updated",
+    "payleaf.inquiry.answered",
+    "payleaf.leave.decided",
+    "payleaf.leave.adjusted",
+    "payleaf.enrollment.opened"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "none",
+    "real_delivery": false
+  },
+  "limitations": [
+    "One salaried employee account at one synthetic employer per App instance. Payroll, the manager and the benefits team are not accounts: what they do arrives as events.",
+    "Pay, direct deposit, paid leave and benefits enrollment only. No hours, shifts, time sheets or overtime, no expense reports or health claims, no dependents, beneficiaries or life events, no tax forms or other documents, and no law of a real place.",
+    "No tax is computed. The earnings and taxes of each pay run are task data. The App computes only the deductions, the net pay and the deposit split that follow from the person's own choices.",
+    "Money does not move. A deposit is a record, and a bank account is a label with its last four digits. No bank checks a new account: the payroll cut-off is the only wait.",
+    "An enrollment window opens only through the enrollment.opened event. No life event reopens enrollment.",
+    "MCP only: no GUI and no console for payroll, the manager or the benefits team.",
+    "The App has no timer and no scheduler. Locked changes, taken and lapsed leave, window states, final or defaulted election sets and the end of the inquiry window are computed from the supplied virtual time.",
+    "No files, images or attachments: resources are not used.",
+    "Email is the only notification channel. Notifications reach Mail only through the Infra-run sender and Messaging. The App itself delivers nothing."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}
