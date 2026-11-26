@@ -30,6 +30,12 @@ function fixture(options = {}) {
     get data() { return structuredClone(data); },
     get logs() { return structuredClone(logs); },
     setTime(value) { ctx.virtual_now = value; },
+    update(fn) {
+      const next = structuredClone(data);
+      fn(next);
+      validate(next);
+      data = next;
+    },
     call(name, args = {}) {
       const tool = tools.find(item => item.name === name);
       assert.ok(tool, 'Known tool');

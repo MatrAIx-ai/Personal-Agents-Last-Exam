@@ -1,5 +1,6 @@
 'use strict';
 const {fail, ID, instant, accountById, chars, serialNumber} = require('./common.cjs');
+const {imageSize} = require('./images.cjs');
 const EARLIEST = '2025-01-01T00:00:00-08:00';
 const MEDIA_LIMITS = {
   avatar: {mime: 'image/png', width: 128, height: 128, bytes: 15 * 1024, count: 16},
@@ -66,8 +67,11 @@ function validateSeed(ctx, data) {
     instant(post.updated_at, 'invalid_seed');
     if (instant(post.created_at, 'invalid_seed') > instant(post.updated_at, 'invalid_seed')) fail('invalid_seed', 'Post timestamps are reversed.');
   }
-  for (const [accountId, high] of Object.entries(maxPost)) {
-    if (data.counters[accountId].post < high) fail('invalid_seed', 'The post counter is behind an existing id.');
+  const retiredPost = retiredSerials(data, 'p');
+  for (const accountId of new Set([...Object.keys(maxPost), ...Object.keys(retiredPost), ...Object.keys(data.counters)])) {
+    if (!data.counters[accountId]) continue;
+    const explained = Math.max(maxPost[accountId] || 0, retiredPost[accountId] || 0);
+    if (data.counters[accountId].post !== explained) fail('invalid_seed', 'The post counter does not match the stored and retired ids.');
   }
   const maxNote = {};
   const noteIds = new Set();
@@ -82,8 +86,11 @@ function validateSeed(ctx, data) {
     instant(note.created_at, 'invalid_seed');
     instant(note.updated_at, 'invalid_seed');
   }
-  for (const [accountId, high] of Object.entries(maxNote)) {
-    if (data.counters[accountId].note < high) fail('invalid_seed', 'The note counter is behind an existing id.');
+  const retiredNote = retiredSerials(data, 'n');
+  for (const accountId of new Set([...Object.keys(maxNote), ...Object.keys(retiredNote), ...Object.keys(data.counters)])) {
+    if (!data.counters[accountId]) continue;
+    const explained = Math.max(maxNote[accountId] || 0, retiredNote[accountId] || 0);
+    if (data.counters[accountId].note !== explained) fail('invalid_seed', 'The note counter does not match the stored and retired ids.');
   }
   for (const edge of data.follows) {
     if (!accountIds.has(edge.follower_account_id) || !accountIds.has(edge.target_account_id)) fail('invalid_seed', 'A follow edge names a missing account.');
@@ -93,17 +100,34 @@ function validateSeed(ctx, data) {
     if (!accountIds.has(block.account_id) || !accountIds.has(block.target_account_id)) fail('invalid_seed', 'A block names a missing account.');
   }
   const receiptIds = new Set();
+  const published = new Set();
   for (const receipt of data.receipts) {
     if (receiptIds.has(receipt.receipt_id) || !/^pr-\d+$/.test(receipt.receipt_id)) fail('invalid_seed', 'Receipt ids must be unique.');
     receiptIds.add(receipt.receipt_id);
+    const key = receipt.object_type + '\0' + receipt.object_id + '\0' + receipt.revision;
+    if (published.has(key)) fail('invalid_seed', 'Two receipts name the same publication.');
+    published.add(key);
     if (receipt.object_type === 'post') {
       const post = data.posts.find(item => item.id === receipt.object_id);
-      if (!post || !post.revisions.some(row => row.revision === receipt.revision)) fail('invalid_seed', 'A receipt names a missing post revision.');
+      const row = post && post.revisions.find(item => item.revision === receipt.revision);
+      if (!row || row.visibility !== 'public') fail('invalid_seed', 'A receipt names a revision that is not public.');
     } else if (receipt.object_type === 'note') {
       const note = data.notes.find(item => item.id === receipt.object_id);
-      if (!note || receipt.revision !== note.revision) fail('invalid_seed', 'A receipt names a missing note revision.');
+      if (!note || receipt.revision !== note.revision || (note.status !== 'posted' && note.status !== 'deleted')) {
+        fail('invalid_seed', 'A receipt names a note that is not public.');
+      }
     } else fail('invalid_seed', 'A receipt names an unknown object type.');
     instant(receipt.published_at, 'invalid_seed');
+  }
+  for (const post of data.posts) {
+    for (const row of post.revisions) {
+      if (row.visibility !== 'public') continue;
+      if (!published.has('post\0' + post.id + '\0' + row.revision)) fail('invalid_seed', 'A public revision has no receipt.');
+    }
+  }
+  for (const note of data.notes) {
+    if (note.status !== 'posted' && note.status !== 'deleted') continue;
+    if (!published.has('note\0' + note.id + '\0' + note.revision)) fail('invalid_seed', 'A public note has no receipt.');
   }
   const media = data.media || [];
   const counts = {avatar: 0, cover: 0, note: 0};
@@ -112,8 +136,20 @@ function validateSeed(ctx, data) {
     if (!limit) fail('invalid_seed', 'Media role is invalid.');
     counts[asset.role] += 1;
     if (counts[asset.role] > limit.count) fail('invalid_seed', 'Too many ' + asset.role + ' images.');
-    if (asset.mime !== limit.mime || asset.byte_length > limit.bytes || asset.byte_length < 1) fail('invalid_seed', 'A media file exceeds its limit.');
+    if (asset.mime !== limit.mime || asset.byte_length < 1) fail('invalid_seed', 'A media file does not match its role.');
+    if (asset.bytes_base64) {
+      const bytes = Buffer.from(asset.bytes_base64, 'base64');
+      const info = imageSize(bytes);
+      if (!info || info.mime !== asset.mime || bytes.length !== asset.byte_length || info.width !== asset.width || info.height !== asset.height) {
+        fail('invalid_seed', 'A media file does not match its bytes.');
+      }
+    } else if (asset.byte_length) fail('invalid_seed', 'A media descriptor has no bytes.');
     if (limit.width && (asset.width !== limit.width || asset.height !== limit.height)) fail('invalid_seed', 'An avatar must be 128 by 128.');
+  }
+  if (data.minimum_load_clock) {
+    const minimum = instant(data.minimum_load_clock, 'invalid_seed');
+    const loaded = instant(ctx.virtual_now || data.seed_clock, 'invalid_seed');
+    if (loaded < minimum) fail('invalid_seed', 'The load clock is before the documented minimum.');
   }
   const clock = instant(ctx.virtual_now || data.seed_clock, 'invalid_seed');
   const earliest = instant(EARLIEST, 'invalid_seed');
@@ -146,12 +182,36 @@ function validateSeed(ctx, data) {
   }
 }
 
+function retiredSerials(data, mark) {
+  const high = {};
+  for (const id of data.retired_ids || []) {
+    const accountId = data.accounts.map(item => item.account_id).find(item => serialNumber(id, item, mark) !== null);
+    if (!accountId) continue;
+    const number = serialNumber(id, accountId, mark);
+    if (mark === 'p' && data.posts.some(item => item.id === id)) fail('invalid_seed', 'A retired id is still stored.');
+    if (mark === 'n' && data.notes.some(item => item.id === id)) fail('invalid_seed', 'A retired id is still stored.');
+    high[accountId] = Math.max(high[accountId] || 0, number);
+  }
+  return high;
+}
+
 function rows(data) { return [...data.posts, ...data.notes]; }
+
+function assetReferences(data) {
+  const refs = [];
+  for (const post of data.posts || []) {
+    if (post.cover_asset_id) refs.push({asset_id: post.cover_asset_id, object_id: post.id, object_type: 'post'});
+  }
+  for (const note of data.notes || []) {
+    if (note.image_asset_id) refs.push({asset_id: note.image_asset_id, object_id: note.id, object_type: 'note'});
+  }
+  return refs;
+}
 
 module.exports = {
   validateSeed,
   records: data => rows(data),
   objects: data => rows(data).map(item => item.id),
   references: () => [],
-  assetReferences: () => []
+  assetReferences
 };

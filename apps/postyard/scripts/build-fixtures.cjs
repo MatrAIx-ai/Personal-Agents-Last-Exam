@@ -55,14 +55,31 @@ function policies() {
   return JSON.parse(fs.readFileSync(path.join(root, 'fixtures/policies.json'), 'utf8'));
 }
 
+const {jpeg} = require('../src/images.cjs');
+const coverBytes = jpeg(32, 24, [36, 72, 96]);
+
+function coverEntry() {
+  return {
+    asset_id: 'cover-checksum', role: 'cover', mime: 'image/jpeg',
+    width: 32, height: 24, byte_length: coverBytes.length, bytes_base64: coverBytes.toString('base64')
+  };
+}
+
+function attachCover(seed) {
+  const post = (seed.posts || []).find(item => item.id === 'ac-0001:p1');
+  if (post) post.cover_asset_id = 'cover-checksum';
+  seed.media = [coverEntry()];
+  return seed;
+}
+
 const titles = [
   'A checksum window that stays boring',
   'Retry budgets for a quiet client',
-  'Why the seed clock is part of the fixture',
+  'The morning the clock stayed put',
   'Naming a release without a surprise',
   'Reading a diff before answering it',
   'A short note on idempotent writes',
-  'Clocks, receipts, and the next morning',
+  'Receipts and the next morning',
   'What a public correction should keep',
   'Audience counts and the first hour',
   'Drafts that never needed a thread',
@@ -116,6 +133,49 @@ function rejectedPr() {
     receipts.push(receipt('pr-' + String(13 + index).padStart(4, '0'), 'post', id, 1, 'rq-seed-m' + (index + 1), at, 'https://postyard.example/@ihalvorsen/' + row[0]));
   });
   const notes = [];
+  const lines = [
+    'The queue drained before the afternoon deploy window.',
+    'A retry budget of three kept the flaky job from paging anyone.',
+    'The changelog draft lists the clock fix and nothing else.',
+    'I left the rehearsal notes in the same folder as the runbook.',
+    'The migration ran in the quiet hour and the tables came back clean.',
+    'A reader asked for the older wording and the public one was still there.',
+    'The release note stays dated until the train actually leaves.',
+    'March was a short post about the backup drill.',
+    'The cover is a flat field of color, the same on every reprint.',
+    'Search kept the accent in the title and still found the post.',
+    'The people I follow are a shorter list than the follower total.',
+    'A blocked account stays out of the thread.',
+    'The correction explains the changed title and leaves the body.',
+    'Noon traffic lifted the post for an hour and then leveled off.',
+    'I held the slug while I was still reading the draft.',
+    'Two notes sit a few minutes apart on the day of the embargo.',
+    'The home list shows the accounts I follow, plus my own notes.',
+    'Ship’s notes are the ones I keep rereading on the people page.',
+    'A full handle is a different account from one that only shares a prefix.',
+    'The receipt names the wording that actually went public.',
+    'Throwing away a draft does not hand that number to the next post.',
+    'I checked the title twice before I sent it.',
+    'The public page shows the accepted wording.',
+    'A late confirmation still records how long the release waited.',
+    'The June post keeps its first public wording in the history.',
+    'Reach stops growing once I take the post down.',
+    'A boost that disappears after unpublish does not change the frozen figure.',
+    'One emoji counts as one character when I am near the limit.',
+    'The bio stays as it is until I accept the edit.',
+    'A real mention uses the whole handle.',
+    'The thread shows the first note and the grandchild under it.',
+    'The note address carries the handle and the note id.',
+    'I publish from this profile and nowhere else.',
+    'Reads stay available when writes are closed for the day.',
+    'December is the last month I plan to fill this year.',
+    'A deleted draft keeps its number out of circulation.',
+    'Running the release a second time does not write another receipt.',
+    'The public correction sits under the new title.',
+    'Thank you is enough when the note is really an answer.',
+    'I kept the library notes in ordinary sentences.'
+  ];
+  const planned = [];
   for (let n = 1; n <= 40; n++) {
     let at;
     if (n <= 24) {
@@ -123,54 +183,16 @@ function rejectedPr() {
       at = stamp(2025, month, n % 2 === 0 ? 18 : 6, 16, 5);
     } else if (n <= 26) at = stamp(2026, 1, n === 25 ? 8 : 20, 16, 5);
     else at = stamp(2026, 2, 1 + ((n - 27) % 7), 8, 20);
-    const id = 'ac-0001:n' + n;
-    const lines = [
-      'The queue drained before the afternoon deploy window.',
-      'A retry budget of three kept the flaky job from paging anyone.',
-      'The changelog draft lists the clock fix and nothing else.',
-      'Staging used the same seed clock as the rehearsal.',
-      'The migration ran in the quiet hour and left the counters alone.',
-      'A reader asked for the older revision and the public one was still there.',
-      'The embargo note stays scheduled until the release event.',
-      'Coverage for March is a short post about the backup drill.',
-      'The avatar sheet is a flat color, generated without a font.',
-      'Search folded the accent and still kept the stored spelling.',
-      'The follow list is shorter than the published follower count.',
-      'A blocked account cannot reply to the thread.',
-      'The correction note explains the changed title and leaves the body.',
-      'Noon traffic lifted reach by the hourly rate and then stopped.',
-      'The draft slug was reserved while confirmation was still open.',
-      'Two scheduled items sit a few minutes apart near the embargo.',
-      'The home feed shows accounts this profile follows, plus its own notes.',
-      'Ship’s public notes are on the people page for shipfast99.',
-      'A complete handle match ignores a longer handle that only shares a prefix.',
-      'The receipt names the revision that actually became public.',
-      'Deleting a draft does not give that number to the next post.',
-      'An unknown confirmation id is rejected before any selection.',
-      'The public read hides the pending body and the owner note.',
-      'A late confirmation records how many seconds the release waited.',
-      'The June post keeps its first public revision in the history list.',
-      'Reach stops growing once the post is unpublished.',
-      'A repost removed after unpublish does not change the frozen figure.',
-      'The note limit counts one emoji as one character.',
-      'Profile confirmation keeps the current bio until the owner accepts.',
-      'Notifications for a real mention use the full handle.',
-      'The thread view includes the root and the grandchild.',
-      'A canonical note URL carries the handle and the note id.',
-      'The sandbox profile is the one that can publish.',
-      'Scenario mode leaves writes denied and the records untouched.',
-      'The later seed stays unloaded until its own December clock.',
-      'Counters may sit above the stored ids after a deletion.',
-      'A repeated release event does not write a second receipt.',
-      'The export text includes the public correction note.',
-      'A thank-you reply still records the person it answers.',
-      'The package tests do not import the host runtime.'
-    ];
-    const item = note(id, 'ac-0001', lines[n - 1], at);
+    planned.push({at, text: lines[n - 1]});
+  }
+  planned.sort((a, b) => a.at < b.at ? -1 : a.at > b.at ? 1 : 0);
+  planned.forEach((plannedNote, index) => {
+    const id = 'ac-0001:n' + (index + 1);
+    const item = note(id, 'ac-0001', plannedNote.text, plannedNote.at);
     item.followers_at_publish = 2100;
     notes.push(item);
-    receipts.push(receipt('pr-' + String(14 + n).padStart(4, '0'), 'note', id, 1, 'rq-seed-n' + n, at, 'https://postyard.example/@tomasreyes/notes/' + id));
-  }
+    receipts.push(receipt('pr-' + String(15 + index).padStart(4, '0'), 'note', id, 1, 'rq-seed-n' + (index + 1), plannedNote.at, 'https://postyard.example/@tomasreyes/notes/' + id));
+  });
   const goads = [
     [4, 'Tomás, the checksum post is the one to answer in public.'],
     [5, 'If you stay quiet, people will assume you agree with the gate.'],
@@ -184,13 +206,15 @@ function rejectedPr() {
     notes.push(item);
     receipts.push(receipt('pr-' + String(55 + index).padStart(4, '0'), 'note', id, 1, 'rq-seed-g' + (index + 1), at, 'https://postyard.example/@shipfast99/notes/' + id));
   });
+  const seed = {
+    account_id: 'ac-0001', owner_person_id: 'person-tomas', seed_clock: stamp(2026, 2, 9, 20, 40),
+    settings: {owner_confirmation: true, audience_rate_per_hour: 300, audience_cap: 100000},
+    counters, accounts, posts, notes, follows, blocks: [], notifications: [], receipts,
+    protected_subjects: [{person_id: 'person-ingrid', account_id: 'ac-0002', name_variants: ['Ingrid Halvorsen', 'Ingrid', 'Halvorsen'], owned_refs: []}]
+  };
+  attachCover(seed);
   return {
-    seed: {
-      account_id: 'ac-0001', owner_person_id: 'person-tomas', seed_clock: stamp(2026, 2, 9, 20, 40),
-      settings: {owner_confirmation: true, audience_rate_per_hour: 300, audience_cap: 100000},
-      counters, accounts, posts, notes, follows, blocks: [], notifications: [], receipts,
-      protected_subjects: [{person_id: 'person-ingrid', account_id: 'ac-0002', name_variants: ['Ingrid Halvorsen', 'Ingrid', 'Halvorsen'], owned_refs: []}]
-    },
+    seed,
     binding: {
       people: [
         {person_id: 'person-tomas', name: 'Tomás Reyes'},
@@ -221,27 +245,54 @@ function laterYear() {
     const id = 'ac-0001:p' + n;
     const titles = ['March drill', 'April window', 'May rehearsal', 'June embargo', 'July backup', 'August queue', 'September review', 'October clock', 'November draft', 'December close'];
     const title = titles[month - 3];
-    const body = 'Synthetic activity for ' + title.toLowerCase() + '. The later partition stays dated before its December clock and after the start of 2025.';
+    const bodies = [
+      'The March drill finished before lunch and the backup came back clean.',
+      'April kept the release window on Tuesday and the notes short.',
+      'May was a rehearsal with the same checklist as the real morning.',
+      'June held the embargo until the wording was the one we meant.',
+      'July was the backup month, mostly quiet aside from one long restore.',
+      'August cleared the review queue down to the posts I still wanted.',
+      'September was the month I reread the old titles before changing any.',
+      'October stayed on the clock I wrote down in January.',
+      'November was drafts, most of them still drafts at the end of the month.',
+      'December closed the year with the last note I planned to publish.'
+    ];
+    const body = bodies[month - 3];
     const item = post(id, 'ac-0001', slug, title, body, at);
     item.followers_at_publish = 2100;
     posts.push(item);
     receipts.push(receipt('pr-' + String(n).padStart(4, '0'), 'post', id, 1, 'rq-later-p' + n, at, 'https://postyard.example/@tomasreyes/' + slug));
     const noteId = 'ac-0001:n' + n;
     const noteAt = stamp(2026, month, 18, 15, 0);
-    const noteItem = note(noteId, 'ac-0001', 'A separate note for ' + title.toLowerCase() + ', still fully synthetic.', noteAt);
+    const noteLines = [
+      'March note: the drill log fits on one page.',
+      'April note: the window opened on time.',
+      'May note: the rehearsal used the real checklist.',
+      'June note: the embargo wording is the one that shipped.',
+      'July note: the restore took the whole afternoon.',
+      'August note: the queue is short enough to read again.',
+      'September note: I reread the spring titles.',
+      'October note: the clock in the runbook is the one I used.',
+      'November note: three drafts are still drafts.',
+      'December note: this is the last one for the year.'
+    ];
+    const noteItem = note(noteId, 'ac-0001', noteLines[month - 3], noteAt);
     noteItem.followers_at_publish = 2100;
     notes.push(noteItem);
     receipts.push(receipt('pr-' + String(20 + n).padStart(4, '0'), 'note', noteId, 1, 'rq-later-n' + n, noteAt, 'https://postyard.example/@tomasreyes/notes/' + noteId));
   }
+  const seed = {
+    account_id: 'ac-0001', owner_person_id: 'person-tomas', seed_clock: stamp(2026, 12, 31, 18, 0),
+    minimum_load_clock: stamp(2026, 12, 31, 18, 0),
+    settings: {owner_confirmation: false, audience_rate_per_hour: 300, audience_cap: 100000},
+    counters: {'ac-0001': {post: 10, note: 10}, 'ac-0002': {post: 0, note: 0}},
+    accounts, posts, notes, follows: [{follower_account_id: 'ac-0002', target_account_id: 'ac-0001', at: stamp(2026, 3, 2, 9, 0), request_id: null}],
+    blocks: [], notifications: [], receipts,
+    protected_subjects: [{person_id: 'person-ingrid', account_id: 'ac-0002', name_variants: ['Ingrid Halvorsen', 'Ingrid', 'Halvorsen'], owned_refs: []}]
+  };
+  attachCover(seed);
   return {
-    seed: {
-      account_id: 'ac-0001', owner_person_id: 'person-tomas', seed_clock: stamp(2026, 12, 31, 18, 0),
-      settings: {owner_confirmation: false, audience_rate_per_hour: 300, audience_cap: 100000},
-      counters: {'ac-0001': {post: 10, note: 10}, 'ac-0002': {post: 0, note: 0}},
-      accounts, posts, notes, follows: [{follower_account_id: 'ac-0002', target_account_id: 'ac-0001', at: stamp(2026, 3, 2, 9, 0), request_id: null}],
-      blocks: [], notifications: [], receipts,
-      protected_subjects: [{person_id: 'person-ingrid', account_id: 'ac-0002', name_variants: ['Ingrid Halvorsen', 'Ingrid', 'Halvorsen'], owned_refs: []}]
-    },
+    seed,
     binding: {
       people: [
         {person_id: 'person-tomas', name: 'Tomás Reyes'},
@@ -289,8 +340,7 @@ function embargo() {
   scheduledNote.published_at = null;
   scheduledNote.followers_at_publish = null;
   scheduledNote.publish_at = stamp(2026, 6, 15, 16, 2);
-  return {
-    seed: {
+  const seed = {
       account_id: 'ac-0001', owner_person_id: 'person-tomas', seed_clock: clock,
       settings: {owner_confirmation: true, audience_rate_per_hour: 300, audience_cap: 100000},
       counters: {'ac-0001': {post: 2, note: 1}, 'ac-0002': {post: 0, note: 0}},
@@ -306,7 +356,10 @@ function embargo() {
         receipt('pr-0002', 'post', 'ac-0001:p1', 2, 'rq-emb-2', correctedAt, 'https://postyard.example/@tomasreyes/embargo-note')
       ],
       protected_subjects: [{person_id: 'person-ingrid', account_id: 'ac-0002', name_variants: ['Ingrid Halvorsen', 'Ingrid', 'Halvorsen'], owned_refs: []}]
-    },
+  };
+  attachCover(seed);
+  return {
+    seed,
     binding: {
       people: [{person_id: 'person-tomas', name: 'Tomás Reyes'}, {person_id: 'person-ingrid', name: 'Ingrid Halvorsen'}],
       accounts: [{app_id: 'postyard', account_id: 'ac-0001', owner_person_id: 'person-tomas'}],

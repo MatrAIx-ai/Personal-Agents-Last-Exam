@@ -7,6 +7,8 @@
     "account_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
     "owner_person_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
     "seed_clock": {"type": "string", "format": "date-time"},
+    "minimum_load_clock": {"type": "string", "format": "date-time"},
+    "retired_ids": {"type": "array", "items": {"type": "string"}},
     "settings": {
       "type": "object",
       "additionalProperties": false,
@@ -39,7 +41,7 @@
           "account_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
           "handle": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_]{0,39}$"},
           "display_name": {"type": "string", "minLength": 1, "maxLength": 80},
-          "bio": {"type": "string", "maxLength": 500},
+          "bio": {"type": "string", "maxLength": 4000},
           "links": {"type": "array", "maxItems": 8, "items": {"type": "string", "minLength": 1, "maxLength": 200}},
           "kind": {"type": "string", "enum": ["person", "audience", "bot"]},
           "person_id": {"anyOf": [{"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"}, {"type": "null"}]},
@@ -47,6 +49,8 @@
           "following_count": {"type": "integer", "minimum": 0},
           "created_at": {"type": "string", "format": "date-time"},
           "profile_revision": {"type": "integer", "minimum": 1},
+          "profile_revision_high": {"type": "integer", "minimum": 1},
+          "retired_profile_revisions": {"type": "array", "items": {"type": "integer", "minimum": 1}},
           "owner_note": {"anyOf": [{"type": "string", "maxLength": 4000}, {"type": "null"}]},
           "pending_profile": {
             "anyOf": [
@@ -94,7 +98,7 @@
                 "body": {"type": "string", "minLength": 1, "maxLength": 20000},
                 "tags": {"type": "array", "maxItems": 20, "items": {"type": "string", "minLength": 1, "maxLength": 40}},
                 "slug": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$"},
-                "correction_note": {"anyOf": [{"type": "string", "maxLength": 500}, {"type": "null"}]},
+                "correction_note": {"anyOf": [{"type": "string", "maxLength": 4000}, {"type": "null"}]},
                 "created_at": {"type": "string", "format": "date-time"},
                 "request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
                 "visibility": {"type": "string", "enum": ["private", "pending", "public", "withheld"]}
@@ -127,6 +131,23 @@
           "schedule_request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
           "cover_asset_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
           "resolution_code": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "superseded": {"type": "array", "items": {"type": "integer", "minimum": 1}},
+          "exposures": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["revision", "start", "end", "followers_at_publish", "reach_at_end", "ended_by"],
+              "properties": {
+                "revision": {"type": "integer", "minimum": 1},
+                "start": {"type": "string", "format": "date-time"},
+                "end": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+                "followers_at_publish": {"type": "integer", "minimum": 0},
+                "reach_at_end": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+                "ended_by": {"anyOf": [{"type": "string"}, {"type": "null"}]}
+              }
+            }
+          },
           "created_at": {"type": "string", "format": "date-time"},
           "updated_at": {"type": "string", "format": "date-time"}
         }
@@ -173,6 +194,7 @@
           "owner_note": {"anyOf": [{"type": "string", "maxLength": 4000}, {"type": "null"}]},
           "links": {"type": "array", "maxItems": 8, "items": {"type": "string", "minLength": 1, "maxLength": 400}},
           "image_asset_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "mentions": {"type": "array", "maxItems": 20, "items": {"type": "string", "minLength": 1, "maxLength": 40}},
           "created_at": {"type": "string", "format": "date-time"},
           "updated_at": {"type": "string", "format": "date-time"}
         }
@@ -191,7 +213,8 @@
           "mime": {"type": "string", "enum": ["image/png", "image/jpeg"]},
           "width": {"type": "integer", "minimum": 1},
           "height": {"type": "integer", "minimum": 1},
-          "byte_length": {"type": "integer", "minimum": 1}
+          "byte_length": {"type": "integer", "minimum": 1},
+          "bytes_base64": {"type": "string", "minLength": 1}
         }
       }
     },
@@ -205,7 +228,9 @@
           "follower_account_id": {"type": "string"},
           "target_account_id": {"type": "string"},
           "at": {"type": "string", "format": "date-time"},
-          "request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]}
+          "request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "ended_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "unfollow_request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]}
         }
       }
     },
@@ -253,7 +278,8 @@
           "published_at": {"type": "string", "format": "date-time"},
           "public_url": {"type": "string", "minLength": 1},
           "request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
-          "event_id": {"anyOf": [{"type": "string"}, {"type": "null"}]}
+          "event_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "followers_at_publish": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]}
         }
       }
     },

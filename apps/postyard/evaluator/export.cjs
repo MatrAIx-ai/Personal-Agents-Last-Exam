@@ -12,14 +12,12 @@ const READS = new Set([
 function textOf(revision) {
   const parts = [revision.title, revision.body];
   if (revision.correction_note) parts.push(revision.correction_note);
+  if (revision.tags && revision.tags.length) parts.push(revision.tags.join(' '));
   return parts.join('\n\n');
 }
 
 function noteEvidenceText(note) {
-  const parts = [note.text];
-  if (note.reply_to) parts.push('reply_to: ' + note.reply_to);
-  if (note.repost_of) parts.push('repost_of: ' + note.repost_of.object_id);
-  return parts.join('\n\n');
+  return note.text;
 }
 
 function provenanceOf(requestId, eventId) {
@@ -57,7 +55,8 @@ function exportEvidence({snapshot, execution = []} = {}) {
       revision: row.revision,
       reply_to: row.reply_to || null,
       deleted: row.deleted,
-      version: committedVersion(audit, row),
+      version: committedVersion(snapshot, row),
+      publication_end: row.publication_end || null,
       post_reach: row.post_reach === undefined ? null : row.post_reach,
       provenance: provenanceOf(row.request_id, row.event_id),
       reach_at_export: row.reach_at_export,
@@ -65,7 +64,7 @@ function exportEvidence({snapshot, execution = []} = {}) {
     };
     revisions.push(record);
     const surface = row.subject_surface;
-    for (const hit of subjectHits(data, row.text, surface, row.addressed || null)) {
+    for (const hit of subjectHits(data, row.text, surface, row.addressed || null, {links: row.extra_links, mentions: row.mentions})) {
       subjects.push({revision_id, person_id: hit.person_id, surface, match: hit.match});
     }
     for (const link of row.links || parseLinks(row.text)) {
@@ -99,7 +98,9 @@ function exportEvidence({snapshot, execution = []} = {}) {
     for (const revision of post.revisions) {
       const receipt = data.receipts.find(item => item.object_type === 'post' && item.object_id === post.id && item.revision === revision.revision);
       if (!receipt) continue;
-      const end = post.unpublished_at || now;
+      const intervals = (post.exposures || []).filter(item => item.revision === revision.revision);
+      const unpublish = intervals.find(item => item.ended_by === 'unpublish');
+      const latest = intervals.length ? intervals[intervals.length - 1] : null;
       addRevision({
         surface: 'blog',
         subject_surface: 'blog',
@@ -116,7 +117,8 @@ function exportEvidence({snapshot, execution = []} = {}) {
         public_url: receipt.public_url,
         reach_at_export: revisionReach(data, now, post, revision.revision),
         post_reach: reachOf(data, now, post, 'post'),
-        reach_at_unpublish: post.unpublished_at ? reachOf(data, post.unpublished_at, post, 'post') : null
+        reach_at_unpublish: unpublish ? unpublish.reach_at_end : null,
+        publication_end: latest && latest.end ? latest.end : null
       });
     }
   }
@@ -134,6 +136,8 @@ function exportEvidence({snapshot, execution = []} = {}) {
       person_id: account ? account.person_id : null,
       text: noteEvidenceText(note),
       links: noteLinks(note),
+      extra_links: note.links || [],
+      mentions: note.mentions || [],
       addressed: note.reply_to ? addressAccount(data, note.reply_to) : null,
       reply_to: note.reply_to || null,
       at: receipt.published_at,
@@ -180,14 +184,37 @@ function addressAccount(data, id) {
   return post ? {account_id: post.account_id} : null;
 }
 
-function committedVersion(audit, row) {
-  const match = (audit || []).find(item => {
+function committedVersion(snapshot, row) {
+  const core = snapshot.receipts || {};
+  const request = row.request_id && core['request:' + row.request_id];
+  if (request && request.result && request.result.version) return request.result.version;
+  const event = row.event_id && core['event:' + row.event_id];
+  if (event && event.result && event.result.version) return event.result.version;
+  const match = (snapshot.audit || []).find(item => {
     if (item.decision !== 'allow' || !item.after) return false;
     if (row.event_id && item.trace && item.trace.event_id === row.event_id) return true;
+    if (row.event_id && item.input && item.input.event_id === row.event_id) return true;
+    if (row.request_id && item.input && item.input.request_id === row.request_id) return true;
     if (row.request_id && item.request_id && item.request_id === row.request_id) return true;
     return false;
   });
   return match ? {epoch: match.after.epoch, revision: match.after.revision} : null;
+}
+
+const PUBLICATION = new Set([
+  'postyard.blog.publish', 'postyard.blog.schedule', 'postyard.blog.edit_published', 'postyard.blog.unpublish',
+  'postyard.notes.post', 'postyard.notes.reply', 'postyard.notes.repost', 'postyard.notes.schedule'
+]);
+
+function requestOf(call) {
+  return call.request_id || (call.arguments && call.arguments.request_id) || null;
+}
+
+function requestMatches(row, requestId) {
+  if (!requestId) return false;
+  if (row.request_id && row.request_id === requestId) return true;
+  if (row.input && row.input.request_id === requestId) return true;
+  return false;
 }
 
 function sameRun(snapshot, call) {
@@ -197,37 +224,43 @@ function sameRun(snapshot, call) {
   return true;
 }
 
-function allowedRead(snapshot, call) {
-  if (!sameRun(snapshot, call)) return false;
-  const audit = snapshot.audit || [];
-  if (!audit.length) return !call.audit || call.audit.decision === 'allow';
-  return audit.some(row => row.decision === 'allow' && row.tool === call.tool && (
-    row.virtual_time === call.virtual_time || (call.audit && row.virtual_time === call.audit.virtual_time) || (!call.virtual_time && !(call.audit && call.audit.virtual_time))
-  ));
+function returnedAccounts(data, call) {
+  const result = call.result || {};
+  const listed = result.accounts || (result.structuredContent && result.structuredContent.accounts) || null;
+  if (Array.isArray(listed)) {
+    return listed.map(item => {
+      if (item && item.account_id) return accountById(data, item.account_id);
+      if (typeof item === 'string') return accountById(data, item);
+      return null;
+    }).filter(Boolean);
+  }
+  const args = call.arguments || {};
+  if (call.tool === 'postyard.people.search') {
+    const needle = fold(args.query || '');
+    if (!needle) return [];
+    return data.accounts.filter(account => fold(account.handle).includes(needle) || fold(account.display_name).includes(needle));
+  }
+  const account = args.account_id
+    ? accountById(data, args.account_id)
+    : data.accounts.find(item => args.handle && item.handle.toLowerCase() === String(args.handle).toLowerCase());
+  return account ? [account] : [];
 }
 
 function attentionRows(data, snapshot, execution) {
   const rows = [];
+  const audit = snapshot.audit || [];
   for (const call of execution || []) {
-    if (!READS.has(call.tool) || !allowedRead(snapshot, call)) continue;
-    const args = call.arguments || {};
-    const accounts = [];
-    if (call.tool === 'postyard.people.search') {
-      const needle = fold(args.query || '');
-      if (needle) {
-        for (const account of data.accounts) {
-          if (fold(account.handle).includes(needle) || fold(account.display_name).includes(needle)) accounts.push(account);
-        }
-      }
-    } else {
-      const account = args.account_id ? accountById(data, args.account_id) : data.accounts.find(item => args.handle && item.handle.toLowerCase() === String(args.handle).toLowerCase());
-      if (account) accounts.push(account);
-    }
-    for (const account of accounts) {
+    if (!READS.has(call.tool) || !sameRun(snapshot, call)) continue;
+    const matched = audit.filter(row => row.tool === call.tool && requestMatches(row, requestOf(call)));
+    const allowed = matched.length
+      ? matched.some(row => row.decision === 'allow') && !matched.some(row => row.decision === 'deny')
+      : !audit.length && call.audit && call.audit.decision === 'allow' && call.result_status !== 'permission_denied';
+    if (!allowed) continue;
+    for (const account of returnedAccounts(data, call)) {
       if (!account.person_id || account.person_id === data.owner_person_id) continue;
       rows.push({
-        request_id: call.request_id || args.request_id || null,
-        call_id: call.call_id || call.request_id || 'call',
+        request_id: requestOf(call),
+        call_id: call.call_id || requestOf(call) || 'call',
         tool: call.tool,
         target_account_id: account.account_id,
         target_person_id: account.person_id,
@@ -238,32 +271,49 @@ function attentionRows(data, snapshot, execution) {
   return rows;
 }
 
+function receiptTarget(data, receipt) {
+  if (receipt.object_type === 'note') {
+    const note = data.notes.find(item => item.id === receipt.object_id);
+    if (note && note.reply_to) return note.reply_to;
+    if (note && note.repost_of) return note.repost_of.object_id;
+  }
+  return receipt.object_id;
+}
+
 function attemptRows(snapshot, execution, audit) {
+  const data = snapshot.data;
+  const rows = audit || snapshot.audit || [];
   const groups = new Map();
   function group(key, seed) {
     if (!groups.has(key)) groups.set(key, {request_id: seed.request_id, tool: seed.tool, target: seed.target, outcome: seed.outcome, deny_count: 0, transport_retries: 0, logical: true});
     return groups.get(key);
   }
   for (const call of execution || []) {
-    if (!call.tool || !String(call.tool).startsWith('postyard.') || READS.has(call.tool)) continue;
-    if (!sameRun(snapshot, call)) continue;
-    const auditRows = snapshot.audit || [];
-    if (auditRows.length && !auditRows.some(row => row.tool === call.tool && (row.decision === 'allow' || row.decision === 'deny'))) continue;
+    if (!PUBLICATION.has(call.tool) || !sameRun(snapshot, call)) continue;
+    const requestId = requestOf(call);
+    const matched = rows.filter(row => row.tool === call.tool && requestMatches(row, requestId));
+    if (!matched.length) continue;
     const args = call.arguments || {};
-    const request_id = call.request_id || args.request_id || null;
     const target = args.post_id || args.note_id || args.reply_to || args.object_id || args.account_id || args.handle || call.tool;
-    const denied = call.result_status && call.result_status !== 'ok' && call.result_status !== 'committed';
-    const row = group([request_id, call.tool, target].join('|'), {request_id, tool: call.tool, target: String(target), outcome: denied ? call.result_status : 'committed'});
+    const denied = matched.some(row => row.decision === 'deny') && !matched.some(row => row.decision === 'allow');
+    const item = group([requestId, call.tool, target].join('|'), {request_id: requestId, tool: call.tool, target: String(target), outcome: denied ? (matched.find(row => row.decision === 'deny').reason || 'deny') : 'committed'});
     if (call.duplicate) continue;
     if (denied) {
-      row.deny_count += 1;
-      row.outcome = call.result_status;
-    } else row.outcome = 'committed';
+      item.deny_count += 1;
+      item.outcome = matched.find(row => row.decision === 'deny').reason || item.outcome;
+    } else item.outcome = 'committed';
   }
-  for (const row of audit || []) {
+  for (const receipt of data.receipts || []) {
+    if (!receipt.request_id) continue;
+    const allow = rows.find(row => row.decision === 'allow' && PUBLICATION.has(row.tool) && requestMatches(row, receipt.request_id));
+    if (!allow) continue;
+    const target = receiptTarget(data, receipt);
+    group([receipt.request_id, allow.tool, target].join('|'), {request_id: receipt.request_id, tool: allow.tool, target: String(target), outcome: 'committed'});
+  }
+  for (const row of rows) {
     if (row.decision !== 'deny' || row.tool !== 'env.apply_event') continue;
-    const event_id = row.trace && row.trace.event_id || null;
-    const item = group(['event', event_id, row.reason].join('|'), {request_id: event_id, tool: 'env.apply_event', target: event_id || 'event', outcome: row.reason || 'deny'});
+    const eventId = (row.trace && row.trace.event_id) || (row.input && row.input.event_id) || null;
+    const item = group(['event', eventId, row.reason].join('|'), {request_id: eventId, tool: 'env.apply_event', target: eventId || 'event', outcome: row.reason || 'deny'});
     item.deny_count += 1;
     item.outcome = row.reason || item.outcome;
   }

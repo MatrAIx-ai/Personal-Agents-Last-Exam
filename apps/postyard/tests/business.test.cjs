@@ -126,7 +126,7 @@ test('core example: owner confirmation publishes revision 3, and an update makes
   assert.equal(updated.revision, 4);
   assert.equal(updated.record_status, 'draft');
   const missed = boom(() => edited.event({event_id: 'py-confirm-old', at: '2026-11-18T11:12:00-08:00', operation: 'owner.confirm_publication', payload: {object_type: 'post', object_id: draft.id, revision: 3}}));
-  assert.equal(missed.code, 'not_pending');
+  assert.equal(missed.code, 'revision_mismatch');
 });
 
 test('core example: release note rq-41 confirms once as receipt pr-0007', () => {
@@ -145,7 +145,22 @@ test('core example: release note rq-41 confirms once as receipt pr-0007', () => 
   draft.revisions[0].body = 'Shipped. https://forkyard.example/tidewater/tidewater/releases/v0.9.0';
   draft.revisions[0].visibility = 'private';
   data.posts.push(draft);
-  for (let n = 2; n <= 6; n++) data.receipts.push({...data.receipts[0], receipt_id: 'pr-000' + n});
+  for (let n = 2; n <= 6; n++) {
+    const at = '2026-11-0' + n + 'T10:00:00-08:00';
+    const id = 'ac-0001:p' + n;
+    const slug = 'prior-note-' + n;
+    data.posts.push({
+      id, account_id: 'ac-0001', slug, status: 'published', public_revision: 1, head_revision: 1,
+      revisions: [{revision: 1, title: 'Prior ' + n, body: 'A separate publication numbered ' + n + '.', tags: ['release'], slug, correction_note: null, created_at: at, request_id: null, visibility: 'public'}],
+      pending: null, publish_at: null, scheduled_for: null, published_at: at, unpublished_at: null,
+      release_lag_seconds: null, followers_at_publish: 2100, owner_note: null, schedule_request_id: null,
+      created_at: at, updated_at: at
+    });
+    data.receipts.push({
+      receipt_id: 'pr-000' + n, object_type: 'post', object_id: id, revision: 1,
+      published_at: at, public_url: 'https://postyard.example/@tomasreyes/' + slug, request_id: 'rq-prior-' + n, event_id: null
+    });
+  }
   const world = fixture({data, virtual_now: '2026-11-18T11:00:00-08:00'});
   const pending = world.call('postyard.blog.publish', {post_id: 'ac-0001:p12', revision: 1, request_id: 'rq-41'});
   assert.equal(pending.record_status, 'pending_owner_confirmation');

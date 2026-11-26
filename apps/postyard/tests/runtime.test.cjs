@@ -108,8 +108,9 @@ test('public runtime replay, reset, release, and selector denies', () => {
     const two = model.execute(one.state, 'agent', 'postyard.blog.drafts.create', {
       expected_version: model.version(one.state), request_id: 'rq-b', title: 'B', slug: 'pending-b', body: 'Pending post B.'
     });
+    const pendingVersion = model.version(two.state);
     const pubA = model.execute(two.state, 'agent', 'postyard.blog.publish', {
-      expected_version: model.version(two.state), request_id: 'rq-pa', post_id: one.result.id, revision: 1
+      expected_version: pendingVersion, request_id: 'rq-pa', post_id: one.result.id, revision: 1
     });
     const pubB = model.execute(pubA.state, 'agent', 'postyard.blog.publish', {
       expected_version: model.version(pubA.state), request_id: 'rq-pb', post_id: two.result.id, revision: 1
@@ -142,6 +143,20 @@ test('public runtime replay, reset, release, and selector denies', () => {
     });
     assert.equal(confirmReplay.result.duplicate, true);
     assert.equal(confirmReplay.state.data.receipts.filter(item => item.object_id === one.result.id).length, 1);
+    const original = model.execute(confirmed.state, 'agent', 'postyard.blog.publish', {
+      expected_version: pendingVersion, request_id: 'rq-pa', post_id: one.result.id, revision: 1
+    });
+    assert.equal(original.result.duplicate, true);
+    assert.equal(original.result.record_status, 'pending_owner_confirmation');
+    assert.equal(original.state.data.receipts.filter(item => item.object_id === one.result.id).length, 1);
+    const badForm = model.execute(pubB.state, 'infra', 'env.apply_event', {
+      expected_version: model.version(pubB.state),
+      event: {event_id: 'py-form', at: '2026-02-09T21:10:00-08:00', operation: 'owner.confirm_publication', payload: {object_type: 'post', object_id: one.result.id, select: 'only_pending'}}
+    });
+    assert.equal(badForm.result.status, 'invalid_arguments');
+    assert.equal(badForm.state.audit.at(-1).reason, 'invalid_arguments');
+    assert.equal(badForm.state.audit.at(-1).trace, undefined);
+    assert.equal(JSON.stringify(badForm.state.data), JSON.stringify(pubB.state.data));
   } finally {
     prep.cleanup();
   }

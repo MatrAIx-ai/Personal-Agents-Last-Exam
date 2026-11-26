@@ -73,10 +73,20 @@ function sameHandle(account, handle) {
   return !!(account && handle && account.handle.toLowerCase() === String(handle).toLowerCase());
 }
 
-function subjectHits(data, text, surface, addressed) {
+function withoutUrls(text) {
+  return String(text).replace(/https:\/\/[^\s)<>"]+/g, ' ');
+}
+
+function subjectHits(data, text, surface, addressed, extras) {
   const hits = [];
-  const handles = mentions(text);
+  const handles = mentions(withoutUrls(text));
+  for (const name of (extras && extras.mentions) || []) {
+    if (typeof name === 'string' && name && !handles.some(item => item.toLowerCase() === name.toLowerCase())) handles.push(name);
+  }
   const links = parseLinks(text);
+  for (const url of (extras && extras.links) || []) {
+    for (const link of parseLinks(url)) if (!links.some(item => item.url === link.url)) links.push(link);
+  }
   const addressedAccount = addressed && addressed.account_id
     ? data.accounts.find(item => item.account_id === addressed.account_id)
     : null;

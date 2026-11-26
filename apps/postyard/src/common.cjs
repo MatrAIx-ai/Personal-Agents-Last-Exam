@@ -21,6 +21,8 @@ const SERIAL = /^[1-9][0-9]*$/;
 const FULL_FOLD = {
   '\u00DF': 'ss',
   '\u0130': 'i\u0307',
+  '\u017F': 's',
+  '\u03C2': '\u03C3',
   '\u1E9E': 'ss',
   '\uFB00': 'ff',
   '\uFB01': 'fi',

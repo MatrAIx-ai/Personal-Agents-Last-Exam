@@ -4,6 +4,12 @@ const {
   nextSerial, nextReceipt, tagsOf, requireText, requireSlug, chars, fold
 } = require('./common.cjs');
 const {subjectHits, parseLinks, mentions} = require('./subjects.cjs');
+const {imageSize} = require('./images.cjs');
+const MEDIA_LIMITS = {
+  avatar: {mime: 'image/png', width: 128, height: 128, bytes: 15 * 1024},
+  cover: {mime: 'image/jpeg', bytes: 80 * 1024},
+  note: {mime: 'image/jpeg', bytes: 60 * 1024}
+};
 
 function touch(ctx, item) {
   if (instant(ctx.virtual_now) < instant(item.updated_at, 'invalid_time')) {
@@ -87,7 +93,8 @@ function addReceipt(data, fields) {
     published_at: fields.published_at,
     public_url: fields.public_url,
     request_id: fields.request_id || null,
-    event_id: fields.event_id || null
+    event_id: fields.event_id || null,
+    followers_at_publish: fields.followers_at_publish === undefined ? null : fields.followers_at_publish
   };
   data.receipts.push(receipt);
   return receipt;
@@ -116,6 +123,12 @@ function repostReach(data, objectType, objectId, end, start) {
 }
 
 function reachOf(data, now, item, objectType) {
+  if (objectType === 'post' && item.exposures && item.exposures.length) {
+    const open = [...item.exposures].reverse().find(row => row.end === null);
+    if (open) return exposureReach(data, item, open, now);
+    const closed = [...item.exposures].reverse().find(row => row.reach_at_end !== null && row.reach_at_end !== undefined);
+    if (closed) return closed.reach_at_end;
+  }
   if (!item.published_at || item.followers_at_publish === null || item.followers_at_publish === undefined) return 0;
   const end = item.unpublished_at || item.deleted_at || now;
   const hours = hoursBetween(item.published_at, end);
@@ -124,29 +137,73 @@ function reachOf(data, now, item, objectType) {
   return Math.min(data.settings.audience_cap, grown);
 }
 
+function exposureReach(data, post, exposure, end) {
+  const hours = hoursBetween(exposure.start, end);
+  const extra = repostReach(data, 'post', post.id, end, exposure.start);
+  const grown = exposure.followers_at_publish + extra + Math.floor(data.settings.audience_rate_per_hour * hours);
+  return Math.min(data.settings.audience_cap, grown);
+}
+
 function revisionReach(data, now, post, revisionNumber) {
+  const rows = (post.exposures || []).filter(item => item.revision === revisionNumber);
+  if (rows.length) {
+    const open = rows.find(item => item.end === null);
+    if (open) return exposureReach(data, post, open, now);
+    return rows[rows.length - 1].reach_at_end || 0;
+  }
   const receipts = data.receipts.filter(item => item.object_type === 'post' && item.object_id === post.id);
   const receipt = receipts.find(item => item.revision === revisionNumber);
   if (!receipt) return 0;
   const start = receipt.published_at;
   let end = post.unpublished_at || now;
   for (const later of receipts) {
-    if (later.revision === revisionNumber) continue;
-    if (instant(later.published_at, 'invalid_time') <= instant(start, 'invalid_time')) continue;
-    if (instant(later.published_at, 'invalid_time') < instant(end, 'invalid_time')) end = later.published_at;
+    if (later.revision <= revisionNumber) continue;
+    const laterAt = instant(later.published_at, 'invalid_time');
+    if (laterAt < instant(start, 'invalid_time')) continue;
+    if (laterAt <= instant(end, 'invalid_time')) end = later.published_at;
   }
-  const first = receipts.reduce((earliest, item) => !earliest || instant(item.published_at, 'invalid_time') < instant(earliest.published_at, 'invalid_time') ? item : earliest, null);
   const hours = hoursBetween(start, end);
   const extra = repostReach(data, 'post', post.id, end, start);
-  const base = first && first.revision === revisionNumber ? (post.followers_at_publish || 0) : 0;
+  const base = receipt.followers_at_publish === undefined || receipt.followers_at_publish === null
+    ? (post.followers_at_publish || 0)
+    : receipt.followers_at_publish;
   return Math.min(data.settings.audience_cap, base + extra + Math.floor(data.settings.audience_rate_per_hour * hours));
 }
 
+function mediaView(data, id, role) {
+  if (!id) return null;
+  const asset = (data.media || []).find(item => item.asset_id === id && item.role === role);
+  if (!asset || typeof asset.bytes_base64 !== 'string') return {asset_id: id, status: 'asset_missing'};
+  const bytes = Buffer.from(asset.bytes_base64, 'base64');
+  const info = imageSize(bytes);
+  const limit = MEDIA_LIMITS[role];
+  if (!info || !limit || info.mime !== limit.mime || bytes.length !== asset.byte_length) return {asset_id: id, status: 'asset_missing'};
+  const view = {asset_id: id, mime: info.mime, width: info.width, height: info.height, byte_length: bytes.length};
+  if (bytes.length > limit.bytes || (limit.width && (info.width !== limit.width || info.height !== limit.height))) {
+    return {...view, status: 'too_large'};
+  }
+  return {...view, status: 'ready'};
+}
+
 function coverOf(data, post) {
-  if (!post.cover_asset_id) return null;
-  const asset = (data.media || []).find(item => item.asset_id === post.cover_asset_id && item.role === 'cover');
-  if (!asset) return {asset_id: post.cover_asset_id, status: 'asset_missing'};
-  return {asset_id: asset.asset_id, status: 'ready', mime: asset.mime, width: asset.width, height: asset.height, byte_length: asset.byte_length};
+  return mediaView(data, post.cover_asset_id, 'cover');
+}
+
+function closeExposures(data, post, end, endedBy) {
+  post.exposures = post.exposures || [];
+  for (const item of post.exposures) {
+    if (item.end !== null) continue;
+    item.end = end;
+    item.ended_by = endedBy;
+    item.reach_at_end = exposureReach(data, post, item, end);
+  }
+}
+
+function openExposure(post, revisionNumber, start, followers) {
+  post.exposures = post.exposures || [];
+  post.exposures.push({
+    revision: revisionNumber, start, end: null, followers_at_publish: followers, reach_at_end: null, ended_by: null
+  });
 }
 
 function dueOf(item, now) {
@@ -161,21 +218,24 @@ function makePostPublic(data, ctx, post, number, requestId, eventId) {
   if (!row) fail('revision_mismatch', 'That revision is not on this post.');
   row.visibility = 'public';
   post.slug = row.slug;
+  closeExposures(data, post, ctx.virtual_now, 'revision');
+  const followers = followersOf(data, post.account_id);
   post.public_revision = number;
   post.status = 'published';
   post.pending = null;
   post.publish_at = null;
   if (!post.published_at) {
     post.published_at = ctx.virtual_now;
-    post.followers_at_publish = followersOf(data, post.account_id);
+    post.followers_at_publish = followers;
   }
   post.unpublished_at = null;
+  openExposure(post, number, ctx.virtual_now, followers);
   touch(ctx, post);
   const account = accountById(data, post.account_id);
   return addReceipt(data, {
     object_type: 'post', object_id: post.id, revision: number,
     published_at: ctx.virtual_now, public_url: publicUrl(account, row.slug),
-    request_id: requestId, event_id: eventId
+    request_id: requestId, event_id: eventId, followers_at_publish: followers
   });
 }
 
@@ -192,7 +252,7 @@ function publishNote(data, ctx, note, requestId, eventId) {
   return addReceipt(data, {
     object_type: 'note', object_id: note.id, revision: 1,
     published_at: ctx.virtual_now, public_url: noteUrl(account, note.id),
-    request_id: requestId, event_id: eventId
+    request_id: requestId, event_id: eventId, followers_at_publish: note.followers_at_publish
   });
 }
 
@@ -231,6 +291,7 @@ function createDraft(data, ctx, args) {
     pending: null, publish_at: null, scheduled_for: null, published_at: null, unpublished_at: null,
     release_lag_seconds: null, followers_at_publish: null, owner_note: null, schedule_request_id: null,
     cover_asset_id: args.cover_asset_id || null, resolution_code: null,
+    superseded: [], exposures: [],
     created_at: now, updated_at: now
   };
   data.posts.push(post);
@@ -254,6 +315,8 @@ function updateDraft(data, ctx, args) {
   if (post.pending) {
     const held = revision(post, post.pending.revision);
     if (held && held.visibility === 'pending') held.visibility = 'withheld';
+    post.superseded = post.superseded || [];
+    post.superseded.push(post.pending.revision);
     post.pending = null;
     post.publish_at = waiting ? null : post.publish_at;
     post.schedule_request_id = null;
@@ -275,6 +338,8 @@ function deleteDraft(data, ctx, args) {
     fail('already_published', 'A public post is removed with blog.unpublish.');
   }
   if (post.status === 'scheduled') fail('invalid_arguments', 'Unschedule the post before deleting it.');
+  data.retired_ids = data.retired_ids || [];
+  data.retired_ids.push(post.id);
   data.posts = data.posts.filter(item => item.id !== post.id);
   return {id: post.id, record_status: 'deleted'};
 }
@@ -353,7 +418,7 @@ function unschedule(data, ctx, args) {
 function editPublished(data, ctx, args) {
   bindId(args, 'post_id');
   const post = ownPost(data, args.post_id);
-  if (post.status !== 'published' || !post.public_revision) fail('not_published', 'That post is not public.');
+  if ((post.status !== 'published' && post.status !== 'unpublished') || !post.public_revision) fail('not_published', 'That post is not public.');
   if (!Number.isInteger(args.base_revision) || args.base_revision !== post.public_revision) {
     fail('revision_mismatch', 'base_revision is not the current public revision.');
   }
@@ -390,6 +455,14 @@ function unpublish(data, ctx, args) {
     if (held && held.visibility === 'pending') held.visibility = 'withheld';
     post.pending = null;
   }
+  if (!(post.exposures || []).some(item => item.end === null) && post.public_revision && post.published_at) {
+    const receipt = [...data.receipts].reverse().find(item => item.object_type === 'post' && item.object_id === post.id && item.revision === post.public_revision);
+    const followers = receipt && receipt.followers_at_publish !== null && receipt.followers_at_publish !== undefined
+      ? receipt.followers_at_publish
+      : (post.followers_at_publish || 0);
+    openExposure(post, post.public_revision, receipt ? receipt.published_at : post.published_at, followers);
+  }
+  closeExposures(data, post, ctx.virtual_now, 'unpublish');
   post.status = 'unpublished';
   post.unpublished_at = ctx.virtual_now;
   touch(ctx, post);
@@ -400,7 +473,15 @@ function postText(post, number) {
   const row = revision(post, number) || head(post);
   const parts = [row.title, row.body];
   if (row.correction_note) parts.push(row.correction_note);
+  if (row.tags && row.tags.length) parts.push(row.tags.join(' '));
   return parts.join('\n\n');
+}
+
+function publicUpdatedAt(data, post) {
+  const row = revision(post, post.public_revision);
+  if (!row) return post.created_at;
+  const receipt = [...data.receipts].reverse().find(item => item.object_type === 'post' && item.object_id === post.id && item.revision === row.revision);
+  return receipt ? receipt.published_at : row.created_at;
 }
 
 function viewPost(data, ctx, post, audience) {
@@ -426,7 +507,7 @@ function viewPost(data, ctx, post, audience) {
     public_url: account ? publicUrl(account, shown.slug) : null,
     cover: coverOf(data, post),
     created_at: post.created_at,
-    updated_at: post.updated_at
+    updated_at: publicUpdatedAt(data, post)
   };
   if (owner) {
     view.head_revision = post.head_revision;
@@ -514,7 +595,7 @@ function createNote(data, ctx, fields) {
     release_lag_seconds: null, followers_at_publish: null, pending_kind: fields.pending_kind || null,
     request_id: fields.request_id || null, event_id: fields.event_id || null,
     schedule_request_id: fields.schedule_request_id || null, owner_note: null,
-    links: fields.links || [], image_asset_id: fields.image_asset_id || null,
+    links: fields.links || [], mentions: fields.mentions || [], image_asset_id: fields.image_asset_id || null,
     created_at: now, updated_at: now
   };
   data.notes.push(note);
@@ -523,15 +604,16 @@ function createNote(data, ctx, fields) {
 
 function postNote(data, ctx, args) {
   const text = noteText(args.text, 'note_too_long');
+  const image = args.image_asset_id || null;
   if (confirms(data)) {
     const note = createNote(data, ctx, {
       account_id: data.account_id, kind: 'note', text, status: 'pending_owner_confirmation',
-      pending_kind: 'post', request_id: args.request_id
+      pending_kind: 'post', request_id: args.request_id, image_asset_id: image
     });
     return {id: note.id, record_status: note.status, revision: 1};
   }
   const note = createNote(data, ctx, {
-    account_id: data.account_id, kind: 'note', text, status: 'posted', request_id: args.request_id
+    account_id: data.account_id, kind: 'note', text, status: 'posted', request_id: args.request_id, image_asset_id: image
   });
   const receipt = publishNote(data, ctx, note, args.request_id, null);
   return {id: note.id, record_status: 'posted', revision: 1, receipt_id: receipt.receipt_id};
@@ -587,12 +669,7 @@ function viewNote(data, ctx, note) {
     created_at: note.created_at, updated_at: note.updated_at
   };
   if (note.account_id === data.account_id) view.owner_note = note.owner_note;
-  if (note.image_asset_id) {
-    const asset = (data.media || []).find(item => item.asset_id === note.image_asset_id && item.role === 'note');
-    view.image = asset
-      ? {asset_id: asset.asset_id, status: 'ready', mime: asset.mime, byte_length: asset.byte_length}
-      : {asset_id: note.image_asset_id, status: 'asset_missing'};
-  }
+  if (note.image_asset_id) view.image = mediaView(data, note.image_asset_id, 'note');
   return view;
 }
 
@@ -602,10 +679,7 @@ function addressOf(data, id) {
 }
 
 function noteTextForEvidence(note) {
-  const parts = [note.text];
-  if (note.reply_to) parts.push('reply_to: ' + note.reply_to);
-  if (note.repost_of) parts.push('repost_of: ' + note.repost_of.object_id);
-  return parts.join('\n\n');
+  return note.text;
 }
 
 function noteLinks(note) {
@@ -657,12 +731,15 @@ function getNote(data, ctx, args) {
   const surface = note.kind === 'reply' ? 'reply_to_subject' : 'note';
   const addressed = note.reply_to ? addressOf(data, note.reply_to) : null;
   const text = noteTextForEvidence(note);
-  return {note: viewNote(data, ctx, note), thread: threadOf(data, ctx, note), subjects: subjectHits(data, text, surface, addressed), links: noteLinks(note)};
+  return {note: viewNote(data, ctx, note), thread: threadOf(data, ctx, note), subjects: subjectHits(data, text, surface, addressed, {links: note.links, mentions: note.mentions}), links: noteLinks(note)};
 }
 
 function followedIds(data) {
   const ids = new Set([data.account_id]);
-  for (const edge of data.follows) if (edge.follower_account_id === data.account_id) ids.add(edge.target_account_id);
+  for (const edge of data.follows) {
+    if (edge.ended_at) continue;
+    if (edge.follower_account_id === data.account_id) ids.add(edge.target_account_id);
+  }
   return ids;
 }
 
@@ -762,8 +839,15 @@ function selectPending(data, payload) {
   return account;
 }
 
+function supersededRevision(post, revisionNumber) {
+  return revisionNumber !== undefined && (post.superseded || []).includes(revisionNumber);
+}
+
 function confirmPost(data, ctx, post, payload, event) {
-  if (!post.pending) fail('not_pending', 'That post is not waiting for confirmation.');
+  if (!post.pending) {
+    if (supersededRevision(post, payload.revision)) fail('revision_mismatch', 'That revision was replaced before confirmation.');
+    fail('not_pending', 'That post is not waiting for confirmation.');
+  }
   if (payload.revision !== undefined && payload.revision !== post.pending.revision) {
     fail('revision_mismatch', 'Confirmation names a revision other than the pending one.');
   }
@@ -791,7 +875,10 @@ function confirmPost(data, ctx, post, payload, event) {
 }
 
 function declinePost(data, ctx, post, payload) {
-  if (!post.pending) fail('not_pending', 'That post is not waiting for confirmation.');
+  if (!post.pending) {
+    if (supersededRevision(post, payload.revision)) fail('revision_mismatch', 'That revision was replaced before confirmation.');
+    fail('not_pending', 'That post is not waiting for confirmation.');
+  }
   if (payload.revision !== undefined && payload.revision !== post.pending.revision) {
     fail('revision_mismatch', 'Decline names a revision other than the pending one.');
   }
@@ -810,10 +897,19 @@ function declinePost(data, ctx, post, payload) {
   touch(ctx, post);
 }
 
+function assertPublicObject(data, id) {
+  const target = targetRecord(data, id);
+  if (!target) fail('not_published', 'That object is not public.');
+  if (target.kind === 'note' && target.item.status !== 'posted') fail('not_published', 'That note is not public.');
+  if (target.kind === 'post' && target.item.status !== 'published') fail('not_published', 'That post is not public.');
+  return target;
+}
+
 function confirmNote(data, ctx, note, payload, event) {
   if (note.status !== 'pending_owner_confirmation') fail('not_pending', 'That note is not waiting for confirmation.');
   if (payload.revision !== undefined && payload.revision !== 1) fail('revision_mismatch', 'Notes have a single revision.');
   if (note.kind === 'reply') assertReplyTarget(data, note.reply_to);
+  if (note.kind === 'repost' && note.repost_of) assertPublicObject(data, note.repost_of.object_id);
   if (note.pending_kind === 'schedule') {
     note.status = 'scheduled';
     note.pending_kind = null;
@@ -873,7 +969,8 @@ function postByOther(data, ctx, event) {
   const text = noteText(payload.text, 'invalid_event');
   const note = createNote(data, ctx, {
     account_id: actor.account_id, kind: 'note', text, status: 'posted', event_id: event.event_id,
-    links: Array.isArray(payload.links) ? payload.links.filter(item => typeof item === 'string') : []
+    links: Array.isArray(payload.links) ? payload.links.filter(item => typeof item === 'string') : [],
+    mentions: Array.isArray(payload.mentions) ? payload.mentions.filter(item => typeof item === 'string' && item) : []
   });
   publishNote(data, ctx, note, null, event.event_id);
   notifyMention(data, ctx, actor.account_id, note.id, text, payload.mentions, event.event_id);
@@ -943,12 +1040,15 @@ function searchPeople(data, args) {
   return {accounts: accounts.map(publicAccount)};
 }
 
+function activeFollow(data, follower, target) {
+  return data.follows.find(edge => edge.follower_account_id === follower && edge.target_account_id === target && !edge.ended_at) || null;
+}
+
 function followAccount(data, ctx, args) {
   const account = resolveAccount(data, args);
-  if (account.account_id === data.account_id) fail('invalid_arguments', 'An account cannot follow itself.');
-  const exists = data.follows.some(edge => edge.follower_account_id === data.account_id && edge.target_account_id === account.account_id);
-  if (exists) fail('already_following', 'That account is already followed.');
-  data.follows.push({follower_account_id: data.account_id, target_account_id: account.account_id, at: ctx.virtual_now, request_id: args.request_id});
+  if (account.account_id === data.account_id) fail('cannot_follow_self', 'An account cannot follow itself.');
+  if (activeFollow(data, data.account_id, account.account_id)) fail('already_following', 'That account is already followed.');
+  data.follows.push({follower_account_id: data.account_id, target_account_id: account.account_id, at: ctx.virtual_now, request_id: args.request_id, ended_at: null, unfollow_request_id: null});
   account.follower_count += 1;
   self(data).following_count += 1;
   return {account_id: account.account_id, record_status: 'following'};
@@ -956,9 +1056,10 @@ function followAccount(data, ctx, args) {
 
 function unfollowAccount(data, ctx, args) {
   const account = resolveAccount(data, args);
-  const exists = data.follows.some(edge => edge.follower_account_id === data.account_id && edge.target_account_id === account.account_id);
-  if (!exists) fail('not_following', 'That account is not followed.');
-  data.follows = data.follows.filter(edge => !(edge.follower_account_id === data.account_id && edge.target_account_id === account.account_id));
+  const edge = activeFollow(data, data.account_id, account.account_id);
+  if (!edge) fail('not_following', 'That account is not followed.');
+  edge.ended_at = ctx.virtual_now;
+  edge.unfollow_request_id = args.request_id || null;
   account.follower_count = Math.max(0, account.follower_count - 1);
   self(data).following_count = Math.max(0, self(data).following_count - 1);
   return {account_id: account.account_id, record_status: 'unfollowed'};
@@ -991,7 +1092,11 @@ function updateSelf(data, ctx, args) {
     fail('invalid_arguments', 'links are invalid.');
   }
   if (confirms(data)) {
-    const revision = account.pending_profile ? account.pending_profile.revision : (account.profile_revision || 1) + 1;
+    const high = account.profile_revision_high || account.profile_revision || 1;
+    const revision = high + 1;
+    account.retired_profile_revisions = account.retired_profile_revisions || [];
+    if (account.pending_profile) account.retired_profile_revisions.push(account.pending_profile.revision);
+    account.profile_revision_high = revision;
     account.pending_profile = {revision, request_id: args.request_id, display_name: displayName, bio, links: [...links]};
     return {record_status: 'pending_owner_confirmation', revision};
   }
@@ -999,12 +1104,25 @@ function updateSelf(data, ctx, args) {
   account.bio = bio;
   account.links = [...links];
   account.profile_revision = (account.profile_revision || 1) + 1;
+  account.profile_revision_high = account.profile_revision;
   account.pending_profile = null;
   return {record_status: 'updated', revision: account.profile_revision};
 }
 
+function profileWasPending(account, revisionNumber) {
+  if (revisionNumber === undefined) return false;
+  const retired = account.retired_profile_revisions || [];
+  if (retired.includes(revisionNumber)) return true;
+  const high = account.profile_revision_high || 0;
+  const published = account.profile_revision || 1;
+  return revisionNumber > published && revisionNumber <= high;
+}
+
 function confirmProfile(data, ctx, account, payload) {
-  if (!account.pending_profile) fail('not_pending', 'No pending profile revision.');
+  if (!account.pending_profile) {
+    if (profileWasPending(account, payload.revision)) fail('revision_mismatch', 'That profile revision was replaced.');
+    fail('not_pending', 'No pending profile revision.');
+  }
   if (payload.revision !== undefined && payload.revision !== account.pending_profile.revision) {
     fail('revision_mismatch', 'Confirmation names a revision other than the pending one.');
   }
@@ -1017,10 +1135,15 @@ function confirmProfile(data, ctx, account, payload) {
 }
 
 function declineProfile(data, ctx, account, payload) {
-  if (!account.pending_profile) fail('not_pending', 'No pending profile revision.');
+  if (!account.pending_profile) {
+    if (profileWasPending(account, payload.revision)) fail('revision_mismatch', 'That profile revision was replaced.');
+    fail('not_pending', 'No pending profile revision.');
+  }
   if (payload.revision !== undefined && payload.revision !== account.pending_profile.revision) {
     fail('revision_mismatch', 'Decline names a revision other than the pending one.');
   }
+  account.retired_profile_revisions = account.retired_profile_revisions || [];
+  account.retired_profile_revisions.push(account.pending_profile.revision);
   account.pending_profile = null;
   account.owner_note = payload.note ? nfc(payload.note) : null;
 }
@@ -1050,13 +1173,21 @@ function replyByOther(data, ctx, event) {
   const actor = otherActor(data, payload);
   const text = noteText(payload.text, 'invalid_event');
   if (typeof payload.reply_to !== 'string' || !payload.reply_to) fail('invalid_event', 'reply_to is required.');
-  if (!targetRecord(data, payload.reply_to)) fail('invalid_event', 'The reply target does not exist.');
+  const target = targetRecord(data, payload.reply_to);
+  if (!target || (target.kind === 'note' && target.item.status !== 'posted')) fail('reply_target_deleted', 'The reply target is not public.');
+  if (target.kind === 'post' && target.item.status !== 'published') fail('not_published', 'The reply target is not public.');
   const note = createNote(data, ctx, {
     account_id: actor.account_id, kind: 'reply', text, status: 'posted', reply_to: payload.reply_to,
-    event_id: event.event_id, links: Array.isArray(payload.links) ? payload.links.filter(item => typeof item === 'string') : []
+    event_id: event.event_id, links: Array.isArray(payload.links) ? payload.links.filter(item => typeof item === 'string') : [],
+    mentions: Array.isArray(payload.mentions) ? payload.mentions.filter(item => typeof item === 'string' && item) : []
   });
   publishNote(data, ctx, note, null, event.event_id);
-  notifyMention(data, ctx, actor.account_id, note.id, text, payload.mentions, event.event_id);
+  if (target.author === data.account_id) {
+    data.notifications.push({
+      id: 'nt-' + event.event_id, account_id: data.account_id, actor_account_id: actor.account_id,
+      kind: 'reply', object_id: note.id, at: ctx.virtual_now, read: false
+    });
+  } else notifyMention(data, ctx, actor.account_id, note.id, text, payload.mentions, event.event_id);
 }
 
 function repostByOther(data, ctx, event) {
@@ -1064,7 +1195,10 @@ function repostByOther(data, ctx, event) {
   const actor = otherActor(data, payload);
   const text = noteText(payload.text || 'Repost.', 'invalid_event');
   if (payload.object_type !== 'post' && payload.object_type !== 'note') fail('invalid_event', 'object_type is not supported.');
-  if (!targetRecord(data, payload.object_id)) fail('invalid_event', 'The repost target does not exist.');
+  const target = targetRecord(data, payload.object_id);
+  if (!target || target.kind !== payload.object_type) fail('not_published', 'The repost target is not public.');
+  if (target.kind === 'post' && target.item.status !== 'published') fail('not_published', 'The repost target is not public.');
+  if (target.kind === 'note' && target.item.status !== 'posted') fail('not_published', 'The repost target is not public.');
   const note = createNote(data, ctx, {
     account_id: actor.account_id, kind: 'repost', text, status: 'posted',
     repost_of: {object_type: payload.object_type, object_id: payload.object_id}, event_id: event.event_id
@@ -1076,17 +1210,18 @@ function followerChanged(data, ctx, event) {
   const payload = event.payload || {};
   const actor = otherActor(data, payload);
   const owner = self(data);
-  const exists = data.follows.some(edge => edge.follower_account_id === actor.account_id && edge.target_account_id === owner.account_id);
+  const edge = activeFollow(data, actor.account_id, owner.account_id);
   if (payload.follows === true) {
-    if (exists) fail('invalid_event', 'That follow already exists.');
-    data.follows.push({follower_account_id: actor.account_id, target_account_id: owner.account_id, at: ctx.virtual_now, request_id: null});
+    if (edge) fail('invalid_event', 'That follow already exists.');
+    data.follows.push({follower_account_id: actor.account_id, target_account_id: owner.account_id, at: ctx.virtual_now, request_id: null, ended_at: null, unfollow_request_id: null});
     owner.follower_count += 1;
     actor.following_count += 1;
     return;
   }
   if (payload.follows === false) {
-    if (!exists) fail('invalid_event', 'That follow does not exist.');
-    data.follows = data.follows.filter(edge => !(edge.follower_account_id === actor.account_id && edge.target_account_id === owner.account_id));
+    if (!edge) fail('invalid_event', 'That follow does not exist.');
+    edge.ended_at = ctx.virtual_now;
+    edge.unfollow_request_id = null;
     owner.follower_count = Math.max(0, owner.follower_count - 1);
     actor.following_count = Math.max(0, actor.following_count - 1);
     return;

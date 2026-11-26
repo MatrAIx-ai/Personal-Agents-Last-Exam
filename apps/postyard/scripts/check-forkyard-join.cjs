@@ -47,13 +47,34 @@ function hits(companion) {
 
 const faithfulHits = hits(faithful);
 const renamedHits = hits(renamed);
+let head = 'unknown';
+try {
+  head = require('node:child_process').execFileSync('git', ['-C', checkout, 'rev-parse', 'HEAD'], {encoding: 'utf8'}).trim();
+} catch (error) {
+  head = 'unknown';
+}
+const currentJoin = head.startsWith('80417c59460dff88d383f9e2cc5da14186ef6ef5');
+const recordedSample = head.startsWith('e9fe739b0b6af11d3805756a4916c028cf41bb4e');
 const report = {
   forkyard_checkout: checkout,
+  forkyard_head: head,
+  pins: {
+    recorded_sample: 'e9fe739b0b6af11d3805756a4916c028cf41bb4e',
+    native_join: '80417c59460dff88d383f9e2cc5da14186ef6ef5'
+  },
   faithful_actor_account_id: 'ac-0001',
+  faithful_person_id: 'person-tomas',
   faithful_linked_post_people: faithfulHits,
   renamed_actor_account_id: 'fy-tomasreyes',
   renamed_linked_post_people: renamedHits,
-  mismatch: 'Forkyard matches a companion revision only when actor_account_id is a Forkyard account whose handle equals the URL handle. Fixture (a) and the approved examples use ac-0001, handle tomasreyes, person_id person-tomas. fy-tomasreyes is the Forkyard account with that handle. A document that keeps ac-0001 does not join. The same document joins when actor_account_id is rewritten to fy-tomasreyes, object_id stays the slug, and the post text names Ingrid so the subject row is person-ingrid.'
+  linked_post: 'The linked_post subject names the person in the post text. The companion revision keeps the author person_id.',
+  task_74: 'Task #74 can use the native ac-0001 document. No actor rewrite is required at the native join pin.'
 };
 console.log(JSON.stringify(report, null, 2));
-if (faithfulHits.length !== 0 || !renamedHits.includes('person-ingrid')) process.exit(1);
+if (currentJoin) {
+  if (!faithfulHits.includes('person-ingrid') || !renamedHits.includes('person-ingrid')) process.exit(1);
+} else if (recordedSample) {
+  if (faithfulHits.length !== 0 || !renamedHits.includes('person-ingrid')) process.exit(1);
+} else if (faithfulHits.length === 0 || !faithfulHits.includes('person-ingrid') || !renamedHits.includes('person-ingrid')) {
+  process.exit(1);
+}

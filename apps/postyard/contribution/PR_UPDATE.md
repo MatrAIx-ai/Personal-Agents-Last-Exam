@@ -22,7 +22,7 @@ Title: `[Environment Proposal] [Social & communities + Work & business] Postyard
 
 Head `<HEAD_SHA>`. Package sha256 `<PACKAGE_SHA256>`.
 
-**Dependencies / questions (optional):** No runtime connection to another App. Forkyard (#88, commit `e9fe739b0b6af11d3805756a4916c028cf41bb4e`) is an evidence-join partner through `apps/postyard/examples/recorded/forkyard-evidence.json`. The schema copy matches Forkyard's blob `0a8eb61ab15c3d3aaec1f687c1cc2bb93ac82053`. The live reverse join is a pinned Forkyard limitation: a real draft, publish and confirm under `ac-0001` produces no `linked_post` subject, and the same document with the actor rewritten to `fy-tomasreyes` produces `person-ingrid`. Postyard keeps `ac-0001`, the stable post id, the slug, the canonical URL and `person_id` `person-tomas`. The byte-for-byte schema comparison waits until Forkyard merges. First consumer: task #74. Task #119 can grade the single receipt `pr-0007` from the release-note example.
+**Dependencies / questions (optional):** No runtime connection to another App. Forkyard (#88) is an evidence-join partner through `apps/postyard/examples/recorded/forkyard-evidence.json`. The recorded sample is Forkyard `e9fe739b0b6af11d3805756a4916c028cf41bb4e`. The native join pin is `80417c59460dff88d383f9e2cc5da14186ef6ef5`. The schema copy matches blob `0a8eb61ab15c3d3aaec1f687c1cc2bb93ac82053`. At the recorded sample, a native `ac-0001` document produces no `linked_post` subject, and rewriting the actor to `fy-tomasreyes` produces `person-ingrid`. At the native join pin, both documents join. `linked_post` names the person in the post. The companion revision keeps `person_id` `person-tomas`. Task #74 needs no actor rewrite. Postyard keeps `ac-0001`, the stable post id, the slug, the canonical URL and `person_id` `person-tomas`. The byte-for-byte schema comparison waits until Forkyard merges. First consumer: task #74. Task #119 can grade the single receipt `pr-0007` from the release-note example.
 
 ## Progress and evidence
 
@@ -60,7 +60,7 @@ node --test runtime/tests/clock.test.cjs
 npm test
 ```
 
-Observed: Node v18.20.8, v22.23.5 and v24.22.3 each passed the 31-test package suite. `tests/business.test.cjs` is 16 of those tests. The host suite passed 1 test on each version. `examples/run.cjs` printed `{"app":"postyard","notes":1,"id":"ac-0007:n1"}`. `app:verify` passed 43 checks on each version (runtime 1.6.0, Core API 1.2.0), `package_sha256` `<PACKAGE_SHA256>`. The clock test passed 7 tests, including the eight-app check. The repository suite passed 22 stages. Coverage counted 121 included rows, `excluded_count` 0, and no empty month from 2025-01 through 2026-12.
+Observed: Node v18.20.8, v22.23.5, v22.23.4, and v24.22.3 each passed the 39-test package suite. `tests/business.test.cjs` is 16 of those tests. The host suite passed 1 test on each version. `examples/run.cjs` printed `{"app":"postyard","notes":1,"id":"ac-0007:n1"}`. `app:verify` passed 43 checks on each version (runtime 1.6.0, Core API 1.2.0), `package_sha256` `<PACKAGE_SHA256>`. The clock test passed 7 tests, including the eight-app check. The repository suite passed 22 stages. Coverage counted 121 included rows, 95 Los Angeles dates, `excluded_count` 2, and no empty month from 2025-01 through 2026-12.
 
 ### Reviewer items
 
