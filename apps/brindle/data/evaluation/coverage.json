@@ -1,0 +1,4017 @@
+{
+  "schema": "brindle.evaluation-coverage.v1",
+  "scope": "Environment coverage of the delivered evaluation seed data/evaluation/seed.json, read at its clock. Only the seven record kinds count, each on one date field. Due times are listed apart. Activity rows are not counted, because each repeats an act that a counted record already dates.",
+  "reproduce": "node apps/brindle/dev/coverage.cjs",
+  "reproduce_note": "Run it from the repository root. With --check it compares with the committed report.",
+  "timezone": "America/New_York",
+  "window": {
+    "first": "2025-01-01",
+    "last": "2026-12-31"
+  },
+  "clock": "2026-12-31T23:00:00-05:00",
+  "clock_day": "2026-12-31",
+  "date_rule": "A timestamp counts on its calendar day in America/New_York after normalizing its UTC offset. A date-only field (payments[].pay_on) is a day in America/New_York. A missing or invalid date is excluded and listed.",
+  "files": {
+    "apps/brindle/data/evaluation/seed.json": {
+      "bytes": 1324198,
+      "sha256": "3d413e174b4c7049ef326a87f22f869b69acfd67537afe32943cf8d4685f7767"
+    },
+    "apps/brindle/data/evaluation/clock.json": {
+      "bytes": 50,
+      "sha256": "4a0a17ea549f275a693b1f7728c04cc3c0d318462bfcc1b1ca16d07dd162debc"
+    },
+    "apps/brindle/data/evaluation/dataset.json": {
+      "bytes": 2040,
+      "sha256": "fc1efa56264ee89cab73e6ae1c04e5484c89d379003809112f4bdeced3bf7812"
+    }
+  },
+  "generator": {
+    "tool": "apps/brindle/dev/generate-dataset.cjs",
+    "version": "1.0.0",
+    "prng": "mulberry32",
+    "prng_seed": 20241202,
+    "stories": 1220
+  },
+  "provenance": {
+    "dataset_id": "brindle-evaluation-2025-2026",
+    "source_ids": [
+      "evaluation-generator"
+    ],
+    "source_kinds": [
+      "synthetic"
+    ],
+    "real": 0,
+    "mixed": 0,
+    "synthetic": 1548,
+    "note": "Counts are of the counted rows. Every record is synthetic: Brindle models no real issuer or website, so there is no real source to collect or to anchor."
+  },
+  "app_records": {
+    "count": 1500,
+    "kinds": "statements, transactions, payments, disputes, offers, points_entries",
+    "dataset_expected": 1500
+  },
+  "not_counted": {
+    "activity": {
+      "field": "activity[].at",
+      "rows": 1949,
+      "reason": "Each activity row repeats a write, an event or an effect that a counted record already dates."
+    }
+  },
+  "actual": {
+    "total_rows": 1603,
+    "counted_rows": 1548,
+    "global": {
+      "records": 1548,
+      "distinct_dates": 666,
+      "earliest": "2025-01-01",
+      "latest": "2026-12-31"
+    },
+    "kinds": [
+      {
+        "kind": "transactions",
+        "date_field": "transactions[].transaction_at",
+        "rows": 1389,
+        "records": 1339,
+        "distinct_dates": 641,
+        "earliest": "2025-01-01",
+        "latest": "2026-12-31",
+        "excluded": 50
+      },
+      {
+        "kind": "statements",
+        "date_field": "statements[].closing_at",
+        "rows": 25,
+        "records": 24,
+        "distinct_dates": 24,
+        "earliest": "2025-01-27",
+        "latest": "2026-12-27",
+        "excluded": 1
+      },
+      {
+        "kind": "payments",
+        "date_field": "payments[].pay_on",
+        "rows": 31,
+        "records": 30,
+        "distinct_dates": 29,
+        "earliest": "2025-01-16",
+        "latest": "2026-12-22",
+        "excluded": 1
+      },
+      {
+        "kind": "disputes",
+        "date_field": "disputes[].opened_at",
+        "rows": 8,
+        "records": 8,
+        "distinct_dates": 8,
+        "earliest": "2025-03-24",
+        "latest": "2026-12-14",
+        "excluded": 0
+      },
+      {
+        "kind": "offers",
+        "date_field": "offers[].issued_at",
+        "rows": 16,
+        "records": 16,
+        "distinct_dates": 11,
+        "earliest": "2025-02-11",
+        "latest": "2026-12-04",
+        "excluded": 0
+      },
+      {
+        "kind": "points_entries",
+        "date_field": "points_entries[].at",
+        "rows": 31,
+        "records": 30,
+        "distinct_dates": 30,
+        "earliest": "2025-01-29",
+        "latest": "2026-12-29",
+        "excluded": 1
+      },
+      {
+        "kind": "notifications",
+        "date_field": "notifications[].at",
+        "rows": 103,
+        "records": 101,
+        "distinct_dates": 92,
+        "earliest": "2025-01-28",
+        "latest": "2026-12-29",
+        "excluded": 2
+      }
+    ],
+    "monthly": [
+      {
+        "month": "2025-01",
+        "records": 59,
+        "distinct_dates": 27,
+        "by_kind": {
+          "transactions": 54,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 2
+        },
+        "dates_by_kind": {
+          "transactions": 27,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 2
+        }
+      },
+      {
+        "month": "2025-02",
+        "records": 51,
+        "distinct_dates": 25,
+        "by_kind": {
+          "transactions": 44,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 1,
+          "points_entries": 1,
+          "notifications": 3
+        },
+        "dates_by_kind": {
+          "transactions": 23,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 1,
+          "points_entries": 1,
+          "notifications": 3
+        }
+      },
+      {
+        "month": "2025-03",
+        "records": 78,
+        "distinct_dates": 29,
+        "by_kind": {
+          "transactions": 65,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 1,
+          "offers": 2,
+          "points_entries": 2,
+          "notifications": 6
+        },
+        "dates_by_kind": {
+          "transactions": 28,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 1,
+          "offers": 1,
+          "points_entries": 2,
+          "notifications": 5
+        }
+      },
+      {
+        "month": "2025-04",
+        "records": 54,
+        "distinct_dates": 26,
+        "by_kind": {
+          "transactions": 48,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 3
+        },
+        "dates_by_kind": {
+          "transactions": 25,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 3
+        }
+      },
+      {
+        "month": "2025-05",
+        "records": 67,
+        "distinct_dates": 29,
+        "by_kind": {
+          "transactions": 57,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 1,
+          "offers": 1,
+          "points_entries": 1,
+          "notifications": 5
+        },
+        "dates_by_kind": {
+          "transactions": 28,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 1,
+          "offers": 1,
+          "points_entries": 1,
+          "notifications": 4
+        }
+      },
+      {
+        "month": "2025-06",
+        "records": 65,
+        "distinct_dates": 27,
+        "by_kind": {
+          "transactions": 58,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 2,
+          "notifications": 3
+        },
+        "dates_by_kind": {
+          "transactions": 26,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 2,
+          "notifications": 3
+        }
+      },
+      {
+        "month": "2025-07",
+        "records": 79,
+        "distinct_dates": 28,
+        "by_kind": {
+          "transactions": 72,
+          "statements": 1,
+          "payments": 2,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 3
+        },
+        "dates_by_kind": {
+          "transactions": 27,
+          "statements": 1,
+          "payments": 2,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 3
+        }
+      },
+      {
+        "month": "2025-08",
+        "records": 66,
+        "distinct_dates": 27,
+        "by_kind": {
+          "transactions": 54,
+          "statements": 1,
+          "payments": 2,
+          "disputes": 0,
+          "offers": 1,
+          "points_entries": 1,
+          "notifications": 7
+        },
+        "dates_by_kind": {
+          "transactions": 26,
+          "statements": 1,
+          "payments": 2,
+          "disputes": 0,
+          "offers": 1,
+          "points_entries": 1,
+          "notifications": 6
+        }
+      },
+      {
+        "month": "2025-09",
+        "records": 67,
+        "distinct_dates": 26,
+        "by_kind": {
+          "transactions": 60,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 1,
+          "points_entries": 1,
+          "notifications": 3
+        },
+        "dates_by_kind": {
+          "transactions": 24,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 1,
+          "points_entries": 1,
+          "notifications": 3
+        }
+      },
+      {
+        "month": "2025-10",
+        "records": 68,
+        "distinct_dates": 31,
+        "by_kind": {
+          "transactions": 56,
+          "statements": 1,
+          "payments": 3,
+          "disputes": 1,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 6
+        },
+        "dates_by_kind": {
+          "transactions": 30,
+          "statements": 1,
+          "payments": 2,
+          "disputes": 1,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 5
+        }
+      },
+      {
+        "month": "2025-11",
+        "records": 66,
+        "distinct_dates": 29,
+        "by_kind": {
+          "transactions": 58,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 2,
+          "notifications": 4
+        },
+        "dates_by_kind": {
+          "transactions": 28,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 2,
+          "notifications": 4
+        }
+      },
+      {
+        "month": "2025-12",
+        "records": 69,
+        "distinct_dates": 28,
+        "by_kind": {
+          "transactions": 55,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 1,
+          "offers": 3,
+          "points_entries": 1,
+          "notifications": 7
+        },
+        "dates_by_kind": {
+          "transactions": 27,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 1,
+          "offers": 1,
+          "points_entries": 1,
+          "notifications": 5
+        }
+      },
+      {
+        "month": "2026-01",
+        "records": 65,
+        "distinct_dates": 30,
+        "by_kind": {
+          "transactions": 58,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 1,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 3
+        },
+        "dates_by_kind": {
+          "transactions": 29,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 1,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 3
+        }
+      },
+      {
+        "month": "2026-02",
+        "records": 65,
+        "distinct_dates": 27,
+        "by_kind": {
+          "transactions": 54,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 1,
+          "offers": 1,
+          "points_entries": 0,
+          "notifications": 7
+        },
+        "dates_by_kind": {
+          "transactions": 25,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 1,
+          "offers": 1,
+          "points_entries": 0,
+          "notifications": 6
+        }
+      },
+      {
+        "month": "2026-03",
+        "records": 70,
+        "distinct_dates": 28,
+        "by_kind": {
+          "transactions": 58,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 1,
+          "offers": 0,
+          "points_entries": 2,
+          "notifications": 7
+        },
+        "dates_by_kind": {
+          "transactions": 27,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 1,
+          "offers": 0,
+          "points_entries": 2,
+          "notifications": 7
+        }
+      },
+      {
+        "month": "2026-04",
+        "records": 58,
+        "distinct_dates": 25,
+        "by_kind": {
+          "transactions": 51,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 1,
+          "points_entries": 1,
+          "notifications": 3
+        },
+        "dates_by_kind": {
+          "transactions": 23,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 1,
+          "points_entries": 1,
+          "notifications": 3
+        }
+      },
+      {
+        "month": "2026-05",
+        "records": 60,
+        "distinct_dates": 27,
+        "by_kind": {
+          "transactions": 52,
+          "statements": 1,
+          "payments": 2,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 4
+        },
+        "dates_by_kind": {
+          "transactions": 27,
+          "statements": 1,
+          "payments": 2,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 4
+        }
+      },
+      {
+        "month": "2026-06",
+        "records": 60,
+        "distinct_dates": 28,
+        "by_kind": {
+          "transactions": 49,
+          "statements": 1,
+          "payments": 2,
+          "disputes": 0,
+          "offers": 1,
+          "points_entries": 2,
+          "notifications": 5
+        },
+        "dates_by_kind": {
+          "transactions": 27,
+          "statements": 1,
+          "payments": 2,
+          "disputes": 0,
+          "offers": 1,
+          "points_entries": 2,
+          "notifications": 5
+        }
+      },
+      {
+        "month": "2026-07",
+        "records": 70,
+        "distinct_dates": 30,
+        "by_kind": {
+          "transactions": 65,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 2
+        },
+        "dates_by_kind": {
+          "transactions": 29,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 2
+        }
+      },
+      {
+        "month": "2026-08",
+        "records": 56,
+        "distinct_dates": 27,
+        "by_kind": {
+          "transactions": 50,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 2,
+          "notifications": 2
+        },
+        "dates_by_kind": {
+          "transactions": 27,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 2,
+          "notifications": 2
+        }
+      },
+      {
+        "month": "2026-09",
+        "records": 56,
+        "distinct_dates": 26,
+        "by_kind": {
+          "transactions": 47,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 1,
+          "points_entries": 2,
+          "notifications": 4
+        },
+        "dates_by_kind": {
+          "transactions": 24,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 1,
+          "points_entries": 2,
+          "notifications": 4
+        }
+      },
+      {
+        "month": "2026-10",
+        "records": 57,
+        "distinct_dates": 29,
+        "by_kind": {
+          "transactions": 52,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 2
+        },
+        "dates_by_kind": {
+          "transactions": 29,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 2
+        }
+      },
+      {
+        "month": "2026-11",
+        "records": 60,
+        "distinct_dates": 28,
+        "by_kind": {
+          "transactions": 54,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 3
+        },
+        "dates_by_kind": {
+          "transactions": 28,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 0,
+          "offers": 0,
+          "points_entries": 1,
+          "notifications": 3
+        }
+      },
+      {
+        "month": "2026-12",
+        "records": 82,
+        "distinct_dates": 29,
+        "by_kind": {
+          "transactions": 68,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 1,
+          "offers": 3,
+          "points_entries": 1,
+          "notifications": 7
+        },
+        "dates_by_kind": {
+          "transactions": 27,
+          "statements": 1,
+          "payments": 1,
+          "disputes": 1,
+          "offers": 1,
+          "points_entries": 1,
+          "notifications": 5
+        }
+      }
+    ],
+    "gaps": {
+      "months_without_records": [],
+      "days_in_window": 730,
+      "active_days": 666,
+      "inactive_days": 64,
+      "working_days_in_window": 501,
+      "active_working_days": 469,
+      "active_weekend_or_holiday_days": 197,
+      "longest_quiet_spans": [
+        {
+          "from": "2025-01-12",
+          "to": "2025-01-13",
+          "days": 2
+        },
+        {
+          "from": "2025-04-25",
+          "to": "2025-04-26",
+          "days": 2
+        },
+        {
+          "from": "2025-05-31",
+          "to": "2025-06-01",
+          "days": 2
+        },
+        {
+          "from": "2026-05-03",
+          "to": "2026-05-04",
+          "days": 2
+        },
+        {
+          "from": "2026-09-16",
+          "to": "2026-09-17",
+          "days": 2
+        },
+        {
+          "from": "2025-01-04",
+          "to": "2025-01-04",
+          "days": 1
+        },
+        {
+          "from": "2025-01-26",
+          "to": "2025-01-26",
+          "days": 1
+        },
+        {
+          "from": "2025-02-03",
+          "to": "2025-02-03",
+          "days": 1
+        },
+        {
+          "from": "2025-02-17",
+          "to": "2025-02-17",
+          "days": 1
+        },
+        {
+          "from": "2025-02-23",
+          "to": "2025-02-23",
+          "days": 1
+        }
+      ]
+    },
+    "exclusions": [
+      {
+        "kind": "transactions",
+        "id": "txn-0001",
+        "value": "2024-12-03T13:12:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0002",
+        "value": "2024-12-03T07:31:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0003",
+        "value": "2024-12-04T18:58:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0004",
+        "value": "2024-12-05T04:30:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0005",
+        "value": "2024-12-04T07:34:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0006",
+        "value": "2024-12-05T13:00:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0007",
+        "value": "2024-12-05T08:11:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0008",
+        "value": "2024-12-07T18:58:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0009",
+        "value": "2024-12-09T03:50:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0010",
+        "value": "2024-12-08T15:49:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0011",
+        "value": "2024-12-09T07:16:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0012",
+        "value": "2024-12-11T03:20:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0013",
+        "value": "2024-12-10T18:23:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0014",
+        "value": "2024-12-11T16:09:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0015",
+        "value": "2024-12-11T07:46:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0016",
+        "value": "2024-12-11T08:23:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0017",
+        "value": "2024-12-12T13:55:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0018",
+        "value": "2024-12-12T08:06:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0019",
+        "value": "2024-12-13T07:39:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0020",
+        "value": "2024-12-14T21:16:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0021",
+        "value": "2024-12-15T10:52:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0022",
+        "value": "2024-12-15T09:24:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0023",
+        "value": "2024-12-16T07:50:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0024",
+        "value": "2024-12-17T08:17:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0025",
+        "value": "2024-12-18T05:45:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0026",
+        "value": "2024-12-18T10:35:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0027",
+        "value": "2024-12-18T12:43:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0028",
+        "value": "2024-12-18T21:03:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0029",
+        "value": "2024-12-18T07:57:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0030",
+        "value": "2024-12-18T16:40:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0031",
+        "value": "2024-12-18T08:25:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0032",
+        "value": "2024-12-19T08:49:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0033",
+        "value": "2024-12-19T08:55:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0034",
+        "value": "2024-12-20T10:41:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0035",
+        "value": "2024-12-21T15:40:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0036",
+        "value": "2024-12-21T23:02:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0037",
+        "value": "2024-12-22T09:14:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0038",
+        "value": "2024-12-22T11:26:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0039",
+        "value": "2024-12-24T13:50:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0040",
+        "value": "2024-12-24T07:50:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0041",
+        "value": "2024-12-25T07:21:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0042",
+        "value": "2024-12-26T15:36:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0043",
+        "value": "2024-12-26T07:36:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0044",
+        "value": "2024-12-26T09:03:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0045",
+        "value": "2024-12-27T08:21:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0046",
+        "value": "2024-12-29T16:19:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0047",
+        "value": "2024-12-29T15:44:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0048",
+        "value": "2024-12-30T13:19:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0049",
+        "value": "2024-12-31T09:29:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "transactions",
+        "id": "txn-0050",
+        "value": "2024-12-31T08:02:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "statements",
+        "id": "stm-2024-12",
+        "value": "2024-12-27T23:59:59-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "payments",
+        "id": "pay-0031",
+        "value": "2027-01-22",
+        "reason": "scheduled after the clock: the payment has not happened yet"
+      },
+      {
+        "kind": "points_entries",
+        "id": "pts-0001",
+        "value": "2024-12-29T04:00:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "notifications",
+        "id": "ntf-0001",
+        "value": "2024-12-28T02:00:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      },
+      {
+        "kind": "notifications",
+        "id": "ntf-0002",
+        "value": "2024-12-29T04:00:00-05:00",
+        "reason": "before 2025-01-01: the opening month of the account (opened 2 December 2024)"
+      }
+    ],
+    "dates": {
+      "2025-01-01": [
+        "txn-0051",
+        "txn-0053"
+      ],
+      "2025-01-02": [
+        "txn-0052",
+        "txn-0054"
+      ],
+      "2025-01-03": [
+        "txn-0055"
+      ],
+      "2025-01-05": [
+        "txn-0056",
+        "txn-0057",
+        "txn-0058",
+        "txn-0059"
+      ],
+      "2025-01-06": [
+        "txn-0060"
+      ],
+      "2025-01-07": [
+        "txn-0061",
+        "txn-0062"
+      ],
+      "2025-01-08": [
+        "txn-0064",
+        "txn-0065"
+      ],
+      "2025-01-09": [
+        "txn-0063",
+        "txn-0066",
+        "txn-0067"
+      ],
+      "2025-01-10": [
+        "txn-0068",
+        "txn-0070"
+      ],
+      "2025-01-11": [
+        "txn-0069",
+        "txn-0071",
+        "txn-0072"
+      ],
+      "2025-01-14": [
+        "txn-0073"
+      ],
+      "2025-01-15": [
+        "txn-0074",
+        "txn-0075",
+        "txn-0076"
+      ],
+      "2025-01-16": [
+        "txn-0077",
+        "pay-0001"
+      ],
+      "2025-01-17": [
+        "txn-0078",
+        "txn-0079"
+      ],
+      "2025-01-18": [
+        "txn-0080",
+        "txn-0081"
+      ],
+      "2025-01-19": [
+        "txn-0082"
+      ],
+      "2025-01-20": [
+        "txn-0083"
+      ],
+      "2025-01-21": [
+        "txn-0084"
+      ],
+      "2025-01-22": [
+        "txn-0085",
+        "txn-0086"
+      ],
+      "2025-01-23": [
+        "txn-0087",
+        "txn-0088"
+      ],
+      "2025-01-24": [
+        "txn-0089",
+        "txn-0090",
+        "txn-0091"
+      ],
+      "2025-01-25": [
+        "txn-0092",
+        "txn-0093"
+      ],
+      "2025-01-27": [
+        "txn-0094",
+        "stm-2025-01"
+      ],
+      "2025-01-28": [
+        "txn-0095",
+        "txn-0096",
+        "txn-0097",
+        "ntf-0003"
+      ],
+      "2025-01-29": [
+        "txn-0098",
+        "txn-0099",
+        "pts-0002",
+        "ntf-0004"
+      ],
+      "2025-01-30": [
+        "txn-0100",
+        "txn-0101",
+        "txn-0102"
+      ],
+      "2025-01-31": [
+        "txn-0103",
+        "txn-0104"
+      ],
+      "2025-02-01": [
+        "txn-0106",
+        "txn-0107"
+      ],
+      "2025-02-02": [
+        "txn-0105",
+        "txn-0108"
+      ],
+      "2025-02-04": [
+        "txn-0110",
+        "txn-0111"
+      ],
+      "2025-02-05": [
+        "txn-0109",
+        "txn-0112"
+      ],
+      "2025-02-06": [
+        "txn-0113"
+      ],
+      "2025-02-07": [
+        "txn-0114"
+      ],
+      "2025-02-08": [
+        "txn-0116"
+      ],
+      "2025-02-09": [
+        "txn-0115",
+        "txn-0117"
+      ],
+      "2025-02-10": [
+        "txn-0118",
+        "txn-0119",
+        "txn-0121"
+      ],
+      "2025-02-11": [
+        "txn-0120",
+        "txn-0122",
+        "off-0001",
+        "ntf-0005"
+      ],
+      "2025-02-12": [
+        "txn-0123"
+      ],
+      "2025-02-13": [
+        "txn-0124",
+        "txn-0125"
+      ],
+      "2025-02-14": [
+        "txn-0126",
+        "txn-0127"
+      ],
+      "2025-02-15": [
+        "txn-0128",
+        "txn-0129",
+        "txn-0130",
+        "txn-0131"
+      ],
+      "2025-02-16": [
+        "txn-0132"
+      ],
+      "2025-02-18": [
+        "txn-0133",
+        "txn-0134",
+        "txn-0135"
+      ],
+      "2025-02-19": [
+        "txn-0136",
+        "txn-0137",
+        "txn-0138"
+      ],
+      "2025-02-20": [
+        "txn-0139",
+        "txn-0140"
+      ],
+      "2025-02-21": [
+        "txn-0141"
+      ],
+      "2025-02-22": [
+        "txn-0142",
+        "txn-0143",
+        "pay-0002"
+      ],
+      "2025-02-24": [
+        "pts-0003",
+        "ntf-0006"
+      ],
+      "2025-02-25": [
+        "txn-0144",
+        "txn-0145"
+      ],
+      "2025-02-26": [
+        "txn-0146",
+        "txn-0147"
+      ],
+      "2025-02-27": [
+        "txn-0148",
+        "stm-2025-02"
+      ],
+      "2025-02-28": [
+        "ntf-0007"
+      ],
+      "2025-03-01": [
+        "txn-0149",
+        "txn-0150",
+        "txn-0151",
+        "pts-0004",
+        "ntf-0008"
+      ],
+      "2025-03-02": [
+        "txn-0152",
+        "txn-0153",
+        "txn-0154"
+      ],
+      "2025-03-03": [
+        "txn-0155",
+        "txn-0156"
+      ],
+      "2025-03-04": [
+        "txn-0157"
+      ],
+      "2025-03-05": [
+        "txn-0158",
+        "txn-0159"
+      ],
+      "2025-03-06": [
+        "txn-0160",
+        "txn-0161",
+        "txn-0162"
+      ],
+      "2025-03-07": [
+        "txn-0163"
+      ],
+      "2025-03-08": [
+        "txn-0164",
+        "txn-0166"
+      ],
+      "2025-03-09": [
+        "txn-0165",
+        "txn-0167"
+      ],
+      "2025-03-10": [
+        "txn-0168",
+        "txn-0169",
+        "txn-0171"
+      ],
+      "2025-03-11": [
+        "txn-0170",
+        "txn-0172",
+        "off-0002",
+        "off-0003",
+        "ntf-0009",
+        "ntf-0010"
+      ],
+      "2025-03-13": [
+        "txn-0173",
+        "txn-0174"
+      ],
+      "2025-03-14": [
+        "txn-0175"
+      ],
+      "2025-03-15": [
+        "txn-0176",
+        "txn-0177",
+        "txn-0178"
+      ],
+      "2025-03-16": [
+        "txn-0179",
+        "txn-0180",
+        "txn-0181"
+      ],
+      "2025-03-17": [
+        "txn-0182"
+      ],
+      "2025-03-18": [
+        "txn-0183",
+        "txn-0184",
+        "txn-0185",
+        "txn-0186"
+      ],
+      "2025-03-19": [
+        "txn-0187",
+        "txn-0188",
+        "txn-0189"
+      ],
+      "2025-03-20": [
+        "txn-0190",
+        "txn-0191",
+        "txn-0192"
+      ],
+      "2025-03-21": [
+        "txn-0193",
+        "txn-0194",
+        "txn-0195"
+      ],
+      "2025-03-22": [
+        "txn-0196",
+        "txn-0197",
+        "pay-0003"
+      ],
+      "2025-03-24": [
+        "dsp-0001"
+      ],
+      "2025-03-25": [
+        "txn-0198",
+        "txn-0199",
+        "txn-0200"
+      ],
+      "2025-03-26": [
+        "txn-0201",
+        "txn-0202"
+      ],
+      "2025-03-27": [
+        "txn-0203",
+        "txn-0204",
+        "stm-2025-03"
+      ],
+      "2025-03-28": [
+        "txn-0205",
+        "ntf-0011"
+      ],
+      "2025-03-29": [
+        "txn-0206",
+        "txn-0207",
+        "txn-0208",
+        "txn-0209",
+        "pts-0005",
+        "ntf-0012"
+      ],
+      "2025-03-30": [
+        "txn-0210",
+        "txn-0211"
+      ],
+      "2025-03-31": [
+        "txn-0212",
+        "txn-0213",
+        "ntf-0013"
+      ],
+      "2025-04-01": [
+        "txn-0214",
+        "txn-0215",
+        "txn-0217"
+      ],
+      "2025-04-02": [
+        "txn-0216",
+        "txn-0218"
+      ],
+      "2025-04-03": [
+        "txn-0219"
+      ],
+      "2025-04-04": [
+        "txn-0221"
+      ],
+      "2025-04-05": [
+        "txn-0220",
+        "txn-0222",
+        "txn-0223"
+      ],
+      "2025-04-06": [
+        "txn-0224",
+        "txn-0225"
+      ],
+      "2025-04-07": [
+        "txn-0226"
+      ],
+      "2025-04-08": [
+        "txn-0228",
+        "txn-0229"
+      ],
+      "2025-04-09": [
+        "txn-0227",
+        "txn-0230"
+      ],
+      "2025-04-10": [
+        "txn-0231",
+        "txn-0233"
+      ],
+      "2025-04-11": [
+        "txn-0232",
+        "txn-0234"
+      ],
+      "2025-04-12": [
+        "txn-0235",
+        "txn-0236"
+      ],
+      "2025-04-13": [
+        "txn-0237"
+      ],
+      "2025-04-14": [
+        "txn-0238"
+      ],
+      "2025-04-15": [
+        "txn-0239",
+        "txn-0240"
+      ],
+      "2025-04-16": [
+        "txn-0241",
+        "txn-0242"
+      ],
+      "2025-04-17": [
+        "txn-0243",
+        "txn-0244",
+        "txn-0245"
+      ],
+      "2025-04-18": [
+        "txn-0246",
+        "txn-0247",
+        "ntf-0014"
+      ],
+      "2025-04-19": [
+        "txn-0248",
+        "txn-0249"
+      ],
+      "2025-04-20": [
+        "txn-0250"
+      ],
+      "2025-04-22": [
+        "txn-0251",
+        "txn-0252",
+        "txn-0253",
+        "txn-0254",
+        "pay-0004"
+      ],
+      "2025-04-24": [
+        "txn-0255",
+        "txn-0256"
+      ],
+      "2025-04-27": [
+        "stm-2025-04"
+      ],
+      "2025-04-28": [
+        "txn-0257",
+        "txn-0258",
+        "ntf-0015"
+      ],
+      "2025-04-29": [
+        "txn-0259",
+        "pts-0006",
+        "ntf-0016"
+      ],
+      "2025-04-30": [
+        "txn-0260",
+        "txn-0261"
+      ],
+      "2025-05-01": [
+        "txn-0262",
+        "txn-0263",
+        "txn-0264",
+        "txn-0265",
+        "txn-0266",
+        "txn-0267"
+      ],
+      "2025-05-02": [
+        "txn-0268",
+        "txn-0269",
+        "txn-0270"
+      ],
+      "2025-05-03": [
+        "txn-0271"
+      ],
+      "2025-05-05": [
+        "txn-0272",
+        "txn-0273"
+      ],
+      "2025-05-06": [
+        "txn-0274"
+      ],
+      "2025-05-07": [
+        "txn-0275",
+        "txn-0276"
+      ],
+      "2025-05-08": [
+        "txn-0277",
+        "txn-0279",
+        "txn-0280"
+      ],
+      "2025-05-09": [
+        "txn-0278",
+        "txn-0281",
+        "txn-0282",
+        "txn-0283",
+        "txn-0284",
+        "txn-0285"
+      ],
+      "2025-05-10": [
+        "txn-0287"
+      ],
+      "2025-05-11": [
+        "txn-0286",
+        "dsp-0002"
+      ],
+      "2025-05-12": [
+        "txn-0288"
+      ],
+      "2025-05-13": [
+        "txn-0289",
+        "txn-0290",
+        "off-0004",
+        "ntf-0017",
+        "ntf-0018"
+      ],
+      "2025-05-14": [
+        "txn-0291",
+        "txn-0292"
+      ],
+      "2025-05-15": [
+        "txn-0293",
+        "txn-0294"
+      ],
+      "2025-05-16": [
+        "txn-0295",
+        "txn-0296",
+        "txn-0297",
+        "txn-0298"
+      ],
+      "2025-05-17": [
+        "txn-0299",
+        "txn-0300"
+      ],
+      "2025-05-18": [
+        "txn-0301"
+      ],
+      "2025-05-19": [
+        "ntf-0019"
+      ],
+      "2025-05-20": [
+        "txn-0302",
+        "txn-0303",
+        "txn-0304"
+      ],
+      "2025-05-21": [
+        "txn-0305",
+        "txn-0306"
+      ],
+      "2025-05-22": [
+        "txn-0307",
+        "pay-0005"
+      ],
+      "2025-05-23": [
+        "txn-0308"
+      ],
+      "2025-05-24": [
+        "txn-0309"
+      ],
+      "2025-05-25": [
+        "txn-0310"
+      ],
+      "2025-05-26": [
+        "txn-0311"
+      ],
+      "2025-05-27": [
+        "txn-0312",
+        "txn-0313",
+        "stm-2025-05"
+      ],
+      "2025-05-28": [
+        "txn-0314",
+        "ntf-0020"
+      ],
+      "2025-05-29": [
+        "txn-0315",
+        "txn-0316",
+        "txn-0317",
+        "pts-0007",
+        "ntf-0021"
+      ],
+      "2025-05-30": [
+        "txn-0318"
+      ],
+      "2025-06-02": [
+        "txn-0319"
+      ],
+      "2025-06-03": [
+        "txn-0320"
+      ],
+      "2025-06-04": [
+        "txn-0321",
+        "txn-0322",
+        "txn-0324"
+      ],
+      "2025-06-05": [
+        "txn-0323",
+        "txn-0325"
+      ],
+      "2025-06-06": [
+        "txn-0326",
+        "txn-0327"
+      ],
+      "2025-06-07": [
+        "txn-0328",
+        "txn-0329",
+        "txn-0330",
+        "pts-a0001"
+      ],
+      "2025-06-09": [
+        "txn-0331"
+      ],
+      "2025-06-10": [
+        "txn-0333",
+        "txn-0334",
+        "txn-0335",
+        "txn-0336"
+      ],
+      "2025-06-11": [
+        "txn-0332",
+        "txn-0337",
+        "txn-0338",
+        "txn-0339"
+      ],
+      "2025-06-12": [
+        "txn-0340",
+        "txn-0341",
+        "txn-0342"
+      ],
+      "2025-06-13": [
+        "txn-0343",
+        "txn-0344",
+        "txn-0345"
+      ],
+      "2025-06-14": [
+        "ntf-0022"
+      ],
+      "2025-06-15": [
+        "txn-0346",
+        "txn-0347",
+        "txn-0348"
+      ],
+      "2025-06-16": [
+        "txn-0349"
+      ],
+      "2025-06-17": [
+        "txn-0350"
+      ],
+      "2025-06-18": [
+        "txn-0351",
+        "txn-0352",
+        "txn-0353",
+        "txn-0354"
+      ],
+      "2025-06-19": [
+        "txn-0355"
+      ],
+      "2025-06-20": [
+        "txn-0356",
+        "txn-0357",
+        "txn-0358"
+      ],
+      "2025-06-21": [
+        "txn-0359"
+      ],
+      "2025-06-22": [
+        "txn-0360",
+        "txn-0361",
+        "pay-0006"
+      ],
+      "2025-06-24": [
+        "txn-0362"
+      ],
+      "2025-06-25": [
+        "txn-0363",
+        "txn-0364",
+        "txn-0365"
+      ],
+      "2025-06-26": [
+        "txn-0366",
+        "txn-0367"
+      ],
+      "2025-06-27": [
+        "txn-0368",
+        "txn-0369",
+        "stm-2025-06"
+      ],
+      "2025-06-28": [
+        "txn-0370",
+        "txn-0371",
+        "txn-0372",
+        "ntf-0023"
+      ],
+      "2025-06-29": [
+        "txn-0373",
+        "txn-0374",
+        "pts-0008",
+        "ntf-0024"
+      ],
+      "2025-06-30": [
+        "txn-0375",
+        "txn-0376"
+      ],
+      "2025-07-01": [
+        "txn-0377",
+        "txn-0378",
+        "txn-0379"
+      ],
+      "2025-07-02": [
+        "txn-0380",
+        "txn-0381",
+        "txn-0382"
+      ],
+      "2025-07-03": [
+        "txn-0383"
+      ],
+      "2025-07-05": [
+        "txn-0384"
+      ],
+      "2025-07-06": [
+        "txn-0385",
+        "txn-0386",
+        "txn-0387",
+        "ntf-0025"
+      ],
+      "2025-07-08": [
+        "txn-0389",
+        "pay-0008"
+      ],
+      "2025-07-09": [
+        "txn-0388",
+        "txn-0390",
+        "txn-0391",
+        "txn-0392",
+        "txn-0393"
+      ],
+      "2025-07-10": [
+        "txn-0394",
+        "txn-0396"
+      ],
+      "2025-07-11": [
+        "txn-0395",
+        "txn-0397",
+        "txn-0398"
+      ],
+      "2025-07-12": [
+        "txn-0399",
+        "txn-0400"
+      ],
+      "2025-07-13": [
+        "txn-0401"
+      ],
+      "2025-07-14": [
+        "txn-0402",
+        "txn-0403",
+        "txn-0404"
+      ],
+      "2025-07-15": [
+        "txn-0405"
+      ],
+      "2025-07-16": [
+        "txn-0406"
+      ],
+      "2025-07-17": [
+        "txn-0407",
+        "txn-0408",
+        "txn-0409"
+      ],
+      "2025-07-18": [
+        "txn-0410",
+        "txn-0411",
+        "txn-0412",
+        "txn-0413",
+        "txn-0414"
+      ],
+      "2025-07-19": [
+        "txn-0415",
+        "txn-0416",
+        "txn-0417"
+      ],
+      "2025-07-20": [
+        "txn-0418",
+        "txn-0419",
+        "txn-0420"
+      ],
+      "2025-07-21": [
+        "txn-0421",
+        "txn-0422",
+        "txn-0423"
+      ],
+      "2025-07-22": [
+        "txn-0424",
+        "txn-0425",
+        "txn-0426",
+        "txn-0427",
+        "pay-0007"
+      ],
+      "2025-07-23": [
+        "txn-0428",
+        "txn-0429",
+        "txn-0430"
+      ],
+      "2025-07-24": [
+        "txn-0431",
+        "txn-0432",
+        "txn-0433"
+      ],
+      "2025-07-25": [
+        "txn-0434",
+        "txn-0435"
+      ],
+      "2025-07-27": [
+        "stm-2025-07"
+      ],
+      "2025-07-28": [
+        "txn-0436",
+        "ntf-0026"
+      ],
+      "2025-07-29": [
+        "txn-0437",
+        "txn-0438",
+        "txn-0439",
+        "txn-0440",
+        "pts-0009",
+        "ntf-0027"
+      ],
+      "2025-07-30": [
+        "txn-0441",
+        "txn-0442",
+        "txn-0443",
+        "txn-0444",
+        "txn-0445"
+      ],
+      "2025-07-31": [
+        "txn-0446",
+        "txn-0447",
+        "txn-0448"
+      ],
+      "2025-08-01": [
+        "txn-0449"
+      ],
+      "2025-08-02": [
+        "txn-0450",
+        "txn-0451"
+      ],
+      "2025-08-04": [
+        "txn-0452",
+        "txn-0454"
+      ],
+      "2025-08-05": [
+        "txn-0453",
+        "txn-0455",
+        "txn-0456",
+        "txn-0457",
+        "off-0005",
+        "ntf-0028"
+      ],
+      "2025-08-06": [
+        "txn-0458",
+        "txn-0459"
+      ],
+      "2025-08-07": [
+        "txn-0460",
+        "txn-0461"
+      ],
+      "2025-08-08": [
+        "txn-0462",
+        "txn-0464"
+      ],
+      "2025-08-09": [
+        "txn-0463",
+        "txn-0465",
+        "txn-0466"
+      ],
+      "2025-08-10": [
+        "txn-0468",
+        "txn-0469"
+      ],
+      "2025-08-11": [
+        "txn-0467",
+        "txn-0470"
+      ],
+      "2025-08-12": [
+        "txn-0471",
+        "txn-0472"
+      ],
+      "2025-08-13": [
+        "txn-0473"
+      ],
+      "2025-08-14": [
+        "txn-0474"
+      ],
+      "2025-08-15": [
+        "txn-0475",
+        "txn-0476"
+      ],
+      "2025-08-17": [
+        "txn-0477"
+      ],
+      "2025-08-18": [
+        "txn-0478",
+        "txn-0479",
+        "txn-0480"
+      ],
+      "2025-08-20": [
+        "txn-0481",
+        "txn-0482",
+        "txn-0483"
+      ],
+      "2025-08-21": [
+        "txn-0484",
+        "txn-0485"
+      ],
+      "2025-08-22": [
+        "txn-0486",
+        "txn-0487",
+        "pay-0009"
+      ],
+      "2025-08-24": [
+        "txn-0488",
+        "txn-0489"
+      ],
+      "2025-08-25": [
+        "ntf-0029"
+      ],
+      "2025-08-26": [
+        "txn-0490",
+        "txn-0491",
+        "ntf-0030"
+      ],
+      "2025-08-27": [
+        "txn-0492",
+        "txn-0493",
+        "txn-0494",
+        "stm-2025-08",
+        "pay-0010",
+        "ntf-0031"
+      ],
+      "2025-08-28": [
+        "txn-0495",
+        "ntf-0032",
+        "ntf-0033"
+      ],
+      "2025-08-29": [
+        "txn-0496",
+        "txn-0497",
+        "txn-0498",
+        "pts-0010",
+        "ntf-0034"
+      ],
+      "2025-08-30": [
+        "txn-0499",
+        "txn-0500",
+        "txn-0501"
+      ],
+      "2025-08-31": [
+        "txn-0502"
+      ],
+      "2025-09-01": [
+        "txn-0503",
+        "txn-0504"
+      ],
+      "2025-09-02": [
+        "txn-0505",
+        "txn-0506",
+        "txn-0507",
+        "txn-0508",
+        "txn-0509"
+      ],
+      "2025-09-03": [
+        "txn-0510",
+        "txn-0511",
+        "txn-0512"
+      ],
+      "2025-09-04": [
+        "txn-0513",
+        "txn-0515",
+        "txn-0516"
+      ],
+      "2025-09-05": [
+        "txn-0514"
+      ],
+      "2025-09-06": [
+        "txn-0517",
+        "txn-0518",
+        "txn-0519"
+      ],
+      "2025-09-08": [
+        "txn-0520"
+      ],
+      "2025-09-09": [
+        "txn-0521",
+        "txn-0522",
+        "txn-0523",
+        "off-0006",
+        "ntf-0035"
+      ],
+      "2025-09-10": [
+        "txn-0524",
+        "txn-0525"
+      ],
+      "2025-09-11": [
+        "txn-0526",
+        "txn-0527",
+        "txn-0528",
+        "txn-0529"
+      ],
+      "2025-09-12": [
+        "txn-0530",
+        "txn-0531"
+      ],
+      "2025-09-14": [
+        "txn-0532"
+      ],
+      "2025-09-15": [
+        "txn-0533"
+      ],
+      "2025-09-16": [
+        "txn-0534",
+        "txn-0535",
+        "txn-0536"
+      ],
+      "2025-09-17": [
+        "txn-0537",
+        "txn-0538",
+        "txn-0539",
+        "txn-0540"
+      ],
+      "2025-09-18": [
+        "txn-0541",
+        "txn-0542"
+      ],
+      "2025-09-19": [
+        "txn-0543"
+      ],
+      "2025-09-20": [
+        "txn-0544",
+        "txn-0545",
+        "txn-0546",
+        "txn-0547"
+      ],
+      "2025-09-22": [
+        "pay-0011"
+      ],
+      "2025-09-23": [
+        "txn-0548",
+        "txn-0549"
+      ],
+      "2025-09-24": [
+        "txn-0550",
+        "txn-0551",
+        "txn-0552",
+        "txn-0553"
+      ],
+      "2025-09-25": [
+        "txn-0554",
+        "txn-0555"
+      ],
+      "2025-09-27": [
+        "txn-0556",
+        "txn-0557",
+        "txn-0558",
+        "stm-2025-09"
+      ],
+      "2025-09-28": [
+        "ntf-0036"
+      ],
+      "2025-09-29": [
+        "txn-0559",
+        "pts-0011",
+        "ntf-0037"
+      ],
+      "2025-09-30": [
+        "txn-0560",
+        "txn-0561",
+        "txn-0562"
+      ],
+      "2025-10-01": [
+        "txn-0563"
+      ],
+      "2025-10-02": [
+        "txn-0564",
+        "txn-0565",
+        "txn-0566"
+      ],
+      "2025-10-03": [
+        "txn-0567",
+        "txn-0568"
+      ],
+      "2025-10-04": [
+        "txn-0570"
+      ],
+      "2025-10-05": [
+        "txn-0569",
+        "txn-0571",
+        "txn-0572",
+        "ntf-0038"
+      ],
+      "2025-10-06": [
+        "txn-0573"
+      ],
+      "2025-10-07": [
+        "txn-0574",
+        "txn-0575"
+      ],
+      "2025-10-08": [
+        "txn-0577"
+      ],
+      "2025-10-09": [
+        "txn-0576",
+        "txn-0578",
+        "txn-0579"
+      ],
+      "2025-10-10": [
+        "txn-0580",
+        "txn-0581",
+        "ntf-0039"
+      ],
+      "2025-10-11": [
+        "txn-0582"
+      ],
+      "2025-10-12": [
+        "txn-0583"
+      ],
+      "2025-10-13": [
+        "txn-0584"
+      ],
+      "2025-10-14": [
+        "txn-0585",
+        "txn-0586"
+      ],
+      "2025-10-15": [
+        "txn-0587",
+        "txn-0588",
+        "txn-0589"
+      ],
+      "2025-10-16": [
+        "txn-0590",
+        "txn-0591",
+        "txn-0592",
+        "dsp-0003"
+      ],
+      "2025-10-17": [
+        "txn-0593",
+        "txn-0594"
+      ],
+      "2025-10-18": [
+        "txn-0595"
+      ],
+      "2025-10-19": [
+        "txn-0596"
+      ],
+      "2025-10-20": [
+        "txn-0597"
+      ],
+      "2025-10-21": [
+        "txn-0598",
+        "txn-0599",
+        "txn-0600"
+      ],
+      "2025-10-22": [
+        "pay-0012"
+      ],
+      "2025-10-23": [
+        "txn-0601",
+        "txn-0602",
+        "ntf-0040"
+      ],
+      "2025-10-24": [
+        "txn-0603",
+        "txn-0604"
+      ],
+      "2025-10-25": [
+        "txn-0605",
+        "txn-0606"
+      ],
+      "2025-10-26": [
+        "txn-0607"
+      ],
+      "2025-10-27": [
+        "txn-0608",
+        "txn-0609",
+        "stm-2025-10",
+        "pay-0013",
+        "pay-0014"
+      ],
+      "2025-10-28": [
+        "txn-0610",
+        "txn-0611",
+        "ntf-0041",
+        "ntf-0042"
+      ],
+      "2025-10-29": [
+        "txn-0612",
+        "pts-0012",
+        "ntf-0043"
+      ],
+      "2025-10-30": [
+        "txn-0613",
+        "txn-0614",
+        "txn-0615"
+      ],
+      "2025-10-31": [
+        "txn-0616",
+        "txn-0617",
+        "txn-0618"
+      ],
+      "2025-11-01": [
+        "txn-0619"
+      ],
+      "2025-11-02": [
+        "txn-0620",
+        "txn-0621"
+      ],
+      "2025-11-03": [
+        "txn-0622",
+        "txn-0623"
+      ],
+      "2025-11-04": [
+        "txn-0624",
+        "txn-0625",
+        "ntf-0044"
+      ],
+      "2025-11-05": [
+        "txn-0626",
+        "txn-0627"
+      ],
+      "2025-11-06": [
+        "txn-0628",
+        "txn-0629",
+        "txn-0630"
+      ],
+      "2025-11-07": [
+        "txn-0631"
+      ],
+      "2025-11-08": [
+        "txn-0632",
+        "txn-0633",
+        "txn-0634",
+        "txn-0636"
+      ],
+      "2025-11-09": [
+        "txn-0635",
+        "ntf-0045"
+      ],
+      "2025-11-10": [
+        "txn-0637"
+      ],
+      "2025-11-11": [
+        "txn-0638",
+        "txn-0639",
+        "txn-0640",
+        "txn-0641"
+      ],
+      "2025-11-12": [
+        "txn-0642",
+        "txn-0643"
+      ],
+      "2025-11-13": [
+        "txn-0644",
+        "txn-0645",
+        "txn-0646"
+      ],
+      "2025-11-14": [
+        "txn-0647"
+      ],
+      "2025-11-15": [
+        "txn-0648"
+      ],
+      "2025-11-16": [
+        "txn-a0001",
+        "txn-0649",
+        "pts-a0002"
+      ],
+      "2025-11-17": [
+        "txn-0650",
+        "txn-0651"
+      ],
+      "2025-11-18": [
+        "txn-0652",
+        "txn-0653",
+        "txn-0654"
+      ],
+      "2025-11-19": [
+        "txn-0655",
+        "txn-0656"
+      ],
+      "2025-11-20": [
+        "txn-0657",
+        "txn-0658"
+      ],
+      "2025-11-21": [
+        "txn-0659"
+      ],
+      "2025-11-22": [
+        "txn-0660",
+        "txn-0661",
+        "txn-0662",
+        "pay-0015"
+      ],
+      "2025-11-23": [
+        "txn-0663"
+      ],
+      "2025-11-24": [
+        "txn-0664",
+        "txn-0665"
+      ],
+      "2025-11-25": [
+        "txn-0666",
+        "txn-0667",
+        "txn-0668"
+      ],
+      "2025-11-26": [
+        "txn-0669",
+        "txn-0670"
+      ],
+      "2025-11-27": [
+        "txn-0671",
+        "txn-0672",
+        "txn-0673",
+        "stm-2025-11"
+      ],
+      "2025-11-28": [
+        "ntf-0046"
+      ],
+      "2025-11-29": [
+        "txn-0674",
+        "txn-0675",
+        "pts-0013",
+        "ntf-0047"
+      ],
+      "2025-12-01": [
+        "txn-0676",
+        "txn-0677"
+      ],
+      "2025-12-02": [
+        "txn-0678",
+        "txn-0679",
+        "txn-0680",
+        "ntf-0048"
+      ],
+      "2025-12-04": [
+        "txn-0681",
+        "off-0007",
+        "off-0008",
+        "off-0009",
+        "ntf-0049",
+        "ntf-0050",
+        "ntf-0051"
+      ],
+      "2025-12-05": [
+        "txn-0682",
+        "txn-0683"
+      ],
+      "2025-12-06": [
+        "txn-0684"
+      ],
+      "2025-12-08": [
+        "txn-0686"
+      ],
+      "2025-12-09": [
+        "txn-0685",
+        "txn-0687",
+        "txn-0688",
+        "txn-0689",
+        "txn-0690"
+      ],
+      "2025-12-10": [
+        "txn-0691",
+        "txn-0693"
+      ],
+      "2025-12-11": [
+        "txn-0692",
+        "txn-0694"
+      ],
+      "2025-12-12": [
+        "txn-0695",
+        "txn-0696"
+      ],
+      "2025-12-13": [
+        "txn-0697"
+      ],
+      "2025-12-14": [
+        "txn-0698"
+      ],
+      "2025-12-15": [
+        "txn-0699",
+        "txn-0700"
+      ],
+      "2025-12-16": [
+        "txn-0701"
+      ],
+      "2025-12-17": [
+        "txn-0702",
+        "txn-0703"
+      ],
+      "2025-12-18": [
+        "txn-0704",
+        "txn-0705",
+        "txn-0706",
+        "txn-0707"
+      ],
+      "2025-12-19": [
+        "txn-0708",
+        "txn-0709",
+        "txn-0710",
+        "txn-0712",
+        "txn-0713"
+      ],
+      "2025-12-20": [
+        "txn-0711",
+        "txn-0714",
+        "txn-0715",
+        "txn-0716",
+        "ntf-0052"
+      ],
+      "2025-12-21": [
+        "txn-0717",
+        "txn-0718",
+        "txn-0719",
+        "txn-0720"
+      ],
+      "2025-12-22": [
+        "txn-0721",
+        "pay-0016"
+      ],
+      "2025-12-23": [
+        "txn-0722"
+      ],
+      "2025-12-24": [
+        "txn-0723"
+      ],
+      "2025-12-25": [
+        "txn-0724",
+        "dsp-0004"
+      ],
+      "2025-12-27": [
+        "stm-2025-12"
+      ],
+      "2025-12-28": [
+        "txn-0725",
+        "ntf-0053"
+      ],
+      "2025-12-29": [
+        "txn-0726",
+        "pts-0014",
+        "ntf-0054"
+      ],
+      "2025-12-30": [
+        "txn-0727",
+        "txn-0728"
+      ],
+      "2025-12-31": [
+        "txn-0729",
+        "txn-0730"
+      ],
+      "2026-01-01": [
+        "txn-0731",
+        "txn-0732"
+      ],
+      "2026-01-02": [
+        "txn-0733",
+        "txn-0734",
+        "txn-0735",
+        "txn-0736",
+        "ntf-0055"
+      ],
+      "2026-01-03": [
+        "txn-0737"
+      ],
+      "2026-01-05": [
+        "txn-0738"
+      ],
+      "2026-01-06": [
+        "txn-0739",
+        "txn-0740"
+      ],
+      "2026-01-07": [
+        "txn-0741",
+        "txn-0742"
+      ],
+      "2026-01-08": [
+        "txn-0743",
+        "txn-0744",
+        "txn-0746"
+      ],
+      "2026-01-09": [
+        "txn-0745",
+        "txn-0747",
+        "txn-0748"
+      ],
+      "2026-01-10": [
+        "txn-0749",
+        "txn-0750"
+      ],
+      "2026-01-11": [
+        "txn-0751",
+        "txn-0752"
+      ],
+      "2026-01-12": [
+        "txn-0753"
+      ],
+      "2026-01-13": [
+        "txn-0754",
+        "txn-0755"
+      ],
+      "2026-01-14": [
+        "txn-0756"
+      ],
+      "2026-01-15": [
+        "txn-0757",
+        "txn-0758"
+      ],
+      "2026-01-16": [
+        "txn-0759",
+        "txn-0760"
+      ],
+      "2026-01-17": [
+        "txn-0761"
+      ],
+      "2026-01-18": [
+        "txn-0762",
+        "txn-0763"
+      ],
+      "2026-01-19": [
+        "txn-0764"
+      ],
+      "2026-01-20": [
+        "txn-0765",
+        "txn-0766"
+      ],
+      "2026-01-21": [
+        "txn-0767",
+        "txn-0768",
+        "txn-0769",
+        "txn-0770"
+      ],
+      "2026-01-22": [
+        "txn-0771",
+        "pay-0017"
+      ],
+      "2026-01-23": [
+        "txn-0772",
+        "txn-0773",
+        "dsp-0005"
+      ],
+      "2026-01-24": [
+        "txn-0774",
+        "txn-0775",
+        "txn-0776",
+        "txn-0777"
+      ],
+      "2026-01-25": [
+        "txn-0778",
+        "txn-0779"
+      ],
+      "2026-01-26": [
+        "txn-0780"
+      ],
+      "2026-01-27": [
+        "txn-0781",
+        "stm-2026-01"
+      ],
+      "2026-01-28": [
+        "ntf-0056"
+      ],
+      "2026-01-29": [
+        "txn-0782",
+        "pts-0015",
+        "ntf-0057"
+      ],
+      "2026-01-30": [
+        "txn-0783",
+        "txn-0784",
+        "txn-0785"
+      ],
+      "2026-01-31": [
+        "txn-0786",
+        "txn-0787",
+        "txn-0788"
+      ],
+      "2026-02-01": [
+        "ntf-0058"
+      ],
+      "2026-02-02": [
+        "txn-0789",
+        "txn-0790",
+        "txn-0791",
+        "ntf-0059"
+      ],
+      "2026-02-03": [
+        "txn-0792",
+        "txn-0793"
+      ],
+      "2026-02-05": [
+        "txn-0794",
+        "txn-0795",
+        "txn-0796"
+      ],
+      "2026-02-06": [
+        "txn-0797",
+        "txn-0798",
+        "txn-0799"
+      ],
+      "2026-02-07": [
+        "txn-0800"
+      ],
+      "2026-02-08": [
+        "txn-0801"
+      ],
+      "2026-02-09": [
+        "txn-0802",
+        "txn-0803",
+        "txn-0804"
+      ],
+      "2026-02-10": [
+        "txn-0806",
+        "off-0010",
+        "ntf-0060"
+      ],
+      "2026-02-11": [
+        "txn-0805",
+        "txn-0807",
+        "txn-0808",
+        "txn-0809",
+        "txn-0810"
+      ],
+      "2026-02-12": [
+        "txn-0811"
+      ],
+      "2026-02-13": [
+        "txn-0812",
+        "txn-0813"
+      ],
+      "2026-02-14": [
+        "txn-0814",
+        "txn-0815"
+      ],
+      "2026-02-15": [
+        "txn-0816",
+        "txn-0817",
+        "txn-0818"
+      ],
+      "2026-02-16": [
+        "dsp-0006"
+      ],
+      "2026-02-17": [
+        "txn-0819"
+      ],
+      "2026-02-18": [
+        "txn-0820",
+        "txn-0821",
+        "txn-0822"
+      ],
+      "2026-02-19": [
+        "txn-0823"
+      ],
+      "2026-02-20": [
+        "txn-0824"
+      ],
+      "2026-02-21": [
+        "txn-0825"
+      ],
+      "2026-02-22": [
+        "txn-0826",
+        "pay-0018"
+      ],
+      "2026-02-23": [
+        "txn-0827",
+        "txn-0828",
+        "ntf-0061"
+      ],
+      "2026-02-24": [
+        "txn-0829"
+      ],
+      "2026-02-25": [
+        "txn-0830",
+        "txn-0831"
+      ],
+      "2026-02-26": [
+        "txn-0832",
+        "txn-0833",
+        "txn-0834"
+      ],
+      "2026-02-27": [
+        "txn-0835",
+        "txn-0836",
+        "txn-0837",
+        "stm-2026-02",
+        "ntf-0062"
+      ],
+      "2026-02-28": [
+        "txn-0838",
+        "txn-0839",
+        "txn-0840",
+        "txn-0841",
+        "txn-0842",
+        "ntf-0063",
+        "ntf-0064"
+      ],
+      "2026-03-01": [
+        "txn-0843",
+        "pts-0016",
+        "ntf-0065"
+      ],
+      "2026-03-02": [
+        "txn-0844"
+      ],
+      "2026-03-03": [
+        "txn-0845",
+        "txn-0846",
+        "txn-0847",
+        "ntf-0066"
+      ],
+      "2026-03-04": [
+        "txn-0849"
+      ],
+      "2026-03-05": [
+        "txn-0848",
+        "txn-0850",
+        "txn-0851",
+        "txn-0852"
+      ],
+      "2026-03-06": [
+        "txn-0853"
+      ],
+      "2026-03-07": [
+        "txn-0854"
+      ],
+      "2026-03-09": [
+        "txn-0855",
+        "txn-0856",
+        "txn-0857"
+      ],
+      "2026-03-10": [
+        "txn-0859",
+        "txn-0860",
+        "txn-0861",
+        "txn-0862",
+        "dsp-0007"
+      ],
+      "2026-03-11": [
+        "txn-0858",
+        "txn-0863"
+      ],
+      "2026-03-12": [
+        "txn-0864",
+        "txn-0865",
+        "txn-0867",
+        "txn-0868",
+        "ntf-0067"
+      ],
+      "2026-03-13": [
+        "txn-0866",
+        "txn-0869",
+        "txn-0870",
+        "ntf-0068"
+      ],
+      "2026-03-14": [
+        "txn-0871"
+      ],
+      "2026-03-15": [
+        "txn-0872"
+      ],
+      "2026-03-16": [
+        "txn-0873",
+        "txn-0874"
+      ],
+      "2026-03-17": [
+        "txn-0875"
+      ],
+      "2026-03-18": [
+        "txn-0876",
+        "txn-0877",
+        "txn-0878",
+        "txn-0879"
+      ],
+      "2026-03-19": [
+        "txn-0880",
+        "txn-0881",
+        "txn-0882"
+      ],
+      "2026-03-21": [
+        "txn-0883"
+      ],
+      "2026-03-22": [
+        "pay-0019"
+      ],
+      "2026-03-23": [
+        "txn-0884",
+        "txn-0885"
+      ],
+      "2026-03-24": [
+        "txn-0886",
+        "txn-0887"
+      ],
+      "2026-03-25": [
+        "txn-0888"
+      ],
+      "2026-03-26": [
+        "txn-0889",
+        "txn-0890",
+        "txn-0891",
+        "txn-0892"
+      ],
+      "2026-03-27": [
+        "txn-0893",
+        "txn-0894",
+        "txn-0895",
+        "txn-0896",
+        "stm-2026-03"
+      ],
+      "2026-03-28": [
+        "txn-0897",
+        "ntf-0069"
+      ],
+      "2026-03-29": [
+        "txn-0898",
+        "pts-0017",
+        "ntf-0070"
+      ],
+      "2026-03-30": [
+        "txn-0899",
+        "txn-0900",
+        "ntf-0071"
+      ],
+      "2026-04-01": [
+        "txn-0901",
+        "txn-0902"
+      ],
+      "2026-04-02": [
+        "txn-0903",
+        "txn-0904"
+      ],
+      "2026-04-03": [
+        "txn-0905"
+      ],
+      "2026-04-04": [
+        "txn-0906",
+        "txn-0907",
+        "txn-0908"
+      ],
+      "2026-04-05": [
+        "txn-0909"
+      ],
+      "2026-04-07": [
+        "txn-0910",
+        "txn-0911",
+        "txn-0912",
+        "txn-0913"
+      ],
+      "2026-04-08": [
+        "txn-0914",
+        "txn-0915",
+        "txn-0916",
+        "txn-0917"
+      ],
+      "2026-04-09": [
+        "txn-0918",
+        "txn-0919"
+      ],
+      "2026-04-10": [
+        "txn-0920",
+        "txn-0922",
+        "txn-0923"
+      ],
+      "2026-04-11": [
+        "txn-0921",
+        "txn-0924",
+        "txn-0925",
+        "txn-0926",
+        "txn-0927"
+      ],
+      "2026-04-12": [
+        "txn-0928"
+      ],
+      "2026-04-14": [
+        "txn-0929",
+        "txn-0930",
+        "off-0011",
+        "ntf-0072"
+      ],
+      "2026-04-15": [
+        "txn-0931",
+        "txn-0932"
+      ],
+      "2026-04-16": [
+        "txn-0933"
+      ],
+      "2026-04-18": [
+        "txn-0934",
+        "txn-0935",
+        "txn-0936"
+      ],
+      "2026-04-19": [
+        "txn-0937"
+      ],
+      "2026-04-21": [
+        "txn-0938",
+        "txn-0939",
+        "txn-0940"
+      ],
+      "2026-04-22": [
+        "pay-0020"
+      ],
+      "2026-04-23": [
+        "txn-0941"
+      ],
+      "2026-04-24": [
+        "txn-0942"
+      ],
+      "2026-04-26": [
+        "txn-0943"
+      ],
+      "2026-04-27": [
+        "stm-2026-04"
+      ],
+      "2026-04-28": [
+        "txn-0944",
+        "txn-0945",
+        "txn-0946",
+        "ntf-0073"
+      ],
+      "2026-04-29": [
+        "txn-0947",
+        "txn-0948",
+        "txn-0949",
+        "pts-0018",
+        "ntf-0074"
+      ],
+      "2026-04-30": [
+        "txn-0950",
+        "txn-0951"
+      ],
+      "2026-05-01": [
+        "txn-0952",
+        "txn-0953"
+      ],
+      "2026-05-02": [
+        "txn-0954",
+        "txn-0955",
+        "txn-0956"
+      ],
+      "2026-05-05": [
+        "txn-0957",
+        "txn-0958",
+        "txn-0959",
+        "txn-0960"
+      ],
+      "2026-05-06": [
+        "txn-0961",
+        "txn-0962"
+      ],
+      "2026-05-07": [
+        "txn-0963",
+        "txn-0964",
+        "txn-0965"
+      ],
+      "2026-05-08": [
+        "txn-0966"
+      ],
+      "2026-05-09": [
+        "txn-0967",
+        "txn-0968"
+      ],
+      "2026-05-11": [
+        "txn-0969",
+        "txn-0970"
+      ],
+      "2026-05-12": [
+        "txn-0971",
+        "txn-0972"
+      ],
+      "2026-05-13": [
+        "txn-0973",
+        "txn-0974"
+      ],
+      "2026-05-14": [
+        "txn-0975",
+        "txn-0976",
+        "txn-0977"
+      ],
+      "2026-05-16": [
+        "txn-0978"
+      ],
+      "2026-05-17": [
+        "txn-0979"
+      ],
+      "2026-05-18": [
+        "txn-0980",
+        "txn-0981",
+        "ntf-0075"
+      ],
+      "2026-05-19": [
+        "txn-0982",
+        "txn-0983"
+      ],
+      "2026-05-20": [
+        "txn-0984"
+      ],
+      "2026-05-21": [
+        "txn-0985",
+        "txn-0986"
+      ],
+      "2026-05-22": [
+        "txn-0987",
+        "pay-0021"
+      ],
+      "2026-05-23": [
+        "txn-0988",
+        "txn-0989"
+      ],
+      "2026-05-24": [
+        "txn-0990"
+      ],
+      "2026-05-25": [
+        "txn-0991",
+        "txn-0992",
+        "txn-0993"
+      ],
+      "2026-05-26": [
+        "txn-0994",
+        "pay-0022"
+      ],
+      "2026-05-27": [
+        "txn-0995",
+        "txn-0996",
+        "txn-0997",
+        "txn-0998",
+        "txn-0999",
+        "stm-2026-05",
+        "ntf-0076"
+      ],
+      "2026-05-28": [
+        "txn-1000",
+        "ntf-0077"
+      ],
+      "2026-05-29": [
+        "txn-1001",
+        "pts-0019",
+        "ntf-0078"
+      ],
+      "2026-05-30": [
+        "txn-1002"
+      ],
+      "2026-05-31": [
+        "txn-1003"
+      ],
+      "2026-06-01": [
+        "txn-1004"
+      ],
+      "2026-06-02": [
+        "txn-1005",
+        "txn-1006",
+        "txn-1007"
+      ],
+      "2026-06-03": [
+        "txn-1008",
+        "txn-1009",
+        "txn-1010",
+        "txn-1011",
+        "txn-1012"
+      ],
+      "2026-06-04": [
+        "txn-1013",
+        "txn-1014",
+        "txn-1016",
+        "txn-1017"
+      ],
+      "2026-06-05": [
+        "txn-1015",
+        "txn-1018",
+        "txn-1019"
+      ],
+      "2026-06-06": [
+        "txn-1020"
+      ],
+      "2026-06-07": [
+        "txn-1021",
+        "txn-1022"
+      ],
+      "2026-06-09": [
+        "txn-1023",
+        "off-0012",
+        "ntf-0079"
+      ],
+      "2026-06-10": [
+        "txn-1025"
+      ],
+      "2026-06-11": [
+        "txn-1024",
+        "txn-1026"
+      ],
+      "2026-06-12": [
+        "txn-1027"
+      ],
+      "2026-06-13": [
+        "txn-1028",
+        "txn-1029"
+      ],
+      "2026-06-14": [
+        "txn-1030"
+      ],
+      "2026-06-15": [
+        "txn-1031"
+      ],
+      "2026-06-16": [
+        "txn-1032",
+        "txn-1033"
+      ],
+      "2026-06-17": [
+        "txn-1034"
+      ],
+      "2026-06-18": [
+        "txn-1035",
+        "pts-a0003"
+      ],
+      "2026-06-19": [
+        "txn-1036",
+        "txn-1037",
+        "txn-1038",
+        "ntf-0080"
+      ],
+      "2026-06-21": [
+        "txn-1039",
+        "txn-1040",
+        "txn-1041"
+      ],
+      "2026-06-22": [
+        "txn-1042",
+        "pay-0023"
+      ],
+      "2026-06-23": [
+        "txn-1043"
+      ],
+      "2026-06-24": [
+        "txn-1044",
+        "pay-0024"
+      ],
+      "2026-06-25": [
+        "txn-1045",
+        "txn-1046"
+      ],
+      "2026-06-26": [
+        "txn-1047",
+        "txn-1048"
+      ],
+      "2026-06-27": [
+        "txn-1049",
+        "txn-1050",
+        "stm-2026-06",
+        "ntf-0081"
+      ],
+      "2026-06-28": [
+        "txn-1051",
+        "ntf-0082"
+      ],
+      "2026-06-29": [
+        "pts-0020",
+        "ntf-0083"
+      ],
+      "2026-06-30": [
+        "txn-1052"
+      ],
+      "2026-07-01": [
+        "txn-1053",
+        "txn-1055"
+      ],
+      "2026-07-02": [
+        "txn-1054",
+        "txn-1056",
+        "txn-1057"
+      ],
+      "2026-07-03": [
+        "txn-1058",
+        "txn-1059",
+        "txn-1060",
+        "txn-1061"
+      ],
+      "2026-07-04": [
+        "txn-1063"
+      ],
+      "2026-07-05": [
+        "txn-1062",
+        "txn-1064"
+      ],
+      "2026-07-06": [
+        "txn-1065",
+        "txn-1066"
+      ],
+      "2026-07-07": [
+        "txn-1067",
+        "txn-1068"
+      ],
+      "2026-07-08": [
+        "txn-1069",
+        "txn-1070"
+      ],
+      "2026-07-09": [
+        "txn-1071"
+      ],
+      "2026-07-10": [
+        "txn-1072",
+        "txn-1073",
+        "txn-1075",
+        "txn-1076"
+      ],
+      "2026-07-11": [
+        "txn-1074",
+        "txn-1077",
+        "txn-1078",
+        "txn-1079"
+      ],
+      "2026-07-12": [
+        "txn-1080",
+        "txn-1081",
+        "txn-1082",
+        "txn-1083"
+      ],
+      "2026-07-13": [
+        "txn-1084",
+        "txn-1085"
+      ],
+      "2026-07-14": [
+        "txn-1086",
+        "txn-1087"
+      ],
+      "2026-07-15": [
+        "txn-1088",
+        "txn-1089",
+        "txn-1090",
+        "txn-1091",
+        "txn-1092"
+      ],
+      "2026-07-16": [
+        "txn-1093",
+        "txn-1094"
+      ],
+      "2026-07-17": [
+        "txn-1095"
+      ],
+      "2026-07-18": [
+        "txn-1096",
+        "txn-1097"
+      ],
+      "2026-07-20": [
+        "txn-1098"
+      ],
+      "2026-07-21": [
+        "txn-1099"
+      ],
+      "2026-07-22": [
+        "txn-1100",
+        "pay-0025"
+      ],
+      "2026-07-23": [
+        "txn-1101",
+        "txn-1102"
+      ],
+      "2026-07-24": [
+        "txn-1103"
+      ],
+      "2026-07-25": [
+        "txn-1104",
+        "txn-1105"
+      ],
+      "2026-07-26": [
+        "txn-1106"
+      ],
+      "2026-07-27": [
+        "stm-2026-07"
+      ],
+      "2026-07-28": [
+        "txn-1107",
+        "txn-1108",
+        "txn-1109",
+        "ntf-0084"
+      ],
+      "2026-07-29": [
+        "txn-1110",
+        "txn-1111",
+        "pts-0021",
+        "ntf-0085"
+      ],
+      "2026-07-30": [
+        "txn-1112",
+        "txn-1113"
+      ],
+      "2026-07-31": [
+        "txn-1114",
+        "txn-1115",
+        "txn-1116",
+        "txn-1117"
+      ],
+      "2026-08-01": [
+        "txn-1118",
+        "txn-1119"
+      ],
+      "2026-08-02": [
+        "txn-1120",
+        "txn-1121",
+        "txn-1122"
+      ],
+      "2026-08-03": [
+        "txn-1123"
+      ],
+      "2026-08-04": [
+        "txn-1124",
+        "txn-1125"
+      ],
+      "2026-08-05": [
+        "txn-1126",
+        "txn-1127",
+        "txn-1128",
+        "txn-1129"
+      ],
+      "2026-08-06": [
+        "txn-1130",
+        "txn-1131"
+      ],
+      "2026-08-07": [
+        "txn-1132"
+      ],
+      "2026-08-08": [
+        "txn-1133",
+        "txn-1134",
+        "txn-1135"
+      ],
+      "2026-08-09": [
+        "txn-1136"
+      ],
+      "2026-08-11": [
+        "txn-1137",
+        "txn-1138",
+        "txn-1139"
+      ],
+      "2026-08-12": [
+        "txn-1140"
+      ],
+      "2026-08-13": [
+        "txn-1141",
+        "txn-1142"
+      ],
+      "2026-08-14": [
+        "txn-1143"
+      ],
+      "2026-08-15": [
+        "txn-1144"
+      ],
+      "2026-08-16": [
+        "txn-1145"
+      ],
+      "2026-08-18": [
+        "txn-1146",
+        "txn-1147",
+        "txn-1148"
+      ],
+      "2026-08-20": [
+        "txn-1149"
+      ],
+      "2026-08-22": [
+        "txn-1150",
+        "txn-1151",
+        "pay-0026"
+      ],
+      "2026-08-23": [
+        "txn-a0002",
+        "txn-1152",
+        "pts-a0004"
+      ],
+      "2026-08-24": [
+        "txn-1153"
+      ],
+      "2026-08-25": [
+        "txn-1154",
+        "txn-1155"
+      ],
+      "2026-08-26": [
+        "txn-1156",
+        "txn-1157"
+      ],
+      "2026-08-27": [
+        "txn-1158",
+        "txn-1159",
+        "stm-2026-08"
+      ],
+      "2026-08-28": [
+        "txn-1160",
+        "ntf-0086"
+      ],
+      "2026-08-29": [
+        "txn-1161",
+        "txn-1162",
+        "txn-1163",
+        "pts-0022",
+        "ntf-0087"
+      ],
+      "2026-08-30": [
+        "txn-1164",
+        "txn-1165"
+      ],
+      "2026-08-31": [
+        "txn-1166"
+      ],
+      "2026-09-01": [
+        "txn-1168",
+        "txn-1169"
+      ],
+      "2026-09-02": [
+        "txn-1167",
+        "txn-1170",
+        "txn-1171",
+        "txn-1172"
+      ],
+      "2026-09-03": [
+        "txn-1173"
+      ],
+      "2026-09-04": [
+        "txn-1174",
+        "txn-1176",
+        "txn-1177"
+      ],
+      "2026-09-05": [
+        "txn-1175",
+        "txn-1178",
+        "txn-1179",
+        "txn-1180"
+      ],
+      "2026-09-06": [
+        "txn-1181"
+      ],
+      "2026-09-08": [
+        "txn-1182"
+      ],
+      "2026-09-09": [
+        "txn-1183",
+        "txn-1184",
+        "txn-1185"
+      ],
+      "2026-09-10": [
+        "txn-1186"
+      ],
+      "2026-09-11": [
+        "txn-1187",
+        "txn-1188"
+      ],
+      "2026-09-13": [
+        "txn-1189"
+      ],
+      "2026-09-14": [
+        "txn-1190"
+      ],
+      "2026-09-15": [
+        "txn-1191",
+        "txn-1192",
+        "off-0013",
+        "ntf-0088"
+      ],
+      "2026-09-18": [
+        "txn-1193",
+        "txn-1194",
+        "txn-1195",
+        "txn-1196"
+      ],
+      "2026-09-19": [
+        "txn-1197"
+      ],
+      "2026-09-20": [
+        "txn-1198"
+      ],
+      "2026-09-21": [
+        "txn-1199"
+      ],
+      "2026-09-22": [
+        "txn-1200",
+        "txn-1201",
+        "txn-1202",
+        "pay-0027"
+      ],
+      "2026-09-23": [
+        "txn-1203",
+        "txn-1204",
+        "txn-1205"
+      ],
+      "2026-09-24": [
+        "txn-1206",
+        "pts-0023",
+        "ntf-0089"
+      ],
+      "2026-09-25": [
+        "txn-1207",
+        "txn-1208",
+        "txn-1209"
+      ],
+      "2026-09-26": [
+        "txn-1210"
+      ],
+      "2026-09-27": [
+        "stm-2026-09"
+      ],
+      "2026-09-28": [
+        "ntf-0090"
+      ],
+      "2026-09-29": [
+        "txn-1211",
+        "txn-1212",
+        "pts-0024",
+        "ntf-0091"
+      ],
+      "2026-09-30": [
+        "txn-1213"
+      ],
+      "2026-10-01": [
+        "txn-1215",
+        "txn-1216"
+      ],
+      "2026-10-02": [
+        "txn-1214",
+        "txn-1217",
+        "txn-1218"
+      ],
+      "2026-10-03": [
+        "txn-1219",
+        "txn-1220"
+      ],
+      "2026-10-04": [
+        "txn-1221"
+      ],
+      "2026-10-05": [
+        "txn-1222",
+        "txn-1223"
+      ],
+      "2026-10-06": [
+        "txn-1224",
+        "txn-1225"
+      ],
+      "2026-10-07": [
+        "txn-1226"
+      ],
+      "2026-10-08": [
+        "txn-1227",
+        "txn-1228",
+        "txn-1229"
+      ],
+      "2026-10-09": [
+        "txn-1230"
+      ],
+      "2026-10-10": [
+        "txn-1232",
+        "txn-1233"
+      ],
+      "2026-10-11": [
+        "txn-1231",
+        "txn-1234"
+      ],
+      "2026-10-12": [
+        "txn-1235",
+        "txn-1236"
+      ],
+      "2026-10-13": [
+        "txn-1237",
+        "txn-1238"
+      ],
+      "2026-10-14": [
+        "txn-1239"
+      ],
+      "2026-10-15": [
+        "txn-1240"
+      ],
+      "2026-10-16": [
+        "txn-1241"
+      ],
+      "2026-10-17": [
+        "txn-1243"
+      ],
+      "2026-10-18": [
+        "txn-1242",
+        "txn-1244",
+        "txn-1245"
+      ],
+      "2026-10-19": [
+        "txn-1246",
+        "txn-1247"
+      ],
+      "2026-10-20": [
+        "txn-1248",
+        "txn-1249"
+      ],
+      "2026-10-22": [
+        "txn-1250",
+        "txn-1251",
+        "pay-0028"
+      ],
+      "2026-10-23": [
+        "txn-1252"
+      ],
+      "2026-10-24": [
+        "txn-1253"
+      ],
+      "2026-10-25": [
+        "txn-1254"
+      ],
+      "2026-10-27": [
+        "txn-1255",
+        "txn-1256",
+        "txn-1257",
+        "txn-1258",
+        "stm-2026-10"
+      ],
+      "2026-10-28": [
+        "txn-1259",
+        "txn-1260",
+        "ntf-0092"
+      ],
+      "2026-10-29": [
+        "txn-1261",
+        "txn-1262",
+        "pts-0025",
+        "ntf-0093"
+      ],
+      "2026-10-30": [
+        "txn-1263"
+      ],
+      "2026-10-31": [
+        "txn-1264",
+        "txn-1265"
+      ],
+      "2026-11-01": [
+        "txn-1266"
+      ],
+      "2026-11-02": [
+        "txn-1267",
+        "txn-1268"
+      ],
+      "2026-11-03": [
+        "txn-1269",
+        "txn-1270"
+      ],
+      "2026-11-04": [
+        "txn-1272"
+      ],
+      "2026-11-05": [
+        "txn-1271"
+      ],
+      "2026-11-06": [
+        "txn-1273"
+      ],
+      "2026-11-07": [
+        "txn-1274",
+        "txn-1275",
+        "ntf-0094"
+      ],
+      "2026-11-08": [
+        "txn-1276"
+      ],
+      "2026-11-10": [
+        "txn-1278"
+      ],
+      "2026-11-11": [
+        "txn-1277",
+        "txn-1279"
+      ],
+      "2026-11-12": [
+        "txn-1280",
+        "txn-1281"
+      ],
+      "2026-11-13": [
+        "txn-1282",
+        "txn-1283",
+        "txn-1284",
+        "txn-1285"
+      ],
+      "2026-11-14": [
+        "txn-1286",
+        "txn-1287"
+      ],
+      "2026-11-15": [
+        "txn-1288"
+      ],
+      "2026-11-16": [
+        "txn-1289"
+      ],
+      "2026-11-17": [
+        "txn-1290",
+        "txn-1291",
+        "txn-1292"
+      ],
+      "2026-11-18": [
+        "txn-1293",
+        "txn-1294"
+      ],
+      "2026-11-19": [
+        "txn-1295",
+        "txn-1296"
+      ],
+      "2026-11-20": [
+        "txn-1297",
+        "txn-1298"
+      ],
+      "2026-11-22": [
+        "txn-1299",
+        "txn-1300",
+        "pay-0029"
+      ],
+      "2026-11-23": [
+        "txn-1301"
+      ],
+      "2026-11-24": [
+        "txn-1302",
+        "txn-1303",
+        "txn-1304"
+      ],
+      "2026-11-25": [
+        "txn-1305",
+        "txn-1306",
+        "txn-1307",
+        "txn-1308",
+        "txn-1309"
+      ],
+      "2026-11-26": [
+        "txn-1310",
+        "txn-1311",
+        "txn-1312",
+        "txn-1313"
+      ],
+      "2026-11-27": [
+        "txn-1314",
+        "txn-1315",
+        "stm-2026-11"
+      ],
+      "2026-11-28": [
+        "txn-1316",
+        "txn-1317",
+        "ntf-0095"
+      ],
+      "2026-11-29": [
+        "txn-1318",
+        "pts-0026",
+        "ntf-0096"
+      ],
+      "2026-11-30": [
+        "txn-1319"
+      ],
+      "2026-12-01": [
+        "txn-1320",
+        "txn-1321",
+        "txn-1323"
+      ],
+      "2026-12-02": [
+        "txn-1322",
+        "txn-1324",
+        "txn-1325",
+        "txn-1326",
+        "txn-1327",
+        "txn-1328",
+        "txn-1329",
+        "ntf-0097"
+      ],
+      "2026-12-03": [
+        "txn-1330",
+        "txn-1331"
+      ],
+      "2026-12-04": [
+        "txn-1332",
+        "off-0014",
+        "off-0015",
+        "off-0016",
+        "ntf-0098",
+        "ntf-0099",
+        "ntf-0100"
+      ],
+      "2026-12-05": [
+        "txn-1333",
+        "txn-1334",
+        "txn-1335"
+      ],
+      "2026-12-06": [
+        "txn-1336"
+      ],
+      "2026-12-08": [
+        "txn-1337"
+      ],
+      "2026-12-09": [
+        "txn-1338",
+        "txn-1339",
+        "txn-1340"
+      ],
+      "2026-12-10": [
+        "txn-1342",
+        "txn-1343"
+      ],
+      "2026-12-11": [
+        "txn-1341"
+      ],
+      "2026-12-13": [
+        "txn-1344",
+        "txn-1345"
+      ],
+      "2026-12-14": [
+        "txn-1346",
+        "txn-1347",
+        "dsp-0008"
+      ],
+      "2026-12-15": [
+        "txn-1348",
+        "txn-1349"
+      ],
+      "2026-12-16": [
+        "txn-1350",
+        "txn-1351"
+      ],
+      "2026-12-17": [
+        "txn-1352",
+        "txn-1354"
+      ],
+      "2026-12-18": [
+        "txn-1353",
+        "txn-1355",
+        "txn-1356",
+        "txn-1357",
+        "txn-1358",
+        "txn-1359",
+        "ntf-0101"
+      ],
+      "2026-12-19": [
+        "txn-1360",
+        "txn-1361",
+        "txn-1362",
+        "txn-1363"
+      ],
+      "2026-12-20": [
+        "txn-1364",
+        "txn-1365",
+        "txn-1366",
+        "txn-1367"
+      ],
+      "2026-12-21": [
+        "txn-1368",
+        "txn-1369",
+        "txn-1370"
+      ],
+      "2026-12-22": [
+        "txn-1371",
+        "txn-1372",
+        "txn-1373",
+        "txn-1374",
+        "pay-0030"
+      ],
+      "2026-12-23": [
+        "txn-1375",
+        "txn-1376",
+        "txn-1377"
+      ],
+      "2026-12-24": [
+        "txn-1378",
+        "txn-1379"
+      ],
+      "2026-12-25": [
+        "txn-1380"
+      ],
+      "2026-12-26": [
+        "txn-1381",
+        "txn-1382"
+      ],
+      "2026-12-27": [
+        "stm-2026-12"
+      ],
+      "2026-12-28": [
+        "ntf-0102"
+      ],
+      "2026-12-29": [
+        "txn-1383",
+        "txn-1384",
+        "pts-0027",
+        "ntf-0103"
+      ],
+      "2026-12-30": [
+        "txn-1385",
+        "txn-1386"
+      ],
+      "2026-12-31": [
+        "txn-1387"
+      ]
+    }
+  },
+  "scheduled": {
+    "note": "Not counted. A statement due time, the posting time of a payment and an offer deadline are due times of a schedule. Rows after the clock are future rows.",
+    "kinds": [
+      {
+        "kind": "statement_due_times",
+        "date_field": "statements[].due_at",
+        "rows": 25,
+        "after_clock": [
+          {
+            "id": "stm-2026-12",
+            "value": "2027-01-22T17:00:00-05:00"
+          }
+        ]
+      },
+      {
+        "kind": "payment_post_times",
+        "date_field": "payments[].posts_at",
+        "rows": 31,
+        "after_clock": [
+          {
+            "id": "pay-0031",
+            "value": "2027-01-22T00:00:00-05:00"
+          }
+        ]
+      },
+      {
+        "kind": "offer_deadlines",
+        "date_field": "offers[].accept_by",
+        "rows": 16,
+        "after_clock": [
+          {
+            "id": "off-0014",
+            "value": "2027-01-08T23:59:59-05:00"
+          },
+          {
+            "id": "off-0015",
+            "value": "2027-01-08T23:59:59-05:00"
+          },
+          {
+            "id": "off-0016",
+            "value": "2027-01-08T23:59:59-05:00"
+          }
+        ]
+      }
+    ]
+  }
+}

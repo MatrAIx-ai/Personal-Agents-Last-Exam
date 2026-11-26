@@ -1,0 +1,7 @@
+# Task data
+
+`seed.json`, `binding.json` and `policies.json` are input examples: a small history of one account, the people and accounts of the run, and the tools that the Agent may call. A task replaces all three through `env.load_seed`, with its own `virtual_now`. Loading is an Infra operation, so the Agent cannot do it. Edit the three files together, because the account and the owner in the seed must exist in the binding.
+
+This seed is built for a clock of `2026-11-09T06:00:00-05:00`, so that the seven example events of the approved plan apply to it in time order. It holds the history from August to early November 2026 of the account `brindle-riley`: 3 statements (`stm-2026-08` to `stm-2026-10`), 3 payments (`pay-0058` to `pay-0060`), 2 ended disputes (`dsp-0007` and `dsp-0008`), 2 offers (`off-0019` and `off-0020`), 12,000 points and 12 notifications. The balance at the clock is 1,300.00. The gym purchase `txn-0412` and the pending fuel hold `txn-0440` are the objects that the examples `ev-br-301` and `ev-br-302` name. The account holder's dispute on `txn-0412` then gets `dsp-0009`, which `ev-br-330` updates. The seed has no annual fee.
+
+A seed may hold any part of the history, for example only the newest notifications, as long as it passes `validateSeed`. The history of this seed starts in August 2026, so its first statement balance is the charges of August only. `dev/build-task-seed.cjs` writes the file. To check an edited seed, run `node dev/check-fixture.cjs examples/task-data/seed.json 2026-11-09T06:00:00-05:00` from the package folder.

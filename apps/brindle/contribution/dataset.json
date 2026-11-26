@@ -1,0 +1,81 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "brindle-minimal",
+  "version": "1.0.0",
+  "description": "Authored synthetic history of one cardholder's credit card account at a fictional issuer, for reproducible acceptance: 1 issuer with its four rules, 2 products (one with an annual fee and 3 transfer partners, one with no fee), 1 account, 13 statements, 180 transactions (12 pending, 9 refunds, 2 annual fees, 6 credits, 3 temporary credits and 2 reversals among them), 16 payments (3 autopay, 2 returned, 1 cancelled and 1 skipped among them), 5 disputes in the 5 states, 7 offers of the 4 kinds in the 5 read states, and 30 points entries. A development script replays the authored history from the opening of the account on 10 November 2025 to 5 December 2026 once through the App, so every statement balance is the App's balance at the closing time. The fixture keeps the 24 newest notifications and the activity rows from the time of the oldest one on. It is not a benchmark task.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Authored synthetic records; no external collection. The issuer, people, merchants, banks, card products and loyalty programs are fictional, and the records hold no card number. Two public pages were read only for the shape of the workflows, and no text, data, form or brand was copied: the credit card pages of the Consumer Financial Protection Bureau (https://www.consumerfinance.gov/consumer-tools/credit-cards/) and Regulation Z, section 1026.13, on billing error resolution (https://www.consumerfinance.gov/rules-policy/regulations/1026/13/).",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted",
+        "tool": "apps/brindle/dev/build-fixture.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "evaluation-generator",
+      "kind": "synthetic",
+      "description": "The source of the separate evaluation dataset in data/evaluation/. Its own dataset.json, passed to env.load_seed, names this same source ID in its record_source_ids, so every record of data/evaluation/seed.json comes from it. The records of this file's fixture come only from authored, so this source is declared here but not listed in record_source_ids above. Every record is synthetic: a scripted history of one cardholder's account from 1 January 2025 to 31 December 2026, made from story templates with a seeded PRNG and replayed through the App. It is not part of the package fixture.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted replay of story templates with a seeded PRNG (mulberry32)",
+        "tool": "apps/brindle/dev/generate-dataset.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20241202,
+        "parameters": {
+          "start": "2024-12-02T10:30:00-05:00",
+          "clock": "2026-12-31T23:00:00-05:00",
+          "timezone": "America/New_York",
+          "files": [
+            {
+              "name": "data/evaluation/seed.json",
+              "bytes": 1324198,
+              "sha256": "3d413e174b4c7049ef326a87f22f869b69acfd67537afe32943cf8d4685f7767"
+            },
+            {
+              "name": "data/evaluation/clock.json",
+              "bytes": 50,
+              "sha256": "4a0a17ea549f275a693b1f7728c04cc3c0d318462bfcc1b1ca16d07dd162debc"
+            },
+            {
+              "name": "data/evaluation/dataset.json",
+              "bytes": 2040,
+              "sha256": "fc1efa56264ee89cab73e6ae1c04e5484c89d379003809112f4bdeced3bf7812"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Normalized timestamps and account IDs. Records are statements, transactions, payments, disputes, offers and points entries."
+  ],
+  "expected_counts": {
+    "records": 251,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}

@@ -1,0 +1,481 @@
+{
+  "schema": "brindle.mcp-integration.v1",
+  "runtime_version": "1.6.0",
+  "app_version": "1.0.0",
+  "node": "v22.23.5",
+  "checks": [
+    {
+      "name": "Before the load, the clock of the fresh instance stands at 5 January 2027",
+      "status": "passed"
+    },
+    {
+      "name": "env.load_seed loads the task seed with its binding, its policies and its own virtual_now",
+      "status": "passed"
+    },
+    {
+      "name": "The snapshot holds the loaded seed",
+      "status": "passed"
+    },
+    {
+      "name": "The clock is the virtual_now of the seed: not the time that the instance had before, and not the package clock",
+      "status": "passed"
+    },
+    {
+      "name": "account.get reads now as 2026-11-09T06:00:00-05:00, with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "account.close_preview reads now as 2026-11-09T06:00:00-05:00, with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "transactions.list reads now as 2026-11-09T06:00:00-05:00, with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "transactions.get reads now as 2026-11-09T06:00:00-05:00, with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "statements.list reads now as 2026-11-09T06:00:00-05:00, with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "statements.get reads now as 2026-11-09T06:00:00-05:00, with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "payments.list reads now as 2026-11-09T06:00:00-05:00, with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "disputes.list reads now as 2026-11-09T06:00:00-05:00, with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "disputes.get reads now as 2026-11-09T06:00:00-05:00, with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "offers.list reads now as 2026-11-09T06:00:00-05:00, with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "offers.get reads now as 2026-11-09T06:00:00-05:00, with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "rewards.get reads now as 2026-11-09T06:00:00-05:00, with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "notifications.list reads now as 2026-11-09T06:00:00-05:00, with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "preferences.get reads now as 2026-11-09T06:00:00-05:00, with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "W1: at the loaded time account.get reads the balance 1,300.00, the pending 150.00, 12,000 points and autopay off",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent connection lists exactly the 25 operations of the plan",
+      "status": "passed"
+    },
+    {
+      "name": "14 of them are read tools",
+      "status": "passed"
+    },
+    {
+      "name": "11 of them are write tools",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent connection lists no env.* operation",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.apply_event gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.reset gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.advance_time gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.load_seed gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.snapshot gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.event_status gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.validate_bundle gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The Agent calling env.apply_event gets permission_denied",
+      "status": "passed"
+    },
+    {
+      "name": "The denied calls changed no business data and no version",
+      "status": "passed"
+    },
+    {
+      "name": "Each denied call has one deny row in the audit, with the Agent as the actor. The repeated env.apply_event counts as a second row",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call: a fixed payment of 2,000.00 against the balance of 1,300.00 returns over_balance",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call: a dispute of 70.00 on the gym charge of 60.00 returns over_net",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call: a dispute on the pending hold txn-0440 returns not_disputable",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call: an amount with three decimals returns the App's own invalid_arguments",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call: a fixed payment with no amount breaks the input schema, so Core returns invalid_arguments",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call changes nothing: after three App errors and two argument errors the business data is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "A failed call changes nothing: the version and the notifications are the same",
+      "status": "passed"
+    },
+    {
+      "name": "The audit has one deny row for each failed call",
+      "status": "passed"
+    },
+    {
+      "name": "W3: ev-br-301 posts the partial refund of 20.00, so the gym charge reads refunded_final 20.00 and net_charge 40.00, and ntf-0057 is written",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: an identical event_id returns the stored receipt with duplicate true",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the repeated event writes no second refund, no notification and no audit row",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the same event_id with other content returns idempotency_conflict",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: an event dated before the clock returns invalid_event",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an event dated before the clock the business data and the notifications are byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an event dated before the clock the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after an event dated before the clock the audit has one deny row",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: a drop of a posted transaction returns invalid_event",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a drop of a posted transaction the business data and the notifications are byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a drop of a posted transaction the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a drop of a posted transaction the audit has one deny row",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: a temporary credit sent with transaction.posted returns invalid_event",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a temporary credit sent with transaction.posted the business data and the notifications are byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a temporary credit sent with transaction.posted the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a temporary credit sent with transaction.posted the audit has one deny row",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: a return of a payment that is not posted returns invalid_event",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a return of a payment that is not posted the business data and the notifications are byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a return of a payment that is not posted the version and the clock are the same",
+      "status": "passed"
+    },
+    {
+      "name": "Refused event: after a return of a payment that is not posted the audit has one deny row",
+      "status": "passed"
+    },
+    {
+      "name": "W1: ev-br-302 drops the pending hold, so pending_total reads 0.00",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-11-13T00:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: at the start of 13 November the dispute window of txn-0381 has closed, so disputes.open returns too_late (the same call commits at the loaded time, see the reset)",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-11-13T20:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "W3: disputes.open of 40.00 on 13 November makes dsp-0009, which reads open",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the same request_id with the same input returns the stored receipt with duplicate true",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: it opens no second dispute, writes no audit row and keeps the version",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the same request_id with changed input returns idempotency_conflict",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: a write with a stale expected_version returns stale_version and names the current version",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the conflict and the stale write changed no business data",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the conflict and the stale write each have one deny row in the audit",
+      "status": "passed"
+    },
+    {
+      "name": "ev-br-330 writes ntf-0058, and its stored wire message equals the example message of the approved plan, field for field",
+      "status": "passed"
+    },
+    {
+      "name": "The event wrote one activity row for itself and effect rows for the temporary credit and the notification",
+      "status": "passed"
+    },
+    {
+      "name": "W3: the gym charge reads refunded_final 20.00, temporary_credit 40.00 and net_charge 40.00",
+      "status": "passed"
+    },
+    {
+      "name": "W1: after the November statement, a purchase of 210.00 and a hotel hold of 300.00, account.get reads balance 1,450.00, pending 300.00, available 6,250.00 and 0.00 paid toward 1,240.00",
+      "status": "passed"
+    },
+    {
+      "name": "ev-br-350 adds 1,240 points and ev-br-340 adds the spending offer off-0021, which reads available",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-12-10T19:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "W2: payments.schedule on 10 December for the statement balance on 20 December makes pay-0061, scheduled for 1,240.00",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the repeated payments.schedule returns the stored receipt with duplicate true",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: it schedules no second payment and keeps the version and the audit",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-12-11T00:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: after accept_by of 10 December at 23:59:59, off-0021 reads expired",
+      "status": "passed"
+    },
+    {
+      "name": "W4 control: offers.accept on the expired offer returns too_late",
+      "status": "passed"
+    },
+    {
+      "name": "Before its day the payment reads scheduled, with no posted amount",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 2, env.advance_time to 2026-12-20T08:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: on 20 December pay-0061 reads posted with 1,240.00, the balance reads 210.00 and the statement is paid in full",
+      "status": "passed"
+    },
+    {
+      "name": "W2: ev-br-320 returns the payment, so it reads returned, the balance is 1,450.00 again and the account reads payment_returned",
+      "status": "passed"
+    },
+    {
+      "name": "The business data in env.snapshot is byte-identical before and after all 14 reads",
+      "status": "passed"
+    },
+    {
+      "name": "Each of the 14 reads has one allow row in the audit, with no state change",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of a read carries input.id",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of a windowed read carries input.start and input.end",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of a write carries input.id, the request_id, the observed version and the ID of the object it wrote",
+      "status": "passed"
+    },
+    {
+      "name": "The audit row of each applied event carries its event_id",
+      "status": "passed"
+    },
+    {
+      "name": "The join scope: the snapshot gives run_id, app_id, epoch and revision next to the activity rows",
+      "status": "passed"
+    },
+    {
+      "name": "Every added activity row has seq, virtual time, actor, action, object ID and the request_id or event_id behind it",
+      "status": "passed"
+    },
+    {
+      "name": "Event effect rows are marked effect true, and the rows of writes and events are marked effect false",
+      "status": "passed"
+    },
+    {
+      "name": "Every committed write has one activity row with its request_id (2 writes)",
+      "status": "passed"
+    },
+    {
+      "name": "Every applied event has one activity row with its event_id (9 events)",
+      "status": "passed"
+    },
+    {
+      "name": "There is no other activity row, apart from the rows of effects",
+      "status": "passed"
+    },
+    {
+      "name": "Each applied event wrote one notification, except the drop and the purchase postings, and no write or clock move wrote one",
+      "status": "passed"
+    },
+    {
+      "name": "Each notification has one effect row",
+      "status": "passed"
+    },
+    {
+      "name": "A refused call has a deny row in the audit and no activity row (7 refusals)",
+      "status": "passed"
+    },
+    {
+      "name": "The audit has one row for each env.advance_time that is not a replay",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: a replayed env.advance_time returns the stored receipt with duplicate true",
+      "status": "passed"
+    },
+    {
+      "name": "Replay: the replayed env.advance_time adds no audit row and moves nothing",
+      "status": "passed"
+    },
+    {
+      "name": "env.reset returns ready for this App instance only",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the loaded seed",
+      "status": "passed"
+    },
+    {
+      "name": "Reset restores the time loaded with the seed",
+      "status": "passed"
+    },
+    {
+      "name": "Reset clears the audit and the receipts: only the row of the reset itself is left",
+      "status": "passed"
+    },
+    {
+      "name": "Reset advances the epoch",
+      "status": "passed"
+    },
+    {
+      "name": "Back at the loaded time of 9 November, the dispute of txn-0381 that was too_late on 12 November commits as open",
+      "status": "passed"
+    },
+    {
+      "name": "A second seed with another virtual_now is loaded in the same run",
+      "status": "passed"
+    },
+    {
+      "name": "A start time spelled in UTC is read with the -05:00 offset of the issuer",
+      "status": "passed"
+    },
+    {
+      "name": "Time alone: in epoch 4, env.advance_time to 2026-11-21T09:00:00-05:00 moves the clock, runs no App code and leaves the business data byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "Reset goes back to the virtual_now of the seed loaded last, not to the first seed or the package clock",
+      "status": "passed"
+    },
+    {
+      "name": "The second run other-run is not affected: its whole state is byte-identical",
+      "status": "passed"
+    },
+    {
+      "name": "The second run still holds the package fixture at the package clock, at its first version, with an empty audit",
+      "status": "passed"
+    }
+  ],
+  "passed": true
+}

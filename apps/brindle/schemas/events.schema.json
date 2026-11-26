@@ -1,0 +1,624 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:brindle:events:1",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "brindle.transaction.posted"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "transaction_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "kind": {
+              "enum": [
+                "purchase",
+                "refund",
+                "fee",
+                "interest",
+                "credit",
+                "provisional_credit",
+                "reversal"
+              ]
+            },
+            "state": {
+              "enum": [
+                "pending",
+                "posted"
+              ]
+            },
+            "amount": {
+              "type": "number"
+            },
+            "merchant": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "relates_to": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "transaction_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "fee_type": {
+              "enum": [
+                "annual",
+                "other"
+              ]
+            },
+            "offer_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "dispute_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "transaction_id",
+            "kind",
+            "state",
+            "amount"
+          ],
+          "additionalProperties": false,
+          "oneOf": [
+            {
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "purchase",
+                    "refund",
+                    "interest",
+                    "provisional_credit"
+                  ]
+                },
+                "fee_type": {
+                  "type": "null"
+                },
+                "offer_id": {
+                  "type": "null"
+                },
+                "dispute_id": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "properties": {
+                "kind": {
+                  "const": "credit"
+                },
+                "fee_type": {
+                  "type": "null"
+                },
+                "dispute_id": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "properties": {
+                "kind": {
+                  "const": "fee"
+                },
+                "offer_id": {
+                  "type": "null"
+                },
+                "dispute_id": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "fee_type"
+              ]
+            },
+            {
+              "properties": {
+                "kind": {
+                  "const": "reversal"
+                },
+                "relates_to": {
+                  "type": "null"
+                },
+                "fee_type": {
+                  "type": "null"
+                },
+                "offer_id": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "dispute_id"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "brindle.transaction.dropped"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "transaction_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "transaction_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "brindle.statement.issued"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "statement_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "closing_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "statement_balance": {
+              "type": "number"
+            },
+            "minimum_due": {
+              "type": "number"
+            },
+            "due_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            }
+          },
+          "required": [
+            "statement_id",
+            "closing_at",
+            "statement_balance",
+            "minimum_due",
+            "due_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "brindle.payment.returned"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "payment_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "payment_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "brindle.dispute.updated"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "dispute_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "status": {
+              "enum": [
+                "open",
+                "resolved_for_me",
+                "resolved_for_merchant",
+                "closed_matched"
+              ]
+            },
+            "provisional_credit": {
+              "type": "object",
+              "properties": {
+                "transaction_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "amount": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "transaction_id",
+                "amount"
+              ],
+              "additionalProperties": false
+            },
+            "reversal": {
+              "type": "object",
+              "properties": {
+                "transaction_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "amount": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "transaction_id",
+                "amount"
+              ],
+              "additionalProperties": false
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "dispute_id",
+            "status"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "brindle.offer.issued"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "offer_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "kind": {
+              "enum": [
+                "statement_credit",
+                "spend_credit",
+                "bonus_points",
+                "product_change"
+              ]
+            },
+            "group": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "terms": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "accept_by": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(19[7-9]\\d|2\\d{3})-"
+            },
+            "credit_amount": {
+              "type": "number"
+            },
+            "spend_target": {
+              "type": "number"
+            },
+            "spend_days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3660
+            },
+            "points": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000000
+            },
+            "product_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "offer_id",
+            "kind",
+            "terms",
+            "accept_by"
+          ],
+          "additionalProperties": false,
+          "oneOf": [
+            {
+              "properties": {
+                "kind": {
+                  "const": "statement_credit"
+                },
+                "spend_target": {
+                  "type": "null"
+                },
+                "spend_days": {
+                  "type": "null"
+                },
+                "points": {
+                  "type": "null"
+                },
+                "product_id": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "credit_amount"
+              ]
+            },
+            {
+              "properties": {
+                "kind": {
+                  "const": "spend_credit"
+                },
+                "points": {
+                  "type": "null"
+                },
+                "product_id": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "credit_amount",
+                "spend_target",
+                "spend_days"
+              ]
+            },
+            {
+              "properties": {
+                "kind": {
+                  "const": "bonus_points"
+                },
+                "credit_amount": {
+                  "type": "null"
+                },
+                "spend_target": {
+                  "type": "null"
+                },
+                "spend_days": {
+                  "type": "null"
+                },
+                "product_id": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "points"
+              ]
+            },
+            {
+              "properties": {
+                "kind": {
+                  "const": "product_change"
+                },
+                "credit_amount": {
+                  "type": "null"
+                },
+                "spend_target": {
+                  "type": "null"
+                },
+                "spend_days": {
+                  "type": "null"
+                },
+                "points": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "product_id"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(19[7-9]\\d|2\\d{3})-"
+        },
+        "operation": {
+          "const": "brindle.points.adjusted"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "entry_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "points": {
+              "type": "integer",
+              "minimum": -100000000,
+              "maximum": 100000000
+            },
+            "reason": {
+              "enum": [
+                "earned",
+                "bonus",
+                "adjustment"
+              ]
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "offer_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "entry_id",
+            "points",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "event_id",
+        "at",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

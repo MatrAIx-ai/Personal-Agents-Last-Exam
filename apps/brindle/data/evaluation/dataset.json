@@ -1,0 +1,48 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "brindle-evaluation-2025-2026",
+  "version": "1.0.0",
+  "description": "Synthetic delivery dataset of one cardholder account at a fictional card issuer: the account opened on 2 December 2024, and the history runs to 2026-12-31T23:00:00-05:00. Every record is synthetic: the issuer, the cardholder, the merchants, the banks and the loyalty programs are fictional, and nothing was collected. A development script builds stories from fixed templates with a seeded PRNG and replays every step through the App's own hooks, so the App made every payment, dispute, redemption and notification.",
+  "record_source_ids": [
+    "evaluation-generator"
+  ],
+  "sources": [
+    {
+      "source_id": "evaluation-generator",
+      "kind": "synthetic",
+      "description": "Scripted synthetic card account history from story templates with seeded random variation; no external collection and no real person, issuer, merchant, card number, bank or loyalty program. Dates are represented event dates of the fictional history, not collection dates.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted replay of story templates with a seeded PRNG (mulberry32)",
+        "tool": "apps/brindle/dev/generate-dataset.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20241202,
+        "parameters": {
+          "start": "2024-12-02T10:30:00-05:00",
+          "clock": "2026-12-31T23:00:00-05:00",
+          "timezone": "America/New_York"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "None. The seed is the App state after the replay."
+  ],
+  "expected_counts": {
+    "records": 1500,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism and variation."
+  }
+}
