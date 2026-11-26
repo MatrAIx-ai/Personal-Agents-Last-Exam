@@ -153,6 +153,29 @@ function revisionRows(data) {
   return rows;
 }
 
+function suppliedPersonAgrees(accountPerson, ...others) {
+  for (const value of others) {
+    if (value === undefined || value === null || value === '') continue;
+    if (value !== accountPerson) return false;
+  }
+  return true;
+}
+
+function postyardAuthor(data, companion, revision, handle) {
+  if (!companion || companion.app_id !== 'postyard') return null;
+  if (companion.schema && companion.schema !== 'urn:pale:public-speech-evidence:1') return null;
+  if (!revision || revision.object_id === undefined) return null;
+  const author = account(data, revision.actor_account_id);
+  if (author) {
+    if (author.handle !== handle) return null;
+    return suppliedPersonAgrees(author.person_id, revision.person_id, companion.person_id) ? author : null;
+  }
+  if (!revision.person_id) return null;
+  const matched = (data.accounts || []).find(item => item.handle === handle && item.person_id === revision.person_id);
+  if (!matched) return null;
+  return suppliedPersonAgrees(matched.person_id, revision.person_id, companion.person_id) ? matched : null;
+}
+
 function subjectHits(data, row, companions) {
   const hits = [];
   const repoRecord = data.repositories.find(item => item.repo === row.repo);
@@ -168,13 +191,7 @@ function subjectHits(data, row, companions) {
       if (link.handle && person && link.handle === person.handle) matches.push('profile_link');
       if (link.app_id === 'postyard' && link.handle) {
         for (const companion of companions || []) {
-          const revisions = (companion.revisions || []).filter(item => {
-            if (item.object_id !== link.object_id) return false;
-            const author = account(data, item.actor_account_id);
-            if (author && author.handle === link.handle) return true;
-            const samePerson = (data.accounts || []).find(row => row.person_id && row.person_id === item.person_id && row.handle === link.handle);
-            return !!samePerson;
-          });
+          const revisions = (companion.revisions || []).filter(item => item.object_id === link.object_id && postyardAuthor(data, companion, item, link.handle));
           const ids = new Set(revisions.map(item => item.revision_id));
           if ((companion.subjects || []).some(item => ids.has(item.revision_id) && item.person_id === subject.person_id)) matches.push('linked_post');
         }
