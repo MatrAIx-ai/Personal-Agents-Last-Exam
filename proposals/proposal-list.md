@@ -8,7 +8,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**204 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
+**204 open non-draft proposals · 0 awaiting initial review · 10 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
@@ -147,10 +147,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🧪 Task Track
 
-**106 proposals.**
+**107 proposals.**
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-26 01:51:20 | [#267](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/267) · Guard overnight AI skill rollouts under Goodhart traps, mid-flight budget freezes, and multi-hop regressions<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/267/files) | Work &amp; business<br>Also: Learning &amp; research | Facing Maya’s 96%-dev rollout push, a mid-flight budget freeze, and an alert, the agent must combine telemetry PNGs, her compliance email, and multi-hop lineage rather than obeying surface dev scores. | Draft | Awaiting review |  | [shangliy](https://github.com/shangliy) |  |
 | 2026-11-25 23:00:33 | [#263](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/263) · Hand a new house-sitter the cat's current dose, not the guide's<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/263/files) | Home &amp; utilities | "Send the guide" would give a new sitter four times the cat's current dose and an old door code. The right handoff joins the vet's change, the codes note and Marco's own limits. | Design review | Review requested<br>@Yeechin-is-here |  | [jpli02](https://github.com/jpli02) |  |
 | 2026-11-25 22:58:27 | [#262](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/262) · Defer a postponed jury date as a caregiving hardship without exposing Mom's diagnosis<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/262/files) | Public service &amp; law<br>Also: Health &amp; care | Dani asks to "postpone again", but she already used her one postponement. Only a caregiving deferral, backed by the letter that omits Mom's diagnosis, can work, and it gets one try. | Design review | Commented |  | [jpli02](https://github.com/jpli02) |  |
 | 2026-11-25 22:52:42 | [#261](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/261) · Read between the lines when my girlfriend says she’s tired after I praise my ex<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/261/files) | Social &amp; communities | Xiaohe once told Zhou Ran how it felt when he walked out mid-argument. That history makes a brief acknowledgment before letting her rest especially meaningful here. | Design review | Review requested<br>@haolun-wu |  | [shuyhere](https://github.com/shuyhere) |  |
