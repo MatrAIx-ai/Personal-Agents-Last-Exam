@@ -122,6 +122,26 @@ test('public runtime replay, reset, release, and selector denies', () => {
     assert.equal(both.state.audit.at(-1).reason, 'ambiguous_target');
     assert.equal(both.state.audit.at(-1).trace.event_id, 'py-both');
     assert.equal(JSON.stringify(both.state.data.posts.map(item => item.status)), JSON.stringify(pubB.state.data.posts.map(item => item.status)));
+    const mix = model.execute(pubB.state, 'infra', 'env.apply_event', {
+      expected_version: model.version(pubB.state),
+      event: {event_id: 'py-mix', at: '2026-02-09T21:10:00-08:00', operation: 'owner.confirm_publication', payload: {object_type: 'post', object_id: 'ac-0001:p999', revision: 1}}
+    });
+    assert.equal(mix.result.status, 'invalid_event');
+    assert.equal(mix.state.audit.at(-1).decision, 'deny');
+    assert.equal(mix.state.audit.at(-1).reason, 'invalid_event');
+    assert.equal(mix.state.audit.at(-1).trace.event_id, 'py-mix');
+    assert.equal(JSON.stringify(mix.state.data), JSON.stringify(pubB.state.data));
+    const confirmed = model.execute(pubB.state, 'infra', 'env.apply_event', {
+      expected_version: model.version(pubB.state),
+      event: {event_id: 'py-one', at: '2026-02-09T21:10:00-08:00', operation: 'owner.confirm_publication', payload: {object_type: 'post', object_id: one.result.id, revision: 1}}
+    });
+    assert.equal(confirmed.result.status, 'committed');
+    const confirmReplay = model.execute(confirmed.state, 'infra', 'env.apply_event', {
+      expected_version: model.version(confirmed.state),
+      event: {event_id: 'py-one', at: '2026-02-09T21:10:00-08:00', operation: 'owner.confirm_publication', payload: {object_type: 'post', object_id: one.result.id, revision: 1}}
+    });
+    assert.equal(confirmReplay.result.duplicate, true);
+    assert.equal(confirmReplay.state.data.receipts.filter(item => item.object_id === one.result.id).length, 1);
   } finally {
     prep.cleanup();
   }

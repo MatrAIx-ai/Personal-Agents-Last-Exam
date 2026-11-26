@@ -60,9 +60,10 @@ function fixture(options = {}) {
         assert.equal(JSON.stringify(data), before);
         throw error;
       }
-      validate(out);
-      data = out;
+      const previous = ctx.virtual_now;
       ctx.virtual_now = event.at;
+      try { validate(out); } catch (error) { ctx.virtual_now = previous; throw error; }
+      data = out;
       return structuredClone(data);
     }
   };

@@ -1,9 +1,9 @@
 'use strict';
 const {
   fail, nfc, instant, accountById, accountByHandle, self, confirms, followersOf, publicUrl, noteUrl,
-  nextSerial, nextReceipt, tagsOf, requireText, requireSlug
+  nextSerial, nextReceipt, tagsOf, requireText, requireSlug, chars, fold
 } = require('./common.cjs');
-const {subjectHits, parseLinks} = require('./subjects.cjs');
+const {subjectHits, parseLinks, mentions} = require('./subjects.cjs');
 
 function touch(ctx, item) {
   if (instant(ctx.virtual_now) < instant(item.updated_at, 'invalid_time')) {
@@ -18,8 +18,25 @@ function revision(post, number) {
 
 function head(post) { return revision(post, post.head_revision); }
 
+function reservedSlug(post) {
+  if (!post.pending) return null;
+  const held = revision(post, post.pending.revision);
+  return held && held.visibility === 'pending' ? held.slug : null;
+}
+
 function slugFree(data, accountId, slug, exceptId) {
-  return !data.posts.some(post => post.account_id === accountId && post.id !== exceptId && post.slug === slug);
+  return !data.posts.some(post => {
+    if (post.account_id !== accountId || post.id === exceptId) return false;
+    return post.slug === slug || reservedSlug(post) === slug;
+  });
+}
+
+function bindId(args, field) {
+  if (args.id !== undefined && args[field] !== undefined && args.id !== args[field]) {
+    fail('invalid_arguments', 'id must match ' + field + '.');
+  }
+  if (args[field] === undefined) args[field] = args.id;
+  if (args[field] === undefined) fail('invalid_arguments', field + ' is required.');
 }
 
 function ownPost(data, id) {
@@ -57,8 +74,7 @@ function appendRevision(post, fields, now, requestId, visibility) {
   return number;
 }
 
-function currentFields(post) {
-  const row = head(post);
+function fieldsFrom(row) {
   return {title: row.title, body: row.body, tags: [...row.tags], slug: row.slug, correction_note: null};
 }
 
@@ -82,13 +98,18 @@ function hoursBetween(start, end) {
   return ms > 0 ? ms / 3600000 : 0;
 }
 
-function repostReach(data, objectType, objectId, end) {
+function repostReach(data, objectType, objectId, end, start) {
   let sum = 0;
   const endMs = instant(end, 'invalid_time');
+  const startMs = start ? instant(start, 'invalid_time') : null;
   for (const note of data.notes) {
-    if (note.kind !== 'repost' || note.status !== 'posted' || !note.repost_of) continue;
+    if (note.kind !== 'repost' || !note.repost_of || !note.published_at) continue;
+    if (note.status !== 'posted' && note.status !== 'deleted') continue;
     if (note.repost_of.object_type !== objectType || note.repost_of.object_id !== objectId) continue;
-    if (!note.published_at || instant(note.published_at, 'invalid_time') > endMs) continue;
+    const published = instant(note.published_at, 'invalid_time');
+    if (published > endMs) continue;
+    if (startMs !== null && published <= startMs) continue;
+    if (note.deleted_at && instant(note.deleted_at, 'invalid_time') <= endMs) continue;
     sum += note.followers_at_publish || 0;
   }
   return sum;
@@ -101,6 +122,31 @@ function reachOf(data, now, item, objectType) {
   const extra = repostReach(data, objectType, item.id, end);
   const grown = item.followers_at_publish + extra + Math.floor(data.settings.audience_rate_per_hour * hours);
   return Math.min(data.settings.audience_cap, grown);
+}
+
+function revisionReach(data, now, post, revisionNumber) {
+  const receipts = data.receipts.filter(item => item.object_type === 'post' && item.object_id === post.id);
+  const receipt = receipts.find(item => item.revision === revisionNumber);
+  if (!receipt) return 0;
+  const start = receipt.published_at;
+  let end = post.unpublished_at || now;
+  for (const later of receipts) {
+    if (later.revision === revisionNumber) continue;
+    if (instant(later.published_at, 'invalid_time') <= instant(start, 'invalid_time')) continue;
+    if (instant(later.published_at, 'invalid_time') < instant(end, 'invalid_time')) end = later.published_at;
+  }
+  const first = receipts.reduce((earliest, item) => !earliest || instant(item.published_at, 'invalid_time') < instant(earliest.published_at, 'invalid_time') ? item : earliest, null);
+  const hours = hoursBetween(start, end);
+  const extra = repostReach(data, 'post', post.id, end, start);
+  const base = first && first.revision === revisionNumber ? (post.followers_at_publish || 0) : 0;
+  return Math.min(data.settings.audience_cap, base + extra + Math.floor(data.settings.audience_rate_per_hour * hours));
+}
+
+function coverOf(data, post) {
+  if (!post.cover_asset_id) return null;
+  const asset = (data.media || []).find(item => item.asset_id === post.cover_asset_id && item.role === 'cover');
+  if (!asset) return {asset_id: post.cover_asset_id, status: 'asset_missing'};
+  return {asset_id: asset.asset_id, status: 'ready', mime: asset.mime, width: asset.width, height: asset.height, byte_length: asset.byte_length};
 }
 
 function dueOf(item, now) {
@@ -184,6 +230,7 @@ function createDraft(data, ctx, args) {
     revisions: [blankRevision(1, {title, body, tags: tagList, slug, correction_note: null}, now, args.request_id, 'private')],
     pending: null, publish_at: null, scheduled_for: null, published_at: null, unpublished_at: null,
     release_lag_seconds: null, followers_at_publish: null, owner_note: null, schedule_request_id: null,
+    cover_asset_id: args.cover_asset_id || null, resolution_code: null,
     created_at: now, updated_at: now
   };
   data.posts.push(post);
@@ -191,13 +238,14 @@ function createDraft(data, ctx, args) {
 }
 
 function updateDraft(data, ctx, args) {
+  bindId(args, 'post_id');
   const post = ownPost(data, args.post_id);
   const pendingEdit = post.status === 'published' && post.pending && post.pending.kind === 'edit';
   const waiting = post.status === 'pending_owner_confirmation';
   if (post.status !== 'draft' && !waiting && !pendingEdit) {
     fail('already_published', 'A published post is changed with blog.edit_published.');
   }
-  const fields = currentFields(post);
+  const fields = fieldsFrom(head(post));
   if (args.title !== undefined) fields.title = requireText(args.title, 200, 'Title');
   if (args.body !== undefined) fields.body = requireText(args.body, 20000, 'Body');
   if (args.slug !== undefined) fields.slug = requireSlug(args.slug);
@@ -221,6 +269,7 @@ function updateDraft(data, ctx, args) {
 }
 
 function deleteDraft(data, ctx, args) {
+  bindId(args, 'post_id');
   const post = ownPost(data, args.post_id);
   if (post.public_revision || post.status === 'published' || post.status === 'unpublished') {
     fail('already_published', 'A public post is removed with blog.unpublish.');
@@ -237,13 +286,13 @@ function assertHead(post, number) {
 }
 
 function publish(data, ctx, args) {
+  bindId(args, 'post_id');
   const post = ownPost(data, args.post_id);
-  assertHead(post, args.revision);
-  if (post.status === 'published' && post.public_revision === args.revision && !post.pending) {
-    fail('already_published', 'That revision is already public.');
-  }
+  if (post.status === 'published') fail('already_published', 'That post is already public. A correction uses blog.edit_published.');
   if (post.status === 'scheduled') fail('invalid_arguments', 'Unschedule the post before publishing it directly.');
+  if (post.status !== 'draft' && post.status !== 'unpublished') fail('invalid_arguments', 'Publish starts from a draft or an unpublished post.');
   if (post.pending) fail('invalid_arguments', 'Resolve the pending revision before publishing again.');
+  assertHead(post, args.revision);
   const row = revision(post, args.revision);
   if (row.visibility === 'public') fail('already_published', 'That revision is already public.');
   if (confirms(data)) {
@@ -259,6 +308,7 @@ function publish(data, ctx, args) {
 }
 
 function schedule(data, ctx, args) {
+  bindId(args, 'post_id');
   const post = ownPost(data, args.post_id);
   assertHead(post, args.revision);
   if (typeof args.publish_at !== 'string') fail('invalid_arguments', 'publish_at is required.');
@@ -284,6 +334,7 @@ function schedule(data, ctx, args) {
 }
 
 function unschedule(data, ctx, args) {
+  bindId(args, 'post_id');
   const post = ownPost(data, args.post_id);
   const waitingSchedule = post.pending && post.pending.kind === 'schedule';
   if (post.status !== 'scheduled' && !waitingSchedule) fail('not_scheduled', 'That post is not scheduled.');
@@ -300,19 +351,22 @@ function unschedule(data, ctx, args) {
 }
 
 function editPublished(data, ctx, args) {
+  bindId(args, 'post_id');
   const post = ownPost(data, args.post_id);
   if (post.status !== 'published' || !post.public_revision) fail('not_published', 'That post is not public.');
   if (!Number.isInteger(args.base_revision) || args.base_revision !== post.public_revision) {
     fail('revision_mismatch', 'base_revision is not the current public revision.');
   }
   if (post.pending) fail('invalid_arguments', 'Resolve the pending revision before editing again.');
-  const fields = currentFields(post);
+  const base = revision(post, args.base_revision);
+  if (!base || base.visibility !== 'public') fail('revision_mismatch', 'base_revision is not the current public revision.');
+  const fields = fieldsFrom(base);
   if (args.title !== undefined) fields.title = requireText(args.title, 200, 'Title');
   if (args.body !== undefined) fields.body = requireText(args.body, 20000, 'Body');
   if (args.slug !== undefined) fields.slug = requireSlug(args.slug);
   if (args.tags !== undefined) fields.tags = tagsOf(args.tags);
   if (args.correction_note !== undefined && args.correction_note !== null) {
-    if (typeof args.correction_note !== 'string' || args.correction_note.length > 500) fail('invalid_arguments', 'correction_note is too long.');
+    if (typeof args.correction_note !== 'string' || chars(args.correction_note) > 500) fail('invalid_arguments', 'correction_note is too long.');
     fields.correction_note = args.correction_note ? nfc(args.correction_note) : null;
   }
   if (!slugFree(data, data.account_id, fields.slug, post.id)) fail('slug_taken', 'That slug is already used on this account.');
@@ -328,6 +382,7 @@ function editPublished(data, ctx, args) {
 }
 
 function unpublish(data, ctx, args) {
+  bindId(args, 'post_id');
   const post = ownPost(data, args.post_id);
   if (post.status !== 'published') fail('not_published', 'That post is not public.');
   if (post.pending) {
@@ -343,15 +398,17 @@ function unpublish(data, ctx, args) {
 
 function postText(post, number) {
   const row = revision(post, number) || head(post);
-  return row.title + '\n\n' + row.body;
+  const parts = [row.title, row.body];
+  if (row.correction_note) parts.push(row.correction_note);
+  return parts.join('\n\n');
 }
 
 function viewPost(data, ctx, post, audience) {
-  const number = post.public_revision || post.head_revision;
-  const row = revision(post, audience === 'public' ? post.public_revision : number);
-  const shown = row || head(post);
+  const owner = audience !== 'public';
+  const shown = revision(post, owner ? (post.public_revision || post.head_revision) : post.public_revision) || (owner ? head(post) : null);
+  if (!shown) fail('not_found', 'Post does not exist.');
   const account = accountById(data, post.account_id);
-  return {
+  const view = {
     id: post.id,
     account_id: post.account_id,
     handle: account ? account.handle : null,
@@ -360,24 +417,31 @@ function viewPost(data, ctx, post, audience) {
     body: shown.body,
     tags: [...shown.tags],
     correction_note: shown.correction_note,
-    status: post.status,
+    status: owner ? post.status : 'published',
     revision: shown.revision,
     public_revision: post.public_revision,
-    head_revision: post.head_revision,
-    publish_at: post.publish_at,
-    scheduled_for: post.scheduled_for,
     published_at: post.published_at,
-    unpublished_at: post.unpublished_at,
-    release_lag_seconds: post.release_lag_seconds,
-    followers_at_publish: post.followers_at_publish,
-    due: dueOf(post, ctx.virtual_now),
     reach: reachOf(data, ctx.virtual_now, post, 'post'),
+    revision_reach: revisionReach(data, ctx.virtual_now, post, shown.revision),
     public_url: account ? publicUrl(account, shown.slug) : null,
-    owner_note: post.owner_note,
-    pending: post.pending ? copyPending(post.pending) : null,
+    cover: coverOf(data, post),
     created_at: post.created_at,
     updated_at: post.updated_at
   };
+  if (owner) {
+    view.head_revision = post.head_revision;
+    view.publish_at = post.publish_at;
+    view.scheduled_for = post.scheduled_for;
+    view.published_at = post.published_at;
+    view.unpublished_at = post.unpublished_at;
+    view.release_lag_seconds = post.release_lag_seconds;
+    view.followers_at_publish = post.followers_at_publish;
+    view.due = dueOf(post, ctx.virtual_now);
+    view.owner_note = post.owner_note;
+    view.pending = post.pending ? copyPending(post.pending) : null;
+    view.resolution_code = post.resolution_code || null;
+  }
+  return view;
 }
 
 function copyPending(pending) {
@@ -392,6 +456,7 @@ function listPosts(data, ctx, args) {
 }
 
 function getPost(data, ctx, args) {
+  bindId(args, 'post_id');
   const post = data.posts.find(item => item.id === args.post_id);
   if (!post) fail('not_found', 'Post does not exist.');
   const owner = post.account_id === data.account_id;
@@ -401,7 +466,7 @@ function getPost(data, ctx, args) {
   const receipts = data.receipts.filter(item => item.object_type === 'post' && item.object_id === post.id);
   return {
     post: view,
-    revisions: post.revisions.map(item => ({
+    revisions: (owner ? post.revisions : post.revisions.filter(item => item.visibility === 'public')).map(item => ({
       revision: item.revision, title: item.title, body: item.body, tags: [...item.tags],
       slug: item.slug, correction_note: item.correction_note, created_at: item.created_at,
       visibility: item.visibility
@@ -435,7 +500,7 @@ function assertReplyTarget(data, id) {
 
 function noteText(value, code) {
   if (typeof value !== 'string' || !value.trim()) fail(code === 'invalid_event' ? 'invalid_event' : 'invalid_arguments', 'Note text is required.');
-  if (value.length > 500) fail(code, code === 'invalid_event' ? 'Note text is longer than 500 characters.' : 'A note can be at most 500 characters.');
+  if (chars(value) > 500) fail(code, code === 'invalid_event' ? 'Note text is longer than 500 characters.' : 'A note can be at most 500 characters.');
   return nfc(value);
 }
 
@@ -449,6 +514,7 @@ function createNote(data, ctx, fields) {
     release_lag_seconds: null, followers_at_publish: null, pending_kind: fields.pending_kind || null,
     request_id: fields.request_id || null, event_id: fields.event_id || null,
     schedule_request_id: fields.schedule_request_id || null, owner_note: null,
+    links: fields.links || [], image_asset_id: fields.image_asset_id || null,
     created_at: now, updated_at: now
   };
   data.notes.push(note);
@@ -491,6 +557,7 @@ function replyNote(data, ctx, args) {
 }
 
 function deleteNote(data, ctx, args) {
+  bindId(args, 'note_id');
   const note = ownNote(data, args.note_id);
   if (note.status === 'deleted' || note.status === 'withdrawn') fail('not_found', 'That note is already withdrawn.');
   if (note.status === 'declined') fail('invalid_arguments', 'A declined note stays in history.');
@@ -509,32 +576,88 @@ function deleteNote(data, ctx, args) {
 
 function viewNote(data, ctx, note) {
   const account = accountById(data, note.account_id);
-  return {
+  const view = {
     id: note.id, account_id: note.account_id, handle: account ? account.handle : null,
     kind: note.kind, text: note.text, status: note.status, revision: 1,
     reply_to: note.reply_to, repost_of: note.repost_of, publish_at: note.publish_at,
     scheduled_for: note.scheduled_for, published_at: note.published_at, deleted_at: note.deleted_at,
     release_lag_seconds: note.release_lag_seconds, followers_at_publish: note.followers_at_publish,
     due: dueOf(note, ctx.virtual_now), reach: reachOf(data, ctx.virtual_now, note, 'note'),
-    public_url: account ? noteUrl(account, note.id) : null, owner_note: note.owner_note,
+    public_url: account ? noteUrl(account, note.id) : null,
     created_at: note.created_at, updated_at: note.updated_at
   };
+  if (note.account_id === data.account_id) view.owner_note = note.owner_note;
+  if (note.image_asset_id) {
+    const asset = (data.media || []).find(item => item.asset_id === note.image_asset_id && item.role === 'note');
+    view.image = asset
+      ? {asset_id: asset.asset_id, status: 'ready', mime: asset.mime, byte_length: asset.byte_length}
+      : {asset_id: note.image_asset_id, status: 'asset_missing'};
+  }
+  return view;
+}
+
+function addressOf(data, id) {
+  const target = targetRecord(data, id);
+  return target ? {account_id: target.author, object_id: id, object_type: target.kind} : null;
+}
+
+function noteTextForEvidence(note) {
+  const parts = [note.text];
+  if (note.reply_to) parts.push('reply_to: ' + note.reply_to);
+  if (note.repost_of) parts.push('repost_of: ' + note.repost_of.object_id);
+  return parts.join('\n\n');
+}
+
+function noteLinks(note) {
+  const links = parseLinks(note.text);
+  for (const url of note.links || []) {
+    for (const link of parseLinks(url)) {
+      if (!links.some(item => item.url === link.url)) links.push(link);
+    }
+  }
+  return links;
+}
+
+function threadRoot(data, note) {
+  let current = note;
+  const seen = new Set();
+  while (current && current.reply_to && !seen.has(current.id)) {
+    seen.add(current.id);
+    const parent = findNote(data, current.reply_to);
+    if (!parent) break;
+    current = parent;
+  }
+  return current || note;
 }
 
 function threadOf(data, ctx, note) {
-  const rootId = note.reply_to && findNote(data, note.reply_to) ? note.reply_to : note.id;
-  const rows = data.notes.filter(item => item.id === rootId || item.reply_to === rootId || item.id === note.id);
+  const root = threadRoot(data, note);
+  const rows = [root];
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const item of data.notes) {
+      if (rows.some(row => row.id === item.id)) continue;
+      if (item.reply_to && rows.some(row => row.id === item.reply_to)) {
+        rows.push(item);
+        grew = true;
+      }
+    }
+  }
   const visible = rows.filter(item => item.account_id === data.account_id || item.status === 'posted' || item.id === note.id);
   visible.sort((a, b) => instant(a.created_at, 'invalid_seed') - instant(b.created_at, 'invalid_seed'));
   return visible.map(item => viewNote(data, ctx, item));
 }
 
 function getNote(data, ctx, args) {
+  bindId(args, 'note_id');
   const note = findNote(data, args.note_id);
   if (!note) fail('not_found', 'Note does not exist.');
   if (note.account_id !== data.account_id && note.status !== 'posted') fail('not_found', 'Note does not exist.');
   const surface = note.kind === 'reply' ? 'reply_to_subject' : 'note';
-  return {note: viewNote(data, ctx, note), thread: threadOf(data, ctx, note), subjects: subjectHits(data, note.text, surface), links: parseLinks(note.text)};
+  const addressed = note.reply_to ? addressOf(data, note.reply_to) : null;
+  const text = noteTextForEvidence(note);
+  return {note: viewNote(data, ctx, note), thread: threadOf(data, ctx, note), subjects: subjectHits(data, text, surface, addressed), links: noteLinks(note)};
 }
 
 function followedIds(data) {
@@ -590,22 +713,40 @@ function peoplePosts(data, ctx, args) {
 }
 
 function pendingPosts(data) {
-  return data.posts.filter(post => post.account_id === data.account_id && (post.status === 'pending_owner_confirmation' || post.pending));
+  return data.posts.filter(post => post.account_id === data.account_id && post.pending);
 }
 function pendingNotes(data) {
   return data.notes.filter(note => note.account_id === data.account_id && note.status === 'pending_owner_confirmation');
 }
+function pendingProfiles(data) {
+  const account = self(data);
+  return account && account.pending_profile ? [account] : [];
+}
+
+function assertTargetForm(payload) {
+  const selected = payload.select !== undefined;
+  const named = payload.object_id !== undefined;
+  const numbered = payload.revision !== undefined;
+  if (selected && payload.select !== 'only_pending') fail('invalid_event', 'select must be only_pending.');
+  if (selected && named) fail('invalid_event', 'Use only_pending or an object id with a revision.');
+  if (!selected && !(named && numbered)) fail('invalid_event', 'Name only_pending, or an object id with a revision.');
+  if (numbered && !Number.isInteger(payload.revision)) fail('invalid_event', 'revision must be an integer.');
+}
 
 function selectPending(data, payload) {
+  assertTargetForm(payload);
   const type = payload.object_type;
   if (type !== 'post' && type !== 'note' && type !== 'profile') fail('invalid_event', 'object_type is not supported.');
   if (payload.select === 'only_pending') {
-    const rows = type === 'post' ? pendingPosts(data) : type === 'note' ? pendingNotes(data) : [];
+    const rows = type === 'post' ? pendingPosts(data) : type === 'note' ? pendingNotes(data) : pendingProfiles(data);
     if (rows.length === 0) fail('not_pending', 'No pending item of that type.');
     if (rows.length > 1) fail('ambiguous_target', 'More than one pending item of that type.');
+    if (payload.revision !== undefined) {
+      const pendingRevision = type === 'note' ? 1 : type === 'profile' ? rows[0].pending_profile.revision : rows[0].pending.revision;
+      if (payload.revision !== pendingRevision) fail('revision_mismatch', 'Confirmation names a revision other than the pending one.');
+    }
     return rows[0];
   }
-  if (!payload.object_id) fail('invalid_event', 'An object id or only_pending is required.');
   if (type === 'post') {
     const post = data.posts.find(item => item.id === payload.object_id);
     if (!post || post.account_id !== data.account_id) fail('invalid_event', 'That post does not exist.');
@@ -616,21 +757,33 @@ function selectPending(data, payload) {
     if (!note || note.account_id !== data.account_id) fail('invalid_event', 'That note does not exist.');
     return note;
   }
-  fail('not_pending', 'No pending profile revision.');
+  const account = self(data);
+  if (!account || payload.object_id !== account.account_id) fail('invalid_event', 'That profile does not exist.');
+  return account;
 }
 
 function confirmPost(data, ctx, post, payload, event) {
-  if (payload.revision !== undefined && (!post.pending || payload.revision !== post.pending.revision)) {
+  if (!post.pending) fail('not_pending', 'That post is not waiting for confirmation.');
+  if (payload.revision !== undefined && payload.revision !== post.pending.revision) {
     fail('revision_mismatch', 'Confirmation names a revision other than the pending one.');
   }
-  if (!post.pending) fail('not_pending', 'That post is not waiting for confirmation.');
   const chosen = post.pending.revision;
   const requestId = post.pending.request_id;
-  if (post.pending.kind === 'schedule') {
-    const row = revision(post, chosen);
+  const kind = post.pending.kind;
+  const row = revision(post, chosen);
+  if (row && !slugFree(data, post.account_id, row.slug, post.id)) {
+    row.visibility = 'withheld';
+    post.pending = null;
+    post.status = post.public_revision ? 'published' : 'draft';
+    post.resolution_code = 'slug_taken';
+    touch(ctx, post);
+    return;
+  }
+  if (kind === 'schedule') {
     if (row) row.visibility = 'private';
     post.pending = null;
     post.status = 'scheduled';
+    post.resolution_code = null;
     touch(ctx, post);
     return;
   }
@@ -647,6 +800,7 @@ function declinePost(data, ctx, post, payload) {
   if (held) held.visibility = edit ? 'withheld' : 'private';
   post.pending = null;
   post.owner_note = payload.note ? nfc(payload.note) : null;
+  post.resolution_code = null;
   if (edit) post.status = 'published';
   else {
     post.status = 'draft';
@@ -697,27 +851,255 @@ function releaseDue(data, ctx, event) {
   }
 }
 
+function handleSet(text, extra) {
+  const names = new Set(mentions(text).map(item => item.toLowerCase()));
+  for (const name of extra || []) if (typeof name === 'string' && name) names.add(name.toLowerCase());
+  return names;
+}
+
+function notifyMention(data, ctx, actorId, objectId, text, extra, eventId) {
+  const owner = self(data);
+  if (!owner || !handleSet(text, extra).has(owner.handle.toLowerCase())) return;
+  data.notifications.push({
+    id: 'nt-' + (eventId || objectId), account_id: data.account_id, actor_account_id: actorId,
+    kind: 'mention', object_id: objectId, at: ctx.virtual_now, read: false
+  });
+}
+
 function postByOther(data, ctx, event) {
   const payload = event.payload || {};
   const actor = accountById(data, payload.actor_account_id);
   if (!actor || actor.account_id === data.account_id) fail('invalid_event', 'The actor account is not valid.');
   const text = noteText(payload.text, 'invalid_event');
   const note = createNote(data, ctx, {
-    account_id: actor.account_id, kind: 'note', text, status: 'posted', event_id: event.event_id
+    account_id: actor.account_id, kind: 'note', text, status: 'posted', event_id: event.event_id,
+    links: Array.isArray(payload.links) ? payload.links.filter(item => typeof item === 'string') : []
   });
   publishNote(data, ctx, note, null, event.event_id);
-  const owner = self(data);
-  if (text.includes('@' + owner.handle)) {
-    data.notifications.push({
-      id: 'nt-' + event.event_id, account_id: data.account_id, actor_account_id: actor.account_id,
-      kind: 'mention', object_id: note.id, at: ctx.virtual_now, read: false
+  notifyMention(data, ctx, actor.account_id, note.id, text, payload.mentions, event.event_id);
+}
+
+function scheduleNote(data, ctx, args) {
+  const text = noteText(args.text, 'note_too_long');
+  if (typeof args.publish_at !== 'string') fail('invalid_arguments', 'publish_at is required.');
+  if (instant(args.publish_at) <= instant(ctx.virtual_now)) fail('schedule_in_past', 'publish_at must be later than the current virtual time.');
+  if (args.image_asset_id) args.image_asset_id = args.image_asset_id;
+  const note = createNote(data, ctx, {
+    account_id: data.account_id, kind: 'note', text,
+    status: confirms(data) ? 'pending_owner_confirmation' : 'scheduled',
+    pending_kind: confirms(data) ? 'schedule' : null,
+    publish_at: args.publish_at, request_id: args.request_id, schedule_request_id: args.request_id,
+    image_asset_id: args.image_asset_id || null
+  });
+  return {id: note.id, record_status: note.status, revision: 1, publish_at: args.publish_at};
+}
+
+function repostNote(data, ctx, args) {
+  const text = noteText(args.text, 'note_too_long');
+  if (typeof args.object_id !== 'string' || !args.object_id) fail('invalid_arguments', 'object_id is required.');
+  const target = targetRecord(data, args.object_id);
+  if (!target) fail('not_found', 'That object does not exist.');
+  if (target.kind === 'note' && target.item.status !== 'posted') fail('not_published', 'That note is not public.');
+  if (target.kind === 'post' && target.item.status !== 'published') fail('not_published', 'That post is not public.');
+  const repostOf = {object_type: target.kind, object_id: args.object_id};
+  if (confirms(data)) {
+    const note = createNote(data, ctx, {
+      account_id: data.account_id, kind: 'repost', text, status: 'pending_owner_confirmation',
+      repost_of: repostOf, pending_kind: 'repost', request_id: args.request_id
     });
+    return {id: note.id, record_status: note.status, revision: 1, repost_of: repostOf};
   }
+  const note = createNote(data, ctx, {
+    account_id: data.account_id, kind: 'repost', text, status: 'posted',
+    repost_of: repostOf, request_id: args.request_id
+  });
+  const receipt = publishNote(data, ctx, note, args.request_id, null);
+  return {id: note.id, record_status: 'posted', revision: 1, repost_of: repostOf, receipt_id: receipt.receipt_id};
+}
+
+function searchNotes(data, ctx, args) {
+  if (typeof args.query !== 'string' || !fold(args.query)) fail('invalid_arguments', 'query is required.');
+  const needle = fold(args.query);
+  const rows = data.notes.filter(note => {
+    const visible = note.account_id === data.account_id || note.status === 'posted';
+    return visible && note.status !== 'deleted' && note.status !== 'declined' && fold(note.text).includes(needle);
+  });
+  rows.sort((a, b) => instant(b.created_at, 'invalid_seed') - instant(a.created_at, 'invalid_seed'));
+  return page(rows.map(note => viewNote(data, ctx, note)), args);
+}
+
+function publicAccount(account) {
+  return {
+    account_id: account.account_id, handle: account.handle, display_name: account.display_name,
+    bio: account.bio, links: [...account.links], kind: account.kind, person_id: account.person_id,
+    follower_count: account.follower_count, following_count: account.following_count
+  };
+}
+
+function searchPeople(data, args) {
+  if (typeof args.query !== 'string' || !fold(args.query)) fail('invalid_arguments', 'query is required.');
+  const needle = fold(args.query);
+  const accounts = data.accounts.filter(account => fold(account.handle).includes(needle) || fold(account.display_name).includes(needle));
+  return {accounts: accounts.map(publicAccount)};
+}
+
+function followAccount(data, ctx, args) {
+  const account = resolveAccount(data, args);
+  if (account.account_id === data.account_id) fail('invalid_arguments', 'An account cannot follow itself.');
+  const exists = data.follows.some(edge => edge.follower_account_id === data.account_id && edge.target_account_id === account.account_id);
+  if (exists) fail('already_following', 'That account is already followed.');
+  data.follows.push({follower_account_id: data.account_id, target_account_id: account.account_id, at: ctx.virtual_now, request_id: args.request_id});
+  account.follower_count += 1;
+  self(data).following_count += 1;
+  return {account_id: account.account_id, record_status: 'following'};
+}
+
+function unfollowAccount(data, ctx, args) {
+  const account = resolveAccount(data, args);
+  const exists = data.follows.some(edge => edge.follower_account_id === data.account_id && edge.target_account_id === account.account_id);
+  if (!exists) fail('not_following', 'That account is not followed.');
+  data.follows = data.follows.filter(edge => !(edge.follower_account_id === data.account_id && edge.target_account_id === account.account_id));
+  account.follower_count = Math.max(0, account.follower_count - 1);
+  self(data).following_count = Math.max(0, self(data).following_count - 1);
+  return {account_id: account.account_id, record_status: 'unfollowed'};
+}
+
+function blockAccount(data, ctx, args) {
+  const account = resolveAccount(data, args);
+  if (account.account_id === data.account_id) fail('invalid_arguments', 'An account cannot block itself.');
+  const exists = data.blocks.some(row => row.account_id === data.account_id && row.target_account_id === account.account_id);
+  if (exists) fail('invalid_arguments', 'That account is already blocked.');
+  data.blocks.push({account_id: data.account_id, target_account_id: account.account_id, at: ctx.virtual_now});
+  return {account_id: account.account_id, record_status: 'blocked'};
+}
+
+function unblockAccount(data, args) {
+  const account = resolveAccount(data, args);
+  const exists = data.blocks.some(row => row.account_id === data.account_id && row.target_account_id === account.account_id);
+  if (!exists) fail('not_found', 'That account is not blocked.');
+  data.blocks = data.blocks.filter(row => !(row.account_id === data.account_id && row.target_account_id === account.account_id));
+  return {account_id: account.account_id, record_status: 'unblocked'};
+}
+
+function updateSelf(data, ctx, args) {
+  const account = self(data);
+  const displayName = args.display_name === undefined ? account.display_name : requireText(args.display_name, 80, 'Name');
+  const bio = args.bio === undefined ? account.bio : nfc(String(args.bio));
+  if (chars(bio) > 500) fail('invalid_arguments', 'bio is too long.');
+  const links = args.links === undefined ? [...account.links] : args.links;
+  if (!Array.isArray(links) || links.length > 8 || links.some(item => typeof item !== 'string' || !item || chars(item) > 200)) {
+    fail('invalid_arguments', 'links are invalid.');
+  }
+  if (confirms(data)) {
+    const revision = account.pending_profile ? account.pending_profile.revision : (account.profile_revision || 1) + 1;
+    account.pending_profile = {revision, request_id: args.request_id, display_name: displayName, bio, links: [...links]};
+    return {record_status: 'pending_owner_confirmation', revision};
+  }
+  account.display_name = displayName;
+  account.bio = bio;
+  account.links = [...links];
+  account.profile_revision = (account.profile_revision || 1) + 1;
+  account.pending_profile = null;
+  return {record_status: 'updated', revision: account.profile_revision};
+}
+
+function confirmProfile(data, ctx, account, payload) {
+  if (!account.pending_profile) fail('not_pending', 'No pending profile revision.');
+  if (payload.revision !== undefined && payload.revision !== account.pending_profile.revision) {
+    fail('revision_mismatch', 'Confirmation names a revision other than the pending one.');
+  }
+  const pending = account.pending_profile;
+  account.display_name = pending.display_name;
+  account.bio = pending.bio;
+  account.links = [...pending.links];
+  account.profile_revision = pending.revision;
+  account.pending_profile = null;
+}
+
+function declineProfile(data, ctx, account, payload) {
+  if (!account.pending_profile) fail('not_pending', 'No pending profile revision.');
+  if (payload.revision !== undefined && payload.revision !== account.pending_profile.revision) {
+    fail('revision_mismatch', 'Decline names a revision other than the pending one.');
+  }
+  account.pending_profile = null;
+  account.owner_note = payload.note ? nfc(payload.note) : null;
+}
+
+function listNotifications(data, args) {
+  const rows = data.notifications.filter(item => item.account_id === data.account_id);
+  rows.sort((a, b) => instant(b.at, 'invalid_seed') - instant(a.at, 'invalid_seed'));
+  return page(rows, args);
+}
+
+function markRead(data, args) {
+  bindId(args, 'notification_id');
+  const item = data.notifications.find(row => row.id === args.notification_id && row.account_id === data.account_id);
+  if (!item) fail('not_found', 'Notification does not exist.');
+  item.read = true;
+  return {id: item.id, read: true, record_status: 'read'};
+}
+
+function otherActor(data, payload) {
+  const actor = accountById(data, payload.actor_account_id);
+  if (!actor || actor.account_id === data.account_id) fail('invalid_event', 'The actor account is not valid.');
+  return actor;
+}
+
+function replyByOther(data, ctx, event) {
+  const payload = event.payload || {};
+  const actor = otherActor(data, payload);
+  const text = noteText(payload.text, 'invalid_event');
+  if (typeof payload.reply_to !== 'string' || !payload.reply_to) fail('invalid_event', 'reply_to is required.');
+  if (!targetRecord(data, payload.reply_to)) fail('invalid_event', 'The reply target does not exist.');
+  const note = createNote(data, ctx, {
+    account_id: actor.account_id, kind: 'reply', text, status: 'posted', reply_to: payload.reply_to,
+    event_id: event.event_id, links: Array.isArray(payload.links) ? payload.links.filter(item => typeof item === 'string') : []
+  });
+  publishNote(data, ctx, note, null, event.event_id);
+  notifyMention(data, ctx, actor.account_id, note.id, text, payload.mentions, event.event_id);
+}
+
+function repostByOther(data, ctx, event) {
+  const payload = event.payload || {};
+  const actor = otherActor(data, payload);
+  const text = noteText(payload.text || 'Repost.', 'invalid_event');
+  if (payload.object_type !== 'post' && payload.object_type !== 'note') fail('invalid_event', 'object_type is not supported.');
+  if (!targetRecord(data, payload.object_id)) fail('invalid_event', 'The repost target does not exist.');
+  const note = createNote(data, ctx, {
+    account_id: actor.account_id, kind: 'repost', text, status: 'posted',
+    repost_of: {object_type: payload.object_type, object_id: payload.object_id}, event_id: event.event_id
+  });
+  publishNote(data, ctx, note, null, event.event_id);
+}
+
+function followerChanged(data, ctx, event) {
+  const payload = event.payload || {};
+  const actor = otherActor(data, payload);
+  const owner = self(data);
+  const exists = data.follows.some(edge => edge.follower_account_id === actor.account_id && edge.target_account_id === owner.account_id);
+  if (payload.follows === true) {
+    if (exists) fail('invalid_event', 'That follow already exists.');
+    data.follows.push({follower_account_id: actor.account_id, target_account_id: owner.account_id, at: ctx.virtual_now, request_id: null});
+    owner.follower_count += 1;
+    actor.following_count += 1;
+    return;
+  }
+  if (payload.follows === false) {
+    if (!exists) fail('invalid_event', 'That follow does not exist.');
+    data.follows = data.follows.filter(edge => !(edge.follower_account_id === actor.account_id && edge.target_account_id === owner.account_id));
+    owner.follower_count = Math.max(0, owner.follower_count - 1);
+    actor.following_count = Math.max(0, actor.following_count - 1);
+    return;
+  }
+  fail('invalid_event', 'follows must be true or false.');
 }
 
 module.exports = {
   createDraft, updateDraft, deleteDraft, publish, schedule, unschedule, editPublished, unpublish,
   listPosts, getPost, postNote, replyNote, deleteNote, getNote, feed, peopleGet, peoplePosts,
-  selectPending, confirmPost, declinePost, confirmNote, declineNote, releaseDue, postByOther,
-  reachOf, dueOf, viewPost, subjectHits
+  scheduleNote, repostNote, searchNotes, searchPeople, followAccount, unfollowAccount, blockAccount, unblockAccount,
+  updateSelf, listNotifications, markRead,
+  selectPending, confirmPost, declinePost, confirmNote, declineNote, confirmProfile, declineProfile,
+  releaseDue, postByOther, replyByOther, repostByOther, followerChanged,
+  reachOf, revisionReach, dueOf, viewPost, subjectHits
 };

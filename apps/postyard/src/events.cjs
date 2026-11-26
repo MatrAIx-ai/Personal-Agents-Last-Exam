@@ -26,10 +26,24 @@ function applyEvent(ctx, data, event) {
       else store.confirmNote(data, ctx, item, payload, event);
       return data;
     }
-    fail('not_pending', 'No pending profile revision.');
+    if (decline) store.declineProfile(data, ctx, item, payload);
+    else store.confirmProfile(data, ctx, item, payload);
+    return data;
   }
   if (event.operation === 'notes.post_by_other') {
     store.postByOther(data, ctx, event);
+    return data;
+  }
+  if (event.operation === 'notes.reply_by_other') {
+    store.replyByOther(data, ctx, event);
+    return data;
+  }
+  if (event.operation === 'notes.repost_by_other') {
+    store.repostByOther(data, ctx, event);
+    return data;
+  }
+  if (event.operation === 'follower.changed') {
+    store.followerChanged(data, ctx, event);
     return data;
   }
   fail('invalid_event', 'Unsupported operation.');

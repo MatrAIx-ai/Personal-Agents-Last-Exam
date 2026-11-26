@@ -3,7 +3,13 @@
   "coverage": "2025-01-01 through 2026-12-31",
   "provenance": "synthetic",
   "anchor": "Postyard has no external archive. November 2026 is synthetic, the same as every other month.",
-  "layout": "Fixture (a) holds history through 2026-02-09T20:40:00-08:00. examples/dataset/later-2026 holds March through December 2026 and is loaded only at its own December clock.",
+  "layout": "Fixture (a) holds history through 2026-02-09. Fixture (b) is the June embargo sample. examples/dataset/later-2026 holds March through December 2026 and loads at its own December clock. The smoke seed is included in the source hashes.",
+  "source_hashes": {
+    "fixture-a": "5854a90bdc948e35930468e783574d8a0d30c8595f195e3efbf592660f6ced82",
+    "fixture-b": "430e48fed45536bbbdbf1d4f95480fa43dd9bdf666ee728bc5643deff5aeb5f9",
+    "later-2026": "73337e028c0008b4773d12543f954e97811fcf5d3722b919ecd3062917dec0f7",
+    "smoke": "e73a072e7e008aed6608ff1d62f74193f044802b9a0945fc6ca60e867b619589"
+  },
   "months": {
     "2025-01": {
       "post": 0,
@@ -142,10 +148,11 @@
       ]
     },
     "2026-06": {
-      "post": 1,
+      "post": 2,
       "note": 1,
       "follow": 0,
       "sources": [
+        "fixture-b",
         "later-2026"
       ]
     },
@@ -176,17 +183,19 @@
     "2026-10": {
       "post": 1,
       "note": 1,
-      "follow": 0,
+      "follow": 1,
       "sources": [
-        "later-2026"
+        "later-2026",
+        "smoke"
       ]
     },
     "2026-11": {
-      "post": 1,
+      "post": 2,
       "note": 1,
       "follow": 0,
       "sources": [
-        "later-2026"
+        "later-2026",
+        "smoke"
       ]
     },
     "2026-12": {
@@ -199,5 +208,9 @@
     }
   },
   "empty_months": [],
-  "row_count": 118
+  "row_count": 121,
+  "excluded_count": 0,
+  "earliest": "2025-01-04T10:00:00-08:00",
+  "latest": "2026-12-18T15:00:00-08:00",
+  "distinct_dates": 102
 }

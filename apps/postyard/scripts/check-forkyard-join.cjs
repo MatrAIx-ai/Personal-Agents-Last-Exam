@@ -13,26 +13,23 @@ if (!author || author.handle !== 'tomasreyes') {
   process.exit(1);
 }
 
-const postyard = JSON.parse(fs.readFileSync(path.join(__dirname, '../fixtures/minimal.json'), 'utf8'));
-postyard.settings.owner_confirmation = false;
-const draft = JSON.parse(JSON.stringify(postyard.posts[0]));
-draft.id = 'ac-0001:p2';
-draft.slug = 'tidewater-gatekeeping';
-draft.revisions[0].slug = 'tidewater-gatekeeping';
-draft.revisions[0].title = 'Gatekeeping';
-draft.revisions[0].body = 'Ingrid kept the release gate on the checksum window.';
-draft.created_at = '2026-11-02T10:00:00-08:00';
-draft.updated_at = draft.created_at;
-draft.published_at = draft.created_at;
-draft.revisions[0].created_at = draft.created_at;
-postyard.posts.push(draft);
-postyard.counters['ac-0001'].post = 2;
-postyard.receipts.push({
-  receipt_id: 'pr-0002', object_type: 'post', object_id: draft.id, revision: 1,
-  published_at: draft.published_at, public_url: 'https://postyard.example/@tomasreyes/tidewater-gatekeeping',
-  request_id: 'rq-join', event_id: null
+const {fixture} = require('../tests/harness.cjs');
+const postyardSeed = JSON.parse(fs.readFileSync(path.join(__dirname, '../fixtures/minimal.json'), 'utf8'));
+postyardSeed.settings.owner_confirmation = true;
+const world = fixture({data: postyardSeed, virtual_now: '2026-11-18T11:00:00-08:00'});
+const draft = world.call('postyard.blog.drafts.create', {
+  title: 'Gatekeeping', slug: 'tidewater-gatekeeping', body: 'Ingrid kept the release gate on the checksum window.'
 });
-const faithful = exportEvidence({snapshot: {data: postyard, epoch: 1, revision: 1, virtual_now: postyard.seed_clock, run_id: 'join-check', audit: []}});
+world.call('postyard.blog.publish', {post_id: draft.id, revision: 1});
+world.event({
+  event_id: 'py-join-confirm', at: '2026-11-18T11:10:00-08:00', operation: 'owner.confirm_publication',
+  payload: {object_type: 'post', object_id: draft.id, revision: 1}
+});
+const faithful = exportEvidence({snapshot: {data: world.data, epoch: 1, revision: 2, virtual_now: '2026-11-18T11:10:00-08:00', run_id: 'join-check', audit: []}});
+if (faithful.revisions.some(item => item.post_id === draft.id && item.actor_account_id !== 'ac-0001')) {
+  console.log(JSON.stringify({ok: false, reason: 'the live export must keep actor ac-0001'}));
+  process.exit(1);
+}
 const renamed = JSON.parse(JSON.stringify(faithful));
 for (const row of renamed.revisions) {
   if (row.post_id === draft.id) row.actor_account_id = 'fy-tomasreyes';

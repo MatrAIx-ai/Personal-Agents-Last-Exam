@@ -17,12 +17,39 @@ function instant(value, code = 'invalid_arguments') {
   if (!Number.isFinite(n)) fail(code, 'A timestamp is required.');
   return n;
 }
+const SERIAL = /^[1-9][0-9]*$/;
+const FULL_FOLD = {
+  '\u00DF': 'ss',
+  '\u0130': 'i\u0307',
+  '\u1E9E': 'ss',
+  '\uFB00': 'ff',
+  '\uFB01': 'fi',
+  '\uFB02': 'fl',
+  '\uFB03': 'ffi',
+  '\uFB04': 'ffl',
+  '\uFB05': 'st',
+  '\uFB06': 'st'
+};
+function chars(value) { return Array.from(String(value)).length; }
+function caseFold(text) {
+  let folded = '';
+  for (const ch of String(text).normalize('NFKC')) folded += FULL_FOLD[ch] || ch.toLowerCase();
+  return folded.replace(/\s+/g, ' ').trim();
+}
 function speechHash(text) {
-  const normalized = String(text).normalize('NFKC').toLocaleLowerCase('en').replace(/\s+/g, ' ').trim();
-  return crypto.createHash('sha256').update(normalized, 'utf8').digest('hex');
+  return crypto.createHash('sha256').update(caseFold(text), 'utf8').digest('hex');
 }
 function fold(value) {
-  return String(value).normalize('NFKC').toLocaleLowerCase('en').normalize('NFD').replace(/\p{M}/gu, '');
+  return caseFold(value).normalize('NFD').replace(/\p{M}/gu, '');
+}
+function serialNumber(id, accountId, mark) {
+  const prefix = accountId + ':' + mark;
+  if (!id.startsWith(prefix)) return null;
+  const rest = id.slice(prefix.length);
+  if (!SERIAL.test(rest)) return null;
+  const number = Number(rest);
+  if (!Number.isSafeInteger(number) || String(number) !== rest) return null;
+  return number;
 }
 function accountById(data, id) {
   return data.accounts.find(item => item.account_id === id) || null;
@@ -72,7 +99,7 @@ function tagsOf(value) {
   return [...new Set(value.map(item => nfc(item.trim())))];
 }
 function requireText(value, max, label) {
-  if (typeof value !== 'string' || !value.trim() || value.length > max) fail('invalid_arguments', label + ' is required.');
+  if (typeof value !== 'string' || !value.trim() || chars(value) > max) fail('invalid_arguments', label + ' is required.');
   return nfc(value);
 }
 function requireSlug(value) {
@@ -80,7 +107,7 @@ function requireSlug(value) {
   return value;
 }
 module.exports = {
-  APP, ID, SLUG, HANDLE, fail, copy, nfc, instant, speechHash, fold,
-  accountById, accountByHandle, self, confirms, followersOf, publicUrl, noteUrl,
+  APP, ID, SLUG, HANDLE, SERIAL, fail, copy, nfc, instant, chars, caseFold, speechHash, fold,
+  serialNumber, accountById, accountByHandle, self, confirms, followersOf, publicUrl, noteUrl,
   nextSerial, nextReceipt, tagsOf, requireText, requireSlug
 };

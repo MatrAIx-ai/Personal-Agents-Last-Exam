@@ -45,7 +45,26 @@
           "person_id": {"anyOf": [{"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"}, {"type": "null"}]},
           "follower_count": {"type": "integer", "minimum": 0},
           "following_count": {"type": "integer", "minimum": 0},
-          "created_at": {"type": "string", "format": "date-time"}
+          "created_at": {"type": "string", "format": "date-time"},
+          "profile_revision": {"type": "integer", "minimum": 1},
+          "owner_note": {"anyOf": [{"type": "string", "maxLength": 4000}, {"type": "null"}]},
+          "pending_profile": {
+            "anyOf": [
+              {"type": "null"},
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["revision", "request_id", "display_name", "bio", "links"],
+                "properties": {
+                  "revision": {"type": "integer", "minimum": 1},
+                  "request_id": {"type": "string"},
+                  "display_name": {"type": "string", "minLength": 1, "maxLength": 80},
+                  "bio": {"type": "string", "maxLength": 4000},
+                  "links": {"type": "array", "maxItems": 8, "items": {"type": "string", "minLength": 1, "maxLength": 200}}
+                }
+              }
+            ]
+          }
         }
       }
     },
@@ -104,8 +123,10 @@
           "unpublished_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
           "release_lag_seconds": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
           "followers_at_publish": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
-          "owner_note": {"anyOf": [{"type": "string", "maxLength": 500}, {"type": "null"}]},
+          "owner_note": {"anyOf": [{"type": "string", "maxLength": 4000}, {"type": "null"}]},
           "schedule_request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "cover_asset_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "resolution_code": {"anyOf": [{"type": "string"}, {"type": "null"}]},
           "created_at": {"type": "string", "format": "date-time"},
           "updated_at": {"type": "string", "format": "date-time"}
         }
@@ -121,7 +142,7 @@
           "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
           "account_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
           "kind": {"type": "string", "enum": ["note", "reply", "repost"]},
-          "text": {"type": "string", "minLength": 1, "maxLength": 500},
+          "text": {"type": "string", "minLength": 1, "maxLength": 4000},
           "status": {"type": "string", "enum": ["posted", "scheduled", "deleted", "pending_owner_confirmation", "declined", "withdrawn"]},
           "revision": {"const": 1},
           "reply_to": {"anyOf": [{"type": "string"}, {"type": "null"}]},
@@ -149,9 +170,28 @@
           "request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
           "event_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
           "schedule_request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
-          "owner_note": {"anyOf": [{"type": "string", "maxLength": 500}, {"type": "null"}]},
+          "owner_note": {"anyOf": [{"type": "string", "maxLength": 4000}, {"type": "null"}]},
+          "links": {"type": "array", "maxItems": 8, "items": {"type": "string", "minLength": 1, "maxLength": 400}},
+          "image_asset_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
           "created_at": {"type": "string", "format": "date-time"},
           "updated_at": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "media": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["asset_id", "role", "mime", "width", "height", "byte_length"],
+        "properties": {
+          "asset_id": {"type": "string", "minLength": 1},
+          "role": {"type": "string", "enum": ["avatar", "cover", "note"]},
+          "mime": {"type": "string", "enum": ["image/png", "image/jpeg"]},
+          "width": {"type": "integer", "minimum": 1},
+          "height": {"type": "integer", "minimum": 1},
+          "byte_length": {"type": "integer", "minimum": 1}
         }
       }
     },

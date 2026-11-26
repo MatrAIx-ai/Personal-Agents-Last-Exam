@@ -126,7 +126,7 @@ test('core example: owner confirmation publishes revision 3, and an update makes
   assert.equal(updated.revision, 4);
   assert.equal(updated.record_status, 'draft');
   const missed = boom(() => edited.event({event_id: 'py-confirm-old', at: '2026-11-18T11:12:00-08:00', operation: 'owner.confirm_publication', payload: {object_type: 'post', object_id: draft.id, revision: 3}}));
-  assert.equal(missed.code, 'revision_mismatch');
+  assert.equal(missed.code, 'not_pending');
 });
 
 test('core example: release note rq-41 confirms once as receipt pr-0007', () => {
@@ -372,6 +372,15 @@ test('thrown calls do not consume ids, and a repeated release adds no receipt', 
   const other = boom(() => world.event({event_id: 'py-long', at: '2026-11-18T10:00:00-08:00', operation: 'notes.post_by_other', payload: {actor_account_id: 'ac-0007', text: 'z'.repeat(501)}}));
   assert.equal(other.code, 'invalid_event');
   assert.equal(world.data.counters['ac-0007'].note, 0);
+  const draft = world.call('postyard.blog.drafts.create', {title: 'Release twice', slug: 'release-twice', body: 'One receipt.'});
+  world.call('postyard.blog.schedule', {post_id: draft.id, revision: 1, publish_at: '2026-11-18T09:30:00-08:00'});
+  world.setTime('2026-11-18T09:30:00-08:00');
+  world.event({event_id: 'py-rel-a', at: '2026-11-18T09:30:00-08:00', operation: 'publication.release_due', payload: {}});
+  const receipts = countReceipts(world.data, draft.id);
+  assert.equal(receipts, 1);
+  world.event({event_id: 'py-rel-a', at: '2026-11-18T09:30:00-08:00', operation: 'publication.release_due', payload: {}});
+  world.event({event_id: 'py-rel-b', at: '2026-11-18T09:30:00-08:00', operation: 'publication.release_due', payload: {}});
+  assert.equal(countReceipts(world.data, draft.id), receipts);
 });
 
 test('fixture history dates, ids, and the materialized audience', () => {
