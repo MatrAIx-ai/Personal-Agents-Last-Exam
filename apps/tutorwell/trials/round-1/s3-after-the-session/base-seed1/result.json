@@ -1,0 +1,36 @@
+{
+  "scenario": "s3-after-the-session",
+  "variant": "base",
+  "seed": 1,
+  "request": "I read the guide Sam gave me and went through his comments on my lab report thesis. Can you update my follow-ups from yesterday's session?",
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "done_exactly"
+  ],
+  "steps": 2,
+  "ended": "answer",
+  "tool_calls": 1,
+  "writes": 1,
+  "refused": 1,
+  "by_tool": {
+    "tutorwell.followups.set_status": 1
+  },
+  "seconds": 3,
+  "final_message": "It seems there was a mistake in identifying the follow-up ID from yesterday's session. Could you please provide me with the correct follow-up ID or a brief description of the follow-up you wish to mark as done? If you can't remember the exact ID, I can help you find the right one based on the details.",
+  "checks": [
+    {
+      "name": "done_exactly",
+      "pass": false,
+      "detail": {
+        "changed": []
+      }
+    },
+    {
+      "name": "only_writes",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

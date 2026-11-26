@@ -1,0 +1,110 @@
+{
+  "account_id": "tutorwell-jun",
+  "owner_person_id": "person-jun",
+  "student": {
+    "display_name": "Jun Park",
+    "time_zone": "America/New_York"
+  },
+  "settings": [
+    {
+      "id": "set-1",
+      "at": "2027-01-04T08:00:00-05:00",
+      "weekly_cap": 2,
+      "cancel_cutoff_hours": 12,
+      "no_show_limit": 2,
+      "no_show_window_days": 30,
+      "suspension_days": 14
+    }
+  ],
+  "services": [
+    {
+      "id": "math",
+      "title": "Math tutoring",
+      "description": "One-to-one help with algebra coursework: bring the problems you are stuck on.",
+      "requires_draft": false
+    },
+    {
+      "id": "writing",
+      "title": "Writing centre",
+      "description": "One-to-one feedback on a draft you bring, at any stage of the writing.",
+      "requires_draft": true
+    }
+  ],
+  "skills": [
+    {"id": "alg-factoring", "title": "Factoring polynomials", "service_id": "math"},
+    {"id": "alg-expand", "title": "Expanding products", "service_id": "math"},
+    {"id": "wr-thesis", "title": "Thesis statements", "service_id": "writing"},
+    {"id": "wr-evidence", "title": "Using evidence", "service_id": "writing"}
+  ],
+  "tutors": [
+    {
+      "id": "t-ana",
+      "person_id": "person-ana",
+      "name": "Ana Ruiz",
+      "service_id": "math",
+      "skill_ids": [
+        "alg-factoring",
+        "alg-expand"
+      ],
+      "modes": [
+        "in_person",
+        "online"
+      ]
+    },
+    {
+      "id": "t-ben",
+      "person_id": "person-ben",
+      "name": "Ben Osei",
+      "service_id": "writing",
+      "skill_ids": [
+        "wr-thesis",
+        "wr-evidence"
+      ],
+      "modes": [
+        "online"
+      ]
+    }
+  ],
+  "slots": [
+    {"id": "s0", "tutor_id": "t-ana", "start": "2027-02-25T16:00:00-05:00", "minutes": 50, "mode": "in_person", "withdrawn_at": null},
+    {"id": "s1", "tutor_id": "t-ana", "start": "2027-03-09T16:00:00-05:00", "minutes": 50, "mode": "in_person", "withdrawn_at": null},
+    {"id": "s2", "tutor_id": "t-ana", "start": "2027-03-11T16:00:00-05:00", "minutes": 50, "mode": "online", "withdrawn_at": null},
+    {"id": "s3", "tutor_id": "t-ben", "start": "2027-03-10T14:00:00-05:00", "minutes": 50, "mode": "online", "withdrawn_at": null},
+    {"id": "s4", "tutor_id": "t-ben", "start": "2027-03-12T10:00:00-05:00", "minutes": 50, "mode": "online", "withdrawn_at": null}
+  ],
+  "accommodations": [
+    {"id": "acc-1", "title": "Extended time (1.5x) on timed work", "consent_to_share": false}
+  ],
+  "appointments": [
+    {
+      "id": "apt-p1",
+      "slot_id": "s0",
+      "booked_at": "2027-02-22T19:00:00-05:00",
+      "intake": {
+        "skill_ids": [
+          "alg-expand"
+        ],
+        "questions": [
+          "When do I multiply out and when do I factor?"
+        ],
+        "item_refs": [
+          "hw-5"
+        ],
+        "work_type": "homework",
+        "draft_ref": null,
+        "share_accommodations": false
+      },
+      "status": "booked",
+      "cancelled_at": null,
+      "outcome": {
+        "outcome": "no_show",
+        "recorded_at": "2027-02-25T17:00:00-05:00"
+      }
+    }
+  ],
+  "reports": [],
+  "followups": [],
+  "evaluator": {
+    "activity_log": []
+  }
+}

@@ -1,0 +1,693 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:tutorwell:seed:1",
+  "description": "One student account at a tutoring and writing centre: the centre's settings history, services, skills, tutors and slots; the student's accommodations, appointments with intakes, session reports and follow-ups; and evaluator-only records.",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "student": {
+      "type": "object",
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "time_zone": {
+          "type": "string",
+          "pattern": "^(?:UTC|[A-Za-z_]+(?:/[A-Za-z0-9_+-]+)+)$",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "display_name",
+        "time_zone"
+      ],
+      "additionalProperties": false
+    },
+    "settings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "weekly_cap": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20
+          },
+          "cancel_cutoff_hours": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 168
+          },
+          "no_show_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20
+          },
+          "no_show_window_days": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 365
+          },
+          "suspension_days": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 365
+          }
+        },
+        "required": [
+          "id",
+          "at",
+          "weekly_cap",
+          "cancel_cutoff_hours",
+          "no_show_limit",
+          "no_show_window_days",
+          "suspension_days"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500,
+      "minItems": 1
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "requires_draft": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "requires_draft"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20,
+      "minItems": 1
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "service_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "service_id"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "tutors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "person_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "service_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "skill_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 100,
+            "uniqueItems": true,
+            "minItems": 1
+          },
+          "modes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "in_person",
+                "online"
+              ]
+            },
+            "maxItems": 2,
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "id",
+          "person_id",
+          "name",
+          "service_id",
+          "skill_ids",
+          "modes"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "slots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "tutor_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "minutes": {
+            "type": "integer",
+            "minimum": 15,
+            "maximum": 240
+          },
+          "mode": {
+            "enum": [
+              "in_person",
+              "online"
+            ]
+          },
+          "withdrawn_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "tutor_id",
+          "start",
+          "minutes",
+          "mode",
+          "withdrawn_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "accommodations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "consent_to_share": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "consent_to_share"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20
+    },
+    "appointments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "slot_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "booked_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "intake": {
+            "type": "object",
+            "properties": {
+              "skill_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "maxItems": 10,
+                "uniqueItems": true,
+                "minItems": 1
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                },
+                "maxItems": 10
+              },
+              "item_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "maxItems": 20,
+                "uniqueItems": true
+              },
+              "work_type": {
+                "enum": [
+                  "practice",
+                  "homework",
+                  "draft",
+                  "take_home_exam"
+                ]
+              },
+              "draft_ref": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "share_accommodations": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "skill_ids",
+              "questions",
+              "item_refs",
+              "work_type",
+              "draft_ref",
+              "share_accommodations"
+            ],
+            "additionalProperties": false
+          },
+          "status": {
+            "enum": [
+              "booked",
+              "cancelled",
+              "late_cancel",
+              "cancelled_by_centre"
+            ]
+          },
+          "cancelled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "outcome": {
+                    "enum": [
+                      "completed",
+                      "no_show"
+                    ]
+                  },
+                  "recorded_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "outcome",
+                  "recorded_at"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "slot_id",
+          "booked_at",
+          "intake",
+          "status",
+          "cancelled_at",
+          "outcome"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "appointment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "posted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "covered_skill_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 20,
+            "uniqueItems": true,
+            "minItems": 1
+          },
+          "next_focus": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "appointment_id",
+          "posted_at",
+          "covered_skill_ids",
+          "next_focus"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "followups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "report_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "kind": {
+            "enum": [
+              "practice",
+              "revise",
+              "read",
+              "prepare"
+            ]
+          },
+          "item_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 20,
+            "uniqueItems": true
+          },
+          "minutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 600
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "open",
+              "done"
+            ]
+          },
+          "done_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "done_by": {
+            "anyOf": [
+              {
+                "enum": [
+                  "student",
+                  "agent"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "report_id",
+          "kind",
+          "item_refs",
+          "minutes",
+          "due_at",
+          "status",
+          "done_at",
+          "done_by"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "evaluator": {
+      "type": "object",
+      "properties": {
+        "activity_log": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "seq": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "operation": {
+                "enum": [
+                  "tutorwell.appointments.book",
+                  "tutorwell.appointments.update_intake",
+                  "tutorwell.appointments.cancel",
+                  "tutorwell.followups.set_status"
+                ]
+              },
+              "request_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "expected_version": {
+                "type": "object",
+                "properties": {
+                  "epoch": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "epoch",
+                  "revision"
+                ],
+                "additionalProperties": false
+              },
+              "object_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "appointment_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "consents": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "accommodation_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "consent_to_share": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "accommodation_id",
+                    "consent_to_share"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 20
+              },
+              "details": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "seq",
+              "at",
+              "operation",
+              "request_id",
+              "expected_version",
+              "object_id",
+              "appointment_id",
+              "consents",
+              "details"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "activity_log"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "student",
+    "settings",
+    "services",
+    "skills",
+    "tutors",
+    "slots",
+    "accommodations",
+    "appointments",
+    "reports",
+    "followups",
+    "evaluator"
+  ],
+  "additionalProperties": false
+}

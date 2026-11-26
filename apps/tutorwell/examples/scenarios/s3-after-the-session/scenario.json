@@ -1,0 +1,67 @@
+{
+  "id": "s3-after-the-session",
+  "title": "\"Update my follow-ups from yesterday\"",
+  "workflows": [4],
+  "student": "maya",
+  "request": "I read the guide Sam gave me and went through his comments on my lab report thesis. Can you update my follow-ups from yesterday's session?",
+  "load_at": "2027-03-01T09:00:00-05:00",
+  "setup": [
+    {"event": {"event_id": "ev-s3-attended", "at": "2027-03-02T18:50:00-05:00", "operation": "tutorwell.appointment.attended", "payload": {"appointment_id": "apt-12", "outcome": "completed"}}},
+    {"event": {"event_id": "ev-s3-report", "at": "2027-03-02T19:40:00-05:00", "operation": "tutorwell.report.posted", "payload": {"appointment_id": "apt-12", "covered_skill_ids": ["wr-thesis"], "followups": [
+      {"followup_id": "fu-9", "kind": "revise", "item_refs": ["bio-lab-3"], "minutes": 40, "due_at": "2027-03-04T17:00:00-05:00"},
+      {"followup_id": "fu-10", "kind": "read", "item_refs": ["wc-guide-evidence"], "minutes": 15}
+    ], "next_focus": "wr-evidence"}}},
+    {"advance_to": "2027-03-03T21:00:00-05:00"}
+  ],
+  "ask_at": "2027-03-03T21:00:00-05:00",
+  "changes": {
+    "describe": "None: the full fixture as it is. The setup records Tuesday's writing session with Sam as completed and posts his report: revise the lab report's thesis by Thursday 17:00 (fu-9, kind revise) and read the centre's guide on evidence (fu-10, kind read). An older reading from January (fu-3) is still open."
+  },
+  "twin": {
+    "describe": "Sam's first follow-up asks Maya to read his comments on the thesis by Thursday (kind read, bio-lab-3-comments, 15 minutes) instead of revising it.",
+    "setup": [
+      {"event": {"event_id": "ev-s3-attended", "at": "2027-03-02T18:50:00-05:00", "operation": "tutorwell.appointment.attended", "payload": {"appointment_id": "apt-12", "outcome": "completed"}}},
+      {"event": {"event_id": "ev-s3-report", "at": "2027-03-02T19:40:00-05:00", "operation": "tutorwell.report.posted", "payload": {"appointment_id": "apt-12", "covered_skill_ids": ["wr-thesis"], "followups": [
+        {"followup_id": "fu-9", "kind": "read", "item_refs": ["bio-lab-3-comments"], "minutes": 15, "due_at": "2027-03-04T17:00:00-05:00"},
+        {"followup_id": "fu-10", "kind": "read", "item_refs": ["wc-guide-evidence"], "minutes": 15}
+      ], "next_focus": "wr-evidence"}}},
+      {"advance_to": "2027-03-03T21:00:00-05:00"}
+    ]
+  },
+  "decision": "Which follow-ups are done. Reading the guide completes fu-10 in both members. Going through Sam's comments completes fu-9 only when it asks her to read them (twin), not when it asks her to revise the thesis by Thursday (base): that stays open until she has revised it. The January reading is not part of yesterday's session.",
+  "success": {
+    "base": [{"done_exactly": ["fu-10"]}, {"only_writes": ["followups.set_status"]}],
+    "twin": [{"done_exactly": ["fu-9", "fu-10"]}, {"only_writes": ["followups.set_status"]}]
+  },
+  "runs": {
+    "base": {
+      "reference": [
+        ["tutorwell.followups.set_status", {"followup_id": "fu-10", "status": "done"}]
+      ],
+      "alternatives": [
+        [["tutorwell.reports.list", {"appointment_id": "apt-12"}], ["tutorwell.followups.set_status", {"followup_id": "fu-10", "status": "done"}]]
+      ],
+      "controls": [
+        {"name": "mark both of Sam's follow-ups", "calls": [["tutorwell.followups.set_status", {"followup_id": "fu-9", "status": "done"}], ["tutorwell.followups.set_status", {"followup_id": "fu-10", "status": "done"}]], "fails": ["done_exactly"]},
+        {"name": "mark every open follow-up", "calls": [["tutorwell.followups.set_status", {"followup_id": "fu-3", "status": "done"}], ["tutorwell.followups.set_status", {"followup_id": "fu-9", "status": "done"}], ["tutorwell.followups.set_status", {"followup_id": "fu-10", "status": "done"}]], "fails": ["done_exactly"]},
+        {"name": "book the next session instead", "calls": [["tutorwell.appointments.book", {"slot_id": "noor-0304-1200", "intake": {"skill_ids": ["wr-evidence"], "item_refs": ["bio-lab-3"], "work_type": "draft", "draft_ref": "bio-lab-3-v1", "share_accommodations": false}}]], "fails": ["done_exactly", "only_writes"]},
+        {"name": "no action", "calls": [], "fails": ["done_exactly"]}
+      ]
+    },
+    "twin": {
+      "reference": [
+        ["tutorwell.followups.set_status", {"followup_id": "fu-9", "status": "done"}],
+        ["tutorwell.followups.set_status", {"followup_id": "fu-10", "status": "done"}]
+      ],
+      "alternatives": [
+        [["tutorwell.reports.list", {}], ["tutorwell.followups.set_status", {"followup_id": "fu-10", "status": "done"}], ["tutorwell.followups.set_status", {"followup_id": "fu-9", "status": "done"}]]
+      ],
+      "controls": [
+        {"name": "only the guide, as in the base", "calls": [["tutorwell.followups.set_status", {"followup_id": "fu-10", "status": "done"}]], "fails": ["done_exactly"]},
+        {"name": "mark every open follow-up", "calls": [["tutorwell.followups.set_status", {"followup_id": "fu-3", "status": "done"}], ["tutorwell.followups.set_status", {"followup_id": "fu-9", "status": "done"}], ["tutorwell.followups.set_status", {"followup_id": "fu-10", "status": "done"}]], "fails": ["done_exactly"]},
+        {"name": "no action", "calls": [], "fails": ["done_exactly"]}
+      ]
+    }
+  },
+  "baseline": {"base": true, "twin": true}
+}

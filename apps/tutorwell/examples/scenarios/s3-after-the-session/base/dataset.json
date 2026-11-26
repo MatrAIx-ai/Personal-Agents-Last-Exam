@@ -1,0 +1,87 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "tutorwell-s3-after-the-session-base",
+  "version": "1.0.0",
+  "description": "Reference scenario s3-after-the-session (base) on the synthetic student of fixtures/students/maya: \"Update my follow-ups from yesterday\". Load with env.load_seed at virtual_now 2027-03-01T09:00:00-05:00 with this binding.json, then apply the base setup in ../scenario.json.",
+  "record_source_ids": [
+    "authored",
+    "milepost-skills",
+    "scenario"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-written synthetic centre, tutors, timetable, student, accommodations, appointments, intakes, reports and follow-ups (fixtures/centre.json and fixtures/profiles/maya.json). The centre settings and intake fields follow the common pattern of public university tutoring and writing-centre policies, in my own words. The student, the tutors, the centre and its school are fictional. No external collection and no third-party text.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "apps/tutorwell/scripts/build-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "profile": "maya"
+        }
+      }
+    },
+    {
+      "source_id": "milepost-skills",
+      "kind": "synthetic",
+      "description": "The 40 Algebra 1 and Introductory Statistics skill IDs and titles are those of Milepost's course catalog (apps/milepost/fixtures/catalog/courses.json, PR #70, same author, MIT), so a task can load both Apps for the same student. Milepost wrote those titles in its own words after the section structure of two OpenStax textbooks; no textbook text is reproduced here.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "fixtures/centre.json",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "milepost_catalog_commit": "5636409"
+        }
+      }
+    },
+    {
+      "source_id": "scenario",
+      "kind": "synthetic",
+      "description": "Records written by hand for the scenario (examples/scenarios/s3-after-the-session/scenario.json). Both members: None: the full fixture as it is. The setup records Tuesday's writing session with Sam as completed and posts his report: revise the lab report's thesis by Thursday 17:00 (fu-9, kind revise) and read the centre's guide on evidence (fu-10, kind read). An older reading from January (fu-3) is still open.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "apps/tutorwell/scripts/build-scenarios.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "scenario": "s3-after-the-session",
+          "variant": "base"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "The centre timetable expanded into 50-minute slots for the two weeks of slot_window, with past slots added for the history; slot IDs are the tutor, the local date and the local start time (ana-0304-0800).",
+    "Times written in America/New_York with their UTC offset.",
+    "Scenario changes applied to the full fixture maya."
+  ],
+  "expected_counts": {
+    "records": 135,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace the author's check of every record and human review of realism and variation."
+  }
+}

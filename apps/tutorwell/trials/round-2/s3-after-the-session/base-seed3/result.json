@@ -1,0 +1,36 @@
+{
+  "scenario": "s3-after-the-session",
+  "variant": "base",
+  "seed": 3,
+  "request": "I read the guide Sam gave me and went through his comments on my lab report thesis. Can you update my follow-ups from yesterday's session?",
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "done_exactly"
+  ],
+  "steps": 2,
+  "ended": "answer",
+  "tool_calls": 1,
+  "writes": 1,
+  "refused": 1,
+  "by_tool": {
+    "tutorwell.followups.set_status": 1
+  },
+  "seconds": 3,
+  "final_message": "It seems there was a misunderstanding. The follow-up related to your lab report thesis has already been marked as done. However, it appears there are other follow-ups from your session that need attention. For instance, follow-up `fu-3` is open and involves reading some text, and `fu-9` is due tomorrow and involves revising your bio lab report. Please let me know if you need help with any of these.",
+  "checks": [
+    {
+      "name": "done_exactly",
+      "pass": false,
+      "detail": {
+        "changed": []
+      }
+    },
+    {
+      "name": "only_writes",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

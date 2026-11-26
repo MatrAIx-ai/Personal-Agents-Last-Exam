@@ -1,0 +1,1586 @@
+[
+  {
+    "name": "tutorwell.services.list",
+    "description": "The centre's services (math tutoring, writing centre), the skills each covers, and the centre's rules (centre-rules/1) with the settings in force now: weekly_cap appointments per Monday-to-Sunday week across services, the cancellation cutoff (cancel_cutoff_hours before the start; a later cancellation is a late cancellation, which counts as a no-show), and a suspension of suspension_days when no_show_limit no-shows fall within no_show_window_days. Times are in the student's time zone with its UTC offset; every read returns the current virtual time as as_of and changes nothing.",
+    "read_only": true,
+    "scope": "tutorwell.services.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tutorwell"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rule_version": {
+          "const": "centre-rules/1"
+        },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "weekly_cap": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            },
+            "cancel_cutoff_hours": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 168
+            },
+            "no_show_limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            },
+            "no_show_window_days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 365
+            },
+            "suspension_days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 365
+            }
+          },
+          "required": [
+            "weekly_cap",
+            "cancel_cutoff_hours",
+            "no_show_limit",
+            "no_show_window_days",
+            "suspension_days"
+          ],
+          "additionalProperties": false
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 20
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "requires_draft": {
+                "type": "boolean"
+              },
+              "skills": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 500
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "description",
+              "requires_draft",
+              "skills"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "rule_version",
+        "settings",
+        "rules",
+        "services"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tutorwell.tutors.list",
+    "description": "Tutors, optionally for one service or one skill (IDs from services.list): the service, the skills each covers and their modes (in_person, online). An unknown service or skill returns not_found.",
+    "read_only": true,
+    "scope": "tutorwell.tutors.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "service_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "A service ID from tutorwell.services.list (math, writing); not a skill ID."
+        },
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "A skill ID from tutorwell.services.list (services[].skills[].id)."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tutorwell"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "tutors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "service_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "skill_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "maxItems": 100
+              },
+              "modes": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "in_person",
+                    "online"
+                  ]
+                },
+                "maxItems": 2
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "service_id",
+              "skill_ids",
+              "modes"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "tutors"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tutorwell.slots.list",
+    "description": "Open slots that start after now, earliest first, optionally for one service, tutor or skill (a skill selects the tutors who cover it): start and end with the local weekday, minutes and mode. Booked, started and withdrawn slots are not listed. An unknown service, tutor or skill returns not_found. Times are in the student's time zone with its UTC offset; every read returns the current virtual time as as_of and changes nothing.",
+    "read_only": true,
+    "scope": "tutorwell.slots.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "service_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "A service ID from tutorwell.services.list (math, writing); not a skill ID."
+        },
+        "tutor_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "A tutor ID from tutorwell.tutors.list."
+        },
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "A skill ID from tutorwell.services.list (services[].skills[].id)."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tutorwell"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "slots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "tutor_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "service_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "weekday": {
+                "enum": [
+                  "Mon",
+                  "Tue",
+                  "Wed",
+                  "Thu",
+                  "Fri",
+                  "Sat",
+                  "Sun"
+                ]
+              },
+              "minutes": {
+                "type": "integer",
+                "minimum": 15,
+                "maximum": 240
+              },
+              "mode": {
+                "enum": [
+                  "in_person",
+                  "online"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "tutor_id",
+              "service_id",
+              "start",
+              "end",
+              "weekday",
+              "minutes",
+              "mode"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 5000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "slots"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tutorwell.appointments.list",
+    "description": "The student's appointments, past and upcoming, earliest first, optionally with one status: booked (before its start, with its cancellation_cutoff), awaiting_outcome (started; only the centre records attendance), completed, no_show, cancelled, late_cancel or cancelled_by_centre; each with its intake, whether it counts toward its week, and its report ID. Times are in the student's time zone with its UTC offset; every read returns the current virtual time as as_of and changes nothing.",
+    "read_only": true,
+    "scope": "tutorwell.appointments.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "booked",
+            "awaiting_outcome",
+            "completed",
+            "no_show",
+            "cancelled",
+            "late_cancel",
+            "cancelled_by_centre"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tutorwell"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "appointments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "slot_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "service_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "tutor_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "weekday": {
+                "enum": [
+                  "Mon",
+                  "Tue",
+                  "Wed",
+                  "Thu",
+                  "Fri",
+                  "Sat",
+                  "Sun"
+                ]
+              },
+              "minutes": {
+                "type": "integer",
+                "minimum": 15,
+                "maximum": 240
+              },
+              "mode": {
+                "enum": [
+                  "in_person",
+                  "online"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "booked",
+                  "awaiting_outcome",
+                  "completed",
+                  "no_show",
+                  "cancelled",
+                  "late_cancel",
+                  "cancelled_by_centre"
+                ]
+              },
+              "booked_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "intake": {
+                "type": "object",
+                "properties": {
+                  "skill_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "maxItems": 10,
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "questions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "maxItems": 10
+                  },
+                  "item_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "maxItems": 20,
+                    "uniqueItems": true
+                  },
+                  "work_type": {
+                    "enum": [
+                      "practice",
+                      "homework",
+                      "draft",
+                      "take_home_exam"
+                    ]
+                  },
+                  "draft_ref": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "share_accommodations": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "skill_ids",
+                  "questions",
+                  "item_refs",
+                  "work_type",
+                  "draft_ref",
+                  "share_accommodations"
+                ],
+                "additionalProperties": false
+              },
+              "cancellation_cutoff": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "cancelled_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "outcome_recorded_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "counts_toward_week": {
+                "type": "boolean"
+              },
+              "report_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "slot_id",
+              "service_id",
+              "tutor_id",
+              "start",
+              "end",
+              "weekday",
+              "minutes",
+              "mode",
+              "status",
+              "booked_at",
+              "intake",
+              "cancellation_cutoff",
+              "cancelled_at",
+              "outcome_recorded_at",
+              "counts_toward_week",
+              "report_id"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "appointments"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tutorwell.reports.list",
+    "description": "Tutors' session reports, newest first, optionally for one appointment ID: skills covered, next focus and follow-ups (kind, item references, suggested minutes, optional due date, status open or done). An unknown appointment returns not_found. Times are in the student's time zone with its UTC offset; every read returns the current virtual time as as_of and changes nothing.",
+    "read_only": true,
+    "scope": "tutorwell.reports.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "An appointment ID from tutorwell.appointments.list."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tutorwell"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "appointment_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "posted_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "covered_skill_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "maxItems": 20
+              },
+              "next_focus": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "followups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "kind": {
+                      "enum": [
+                        "practice",
+                        "revise",
+                        "read",
+                        "prepare"
+                      ]
+                    },
+                    "item_refs": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "maxItems": 20
+                    },
+                    "minutes": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 600
+                    },
+                    "due_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "status": {
+                      "enum": [
+                        "open",
+                        "done"
+                      ]
+                    },
+                    "done_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "item_refs",
+                    "minutes",
+                    "due_at",
+                    "status",
+                    "done_at"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 20
+              }
+            },
+            "required": [
+              "id",
+              "appointment_id",
+              "posted_at",
+              "covered_skill_ids",
+              "next_focus",
+              "followups"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "reports"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tutorwell.profile.get",
+    "description": "The student: name, time zone (IANA), accommodations with whether the student consents to share each, this week's appointment count against the weekly cap, the counts of this and later weeks that have appointments (weekly_counts), no-shows (including late cancellations) dated within the window, and any suspension in force now. Times are in the student's time zone with its UTC offset; every read returns the current virtual time as as_of and changes nothing.",
+    "read_only": true,
+    "scope": "tutorwell.profile.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "tutorwell"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "time_zone": {
+          "type": "string"
+        },
+        "accommodations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "consent_to_share": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "consent_to_share"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 20
+        },
+        "this_week": {
+          "type": "object",
+          "properties": {
+            "week_start": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "weekly_cap": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            }
+          },
+          "required": [
+            "week_start",
+            "count",
+            "weekly_cap"
+          ],
+          "additionalProperties": false
+        },
+        "weekly_counts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "week_start": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000
+              }
+            },
+            "required": [
+              "week_start",
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 1000
+        },
+        "no_shows": {
+          "type": "object",
+          "properties": {
+            "in_window": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "window_days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 365
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            }
+          },
+          "required": [
+            "in_window",
+            "window_days",
+            "limit"
+          ],
+          "additionalProperties": false
+        },
+        "suspension": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "until": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "cause": {
+                  "enum": [
+                    "late_cancel",
+                    "no_show"
+                  ]
+                },
+                "cause_appointment_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              },
+              "required": [
+                "from",
+                "until",
+                "cause",
+                "cause_appointment_id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "display_name",
+        "time_zone",
+        "accommodations",
+        "this_week",
+        "weekly_counts",
+        "no_shows",
+        "suspension"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tutorwell.appointments.book",
+    "description": "Book an open slot that starts after now (an ID from slots.list) with an intake: skill IDs to work on (from services.list), questions, references to specific items such as problem or assignment IDs, the type of work (practice, homework, draft or take_home_exam), a draft reference (required by the writing centre) and whether to share the student's accommodations with the tutor. Refused: unknown slot (not_found), unknown skill (unknown_reference), a slot that is booked, withdrawn or started (slot_unavailable), the student is suspended (suspended), the slot's week already has weekly_cap appointments (weekly_cap), take_home_exam work (not_tutorable), a writing-centre booking without draft_ref (draft_required). Tutorwell does not check whether sharing accommodations has the student's consent; profile.get shows the consents.",
+    "read_only": false,
+    "scope": "tutorwell.appointments.book",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "slot_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "An open slot's ID from tutorwell.slots.list."
+        },
+        "intake": {
+          "type": "object",
+          "properties": {
+            "skill_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 10,
+              "uniqueItems": true,
+              "minItems": 1
+            },
+            "questions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "maxItems": 10
+            },
+            "item_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 20,
+              "uniqueItems": true
+            },
+            "work_type": {
+              "enum": [
+                "practice",
+                "homework",
+                "draft",
+                "take_home_exam"
+              ]
+            },
+            "draft_ref": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "share_accommodations": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "skill_ids",
+            "work_type",
+            "share_accommodations"
+          ],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "slot_id",
+        "intake",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tutorwell"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "appointment_status": {
+          "const": "booked"
+        },
+        "cancellation_cutoff": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "appointment_status",
+        "cancellation_cutoff"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tutorwell.appointments.update_intake",
+    "description": "Change the intake of a booked appointment (an ID from appointments.list) until its session starts; the fields given replace the current ones and the result must satisfy the same rules as a booking. Refused: unknown appointment (not_found), the session has started (session_started), a cancelled appointment (invalid_state), unknown skill (unknown_reference), take_home_exam (not_tutorable), no draft_ref for the writing centre (draft_required), no field given (invalid_arguments).",
+    "read_only": false,
+    "scope": "tutorwell.appointments.update_intake",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "An appointment ID from tutorwell.appointments.list."
+        },
+        "intake": {
+          "type": "object",
+          "properties": {
+            "skill_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 10,
+              "uniqueItems": true,
+              "minItems": 1
+            },
+            "questions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "maxItems": 10
+            },
+            "item_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 20,
+              "uniqueItems": true
+            },
+            "work_type": {
+              "enum": [
+                "practice",
+                "homework",
+                "draft",
+                "take_home_exam"
+              ]
+            },
+            "draft_ref": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "share_accommodations": {
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "appointment_id",
+        "intake",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tutorwell"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tutorwell.appointments.cancel",
+    "description": "Cancel a booked appointment (an ID from appointments.list) and free its slot. At or before its cancellation_cutoff (shown by appointments.list) it is cancelled; after the cutoff it is a late_cancel, which counts as a no-show and can start a suspension (returned here). From the start on it cannot be cancelled (session_started). Refused also: unknown appointment (not_found), already cancelled (invalid_state).",
+    "read_only": false,
+    "scope": "tutorwell.appointments.cancel",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "appointment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "An appointment ID from tutorwell.appointments.list."
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "appointment_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tutorwell"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "appointment_status": {
+          "enum": [
+            "cancelled",
+            "late_cancel"
+          ]
+        },
+        "suspension": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "until": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "cause": {
+                  "enum": [
+                    "late_cancel",
+                    "no_show"
+                  ]
+                },
+                "cause_appointment_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                }
+              },
+              "required": [
+                "from",
+                "until",
+                "cause",
+                "cause_appointment_id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id",
+        "appointment_status",
+        "suspension"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "tutorwell.followups.set_status",
+    "description": "Mark a follow-up from a session report (an ID from reports.list) done when the student has done it, or open again. Setting the status it already has is refused (invalid_state); unknown follow-up: not_found.",
+    "read_only": false,
+    "scope": "tutorwell.followups.set_status",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "followup_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$",
+          "description": "A follow-up ID from tutorwell.reports.list (reports[].followups[].id)."
+        },
+        "status": {
+          "enum": [
+            "open",
+            "done"
+          ]
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "followup_id",
+        "status",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "tutorwell"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

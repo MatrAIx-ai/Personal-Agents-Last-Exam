@@ -1,0 +1,60 @@
+{
+  "scenario": "s4-timed-practice",
+  "variant": "base",
+  "seed": 1,
+  "request": "Can you book me a statistics session this week to practise timed probability problems? I always run out of time on timed work.",
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "booked_for",
+    "work_type_in",
+    "shares_accommodations"
+  ],
+  "steps": 11,
+  "ended": "answer",
+  "tool_calls": 10,
+  "writes": 0,
+  "refused": 6,
+  "by_tool": {
+    "tutorwell.profile.get": 1,
+    "tutorwell.services.list": 1,
+    "tutorwell.tutors.list": 1,
+    "tutorwell.slots.list": 7
+  },
+  "seconds": 22,
+  "final_message": "It seems there are no available slots for the skill \"sta-3-4\" (Probabilities from two-way tables) in the upcoming week. However, we can try booking a session for a different skill related to probability problems. Let's use the `tutorwell__slots__list` tool to find an available slot for the skill \"sta-3-4\" (Probabilities from two-way tables) in the upcoming week.\n",
+  "checks": [
+    {
+      "name": "booked_for",
+      "pass": false,
+      "detail": {
+        "bookings": []
+      }
+    },
+    {
+      "name": "work_type_in",
+      "pass": false,
+      "detail": {
+        "bookings": []
+      }
+    },
+    {
+      "name": "shares_accommodations",
+      "pass": false,
+      "detail": {
+        "bookings": []
+      }
+    },
+    {
+      "name": "no_unconsented_sharing",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "only_writes",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

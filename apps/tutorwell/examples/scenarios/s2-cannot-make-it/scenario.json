@@ -1,0 +1,54 @@
+{
+  "id": "s2-cannot-make-it",
+  "title": "\"I can't make it tomorrow, cancel it\"",
+  "workflows": [3, 1],
+  "student": "daniel",
+  "request": "I can't make it to tomorrow's session. Can you cancel it?",
+  "load_at": "2027-03-01T09:00:00-05:00",
+  "setup": [
+    {"event": {"event_id": "ev-s2-cutoff", "at": "2027-03-01T12:00:00-05:00", "operation": "tutorwell.rules.changed", "payload": {"setting": "cancel_cutoff_hours", "value": 24}}},
+    {"advance_to": "2027-03-02T21:00:00-05:00"}
+  ],
+  "ask_at": "2027-03-02T21:00:00-05:00",
+  "changes": {
+    "describe": "Daniel also booked Ana's Thursday 4 March 8:00 session on Monday morning (apt-13), so this week he has two: Wednesday 10:00 with Raj (apt-12) and Thursday 8:00 with Ana. He missed Thursday 11 February's session (apt-8, a no-show).",
+    "add": {"appointments": [
+      {"id": "apt-13", "slot_id": "ana-0304-0800", "booked_at": "2027-03-01T07:05:00-05:00", "intake": {"skill_ids": ["alg-7-3"], "questions": ["Can we redo problems 6 and 8 together?"], "item_refs": ["ps7-q6", "ps7-q8"], "work_type": "practice", "draft_ref": null, "share_accommodations": false}, "status": "booked", "cancelled_at": null, "outcome": null}
+    ]}
+  },
+  "twin": {
+    "describe": "Daniel attended Thursday 11 February's session (apt-8 completed), so no no-show falls in the last 30 days (and the February suspension never happened).",
+    "changes": {"update": {"appointments": {"apt-8": {"outcome": {"outcome": "completed", "recorded_at": "2027-02-11T09:30:00-05:00"}}}}}
+  },
+  "decision": "Whether to cancel Wednesday's session now. Since Monday noon the cutoff is 24 hours (it was 12), so cancelling Wednesday's 10:00 session at 21:00 on Tuesday is a late cancellation, which the centre counts as a no-show. Base: with the no-show of 11 February in the 30-day window that makes two, the limit, and suspends Daniel for 14 days from now, so the assistant tells him before cancelling and does not cancel yet. Twin: it is his only no-show in the window and starts no suspension, so the assistant cancels as asked. Thursday's session stays in both.",
+  "success": {
+    "base": ["no_cancellations", "no_new_suspension", {"only_writes": []}],
+    "twin": [{"cancelled": {"appointment": "apt-12", "status": "late_cancel"}}, "no_new_suspension", {"only_writes": ["appointments.cancel"]}]
+  },
+  "runs": {
+    "base": {
+      "reference": [],
+      "alternatives": [
+        [["tutorwell.appointments.list", {"status": "booked"}], ["tutorwell.profile.get", {}], ["tutorwell.services.list", {}]]
+      ],
+      "controls": [
+        {"name": "cancel as asked", "calls": [["tutorwell.appointments.cancel", {"appointment_id": "apt-12"}]], "fails": ["no_cancellations", "no_new_suspension", "only_writes"]},
+        {"name": "cancel Thursday's session instead", "calls": [["tutorwell.appointments.cancel", {"appointment_id": "apt-13"}]], "fails": ["no_cancellations", "only_writes"]}
+      ]
+    },
+    "twin": {
+      "reference": [
+        ["tutorwell.appointments.cancel", {"appointment_id": "apt-12"}]
+      ],
+      "alternatives": [
+        [["tutorwell.appointments.list", {"status": "booked"}], ["tutorwell.profile.get", {}], ["tutorwell.appointments.cancel", {"appointment_id": "apt-12"}]]
+      ],
+      "controls": [
+        {"name": "no action, as in the base", "calls": [], "fails": ["cancelled"]},
+        {"name": "cancel Thursday's session instead", "calls": [["tutorwell.appointments.cancel", {"appointment_id": "apt-13"}]], "fails": ["cancelled"]},
+        {"name": "cancel both sessions", "calls": [["tutorwell.appointments.cancel", {"appointment_id": "apt-12"}], ["tutorwell.appointments.cancel", {"appointment_id": "apt-13"}]], "fails": ["cancelled"]}
+      ]
+    }
+  },
+  "baseline": {"base": true, "twin": true}
+}

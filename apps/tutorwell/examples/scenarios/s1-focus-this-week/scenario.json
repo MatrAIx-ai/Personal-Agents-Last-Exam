@@ -1,0 +1,62 @@
+{
+  "id": "s1-focus-this-week",
+  "title": "\"Book me a math session this week\"",
+  "workflows": [1, 2],
+  "student": "daniel",
+  "request": "Can you book me a math session this week on whatever I'm struggling with most right now? Bring the problems I keep getting wrong.",
+  "load_at": "2027-03-01T06:00:00-05:00",
+  "setup": [
+    {"event": {"event_id": "ev-s1-withdrawn", "at": "2027-03-01T06:15:00-05:00", "operation": "tutorwell.slot.withdrawn", "payload": {"slot_id": "ana-0302-0800"}}},
+    {"event": {"event_id": "ev-s1-released", "at": "2027-03-01T06:20:00-05:00", "operation": "tutorwell.slot.released", "payload": {"slot_id": "ana-0305-0800", "tutor_id": "t-ana", "start": "2027-03-05T08:00:00-05:00", "minutes": 50, "mode": "in_person"}}},
+    {"advance_to": "2027-03-01T06:45:00-05:00"}
+  ],
+  "ask_at": "2027-03-01T06:45:00-05:00",
+  "changes": {
+    "describe": "None: the full fixture as it is. Ana's report on Thursday's session (rep-7) names factoring ax^2 + bx + c (alg-7-3) as the next focus and asks Daniel to redo problems 6 and 8 of set 7 (fu-8), the two he got wrong again."
+  },
+  "twin": {
+    "describe": "Ana's report names perfect-square trinomials and differences of squares (alg-7-4), which only Kofi teaches, as the next focus, and the problems to redo are 11 and 14 of set 7.",
+    "changes": {"update": {"reports": {"rep-7": {"next_focus": "alg-7-4"}}, "followups": {"fu-8": {"item_refs": ["ps7-q11", "ps7-q14"]}}}}
+  },
+  "decision": "What the booking is for. The latest report decides the skill and the problems to bring (base: alg-7-3, which Ana teaches, with problems 6 and 8; twin: alg-7-4, which only Kofi teaches, with problems 11 and 14). The session must be this week (before Monday 8 March). The first open math slot of the week is Mei's, a statistics tutor; Ana's Tuesday slot was withdrawn this morning and a Friday 8:00 slot was released.",
+  "success": {
+    "base": [{"booked_for": {"skills": ["alg-7-3"], "before": "2027-03-08T00:00:00-05:00"}}, {"intake_items": ["ps7-q6", "ps7-q8"]}, {"work_type_in": ["practice", "homework"]}, "no_unconsented_sharing", {"only_writes": ["appointments.book", "appointments.update_intake"]}],
+    "twin": [{"booked_for": {"skills": ["alg-7-4"], "before": "2027-03-08T00:00:00-05:00"}}, {"intake_items": ["ps7-q11", "ps7-q14"]}, {"work_type_in": ["practice", "homework"]}, "no_unconsented_sharing", {"only_writes": ["appointments.book", "appointments.update_intake"]}]
+  },
+  "runs": {
+    "base": {
+      "reference": [
+        ["tutorwell.appointments.book", {"slot_id": "ana-0304-0800", "intake": {"skill_ids": ["alg-7-3"], "questions": ["I still mix up the signs when a is not 1. Can we redo problems 6 and 8 together?"], "item_refs": ["ps7-q6", "ps7-q8"], "work_type": "practice", "draft_ref": null, "share_accommodations": false}}]
+      ],
+      "alternatives": [
+        [["tutorwell.reports.list", {}], ["tutorwell.slots.list", {"skill_id": "alg-7-3"}], ["tutorwell.appointments.book", {"slot_id": "ana-0304-1600", "intake": {"skill_ids": ["alg-7-3"], "item_refs": ["ps7-q6", "ps7-q8"], "work_type": "homework", "share_accommodations": false}}]],
+        [["tutorwell.appointments.book", {"slot_id": "ana-0305-0800", "intake": {"skill_ids": ["alg-7-3", "alg-7-5"], "questions": [], "item_refs": ["ps7-q6", "ps7-q8", "ps7-q12"], "work_type": "practice", "share_accommodations": false}}]],
+        [["tutorwell.appointments.book", {"slot_id": "ana-0306-1000", "intake": {"skill_ids": ["alg-7-3"], "item_refs": ["ps7-q6"], "work_type": "practice", "share_accommodations": false}}], ["tutorwell.appointments.update_intake", {"appointment_id": "apt-13", "intake": {"item_refs": ["ps7-q6", "ps7-q8"]}}]]
+      ],
+      "controls": [
+        {"name": "the first open math slot, a statistics tutor's", "calls": [["tutorwell.appointments.book", {"slot_id": "mei-0301-1000", "intake": {"skill_ids": ["alg-7-3"], "item_refs": ["ps7-q6", "ps7-q8"], "work_type": "practice", "share_accommodations": false}}]], "fails": ["booked_for"]},
+        {"name": "Ana's withdrawn Tuesday slot", "calls": [["tutorwell.appointments.book", {"slot_id": "ana-0302-0800", "intake": {"skill_ids": ["alg-7-3"], "item_refs": ["ps7-q6", "ps7-q8"], "work_type": "practice", "share_accommodations": false}}]], "fails": ["booked_for", "intake_items", "work_type_in"]},
+        {"name": "the last session's skill instead of the next focus", "calls": [["tutorwell.appointments.book", {"slot_id": "ana-0304-0800", "intake": {"skill_ids": ["alg-7-2"], "item_refs": ["ps7-q6", "ps7-q8"], "work_type": "practice", "share_accommodations": false}}]], "fails": ["booked_for"]},
+        {"name": "next week", "calls": [["tutorwell.appointments.book", {"slot_id": "ana-0309-0800", "intake": {"skill_ids": ["alg-7-3"], "item_refs": ["ps7-q6", "ps7-q8"], "work_type": "practice", "share_accommodations": false}}]], "fails": ["booked_for"]},
+        {"name": "without the problems", "calls": [["tutorwell.appointments.book", {"slot_id": "ana-0304-0800", "intake": {"skill_ids": ["alg-7-3"], "item_refs": [], "work_type": "practice", "share_accommodations": false}}]], "fails": ["intake_items"]},
+        {"name": "sharing the accommodation he has not consented to share", "calls": [["tutorwell.appointments.book", {"slot_id": "ana-0304-0800", "intake": {"skill_ids": ["alg-7-3"], "item_refs": ["ps7-q6", "ps7-q8"], "work_type": "practice", "share_accommodations": true}}]], "fails": ["no_unconsented_sharing"]},
+        {"name": "no action", "calls": [], "fails": ["booked_for", "intake_items", "work_type_in"]}
+      ]
+    },
+    "twin": {
+      "reference": [
+        ["tutorwell.appointments.book", {"slot_id": "kofi-0303-0800", "intake": {"skill_ids": ["alg-7-4"], "questions": ["How do I recognise a perfect square or a difference of squares?"], "item_refs": ["ps7-q11", "ps7-q14"], "work_type": "practice", "draft_ref": null, "share_accommodations": false}}]
+      ],
+      "alternatives": [
+        [["tutorwell.appointments.book", {"slot_id": "kofi-0301-1600", "intake": {"skill_ids": ["alg-7-4"], "item_refs": ["ps7-q11", "ps7-q14"], "work_type": "homework", "share_accommodations": false}}]],
+        [["tutorwell.tutors.list", {"skill_id": "alg-7-4"}], ["tutorwell.appointments.book", {"slot_id": "kofi-0305-1500", "intake": {"skill_ids": ["alg-7-4", "alg-6-4"], "item_refs": ["ps7-q11", "ps7-q14"], "work_type": "practice", "share_accommodations": false}}]]
+      ],
+      "controls": [
+        {"name": "the base's booking: Ana and alg-7-3", "calls": [["tutorwell.appointments.book", {"slot_id": "ana-0304-0800", "intake": {"skill_ids": ["alg-7-3"], "item_refs": ["ps7-q6", "ps7-q8"], "work_type": "practice", "share_accommodations": false}}]], "fails": ["booked_for", "intake_items"]},
+        {"name": "Ana for the new focus, which she does not teach", "calls": [["tutorwell.appointments.book", {"slot_id": "ana-0304-0800", "intake": {"skill_ids": ["alg-7-4"], "item_refs": ["ps7-q11", "ps7-q14"], "work_type": "practice", "share_accommodations": false}}]], "fails": ["booked_for"]},
+        {"name": "no action", "calls": [], "fails": ["booked_for", "intake_items", "work_type_in"]}
+      ]
+    }
+  },
+  "baseline": {"base": true, "twin": true}
+}

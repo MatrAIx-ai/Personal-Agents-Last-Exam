@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "app_id": "tutorwell",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "GitHub @LixinTu; repository PR #161 or issues tagged app:tutorwell"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "tutorwell.slot.released",
+    "tutorwell.slot.withdrawn",
+    "tutorwell.appointment.attended",
+    "tutorwell.report.posted",
+    "tutorwell.rules.changed"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "centre-rules/1 is Tutorwell's own test rule, modelled on common tutoring and writing-centre policies; it is not any centre's actual policy.",
+    "Tutorwell enforces the centre's rules only; consent to share accommodations, the type of work and the choice of skill are checked by graders from the activity log.",
+    "The GUI is a read-only reviewer renderer with four views; there is no interactive business Web App or tutor-side interface.",
+    "One student account per App instance; no payment, waitlists, video sessions, tutoring dialogue or live sync with any product."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

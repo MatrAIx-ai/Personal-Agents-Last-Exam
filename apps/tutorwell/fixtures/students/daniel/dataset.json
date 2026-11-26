@@ -1,0 +1,66 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "tutorwell-daniel",
+  "version": "1.0.0",
+  "description": "Full fixture: one synthetic student (Daniel Kim) at a university tutoring and writing centre with six tutors across math and statistics tutoring and the writing centre, a term of 12 appointments (completed sessions with their reports and follow-ups, cancellations in time and late, a no-show and a slot the centre withdrew), two weeks of open slots and accommodations with their consents. Load with env.load_seed at virtual_now 2027-03-01T09:00:00-05:00 with this binding.json.",
+  "record_source_ids": [
+    "authored",
+    "milepost-skills"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-written synthetic centre, tutors, timetable, student, accommodations, appointments, intakes, reports and follow-ups (fixtures/centre.json and fixtures/profiles/daniel.json). The centre settings and intake fields follow the common pattern of public university tutoring and writing-centre policies, in my own words. The student, the tutors, the centre and its school are fictional. No external collection and no third-party text.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "apps/tutorwell/scripts/build-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "profile": "daniel"
+        }
+      }
+    },
+    {
+      "source_id": "milepost-skills",
+      "kind": "synthetic",
+      "description": "The 40 Algebra 1 and Introductory Statistics skill IDs and titles are those of Milepost's course catalog (apps/milepost/fixtures/catalog/courses.json, PR #70, same author, MIT), so a task can load both Apps for the same student. Milepost wrote those titles in its own words after the section structure of two OpenStax textbooks; no textbook text is reproduced here.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "fixtures/centre.json",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "milepost_catalog_commit": "5636409"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "The centre timetable expanded into 50-minute slots for the two weeks of slot_window, with past slots added for the history; slot IDs are the tutor, the local date and the local start time (ana-0304-0800).",
+    "Times written in America/New_York with their UTC offset."
+  ],
+  "expected_counts": {
+    "records": 135,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace the author's check of every record and human review of realism and variation."
+  }
+}

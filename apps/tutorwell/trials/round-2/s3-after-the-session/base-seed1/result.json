@@ -1,0 +1,36 @@
+{
+  "scenario": "s3-after-the-session",
+  "variant": "base",
+  "seed": 1,
+  "request": "I read the guide Sam gave me and went through his comments on my lab report thesis. Can you update my follow-ups from yesterday's session?",
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "done_exactly"
+  ],
+  "steps": 2,
+  "ended": "answer",
+  "tool_calls": 1,
+  "writes": 1,
+  "refused": 1,
+  "by_tool": {
+    "tutorwell.followups.set_status": 1
+  },
+  "seconds": 5,
+  "final_message": "It seems there was a misunderstanding. The follow-up related to your lab report thesis introduction does not exist in your session report. The follow-ups that are currently open are:\n\n- fu-3 (sta-text-2-3)\n- fu-9 (revise bio-lab-3, due 2027-03-04T17:00:00-05:00)\n- fu-10 (read wc-guide-evidence)\n\nIf you have completed any of these, you can mark them as \"done\" using the same command. If you need to add a new follow-up related to your lab report thesis introduction, please provide the details, and I can help you with that.",
+  "checks": [
+    {
+      "name": "done_exactly",
+      "pass": false,
+      "detail": {
+        "changed": []
+      }
+    },
+    {
+      "name": "only_writes",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}
