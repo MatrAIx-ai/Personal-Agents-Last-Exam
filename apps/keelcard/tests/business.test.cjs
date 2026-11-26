@@ -1418,3 +1418,103 @@ test('a reused snapshot reports persisted from a Core receipt or a fresh read', 
   assert.equal(quiet.stopped, false);
   assert.equal(quiet.reports.every(report => report.persisted === true), true);
 });
+
+test('coverage counts match the delivered 2025-26 window', () => {
+  const { buildCoverage } = require('../examples/coverage-report.cjs');
+  const report = buildCoverage();
+  const household = report.sources.a;
+  const freelancer = report.sources.b;
+  const delegate = report.sources.c;
+  const december = report.sources.december;
+  const weekly = household.per_card['card-4417'];
+  assert.equal(household.sha256, 'd9eeb281a49e632fa726f5a06c9c5147c8ba6924c42acfd88dd5b420073c6bc4');
+  assert.equal(household.counts.approved, 62);
+  assert.equal(household.counts.declined, 1);
+  assert.equal(household.counts.statements, 14);
+  assert.equal(household.distinct_dates, 62);
+  assert.equal(household.earliest, '2025-09-20');
+  assert.equal(household.latest, '2026-11-14');
+  assert.equal(weekly.approved, 61);
+  assert.equal(weekly.declined, 1);
+  assert.equal(weekly.distinct_dates, 61);
+  assert.deepEqual(weekly.weekdays, ['Saturday']);
+  assert.equal(weekly.earliest, '2025-09-20');
+  assert.equal(weekly.latest, '2026-11-14');
+  assert.equal(freelancer.counts.approved, 508);
+  assert.equal(freelancer.counts.declined, 37);
+  assert.equal(freelancer.counts.statements, 22);
+  assert.equal(freelancer.distinct_dates, 397);
+  assert.equal(freelancer.earliest, '2025-01-01');
+  assert.equal(freelancer.latest, '2026-11-11');
+  assert.equal(december.counts.events, 48);
+  assert.equal(december.counts.requests, 24);
+  assert.equal(december.counts.approved, 23);
+  assert.equal(december.counts.captured, 23);
+  assert.equal(december.counts.declined, 1);
+  assert.equal(december.distinct_dates, 18);
+  assert.equal(december.by_month['2026-12'].dates, 18);
+  assert.equal(delegate.counts.approved, 0);
+  assert.equal(delegate.counts.declined, 0);
+  assert.equal(delegate.counts.statements, 0);
+  assert.equal(delegate.distinct_dates, 1);
+  assert.equal(delegate.earliest, '2026-11-18');
+  assert.equal(report.global.seeds.distinct_dates, 424);
+  assert.equal(report.global.seeds.earliest, '2025-01-01');
+  assert.equal(report.global.seeds.latest, '2026-11-18');
+  assert.equal(report.global.seeds_plus_december.distinct_dates, 442);
+  assert.equal(report.global.seeds_plus_december.months_with_activity, 24);
+  assert.equal(household.exclusions.length, 0);
+  assert.equal(freelancer.exclusions.length, 0);
+  assert.equal(delegate.exclusions.length, 0);
+  assert.equal(december.exclusions.length, 1);
+  assert.equal(december.exclusions[0].reason, 'out_of_window');
+});
+
+test('reviewer views escape text and omit card secrets', () => {
+  const view = require('../gui/src/view.js');
+  const number = '9417220000014417';
+  const code = '317';
+  const card = {
+    card_id: CARD,
+    nickname: '<img src=x onerror=alert(1)>',
+    last_four: '4417',
+    status: 'active',
+    number,
+    security_code: code,
+    limits: { per_transaction: 7500, per_day: 20000, per_month: 120000, lifetime: null }
+  };
+  const transaction = {
+    authorization_id: 'auth-w01',
+    decided_at: '2025-09-20T12:12:00.000Z',
+    merchant_name: 'FreshCart <b>',
+    amount_cents: 4200,
+    status: 'captured',
+    number,
+    security_code: code
+  };
+  const pages = [
+    view.render([card]),
+    view.renderCardList([card]),
+    view.renderCardDetail(card),
+    view.renderTransactions([transaction])
+  ];
+  for (const html of pages) {
+    assert.equal(html.includes(number), false);
+    assert.equal(html.includes(code), false);
+    assert.equal(html.includes('<img'), false);
+    assert.equal(html.includes('<script'), false);
+  }
+  assert.equal(pages[0].includes('&lt;img'), true);
+  assert.equal(pages[1].includes('&lt;img'), true);
+  assert.equal(pages[1].includes('Last four 4417'), true);
+  assert.equal(pages[1].includes('Status active'), true);
+  assert.equal(pages[2].includes('Per transaction'), true);
+  assert.equal(pages[2].includes('7500'), true);
+  assert.equal(pages[2].includes('Per day'), true);
+  assert.equal(pages[2].includes('Per month'), true);
+  assert.equal(pages[2].includes('Lifetime'), true);
+  assert.equal(pages[3].includes('FreshCart &lt;b&gt;'), true);
+  assert.equal(pages[3].includes('4200'), true);
+  assert.equal(pages[3].includes('2025-09-20T12:12:00.000Z'), true);
+  assert.equal(pages[3].includes('captured'), true);
+});

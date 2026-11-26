@@ -51,7 +51,7 @@ The code email body has this shape: `Code 482913 confirms raising the per-transa
 
 Further tools for later tasks: `keelcard.disputes.list`, `keelcard.disputes.open`, `keelcard.disputes.withdraw`, `keelcard.funding.get`, `keelcard.statements.get`, `keelcard.statements.list`, `keelcard.alerts.preferences.get`, `keelcard.alerts.preferences.update`, `keelcard.merchants.block` and `keelcard.merchants.unblock`. Infra events also include `refund.issue`, `funding.top_up` and `dispute.update`. `examples/join-evidence.cjs` reads a snapshot, the Core audit and a supplied execution list and prints the evidence rows. It does not write back.
 
-Fixture (b) is `fixtures/freelancer.json` with `fixtures/freelancer-binding.json`: Amadi Okonkwo, six cards, 60 merchants, nine months. Fixture (c) is `fixtures/delegate.json` with `fixtures/delegate-binding.json`: Nia Cole, `owner_approval`, one request that is still open at `2026-11-18T10:00:00-05:00`. The package seed remains fixture (a), so the dataset record count stays 2.
+Fixture (b) is `fixtures/freelancer.json` with `fixtures/freelancer-binding.json`: Amadi Okonkwo, six cards, 60 merchants, 2025-01 to 2026-11, plus December 2026 staged events in `examples/events/freelancer-2026-12.json`. Apply those events after `env.advance_time`. They are staged scenario events, and they are never pre-session history. Counts, the monthly tables and the load query are in `contribution/coverage.md`. Recount with `node apps/keelcard/examples/coverage-report.cjs`. Fixture (c) is `fixtures/delegate.json` with `fixtures/delegate-binding.json`: Nia Cole, `owner_approval`, one request that is still open at `2026-11-18T10:00:00-05:00`. The package seed remains fixture (a), so the dataset record count stays 2.
 
 `keelcard.cards.reveal` is the only Agent tool that returns a full number, expiry and security code. Infra snapshots include numbers, security codes, fingerprints and verification codes. Core audit records the tool name and the decision. It does not copy the code or the card number into the audit summary.
 
@@ -71,7 +71,7 @@ v1 sends decline, receipt, code, card-created, card-closed and limit-changed not
 
 ## Known limits of this package
 
-v1 excludes real card networks, physical cards, credit, interest, rewards, currencies other than USD, chargeback law, fraud scoring, a link to an external funding account, shared cards and recurring-charge detection. When a merchant host is supplied, its allow list is `keelcard.authorizations.lookup`. The checkout case that narrows the scenario policy to that one tool is an instance-policy test. Until a trusted merchant host exists, the delivered path is Infra applying `authorization.request`, and the grader reads the snapshot. `gui/src/view.js` is an escaped reviewer renderer. It omits full numbers and security codes. There is no interactive business page.
+v1 excludes real card networks, physical cards, credit, interest, rewards, currencies other than USD, chargeback law, fraud scoring, a link to an external funding account, shared cards and recurring-charge detection. When a merchant host is supplied, its allow list is `keelcard.authorizations.lookup`. The checkout case that narrows the scenario policy to that one tool is an instance-policy test. Until a trusted merchant host exists, the delivered path is Infra applying `authorization.request`, and the grader reads the snapshot. `gui/src/view.js` renders escaped, read-only views for human reviewers. It has no controls and is not an interactive GUI. The approved plan lists only this optional read-only renderer, so no GUI is claimed. Agents use the MCP tools. `renderCardList`, `renderCardDetail` and `renderTransactions` are the card list, the card detail with limits, and the transactions. `render` remains for compatibility. The views omit full numbers and security codes.
 
 ## Workflow checks
 
@@ -95,6 +95,10 @@ src/                         Cards, limits, ledger, notices, publisher and diagn
 schemas/                     Seed, state, events and copied public contracts
 contribution/                Capabilities, GUI declaration, catalog and provenance
 fixtures/minimal.json        Fixture (a), the household grocery seed
+fixtures/freelancer.json     Fixture (b), 2025-01 to 2026-11
+examples/events/             December 2026 staged events for fixture (b)
+contribution/coverage.md     Window counts and the load query
+examples/coverage-report.cjs Recount script for that coverage
 examples/task-data/          Binding, policies and the task session clock
 examples/mail-publisher.json Publisher grant from kc-adeyemi to mail-maya
 gui/src/view.js              Reviewer renderer
