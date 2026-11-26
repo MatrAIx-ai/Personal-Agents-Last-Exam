@@ -1,0 +1,140 @@
+{
+  "schema": "fernshelf.coverage-query.v1",
+  "runtime_version": "1.6.0",
+  "run": "coverage",
+  "profile": "scenario (the ten reads)",
+  "seed_loaded_unchanged": true,
+  "virtual_now": "2026-11-20T09:00:00-08:00",
+  "version": {
+    "epoch": 2,
+    "revision": 0
+  },
+  "families": [
+    {
+      "source": "items",
+      "tool": "fernshelf.items.search",
+      "sample_call": {
+        "state": "active|trashed|purged",
+        "collapse_stacks": false,
+        "limit": 200
+      },
+      "returned": 428,
+      "fixture": 428,
+      "match": true
+    },
+    {
+      "source": "item_history",
+      "tool": "fernshelf.items.get",
+      "sample_call": {
+        "id": "it-2401-0101"
+      },
+      "returned": 592,
+      "fixture": 592,
+      "match": true
+    },
+    {
+      "source": "stacks",
+      "tool": "fernshelf.items.get (stack)",
+      "sample_call": {
+        "id": "it-2611-0931"
+      },
+      "returned": 26,
+      "fixture": 26,
+      "match": true
+    },
+    {
+      "source": "albums",
+      "tool": "fernshelf.albums.list",
+      "sample_call": {
+        "include_deleted": true
+      },
+      "returned": 12,
+      "fixture": 12,
+      "match": true
+    },
+    {
+      "source": "album_members",
+      "tool": "fernshelf.albums.get",
+      "sample_call": {
+        "id": "al-reunion-2026"
+      },
+      "returned": 11,
+      "fixture": 11,
+      "match": true
+    },
+    {
+      "source": "contributions",
+      "tool": "fernshelf.albums.get",
+      "sample_call": {
+        "id": "al-reunion-2026"
+      },
+      "returned": 14,
+      "fixture": 14,
+      "match": true
+    },
+    {
+      "source": "links",
+      "tool": "fernshelf.albums.get",
+      "sample_call": {
+        "id": "al-reunion-2026"
+      },
+      "returned": 6,
+      "fixture": 6,
+      "match": true
+    },
+    {
+      "source": "views",
+      "tool": "fernshelf.albums.get (links[].views, member_views)",
+      "sample_call": {
+        "id": "al-reunion-2026"
+      },
+      "returned": 16,
+      "fixture": 16,
+      "match": true
+    },
+    {
+      "source": "removals",
+      "tool": "fernshelf.removals.list",
+      "sample_call": {},
+      "returned": 8,
+      "fixture": 8,
+      "match": true
+    },
+    {
+      "source": "notifications",
+      "tool": "fernshelf.notifications.list",
+      "sample_call": {},
+      "returned": 27,
+      "fixture": 27,
+      "match": true
+    },
+    {
+      "source": "activity",
+      "tool": "env.snapshot (Infra; the activity log has no Agent read)",
+      "sample_call": {},
+      "returned": 1259,
+      "fixture": 1259,
+      "match": true
+    }
+  ],
+  "sample_window": {
+    "call": {
+      "tool": "fernshelf.notifications.list",
+      "start": "2025-06-01",
+      "end": "2025-06-30"
+    },
+    "returned": [
+      {
+        "at": "2025-06-16T08:20:00-07:00",
+        "kind": "album.activity",
+        "title": "Theo Fenwick declined your invitation to Trail days"
+      },
+      {
+        "at": "2025-06-16T18:40:00-07:00",
+        "kind": "removal.requested",
+        "title": "Sam Ardell asked you to take down 1 photo"
+      }
+    ]
+  },
+  "passed": true
+}

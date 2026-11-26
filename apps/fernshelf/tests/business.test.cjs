@@ -11,3 +11,4 @@ require('./edge-cases.test.cjs');
 require('./fixtures.test.cjs');
 require('./log-shapes.test.cjs');
 require('./schema-inline.test.cjs');
+require('./coverage.test.cjs');

@@ -1,0 +1,268 @@
+{
+  "schema": "fernshelf.dependency.resource-access.v1",
+  "dependency": "Resource access registration for items.read (platform)",
+  "node": "v22.23.1",
+  "contract": "fernshelf.items.read returns the file object (filename, mime_type, base64, sha256, media) read by Core ctx.assets.read under the parent item; Core allows it only through runtime/registrations/fernshelf.json, which maps object type item to the read tool fernshelf.items.get, and applies the task policy on that tool.",
+  "not_applicable": {
+    "retry_duplicate": "reads change nothing, so a repeat is shown to return the same bytes",
+    "unknown_outcome": "no write and no other App is involved"
+  },
+  "passed": true,
+  "checks": [
+    "The catalogue hash is the hash of the package file",
+    "The received bytes are the immutable source file (same SHA-256 as the catalogue and the package file)",
+    "The read changes no business data or version",
+    "A repeated read returns the same bytes",
+    "Core resources/read serves the same bytes for an active item",
+    "Another item's asset under this parent is not_found; a trashed item is in_trash and refused by resources/read; a video is no_file",
+    "The allowed parent returns its bytes; another parent is refused by Core (not_available)",
+    "Missing dependency: no registration: items.read is not_available, other reads work, nothing changes",
+    "Incompatible registration: it maps another object type: items.read is not_available, other reads work, nothing changes"
+  ],
+  "transcript": [
+    {
+      "n": 1,
+      "step": "Revisions, registration and initial state",
+      "caller": "Infra",
+      "revisions": {
+        "fernshelf": "1.0.0",
+        "runtime": "1.6.0",
+        "core_api": "1.2.0"
+      },
+      "registration": {
+        "file": "runtime/registrations/fernshelf.json",
+        "content": {
+          "app_id": "fernshelf",
+          "resource_access": {
+            "item": "fernshelf.items.get"
+          }
+        },
+        "sha256": "b0c9c8266b20809b5981b570ab23dbdf6145b1b41de152d18dd3018d42ffde1d"
+      },
+      "state": {
+        "version": {
+          "epoch": 2,
+          "revision": 0
+        },
+        "virtual_now": "2026-11-20T09:00:00-08:00",
+        "assets_in_bundle": 48
+      },
+      "source_file": {
+        "item_id": "it-2611-0931",
+        "asset_id": "img-it-2611-0931",
+        "mime_type": "image/png",
+        "catalog_sha256": "35b978cc7241534e12440dd6c256abec958def34652c7ce430a74b43ac5cd5a8",
+        "bytes_on_disk": 11096,
+        "sha256_on_disk": "35b978cc7241534e12440dd6c256abec958def34652c7ce430a74b43ac5cd5a8"
+      }
+    },
+    {
+      "n": 2,
+      "step": "Read the bytes through the parent item",
+      "caller": "Agent",
+      "direction": "Agent -> Fernshelf items.read -> Core ctx.assets.read (registration: item -> fernshelf.items.get)",
+      "request": {
+        "tool": "fernshelf.items.read",
+        "id": "it-2611-0931"
+      },
+      "result": {
+        "status": "ok",
+        "version": {
+          "epoch": 2,
+          "revision": 0
+        },
+        "file": {
+          "filename": "it-2611-0931.png",
+          "mime_type": "image/png",
+          "sha256": "35b978cc7241534e12440dd6c256abec958def34652c7ce430a74b43ac5cd5a8",
+          "media": {
+            "image": {
+              "width": 128,
+              "height": 96
+            }
+          },
+          "base64_length": 14796
+        }
+      },
+      "received": {
+        "bytes": 11096,
+        "sha256": "35b978cc7241534e12440dd6c256abec958def34652c7ce430a74b43ac5cd5a8"
+      },
+      "state_after": {
+        "version": {
+          "epoch": 2,
+          "revision": 0
+        },
+        "audit_rows_added": 1
+      }
+    },
+    {
+      "n": 3,
+      "step": "Repeat the read",
+      "caller": "Agent",
+      "request": {
+        "tool": "fernshelf.items.read",
+        "id": "it-2611-0931"
+      },
+      "result": {
+        "status": "ok",
+        "sha256": "35b978cc7241534e12440dd6c256abec958def34652c7ce430a74b43ac5cd5a8"
+      }
+    },
+    {
+      "n": 4,
+      "step": "Accessibility through Core resources/read",
+      "caller": "Agent",
+      "request": {
+        "method": "resources/read",
+        "uri": "pale://deps-resource/fernshelf/assets/img-it-2611-0931"
+      },
+      "result": {
+        "mimeType": "image/png",
+        "sha256": "35b978cc7241534e12440dd6c256abec958def34652c7ce430a74b43ac5cd5a8"
+      }
+    },
+    {
+      "n": 5,
+      "step": "Refusals by the App and by Core",
+      "caller": "Agent",
+      "request": [
+        {
+          "tool": "fernshelf.items.read",
+          "id": "it-2611-0931",
+          "asset_id": "img-it-2611-0934"
+        },
+        {
+          "tool": "fernshelf.items.read",
+          "id": "it-2401-0327"
+        },
+        {
+          "method": "resources/read",
+          "asset": "img-it-2401-0327"
+        },
+        {
+          "tool": "fernshelf.items.read",
+          "id": "it-2406-0397"
+        }
+      ],
+      "result": [
+        {
+          "status": "not_found"
+        },
+        {
+          "status": "in_trash"
+        },
+        {
+          "error": "The resource does not exist or is outside the current permissions."
+        },
+        {
+          "status": "no_file"
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "step": "Denied: a task policy limits fernshelf.items.get to one item",
+      "caller": "Agent",
+      "policy": {
+        "fernshelf.items.get": {
+          "ids": [
+            "it-2611-0934"
+          ]
+        }
+      },
+      "request": [
+        {
+          "tool": "fernshelf.items.read",
+          "id": "it-2611-0934"
+        },
+        {
+          "tool": "fernshelf.items.read",
+          "id": "it-2611-0931"
+        }
+      ],
+      "result": [
+        {
+          "status": "ok",
+          "sha256": "a21ff21eac671b876bd99cf782b5ec5a89e80eb1cb531d4c60ca5c37a95981d4"
+        },
+        {
+          "status": "not_available"
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "step": "Missing dependency: no registration",
+      "caller": "Agent",
+      "registration": null,
+      "request": [
+        {
+          "tool": "fernshelf.items.read",
+          "id": "it-2611-0931"
+        },
+        {
+          "tool": "fernshelf.exposure.get",
+          "id": "it-2611-0931"
+        }
+      ],
+      "result": [
+        {
+          "status": "not_available"
+        },
+        {
+          "status": "ok"
+        }
+      ],
+      "state": {
+        "before": {
+          "epoch": 2,
+          "revision": 0
+        },
+        "after": {
+          "epoch": 2,
+          "revision": 0
+        }
+      }
+    },
+    {
+      "n": 8,
+      "step": "Incompatible registration: it maps another object type",
+      "caller": "Agent",
+      "registration": {
+        "app_id": "fernshelf",
+        "resource_access": {
+          "photo": "fernshelf.items.get"
+        }
+      },
+      "request": [
+        {
+          "tool": "fernshelf.items.read",
+          "id": "it-2611-0931"
+        },
+        {
+          "tool": "fernshelf.exposure.get",
+          "id": "it-2611-0931"
+        }
+      ],
+      "result": [
+        {
+          "status": "not_available"
+        },
+        {
+          "status": "ok"
+        }
+      ],
+      "state": {
+        "before": {
+          "epoch": 2,
+          "revision": 0
+        },
+        "after": {
+          "epoch": 2,
+          "revision": 0
+        }
+      }
+    }
+  ]
+}

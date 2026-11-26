@@ -1,0 +1,1037 @@
+{
+  "schema": "fernshelf.gui-sequences.v1",
+  "captured_at": "2026-11-26T01:57:46.549Z",
+  "node": "v22.23.1",
+  "browser": "Chromium 141.0.7390.37",
+  "host": "runtime/web/server.cjs (public runtime 1.6.0)",
+  "run": "capture",
+  "profile": "sandbox",
+  "account": "fernshelf-maya (Maya Fenwick, synthetic)",
+  "clock": "2026-11-20T09:00:00-08:00",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 720
+    },
+    "phone": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "time_zone": "America/Los_Angeles",
+  "frames": [
+    {
+      "workflow": "W1",
+      "n": 1,
+      "file": "w1-01-photos-grid.png",
+      "bytes": 166693,
+      "viewport": "desktop",
+      "region": "viewport",
+      "stage": "start",
+      "action": "Open the access link printed by the Host.",
+      "expected": "Photos grid by month, newest first, with the drawn stand-in images.",
+      "observed": "357 tiles shown; page title \"Fernshelf · PALE\".",
+      "mcp": {
+        "call": "fernshelf.items.search {\"archived\":false}",
+        "result": "357 rows (stacks collapsed; archived items are under Archive)",
+        "version": "1.0"
+      },
+      "test": "web-browser.cjs \"Page opens from the access link and shows the photo grid with authorised thumbnails\""
+    },
+    {
+      "workflow": "W1",
+      "n": 2,
+      "file": "w1-02-search-hall.png",
+      "bytes": 27343,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "action",
+      "action": "Type \"hall\" in Search captions.",
+      "expected": "Only photos whose caption contains \"hall\" (items.search text).",
+      "observed": "1 tile(s): \"Everyone on the hall steps\" (a stack of 3, shown by its cover).",
+      "mcp": {
+        "call": "fernshelf.items.search {\"text\":\"hall\"}",
+        "result": "1 rows",
+        "version": "1.0"
+      },
+      "test": "web-smoke.cjs reads for Photos"
+    },
+    {
+      "workflow": "W1",
+      "n": 3,
+      "file": "w1-03-photo-who-can-see.png",
+      "bytes": 17474,
+      "viewport": "desktop",
+      "region": "element",
+      "stage": "outcome",
+      "action": "Click the photo \"Everyone on the hall steps\".",
+      "expected": "Photo panel with the image, details and \"who can see this\": Reunion 2026, its joined members, the link and Kofi's view and save.",
+      "observed": "Panel lists \"Visible now to Kofi Darrow, Omar Sandquist, Ruth Fenwick, Theo Fenwick and anyone with a link. / Reunion 2026 / joined: Kofi Darrow, Omar Sandquist, Ruth Fenwick, Theo Fenwick · 1 active link\".",
+      "mcp": {
+        "call": "fernshelf.exposure.get {\"id\":\"it-2611-0931\"}",
+        "result": "visible_to 4 people, albums Reunion 2026, 1 recorded view(s)",
+        "version": "1.0"
+      },
+      "test": "web-browser.cjs \"Before answering, the photo panel shows where the item is visible (exposure.get)\""
+    },
+    {
+      "workflow": "W1",
+      "n": 4,
+      "file": "w1-04-storage.png",
+      "bytes": 57992,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Open Storage.",
+      "expected": "Plan, used and free space, trash, duplicates, largest items.",
+      "observed": "\"13.95 GB of 15.00 GB used · 1.05 GB free\".",
+      "mcp": {
+        "call": "fernshelf.storage.summary {}",
+        "result": "used_bytes 13950000000, trash_bytes 410000000",
+        "version": "1.0"
+      },
+      "test": "web-smoke.cjs reads for Storage"
+    },
+    {
+      "workflow": "W2",
+      "n": 1,
+      "file": "w2-01-edit-details-form.png",
+      "bytes": 35946,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "action",
+      "action": "On \"Mum and me\", click Edit details and change the caption.",
+      "expected": "The form shows only caption, favourite, archived and corrected capture time.",
+      "observed": "Form open with the new caption typed.",
+      "mcp": {
+        "call": "fernshelf.items.get {\"id\":\"it-2611-0943\"}",
+        "result": "caption \"Mum and me\" (unchanged until saved)",
+        "version": "1.0"
+      },
+      "test": "web-browser.cjs \"Edit details: the dialog shows exactly patch.caption, patch.favorite, patch.archived, patch.taken_at\""
+    },
+    {
+      "workflow": "W2",
+      "n": 2,
+      "file": "w2-02-edit-details-saved.png",
+      "bytes": 62822,
+      "viewport": "desktop",
+      "region": "panel",
+      "stage": "outcome",
+      "action": "Click Save.",
+      "expected": "The dialog closes and the panel shows the new caption.",
+      "observed": "Panel title \"Mum and me on the hall steps\".",
+      "mcp": {
+        "call": "fernshelf.items.get {\"id\":\"it-2611-0943\"}",
+        "result": "caption \"Mum and me on the hall steps\"",
+        "version": "1.1"
+      },
+      "test": "web-browser.cjs \"Hostile caption is stored as text and shown as text, never executed\" (same form)"
+    },
+    {
+      "workflow": "W2",
+      "n": 3,
+      "file": "w2-03-edit-details-cancelled.png",
+      "bytes": 62894,
+      "viewport": "desktop",
+      "region": "panel",
+      "stage": "outcome",
+      "action": "Open Edit details again, type another caption, click Cancel.",
+      "expected": "Nothing is written; the caption and version stay.",
+      "observed": "Panel still shows \"Mum and me on the hall steps\".",
+      "mcp": {
+        "call": "fernshelf.items.get {\"id\":\"it-2611-0943\"}",
+        "result": "caption unchanged",
+        "version": "1.1 (same as before)"
+      },
+      "test": "capture only"
+    },
+    {
+      "workflow": "W2",
+      "n": 4,
+      "file": "w2-04-edit-details-invalid.png",
+      "bytes": 39495,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "outcome",
+      "action": "Set the corrected capture time to 19 Nov 2026 12:00, after the photo was backed up (14 Nov), and save.",
+      "expected": "Refused (the App answers invalid_arguments); the form says so in the page's words and stays open.",
+      "observed": "\"That change could not be made as entered. Check the fields and try again.\".",
+      "mcp": {
+        "call": "fernshelf.items.get {\"id\":\"it-2611-0943\"}",
+        "result": "taken_at 2026-11-14T17:50:00-08:00 (unchanged)",
+        "version": "1.1 (unchanged)"
+      },
+      "test": "w2-organising.test.cjs (corrected taken_at later than added_at is invalid_arguments)"
+    },
+    {
+      "workflow": "W2",
+      "n": 5,
+      "file": "w2-05-new-album-form.png",
+      "bytes": 18950,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "action",
+      "action": "In Albums, click New album and type a title.",
+      "expected": "A form with the title only.",
+      "observed": "Form with \"Coast weekend\".",
+      "mcp": {
+        "call": "fernshelf.albums.list {}",
+        "result": "12 albums",
+        "version": "1.1"
+      },
+      "test": "web-browser.cjs \"New album: the dialog shows exactly title\""
+    },
+    {
+      "workflow": "W2",
+      "n": 6,
+      "file": "w2-06-new-album-created.png",
+      "bytes": 22656,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Click Save.",
+      "expected": "The new, empty, private album opens.",
+      "observed": "Album page \"Coast weekend\", no items.",
+      "mcp": {
+        "call": "fernshelf.albums.get {\"id\":\"<new album>\"}",
+        "result": "state private, 0 items",
+        "version": "1.2"
+      },
+      "test": "web-browser.cjs \"After creating, the page opens the new album\""
+    },
+    {
+      "workflow": "W2",
+      "n": 7,
+      "file": "w2-07-add-items-picker.png",
+      "bytes": 66789,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "action",
+      "action": "Click Add items, filter the picker by \"Wrenfield\" and pick three photos.",
+      "expected": "A picker of the library narrowed to that place; picked photos are marked.",
+      "observed": "3 photos marked.",
+      "mcp": {
+        "call": "fernshelf.albums.get {\"id\":\"<new album>\"}",
+        "result": "0 items (not yet saved)",
+        "version": "1.2"
+      },
+      "test": "web-browser.cjs \"Add items: albums.update add_ids committed in order\""
+    },
+    {
+      "workflow": "W2",
+      "n": 8,
+      "file": "w2-08-add-items-done.png",
+      "bytes": 55914,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Click Add.",
+      "expected": "The album shows the three photos in the order picked.",
+      "observed": "3 photos in the album.",
+      "mcp": {
+        "call": "fernshelf.albums.get {\"id\":\"<new album>\"}",
+        "result": "3 items, in the picked order",
+        "version": "1.3"
+      },
+      "test": "web-browser.cjs \"Add items: albums.update add_ids committed in order\""
+    },
+    {
+      "workflow": "W2",
+      "n": 9,
+      "file": "w2-09-rename-form.png",
+      "bytes": 17375,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "action",
+      "action": "Click Rename and type a new title.",
+      "expected": "A form with the current title, the only field.",
+      "observed": "Form with \"Coast weekend 2026\".",
+      "mcp": {
+        "call": "fernshelf.albums.get",
+        "result": "title \"Coast weekend\"",
+        "version": "1.3"
+      },
+      "test": "web-browser.cjs \"The Rename form shows the title as it is now\""
+    },
+    {
+      "workflow": "W2",
+      "n": 10,
+      "file": "w2-10-rename-saved.png",
+      "bytes": 57054,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Click Save.",
+      "expected": "The album page shows the new title.",
+      "observed": "Title \"Coast weekend 2026\".",
+      "mcp": {
+        "call": "fernshelf.albums.get",
+        "result": "title \"Coast weekend 2026\"",
+        "version": "1.4"
+      },
+      "test": "web-smoke.cjs W2 rename"
+    },
+    {
+      "workflow": "W2",
+      "n": 11,
+      "file": "w2-11-rename-stale.png",
+      "bytes": 20515,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "outcome",
+      "action": "Open Rename; meanwhile a separate MCP connection renames the album; type \"Coast trip\" and save.",
+      "expected": "Refused as stale_version; the form says the library changed; the other rename stays.",
+      "observed": "\"Something changed in the library since this was opened. Close it, refresh and try again.\".",
+      "mcp": {
+        "call": "fernshelf.albums.update (separate connection), then fernshelf.albums.get",
+        "result": "title \"Coast weekend (renamed elsewhere)\"",
+        "version": "1.5"
+      },
+      "test": "web-browser.cjs \"A form opened before a change elsewhere shows the conflict, and the change elsewhere stays\""
+    },
+    {
+      "workflow": "W2",
+      "n": 12,
+      "file": "w2-12-refresh-shows-other-change.png",
+      "bytes": 58181,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Cancel, then click Refresh.",
+      "expected": "The page shows the title set elsewhere.",
+      "observed": "Title \"Coast weekend (renamed elsewhere)\".",
+      "mcp": {
+        "call": "fernshelf.albums.get",
+        "result": "title \"Coast weekend (renamed elsewhere)\"",
+        "version": "1.5"
+      },
+      "test": "web-browser.cjs \"Refresh shows the change made elsewhere\""
+    },
+    {
+      "workflow": "W2",
+      "n": 13,
+      "file": "w2-13-remove-from-album.png",
+      "bytes": 47056,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Open the third photo in the album and click Remove from \"Coast weekend (renamed elsewhere)\".",
+      "expected": "The album keeps two photos; the photo stays in the library.",
+      "observed": "2 photos in the album.",
+      "mcp": {
+        "call": "fernshelf.albums.get; fernshelf.items.get",
+        "result": "2 items; removed photo state active",
+        "version": "1.6"
+      },
+      "test": "web-smoke.cjs W2; w2-organising.test.cjs T07 (remove_ids)"
+    },
+    {
+      "workflow": "W3",
+      "n": 1,
+      "file": "w3-01-invite-form.png",
+      "bytes": 31812,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "action",
+      "action": "On the album, click Invite; choose Iris and Contributor.",
+      "expected": "A form with person and role only.",
+      "observed": "Iris, Contributor chosen.",
+      "mcp": {
+        "call": "fernshelf.albums.get",
+        "result": "0 members",
+        "version": "1.6"
+      },
+      "test": "web-browser.cjs \"Invite: the dialog shows exactly person_id, role\""
+    },
+    {
+      "workflow": "W3",
+      "n": 2,
+      "file": "w3-02-invited.png",
+      "bytes": 51281,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Click Invite.",
+      "expected": "Iris is listed as invited; the album is shared.",
+      "observed": "\"MEMBERS / IV / Iris Valcourt / Contributor · Invited Nov 20, 2026\".",
+      "mcp": {
+        "call": "fernshelf.albums.get",
+        "result": "state shared; Iris invited as contributor",
+        "version": "1.7"
+      },
+      "test": "web-browser.cjs \"Invite: Iris invited as contributor\""
+    },
+    {
+      "workflow": "W3",
+      "n": 3,
+      "file": "w3-03-joined-after-refresh.png",
+      "bytes": 51264,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Infra applies a member.changed join for Iris (env.apply_event on the separate Infra connection); click Refresh.",
+      "expected": "Iris is listed as joined.",
+      "observed": "Iris shown as Joined.",
+      "mcp": {
+        "call": "env.apply_event ev-capture-join, then fernshelf.albums.get",
+        "result": "Iris joined",
+        "version": "1.8"
+      },
+      "test": "web-browser.cjs \"Refresh shows a removal request that arrived as an event\" (same mechanism)"
+    },
+    {
+      "workflow": "W3",
+      "n": 4,
+      "file": "w3-04-create-link-form.png",
+      "bytes": 29398,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "action",
+      "action": "Click Create link.",
+      "expected": "A form with an optional expiry only.",
+      "observed": "Form open, expiry empty.",
+      "mcp": {
+        "call": "fernshelf.albums.get",
+        "result": "0 links",
+        "version": "1.8"
+      },
+      "test": "web-browser.cjs \"Create link: the dialog shows exactly expires_at\""
+    },
+    {
+      "workflow": "W3",
+      "n": 5,
+      "file": "w3-05-link-active.png",
+      "bytes": 55708,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Click Create link with no expiry.",
+      "expected": "An active link is listed by state and creation date, never by ID.",
+      "observed": "Active link listed.",
+      "mcp": {
+        "call": "fernshelf.albums.get",
+        "result": "link state active, expires_at none",
+        "version": "1.9"
+      },
+      "test": "web-browser.cjs \"Create link: an active link without expiry\""
+    },
+    {
+      "workflow": "W3",
+      "n": 6,
+      "file": "w3-06-revoke-confirm.png",
+      "bytes": 21914,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "intermediate",
+      "action": "Click Revoke on the link.",
+      "expected": "A confirmation; nothing is revoked yet.",
+      "observed": "Confirmation open.",
+      "mcp": {
+        "call": "fernshelf.albums.get",
+        "result": "link still active",
+        "version": "1.9"
+      },
+      "test": "web-browser.cjs \"Revoke link: link revoked\""
+    },
+    {
+      "workflow": "W3",
+      "n": 7,
+      "file": "w3-07-link-revoked.png",
+      "bytes": 55990,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Click Revoke link.",
+      "expected": "The link is listed as revoked.",
+      "observed": "Link shown as revoked.",
+      "mcp": {
+        "call": "fernshelf.albums.get",
+        "result": "link state revoked",
+        "version": "1.10"
+      },
+      "test": "web-browser.cjs \"Revoke link: link revoked\""
+    },
+    {
+      "workflow": "W3",
+      "n": 8,
+      "file": "w3-08-change-role-form.png",
+      "bytes": 21304,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "action",
+      "action": "On Reunion 2026, click Change role for Kofi and choose Contributor.",
+      "expected": "A form with the role only.",
+      "observed": "Contributor chosen.",
+      "mcp": {
+        "call": "fernshelf.albums.get {\"id\":\"al-reunion-2026\"}",
+        "result": "Kofi viewer",
+        "version": "1.10"
+      },
+      "test": "web-browser.cjs \"Change role: the dialog shows exactly role\""
+    },
+    {
+      "workflow": "W3",
+      "n": 9,
+      "file": "w3-09-role-changed.png",
+      "bytes": 116313,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Click Save.",
+      "expected": "Kofi is listed as a contributor.",
+      "observed": "\"KD / Kofi Darrow / Contributor · Joined Nov 14, 2026 / Change role / Remove\".",
+      "mcp": {
+        "call": "fernshelf.albums.get {\"id\":\"al-reunion-2026\"}",
+        "result": "Kofi contributor",
+        "version": "1.11"
+      },
+      "test": "web-browser.cjs \"Change role: Kofi is a contributor\""
+    },
+    {
+      "workflow": "W3",
+      "n": 10,
+      "file": "w3-10-contribution-dialog.png",
+      "bytes": 56198,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "intermediate",
+      "action": "Click a photo Omar added.",
+      "expected": "Its details, who added it, and Save to my library.",
+      "observed": "Dialog \"Shared by Omar Sandquist\".",
+      "mcp": {
+        "call": "fernshelf.items.search {\"source\":\"saved_from_share\"}",
+        "result": "0 saved copies",
+        "version": "1.11"
+      },
+      "test": "web-browser.cjs \"Save to my library: albums.save_item\""
+    },
+    {
+      "workflow": "W3",
+      "n": 11,
+      "file": "w3-11-contribution-saved.png",
+      "bytes": 30129,
+      "viewport": "desktop",
+      "region": "panel",
+      "stage": "outcome",
+      "action": "Click Save to my library, then open the copy in Photos.",
+      "expected": "A copy in my library, source \"saved from a shared album\".",
+      "observed": "Panel for the copy: \"No caption\".",
+      "mcp": {
+        "call": "fernshelf.items.search {\"source\":\"saved_from_share\"}",
+        "result": "1 saved copies (+1)",
+        "version": "1.12"
+      },
+      "test": "web-browser.cjs \"Save to my library: albums.save_item\""
+    },
+    {
+      "workflow": "W3",
+      "n": 12,
+      "file": "w3-12-delete-refused.png",
+      "bytes": 27679,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "outcome",
+      "action": "Click Delete album on Reunion 2026 and confirm without ticking \"Also end access\".",
+      "expected": "Refused (confirm_required); the dialog says the album is still shared and what to tick; nothing is deleted.",
+      "observed": "\"“Reunion 2026” is still shared. Tick “Also end access” to delete it and end that access, or cancel.\".",
+      "mcp": {
+        "call": "fernshelf.albums.get {\"id\":\"al-reunion-2026\"}",
+        "result": "deleted_at null, state shared",
+        "version": "1.12"
+      },
+      "test": "web-browser.cjs \"A refused delete (confirm_required) says what to do and changes nothing\""
+    },
+    {
+      "workflow": "W3",
+      "n": 13,
+      "file": "w3-13-delete-with-end-access.png",
+      "bytes": 24509,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "intermediate",
+      "action": "On the album Iris joined, click Delete album and tick \"Also end access\".",
+      "expected": "The confirmation names the joined member it ends access for.",
+      "observed": "\"Delete “Coast weekend (renamed elsewhere)”? / The album goes away; its items stay in your library. / Also end access for 1 joined member and 0 active links.\".",
+      "mcp": {
+        "call": "fernshelf.albums.get",
+        "result": "Iris joined",
+        "version": "1.12"
+      },
+      "test": "edge-cases.test.cjs \"albums.delete asks for confirm only while…\""
+    },
+    {
+      "workflow": "W3",
+      "n": 14,
+      "file": "w3-14-album-deleted.png",
+      "bytes": 117280,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Click Delete album.",
+      "expected": "The album is gone from Albums; its photos stay in the library; Iris no longer sees them.",
+      "observed": "Albums view; the deleted album is not listed.",
+      "mcp": {
+        "call": "fernshelf.albums.get; fernshelf.exposure.get",
+        "result": "deleted_at 2026-11-20T09:20:00-08:00; it-2611-0942 visible_to []",
+        "version": "1.13"
+      },
+      "test": "w2-organising.test.cjs T07; edge-cases.test.cjs \"albums.delete revokes only the links active at that time\""
+    },
+    {
+      "workflow": "W4",
+      "n": 1,
+      "file": "w4-01-requests.png",
+      "bytes": 148460,
+      "viewport": "desktop",
+      "region": "viewport",
+      "stage": "start",
+      "action": "Open Requests.",
+      "expected": "Pending requests first, each with requester, message, scope and the named photos.",
+      "observed": "8 request cards.",
+      "mcp": {
+        "call": "fernshelf.removals.list {\"state\":\"pending\"}",
+        "result": "2 pending",
+        "version": "1.13"
+      },
+      "test": "web-smoke.cjs \"Requests (2 pending)\""
+    },
+    {
+      "workflow": "W4",
+      "n": 2,
+      "file": "w4-02-where-visible.png",
+      "bytes": 18260,
+      "viewport": "desktop",
+      "region": "element",
+      "stage": "intermediate",
+      "action": "Click the photo Kofi's request names.",
+      "expected": "The panel shows where it is visible before answering.",
+      "observed": "Who can see this lists Reunion 2026.",
+      "mcp": {
+        "call": "fernshelf.exposure.get",
+        "result": "albums Reunion 2026; visible_to 4",
+        "version": "1.13"
+      },
+      "test": "web-browser.cjs \"Before answering, the photo panel shows where the item is visible (exposure.get)\""
+    },
+    {
+      "workflow": "W4",
+      "n": 3,
+      "file": "w4-03-honour-form.png",
+      "bytes": 36608,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "action",
+      "action": "Click Honour… on Kofi's request and write a note.",
+      "expected": "A form with the note only.",
+      "observed": "Note typed.",
+      "mcp": {
+        "call": "fernshelf.removals.list",
+        "result": "pending",
+        "version": "1.13"
+      },
+      "test": "web-browser.cjs \"Honour: the dialog shows exactly note\""
+    },
+    {
+      "workflow": "W4",
+      "n": 4,
+      "file": "w4-04-honour-result.png",
+      "bytes": 25273,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "intermediate",
+      "action": "Click Honour.",
+      "expected": "A summary of what was taken down and the views and saves that cannot be called back.",
+      "observed": "\"Request honoured / TAKEN DOWN / The old team photo, redone — removed from 1 album and 1 link\".",
+      "mcp": {
+        "call": "fernshelf.removals.list {\"state\":\"honored\"}",
+        "result": "state honored, cleared 1 album(s), note \"Taken out of the reunion album.\"",
+        "version": "1.14"
+      },
+      "test": "web-browser.cjs \"Honour shows what was taken down and what was already seen\""
+    },
+    {
+      "workflow": "W4",
+      "n": 5,
+      "file": "w4-05-honoured-card.png",
+      "bytes": 26884,
+      "viewport": "desktop",
+      "region": "element",
+      "stage": "outcome",
+      "action": "Close the summary.",
+      "expected": "The request is shown as honoured with the note and the albums it was taken down from.",
+      "observed": "\"Kofi Darrow / Honoured\".",
+      "mcp": {
+        "call": "fernshelf.items.get",
+        "result": "removal_history rows 1",
+        "version": "1.14"
+      },
+      "test": "web-browser.cjs \"Honour: request honoured with the note\""
+    },
+    {
+      "workflow": "W4",
+      "n": 6,
+      "file": "w4-06-decline-form.png",
+      "bytes": 35708,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "action",
+      "action": "Click Decline… on Lena's request and write a note.",
+      "expected": "A form with the note only.",
+      "observed": "Note typed.",
+      "mcp": {
+        "call": "fernshelf.removals.list",
+        "result": "pending",
+        "version": "1.14"
+      },
+      "test": "web-browser.cjs \"Decline: the dialog shows exactly note\""
+    },
+    {
+      "workflow": "W4",
+      "n": 7,
+      "file": "w4-07-declined.png",
+      "bytes": 26263,
+      "viewport": "desktop",
+      "region": "element",
+      "stage": "outcome",
+      "action": "Click Decline.",
+      "expected": "The request is shown as declined with the note; no album changes.",
+      "observed": "\"Lena Corvi / Declined\".",
+      "mcp": {
+        "call": "fernshelf.removals.list {\"state\":\"declined\"}",
+        "result": "state declined",
+        "version": "1.15"
+      },
+      "test": "web-browser.cjs \"Decline: request declined\""
+    },
+    {
+      "workflow": "W4",
+      "n": 8,
+      "file": "w4-08-re-share-chooser.png",
+      "bytes": 56170,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "action",
+      "action": "On the honoured photo, click Add to album.",
+      "expected": "A chooser of my albums.",
+      "observed": "Chooser open.",
+      "mcp": {
+        "call": "fernshelf.albums.list",
+        "result": "12 albums",
+        "version": "1.15"
+      },
+      "test": "web-browser.cjs \"Re-sharing an honoured item shows the removal_honored warning\""
+    },
+    {
+      "workflow": "W4",
+      "n": 9,
+      "file": "w4-09-re-share-warning.png",
+      "bytes": 22663,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "outcome",
+      "action": "Choose Family 2026, which is shared.",
+      "expected": "Accepted, with a notice naming Kofi, the photo and when his request was honoured.",
+      "observed": "\"Saved — please note / SHOWN AGAIN TO PEOPLE WHO ASKED FOR REMOVAL\".",
+      "mcp": {
+        "call": "fernshelf.albums.get {\"id\":\"al-family-2026\"}",
+        "result": "contains the photo: true",
+        "version": "1.16"
+      },
+      "test": "web-browser.cjs \"Re-sharing an honoured item shows the removal_honored warning\""
+    },
+    {
+      "workflow": "W4",
+      "n": 10,
+      "file": "w4-10-request-arrives.png",
+      "bytes": 66140,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Infra applies Dana's removal.requested (examples/scenario.json); click Refresh.",
+      "expected": "The new request is listed first and counted in the navigation.",
+      "observed": "\"Requests · 1 new\".",
+      "mcp": {
+        "call": "env.apply_event ev-fs-440, then fernshelf.removals.list {\"state\":\"pending\"}",
+        "result": "1 pending",
+        "version": "1.17"
+      },
+      "test": "web-browser.cjs \"Refresh shows a removal request that arrived as an event\""
+    },
+    {
+      "workflow": "W5",
+      "n": 1,
+      "file": "w5-01-stack-versions.png",
+      "bytes": 15125,
+      "viewport": "desktop",
+      "region": "element",
+      "stage": "start",
+      "action": "Open a photo that has edited versions.",
+      "expected": "The panel lists every version with its time and size and marks the cover.",
+      "observed": "\"Version 1 · Nov 14, 2026, 5:45:00 PM · 5.2 MB / Make cover / Open / Version 2 · Nov 14, 2026, 5:45:00 PM · 5.3 MB\".",
+      "mcp": {
+        "call": "fernshelf.items.get {\"id\":\"it-2611-0942\"}",
+        "result": "stack of 3, cover is version 3",
+        "version": "1.17"
+      },
+      "test": "web-browser.cjs \"Make cover: the stack cover changes\""
+    },
+    {
+      "workflow": "W5",
+      "n": 2,
+      "file": "w5-02-cover-changed.png",
+      "bytes": 15314,
+      "viewport": "desktop",
+      "region": "element",
+      "stage": "outcome",
+      "action": "Click Make cover on another version, then open the stack again from the grid.",
+      "expected": "That version becomes the cover and the grid shows the stack by it; nothing is deleted.",
+      "observed": "\"Version 1 (this one) · Nov 14, 2026, 5:45:00 PM · 5.2 MB / Cover / Version 2 · Nov 14, 2026, 5:45:00 PM · 5.3 MB / Make cover\".",
+      "mcp": {
+        "call": "fernshelf.items.get {\"id\":\"it-2611-0942\"}",
+        "result": "cover is now version 1 of 3",
+        "version": "1.18"
+      },
+      "test": "web-browser.cjs \"Make cover: the stack cover changes\"; w2-organising.test.cjs T06 covers"
+    },
+    {
+      "workflow": "W5",
+      "n": 3,
+      "file": "w5-03-before-trash.png",
+      "bytes": 64427,
+      "viewport": "desktop",
+      "region": "panel",
+      "stage": "start",
+      "action": "Open a photo.",
+      "expected": "The panel offers Move to trash.",
+      "observed": "Panel for \"Gift for Mum: the blue scarf\".",
+      "mcp": {
+        "call": "fernshelf.items.get",
+        "result": "state active",
+        "version": "1.18"
+      },
+      "test": "web-browser.cjs \"Move to trash: item trashed\""
+    },
+    {
+      "workflow": "W5",
+      "n": 4,
+      "file": "w5-04-in-trash.png",
+      "bytes": 100967,
+      "viewport": "desktop",
+      "region": "viewport",
+      "stage": "outcome",
+      "action": "Click Move to trash, then open Trash.",
+      "expected": "The photo is in the trash and says when it is deleted for good.",
+      "observed": "\"In the trash since Nov 20, 2026, 7:20 PM. Deleted for good on Dec 20, 2026, 7:20 PM.\".",
+      "mcp": {
+        "call": "fernshelf.items.get",
+        "result": "state trashed, purge_at 2026-12-20T19:20:00-08:00",
+        "version": "1.19"
+      },
+      "test": "web-browser.cjs \"Trashed item shows when it will be deleted for good\""
+    },
+    {
+      "workflow": "W5",
+      "n": 5,
+      "file": "w5-05-restored.png",
+      "bytes": 30963,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Click Restore.",
+      "expected": "The photo leaves the trash and is back in the 1 album(s) it was in.",
+      "observed": "Trash no longer lists it.",
+      "mcp": {
+        "call": "fernshelf.items.get",
+        "result": "state active, in 1 album(s)",
+        "version": "1.20"
+      },
+      "test": "web-browser.cjs \"Restore: item back in its albums\""
+    },
+    {
+      "workflow": "W5",
+      "n": 6,
+      "file": "w5-06-delete-forever-confirm.png",
+      "bytes": 17294,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "intermediate",
+      "action": "In Trash, click Select, pick two items, click Delete forever.",
+      "expected": "A confirmation that this cannot be undone.",
+      "observed": "\"Delete forever? / 2 items will be deleted for good and their space freed. This cannot be undone.\".",
+      "mcp": {
+        "call": "fernshelf.items.get (both)",
+        "result": "both trashed",
+        "version": "1.20"
+      },
+      "test": "web-browser.cjs \"Delete forever: items.purge with confirm, and the freed space is shown\""
+    },
+    {
+      "workflow": "W5",
+      "n": 7,
+      "file": "w5-07-freed.png",
+      "bytes": 12443,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "outcome",
+      "action": "Click Delete forever.",
+      "expected": "The freed space is shown.",
+      "observed": "\"10.1 MB freed\".",
+      "mcp": {
+        "call": "fernshelf.items.get (both)",
+        "result": "both purged",
+        "version": "1.21"
+      },
+      "test": "web-browser.cjs \"Delete forever: items.purge with confirm, and the freed space is shown\""
+    },
+    {
+      "workflow": "W5",
+      "n": 8,
+      "file": "w5-08-delete-forever-stale.png",
+      "bytes": 21822,
+      "viewport": "desktop",
+      "region": "dialog",
+      "stage": "outcome",
+      "action": "Open Delete forever on another trashed item; meanwhile a separate MCP connection restores it; confirm.",
+      "expected": "Refused as stale_version; the item is not deleted.",
+      "observed": "\"Something changed in the library since this was opened. Close it, refresh and try again.\".",
+      "mcp": {
+        "call": "fernshelf.items.restore (separate connection), then fernshelf.items.get",
+        "result": "state active",
+        "version": "1.22"
+      },
+      "test": "web-browser.cjs \"Delete forever drawn before the item was restored elsewhere: confirming shows the conflict and nothing is written\""
+    },
+    {
+      "workflow": "W5",
+      "n": 9,
+      "file": "w5-09-storage-after.png",
+      "bytes": 58701,
+      "viewport": "desktop",
+      "region": "list",
+      "stage": "outcome",
+      "action": "Open Storage.",
+      "expected": "Used space is lower by the bytes deleted for good.",
+      "observed": "\"13.94 GB of 15.00 GB used · 1.06 GB free\".",
+      "mcp": {
+        "call": "fernshelf.storage.summary",
+        "result": "used_bytes 13943662359 (-6337641 since the start)",
+        "version": "1.22"
+      },
+      "test": "w5-storage.test.cjs T13 (only a purge frees bytes)"
+    },
+    {
+      "workflow": "Reload",
+      "n": 1,
+      "file": "reload-01-requests-after-reload.png",
+      "bytes": 158751,
+      "viewport": "desktop",
+      "region": "viewport",
+      "stage": "outcome",
+      "action": "Reload the browser tab.",
+      "expected": "The open view and every committed answer are read back.",
+      "observed": "9 request cards; the honoured and declined answers are shown.",
+      "mcp": {
+        "call": "fernshelf.removals.list",
+        "result": "honored, honored, declined, withdrawn, honored, declined, honored, declined, pending",
+        "version": "1.22"
+      },
+      "test": "web-browser.cjs \"Reload: committed caption and favourite are read back\""
+    },
+    {
+      "workflow": "Reload",
+      "n": 2,
+      "file": "reload-02-caption-after-reload.png",
+      "bytes": 62822,
+      "viewport": "desktop",
+      "region": "panel",
+      "stage": "outcome",
+      "action": "Open \"Mum and me on the hall steps\" after the reload.",
+      "expected": "The caption saved in W2.",
+      "observed": "Panel title \"Mum and me on the hall steps\".",
+      "mcp": {
+        "call": "fernshelf.items.get",
+        "result": "caption \"Mum and me on the hall steps\"",
+        "version": "1.22"
+      },
+      "test": "web-browser.cjs \"Reload: committed caption and favourite are read back\""
+    },
+    {
+      "workflow": "Phone",
+      "n": 1,
+      "file": "phone-01-photos.png",
+      "bytes": 83149,
+      "viewport": "phone",
+      "region": "viewport",
+      "stage": "start",
+      "action": "Open the page at 390 px.",
+      "expected": "The grid and the whole navigation fit the width.",
+      "observed": "No horizontal overflow: true.",
+      "mcp": null,
+      "test": "web-browser.cjs \"390 px: Photos has no horizontal page overflow\""
+    },
+    {
+      "workflow": "Phone",
+      "n": 2,
+      "file": "phone-02-photo-panel.png",
+      "bytes": 98947,
+      "viewport": "phone",
+      "region": "viewport",
+      "stage": "outcome",
+      "action": "Tap a photo.",
+      "expected": "The page scrolls to its panel.",
+      "observed": "Panel visible: true.",
+      "mcp": null,
+      "test": "web-browser.cjs \"390 px: tapping a photo scrolls to its panel\""
+    },
+    {
+      "workflow": "Phone",
+      "n": 3,
+      "file": "phone-03-album.png",
+      "bytes": 56154,
+      "viewport": "phone",
+      "region": "viewport",
+      "stage": "outcome",
+      "action": "Open Albums, then Reunion 2026.",
+      "expected": "The album page fits the width.",
+      "observed": "No horizontal overflow: true.",
+      "mcp": null,
+      "test": "web-browser.cjs \"390 px: album page has no horizontal page overflow\""
+    },
+    {
+      "workflow": "Phone",
+      "n": 4,
+      "file": "phone-04-requests.png",
+      "bytes": 69473,
+      "viewport": "phone",
+      "region": "viewport",
+      "stage": "outcome",
+      "action": "Open Requests.",
+      "expected": "Request cards with their answer buttons fit the width.",
+      "observed": "9 request cards.",
+      "mcp": null,
+      "test": "web-browser.cjs \"390 px: Requests has no horizontal page overflow\""
+    },
+    {
+      "workflow": "Denied",
+      "n": 1,
+      "file": "denied-01-read-only-profile.png",
+      "bytes": 140111,
+      "viewport": "phone",
+      "region": "viewport",
+      "stage": "outcome",
+      "action": "Open a run started with --profile scenario (reads only); open Requests; send a write directly from the page's session.",
+      "expected": "No Honour or Decline buttons; the forced write is refused by the Host.",
+      "observed": "0 answer buttons; forced write answered HTTP 403.",
+      "mcp": {
+        "call": "fernshelf.removals.list {\"state\":\"pending\"} on that run, before and after",
+        "result": "2 pending before, 2 after",
+        "version": "1.0 → 1.0"
+      },
+      "test": "web-browser.cjs \"Restricted profile: requests are readable but cannot be answered\"; \"a forced write from the page is refused by the Host\""
+    }
+  ],
+  "passed": true,
+  "javascript_errors": [],
+  "total_bytes": 2994820
+}

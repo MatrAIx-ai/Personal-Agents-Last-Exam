@@ -1,6 +1,6 @@
 # Fernshelf 1.0.0 validation
 
-Checked on 25 November 2026 (America/Los_Angeles) against base `main` commit `a4bce02`; every command below was run on that day on the final package. Environment: Node.js v22.23.1 and v18.20.8 (Linux), public runtime 1.6.0, Core API 1.2.0, contribution revision 0.4.0, Mail 1.3.0; for the browser test, the repository's pinned Playwright 1.56.1 with Chromium 141.0.7390.37 (headless). Scope: the approved Environment proposal [`proposals/environment/fernshelf.md`](../../proposals/environment/fernshelf.md). All data is synthetic. No credentials or model API were used; the only network use was installing Playwright and Chromium for the browser test.
+Checked on 25 November 2026 (America/Los_Angeles) against base `main` commit `a4bce02`; every command below was run on that day on the final package. Environment: Node.js v22.23.1 and v18.20.8 (Linux), public runtime 1.6.0, Core API 1.2.0, contribution revision 0.4.0, Mail 1.3.0; for the browser test, the repository's pinned Playwright 1.56.1 with Chromium 141.0.7390.37 (headless). Scope: the approved Environment proposal [`proposals/environment/fernshelf.md`](../../proposals/environment/fernshelf.md). All data is synthetic. No credentials or model API were used; the only network use was installing Playwright and Chromium for the browser test and reading the public Google Photos Help and Immich documentation pages cited in [`evidence/README.md`](evidence/README.md).
 
 **The web page was added after plan approval.** The approved plan said MCP-only; the maintainers later asked every Environment for an App-owned page served by the shared Web Host ([comment on #111](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/111#issuecomment-7123353250)). The page changed no business schema, tool, event, seed format or `src/` behaviour. **The seeded history now starts on 2025-01-01**, also at the maintainers' later request to every Environment ([comment on #111](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/111#issuecomment-7122958570)); see the deviations below.
 
@@ -10,7 +10,7 @@ Checked on 25 November 2026 (America/Los_Angeles) against base `main` commit `a4
 
 | Evidence | Command | Result |
 | --- | --- | --- |
-| App-only business tests | `cd apps/fernshelf && npm test` | 44 tests, 44 passed, 0 failed (about 10 s on each Node version at load average 2.5–4) |
+| App-only business tests | `cd apps/fernshelf && npm test` | 45 tests, 45 passed, 0 failed (about 10 s on each Node version at load average 2.5–4); the 45th keeps `evidence/coverage/report.*` equal to the fixture |
 | Walkthrough | `npm run example` | Iris joins an album made in the run through `album_match` and saves a photo through its link. Dana's request is honoured for Reunion 2026 only (Omar's photo `not_removable`). The result lists Kofi's earlier view and save. A later re-share returns one `removal_honored` warning |
 | Generated contracts | `npm run contracts:check` | `tools.json` and the seed, events and state schemas match `scripts/build-contracts.cjs`; the published seed schema has its definitions inlined (no `$ref`), and `tests/schema-inline.test.cjs` shows it means the same as the definitions form |
 | Reference fixture | `node scripts/build-reference-fixture.cjs --check` | `fixtures/reference.json`, `assets/*.png`, the catalogue and the dataset counts and sources match the builder, byte for byte on both Node versions |
@@ -26,9 +26,12 @@ Checked on 25 November 2026 (America/Los_Angeles) against base `main` commit `a4
 | Web page on the shared Host | `cd apps/fernshelf && npm run test:web` (`tests/web-smoke.cjs`, no npm dependency) | 14 tests (2 top-level, 12 subtests), 14 passed |
 | Web page in a browser | `cd apps/fernshelf && npm run test:browser -- --out DIR` (needs `npm ci && npx playwright install chromium` at the root) | 145 checks passed, no JavaScript errors, 21 screenshots (see "Web page" below); 3–4 minutes at load average 1–3 |
 | Repository Web Host tests | `npm run test:web` | 4/4 passed |
+| Dataset coverage | `npm run coverage:check`; `npm run coverage:query` | the committed report matches the fixture, byte-identical on both Node versions (2,399 records, 252 distinct dates, 23 of 24 months); every counted record family is read back through the App's tools on the public runtime (11 of 11) |
+| Dependency demonstrations | `npm run evidence:dependencies` | 17 Mail checks and 9 resource-access checks passed; transcripts in `evidence/dependencies/` |
+| Workflow screenshot sequences | `npm run evidence:capture` (same needs as the browser test) | 57 frames in `evidence/gui/`, each step confirmed through MCP, no JavaScript errors, no raw ID or Agent wording in any frame |
 | Node 18 and Node 22 | every command in this table on v18.20.8 and on v22.23.1 | all passed on both (counts as above on each) |
-| Isolated package | a copy of `apps/fernshelf` alone: `npm test`, `npm run example`; then `scripts/real-mcp.cjs --runtime DIR` and `scripts/mail-flow.cjs --runtime DIR --mail DIR` | 44/44; example passed; 60/60; 25/25. Without `--runtime` the scripts stop with a message naming the option |
-| Fresh clone | `git clone` of the branch into an empty directory, then `npm test` in the package and `npm run app:verify -- --app apps/fernshelf` at the root (Node 22) | 44/44; verifier passed (44 checks) with the same package digest as the working checkout |
+| Isolated package | a copy of `apps/fernshelf` alone: `npm test`, `npm run example`; then `scripts/real-mcp.cjs --runtime DIR` and `scripts/mail-flow.cjs --runtime DIR --mail DIR` | 45/45; example passed; 60/60; 25/25. Without `--runtime` the scripts stop with a message naming the option |
+| Fresh clone | `git clone` of the branch into an empty directory, then `npm test` in the package and `npm run app:verify -- --app apps/fernshelf` at the root (Node 22) | 45/45; verifier passed (44 checks) with the same package digest as the working checkout |
 
 ## Web page
 
@@ -151,14 +154,15 @@ Against [docs/review/app-implementation-checklist.md](../../docs/review/app-impl
 | 1.2 Versions, paths, schemas, tools, hooks, events, dependencies | met | loader and verifier; `contracts:check`; contribution declarations derived and checked |
 | 1.3 Reproduce startup and tests from a clean public checkout | met | a fresh clone of the branch, an isolated package copy and the working checkout, on Node 18 and 22 (the fresh clone on 22) |
 | 1.4 Receiving Apps at pinned versions; contracts reused | met | Mail is optional; its 1.3.0 wire schema is reused byte for byte; no Mail state or code is copied |
-| 2.1 App-only tests on real functions, invalid transitions, missing objects, read-only | met | 44 tests |
+| 2.1 App-only tests on real functions, invalid transitions, missing objects, read-only | met | 45 tests |
 | 2.2 Create/read/update/cancel flows and history; failures preserve data | met | Harness: each refusal is decided before any change. Real Core: refusals, a rejected event and a batch |
 | 2.3 Data and media references, bytes and provenance | met (automated); human review pending | catalogue hashes, sizes, PNG dimensions, no duplicates; `contribution/dataset.json` names the hand-written, procedural (seed 20261122), history (seed 20250104) and drawn sources. Whether the stand-ins are adequate is a human call |
 | 2.4 Optional diagnostics | met | `package.test.cjs` |
+| Dataset coverage 2025-01-01 to 2026-12-31 | met, with a stated gap | `evidence/coverage/`: monthly and per-source counts, provenance (all synthetic), hashes, loading through the App's tools. No history after the clock (2026-11-20 09:00); December 2026 holds only scheduled due times |
 | 3.1 Real MCP discovery and calls | met | verifier (44 checks), real MCP (60) |
 | 3.2 Business callers cannot seed, reset, inject or snapshot; backend object, field and attachment authorization | met | Agent `permission_denied` on all 7 `env.*` operations. A policy constraint on `fernshelf.items.get` limits `items.read` to that parent (Core `not_available` for another). A trashed item's file is refused by `resources/read` |
 | 3.3 Seed/reset, separate runs, versions, retries, events, supplied time | met | verifier and real MCP |
-| 3.4 Declared messaging: receiver records, receipts, refusals, duplicates | met | Mail flow |
+| 3.4 Declared messaging: receiver records, receipts, refusals, duplicates | met | Mail flow; `evidence/dependencies/mail.json` adds the transcript and the unknown-outcome, missing-Mail and incompatible-contract cases. Recipient confirmation is not established by any flow |
 | 3.5 Candidate and independently selected base validators | met, with one caveat | the candidate validator and the `a4bce02` validator (from `git archive`) both pass. Both ran locally, not in CI |
 | GUI acceptance | met (automated); human review pending | Requested after plan approval. Runnable delivery on the shared Host; real browser clicks for W2–W5; MCP inspection after each write, reload, an Infra event seen after Refresh; refusals, stale forms and a lost response without false success or double effect; direct forbidden requests refused; image bytes only through `items.read`; hostile text not executed. No user-simulator or model-agent run |
 | 4.1 Every essential workflow has evidence; human review | not met (human) | automated evidence complete. Pending: realism of the library and metadata, adequacy of the stand-in images, notification wording, and that every person and place is fictional |
@@ -217,6 +221,12 @@ Against [docs/review/app-implementation-checklist.md](../../docs/review/app-impl
 
 - `runtime/registrations/fernshelf.json`: the resource registration named by the plan, for Infra review. Remove it to fall back, as described in the README.
 - None for the web page: it, its registry and its tests are inside `apps/fernshelf/`.
+
+## Delivery evidence
+
+The repository's submission evidence contract was merged after this App's plan was approved. The evidence it asks for was added to the package as recorded delivery work, without changing the App: [`evidence/README.md`](evidence/README.md) is the index. It holds the ordered screenshot sequences of W1–W5 with their edit, cancel, invalid, denied and stale cases, each step confirmed through MCP and ending with a reload (`scripts/capture-workflows.cjs`); a comparison with public Google Photos Help and Immich documentation pages, referenced by URL and not copied; transcripts of the Mail and `items.read` dependencies against the real pinned packages (`scripts/dependency-evidence.cjs`); and the dataset coverage report with its loading check (`scripts/coverage-report.cjs`).
+
+Gaps: no reference-product page exists for removal requests (W4); reference images are not redistributed; recipient confirmation of a Mail notice is not part of any flow; the dataset has no history after the fixture clock, so December 2026 holds scheduled due times only; the capture script, like the browser test, runs locally and not in CI.
 
 ## Remaining gaps and dependencies
 

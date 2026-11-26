@@ -96,6 +96,7 @@ Under more load these grow in proportion to the per-call time. No single call ca
 ```sh
 node --test tests/web-smoke.cjs     # from apps/fernshelf; real Host, no npm dependency
 node tests/web-browser.cjs --out DIR # needs the repository's Playwright and Chromium
+node scripts/capture-workflows.cjs   # ordered screenshots of every workflow into ../evidence/gui/ (same needs)
 ```
 
-See [`../VALIDATION.md`](../VALIDATION.md) for results.
+See [`../VALIDATION.md`](../VALIDATION.md) for results and [`../evidence/README.md`](../evidence/README.md) for the workflow sequences and the reference comparison.

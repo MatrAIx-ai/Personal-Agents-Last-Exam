@@ -1,0 +1,675 @@
+{
+  "schema": "fernshelf.dependency.mail.v1",
+  "dependency": "Mail notices (optional, send-only)",
+  "node": "v22.23.1",
+  "revisions": {
+    "fernshelf": "1.0.0",
+    "mail": "1.3.0",
+    "runtime": "1.6.0",
+    "messaging_router": "1.2.0"
+  },
+  "contract": {
+    "channel": "channel.email",
+    "wire_schema": "urn:pale:email-message:2",
+    "payload_schema": "urn:pale:email-payload:1",
+    "event_type": "org.pale.mail.notification.v1",
+    "receiver_operation": "mail.receive_notification (through Core env.apply_event on the Mail instance)",
+    "fernshelf_declaration": "contribution/contribution.json messaging.publishes[0]",
+    "mail_declaration": "examples/apps/mail/contribution/contribution.json messaging.receives[0]",
+    "fernshelf_wire_schema_sha256": "74d5a4b4406b7ac1870dbecc114cae3f8978846a6e9999b46d33b7470598b4f0",
+    "mail_wire_schema_sha256": "74d5a4b4406b7ac1870dbecc114cae3f8978846a6e9999b46d33b7470598b4f0"
+  },
+  "meanings": {
+    "local_commit": "Fernshelf committed the notification and its wire message in its own state when the event was applied.",
+    "receiver_commit": "The router returned committed only after Mail's env.apply_event committed; Mail's env.event_status and mail.get show the record.",
+    "recipient_confirmation": "Not established by this flow: the Mail record is unread and nobody acts on it."
+  },
+  "passed": true,
+  "checks": [
+    "Fernshelf publishes the exact wire schema Mail 1.3.0 receives",
+    "The notification stored its wire message (email notices on)",
+    "Router commits the delivery to the Mail account mail-maya",
+    "Mail holds one new inbox record whose ID is the delivery event ID",
+    "The Mail record carries the notification title and body, unread",
+    "Mail's committed receipt names the same event",
+    "Fernshelf is unchanged by the dispatch",
+    "An identical retry returns the first receipt marked duplicate",
+    "A new request ID for the same message reaches the same Mail event; still one inbox record",
+    "A lost acknowledgement is reported as unknown with the event ID and no commit time, and stops the run",
+    "Mail's own receipt shows the message was committed",
+    "The halted run refuses further publishing until it is reconciled",
+    "Fernshelf is unchanged",
+    "Rejected with recipient_not_authorized; Mail and Fernshelf unchanged",
+    "With email notices off the notification has no wire message and nothing is published",
+    "Without Mail the delivery is rejected as recipient_unavailable and Fernshelf is unchanged and usable",
+    "A receiver with a different contract is refused as incompatible_contract; neither App changes"
+  ],
+  "transcript": [
+    {
+      "n": 1,
+      "step": "Initial states and account binding",
+      "caller": "Infra",
+      "direction": "none",
+      "fernshelf": {
+        "app_version": "1.0.0",
+        "account_id": "fernshelf-maya",
+        "owner_person_id": "person-maya",
+        "email_notices": true,
+        "version_before_event": {
+          "epoch": 2,
+          "revision": 0
+        },
+        "state_after_event": {
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "data_sha256": "9e5e98c4b5d53359580a59fae43880c2f80c289ef18e599245c7042ac2a3f232",
+          "notifications": 28
+        }
+      },
+      "mail": {
+        "app_version": "1.3.0",
+        "account_id": "mail-maya",
+        "owner_person_id": "person-maya",
+        "address": "maya.main@example.com",
+        "state": {
+          "version": {
+            "epoch": 1,
+            "revision": 0
+          },
+          "inbox": [
+            "materials",
+            "confirmation"
+          ]
+        }
+      },
+      "router_grant": {
+        "app_id": "mail",
+        "account_id": "mail-maya",
+        "channel": "channel.email"
+      },
+      "note": "Each App starts from its own package fixture in the same run; the recipient is addressed as person_ref person-maya, which the router resolves to the Mail account bound to that person."
+    },
+    {
+      "n": 2,
+      "step": "Local commit in Fernshelf: an event writes the notification and its wire message",
+      "caller": "Infra -> Fernshelf (env.apply_event)",
+      "direction": "into Fernshelf",
+      "request": {
+        "tool": "env.apply_event",
+        "event_id": "ev-fs-440",
+        "operation": "fernshelf.removal.requested"
+      },
+      "result": {
+        "status": "committed",
+        "version": {
+          "epoch": 2,
+          "revision": 1
+        }
+      },
+      "notification": {
+        "id": "ntf-0028",
+        "kind": "removal.requested",
+        "object_id": "rr-0007",
+        "title": "Dana Ilvesmaa asked you to take down 3 photos"
+      },
+      "wire_message": {
+        "specversion": "1.0",
+        "id": "fernshelf-ntf-0028-6b0e2faf50b812b3",
+        "source": "urn:pale:app:fernshelf:account:fernshelf-maya",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-11-20T19:20:00-08:00",
+        "datacontenttype": "application/json",
+        "dataschema": "urn:pale:email-payload:1",
+        "data": {
+          "channel": "channel.email",
+          "recipient": {
+            "kind": "person_ref",
+            "id": "person-maya"
+          },
+          "source_object": {
+            "app_id": "fernshelf",
+            "account_id": "fernshelf-maya",
+            "object_type": "removal_request",
+            "object_id": "rr-0007"
+          },
+          "content": {
+            "title": "Dana Ilvesmaa asked you to take down 3 photos",
+            "body": {
+              "format": "text/plain",
+              "text": "Dana Ilvesmaa asked that 3 photos showing them be removed from the shared album Reunion 2026. Their note: Please take these down, I would rather they were not shared. Open Fernshelf to see where each photo is visible and to answer the request."
+            },
+            "asset_ids": []
+          },
+          "subscription_ref": "fernshelf-maya:removal.requested",
+          "extensions": []
+        }
+      }
+    },
+    {
+      "n": 3,
+      "step": "Router capabilities for the fixed Fernshelf source",
+      "caller": "Infra-run sender",
+      "request": {
+        "tool": "router.capabilities"
+      },
+      "result": {
+        "status": "ok",
+        "publisher": "fernshelf",
+        "channels": [
+          {
+            "channel": "channel.email",
+            "schema_id": "urn:pale:email-message:2",
+            "event_type": "org.pale.mail.notification.v1",
+            "payload_schema_id": "urn:pale:email-payload:1"
+          }
+        ],
+        "authentication": {
+          "mode": "trusted-stdio",
+          "identity_source": "trusted-launcher",
+          "remote_oauth": "not_implemented"
+        }
+      }
+    },
+    {
+      "n": 4,
+      "step": "Receiver delivery and commit: router.publish",
+      "caller": "Infra-run sender (src/publisher.cjs)",
+      "direction": "Fernshelf -> Messaging -> Mail",
+      "request": {
+        "tool": "router.publish",
+        "request_id": "fernshelf-2-ntf-0028",
+        "message_id": "fernshelf-ntf-0028-6b0e2faf50b812b3",
+        "source": "urn:pale:app:fernshelf:account:fernshelf-maya",
+        "recipient": {
+          "kind": "person_ref",
+          "id": "person-maya"
+        }
+      },
+      "result": {
+        "received_at": "2026-11-26T02:00:50.538Z",
+        "status": "committed",
+        "run_id": "deps-mail",
+        "source_app": "fernshelf",
+        "channel": "channel.email",
+        "target": {
+          "app_id": "mail",
+          "account_id": "mail-maya"
+        },
+        "cloud_event": {
+          "source": "urn:pale:app:fernshelf:account:fernshelf-maya",
+          "id": "fernshelf-ntf-0028-6b0e2faf50b812b3",
+          "type": "org.pale.mail.notification.v1",
+          "time": "2026-11-20T19:20:00-08:00"
+        },
+        "event_id": "router-f25e26e275ac76761b925e46cde07300",
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "applied_at": "2026-11-20T09:00:00-08:00",
+        "committed_at": "2026-11-26T02:00:50.605Z",
+        "receiver_trace": {
+          "run_id": "deps-mail",
+          "app_id": "mail",
+          "event_id": "router-f25e26e275ac76761b925e46cde07300",
+          "cloud_event": {
+            "source": "urn:pale:app:fernshelf:account:fernshelf-maya",
+            "id": "fernshelf-ntf-0028-6b0e2faf50b812b3",
+            "type": "org.pale.mail.notification.v1",
+            "time": "2026-11-20T19:20:00-08:00"
+          },
+          "received_at": "2026-11-26T02:00:50.578Z",
+          "virtual_received_at": "2026-11-20T09:00:00-08:00",
+          "applied_at": "2026-11-20T09:00:00-08:00",
+          "processed_at": "2026-11-26T02:00:50.588Z"
+        }
+      }
+    },
+    {
+      "n": 5,
+      "step": "Result inside Mail",
+      "caller": "Mail Agent connection (mail.get) and Mail Infra (env.event_status)",
+      "request": [
+        {
+          "tool": "mail.get",
+          "id": "router-f25e26e275ac76761b925e46cde07300"
+        },
+        {
+          "tool": "env.event_status",
+          "event_id": "router-f25e26e275ac76761b925e46cde07300"
+        }
+      ],
+      "result": {
+        "message": {
+          "id": "router-f25e26e275ac76761b925e46cde07300",
+          "thread_id": "fernshelf-ntf-0028-6b0e2faf50b812b3",
+          "account_id": "mail-maya",
+          "from": "fernshelf@pale.example",
+          "to": [
+            "maya.main@example.com"
+          ],
+          "subject": "Dana Ilvesmaa asked you to take down 3 photos",
+          "body": "Dana Ilvesmaa asked that 3 photos showing them be removed from the shared album Reunion 2026. Their note: Please take these down, I would rather they were not shared. Open Fernshelf to see where each photo is visible and to answer the request.",
+          "received_at": "2026-11-20T09:00:00-08:00",
+          "folder": "inbox",
+          "read": false,
+          "attachments": []
+        },
+        "receipt": {
+          "status": "committed",
+          "event_id": "router-f25e26e275ac76761b925e46cde07300",
+          "trace": {
+            "run_id": "deps-mail",
+            "app_id": "mail",
+            "event_id": "router-f25e26e275ac76761b925e46cde07300",
+            "cloud_event": {
+              "source": "urn:pale:app:fernshelf:account:fernshelf-maya",
+              "id": "fernshelf-ntf-0028-6b0e2faf50b812b3",
+              "type": "org.pale.mail.notification.v1",
+              "time": "2026-11-20T19:20:00-08:00"
+            },
+            "received_at": "2026-11-26T02:00:50.578Z",
+            "virtual_received_at": "2026-11-20T09:00:00-08:00",
+            "applied_at": "2026-11-20T09:00:00-08:00",
+            "processed_at": "2026-11-26T02:00:50.588Z"
+          },
+          "app_id": "mail",
+          "version": {
+            "epoch": 1,
+            "revision": 1
+          }
+        }
+      },
+      "mail_state": {
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "inbox": [
+          "materials",
+          "confirmation",
+          "router-f25e26e275ac76761b925e46cde07300"
+        ]
+      },
+      "fernshelf_state": {
+        "version": {
+          "epoch": 2,
+          "revision": 1
+        },
+        "data_sha256": "9e5e98c4b5d53359580a59fae43880c2f80c289ef18e599245c7042ac2a3f232",
+        "notifications": 28
+      }
+    },
+    {
+      "n": 6,
+      "step": "Recipient or business confirmation",
+      "caller": "none",
+      "result": "not established: the Mail record is stored with read: false and nothing in this flow reads, answers or acknowledges it. A delivery receipt proves only that Mail stored the message."
+    },
+    {
+      "n": 7,
+      "step": "Retry and duplicate",
+      "caller": "Infra-run sender",
+      "request": [
+        {
+          "tool": "router.publish",
+          "request_id": "fernshelf-2-ntf-0028",
+          "note": "identical retry"
+        },
+        {
+          "tool": "router.publish",
+          "request_id": "fernshelf-rerun-1",
+          "note": "same message under a new request ID"
+        }
+      ],
+      "result": [
+        {
+          "received_at": "2026-11-26T02:00:50.538Z",
+          "status": "committed",
+          "run_id": "deps-mail",
+          "source_app": "fernshelf",
+          "channel": "channel.email",
+          "target": {
+            "app_id": "mail",
+            "account_id": "mail-maya"
+          },
+          "cloud_event": {
+            "source": "urn:pale:app:fernshelf:account:fernshelf-maya",
+            "id": "fernshelf-ntf-0028-6b0e2faf50b812b3",
+            "type": "org.pale.mail.notification.v1",
+            "time": "2026-11-20T19:20:00-08:00"
+          },
+          "event_id": "router-f25e26e275ac76761b925e46cde07300",
+          "version": {
+            "epoch": 1,
+            "revision": 1
+          },
+          "applied_at": "2026-11-20T09:00:00-08:00",
+          "committed_at": "2026-11-26T02:00:50.605Z",
+          "receiver_trace": {
+            "run_id": "deps-mail",
+            "app_id": "mail",
+            "event_id": "router-f25e26e275ac76761b925e46cde07300",
+            "cloud_event": {
+              "source": "urn:pale:app:fernshelf:account:fernshelf-maya",
+              "id": "fernshelf-ntf-0028-6b0e2faf50b812b3",
+              "type": "org.pale.mail.notification.v1",
+              "time": "2026-11-20T19:20:00-08:00"
+            },
+            "received_at": "2026-11-26T02:00:50.578Z",
+            "virtual_received_at": "2026-11-20T09:00:00-08:00",
+            "applied_at": "2026-11-20T09:00:00-08:00",
+            "processed_at": "2026-11-26T02:00:50.588Z"
+          },
+          "duplicate": true
+        },
+        {
+          "received_at": "2026-11-26T02:00:50.538Z",
+          "status": "committed",
+          "run_id": "deps-mail",
+          "source_app": "fernshelf",
+          "channel": "channel.email",
+          "target": {
+            "app_id": "mail",
+            "account_id": "mail-maya"
+          },
+          "cloud_event": {
+            "source": "urn:pale:app:fernshelf:account:fernshelf-maya",
+            "id": "fernshelf-ntf-0028-6b0e2faf50b812b3",
+            "type": "org.pale.mail.notification.v1",
+            "time": "2026-11-20T19:20:00-08:00"
+          },
+          "event_id": "router-f25e26e275ac76761b925e46cde07300",
+          "version": {
+            "epoch": 1,
+            "revision": 1
+          },
+          "applied_at": "2026-11-20T09:00:00-08:00",
+          "committed_at": "2026-11-26T02:00:50.605Z",
+          "receiver_trace": {
+            "run_id": "deps-mail",
+            "app_id": "mail",
+            "event_id": "router-f25e26e275ac76761b925e46cde07300",
+            "cloud_event": {
+              "source": "urn:pale:app:fernshelf:account:fernshelf-maya",
+              "id": "fernshelf-ntf-0028-6b0e2faf50b812b3",
+              "type": "org.pale.mail.notification.v1",
+              "time": "2026-11-20T19:20:00-08:00"
+            },
+            "received_at": "2026-11-26T02:00:50.578Z",
+            "virtual_received_at": "2026-11-20T09:00:00-08:00",
+            "applied_at": "2026-11-20T09:00:00-08:00",
+            "processed_at": "2026-11-26T02:00:50.588Z"
+          },
+          "duplicate": true
+        }
+      ],
+      "mail_state": {
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        },
+        "inbox": [
+          "materials",
+          "confirmation",
+          "router-f25e26e275ac76761b925e46cde07300"
+        ]
+      }
+    },
+    {
+      "n": 8,
+      "step": "Unknown outcome (injected lost acknowledgement)",
+      "caller": "Infra-run sender with an in-process router; the drop is injected",
+      "direction": "Fernshelf -> Messaging -> Mail",
+      "request": {
+        "tool": "router.publish",
+        "request_id": "fernshelf-2-ntf-0028"
+      },
+      "result": {
+        "received_at": "2026-11-26T02:00:54.894Z",
+        "status": "unknown",
+        "code": "receiver_unconfirmed",
+        "run_id": "deps-mail-unknown",
+        "stop_run": true,
+        "event_id": "router-1cad08eb53d20e6f711189d96bf2b631"
+      },
+      "mail_receipt": {
+        "status": "committed",
+        "event_id": "router-1cad08eb53d20e6f711189d96bf2b631",
+        "trace": {
+          "run_id": "deps-mail-unknown",
+          "app_id": "mail",
+          "event_id": "router-1cad08eb53d20e6f711189d96bf2b631",
+          "cloud_event": {
+            "source": "urn:pale:app:fernshelf:account:fernshelf-maya",
+            "id": "fernshelf-ntf-0028-6b0e2faf50b812b3",
+            "type": "org.pale.mail.notification.v1",
+            "time": "2026-11-20T19:20:00-08:00"
+          },
+          "received_at": "2026-11-26T02:00:54.935Z",
+          "virtual_received_at": "2026-11-20T09:00:00-08:00",
+          "applied_at": "2026-11-20T09:00:00-08:00",
+          "processed_at": "2026-11-26T02:00:54.944Z"
+        },
+        "app_id": "mail",
+        "version": {
+          "epoch": 1,
+          "revision": 1
+        }
+      },
+      "next_publish": {
+        "received_at": "2026-11-26T02:00:55.230Z",
+        "status": "halted",
+        "code": "run_halted",
+        "stop_run": true
+      },
+      "mail_state": {
+        "before": {
+          "version": {
+            "epoch": 1,
+            "revision": 0
+          },
+          "inbox": [
+            "materials",
+            "confirmation"
+          ]
+        },
+        "after": {
+          "version": {
+            "epoch": 1,
+            "revision": 1
+          },
+          "inbox": [
+            "materials",
+            "confirmation",
+            "router-1cad08eb53d20e6f711189d96bf2b631"
+          ]
+        }
+      },
+      "fernshelf_state": {
+        "before": {
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "data_sha256": "9e5e98c4b5d53359580a59fae43880c2f80c289ef18e599245c7042ac2a3f232",
+          "notifications": 28
+        },
+        "after": {
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "data_sha256": "9e5e98c4b5d53359580a59fae43880c2f80c289ef18e599245c7042ac2a3f232",
+          "notifications": 28
+        }
+      }
+    },
+    {
+      "n": 9,
+      "step": "Denied: no Infra grant for channel.email",
+      "caller": "Infra-run sender",
+      "request": {
+        "tool": "router.publish",
+        "request_id": "fernshelf-2-ntf-0028"
+      },
+      "result": {
+        "received_at": "2026-11-26T02:00:58.657Z",
+        "status": "rejected",
+        "code": "recipient_not_authorized"
+      },
+      "mail_state": {
+        "before": {
+          "version": {
+            "epoch": 1,
+            "revision": 0
+          },
+          "inbox": [
+            "materials",
+            "confirmation"
+          ]
+        },
+        "after": {
+          "version": {
+            "epoch": 1,
+            "revision": 0
+          },
+          "inbox": [
+            "materials",
+            "confirmation"
+          ]
+        }
+      },
+      "fernshelf_state": {
+        "before": {
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "data_sha256": "9e5e98c4b5d53359580a59fae43880c2f80c289ef18e599245c7042ac2a3f232",
+          "notifications": 28
+        },
+        "after": {
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "data_sha256": "9e5e98c4b5d53359580a59fae43880c2f80c289ef18e599245c7042ac2a3f232",
+          "notifications": 28
+        }
+      }
+    },
+    {
+      "n": 10,
+      "step": "Email notices off",
+      "caller": "Infra-run sender",
+      "request": {
+        "notification_id": "ntf-0028"
+      },
+      "result": {
+        "stage": "email_notices_off"
+      },
+      "notification": {
+        "id": "ntf-0028",
+        "wire": null
+      }
+    },
+    {
+      "n": 11,
+      "step": "Missing dependency: no Mail App in the run",
+      "caller": "Infra-run sender",
+      "request": {
+        "tool": "router.publish",
+        "request_id": "fernshelf-2-ntf-0028"
+      },
+      "result": {
+        "received_at": "2026-11-26T02:01:04.723Z",
+        "status": "rejected",
+        "code": "recipient_unavailable"
+      },
+      "fernshelf_state": {
+        "before": {
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "data_sha256": "9e5e98c4b5d53359580a59fae43880c2f80c289ef18e599245c7042ac2a3f232",
+          "notifications": 28
+        },
+        "after": {
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "data_sha256": "9e5e98c4b5d53359580a59fae43880c2f80c289ef18e599245c7042ac2a3f232",
+          "notifications": 28
+        }
+      },
+      "fernshelf_still_works": {
+        "tool": "fernshelf.removals.list",
+        "pending": [
+          "rr-0005",
+          "rr-0006",
+          "rr-0007"
+        ]
+      }
+    },
+    {
+      "n": 12,
+      "step": "Incompatible contract: Mail copy with a changed receive schema",
+      "caller": "Infra-run sender",
+      "change": "title maxLength 200 -> 120 in the Mail copy's schemas/router-message.schema.json",
+      "request": {
+        "tool": "router.publish",
+        "request_id": "fernshelf-2-ntf-0028"
+      },
+      "result": {
+        "received_at": "2026-11-26T02:01:08.568Z",
+        "status": "rejected",
+        "code": "incompatible_contract"
+      },
+      "mail_state": {
+        "before": {
+          "version": {
+            "epoch": 1,
+            "revision": 0
+          },
+          "inbox": [
+            "materials",
+            "confirmation"
+          ]
+        },
+        "after": {
+          "version": {
+            "epoch": 1,
+            "revision": 0
+          },
+          "inbox": [
+            "materials",
+            "confirmation"
+          ]
+        }
+      },
+      "fernshelf_state": {
+        "before": {
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "data_sha256": "9e5e98c4b5d53359580a59fae43880c2f80c289ef18e599245c7042ac2a3f232",
+          "notifications": 28
+        },
+        "after": {
+          "version": {
+            "epoch": 2,
+            "revision": 1
+          },
+          "data_sha256": "9e5e98c4b5d53359580a59fae43880c2f80c289ef18e599245c7042ac2a3f232",
+          "notifications": 28
+        }
+      }
+    }
+  ]
+}

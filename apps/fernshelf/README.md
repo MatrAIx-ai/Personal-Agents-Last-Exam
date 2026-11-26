@@ -3,7 +3,7 @@
 Fernshelf is a resettable personal photo library seen from one person's account. A photo can be visible in several places at once (shared albums and the links to them), and a copy someone has saved cannot be called back, so an action the App accepts can still be wrong for the account holder, the people in the picture or the family. Fernshelf records who could see what and when; it does not judge consent.
 
 - App ID `fernshelf`, version 1.0.0, Core API 1.2.0, public runtime 1.6.0. MCP, plus a web page for the account holder served by the repository's shared Web Host ([`gui/`](gui/README.md)). The approved plan was MCP-only; the page was added after approval because the maintainers asked every Environment for one ([comment on #111](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/111#issuecomment-7123353250)).
-- Approved plan: [`proposals/environment/fernshelf.md`](../../proposals/environment/fernshelf.md). Validation evidence: [VALIDATION.md](VALIDATION.md).
+- Approved plan: [`proposals/environment/fernshelf.md`](../../proposals/environment/fernshelf.md). Validation evidence: [VALIDATION.md](VALIDATION.md). Delivery evidence index (workflow screenshot sequences, reference comparison, dependency demonstrations, dataset coverage): [evidence/README.md](evidence/README.md).
 - Node.js 18 or later, built-ins only. Nothing to install.
 
 ## Workflows
@@ -80,6 +80,10 @@ npm run mcp                  # real MCP checks on the public runtime (scripts/re
 npm run mail-flow            # Fernshelf -> Mail on real processes (scripts/mail-flow.cjs)
 npm run test:web             # the page on the real shared Web Host, no npm dependency (tests/web-smoke.cjs)
 npm run test:browser         # clicks in Chromium (tests/web-browser.cjs); needs the repository's Playwright
+npm run coverage:check       # evidence/coverage/report.* match the fixture (also part of npm test)
+npm run coverage:query       # the counted records read back through the App's tools on the public runtime
+npm run evidence:dependencies # Mail and items.read demonstrations with transcripts (evidence/dependencies/)
+npm run evidence:capture     # workflow screenshot sequences in Chromium (evidence/gui/); needs the repository's Playwright
 ```
 
 From the repository root:
@@ -90,7 +94,7 @@ node runtime/ci/verify-submissions.cjs . .artifacts/submissions <base-sha>
 npm test
 ```
 
-The business tests and the example need only this folder. `scripts/real-mcp.cjs`, `scripts/mail-flow.cjs` and the two web tests look upwards for a public checkout. From a copy of the package alone, pass `--runtime DIR` (and `--mail DIR` for the Mail flow).
+The business tests and the example need only this folder. `scripts/real-mcp.cjs`, `scripts/mail-flow.cjs`, `scripts/dependency-evidence.cjs`, `scripts/capture-workflows.cjs`, `coverage:query` and the two web tests look upwards for a public checkout. From a copy of the package alone, pass `--runtime DIR` (and `--mail DIR` for the Mail flow).
 
 ## Resource registration and its fallback
 
@@ -127,8 +131,9 @@ The wire message ID is `fernshelf-<notification ID>-<digest>`, where the digest 
 | `src/model.cjs` | Seed validation, records, objects and media references |
 | `src/notify.cjs`, `src/publisher.cjs` | Notifications with their wire messages; the Infra-run Mail sender |
 | `schemas/` | Generated seed (definitions inlined), events and state schemas; copies of the shared platform schemas and of Mail's wire schema |
-| `scripts/` | Contract and fixture builders, consistency checks, real-MCP and Mail-flow scripts |
-| `tests/` | Business tests (`business.test.cjs` loads them all), App-only harness, verifier inputs (`cases.json`); `web-smoke.cjs` and `web-browser.cjs` for the page |
+| `scripts/` | Contract and fixture builders, consistency checks, real-MCP and Mail-flow scripts; `coverage-report.cjs`, `dependency-evidence.cjs` and `capture-workflows.cjs` for the delivery evidence |
+| `evidence/` | Delivery evidence index (`README.md`), workflow screenshot sequences (`gui/`), dependency transcripts (`dependencies/`) and the dataset coverage report (`coverage/`); review material, not runtime assets |
+| `tests/` | Business tests (`business.test.cjs` loads them all, including `coverage.test.cjs`), App-only harness, verifier inputs (`cases.json`); `web-smoke.cjs` and `web-browser.cjs` for the page |
 | `gui/` | `index.html`, `src/app.js` (the page's controller), `src/view.js` (reviewer renderer), `README.md` |
 | `web.registry.json` | One-App registry used to start the shared Web Host for this package |
 | `examples/` | `run.cjs` walkthrough and `scenario.json` (Dana's removal request) |
