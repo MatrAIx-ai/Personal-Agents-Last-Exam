@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "app_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "core_api_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "maintainer": {
+      "type": "object",
+      "properties": {
+        "contact": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "contact"
+      ],
+      "additionalProperties": false
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1
+    },
+    "entrypoint": {
+      "type": "string",
+      "pattern": "^[^/].*"
+    },
+    "service": {
+      "type": "string",
+      "pattern": "^[^/].*"
+    },
+    "tools": {
+      "type": "string",
+      "pattern": "^[^/].*"
+    },
+    "schemas": {
+      "type": "object",
+      "properties": {
+        "seed": {
+          "type": "string",
+          "pattern": "^[^/].*"
+        },
+        "state": {
+          "type": "string",
+          "pattern": "^[^/].*"
+        },
+        "events": {
+          "type": "string",
+          "pattern": "^[^/].*"
+        }
+      },
+      "required": [
+        "seed",
+        "state",
+        "events"
+      ],
+      "additionalProperties": false
+    },
+    "fixtures": {
+      "type": "object",
+      "properties": {
+        "seed": {
+          "type": "string",
+          "pattern": "^[^/].*"
+        },
+        "binding": {
+          "type": "string",
+          "pattern": "^[^/].*"
+        },
+        "policies": {
+          "type": "string",
+          "pattern": "^[^/].*"
+        }
+      },
+      "required": [
+        "seed",
+        "binding",
+        "policies"
+      ],
+      "additionalProperties": false
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          }
+        },
+        "required": [
+          "app_id",
+          "version"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "event_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "capabilities": {
+      "type": "object",
+      "properties": {
+        "modes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "synthetic"
+            ]
+          }
+        },
+        "resources": {
+          "type": "boolean"
+        },
+        "ui": {
+          "type": "string",
+          "minLength": 1
+        },
+        "real_delivery": {
+          "const": false
+        }
+      },
+      "required": [
+        "modes",
+        "resources",
+        "ui",
+        "real_delivery"
+      ],
+      "additionalProperties": false
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "catalog": {
+          "type": "string",
+          "pattern": "^[^/].*"
+        },
+        "directory": {
+          "type": "string",
+          "pattern": "^[^/].*"
+        }
+      },
+      "required": [
+        "catalog",
+        "directory"
+      ],
+      "additionalProperties": false
+    },
+    "dataset": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contribution": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "app_id",
+    "version",
+    "core_api_version",
+    "maintainer",
+    "license",
+    "entrypoint",
+    "service",
+    "tools",
+    "schemas",
+    "fixtures",
+    "dependencies",
+    "event_types",
+    "capabilities",
+    "limitations",
+    "dataset",
+    "contribution"
+  ],
+  "additionalProperties": false
+}

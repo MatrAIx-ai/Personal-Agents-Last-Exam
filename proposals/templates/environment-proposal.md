@@ -8,6 +8,10 @@ Copy this template to `proposals/environment/<slug>.md`. Keep the overview conci
 
 ✍️ Replace each `[Fill in: …]` with your answer. Optional fields can be `None`. For unresolved details, use `TBD` and explain how they will be resolved.
 
+After design approval, use the [App contribution guide](../../docs/app-contribution.md) and [public Core / Messaging runtime](../../runtime/README.md) to reproduce local integration checks. For connections to existing Apps, consult their [business and receive contracts](../../docs/app-integrations.md) before implementing the sender.
+
+Plan the [submission evidence](../../docs/submission-evidence.md): reference/implemented GUI screenshots and ordered workflow demonstrations when GUI is in scope; real dependency demonstrations alongside business/MCP tests; historical-data loading and date coverage. Completed evidence follows implementation, not initial proposal submission.
+
 ## 1. App and domains
 
 - **Authors / GitHub handles (required):** `[Fill in: names and @handles]`
@@ -37,6 +41,8 @@ Briefly describe the main workflows and why this environment would be useful for
 
 Name possible connections and briefly explain their purpose. Internal personal apps include Mail, Calendar, Contacts and similar tools. Use `None` if no connection applies, or `TBD` if undecided.
 
+For internal personal Apps, state which workflow needs each App and whether the connection is required or optional. Link the existing public interface/version, or identify the missing capability, owner and fallback.
+
 - **Internal personal apps (required):** `[Fill in: personal apps and what could be read or updated, or None / TBD]`
 - **Other apps and websites (required):** `[Fill in: services and potential shared workflows, or None / TBD]`
 
@@ -45,7 +51,7 @@ Name possible connections and briefly explain their purpose. Internal personal a
 - **Operations and access (required):** `[Fill in: MCP, API or GUI entry points; agent-facing actions; setup, reset and event-injection operations used by the platform]`
 - **State and lifecycle (required):** `[Fill in: how app, account and run state is separated; initial data, reset and snapshot behavior; write confirmation, retries and concurrent updates]`
 - **Events and notifications (required):** `[Fill in: external events the app accepts and notifications it sends; channels and example input/output data, or None. Task scenarios define when events occur.]`
-- **Shared data and dependencies (required):** `[Fill in: people, accounts and object references; media and attachment formats; shared components or services needed to run the app]`
+- **Shared data and dependencies (required):** `[Fill in: people, accounts and object references; media and attachment formats; shared components or services needed to run the app; confirm the App package runs on its own with only the shared runtime and these declared dependencies]`
 
 ## 4. Construction plan and effort
 
@@ -55,11 +61,11 @@ Specify how the environment will be built, what will be collected or synthesized
 
 | Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
 | :--- | :--- | :--- | :--- |
-| Web / app construction | `[Fill in: pages, workflows and state to build; components to reuse]` | `[Fill in: working flows and expected outcomes to verify]` | `[Fill in: estimate]` |
+| Web / app construction | `[Fill in: pages, workflows and state to build; components to reuse; original-product screenshot sources and comparison plan if GUI is in scope]` | `[Fill in: working flows and expected outcomes; corresponding implemented screenshots and ordered start/action/result sequences including relevant error paths, tied to real browser and MCP/state checks]` | `[Fill in: estimate]` |
 | Data and image collection | `[Fill in: sources, crawling or reuse method, expected records/images and cleaning work]` | `[Fill in: collected assets, source/reuse records and checks for completeness and broken media]` | `[Fill in: estimate, or N/A with reason]` |
-| Synthetic data and assets | `[Fill in: records/images to generate, quantities, generation method and realistic variation]` | `[Fill in: generated fixtures and checks for consistency, duplication and realism]` | `[Fill in: estimate, or N/A with reason]` |
-| App integrations | `[Fill in: internal personal apps and other services in initial scope; reads/writes and dependencies]` | `[Fill in: connected workflows and state-consistency checks]` | `[Fill in: estimate, or N/A with reason]` |
-| Validation and reset | `[Fill in: local business tests, workflow/error cases and reset checks; fixtures and expected outcomes for platform integration validation]` | `[Fill in: reproducible local test results and platform validation evidence covering permissions, state consistency and reset]` | `[Fill in: estimate]` |
+| Synthetic data and assets | `[Fill in: evaluation data covering 2025-01-01 through 2026-12-31; sources, quantities and generation method; real November 2026 data and synthetic completion if earlier website data are inaccessible]` | `[Fill in: monthly/source coverage and gaps; real/synthetic provenance, consistency and realism checks; distinguish full delivery data from small smoke fixtures]` | `[Fill in: estimate, or explain non-applicable data types]` |
+| App integrations | `[Fill in: internal personal apps and other services in initial scope; reads/writes, exact tool/receive contracts and versions, data/files and dependencies; distinguish delivered optional links from future links]` | `[Fill in: real-dependency demonstrations/tests for every delivered connection; actual source use, target account/records/file versions and receipts; distinguish send, delivery and business confirmation; relevant rejection/retry/unknown outcomes]` | `[Fill in: estimate, or N/A with reason]` |
+| Validation and reset | `[Fill in: local business tests plus public-runtime MCP, GUI workflows when promised, history-loading and reset checks; dependency demonstrations and historical-count method when supplying Task data]` | `[Fill in: after implementation: exact versions, commands, reproducible reports and an evidence index linking GUI comparisons/sequences, tests, actual dependency results and date counts; remaining manual or deployment checks]` | `[Fill in: estimate]` |
 
 - **Milestones, owners and dependencies (required):** `[Fill in: work order, responsible contributors, expected calendar duration and dependencies; link related PRs]`
 - **Resources and total effort (required):** `[Fill in: total person-days, expected collection/generation costs and storage/compute needs; estimates or explained TBDs]`
