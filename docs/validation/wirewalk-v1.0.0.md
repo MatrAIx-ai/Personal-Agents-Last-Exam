@@ -106,7 +106,7 @@ The plan was approved on 2026-11-24; #260 published the Environment data rule on
 
 - **Seed:** `seed.json` (its sha256 is recorded under the generated source's `generation.parameters.outputs` in `dataset.json`, which a test validates against the dataset schema), sha256 `2fb3a768836b166b4e728fa197e10e11fb857654fe06fe43df52096cdb2894be`, one record per line, 505,511 bytes as compact JSON.
 - **Records:** 23 accounts, 1,864 posts and 127 bookmarks of reader `ww-priya`. The 14 fixture accounts, 37 fixture posts and the fixture bookmark are included verbatim.
-- **Event posts:** the seven event posts in `examples/scenario.json` and `examples/wildfire-events.json` are not in the seed and still apply as `post.publish` events. Generated posts skip Oct. 10-12, 2026.
+- **Event posts:** the seven event posts in `examples/scenario.json` and `examples/wildfire-events.json` are not in the seed and still apply as `post.publish` events. Posts dated after Oct. 12, 2026 continue the three storylines as if those events had been applied; for example, the transit agency's later posts about the canceled train refer to the rider's photo post. A task that does not apply the events should not rely on those later posts for that storyline. Generated posts skip Oct. 10-12, 2026.
 - **Dataset clock:** `2026-10-10T21:10:00-07:00`, the fixture clock. The reader's bookmarks end at it. Public posts continue to 2026-12-31, and one account joins on 2026-10-14.
 - **Provenance:** every record is synthetic.
   - 52 records are copied from the authored fixture (`authored`): 14 accounts, 37 posts and 1 bookmark.
