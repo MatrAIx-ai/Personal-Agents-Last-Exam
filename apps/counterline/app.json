@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "app_id": "counterline",
+  "version": "0.1.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:counterline"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "counterline.commitment.performance_reported",
+    "counterline.case.followup",
+    "counterline.commitment.condition_missed",
+    "counterline.commitment.revoked",
+    "counterline.contest.answered",
+    "counterline.offer.added",
+    "counterline.notification.delivery_recorded"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "web app (shared Web Host) and reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "No language model; replies come from the provider's records and a deterministic recognizer.",
+    "No account ledger or balances; settlement is shown only by the owning App's records.",
+    "Mail copies are queued by Counterline and published by its outbound adapter (src/publisher.cjs); automatic invocation after each commit belongs to the planned runner."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}
