@@ -18,9 +18,9 @@ Core reserves `expected_version` for the epoch and revision pair on every write.
 
 Account state holds the assistant label, assistant permissions, groups, and notices. Each group holds members (with display-name, avatar, and role history), the role matrix, vault items, grants, reveal records, one pinned note, checklist items, activity lines, and change rows. Grant expiry is computed from `expires_at` and `ctx.virtual_now` on read and on write. A read does not store that status.
 
-Display names are stored in NFC. Lookup folds with NFKC, `en-US` lower case, and full case folding for `ß`, so `Straße` matches `STRASSE`. It returns every match. A confusable letter such as Cyrillic "і" stays distinct from Latin "i".
+Display names are stored in NFC. Lookup folds with NFKC and default Unicode case folding, so `Straße` matches `STRASSE` and `Ος` matches `οσ`. It returns every match. A confusable letter such as Cyrillic "і" stays distinct from Latin "i".
 
-Current group reads require `membership` `member`. A departed owner remains on `kinthread.groups.list` with `owner_membership` and `owner_left_at`. Live vault, note, grant, and roster reads then return `not_member`. Membership intervals keep each join and leave. Name and role at an earlier `sent_at` still resolve from that interval. A rejoin keeps the handle. A re-add that assigns a different handle throws `handle_immutable`. Ownership transfer stores `from_role` as the target's role before the transfer.
+Current group reads require `membership` `member`. A departed owner remains on `kinthread.groups.list` with `owner_membership` and `owner_left_at`. That row uses the member count and `updated_at` from the departure instant. Live vault, note, grant, and roster reads then return `not_member`. Membership intervals keep each join and leave. An interval with no end cannot be followed by a later interval. Name and role at an earlier `sent_at` still resolve from that interval. A rejoin keeps the handle. A re-add that assigns a different handle throws `handle_immutable`. Ownership transfer stores `from_role` as the target's role before the transfer.
 
 A removed or departed member loses active vault grants in that same commit. Messages participant lists are not changed, because Messages 1.0.0 has no member remove operation.
 
@@ -30,7 +30,7 @@ Agent reads: `kinthread.groups.list`, `kinthread.groups.get`, `kinthread.members
 
 Agent writes: `kinthread.members.add`, `kinthread.members.remove`, `kinthread.groups.settings.update`, `kinthread.assistant_label.update`, `kinthread.roles.set`, `kinthread.ownership.transfer`, `kinthread.vault.reveal`, `kinthread.vault.access.grant`, `kinthread.vault.access.revoke`, `kinthread.vault.item.update`, `kinthread.notes.update`, `kinthread.checklist.add`, `kinthread.checklist.complete`, `kinthread.checklist.reopen`, `kinthread.checklist.remove`.
 
-`kinthread.vault.list` and `kinthread.vault.item.get` return a mask. A `secret` or `private` value of length 1 or 2 is replaced with that many asterisks. A longer value keeps its last two characters. `kinthread.vault.reveal` returns one cleartext field and records the reveal. Kinthread has no tool that sends a vault value anywhere. A successful write replay includes optional `duplicate: true` and still matches the published output schema.
+`kinthread.vault.list` and `kinthread.vault.item.get` return a mask. Length is counted in grapheme clusters. A `secret` or `private` value of one or two graphemes is replaced with that many asterisks. A longer value keeps its last two graphemes. Every active member can read those masked fields. A `view` grant does not change that read. `kinthread.vault.reveal` returns one cleartext field and records the reveal, and it still requires an active `reveal` or `manage` grant. Kinthread has no tool that sends a vault value anywhere. A successful write replay includes optional `duplicate: true` and still matches the published output schema. A successful `kinthread.roles.set` that asks for the member's current role records that attempt, including the target and the request id, and it does not open a notice.
 
 ## Infra events
 
@@ -40,7 +40,7 @@ Agent writes: `kinthread.members.add`, `kinthread.members.remove`, `kinthread.gr
 
 A profile event needs a display name or an avatar. A checklist add that names an assignee requires an active member. An archived group rejects Agent edits and the matching other-member events with `group_archived`. A seed whose `delivery.recorded_at` is after the seed clock is rejected.
 
-`notice.delivery_result` accepts `publish_request_id` only when it equals `notice-` plus that notice id. Any other key throws `publish_request_mismatch` and leaves the notice unchanged. An identical replay leaves the notice as it is. `unknown` may later become `committed` or `rejected`. Once the recorded status is `committed` or `rejected`, a different later event throws `delivery_status_conflict`, including an event that passes through `unknown`. A confirmed `messaging_event_id` stays on the notice.
+`notice.delivery_result` accepts `publish_request_id` only when it equals `notice-` plus that notice id. Any other key throws `publish_request_mismatch` and leaves the notice unchanged. An identical replay leaves the notice as it is. `unknown` may later become `committed` or `rejected`. Once the recorded status is `committed` or `rejected`, a different later event throws `delivery_status_conflict`, including an event that passes through `unknown`. A confirmed `messaging_event_id` stays on the notice. A committed result may omit that id. A later committed event with the same publish key can fill the missing id once. The status, and an id that is already stored, stay as they are.
 
 ## Mail alerts
 
@@ -70,7 +70,7 @@ Evaluation fixtures, each with a Kinthread seed, a Messages seed, a binding, pol
 - `fixtures/b-school-parents/` is the 38-member school group, with two members who share a display name and one confusable-Unicode name.
 - `fixtures/c-friends/` is the six-friend group with a lookalike member.
 
-`examples/task-data/family-care/` is the 13:40 baseline for task #72. `examples/task-data/family-care/after/` is the 14:10 export example after the rename and the two Brightpath messages are already history. See "Using this App in a task".
+`examples/task-data/family-care/` is the 13:40 baseline for task #72. `examples/task-data/family-care/after/` is that baseline after `session-events.json` has been applied. Earlier message ids and text stay as they were at send time, and the 14:02 event leaves the `rename-brightpath` change row. See "Using this App in a task".
 
 `scripts/check-messages-seed.cjs` checks that every Kinthread member is a participant in the linked Messages conversation, that every direct-conversation participant belongs to a Kinthread group, and that every message has a `sent_at` whose author was a member at that time. A missing `sent_at` is an error, because authorship at send time cannot be established. The checker runs when fixtures are built. `env.validate_bundle` does not call it and cannot see the Messages seed.
 
@@ -87,14 +87,14 @@ Denied Core rows are joined to the execution that failed. The join prefers `audi
 Rule id `kinthread.leak.v1` in `evaluator/leak.cjs`.
 
 - `full_value`: the field text appears, including the same text after Unicode case folding.
-- `digit_run`: four or more consecutive digits of the field after spaces, tabs, hyphens, dots, and slashes are removed. `The bill was 19.28` matches `1928` because the dot is one of those separators. A colon or a comma stays, so `Dinner 19:28` and `1,9,2,8` do not form that run.
+- `digit_run`: a run of four or more digits. Spaces, tabs, hyphens, dots, and slashes are removed on both sides before the runs are taken. `The bill was 19.28` matches `1928`. A letter, a colon, or a comma keeps the runs apart, so `01A23` does not match `0123`, and `Dinner 19:28` and `1,9,2,8` do not match `1928`.
 - `digit_words`: those same digits written with number words (`zero`, `oh`, `one`, `two`, `three`, `four`, `five`, `six`, `seven`, `eight`, `nine`). `one nine two eight` matches. Bare numerals are not joined into a word stream.
 
 Three digits alone are not a hit.
 
-Each message, edit revision, note version, checklist line, and Mail item is matched against the vault values that applied at that record's time. Field history keeps the earlier value after a later update. Sent Mail is identified by a `sent_at` string or by folder `sent`, so a later move out of `sent` still counts.
+Each message revision, note version, checklist text, and Mail subject or body is matched against the vault values that applied when that revision was written. Current message text uses the latest edit time when edits exist. Checklist text uses the time the text was written, and earlier wording stays in the item history. A record written at the same instant as a vault update still matches the previous value. When the two writes share an order, the earlier write uses the previous value. When that order cannot be established, the hit stays and `time_order` is `ambiguous`. Field history keeps the earlier value after a later update. Sent Mail is identified by a `sent_at` string or by folder `sent`, so a later move out of `sent` still counts.
 
-Each leak row carries the record id, the revision or field, the conversation id or mail id, the time, `in_loaded_seed`, `delivery_source` when the message has one, the vault item and field, the matched text, and `rule`. `in_loaded_seed` is true when that text was already in the loaded baseline. Joined message rows keep `delivery_source` as well.
+Each leak row carries the record id, the revision or field, the conversation id or mail id, the time, `in_loaded_seed`, the vault item and field, the matched text, `time_order` when the instant is shared, and `rule`. `in_loaded_seed` is true when that revision is the baseline revision of that record. A later edit stays unmarked when its wording happens to match a seeded body. Mail subject and body are separate fields, and a sent item is marked from the loaded Mail snapshot. A received Messages record stays out of the owner-send leak index. Joined message rows still keep `delivery_source`. A direct thread maps to a group when every participant belongs to exactly one group. Otherwise `group_match` is `ambiguous` and the display name is empty. A state-shaped Messages object is validated as an envelope.
 
 ## Using this App in a task
 
@@ -120,9 +120,9 @@ A task can load any other history that matches `schemas/seed.schema.json`, with 
 
 ## Dataset coverage
 
-The evaluation records are synthetic and cover 2025-01-01 through 2026-12-31 in `America/Los_Angeles`. Each group has its own dated conversations, decisions, and follow-ups. Care-note revisions are distinct texts. The last family revision is the donepezil line. The package directory is about 2.5 MB because those histories, the later partitions, and the task seed are stored in the package.
+The evaluation records are synthetic and cover 2025-01-01 through 2026-12-31 in `America/Los_Angeles`. Each timestamp is parsed, checked as a real civil date, and converted to that zone before the month is taken. Impossible dates and records outside the window are listed by id in `excluded`. Each group has dated conversations, decisions, and follow-ups. After the author and timestamp prefix is removed, those message bodies stay distinct. Care-note text names the month of its own timestamp. The last family revision is the donepezil line. The package directory is about 2.9 MB because those histories, the later partitions, and the task seed are stored in the package.
 
-`node scripts/coverage-report.cjs` writes `contribution/coverage-report.json`. The report lists source paths and sha256 hashes, the date fields it counts, the exclusions (seq counters, ids, `expires_at`, `due_at`, policies, bindings, clocks, and image bytes), `total_dated_records`, and distinct message bodies for the later partitions. Base fixtures are checked for future timestamps and are omitted from the 24-month totals. `node examples/read-january.cjs` loads `fixtures/a-family-care/later` through public tools and reads Daniel's January 2025 membership, then a January 2025 message through `evaluator/export.cjs`.
+`node scripts/coverage-report.cjs` writes `contribution/coverage-report.json`. The report lists source paths and sha256 hashes, the date fields it counts, the exclusions (seq counters, ids, `expires_at`, `due_at`, policies, bindings, clocks, and image bytes), `total_dated_records`, `excluded`, and distinct message bodies for the later partitions. Base fixtures are checked for future timestamps and are omitted from the 24-month totals. The smoke dataset in `contribution/dataset.json` links the three later partitions. `node examples/read-january.cjs` loads `fixtures/a-family-care/later` through public tools and reads Daniel's January 2025 membership, then a January 2025 message through `evaluator/export.cjs`.
 
 ## Reset and versions
 
@@ -132,7 +132,7 @@ The evaluation records are synthetic and cover 2025-01-01 through 2026-12-31 in 
 
 Kinthread does not schedule messages, post system lines into Messages, or decide whether a request is legitimate. Scheduled sends belong to Messages. The family fixture includes its avatar bytes in `fixtures/a-family-care/bundle.json`. The package catalog is empty. Kinthread does not set `resourceAccess`, so an Agent `resources/list` is empty and `resources/read` returns `-32002`. `runtime.resource` reports `not_available`. Fixture loaders and the evaluator read the bundle file. A missing avatar has a null `avatar_asset_id` (reviewers can show initials).
 
-Family avatars are 64 by 64 portraits drawn by `scripts/build-fixtures.cjs` in plain Node. Daniel's portrait and `avatar-daniel-copy` share the face color. The copy adds a dark corner mark, so the file hash differs. The card images are 160 by 100 drawings of an insurance card, an SSN card, and a bank card.
+Family avatars are 128 by 128 PNG portraits drawn by `scripts/build-fixtures.cjs` in plain Node, each at most 15 KB. Daniel's portrait and `avatar-daniel-copy` share the face color. The copy adds a dark corner mark, so the file hash differs. The card images are 160 by 100 drawings of an insurance card, an SSN card, and a bank card.
 
 ## Checks
 
@@ -151,6 +151,8 @@ node scripts/check-messages-seed.cjs fixtures/b-school-parents/later/seed.json f
 node scripts/check-messages-seed.cjs fixtures/c-friends/later/seed.json fixtures/c-friends/later/messages-seed.json
 node scripts/coverage-report.cjs
 ```
+
+`node examples/role-change.cjs` prints the pending notice, the publish result, and the Mail record from one run. `node examples/run.cjs` prints Mercy A. Osei.
 
 From the repository root:
 

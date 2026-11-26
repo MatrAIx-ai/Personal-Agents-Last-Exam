@@ -417,8 +417,15 @@
               ]
             },
             "messaging_event_id": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             }
           },
           "required": [

@@ -11,6 +11,10 @@ function reads(ctx, data, name, args) {
   if (name === 'kinthread.groups.list') {
     const groups = data.groups.filter(group => c.memberRow(group, data.owner_person_id)).map(group => {
       const owner = c.memberRow(group, data.owner_person_id);
+      const historical = owner.membership !== 'member' && owner.left_at;
+      const memberCount = historical
+        ? group.members.filter(member => c.memberAt(group, member.person_id, owner.left_at)).length
+        : group.members.filter(member => member.membership === 'member').length;
       return {
         group_id: group.group_id,
         name: group.name,
@@ -18,10 +22,11 @@ function reads(ctx, data, name, args) {
         messages_conversation_id: group.messages_conversation_id,
         settings: c.copy(group.settings),
         settings_version: group.settings_version,
-        member_count: group.members.filter(member => member.membership === 'member').length,
+        member_count: memberCount,
         owner_membership: owner.membership,
         owner_left_at: owner.left_at,
-        updated_at: group.updated_at
+        updated_at: historical ? owner.left_at : group.updated_at,
+        as_of: historical ? owner.left_at : group.updated_at
       };
     });
     return {groups};
@@ -235,7 +240,11 @@ function writes(ctx, data, name, args) {
     if (!target) c.fail('not_member', 'That person is not an active member.');
     if (target.role === 'owner' || args.role === 'owner') c.fail('sole_owner', 'Ownership changes use ownership transfer.');
     if (!c.roleRow(group, args.role)) c.fail('invalid_arguments', 'Unknown role.');
-    if (target.role === args.role) return finish(data, {group_id: group.group_id, person_id: target.person_id, role: target.role, notice_id: null});
+    if (target.role === args.role) {
+      c.pushChange(data, group, ctx, {kind: 'role', person_id: target.person_id, from_role: target.role, to_role: args.role, acting_via: via, request_id, summary: 'Role unchanged.'});
+      c.touch(ctx, group);
+      return finish(data, {group_id: group.group_id, person_id: target.person_id, role: target.role, notice_id: null});
+    }
     const from = setRole(target, ctx, args.role, data.owner_person_id, via);
     const changeId = c.pushChange(data, group, ctx, {kind: 'role', person_id: target.person_id, from_role: from, to_role: args.role, acting_via: via, request_id, summary: 'Role changed.'});
     const notice = c.pushNotice(data, group, ctx, {notice_type: 'role_change', title: c.titles(group, 'role_change'), body: 'Your assistant changed @' + target.handle + ' from ' + from + ' to ' + args.role + ' at ' + c.clockLabel(ctx.virtual_now) + '.', object_id: changeId});
@@ -287,7 +296,7 @@ function writes(ctx, data, name, args) {
     if (args.expires_at && c.at(args.expires_at, 'invalid_arguments') <= c.at(ctx.virtual_now, 'invalid_time')) c.fail('invalid_arguments', 'Grant expiry must be in the future.');
     const grant_id = c.take(data, 'grant', 'gr');
     group.grants.push({grant_id, vault_item_id: item.vault_item_id, person_id: grantee.person_id, level: args.level, granted_by: actor.person_id, granted_at: ctx.virtual_now, expires_at: args.expires_at || null, revoked_at: null});
-    const changeId = c.pushChange(data, group, ctx, {kind: 'grant', person_id: grantee.person_id, acting_via: via, request_id, summary: 'Granted ' + args.level + ' on ' + item.vault_item_id});
+    const changeId = c.pushChange(data, group, ctx, {kind: 'grant', person_id: grantee.person_id, acting_via: via, request_id, vault_item_id: item.vault_item_id, grant_level: args.level, summary: 'Granted ' + args.level + ' on ' + item.vault_item_id});
     const notice = c.pushNotice(data, group, ctx, {notice_type: 'vault_access_granted', title: c.titles(group, 'vault_access_granted'), body: 'Your assistant granted ' + args.level + ' on ' + item.title + ' to @' + grantee.handle + ' at ' + c.clockLabel(ctx.virtual_now) + '.', object_id: changeId});
     c.pushActivity(data, group, ctx, {kind: 'grant', text: data.assistant_label + ' granted ' + args.level + ' on ' + item.title + ' to @' + grantee.handle + '.', person_id: actor.person_id, acting_via: via});
     c.touch(ctx, group);
@@ -351,7 +360,7 @@ function checklistWrite(ctx, data, args, action) {
     if (typeof args.text !== 'string' || !args.text.trim() || args.text.length > 400) c.fail('invalid_arguments', 'Checklist text must be 1 to 400 characters.');
     if (args.assignee && !c.activeMember(group, args.assignee)) c.fail('not_member', 'Assignee is not an active member.');
     const item_id = c.take(data, 'checklist', 'ck');
-    group.checklist.push({item_id, text: args.text, status: 'open', assignee: args.assignee || null, due_at: args.due_at || null, history: [{at: ctx.virtual_now, action: 'add', person_id: actor.person_id}]});
+    group.checklist.push({item_id, text: args.text, status: 'open', assignee: args.assignee || null, due_at: args.due_at || null, history: [{at: ctx.virtual_now, action: 'add', person_id: actor.person_id, text: args.text}]});
     c.pushActivity(data, group, ctx, {kind: 'checklist', text: data.assistant_label + ' added a checklist item.', person_id: actor.person_id, acting_via: via});
     c.touch(ctx, group);
     return {group_id: group.group_id, item_id, item_status: 'open', notice_id: null};
@@ -491,7 +500,7 @@ function applyBusinessEvent(ctx, data, event) {
       if (group.checklist.some(item => item.item_id === payload.item_id)) c.fail('invalid_event', 'Checklist id already exists.');
       if (!payload.text) c.fail('invalid_event', 'Checklist add needs text.');
       if (payload.assignee && !c.activeMember(group, payload.assignee)) c.fail('not_member', 'Assignee is not an active member.');
-      group.checklist.push({item_id: payload.item_id, text: payload.text, status: 'open', assignee: payload.assignee || null, due_at: payload.due_at || null, history: [{at: ctx.virtual_now, action: 'add', person_id: actor.person_id}]});
+      group.checklist.push({item_id: payload.item_id, text: payload.text, status: 'open', assignee: payload.assignee || null, due_at: payload.due_at || null, history: [{at: ctx.virtual_now, action: 'add', person_id: actor.person_id, text: payload.text}]});
     } else {
       const item = group.checklist.find(row => row.item_id === payload.item_id);
       if (!item || item.status === 'removed') c.fail('item_not_found', 'Checklist item does not exist.');
@@ -513,6 +522,11 @@ function applyBusinessEvent(ctx, data, event) {
     const prev = notice.delivery;
     const same = prev && prev.status === next && prev.publish_request_id === payload.publish_request_id && (prev.messaging_event_id || null) === (payload.messaging_event_id || null);
     if (same) return data;
+    if (prev && prev.status === 'committed' && next === 'committed' && !prev.messaging_event_id && payload.messaging_event_id && prev.publish_request_id === payload.publish_request_id) {
+      notice.delivery = {status: prev.status, publish_request_id: prev.publish_request_id, messaging_event_id: payload.messaging_event_id, recorded_at: prev.recorded_at};
+      notice.status = 'recorded';
+      return data;
+    }
     if (prev && (prev.status === 'committed' || prev.status === 'rejected')) c.fail('delivery_status_conflict', 'A recorded delivery outcome stays in place.');
     const messaging = next === 'committed' ? (payload.messaging_event_id || (prev && prev.messaging_event_id) || null) : (payload.messaging_event_id || null);
     notice.delivery = {status: next, publish_request_id: payload.publish_request_id, messaging_event_id: messaging, recorded_at: ctx.virtual_now};

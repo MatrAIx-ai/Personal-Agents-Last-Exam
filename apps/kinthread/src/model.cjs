@@ -75,6 +75,7 @@ function validateSeed(ctx, data) {
         for (const row of member.membership_intervals) {
           const start = timeOk(row.joined_at, now, 'invalid_seed');
           if (start < prev) c.fail('invalid_seed', 'Membership intervals go backwards.');
+          if (!row.left_at && member.membership_intervals.indexOf(row) < member.membership_intervals.length - 1) c.fail('invalid_seed', 'A membership interval must end before a later interval.');
           if (row.left_at) {
             const end = timeOk(row.left_at, now, 'invalid_seed');
             if (end < start) c.fail('invalid_seed', 'A membership interval ends before it starts.');

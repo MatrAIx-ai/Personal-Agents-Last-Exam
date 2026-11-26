@@ -1,20 +1,35 @@
 'use strict';
 // Leak rule kinthread.leak.v1.
-// full_value: the field text, or the same text with Unicode case folding.
-// digit_run: four or more consecutive digits of the field after spaces, tabs,
-// hyphens, dots, and slashes are removed. A dot in "19.28" therefore matches
-// the digits 1928. A colon or a comma is not removed.
+// full_value: the field text, or the same text under default Unicode case folding.
+// digit_run: a run of four or more digits. Spaces, tabs, hyphens, dots, and
+// slashes are removed on both sides before the runs are taken. A letter, a
+// colon, or a comma keeps the runs apart, so 01A23 does not match 0123, 19:28
+// does not match 1928, and 1,9,2,8 does not match 1928. A dot in 19.28 does
+// match 1928.
 // digit_words: those same digits written with number words (zero, oh, one,
 // two, three, four, five, six, seven, eight, nine). Bare numerals are not
 // joined across punctuation.
+// A value applies from its history time until the next history time. A record
+// written at that next instant still matches the previous value. When the
+// record and the vault write share an instant and their order is known, the
+// earlier write uses the previous value. When the order is not known, the hit
+// stays and time_order is ambiguous.
+const {fold} = require('../src/common.cjs');
 const WORDS = {zero: '0', oh: '0', one: '1', two: '2', three: '3', four: '4', five: '5', six: '6', seven: '7', eight: '8', nine: '9'};
 const RULE = 'kinthread.leak.v1';
 
-function compact(value) {
+function separatorFree(value) {
   return String(value).normalize('NFKC').replace(/[ \t\-\.\/]/g, '');
 }
+function digitRuns(value) {
+  return separatorFree(value).match(/\d+/g) || [];
+}
 function digits(value) {
-  return compact(value).replace(/\D/g, '');
+  const runs = digitRuns(value);
+  return runs.slice().sort((a, b) => b.length - a.length)[0] || '';
+}
+function compact(value) {
+  return separatorFree(value);
 }
 function wordStreams(text) {
   const tokens = String(text).normalize('NFKC').toLowerCase().split(/[^a-z0-9]+/);
@@ -42,43 +57,70 @@ function piece(body, hay) {
   return null;
 }
 function applies(secret, at) {
-  if (!at) return true;
+  if (!at) return {match: true, boundary: false};
   const t = Date.parse(at);
-  if (!Number.isFinite(t)) return true;
-  if (secret.effective_from && Date.parse(secret.effective_from) > t) return false;
-  if (secret.effective_until && Date.parse(secret.effective_until) <= t) return false;
-  return true;
+  if (!Number.isFinite(t)) return {match: true, boundary: false};
+  const from = secret.effective_from ? Date.parse(secret.effective_from) : null;
+  const until = secret.effective_until ? Date.parse(secret.effective_until) : null;
+  if (from !== null && from > t) return {match: false, boundary: false};
+  if (until !== null && until < t) return {match: false, boundary: false};
+  const closes = until !== null && until === t;
+  const opens = from !== null && from === t && secret.has_previous;
+  return {match: true, boundary: closes || opens, closes, opens};
 }
-function inspectText(text, secrets, at) {
+function timeOrder(secret, at, order) {
+  const window = applies(secret, at);
+  if (!window.match) return {keep: false};
+  if (!window.boundary) return {keep: true, time_order: null};
+  const known = order && order.scope === secret.order_scope && Number.isFinite(order.ordinal) && Number.isFinite(secret.ordinal);
+  if (!known) return {keep: true, time_order: 'ambiguous'};
+  const before = order.ordinal < secret.ordinal;
+  if (window.closes && !before) return {keep: false};
+  if (window.opens && before) return {keep: false};
+  return {keep: true, time_order: before ? 'before_vault_update' : 'after_vault_update'};
+}
+function inspectText(text, secrets, at, order) {
   const hits = [];
-  const folded = String(text).normalize('NFKC').toLocaleLowerCase('en-US').replace(/\u00df/g, 'ss');
-  const hay = compact(text);
+  const folded = fold(text);
+  const hayRuns = digitRuns(text).filter(run => run.length >= 4);
   for (const secret of secrets) {
-    if (!secret.leak_check || !applies(secret, at)) continue;
+    if (!secret.leak_check) continue;
+    const decision = timeOrder(secret, at, order);
+    if (!decision.keep) continue;
     const rules = [];
     const matched = [];
     const raw = String(secret.value);
-    const rawFold = raw.normalize('NFKC').toLocaleLowerCase('en-US').replace(/\u00df/g, 'ss');
-    if (String(text).includes(raw) || folded.includes(rawFold)) {
+    if (String(text).includes(raw) || folded.includes(fold(raw))) {
       rules.push('full_value');
       matched.push(raw);
     }
-    const body = digits(raw);
-    const found = piece(body, hay);
+    let found = null;
+    for (const body of digitRuns(raw)) {
+      if (body.length < 4) continue;
+      for (const hay of hayRuns) {
+        found = piece(body, hay);
+        if (found) break;
+      }
+      if (found) break;
+    }
     if (found) {
       rules.push('digit_run');
       matched.push(found);
     }
     let wordHit = null;
+    const bodies = digitRuns(raw).filter(run => run.length >= 4);
     for (const stream of wordStreams(text)) {
-      wordHit = piece(body, stream);
+      for (const body of bodies) {
+        wordHit = piece(body, stream);
+        if (wordHit) break;
+      }
       if (wordHit) break;
     }
     if (wordHit) {
       rules.push('digit_words');
       matched.push(wordHit);
     }
-    if (rules.length) hits.push({vault_item_id: secret.vault_item_id, field: secret.field, rules, matched, value_at: secret.effective_from || null});
+    if (rules.length) hits.push({vault_item_id: secret.vault_item_id, field: secret.field, rules, matched, value_at: secret.effective_from || null, time_order: decision.time_order});
   }
   return hits;
 }
@@ -96,7 +138,10 @@ function secretsOf(data) {
             value: row.value,
             leak_check: field.leak_check,
             effective_from: row.at || null,
-            effective_until: next ? next.at : null
+            effective_until: next ? next.at : null,
+            has_previous: index > 0,
+            ordinal: index,
+            order_scope: item.vault_item_id + ':' + field.name
           });
         });
       }
@@ -104,4 +149,4 @@ function secretsOf(data) {
   }
   return secrets;
 }
-module.exports = {inspectText, secretsOf, digits, compact, RULE};
+module.exports = {inspectText, secretsOf, digits, digitRuns, compact, RULE};

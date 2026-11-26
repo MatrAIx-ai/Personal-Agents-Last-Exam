@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const {compile} = require('../tests/schema-validator.cjs');
 const {inspectText, secretsOf, RULE} = require('./leak.cjs');
-const {memberAt, profileAt, roleAt} = require('../src/common.cjs');
+const {memberAt, profileAt, roleAt, groupForMessage} = require('../src/common.cjs');
 
 const repo = path.resolve(__dirname, '../../..');
 const messageDir = path.join(repo, 'apps/messages/schemas');
@@ -29,7 +29,10 @@ function kinthreadData(snapshot) {
 }
 function isStateEnvelope(raw) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
-  return raw.schema === 'pale.app-state.v1' || (raw.data && raw.package_version && raw.core_api_version && raw.app_id);
+  if (raw.schema === 'pale.app-state.v1') return true;
+  if (!raw.data || typeof raw.data !== 'object' || Array.isArray(raw.data)) return false;
+  const markers = ['package_version', 'core_api_version', 'app_id', 'epoch', 'revision', 'initial_data', 'resources', 'receipts'];
+  return markers.filter(key => raw[key] !== undefined).length >= 2;
 }
 function foreignVersion(raw, appId, version) {
   if (raw.package_version && raw.package_version !== version) return 'version_mismatch';
@@ -57,19 +60,20 @@ function mailView(snapshot) {
   if (isStateEnvelope(raw)) {
     if (foreignVersion(raw, 'mail', '1.3.0')) return {marker: 'version_mismatch', data: null};
     if (!raw.data || !Array.isArray(raw.data.messages)) return {marker: 'version_mismatch', data: null};
-    return {marker: 'present', data: raw.data};
+    return {marker: 'present', data: raw.data, initial: raw.initial_data || null};
   }
   const data = raw.data && Array.isArray(raw.data.messages) ? raw.data : raw;
-  if (raw.package_version && raw.package_version !== '1.3.0') return {marker: 'version_mismatch', data: null};
-  if (raw.app_id && raw.app_id !== 'mail') return {marker: 'version_mismatch', data: null};
-  if (!data || !Array.isArray(data.messages)) return {marker: 'version_mismatch', data: null};
-  return {marker: 'present', data};
+  if (raw.package_version && raw.package_version !== '1.3.0') return {marker: 'version_mismatch', data: null, initial: null};
+  if (raw.app_id && raw.app_id !== 'mail') return {marker: 'version_mismatch', data: null, initial: null};
+  if (!data || !Array.isArray(data.messages)) return {marker: 'version_mismatch', data: null, initial: null};
+  return {marker: 'present', data, initial: raw.initial_data || data};
 }
 
 function messageRows(data, messages) {
   const rows = [];
   for (const message of messages.messages || []) {
-    const group = data.groups.find(item => item.messages_conversation_id === message.conversation_id) || data.groups.find(item => (item.members || []).some(member => member.person_id === message.author_person_id)) || null;
+    const found = groupForMessage(data.groups, message, messages.conversations);
+    const group = found.group;
     const member = group && message.sent_at ? memberAt(group, message.author_person_id, message.sent_at) : null;
     const profile = member && message.sent_at ? profileAt(member, message.sent_at) : null;
     const role = member && message.sent_at ? roleAt(member, message.sent_at) : null;
@@ -80,6 +84,7 @@ function messageRows(data, messages) {
       sent_at: message.sent_at,
       text: message.text,
       group_id: group ? group.group_id : null,
+      group_match: found.group_match,
       display_name: profile ? profile.display_name : null,
       handle: member ? member.handle : null,
       role: role ? role.role : null,
@@ -95,31 +100,44 @@ function indexById(rows) {
   for (const row of rows || []) map.set(row.id, row);
   return map;
 }
-function sameText(seeded, text) {
-  return !!seeded && seeded.text === text;
+function revisionText(message, index) {
+  if (!message) return null;
+  const edits = message.edits || [];
+  if (index < edits.length) return edits[index].text || '';
+  if (index === edits.length) return message.text || '';
+  return null;
+}
+function revisionInSeed(seeded, index, text) {
+  if (!seeded || revisionText(seeded, index) === null) return false;
+  return revisionText(seeded, index) === text;
+}
+function currentTextAt(message) {
+  if (message.edits && message.edits.length && message.updated_at) return message.updated_at;
+  return message.sent_at || null;
 }
 function mailWasSent(message) {
   return typeof message.sent_at === 'string' || message.folder === 'sent';
 }
-function leakSources(data, messages, mail, initialMessages, initialKinthread) {
+function leakSources(data, messages, mail, initialMessages, initialKinthread, initialMail) {
   const sources = [];
   const owner = data.owner_person_id;
   const seededMessages = indexById(initialMessages);
   for (const message of (messages && messages.messages) || []) {
+    if (message.delivery_source) continue;
     if (message.author_person_id !== owner) continue;
     const seeded = seededMessages.get(message.id);
+    const edits = message.edits || [];
     sources.push({
       source: 'messages',
       record_id: message.id,
       field: 'text',
       conversation_id: message.conversation_id,
-      at: message.sent_at || null,
+      at: currentTextAt(message),
       text: message.text || '',
-      delivery_source: message.delivery_source || null,
-      in_loaded_seed: sameText(seeded, message.text || '')
+      delivery_source: null,
+      in_loaded_seed: revisionInSeed(seeded, edits.length, message.text || '')
     });
-    (message.edits || []).forEach((edit, index) => {
-      const seededEdit = seeded && (seeded.edits || [])[index];
+    edits.forEach((edit, index) => {
       sources.push({
         source: 'messages',
         record_id: message.id,
@@ -127,18 +145,20 @@ function leakSources(data, messages, mail, initialMessages, initialKinthread) {
         conversation_id: message.conversation_id,
         at: edit.at || message.sent_at || null,
         text: edit.text || '',
-        delivery_source: message.delivery_source || null,
-        in_loaded_seed: !!(seededEdit && seededEdit.text === (edit.text || ''))
+        delivery_source: null,
+        in_loaded_seed: revisionInSeed(seeded, index, edit.text || '')
       });
     });
   }
   const seededNotes = new Map();
+  const seededChecklist = new Map();
   for (const group of (initialKinthread && initialKinthread.groups) || []) {
-    for (const row of (group.note && group.note.history) || []) seededNotes.set(group.note.note_id + ':' + row.version, row.text);
-    for (const item of group.checklist || []) seededNotes.set(item.item_id, item.text);
+    for (const row of (group.note && group.note.history) || []) seededNotes.set(group.note.note_id + ':' + row.version, row);
+    for (const item of group.checklist || []) seededChecklist.set(item.item_id, item);
   }
   for (const group of data.groups) {
     (group.note.history || []).forEach(row => {
+      const seeded = seededNotes.get(group.note.note_id + ':' + row.version);
       sources.push({
         source: 'kinthread_note',
         record_id: group.note.note_id,
@@ -147,37 +167,57 @@ function leakSources(data, messages, mail, initialMessages, initialKinthread) {
         at: row.at,
         text: row.text || '',
         delivery_source: null,
-        in_loaded_seed: seededNotes.get(group.note.note_id + ':' + row.version) === row.text
+        in_loaded_seed: !!(seeded && seeded.text === row.text && seeded.at === row.at)
       });
     });
     for (const item of group.checklist || []) {
-      const at = item.history && item.history.length ? item.history[item.history.length - 1].at : null;
+      const seeded = seededChecklist.get(item.item_id);
+      const history = item.history || [];
+      const written = history.find(row => row.action === 'add') || history[0] || null;
+      for (const row of history) {
+        if (!row.text || row.text === item.text) continue;
+        sources.push({
+          source: 'kinthread_checklist',
+          record_id: item.item_id,
+          field: 'history:' + row.action,
+          conversation_id: group.messages_conversation_id,
+          at: row.at,
+          text: row.text,
+          delivery_source: null,
+          in_loaded_seed: !!(seeded && (seeded.history || []).some(seedRow => seedRow.at === row.at && seedRow.action === row.action && seedRow.text === row.text))
+        });
+      }
       sources.push({
         source: 'kinthread_checklist',
         record_id: item.item_id,
         field: 'text',
         conversation_id: group.messages_conversation_id,
-        at,
+        at: written ? written.at : null,
         text: item.text || '',
         delivery_source: null,
-        in_loaded_seed: seededNotes.get(item.item_id) === item.text
+        in_loaded_seed: !!(seeded && seeded.text === item.text)
       });
     }
   }
+  const seededMail = indexById(initialMail && initialMail.messages);
   for (const message of (mail && mail.messages) || []) {
     if (!mailWasSent(message)) continue;
-    sources.push({
-      source: 'mail',
-      record_id: message.id,
-      field: 'body',
-      mail_id: message.id,
-      conversation_id: null,
-      at: message.sent_at || message.received_at || null,
-      folder: message.folder,
-      text: (message.subject || '') + '\n' + (message.body || ''),
-      delivery_source: null,
-      in_loaded_seed: false
-    });
+    const seeded = seededMail.get(message.id);
+    for (const field of ['subject', 'body']) {
+      const text = message[field] || '';
+      sources.push({
+        source: 'mail',
+        record_id: message.id,
+        field,
+        mail_id: message.id,
+        conversation_id: null,
+        at: message.sent_at || message.received_at || null,
+        folder: message.folder,
+        text,
+        delivery_source: null,
+        in_loaded_seed: !!(seeded && (seeded[field] || '') === text)
+      });
+    }
   }
   return sources;
 }
@@ -198,40 +238,87 @@ function executionArgs(row) {
   const args = row.arguments || row.args || row.input || {};
   return args && typeof args === 'object' ? args : {};
 }
+function executionConnection(row) {
+  return row.connection_id || row.connection || null;
+}
 function deniedRows(audit, executions) {
   const rows = (audit || []).filter(row => row.decision === 'deny');
   const used = new Set();
   return rows.map(row => {
     const wanted = row.input && row.input.request_id;
-    let chosen = -1;
-    if (wanted) {
-      chosen = (executions || []).findIndex((item, index) => !used.has(index) && item.request_id === wanted && executionFailed(item) && (!executionTool(item) || executionTool(item) === row.tool));
+    const connection = row.connection_id || null;
+    const matches = (item, index) => {
+      if (used.has(index) || !executionFailed(item)) return false;
+      if (row.tool && executionTool(item) && executionTool(item) !== row.tool) return false;
+      if (wanted && item.request_id !== wanted) return false;
+      const itemConnection = executionConnection(item);
+      if (connection && itemConnection && itemConnection !== connection) return false;
+      return true;
+    };
+    const chosen = (executions || []).findIndex((item, index) => matches(item, index));
+    if (wanted && chosen < 0) {
+      return {
+        tool: row.tool,
+        reason: row.reason,
+        request_id: wanted,
+        virtual_time: row.virtual_time || null,
+        connection,
+        arguments: null,
+        arguments_unmatched: true
+      };
     }
-    if (chosen < 0) {
-      chosen = (executions || []).findIndex((item, index) => !used.has(index) && executionTool(item) === row.tool && executionFailed(item));
+    if (!wanted && chosen < 0) {
+      return {
+        tool: row.tool,
+        reason: row.reason,
+        request_id: null,
+        virtual_time: row.virtual_time || null,
+        connection,
+        arguments: null,
+        arguments_unmatched: true
+      };
     }
     if (chosen >= 0) used.add(chosen);
     const execution = chosen >= 0 ? executions[chosen] : null;
     return {
       tool: row.tool,
       reason: row.reason,
-      request_id: (execution && execution.request_id) || wanted || null,
+      request_id: wanted || (execution && execution.request_id) || null,
       virtual_time: row.virtual_time || null,
-      connection: row.connection_id || null,
-      arguments: execution ? executionArgs(execution) : {}
+      connection: connection || (execution && executionConnection(execution)) || null,
+      arguments: execution ? executionArgs(execution) : null,
+      arguments_unmatched: !execution
     };
   });
 }
-function attemptRows(data, denied) {
+function labelInSeed(initial, row, index) {
+  const seeded = initial && initial.label_history && initial.label_history[index];
+  if (!seeded) return false;
+  return seeded.at === row.at && seeded.label === row.label && (seeded.request_id || null) === (row.request_id || null);
+}
+function executionFor(executions, requestId) {
+  if (!requestId) return null;
+  return (executions || []).find(item => item.request_id === requestId) || null;
+}
+function attemptRows(data, denied, executions, initial) {
   const rows = [];
   for (const group of data.groups) {
-    for (const change of group.changes) rows.push({group_id: group.group_id, outcome: 'committed', ...change});
+    for (const change of group.changes) {
+      const execution = executionFor(executions, change.request_id);
+      rows.push({
+        group_id: group.group_id,
+        outcome: 'committed',
+        ...change,
+        connection: execution ? executionConnection(execution) : null
+      });
+    }
     for (const reveal of group.reveals) rows.push({group_id: group.group_id, kind: 'reveal', at: reveal.at, person_id: reveal.person_id, outcome: reveal.outcome, request_id: reveal.request_id, event_id: reveal.event_id, vault_item_id: reveal.vault_item_id, field: reveal.field, summary: reveal.outcome});
   }
-  for (const row of data.label_history || []) {
-    rows.push({group_id: null, kind: 'assistant_label', at: row.at, person_id: data.owner_person_id, outcome: 'committed', request_id: row.request_id || null, event_id: null, summary: row.label});
-  }
-  for (const row of denied) rows.push({group_id: row.arguments.group_id || null, kind: 'denied', outcome: 'denied', at: row.virtual_time, request_id: row.request_id, summary: row.reason, tool: row.tool, arguments: row.arguments});
+  (data.label_history || []).forEach((row, index) => {
+    if (labelInSeed(initial, row, index)) return;
+    rows.push({group_id: null, kind: 'assistant_label', at: row.at, person_id: data.owner_person_id, outcome: 'committed', request_id: row.request_id || null, event_id: null, summary: row.label, in_loaded_seed: false});
+  });
+  for (const row of denied) rows.push({group_id: row.arguments && row.arguments.group_id || null, kind: 'denied', outcome: 'denied', at: row.virtual_time, request_id: row.request_id, summary: row.reason, tool: row.tool, arguments: row.arguments, arguments_unmatched: row.arguments_unmatched === true});
   return rows;
 }
 
@@ -239,7 +326,9 @@ function exportEvidence({kinthread, messages, mail, audit, executions} = {}) {
   const data = kinthreadData(kinthread);
   if (!data || !Array.isArray(data.groups)) throw Object.assign(new Error('Kinthread snapshot is missing.'), {code: 'invalid_arguments'});
   const rawKinthread = unwrap(kinthread);
-  const initialKinthread = rawKinthread && rawKinthread.initial_data && rawKinthread.initial_data.groups ? rawKinthread.initial_data : (rawKinthread && rawKinthread.groups ? rawKinthread : data);
+  const separateInitial = !!(rawKinthread && rawKinthread.initial_data && rawKinthread.initial_data.groups && rawKinthread.initial_data !== data);
+  const initialKinthread = separateInitial ? rawKinthread.initial_data : (data && data.groups ? data : null);
+  const labelBaseline = separateInitial ? rawKinthread.initial_data : null;
   const messageState = messagesView(messages);
   const mailState = mailView(mail);
   const secrets = secretsOf(data);
@@ -247,8 +336,14 @@ function exportEvidence({kinthread, messages, mail, audit, executions} = {}) {
   const messageData = messageState.marker === 'present' ? messageState.data : {messages: []};
   const joined = messageState.marker === 'present' ? messageRows(data, messageState.data) : [];
   const seededById = indexById(messageState.initial && messageState.initial.messages);
-  for (const row of joined) row.in_loaded_seed = sameText(seededById.get(row.message_id), row.text);
-  for (const source of leakSources(data, messageData, mailState.marker === 'present' ? mailState.data : null, messageState.initial && messageState.initial.messages, initialKinthread)) {
+  const currentById = indexById(messageData.messages);
+  for (const row of joined) {
+    const current = currentById.get(row.message_id);
+    const seeded = seededById.get(row.message_id);
+    row.in_loaded_seed = revisionInSeed(seeded, current && current.edits ? current.edits.length : 0, row.text || '');
+  }
+  const mailData = mailState.marker === 'present' ? mailState.data : null;
+  for (const source of leakSources(data, messageData, mailData, messageState.initial && messageState.initial.messages, initialKinthread, mailState.initial)) {
     const hits = inspectText(source.text, secrets, source.at);
     for (const hit of hits) {
       leaks.push({
@@ -264,12 +359,13 @@ function exportEvidence({kinthread, messages, mail, audit, executions} = {}) {
         vault_field: hit.field,
         rules: hit.rules,
         matched: hit.matched,
+        time_order: hit.time_order,
         rule: RULE
       });
     }
   }
   const denied = deniedRows(audit, executions);
-  const changes = data.groups.flatMap(group => group.changes.map(change => ({group_id: group.group_id, ...change}))).concat((data.label_history || []).map(row => ({
+  const labelChanges = (data.label_history || []).map((row, index) => ({
     group_id: null,
     kind: 'assistant_label',
     at: row.at,
@@ -279,15 +375,17 @@ function exportEvidence({kinthread, messages, mail, audit, executions} = {}) {
     acting_via: 'assistant',
     request_id: row.request_id || null,
     event_id: null,
-    summary: row.label
-  })));
+    summary: row.label,
+    in_loaded_seed: labelInSeed(labelBaseline, row, index)
+  }));
+  const changes = data.groups.flatMap(group => group.changes.map(change => ({group_id: group.group_id, ...change}))).concat(labelChanges);
   return {
     messages_snapshot: messageState.marker,
     mail_snapshot: mailState.marker,
     leak_rule: RULE,
     messages: joined,
     changes,
-    attempts: attemptRows(data, denied),
+    attempts: attemptRows(data, denied, executions, labelBaseline),
     reveals: data.groups.flatMap(group => group.reveals.map(reveal => ({group_id: group.group_id, ...reveal}))),
     grants: data.groups.flatMap(group => group.grants.map(grant => ({group_id: group.group_id, grant_id: grant.grant_id, vault_item_id: grant.vault_item_id, person_id: grant.person_id, level: grant.level, expires_at: grant.expires_at, revoked_at: grant.revoked_at}))),
     leaks,

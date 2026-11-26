@@ -4,7 +4,8 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 
 const root = path.join(__dirname, '..');
-const DATE = /^(\d{4})-(\d{2})-(\d{2})T/;
+const DATE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+const ZONE = 'America/Los_Angeles';
 const PARTS = [
   ['a-family-care', 'fixtures/a-family-care'],
   ['a-family-care-later', 'fixtures/a-family-care/later'],
@@ -29,65 +30,92 @@ function months() {
 function sha256(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 }
-function add(bucket, dates, unrecognized, source, field, instant) {
+function civilDate(year, month, day) {
+  if (month < 1 || month > 12 || day < 1) return false;
+  const last = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return day <= last;
+}
+function placeInstant(instant) {
+  if (typeof instant !== 'string') return {error: 'not_a_timestamp'};
+  const match = instant.match(DATE);
+  if (!match) return {error: 'unrecognized'};
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const hour = Number(match[4]);
+  const minute = Number(match[5]);
+  const second = Number(match[6]);
+  if (hour > 23 || minute > 59 || second > 60 || !civilDate(year, month, day)) return {error: 'invalid_civil_date'};
+  const parsed = Date.parse(instant);
+  if (!Number.isFinite(parsed)) return {error: 'invalid_instant'};
+  const parts = new Intl.DateTimeFormat('en-US', {timeZone: ZONE, year: 'numeric', month: '2-digit', day: '2-digit'}).formatToParts(new Date(parsed));
+  const value = type => parts.find(part => part.type === type).value;
+  const pacificYear = value('year');
+  const pacificMonth = value('month');
+  const pacificDay = value('day');
+  return {key: pacificYear + '-' + pacificMonth, day: pacificYear + '-' + pacificMonth + '-' + pacificDay, month: pacificMonth};
+}
+function add(bucket, dates, excluded, source, field, instant, recordId) {
   if (instant === null || instant === undefined) return 0;
-  const match = typeof instant === 'string' ? instant.match(DATE) : null;
-  if (!match) {
-    unrecognized.push(source + '.' + field);
+  const placed = placeInstant(instant);
+  if (placed.error) {
+    excluded.push({id: recordId || null, source, field, instant: typeof instant === 'string' ? instant : null, reason: placed.error});
     return 0;
   }
-  const key = match[1] + '-' + match[2];
+  if (placed.key < '2025-01' || placed.key > '2026-12') {
+    excluded.push({id: recordId || null, source, field, instant, reason: 'outside_window', pacific_month: placed.key});
+    return 0;
+  }
   if (!bucket[source]) bucket[source] = {};
-  bucket[source][key] = (bucket[source][key] || 0) + 1;
-  const day = match[1] + '-' + match[2] + '-' + match[3];
+  bucket[source][placed.key] = (bucket[source][placed.key] || 0) + 1;
   if (!dates[source]) dates[source] = new Set();
-  dates[source].add(day);
-  dates.all.add(day);
+  dates[source].add(placed.day);
+  dates.all.add(placed.day);
   return 1;
 }
-function collectSeed(bucket, dates, unrecognized, data, source) {
+function collectSeed(bucket, dates, excluded, data, source) {
   let total = 0;
-  for (const row of data.label_history || []) total += add(bucket, dates, unrecognized, source, 'label_history.at', row.at);
+  for (const row of data.label_history || []) total += add(bucket, dates, excluded, source, 'label_history.at', row.at, 'label:' + row.at);
   for (const notice of data.notices || []) {
-    total += add(bucket, dates, unrecognized, source, 'notice.created_at', notice.created_at);
-    if (notice.delivery) total += add(bucket, dates, unrecognized, source, 'delivery.recorded_at', notice.delivery.recorded_at);
+    total += add(bucket, dates, excluded, source, 'notice.created_at', notice.created_at, notice.notice_id);
+    if (notice.delivery) total += add(bucket, dates, excluded, source, 'delivery.recorded_at', notice.delivery.recorded_at, notice.notice_id);
   }
   for (const group of data.groups || []) {
-    total += add(bucket, dates, unrecognized, source, 'group.created_at', group.created_at);
+    total += add(bucket, dates, excluded, source, 'group.created_at', group.created_at, group.group_id);
     for (const member of group.members) {
-      total += add(bucket, dates, unrecognized, source, 'member.joined_at', member.joined_at);
-      if (member.left_at) total += add(bucket, dates, unrecognized, source, 'member.left_at', member.left_at);
-      for (const row of member.profile_history || []) total += add(bucket, dates, unrecognized, source, 'profile_history.at', row.at);
-      for (const row of member.role_history || []) total += add(bucket, dates, unrecognized, source, 'role_history.at', row.at);
+      total += add(bucket, dates, excluded, source, 'member.joined_at', member.joined_at, member.person_id);
+      if (member.left_at) total += add(bucket, dates, excluded, source, 'member.left_at', member.left_at, member.person_id);
+      for (const row of member.profile_history || []) total += add(bucket, dates, excluded, source, 'profile_history.at', row.at, member.person_id);
+      for (const row of member.role_history || []) total += add(bucket, dates, excluded, source, 'role_history.at', row.at, member.person_id);
       for (const row of member.membership_intervals || []) {
-        total += add(bucket, dates, unrecognized, source, 'membership_intervals.joined_at', row.joined_at);
-        if (row.left_at) total += add(bucket, dates, unrecognized, source, 'membership_intervals.left_at', row.left_at);
+        total += add(bucket, dates, excluded, source, 'membership_intervals.joined_at', row.joined_at, member.person_id);
+        if (row.left_at) total += add(bucket, dates, excluded, source, 'membership_intervals.left_at', row.left_at, member.person_id);
       }
     }
     for (const item of group.vault_items || []) {
       for (const field of item.fields || []) {
-        for (const row of field.history || []) total += add(bucket, dates, unrecognized, source, 'vault_field.history.at', row.at);
+        for (const row of field.history || []) total += add(bucket, dates, excluded, source, 'vault_field.history.at', row.at, item.vault_item_id + ':' + field.name);
       }
     }
-    for (const row of (group.note && group.note.history) || []) total += add(bucket, dates, unrecognized, source, 'note.history.at', row.at);
+    for (const row of (group.note && group.note.history) || []) total += add(bucket, dates, excluded, source, 'note.history.at', row.at, group.note.note_id + ':' + row.version);
     for (const item of group.checklist || []) {
-      for (const row of item.history || []) total += add(bucket, dates, unrecognized, source, 'checklist.history.at', row.at);
+      for (const row of item.history || []) total += add(bucket, dates, excluded, source, 'checklist.history.at', row.at, item.item_id);
     }
     for (const grant of group.grants || []) {
-      total += add(bucket, dates, unrecognized, source, 'grant.granted_at', grant.granted_at);
-      if (grant.revoked_at) total += add(bucket, dates, unrecognized, source, 'grant.revoked_at', grant.revoked_at);
+      total += add(bucket, dates, excluded, source, 'grant.granted_at', grant.granted_at, grant.grant_id);
+      if (grant.revoked_at) total += add(bucket, dates, excluded, source, 'grant.revoked_at', grant.revoked_at, grant.grant_id);
     }
-    for (const reveal of group.reveals || []) total += add(bucket, dates, unrecognized, source, 'reveal.at', reveal.at);
-    for (const row of group.activity || []) total += add(bucket, dates, unrecognized, source, 'activity.at', row.at);
-    for (const row of group.changes || []) total += add(bucket, dates, unrecognized, source, 'changes.at', row.at);
+    for (const reveal of group.reveals || []) total += add(bucket, dates, excluded, source, 'reveal.at', reveal.at, reveal.reveal_id);
+    for (const row of group.activity || []) total += add(bucket, dates, excluded, source, 'activity.at', row.at, row.activity_id);
+    for (const row of group.changes || []) total += add(bucket, dates, excluded, source, 'changes.at', row.at, row.change_id);
   }
   return total;
 }
-function collectMessages(bucket, dates, unrecognized, data, source) {
+function collectMessages(bucket, dates, excluded, data, source) {
   let total = 0;
   for (const message of data.messages || []) {
-    total += add(bucket, dates, unrecognized, source, 'message.sent_at', message.sent_at);
-    for (const edit of message.edits || []) total += add(bucket, dates, unrecognized, source, 'message.edits.at', edit.at);
+    total += add(bucket, dates, excluded, source, 'message.sent_at', message.sent_at, message.id);
+    for (const edit of message.edits || []) total += add(bucket, dates, excluded, source, 'message.edits.at', edit.at, message.id);
   }
   return total;
 }
@@ -103,7 +131,10 @@ function futureProblems(value, clock, trail, problems) {
     }
     return;
   }
-  if (typeof value === 'string' && DATE.test(value) && Date.parse(value) > Date.parse(clock)) problems.push(trail);
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
+    const placed = placeInstant(value);
+    if (placed.error || Date.parse(value) > Date.parse(clock)) problems.push(trail);
+  }
 }
 function partition(dir) {
   const clock = read(path.join(dir, 'clock.json')).initial_time;
@@ -119,13 +150,13 @@ function report() {
   for (const [name, rel] of PARTS) parts[name] = partition(path.join(root, rel));
   const counts = {};
   const dates = {all: new Set()};
-  const unrecognized = [];
+  const excluded = [];
   let total = 0;
   const sources = [];
   for (const [name, part] of Object.entries(parts)) {
     if (!name.endsWith('-later')) continue;
-    total += collectSeed(counts, dates, unrecognized, part.seed, name);
-    total += collectMessages(counts, dates, unrecognized, part.messages, name);
+    total += collectSeed(counts, dates, excluded, part.seed, name);
+    total += collectMessages(counts, dates, excluded, part.messages, name);
     sources.push({
       partition: name,
       seed: path.relative(root, part.seedFile),
@@ -153,7 +184,7 @@ function report() {
     zone: 'America/Los_Angeles',
     provenance: 'synthetic',
     window: {start: '2025-01-01', end: '2026-12-31'},
-    method: 'The civil date is the year, month, and day written in each timestamp. The generator stores the Pacific offset for that date, so the calendar day is the date in the string.',
+    method: 'Each timestamp is parsed as an instant, checked as a real civil date, and converted to America/Los_Angeles before the year, month, and day are taken. Impossible dates and instants outside 2025-01 through 2026-12 are listed in excluded.',
     date_fields: [
       'label_history.at', 'group.created_at', 'member.joined_at', 'member.left_at',
       'profile_history.at', 'role_history.at', 'membership_intervals.joined_at', 'membership_intervals.left_at',
@@ -180,7 +211,8 @@ function report() {
     distinct_dates: Object.fromEntries(Object.entries(dates).filter(([name]) => name !== 'all').map(([name, set]) => [name, set.size])),
     global_distinct_dates: dates.all.size,
     total_dated_records: total,
-    unrecognized_dates: unrecognized,
+    unrecognized_dates: excluded.filter(row => row.reason !== 'outside_window').map(row => row.source + '.' + row.field),
+    excluded,
     earliest: [...dates.all].sort()[0] || null,
     latest: [...dates.all].sort().slice(-1)[0] || null,
     load_example: 'node examples/read-january.cjs',
@@ -191,7 +223,7 @@ function main() {
   const value = report();
   const file = path.join(root, 'contribution/coverage-report.json');
   fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n');
-  console.log(JSON.stringify({gaps: value.gaps, months: Object.keys(value.by_month).length, total: value.total_dated_records, bodies: value.message_bodies, unrecognized: value.unrecognized_dates.length}, null, 2));
+  console.log(JSON.stringify({gaps: value.gaps, months: Object.keys(value.by_month).length, total: value.total_dated_records, bodies: value.message_bodies, unrecognized: value.unrecognized_dates.length, excluded: value.excluded.length}, null, 2));
 }
-module.exports = {report, futureProblems, partition};
+module.exports = {report, futureProblems, partition, placeInstant};
 if (require.main === module) main();

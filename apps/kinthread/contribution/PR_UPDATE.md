@@ -22,7 +22,7 @@ Title: `[Environment Proposal] [Social & communities + Health & care] Kinthread 
 
 Head `<HEAD_SHA>`. `package_sha256` `<PACKAGE_SHA256>`. Verified against upstream main `<UPSTREAM_MAIN_SHA>` (public runtime 1.6.0, Core API 1.2.0). Messages 1.0.0 and Mail 1.3.0 are on that main. No unmerged dependency.
 
-The 2-3 person-day figure was a human sketch. This package is larger than that sketch: the first runnable set and the completion items (note, checklist, the remaining events, fixtures b and c, `notice.delivery_result`, and the 2025-2026 dataset) landed together. The directory is about 2.5 MB because those histories, the later partitions, and the task seed are all in the package.
+The 2-3 person-day figure was a human sketch. This package is larger than that sketch: the first runnable set and the completion items (note, checklist, the remaining events, fixtures b and c, `notice.delivery_result`, and the 2025-2026 dataset) landed together. The directory is about 2.9 MB because those histories, the later partitions, and the task seed are all in the package.
 
 **Dependencies:** Messages 1.0.0 (`apps/messages`), Mail 1.3.0 (`examples/apps/mail`), public runtime 1.6.0. First consumer: task #72. Scheduled sends stay in Messages. Kinthread does not schedule messages.
 
@@ -55,12 +55,12 @@ Registered in `apps.registry.json`.
 
 From `apps/kinthread`, on Node v18.20.8, v22.23.5, and v24.22.1:
 
-- `npm test`: business 28 passed, runtime 10 passed, Mail integration 2 passed. No skips.
+- `npm test`: business 35 passed, runtime 14 passed, Mail integration 2 passed. No skips.
 - `npm run example`: Mercy A. Osei.
 - `node examples/role-change.cjs`: one pending role-change notice, then one Mail message from `kinthread@pale.example`, and a repeat publish returns `duplicate: true`.
 - `node examples/read-january.cjs`: Daniel joined 2025-01-01 and message `msg-a-0001` is dated 2025-01-12.
 - `node scripts/check-messages-seed.cjs` for fixture (a), the 13:40 task seed, the 14:10 after seed, and the three later partitions: `ok`.
-- `node scripts/coverage-report.cjs`: 24 months, 0 gaps, 438 distinct dates, 1367 dated records, 2025-01-01 through 2026-12-31, all synthetic, zone America/Los_Angeles. Later message bodies are all distinct (527, 360, and 192).
+- `node scripts/coverage-report.cjs`: 24 months, 0 gaps, 450 distinct dates, 1391 dated records, 2025-01-01 through 2026-12-31, all synthetic, zone America/Los_Angeles. Later message bodies are all distinct (527, 360, and 192), including after the author and timestamp prefix is removed.
 
 From the repository root, on the same three Node versions:
 
@@ -75,7 +75,7 @@ From the repository root, on the same three Node versions:
 
 2. Package boundaries. `env.validate_bundle` sees the Kinthread seed, binding, and policies. `scripts/check-messages-seed.cjs` is separate and runs from the fixture generator. A message with no `sent_at` is an error. `evaluator/export.cjs` reads Messages only through `apps/messages/schemas/seed.schema.json` and `state.schema.json`. A bare seed and a full state envelope are selected by shape. A missing snapshot sets `messages_snapshot` to `missing` and returns Kinthread rows with empty message rows. A version or schema mismatch, including an envelope with the wrong Core version, sets `version_mismatch` and does not read the inner seed as if it were valid. Mail uses `mail_snapshot` with the same two markers.
 
-Leak rule `kinthread.leak.v1` is in the README. `digit_run` removes spaces, hyphens, dots, and slashes, so `19.28` matches `1928`. `digit_words` uses number words such as `one nine two eight`. `Dinner 19:28` and `1,9,2,8` stay clear. Matching uses the vault value that applied at the record's time, and sent Mail is recognized from `sent_at` as well as folder `sent`. Each leak row keeps the record id, revision or field, conversation or mail id, time, and `in_loaded_seed`.
+Leak rule `kinthread.leak.v1` is in the README. `digit_run` removes spaces, hyphens, dots, and slashes on both sides and keeps separate runs across letters, colons, and commas, so `19.28` matches `1928` and `01A23` does not match `0123`. `digit_words` uses number words such as `one nine two eight`. `Dinner 19:28` and `1,9,2,8` stay clear. Current message text is dated at the latest edit. Checklist text is dated when the text was written. A disclosure at the same instant as a vault update still matches the previous value, and an unordered pair is marked `time_order` `ambiguous`. Baseline revisions, including original message text that later sits in edit history and a sent Mail item in the loaded snapshot, stay marked `in_loaded_seed`. Mail subject and body are separate fields. Received records stay out of the owner-send index. Deny rows join on request id, connection, and tool. A same-role success is an attempt. `examples/task-data/family-care/after/` is the 13:40 baseline after `session-events.json`. Avatars are 128 by 128 PNG files, at most 15 KB. Coverage instants are converted to America/Los_Angeles, and impossible civil dates are excluded by id.
 
 Denied rows join to the failed execution by `request_id` when that id is present, and otherwise to a denied execution of the same tool. A successful execution is not used. Attempt rows include a successful assistant-label change. A successful replay may include `duplicate: true`, and that field is optional on every tool output schema.
 

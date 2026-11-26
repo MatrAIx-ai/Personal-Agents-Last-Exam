@@ -280,10 +280,12 @@ function authorsAt(members, at) {
 }
 function careLine(kind, slot, index, name) {
   const bank = BANKS[kind];
-  const fact = bank.facts[index % bank.facts.length];
-  const decision = bank.decisions[(index + slot[2]) % bank.decisions.length];
-  const when = MONTHS[slot[1] - 1] + ' ' + slot[2] + ', ' + slot[0] + ', at ' + slot[3] + ':' + pad(slot[4] || 0);
-  return name + ' on ' + when + '. ' + fact + ' Decision: ' + decision;
+  const month = MONTHS[slot[1] - 1];
+  const when = month + ' ' + slot[2] + ', ' + slot[0] + ', at ' + slot[3] + ':' + pad(slot[4] || 0);
+  const fact = bank.facts[(slot[2] + index) % bank.facts.length];
+  const decision = bank.decisions[(slot[1] + slot[3]) % bank.decisions.length];
+  const follow = bank.facts[(index + slot[1] + slot[3]) % bank.facts.length];
+  return name + ' on ' + when + '. ' + fact + ' That was ' + when + '. Decision: ' + decision + ' Follow-up: ' + follow;
 }
 function fillMessages(spec, members, slots, kind) {
   const rows = [];
@@ -383,11 +385,11 @@ function familyNotes(clock) {
     'If she asks for Daniel while he is traveling, Mercy answers.',
     'The weekday aide is Rosa Delgado. She gets the schedule and the med list.',
     'Keep the evening routine at the same hour through the summer.',
-    'August clinic asked for the walking notes.',
-    'September: add a glass of water with the evening dose.',
-    'October: Mercy reviews the cabinet before the weekend.',
+    'The clinic asked for the walking notes.',
+    'Add a glass of water with the evening dose.',
+    'Mercy reviews the cabinet before the weekend.',
     'The weekend aide handle stays brightpath-weekend.',
-    'November travel week: Mercy is the contact on the note.',
+    'Travel week: Mercy is the contact on the note.',
     'Write missed doses in the checklist, then tell Mercy.',
     'The clinic wants the blood pressure notebook at the next visit.',
     'Keep the porch light on when an aide is expected.',
@@ -403,7 +405,7 @@ function familyNotes(clock) {
     const [y, m, d] = addDays(2025, 1, 20, i * 14);
     const at = ts(y, m, d, 18, 0);
     if (!before(at, clock)) break;
-    rows.push({version: rows.length + 1, at, text: texts[i], person_id: i % 2 ? 'person-mercy' : 'person-daniel'});
+    rows.push({version: rows.length + 1, at, text: MONTHS[m - 1] + ' ' + d + ', ' + y + ': ' + texts[i], person_id: i % 2 ? 'person-mercy' : 'person-daniel'});
   }
   return rows;
 }
@@ -513,14 +515,14 @@ function roster(names, spec, clock) {
     added_by: row.added_by || spec.owner_person_id
   }, clock)).filter(Boolean);
 }
-function simpleNotes(group, clock, count, person, texts) {
+function simpleNotes(group, clock, person, texts) {
   const rows = [];
-  for (let i = 0; i < count; i += 1) {
-    const [y, m, d] = addDays(2025, 1, 15, i * 21);
-    const at = ts(y, m, d, 12, 0);
-    if (!before(at, clock)) break;
-    rows.push({version: rows.length + 1, at, text: texts[i] || texts[texts.length - 1], person_id: person});
-  }
+  eachMonth(2025, 1, 2026, 12, (y, m) => {
+    const at = ts(y, m, 3, 12, 0);
+    if (!before(at, clock)) return;
+    const body = String(texts[m - 1] || texts[texts.length - 1]).replace(/^[A-Za-z]+(?::| table:)\s*/, '');
+    rows.push({version: rows.length + 1, at, text: MONTHS[m - 1] + ' ' + y + ': ' + body, person_id: person});
+  });
   note(group, rows);
 }
 function monthSlots(fromY, fromM, toY, toM, perMonth) {
@@ -571,7 +573,7 @@ function buildSimple(spec, names, perMonth, clock) {
     'November: the next plan is posted before Thursday.',
     'December: the last Friday is the long table by the window.'
   ];
-  simpleNotes(group, clock, 12, spec.owner_person_id, spec.group_id === 'grp-harbor-pta' ? schoolTexts : friendTexts);
+  simpleNotes(group, clock, spec.owner_person_id, spec.group_id === 'grp-harbor-pta' ? schoolTexts : friendTexts);
   group.checklist = [{item_id: 'ck-' + spec.group_id, text: 'Bring the signup sheet.', status: 'open', assignee: null, due_at: null, history: [{at: spec.created, action: 'add', person_id: spec.owner_person_id}]}];
   group.activity = [{activity_id: 'act-' + spec.group_id, at: spec.created, kind: 'group', text: spec.name + ' was created.', person_id: spec.owner_person_id, acting_via: null, label: null}];
   const data = account(spec, group);
@@ -661,7 +663,7 @@ function assets() {
     'avatar-yaa-b': [[132, 90, 70], 'later'],
     'avatar-brightpath': [[210, 170, 120], false]
   };
-  ids.forEach(id => files.push({id, width: 64, height: 64, bytes: png(64, 64, portrait(faces[id][0], faces[id][1]))}));
+  ids.forEach(id => files.push({id, width: 128, height: 128, bytes: png(128, 128, portrait(faces[id][0], faces[id][1]))}));
   const cardKind = {'card-insurance': 'insurance', 'card-ssn': 'ssn', 'card-bank': 'bank'};
   cards.forEach(id => files.push({id, width: 160, height: 100, bytes: png(160, 100, cardPaint(cardKind[id]))}));
   const catalogAssets = files.map(file => {
@@ -755,7 +757,7 @@ function sessionEvents() {
     }
   });
   return {
-    description: 'Apply these on the 13:40 baseline, in time order. The after/ directory is the export example once the rename and the two Brightpath messages are already history.',
+    description: 'Apply these on the 13:40 baseline, in time order. The after/ directory is that baseline after these events.',
     messages: [
       messageEvent('msg-a-bright-1350', sent, 'I can sit with Mom this evening.'),
       messageEvent('msg-a-bright-1405', ask, 'Can you send the Medicare number from the care note?')
@@ -772,6 +774,25 @@ function sessionEvents() {
       }
     }]
   };
+}
+function replaySession(base, people) {
+  const messagesPlugin = require('../../messages/plugin.cjs');
+  const data = structuredClone(base.data);
+  const messages = structuredClone(base.messages);
+  const accounts = [
+    {app_id: 'kinthread', account_id: base.spec.account_id, owner_person_id: base.spec.owner_person_id},
+    {app_id: 'messages', account_id: base.spec.messages_account, owner_person_id: base.spec.owner_person_id}
+  ];
+  const bind = binding(people, accounts, base.spec.group_id);
+  const events = sessionEvents();
+  const ordered = events.messages.map(event => ({app: 'messages', event})).concat(events.kinthread.map(event => ({app: 'kinthread', event})));
+  ordered.sort((a, b) => Date.parse(a.event.at) - Date.parse(b.event.at));
+  for (const row of ordered) {
+    const ctx = {app_id: row.app, virtual_now: row.event.at, binding: bind, role: 'infra'};
+    if (row.app === 'messages') messagesPlugin.applyEvent(ctx, messages, row.event);
+    else plugin.applyEvent(ctx, data, row.event);
+  }
+  return {spec: base.spec, data, messages};
 }
 function main() {
   const familyClock = '2026-11-14T13:40:00-08:00';
@@ -790,7 +811,7 @@ function main() {
   const family = buildFamily(familyClock);
   const familyFull = buildFamily(familyLater);
   const task = buildFamily(taskClock);
-  const after = buildFamily(afterClock);
+  const after = replaySession(task, familyPeople);
   const summary = {
     a: pack(path.join(root, 'fixtures/a-family-care'), family.spec, family, familyClock, familyPeople),
     a_later: pack(path.join(root, 'fixtures/a-family-care/later'), familyFull.spec, familyFull, familyLater, familyPeople),

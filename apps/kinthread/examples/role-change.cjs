@@ -96,18 +96,32 @@ async function publishAndRead() {
     ]});
     clients.push(router);
     await router.initialize();
+    const pendingSnap = await infra.call('env.snapshot');
+    const notice = pendingSnap.snapshot.data.notices.find(item => item.notice_id === changed.notice_id);
     const sent = await publishPendingNotices({infra, router});
     const again = await publishPendingNotices({infra, router});
     const mail = open('mail', 'agent', 'role-mail');
     await mail.initialize();
     const got = await mail.call('mail.get', {id: sent.results[0].result.event_id});
-    const after = await infra.call('env.snapshot');
     return {
-      notice_id: changed.notice_id,
-      duplicate_publish: again.results[0].result.duplicate,
-      mail_subject: got.message.subject,
-      mail_from: got.message.from,
-      notices: after.snapshot.data.notices.length
+      pending: {
+        notice_id: notice.notice_id,
+        status: notice.status,
+        title: notice.title,
+        body: notice.body
+      },
+      publish: {
+        status: sent.results[0].result.status,
+        event_id: sent.results[0].result.event_id,
+        duplicate: again.results[0].result.duplicate === true
+      },
+      mail: {
+        id: got.message.id,
+        subject: got.message.subject,
+        body: got.message.body,
+        from: got.message.from,
+        folder: got.message.folder
+      }
     };
   } finally {
     await Promise.allSettled(clients.map(client => client.close()));
@@ -118,7 +132,7 @@ async function publishAndRead() {
 module.exports = {demonstrate, publishAndRead};
 if (require.main === module) {
   publishAndRead().then(result => {
-    console.log(JSON.stringify({pending: demonstrate(), mail: result}, null, 2));
+    console.log(JSON.stringify(result, null, 2));
   }).catch(error => {
     console.error(error);
     process.exitCode = 1;

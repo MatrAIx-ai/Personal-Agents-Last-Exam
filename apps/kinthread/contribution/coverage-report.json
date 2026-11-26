@@ -5,7 +5,7 @@
     "start": "2025-01-01",
     "end": "2026-12-31"
   },
-  "method": "The civil date is the year, month, and day written in each timestamp. The generator stores the Pacific offset for that date, so the calendar day is the date in the string.",
+  "method": "Each timestamp is parsed as an instant, checked as a real civil date, and converted to America/Los_Angeles before the year, month, and day are taken. Impossible dates and instants outside 2025-01 through 2026-12 are listed in excluded.",
   "date_fields": [
     "label_history.at",
     "group.created_at",
@@ -42,22 +42,22 @@
       "partition": "a-family-care-later",
       "seed": "fixtures/a-family-care/later/seed.json",
       "messages": "fixtures/a-family-care/later/messages-seed.json",
-      "seed_sha256": "6a8015d5fc0f80a7644cd1aeddaafbe7b0dcfc59bbf4bf983bd74f3c024b82e5",
-      "messages_sha256": "961d61781871c8203be96227c708be2a0d6c77fef06b9d8e519d23cbe17decc7"
+      "seed_sha256": "6b126bb501f578b3ebbd405ecf455735fde24c980bae68de8eb39be95fd9e142",
+      "messages_sha256": "d67a12217305ba1f9960cde8284d56adada3d7c84998bb523dc0ef1894c56125"
     },
     {
       "partition": "b-school-parents-later",
       "seed": "fixtures/b-school-parents/later/seed.json",
       "messages": "fixtures/b-school-parents/later/messages-seed.json",
-      "seed_sha256": "0498d24535cb29b1be692ee3189f3aa16a2810649bc6cc2d5e2c82c207f3656d",
-      "messages_sha256": "b33b1304e699b8478984ac467fb57b1c7652f5a1611d242dc84b85469e7db942"
+      "seed_sha256": "cc2af5245d0fbfa745dde6f3b798f7af88be669e67d47d03a0aa79cf6e0b1855",
+      "messages_sha256": "d8eaff4f1457d4cf36ad79be7577239bfbab194ac8ad90b5933737b2f1052f59"
     },
     {
       "partition": "c-friends-later",
       "seed": "fixtures/c-friends/later/seed.json",
       "messages": "fixtures/c-friends/later/messages-seed.json",
-      "seed_sha256": "b6c2f4487af0501afce806506509317b3210b7a9b77d90202822eab168bb1119",
-      "messages_sha256": "5786649552d979637a95079e331f8935f5f186958e0cf4a030b128b185115eee"
+      "seed_sha256": "d3d3dd478e35c3b0b79ab1d427abc45a61009950471528cb26b898e3191e8fcd",
+      "messages_sha256": "6a08e9491fcfb9c78d78462d1d07ba5d1ead7a899d6ae502c50c7229d965477c"
     }
   ],
   "message_bodies": {
@@ -132,8 +132,8 @@
     },
     "2025-02": {
       "a-family-care-later": 17,
-      "b-school-parents-later": 17,
-      "c-friends-later": 10
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2025-03": {
       "a-family-care-later": 14,
@@ -142,8 +142,8 @@
     },
     "2025-04": {
       "a-family-care-later": 13,
-      "b-school-parents-later": 17,
-      "c-friends-later": 10
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2025-05": {
       "a-family-care-later": 10,
@@ -157,8 +157,8 @@
     },
     "2025-07": {
       "a-family-care-later": 8,
-      "b-school-parents-later": 17,
-      "c-friends-later": 10
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2025-08": {
       "a-family-care-later": 7,
@@ -172,89 +172,90 @@
     },
     "2025-10": {
       "a-family-care-later": 6,
-      "b-school-parents-later": 15,
-      "c-friends-later": 8
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2025-11": {
       "a-family-care-later": 6,
-      "b-school-parents-later": 15,
-      "c-friends-later": 8
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2025-12": {
       "a-family-care-later": 6,
-      "b-school-parents-later": 15,
-      "c-friends-later": 8
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2026-01": {
       "a-family-care-later": 7,
-      "b-school-parents-later": 15,
-      "c-friends-later": 8
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2026-02": {
       "a-family-care-later": 6,
-      "b-school-parents-later": 15,
-      "c-friends-later": 8
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2026-03": {
       "a-family-care-later": 8,
-      "b-school-parents-later": 15,
-      "c-friends-later": 8
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2026-04": {
       "a-family-care-later": 6,
-      "b-school-parents-later": 15,
-      "c-friends-later": 8
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2026-05": {
       "a-family-care-later": 6,
-      "b-school-parents-later": 15,
-      "c-friends-later": 8
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2026-06": {
       "a-family-care-later": 6,
-      "b-school-parents-later": 15,
-      "c-friends-later": 8
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2026-07": {
       "a-family-care-later": 6,
-      "b-school-parents-later": 15,
-      "c-friends-later": 8
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2026-08": {
       "a-family-care-later": 4,
-      "b-school-parents-later": 15,
-      "c-friends-later": 11
+      "b-school-parents-later": 16,
+      "c-friends-later": 12
     },
     "2026-09": {
       "a-family-care-later": 160,
-      "b-school-parents-later": 15,
-      "c-friends-later": 8
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2026-10": {
       "a-family-care-later": 191,
-      "b-school-parents-later": 15,
-      "c-friends-later": 8
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2026-11": {
       "a-family-care-later": 90,
-      "b-school-parents-later": 15,
-      "c-friends-later": 8
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2026-12": {
       "a-family-care-later": 5,
-      "b-school-parents-later": 15,
-      "c-friends-later": 8
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     }
   },
   "gaps": [],
   "distinct_dates": {
     "a-family-care-later": 158,
-    "b-school-parents-later": 367,
-    "c-friends-later": 201
+    "b-school-parents-later": 385,
+    "c-friends-later": 217
   },
-  "global_distinct_dates": 438,
-  "total_dated_records": 1367,
+  "global_distinct_dates": 450,
+  "total_dated_records": 1391,
   "unrecognized_dates": [],
+  "excluded": [],
   "earliest": "2025-01-01",
   "latest": "2026-12-31",
   "load_example": "node examples/read-january.cjs",

@@ -1,6 +1,6 @@
 'use strict';
 const fs = require('node:fs');
-const {memberAt} = require('../src/common.cjs');
+const {memberAt, groupForMessage} = require('../src/common.cjs');
 
 function load(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -30,13 +30,25 @@ function check(kinthread, messages) {
     }
   }
   for (const message of messages.messages || []) {
+    const conversation = (messages.conversations || []).find(item => item.id === message.conversation_id);
+    if (!conversation) {
+      errors.push((message.id || 'message') + ' names conversation ' + message.conversation_id + ', which does not exist');
+      continue;
+    }
+    if (!(conversation.participant_ids || []).includes(message.author_person_id)) {
+      errors.push((message.id || 'message') + ' author ' + message.author_person_id + ' is not a participant in ' + conversation.id);
+      continue;
+    }
     if (!message.sent_at) {
       errors.push(message.id + ' has no sent_at, so authorship at send time cannot be established');
       continue;
     }
-    const linked = groups.find(group => group.messages_conversation_id === message.conversation_id);
-    const home = linked || groups.find(group => group.members.some(member => member.person_id === message.author_person_id));
-    if (!home || !memberAt(home, message.author_person_id, message.sent_at)) {
+    const found = groupForMessage(groups, message, messages.conversations);
+    if (found.group_match === 'ambiguous') {
+      errors.push((message.id || 'message') + ' matches more than one Kinthread group');
+      continue;
+    }
+    if (!found.group || !memberAt(found.group, message.author_person_id, message.sent_at)) {
       errors.push((message.id || 'message') + ' author ' + message.author_person_id + ' was not a member at ' + message.sent_at);
     }
   }

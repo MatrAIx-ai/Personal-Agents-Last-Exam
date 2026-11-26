@@ -7,10 +7,10 @@ const crypto = require('node:crypto');
 const {fixture, input, tools} = require('./harness.cjs');
 const plugin = require('../plugin.cjs');
 const zlib = require('node:zlib');
-const {inspectText, secretsOf} = require('../evaluator/leak.cjs');
-const {profileAt, roleAt, memberAt} = require('../src/common.cjs');
+const {inspectText, secretsOf, digitRuns} = require('../evaluator/leak.cjs');
+const {profileAt, roleAt, memberAt, fold, mask} = require('../src/common.cjs');
 const {check} = require('../scripts/check-messages-seed.cjs');
-const {report} = require('../scripts/coverage-report.cjs');
+const {report, placeInstant} = require('../scripts/coverage-report.cjs');
 
 const HOME = 'grp-home';
 const FAMILY = 'grp-osei-care';
@@ -430,6 +430,10 @@ test('avatar files differ and every fixture date stays inside its clock', () => 
   const daniel = pngView('fixtures/a-family-care/assets/avatar-daniel.png');
   const copy = pngView('fixtures/a-family-care/assets/avatar-daniel-copy.png');
   assert.deepEqual(daniel.center, copy.center);
+  assert.equal(daniel.width, 128);
+  assert.equal(daniel.height, 128);
+  assert.equal(copy.width, 128);
+  assert.equal(fs.readFileSync(path.join(root, 'fixtures/a-family-care/assets/avatar-daniel.png')).length <= 15 * 1024, true);
   assert.equal(pngView('fixtures/a-family-care/assets/card-insurance.png').colors >= 3, true);
   assert.equal(pngView('fixtures/a-family-care/assets/card-ssn.png').colors >= 3, true);
   assert.equal(pngView('fixtures/a-family-care/assets/card-bank.png').colors >= 3, true);
@@ -439,6 +443,10 @@ test('avatar files differ and every fixture date stays inside its clock', () => 
   assert.equal(value.sources.length, 3);
   assert.equal(value.sources.every(row => row.seed_sha256 && row.messages_sha256), true);
   for (const row of Object.values(value.message_bodies)) assert.equal(row.distinct_bodies, row.messages);
+  assert.equal(value.excluded.length, 0);
+  assert.equal(placeInstant('2027-01-01T07:30:00Z').key, '2026-12');
+  assert.equal(placeInstant('2025-02-31T12:00:00-08:00').error, 'invalid_civil_date');
+  assert.equal(placeInstant('2024-06-01T12:00:00-07:00').key, '2024-06');
   const familyNotes = read('fixtures/a-family-care/later/seed.json').groups[0].note.history;
   assert.equal(new Set(familyNotes.map(row => row.text)).size, familyNotes.length);
   assert.match(familyNotes[familyNotes.length - 1].text, /donepezil 10 mg at 20:00/);
@@ -695,4 +703,161 @@ test('a message with no sent_at is a checker error', () => {
   broken.messages[0].sent_at = null;
   const errors = check(data, broken);
   assert.equal(errors.some(item => item.includes('no sent_at')), true);
+});
+
+test('digit runs stay split across letters, and short secrets mask by grapheme', () => {
+  assert.deepEqual(digitRuns('01A23'), ['01', '23']);
+  assert.equal(inspectText('0123', [{vault_item_id: 'v', field: 'code', value: '01A23', leak_check: true}]).length, 0);
+  assert.equal(inspectText('Dinner 19:28', [{vault_item_id: 'v', field: 'code', value: '1928', leak_check: true}]).length, 0);
+  assert.equal(inspectText('The bill was 19.28', [{vault_item_id: 'v', field: 'code', value: '1928', leak_check: true}]).some(hit => hit.rules.includes('digit_run')), true);
+  assert.equal(fold('Ος'), fold('οσ'));
+  assert.equal(mask('🟢🟡', 'secret'), '**');
+  assert.equal(mask('A', 'secret'), '*');
+  assert.equal(mask('AB', 'private'), '**');
+  assert.equal(mask('ABC', 'secret'), 'BC');
+});
+
+test('a departed member list row stays at the departure instant', () => {
+  const f = fixture();
+  f.call('kinthread.ownership.transfer', {group_id: HOME, person_id: 'person-mercy'});
+  f.event({
+    event_id: 'daniel-left-list',
+    at: '2026-11-18T09:20:00-08:00',
+    operation: 'member.left',
+    payload: {group_id: HOME, person_id: 'person-daniel', reason: 'left'}
+  });
+  const first = f.call('kinthread.groups.list', {});
+  f.event({
+    event_id: 'alex-joined-later',
+    at: '2026-11-18T09:30:00-08:00',
+    operation: 'member.joined',
+    payload: {group_id: HOME, person_id: 'person-alex', handle: 'alex-rivera', display_name: 'Alex Rivera', role: 'member', added_by: 'person-mercy'}
+  });
+  const second = f.call('kinthread.groups.list', {});
+  assert.equal(second.groups[0].member_count, first.groups[0].member_count);
+  assert.equal(second.groups[0].updated_at, '2026-11-18T09:20:00-08:00');
+  assert.equal(second.groups[0].as_of, '2026-11-18T09:20:00-08:00');
+});
+
+test('an open membership interval cannot sit before a later interval', () => {
+  const person = {
+    person_id: 'person-daniel',
+    joined_at: '2026-06-01T00:00:00-08:00',
+    left_at: null,
+    membership_intervals: [
+      {joined_at: '2026-01-01T00:00:00-08:00', left_at: null},
+      {joined_at: '2026-06-01T00:00:00-08:00', left_at: null}
+    ]
+  };
+  assert.equal(memberAt({members: [person]}, 'person-daniel', '2026-03-01T00:00:00-08:00'), null);
+  const f = fixture();
+  const data = f.data;
+  const daniel = member(data, 'person-daniel');
+  daniel.membership_intervals = [
+    {joined_at: '2026-01-01T00:00:00-08:00', left_at: null},
+    {joined_at: daniel.joined_at, left_at: daniel.left_at || null}
+  ];
+  throws(() => plugin.validateSeed(f.ctx, data), 'invalid_seed');
+});
+
+test('an expired view grant still leaves masked vault fields readable', () => {
+  const f = fixture();
+  f.mutate(data => {
+    data.groups[0].grants = [{
+      grant_id: 'gr-expired-view',
+      vault_item_id: 'vi-sample',
+      person_id: 'person-daniel',
+      level: 'view',
+      granted_by: 'person-daniel',
+      granted_at: '2026-11-01T09:00:00-08:00',
+      expires_at: '2026-11-02T09:00:00-08:00',
+      revoked_at: null
+    }];
+  });
+  const listed = f.call('kinthread.vault.list', {group_id: HOME});
+  const got = f.call('kinthread.vault.item.get', {group_id: HOME, vault_item_id: 'vi-sample'});
+  const fromList = listed.items[0].fields.find(field => field.name === 'code').masked;
+  const fromGet = got.item.fields.find(field => field.name === 'code').masked;
+  assert.equal(fromList, fromGet);
+  assert.equal(fromGet.endsWith('68'), true);
+  throws(() => f.call('kinthread.vault.reveal', {group_id: HOME, vault_item_id: 'vi-sample', field: 'code'}), 'vault_access_denied');
+});
+
+test('a same-role call records an attempt and a missing delivery id can be filled once', () => {
+  const f = fixture();
+  const same = f.call('kinthread.roles.set', {group_id: HOME, person_id: 'person-mercy', role: 'admin'});
+  assert.equal(same.notice_id, null);
+  const change = f.data.groups[0].changes.find(row => row.summary === 'Role unchanged.');
+  assert.equal(change.person_id, 'person-mercy');
+  assert.equal(change.from_role, 'admin');
+  assert.equal(change.to_role, 'admin');
+  assert.equal(typeof change.request_id, 'string');
+  const changed = f.call('kinthread.roles.set', {group_id: HOME, person_id: 'person-mercy', role: 'member'});
+  const noticeId = changed.notice_id;
+  f.event({
+    event_id: 'deliver-null',
+    at: f.ctx.virtual_now,
+    operation: 'notice.delivery_result',
+    payload: {notice_id: noticeId, publish_request_id: 'notice-' + noticeId, status: 'committed', messaging_event_id: null}
+  });
+  assert.equal(f.data.notices.find(item => item.notice_id === noticeId).delivery.messaging_event_id, null);
+  f.event({
+    event_id: 'deliver-fill',
+    at: f.ctx.virtual_now,
+    operation: 'notice.delivery_result',
+    payload: {notice_id: noticeId, publish_request_id: 'notice-' + noticeId, status: 'committed', messaging_event_id: 'mail-evt-1'}
+  });
+  const filled = f.data.notices.find(item => item.notice_id === noticeId);
+  assert.equal(filled.delivery.status, 'committed');
+  assert.equal(filled.delivery.messaging_event_id, 'mail-evt-1');
+  throws(() => f.event({
+    event_id: 'deliver-replace',
+    at: f.ctx.virtual_now,
+    operation: 'notice.delivery_result',
+    payload: {notice_id: noticeId, publish_request_id: 'notice-' + noticeId, status: 'committed', messaging_event_id: 'mail-evt-2'}
+  }), 'delivery_status_conflict');
+  assert.equal(f.data.notices.find(item => item.notice_id === noticeId).delivery.messaging_event_id, 'mail-evt-1');
+});
+
+test('the message checker requires a real conversation and a participating author', () => {
+  const data = read('fixtures/a-family-care/seed.json');
+  const messages = read('fixtures/a-family-care/messages-seed.json');
+  const missing = structuredClone(messages);
+  missing.messages[0].conversation_id = 'conv-missing';
+  assert.equal(check(data, missing).some(item => item.includes('does not exist')), true);
+  const outsider = structuredClone(messages);
+  outsider.messages.push({
+    id: 'msg-ama-on-dm',
+    account_id: outsider.account_id,
+    conversation_id: 'conv-daniel-mercy',
+    author_person_id: 'person-ama',
+    text: 'Ama wrote on the Daniel and Mercy thread.',
+    sent_at: '2026-02-03T19:10:00-08:00'
+  });
+  assert.equal(check(data, outsider).some(item => item.includes('not a participant')), true);
+});
+
+test('later message bodies stay distinct after the author and time prefix, and notes name their own month', () => {
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const prefix = /^.+ on [A-Z][a-z]+ \d{1,2}, \d{4}, at \d{1,2}:\d{2}\. /;
+  for (const dir of ['fixtures/a-family-care/later', 'fixtures/b-school-parents/later', 'fixtures/c-friends/later']) {
+    const messages = read(dir + '/messages-seed.json');
+    const remainders = messages.messages.map(row => row.text.replace(prefix, ''));
+    assert.equal(new Set(remainders).size, messages.messages.length, dir);
+    const notes = read(dir + '/seed.json').groups[0].note.history;
+    for (const row of notes) {
+      const name = months[Number(row.at.slice(5, 7)) - 1];
+      for (const month of months) {
+        if (row.text.includes(month)) assert.equal(month, name, row.text);
+      }
+    }
+  }
+  const before = read('examples/task-data/family-care/messages-seed.json');
+  const after = read('examples/task-data/family-care/after/messages-seed.json');
+  const baseline = new Map(before.messages.map(row => [row.id, row.text]));
+  for (const [id, text] of baseline) assert.equal(after.messages.find(row => row.id === id).text, text);
+  const october = after.messages.find(row => row.id === 'msg-a-0406');
+  assert.equal(october.text.startsWith('Brightpath Backup on October 28, 2026'), true);
+  const renamed = read('examples/task-data/family-care/after/seed.json').groups[0].changes.find(row => row.event_id === 'rename-brightpath');
+  assert.equal(renamed.kind, 'profile');
 });

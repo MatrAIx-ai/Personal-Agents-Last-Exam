@@ -83,6 +83,13 @@ test('one role change yields one Mail message, a repeat is a duplicate, and a mi
       virtual_now: boot.snapshot.virtual_now
     });
     assert.equal(loaded.status, 'ready');
+    const mail = open('mail', 'agent', run, dir, 'mail-reader');
+    const mailInfra = open('mail', 'infra', run, dir, 'mail-infra');
+    clients.push(mail, mailInfra);
+    await mail.initialize();
+    await mailInfra.initialize();
+    const beforeMail = await mailInfra.call('env.snapshot');
+    const beforeCount = beforeMail.snapshot.data.messages.length;
     const ready = await infra.call('env.snapshot');
     const changed = await agent.call('kinthread.roles.set', {
       expected_version: ready.version,
@@ -96,13 +103,7 @@ test('one role change yields one Mail message, a repeat is a duplicate, and a mi
     const notice = pending.snapshot.data.notices.find(item => item.notice_id === changed.notice_id);
     assert.equal(notice.status, 'pending_delivery');
     assert.equal(pending.snapshot.data.groups[0].members.find(item => item.person_id === 'person-mercy').role, 'member');
-    const mail = open('mail', 'agent', run, dir, 'mail-reader');
-    const mailInfra = open('mail', 'infra', run, dir, 'mail-infra');
-    clients.push(mail, mailInfra);
-    await mail.initialize();
-    await mailInfra.initialize();
-    const beforeMail = await mailInfra.call('env.snapshot');
-    const beforeCount = beforeMail.snapshot.data.messages.length;
+    assert.equal((await mailInfra.call('env.snapshot')).snapshot.data.messages.length, beforeCount);
     const deniedRouter = await router(deniedConfig, run, dir, 'router-denied');
     clients.push(deniedRouter);
     const denied = await publishPendingNotices({infra, router: deniedRouter});

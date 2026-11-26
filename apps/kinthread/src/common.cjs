@@ -18,7 +18,14 @@ function nfc(value) {
   return String(value).normalize('NFC');
 }
 function fold(value) {
-  return nfc(value).normalize('NFKC').toLocaleLowerCase('en-US').replace(/\u00df/g, 'ss').normalize('NFC');
+  return nfc(value).normalize('NFKC').toLowerCase().replace(/\u00df/g, 'ss').replace(/\u1e9e/g, 'ss').replace(/\u03c2/g, '\u03c3').normalize('NFC');
+}
+function graphemes(value) {
+  const text = String(value);
+  if (typeof Intl !== 'undefined' && typeof Intl.Segmenter === 'function') {
+    return [...new Intl.Segmenter(undefined, {granularity: 'grapheme'}).segment(text)].map(part => part.segment);
+  }
+  return [...text];
 }
 function handleOf(value) {
   const raw = String(value || '').trim();
@@ -93,10 +100,10 @@ function vaultField(item, name) {
   return field;
 }
 function mask(value, classification) {
-  const text = String(value);
-  if ((classification === 'secret' || classification === 'private') && text.length <= 2) return '*'.repeat(text.length);
-  if (text.length <= 2) return text;
-  return text.slice(-2);
+  const parts = graphemes(value);
+  if ((classification === 'secret' || classification === 'private') && parts.length <= 2) return '*'.repeat(parts.length);
+  if (parts.length <= 2) return parts.join('');
+  return parts.slice(-2).join('');
 }
 function intervalsOf(member) {
   if (Array.isArray(member.membership_intervals) && member.membership_intervals.length) return member.membership_intervals;
@@ -133,7 +140,7 @@ function pushActivity(data, group, ctx, row) {
 }
 function pushChange(data, group, ctx, row) {
   const change_id = take(data, 'change', 'ch');
-  group.changes.push({
+  const change = {
     change_id,
     at: ctx.virtual_now,
     kind: row.kind,
@@ -144,7 +151,10 @@ function pushChange(data, group, ctx, row) {
     request_id: row.request_id || null,
     event_id: row.event_id || null,
     summary: row.summary
-  });
+  };
+  if (row.vault_item_id) change.vault_item_id = row.vault_item_id;
+  if (row.grant_level) change.grant_level = row.grant_level;
+  group.changes.push(change);
   return change_id;
 }
 function pushNotice(data, group, ctx, row) {
@@ -181,8 +191,10 @@ function memberAt(group, personId, instant) {
   const member = memberRow(group, personId);
   if (!member) return null;
   const t = at(instant, 'invalid_event');
-  const covered = intervalsOf(member).some(row => {
+  const intervals = intervalsOf(member);
+  const covered = intervals.some((row, index) => {
     if (at(row.joined_at, 'invalid_seed') > t) return false;
+    if (!row.left_at && index < intervals.length - 1) return false;
     if (row.left_at && at(row.left_at, 'invalid_seed') <= t) return false;
     return true;
   });
@@ -203,6 +215,17 @@ function roleAt(member, instant) {
     if (at(row.at, 'invalid_seed') <= t) chosen = row;
   }
   return chosen;
+}
+function groupForMessage(groups, message, conversations) {
+  const list = groups || [];
+  const linked = list.find(group => group.messages_conversation_id === message.conversation_id);
+  if (linked) return {group: linked, group_match: 'conversation'};
+  const conversation = (conversations || []).find(item => item.id === message.conversation_id);
+  const people = conversation && Array.isArray(conversation.participant_ids) && conversation.participant_ids.length ? conversation.participant_ids : [message.author_person_id];
+  const candidates = list.filter(group => people.every(id => (group.members || []).some(member => member.person_id === id)));
+  if (candidates.length === 1) return {group: candidates[0], group_match: 'participants'};
+  if (candidates.length > 1) return {group: null, group_match: 'ambiguous'};
+  return {group: null, group_match: 'none'};
 }
 function publicMember(member) {
   return {
@@ -255,6 +278,6 @@ module.exports = {
   fail, copy, references, log, at, nfc, fold, handleOf, clockOk, notBefore,
   groupOf, memberRow, activeMember, roleRow, hasPower, boundPerson,
   requireUser, requirePower, grantStatus, revealOutcome, vaultItem, vaultField, mask, intervalsOf, ensureIntervals, take, touch,
-  pushActivity, pushChange, pushNotice, titles, clockLabel, memberAt, profileAt, roleAt,
+  pushActivity, pushChange, pushNotice, titles, clockLabel, memberAt, profileAt, roleAt, groupForMessage, graphemes,
   publicMember, publicField, publicItem, publicGrant
 };
