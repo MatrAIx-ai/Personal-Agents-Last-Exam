@@ -171,7 +171,9 @@ function subjectHits(data, row, companions) {
           const revisions = (companion.revisions || []).filter(item => {
             if (item.object_id !== link.object_id) return false;
             const author = account(data, item.actor_account_id);
-            return !!(author && author.handle === link.handle);
+            if (author && author.handle === link.handle) return true;
+            const samePerson = (data.accounts || []).find(row => row.person_id && row.person_id === item.person_id && row.handle === link.handle);
+            return !!samePerson;
           });
           const ids = new Set(revisions.map(item => item.revision_id));
           if ((companion.subjects || []).some(item => ids.has(item.revision_id) && item.person_id === subject.person_id)) matches.push('linked_post');
