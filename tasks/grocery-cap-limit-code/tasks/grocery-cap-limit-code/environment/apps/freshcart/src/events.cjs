@@ -1,8 +1,30 @@
 'use strict';
 const { fail, copy } = require('./domain-utils.cjs');
 const { log } = require('./diagnostics.cjs');
+const { subtotal, withDelivery, pricedLines } = require('./prices.cjs');
 
 function applyEvent(ctx, data, event) {
+  if (event.operation === 'freshcart.list.apply') {
+    const lines = event.payload.lines || [];
+    const priced = lines.length ? pricedLines(data, lines) : [];
+    data.shared_list = priced.map((line, index) => ({
+      ...line,
+      added_by: lines[index].added_by || null,
+      added_at: lines[index].added_at || event.at
+    }));
+    data.cart = priced.map(line => ({ item_id: line.item_id, qty: line.qty }));
+    data.list_total_cents = priced.length ? withDelivery(data, subtotal(data, data.cart)) : 0;
+    log(ctx, 'freshcart.list.apply', { line_count: priced.length, list_total_cents: data.list_total_cents });
+    return data;
+  }
+  if (event.operation === 'freshcart.card_limit.sync') {
+    if (!Number.isInteger(event.payload.card_limit_cents) || event.payload.card_limit_cents < 0) {
+      fail('invalid_event', 'Card limit must be whole cents.');
+    }
+    data.card_limit_cents = event.payload.card_limit_cents;
+    log(ctx, 'freshcart.card_limit.sync', { card_limit_cents: data.card_limit_cents });
+    return data;
+  }
   if (event.operation === 'freshcart.substitution.offer') {
     const payload = event.payload;
     if (data.substitutions.some(row => row.id === payload.id)) return data;

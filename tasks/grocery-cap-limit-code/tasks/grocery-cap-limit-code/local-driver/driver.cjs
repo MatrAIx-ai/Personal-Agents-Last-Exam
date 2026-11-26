@@ -1,15 +1,12 @@
 'use strict';
 
 const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
 const { Client } = require('../../../../../runtime/client.cjs');
 const { create } = require('../../../../../runtime/messaging/src/router.cjs');
 const cloudEvents = require('../../../../../runtime/core/cloud-events.cjs');
 
-const taskRoot = path.resolve(__dirname, '..');
-const packageRoot = path.resolve(taskRoot, '../..');
-const repoRoot = path.resolve(packageRoot, '../..');
+const { prepareRun, routerConfig, packageRoot, taskRoot } = require('./registry.cjs');
 const deps = path.join(packageRoot, '.deps/keelcard');
 const { loadSeed } = require(path.join(deps, 'src/load-seed.cjs'));
 const { publishPending } = require(path.join(deps, 'src/publisher.cjs'));
@@ -17,49 +14,12 @@ const world = require('./world.cjs');
 
 const APPS = ['keelcard', 'mail', 'freshcart', 'webstub'];
 const SEED_CLOCK = '2026-11-18T09:00:00-08:00';
+const DECLARED = ['main', 'no-reply', 'clarification', 'control-under-cap', 'control-express', 'control-authentic'];
 
 function readJson(file) {
   const text = fs.readFileSync(file, 'utf8');
   const body = text.split('\n').filter(line => !line.startsWith('#')).join('\n');
   return JSON.parse(body);
-}
-
-function writeRegistry(file) {
-  const registry = {
-    schema_version: 1,
-    initial_time: SEED_CLOCK,
-    apps: [
-      { app_id: 'keelcard', version: '1.0.0', path: 'tasks/grocery-cap-limit-code/.deps/keelcard' },
-      { app_id: 'mail', version: '1.3.0', path: 'examples/apps/mail' },
-      { app_id: 'freshcart', version: '1.0.0', path: 'tasks/grocery-cap-limit-code/tasks/grocery-cap-limit-code/environment/apps/freshcart' },
-      { app_id: 'webstub', version: '1.0.0', path: 'tasks/grocery-cap-limit-code/tasks/grocery-cap-limit-code/environment/apps/webstub' }
-    ]
-  };
-  fs.writeFileSync(file, JSON.stringify(registry, null, 2));
-}
-
-function routerConfig(file, publisher) {
-  const merchants = publisher === 'freshcart';
-  const body = {
-    schema_version: 2,
-    registry: path.relative(repoRoot, file).replaceAll('\\', '/'),
-    publishers: [{
-      app_id: merchants ? 'freshcart' : 'keelcard',
-      account_id: merchants ? 'fc-grace' : 'kc-adeyemi',
-      owner_person_id: 'person-grace',
-      package_root: merchants
-        ? 'tasks/grocery-cap-limit-code/.deps/keelcard/examples/test-merchant'
-        : 'tasks/grocery-cap-limit-code/.deps/keelcard',
-      contribution_ref: 'contribution/contribution.json',
-      allowed_recipients: merchants
-        ? [{ app_id: 'keelcard', account_id: 'kc-adeyemi', channel: 'channel.card.authorization' }]
-        : [{ app_id: 'mail', account_id: 'mail-grace', channel: 'channel.email' }]
-    }],
-    authentication: { mode: 'trusted-stdio' }
-  };
-  const config = file + '.' + (merchants ? 'merchant' : 'mail') + '.json';
-  fs.writeFileSync(config, JSON.stringify(body, null, 2));
-  return config;
 }
 
 class RunHalt extends Error {
@@ -71,12 +31,15 @@ class RunHalt extends Error {
 }
 
 async function runScenario(options) {
+  const started = Date.now();
   const plan = options.plan;
   const variant = plan.variant || 'main';
   const hinted = Boolean(options.hinted);
   const runId = String(options.runId || plan.id || 'gcl').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 80);
-  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gcl-'));
-  const registryFile = path.join(repoRoot, 'grocery-cap.registry.json');
+  const prepared = prepareRun(runId);
+  const stateDir = prepared.stateDir;
+  const registryFile = prepared.registryFile;
+  const runRoot = prepared.runRoot;
   const workspace = path.join(taskRoot, 'environment/workspace');
   const timeline = readJson(path.join(taskRoot, 'context/timeline.yaml'));
   const script = readJson(path.join(taskRoot, 'context/user/script.json'));
@@ -84,6 +47,7 @@ async function runScenario(options) {
   const historyName = variant === 'control-express' ? 'history-express.json' : 'history.json';
   const history = readJson(path.join(taskRoot, 'context/user', historyName));
   const arrivals = readJson(path.join(workspace, 'mail/arrivals.json'));
+  const listEdits = readJson(path.join(workspace, 'freshcart/list-edits.json'));
   const hint = hinted ? hintText() : '';
   const transcript = [];
   const toolLog = [];
@@ -92,10 +56,11 @@ async function runScenario(options) {
   let tick = 0;
   let trace = 0;
   let delivery = 'none';
+  let publication = null;
+  let clockBarrier = null;
   const infra = {};
   const agent = {};
   const routers = [];
-  writeRegistry(registryFile);
 
   function logCall(entry) {
     trace += 1;
@@ -126,6 +91,14 @@ async function runScenario(options) {
         virtual_now: at
       });
       if (moved.status !== 'committed') throw new Error(id + ' did not advance: ' + moved.status + ' ' + (moved.message || ''));
+      const check = await infra[id].call('env.snapshot');
+      const actual = check.snapshot && check.snapshot.virtual_now;
+      if (Date.parse(actual) !== Date.parse(at)) {
+        clockBarrier = { app_id: id, expected: at, actual: actual || null };
+        const error = new Error('Clock barrier held ' + id + ' at ' + (actual || 'unknown'));
+        error.clockBarrier = clockBarrier;
+        throw error;
+      }
     }
     clock = at;
   }
@@ -157,9 +130,17 @@ async function runScenario(options) {
       receiptLog,
       runDir: path.join(stateDir, runId)
     });
+    publication = {
+      halted: Boolean(published.halted),
+      stopped: Boolean(published.stopped),
+      sent: published.sent || [],
+      report: published.report || null
+    };
     if (published.halted || published.stopped) {
-      delivery = 'unresolved';
-      throw new RunHalt(published.report || published);
+      delivery = published.sent && published.sent.length ? 'confirmed' : 'unresolved';
+      const halt = new RunHalt(publication);
+      halt.delivery = delivery;
+      throw halt;
     }
     if (published.sent && published.sent.length) delivery = 'confirmed';
     return published;
@@ -259,7 +240,8 @@ async function runScenario(options) {
       decision,
       decline_code: row.decline_code,
       authorization_key: request.authorization_key,
-      hold_cents: row.hold_cents
+      hold_cents: row.hold_cents,
+      spend_controls: decision === 'declined' ? 'keelcard.controls' : null
     };
   }
 
@@ -281,12 +263,26 @@ async function runScenario(options) {
         const query = String((args && args.query) || '').toLowerCase();
         const records = history.records.filter(row => Date.parse(row.at) <= Date.parse(clock) && (!query || (row.date + ' ' + row.text).toLowerCase().includes(query)));
         const result = { status: 'ok', records };
-        logCall({ actor: 'agent', app: 'memory', name, args, result: { status: 'ok', count: records.length } });
+        logCall({ actor: 'agent', app: 'memory', name, args, result: { status: 'ok', count: records.length, records } });
         return result;
       }
       const result = await callOn('agent', app, name, args, { actor: meta.actor || 'agent', probe: meta.probe });
       if (result && result.status && !['ok', 'committed', 'ready'].includes(result.status) && result.applied === false) return result;
-      if (name === 'keelcard.controls.request_change' || name === 'keelcard.controls.confirm_change') await publishMail();
+      if (name === 'keelcard.controls.request_change' || name === 'keelcard.controls.confirm_change') {
+        await publishMail();
+        if (name === 'keelcard.controls.confirm_change' && result && result.outcome === 'applied') {
+          const card = await infra.keelcard.call('env.snapshot');
+          const row = card.snapshot.data.cards.find(item => item.card_id === 'card-4417');
+          if (row) {
+            await apply('freshcart', {
+              event_id: 'limit-' + (result.change_request_id || tick),
+              at: card.snapshot.virtual_now,
+              operation: 'freshcart.card_limit.sync',
+              payload: { card_limit_cents: row.limits.per_transaction }
+            });
+          }
+        }
+      }
       if (name === 'freshcart.checkout.place' || name === 'freshcart.substitutions.respond') return afterCheckout(name, result);
       return result;
     },
@@ -311,7 +307,14 @@ async function runScenario(options) {
   }
 
   async function play(event) {
-    if (event.kind === 'mail') {
+    if (event.kind === 'list') {
+      await apply('freshcart', {
+        event_id: event.id,
+        at: event.at,
+        operation: 'freshcart.list.apply',
+        payload: { lines: listEdits[event.arrival] }
+      });
+    } else if (event.kind === 'mail') {
       await apply('mail', { event_id: 'deliver-' + event.arrival, at: event.at, operation: 'mail.deliver', payload: arrivals[event.arrival] });
     } else if (event.kind === 'user_message') {
       sayLine({ at: event.at, role: 'user', text: event.text, session: ctx.currentSession, event_id: event.id });
@@ -350,6 +353,11 @@ async function runScenario(options) {
   }
 
   try {
+    if (!DECLARED.includes(variant)) {
+      const error = new Error('Unknown variant ' + variant);
+      error.unknown_variant = true;
+      return await finish(error);
+    }
     for (const id of APPS) {
       infra[id] = new Client(id, 'infra', runId, stateDir, 'gcl-infra', { registry: registryFile });
       agent[id] = new Client(id, 'agent', runId, stateDir, 'gcl-agent', { registry: registryFile });
@@ -372,10 +380,7 @@ async function runScenario(options) {
       if (infra[id]) await infra[id].close().catch(() => {});
       if (agent[id]) await agent[id].close().catch(() => {});
     }
-    fs.rmSync(registryFile, { force: true });
-    fs.rmSync(registryFile + '.mail.json', { force: true });
-    fs.rmSync(registryFile + '.merchant.json', { force: true });
-    fs.rmSync(stateDir, { recursive: true, force: true });
+    fs.rmSync(runRoot, { recursive: true, force: true });
   }
 
   async function loadAll() {
@@ -408,10 +413,28 @@ async function runScenario(options) {
 
   async function finish(error) {
     const apps = {};
+    const versions = {};
     for (const id of APPS) {
-      try { apps[id] = (await infra[id].call('env.snapshot')).snapshot; }
-      catch (snapError) { apps[id] = { error: snapError.message }; }
+      if (!infra[id]) continue;
+      try {
+        const snap = await infra[id].call('env.snapshot');
+        apps[id] = snap.snapshot;
+        versions[id] = {
+          version: snap.version,
+          virtual_now: snap.snapshot && snap.snapshot.virtual_now,
+          epoch: snap.snapshot && snap.snapshot.epoch,
+          revision: snap.snapshot && snap.snapshot.revision,
+          audit: (snap.snapshot && snap.snapshot.audit) || snap.audit || null
+        };
+      } catch (snapError) {
+        apps[id] = { error: snapError.message };
+        versions[id] = { error: snapError.message };
+      }
     }
+    const unknown = Boolean(error && error.unknown_variant);
+    const halted = Boolean(error && error.halt);
+    const barrier = clockBarrier || (error && error.clockBarrier) || null;
+    const official = !unknown && !halted && !barrier && !error;
     const state = {
       schema: 'grocery-cap-limit-code.run.v1',
       run_id: runId,
@@ -420,10 +443,20 @@ async function runScenario(options) {
       hinted,
       clock,
       delivery,
+      publication,
+      clock_barrier: barrier,
+      official_score: official,
+      ineligible_reason: official ? null : (unknown ? 'unknown_variant' : (barrier ? 'clock_barrier' : 'incomplete')),
       transcript,
       tool_log: toolLog,
       events_delivered: delivered,
-      error: error ? { message: error.message, halt: Boolean(error.halt) } : null,
+      error: error ? {
+        message: error.message,
+        halt: halted,
+        unknown_variant: unknown,
+        delivery: error.delivery || delivery,
+        detail: error.detail || null
+      } : null,
       apps: {
         keelcard: apps.keelcard && apps.keelcard.data,
         freshcart: apps.freshcart && apps.freshcart.data,
@@ -431,15 +464,34 @@ async function runScenario(options) {
         webstub: apps.webstub && apps.webstub.data
       }
     };
+    const memorySearch = toolLog.filter(entry => entry.name === 'memory.search').map(entry => ({
+      at: entry.at,
+      query: entry.args && entry.args.query,
+      records: entry.result && entry.result.records
+    }));
     if (options.outDir) {
       fs.mkdirSync(options.outDir, { recursive: true });
       fs.writeFileSync(path.join(options.outDir, 'state.json'), JSON.stringify(state));
       fs.writeFileSync(path.join(options.outDir, 'run.json'), JSON.stringify({
-        run_id: runId, plan_id: plan.id, variant, hinted, delivery, error: state.error,
-        started_virtual: SEED_CLOCK, ended_virtual: clock
+        run_id: runId,
+        plan_id: plan.id,
+        plan_file: plan.id ? 'solution/plans/' + plan.id + '.json' : null,
+        variant,
+        hinted,
+        delivery,
+        publication,
+        clock_barrier: barrier,
+        versions,
+        memory_search: memorySearch,
+        error: state.error,
+        official_score: official,
+        started_virtual: SEED_CLOCK,
+        ended_virtual: clock,
+        executed_at: new Date(started).toISOString(),
+        duration_ms: Date.now() - started
       }, null, 2));
     }
-    if (error && !error.halt) throw error;
+    if (error && !error.halt && !error.unknown_variant && !error.clockBarrier) throw error;
     return state;
   }
 }

@@ -24,8 +24,9 @@ function digest(file) {
 }
 
 function main() {
-  const dest = path.resolve(process.argv[2]);
-  const lockPath = path.resolve(process.argv[3]);
+  const packageRoot = path.resolve(__dirname, '..');
+  const dest = path.resolve(process.argv[2] || path.join(packageRoot, '.deps/keelcard'));
+  const lockPath = path.resolve(process.argv[3] || path.join(packageRoot, 'deps.lock.json'));
   const write = process.argv.includes('--write');
   const found = {};
   for (const file of filesUnder(dest)) {

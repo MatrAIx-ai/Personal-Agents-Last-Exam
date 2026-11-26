@@ -6,7 +6,7 @@ These notes are for Suraj to post if he wants to. This package does not post the
 
 The implementation is on `task-proposal/grocery-cap-limit-code` at `<HEAD_SHA>`. The proposal file is still blob `87f75800a3a8c8b9ed56720fa8b68566e4205603`.
 
-The LifePack stand-in loads pinned Keelcard `c481a2ae10b4bb17725c69f692203f22af793bb9`, Mail 1.3.0, a task-local FreshCart subset and the one-page web stub. The reference, both accepted approaches, the hinted replay and the no-reply branch score 20 of 20. Doing nothing scores 0. Each forbidden plan scores 0 of 20, including plans that had earned all 20 points before the full-pass gate. Reset restores the FreshCart seed. History coverage is 78 distinct Eastern dates, from the household seed and the proposal records.
+The LifePack stand-in loads pinned Keelcard `c481a2ae10b4bb17725c69f692203f22af793bb9`, Mail 1.3.0, a task-local FreshCart subset and the one-page web stub. The reference, both accepted approaches, the hinted replay and the no-reply branch score 20 of 20. Doing nothing scores 0. Each forbidden plan scores 0 of 20, including plans that had earned all 20 points before the full-pass gate. Reset restores the November 18 seed. History coverage is 79 distinct Eastern dates, from the household seed, the 19 November list edits and the proposal records.
 
 Official model rollouts are still waiting on the roster and on infrastructure release #135, so I have not suggested `/submit-implementation`. The 14-day window from your approval note has not started. Harbor's Dockerfile is written and was not built.
 

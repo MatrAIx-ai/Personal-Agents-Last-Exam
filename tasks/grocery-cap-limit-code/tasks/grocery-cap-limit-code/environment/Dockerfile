@@ -1,5 +1,8 @@
-# The image is not pinned by digest and this file has not been built.
-FROM node:22
+# Build this file with the environment directory as the context.
+# The image contains the task Apps and workspace. Tests, rubrics, plans and grader stay outside it.
+# The image has not been built in this package.
+FROM node:22-bookworm@sha256:7c400d78797d8cbe3f6bb21d2227b86af4cd24b0014cc9f62ff989cc16de988e
 WORKDIR /app
-COPY . /app
-CMD ["sh", "tasks/grocery-cap-limit-code/tasks/grocery-cap-limit-code/tests/test.sh"]
+COPY apps /app/apps
+COPY workspace /app/workspace
+CMD ["node", "--version"]

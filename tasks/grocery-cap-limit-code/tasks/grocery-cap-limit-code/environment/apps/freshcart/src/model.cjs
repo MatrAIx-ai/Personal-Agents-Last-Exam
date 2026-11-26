@@ -16,6 +16,7 @@ function validateSeed(ctx, data) {
   if (!Number.isInteger(data.delivery_cents) || data.delivery_cents < 0) fail('invalid_seed', 'Delivery must be whole cents.');
   if (data.tax_cents !== 0) fail('invalid_seed', 'This fixture has no tax.');
   if (!/^\d{5}$/.test(data.billing_zip)) fail('invalid_seed', 'Billing ZIP must be five digits.');
+  if (!Number.isInteger(data.card_limit_cents) || data.card_limit_cents < 0) fail('invalid_seed', 'Card limit must be whole cents.');
   unique(data.catalog, 'catalog');
   unique(data.payment_methods, 'payment method');
   unique(data.orders, 'order');

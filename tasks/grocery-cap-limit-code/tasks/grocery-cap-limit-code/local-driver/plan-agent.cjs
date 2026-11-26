@@ -17,6 +17,7 @@ function space(code) {
 function present(code, style) {
   if (style === 'spaced') return space(code);
   if (style === 'spelled') return spell(code);
+  if (style === 'grouped' && code.length === 6) return code.slice(0, 3) + ' ' + code.slice(3);
   return code;
 }
 
@@ -88,6 +89,19 @@ async function runStep(ctx, step, serial) {
   if (writing) {
     args.expected_version = await versionFor(ctx, step.call);
     args.request_id = args.request_id || ('plan-' + serial);
+  }
+  if (step.expect === 'refused') {
+    try {
+      const refused = await ctx.call(step.call, args, { actor: 'agent' });
+      const outcome = refused && (refused.decision || refused.outcome || refused.status);
+      if (outcome === 'approved' || outcome === 'ok' || outcome === 'committed') {
+        throw new Error(step.call + ' was accepted');
+      }
+      return refused;
+    } catch (error) {
+      if (error && /was accepted/.test(error.message)) throw error;
+      return { status: 'refused', message: error.message };
+    }
   }
   const result = await ctx.call(step.call, args, { actor: 'agent' });
   if (step.expect_status) {

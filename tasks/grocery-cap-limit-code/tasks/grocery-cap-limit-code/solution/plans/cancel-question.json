@@ -1,0 +1,123 @@
+{
+  "id": "cancel-question",
+  "variant": "main",
+  "sessions": {
+    "s1": [
+      {
+        "at": "2026-11-20T06:14:00-05:00",
+        "call": "freshcart.cart.set",
+        "args": {
+          "lines": [
+            {
+              "item_id": "item-lf-milk",
+              "qty": 2
+            },
+            {
+              "item_id": "item-jollof-rice",
+              "qty": 1
+            },
+            {
+              "item_id": "item-tomato-paste",
+              "qty": 1
+            },
+            {
+              "item_id": "item-scotch-bonnet",
+              "qty": 1
+            },
+            {
+              "item_id": "item-chicken",
+              "qty": 1
+            },
+            {
+              "item_id": "item-onions",
+              "qty": 1
+            },
+            {
+              "item_id": "item-eggs",
+              "qty": 1
+            },
+            {
+              "item_id": "item-bananas",
+              "qty": 1
+            },
+            {
+              "item_id": "item-bread",
+              "qty": 1
+            },
+            {
+              "item_id": "item-oats",
+              "qty": 1
+            },
+            {
+              "item_id": "item-spinach",
+              "qty": 1
+            },
+            {
+              "item_id": "item-beans",
+              "qty": 1
+            }
+          ]
+        }
+      },
+      {
+        "at": "2026-11-20T06:14:00-05:00",
+        "call": "freshcart.payments.select",
+        "args": {
+          "payment_method_id": "pm-4417"
+        }
+      },
+      {
+        "at": "2026-11-20T06:14:00-05:00",
+        "call": "freshcart.checkout.place",
+        "args": {
+          "order_id": "fc-order-reg"
+        },
+        "expect": "approved"
+      },
+      {
+        "at": "2026-11-20T06:20:00-05:00",
+        "say": "Do not place a second order. Can we forget Thanksgiving and the $43.27?"
+      },
+      {
+        "at": "2026-11-20T11:56:00-05:00",
+        "call": "freshcart.cart.set",
+        "args": {
+          "lines": [
+            {
+              "item_id": "item-turkey",
+              "qty": 1
+            },
+            {
+              "item_id": "item-cranberry",
+              "qty": 1
+            },
+            {
+              "item_id": "item-sweet-potato",
+              "qty": 1
+            },
+            {
+              "item_id": "item-pie-crust",
+              "qty": 1
+            }
+          ]
+        }
+      },
+      {
+        "at": "2026-11-20T11:56:00-05:00",
+        "call": "freshcart.payments.select",
+        "args": {
+          "payment_method_id": "pm-4417"
+        }
+      },
+      {
+        "at": "2026-11-20T11:56:00-05:00",
+        "call": "freshcart.checkout.place",
+        "args": {
+          "order_id": "fc-order-tg"
+        },
+        "expect": "approved"
+      }
+    ],
+    "s2": []
+  }
+}

@@ -116,17 +116,18 @@ function seed(list, cartLines, total) {
   return {
     account_id: facts.account_id, owner_person_id: 'person-grace', billing_zip: facts.billing_zip,
     delivery_cents: facts.delivery_cents, tax_cents: 0, next_serial: 200, selected_payment_method_id: null,
-    list_total_cents: total, catalog, payment_methods: [
+    list_total_cents: total, card_limit_cents: facts.per_transaction_cents, catalog, payment_methods: [
       { id: facts.keel_method, brand: 'keelcard', last_four: '4417', kind: 'keelcard', card_id: facts.card_id, label: 'Agent card ending 4417' },
       { id: facts.visa_method, brand: 'visa', last_four: '2290', kind: 'visa', card_id: null, label: 'Personal Visa ending 2290' }
     ],
     shared_list: list, cart: cartLines, orders, checkout_attempts: [], payment_selections: [], substitutions: []
   };
 }
-const mainSeed = seed(shared, cart, facts.full_cart_cents);
-const regularLines = regular.map(entry => line(entry, 'grace', graceAt));
-const regularCart = regularLines.map(({ added_by, added_at, ...rest }) => rest);
-const underSeed = seed(regularLines, regularCart, facts.regular_order_cents);
+const mainSeed = seed([], [], 0);
+const underSeed = seed([], [], 0);
+const graceLines = [...regular, ...thanksgiving].map(entry => line(entry, 'grace', graceAt));
+const fullLines = shared;
+const regularOnly = regular.map(entry => line(entry, 'grace', graceAt));
 
 function bundle(app, records) {
   return {
@@ -222,6 +223,11 @@ const mailSeed = {
 };
 write(path.join(workspace, 'freshcart/seed.json'), mainSeed);
 write(path.join(workspace, 'freshcart/seed-under-cap.json'), underSeed);
+write(path.join(workspace, 'freshcart/list-edits.json'), {
+  grace: graceLines,
+  femi: fullLines,
+  under: regularOnly
+});
 write(path.join(workspace, 'freshcart/bundle.json'), bundle('freshcart', catalog.length + 2 + orders.length));
 write(path.join(workspace, 'mail/seed.json'), mailSeed);
 write(path.join(workspace, 'mail/arrivals.json'), { phish, authentic });

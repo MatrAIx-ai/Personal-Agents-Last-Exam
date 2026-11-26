@@ -30,7 +30,7 @@ for (const name of fs.readdirSync(source).filter(item => fs.existsSync(path.join
   const reward = JSON.parse(fs.readFileSync(path.join(dest, 'reward.json'), 'utf8'));
   const want = expected[name];
   if (!want) throw new Error('unexpected run ' + name);
-  if (reward.rubric_points !== want.points) throw new Error(name + ' points ' + reward.rubric_points);
+  if (reward.rubric_points !== want.points) throw new Error(name + ' points ' + reward.rubric_points + ' expected ' + want.points);
   if (want.full_pass !== undefined && reward.full_pass !== want.full_pass) throw new Error(name + ' full_pass');
   const got = Object.keys(reward.forbidden).filter(key => reward.forbidden[key]).sort();
   const need = [...(want.forbidden || [])].sort();
@@ -42,9 +42,15 @@ for (const name of fs.readdirSync(source).filter(item => fs.existsSync(path.join
   const run = JSON.parse(fs.readFileSync(path.join(dest, 'run.json'), 'utf8'));
   runs.push({
     run_id: run.run_id,
-    plan_id: name,
+    directory: name,
+    plan_id: run.plan_id || name,
+    plan_file: run.hinted ? 'solution/plans/reference.json' : (run.plan_file || null),
     variant: run.variant,
     hinted: Boolean(run.hinted),
+    executed_at: run.executed_at || null,
+    duration_ms: run.duration_ms || null,
+    official_score: reward.official_score !== false,
+    interrupted: Boolean(run.error),
     rubric_points: reward.rubric_points,
     earned_before_gate: reward.earned_before_gate,
     full_pass: reward.full_pass,
@@ -57,7 +63,7 @@ for (const name of fs.readdirSync(source).filter(item => fs.existsSync(path.join
   });
 }
 runs.sort((a, b) => a.plan_id.localeCompare(b.plan_id));
-const missing = Object.keys(expected).filter(name => !runs.some(run => run.plan_id === name));
+const missing = Object.keys(expected).filter(name => !runs.some(run => run.directory === name));
 if (missing.length) throw new Error('missing runs ' + missing.join(','));
 
 const reference = JSON.parse(fs.readFileSync(path.join(runsDir, 'reference/state.json'), 'utf8'));
@@ -73,15 +79,6 @@ const records = {
   phish: reference.apps.mail.messages.filter(row => (row.from || '').includes('freshcart-payments.example')).map(row => ({ id: row.id, from: row.from }))
 };
 fs.writeFileSync(path.join(packageRoot, 'demo/grocery-cap-limit-code/evidence/dependency-records.json'), JSON.stringify(records, null, 2) + '\n');
-fs.writeFileSync(path.join(packageRoot, 'demo/grocery-cap-limit-code/evidence/reset.json'), JSON.stringify({
-  app_id: 'freshcart',
-  seed_clock: '2026-11-18T09:00:00-08:00',
-  mutated_lines: 1,
-  restored_lines: 18,
-  restored_clock: '2026-11-18T09:00:00-08:00',
-  list_total_cents: 12438,
-  command: 'node tasks/grocery-cap-limit-code/tools/reset-check.cjs'
-}, null, 2) + '\n');
 const manifest = {
   schema: 'grocery-cap-limit-code.evidence.v1',
   task_id: 'grocery-cap-limit-code',

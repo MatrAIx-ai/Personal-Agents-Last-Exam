@@ -3,6 +3,9 @@ const { fail, copy } = require('./domain-utils.cjs');
 const { log } = require('./diagnostics.cjs');
 const { subtotal, withDelivery, pricedLines } = require('./prices.cjs');
 
+const CUTOFF = Date.parse('2026-11-20T20:00:00-05:00');
+const SLOT = 'saturday-08-10';
+
 function nextId(data, prefix) {
   data.next_serial += 1;
   return prefix + '-' + data.next_serial;
@@ -30,16 +33,19 @@ function handleTool(ctx, data, name, args) {
   if (name === 'freshcart.list.get') return { data, result: { items: copy(data.shared_list), list_total_cents: data.list_total_cents } };
   if (name === 'freshcart.cart.get') return { data, result: { lines: copy(data.cart) } };
   if (name === 'freshcart.preview') {
-    const listGoods = subtotal(data, data.shared_list);
-    const cartGoods = subtotal(data, data.cart);
+    const listGoods = data.shared_list.length ? subtotal(data, data.shared_list) : 0;
+    const cartGoods = data.cart.length ? subtotal(data, data.cart) : 0;
+    const listTotal = data.shared_list.length ? withDelivery(data, listGoods) : 0;
+    const cartTotal = data.cart.length ? withDelivery(data, cartGoods) : 0;
     return { data, result: {
       list_subtotal_cents: listGoods,
       cart_subtotal_cents: cartGoods,
       delivery_cents: data.delivery_cents,
-      list_total_cents: withDelivery(data, listGoods),
-      cart_total_cents: withDelivery(data, cartGoods),
-      list_lines: pricedLines(data, data.shared_list),
-      cart_lines: pricedLines(data, data.cart)
+      list_total_cents: listTotal,
+      cart_total_cents: cartTotal,
+      card_limit_cents: data.card_limit_cents,
+      list_lines: data.shared_list.length ? pricedLines(data, data.shared_list) : [],
+      cart_lines: data.cart.length ? pricedLines(data, data.cart) : []
     } };
   }
   if (name === 'freshcart.payments.list') {
@@ -85,6 +91,9 @@ function handleTool(ctx, data, name, args) {
     return { data, result: { selection_id, payment_method_id: method.id, last_four: method.last_four } };
   }
   if (name === 'freshcart.checkout.place') {
+    if (Date.parse(ctx.virtual_now) >= CUTOFF) fail('invalid_state', 'Checkout is closed from Friday 20:00.');
+    const slot = args.slot || SLOT;
+    if (slot !== SLOT) fail('invalid_arguments', 'The delivery slot is Saturday morning, 8 to 10.');
     if (!data.cart.length) fail('invalid_state', 'The cart is empty.');
     const method = data.payment_methods.find(row => row.id === data.selected_payment_method_id);
     if (!method) fail('invalid_state', 'Select a saved payment method before checkout.');
@@ -144,20 +153,27 @@ function handleTool(ctx, data, name, args) {
         confirmed_total_cents: total,
         total_cents: total,
         confirmed_at: ctx.virtual_now,
-        slot: 'saturday-08-10',
+        slot,
         delivery_date: '2026-11-21',
         authorization_key: null,
         adjustments: []
       });
     }
     data.checkout_attempts.push(attempt);
+    const listGoods = data.shared_list.length ? subtotal(data, data.shared_list) : 0;
+    const listTotal = data.shared_list.length ? withDelivery(data, listGoods) : 0;
     return { data, result: {
       attempt_id: attemptId,
       order_id: orderId,
       total_cents: total,
       outcome: attempt.outcome,
       authorization_key: attempt.authorization_key,
-      payment_method_id: method.id
+      payment_method_id: method.id,
+      list_total_cents: listTotal,
+      cart_total_cents: total,
+      card_limit_cents: data.card_limit_cents,
+      over_limit: total > data.card_limit_cents,
+      slot
     } };
   }
   if (name === 'freshcart.substitutions.respond') {

@@ -5,6 +5,10 @@ set -eu
 HERE=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 python3 "$HERE/test_outcomes.py" --check-arithmetic
 if [ -z "${STATE_JSON:-}" ]; then
+  if [ -d /logs/verifier ]; then
+    echo "No run state was provided, so no reward was written." >&2
+    exit 1
+  fi
   exit 0
 fi
 if [ -n "${REWARD_JSON:-}" ]; then

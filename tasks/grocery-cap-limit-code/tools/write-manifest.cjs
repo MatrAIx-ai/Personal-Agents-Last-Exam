@@ -25,6 +25,21 @@ for (const rel of filesUnder(packageRoot, '').sort()) {
   const body = fs.readFileSync(path.join(packageRoot, rel));
   files[rel] = crypto.createHash('sha256').update(body).digest('hex');
 }
+function fileHash(rel) {
+  return crypto.createHash('sha256').update(fs.readFileSync(path.join(packageRoot, rel))).digest('hex');
+}
+const components = {
+  harbor_dockerfile: fileHash('tasks/grocery-cap-limit-code/environment/Dockerfile'),
+  harbor_task_toml: fileHash('tasks/grocery-cap-limit-code/task.toml'),
+  harbor_test_sh: fileHash('tasks/grocery-cap-limit-code/tests/test.sh'),
+  local_driver: [
+    'tasks/grocery-cap-limit-code/local-driver/driver.cjs',
+    'tasks/grocery-cap-limit-code/local-driver/plan-agent.cjs',
+    'tasks/grocery-cap-limit-code/local-driver/world.cjs',
+    'tasks/grocery-cap-limit-code/local-driver/registry.cjs',
+    'tasks/grocery-cap-limit-code/local-driver/run.cjs'
+  ].map(rel => ({ path: rel, sha256: fileHash(rel) }))
+};
 const manifest = {
   format: 'lifepack',
   format_version: '1.0',
@@ -78,6 +93,7 @@ const manifest = {
       source: 'tasks/grocery-cap-limit-code/environment/apps/webstub'
     }
   ],
+  components,
   files
 };
 fs.writeFileSync(path.join(packageRoot, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
