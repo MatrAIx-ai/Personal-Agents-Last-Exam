@@ -380,13 +380,6 @@ function printSource(source) {
   }
 }
 
-function itemsOf(result, key) {
-  if (Array.isArray(result)) return result;
-  if (result && Array.isArray(result[key])) return result[key];
-  if (result && Array.isArray(result.items)) return result.items;
-  return [];
-}
-
 function partitionBundle(sourceId, data) {
   const dataset = structuredClone(require(path.join(pkg, 'contribution/dataset.json')));
   const source = dataset.sources.find(item => item.source_id === sourceId);
@@ -396,6 +389,7 @@ function partitionBundle(sourceId, data) {
   dataset.sources = [source];
   dataset.record_source_ids = [sourceId];
   dataset.expected_counts = { records: data.cards.length, assets: 0 };
+  dataset.description = source.description;
   const catalog = structuredClone(require(path.join(pkg, 'contribution/assets.catalog.json')));
   return { dataset, catalog, blobs: {} };
 }
@@ -410,7 +404,8 @@ function provenanceOf(model, state) {
     source_id: source && source.source_id,
     kind: source && source.kind,
     tool: source && source.generation && source.generation.tool,
-    records: dataset.expected_counts.records
+    records: dataset.expected_counts.records,
+    description: dataset.description
   };
 }
 
@@ -432,6 +427,52 @@ function statementsClosedBy(statements, settleAt) {
   return ids;
 }
 
+function readAccount(model, state, label) {
+  const specs = [
+    ['keelcard.transactions.list', 'transactions'],
+    ['keelcard.declines.list', 'declines'],
+    ['keelcard.statements.list', 'statements']
+  ];
+  const out = { transactions: null, declines: null, statements: null, problems: [] };
+  for (const [name, key] of specs) {
+    const result = model.execute(state, 'agent', name, {}).result;
+    if (result.status !== 'ok' || !Array.isArray(result[key])) {
+      out.problems.push(label + ' ' + name + ' ' + (result.status || 'missing ' + key));
+      continue;
+    }
+    out[key] = result[key];
+  }
+  return out;
+}
+
+function scheduledDecember() {
+  const events = require(path.join(pkg, 'examples/events/freelancer-2026-12.json'));
+  const rows = decemberRows(events);
+  return {
+    approved: rows.filter(row => row.kind === 'authorization').length,
+    captured: rows.filter(row => row.kind === 'capture').length,
+    declined: rows.filter(row => row.kind === 'decline').length
+  };
+}
+
+function declaredDecemberClose(seedStatements) {
+  const dataset = require(path.join(pkg, 'contribution/dataset.json'));
+  const source = dataset.sources.find(item => item.source_id === 'december-2026');
+  const settleAt = source && source.generation && source.generation.parameters ? source.generation.parameters.settle_at : null;
+  return { settleAt, ids: statementsClosedBy(seedStatements, settleAt) };
+}
+
+function distinctDeltas(before, after) {
+  const seedIds = new Set(before.transactions.map(row => row.authorization_id));
+  const seedCaptured = new Set(before.transactions.filter(row => row.captured_at).map(row => row.authorization_id));
+  const seedDeclines = new Set(before.declines.map(row => row.authorization_id));
+  return {
+    approved: after.transactions.filter(row => !seedIds.has(row.authorization_id)).length,
+    captured: after.transactions.filter(row => row.captured_at && !seedCaptured.has(row.authorization_id)).length,
+    declined: after.declines.filter(row => !seedDeclines.has(row.authorization_id)).length
+  };
+}
+
 function loadQueries(options = {}) {
   const runtimeFile = path.resolve(pkg, '../../runtime/core/runtime.cjs');
   if (!fs.existsSync(runtimeFile)) {
@@ -439,7 +480,7 @@ function loadQueries(options = {}) {
   }
   const { createRuntime } = require(runtimeFile);
   const model = createRuntime({ registryFile: path.resolve(pkg, '../../apps.registry.json') });
-  const policies = require(path.join(pkg, 'fixtures/policies.json'));
+  const policies = options.policies || require(path.join(pkg, 'fixtures/policies.json'));
   const stages = {};
   const runId = options.runId || 'cov';
   function open(label, seedRel, bindingRel, sourceId) {
@@ -456,41 +497,30 @@ function loadQueries(options = {}) {
     });
     if (loaded.result.status !== 'ready') throw new Error(label + ' load failed: ' + JSON.stringify(loaded.result).slice(0, 400));
     state = loaded.state;
-    const call = name => model.execute(state, 'agent', name, {}).result;
-    const transactions = itemsOf(call('keelcard.transactions.list'), 'transactions');
-    const declines = itemsOf(call('keelcard.declines.list'), 'declines');
-    const statements = itemsOf(call('keelcard.statements.list'), 'statements');
+    const read = readAccount(model, state, label);
     const provenance = provenanceOf(model, state);
-    return { state, transactions, declines, statements, provenance };
+    return { state, ...read, provenance };
+  }
+  function counted(read) {
+    const first = Array.isArray(read.transactions) ? read.transactions[0] : null;
+    return {
+      transactions: Array.isArray(read.transactions) ? read.transactions.length : null,
+      declines: Array.isArray(read.declines) ? read.declines.length : null,
+      statements: Array.isArray(read.statements) ? read.statements.length : null,
+      first_transaction: first ? {
+        id: first.authorization_id,
+        decided_at: first.decided_at,
+        merchant_name: first.merchant_name,
+        amount_cents: first.amount_cents
+      } : null,
+      last_statements: Array.isArray(read.statements) ? read.statements.slice(-3).map(statement => statement.statement_id) : null,
+      provenance: read.provenance
+    };
   }
   const household = open('a', 'fixtures/minimal.json', 'fixtures/binding.json', 'authored');
-  stages.a = {
-    transactions: household.transactions.length,
-    declines: household.declines.length,
-    statements: household.statements.length,
-    first_transaction: household.transactions[0] ? {
-      id: household.transactions[0].authorization_id,
-      decided_at: household.transactions[0].decided_at,
-      merchant_name: household.transactions[0].merchant_name,
-      amount_cents: household.transactions[0].amount_cents
-    } : null,
-    last_statements: household.statements.slice(-3).map(statement => statement.statement_id),
-    provenance: household.provenance
-  };
+  stages.a = counted(household);
   const freelancer = open('b', 'fixtures/freelancer.json', 'fixtures/freelancer-binding.json', 'freelancer');
-  stages.b = {
-    transactions: freelancer.transactions.length,
-    declines: freelancer.declines.length,
-    statements: freelancer.statements.length,
-    first_transaction: freelancer.transactions[0] ? {
-      id: freelancer.transactions[0].authorization_id,
-      decided_at: freelancer.transactions[0].decided_at,
-      merchant_name: freelancer.transactions[0].merchant_name,
-      amount_cents: freelancer.transactions[0].amount_cents
-    } : null,
-    last_statements: freelancer.statements.slice(-3).map(statement => statement.statement_id),
-    provenance: freelancer.provenance
-  };
+  stages.b = counted(freelancer);
   let state = freelancer.state;
   const events = options.events || require(path.join(pkg, 'examples/events/freelancer-2026-12.json'));
   const receipts = [];
@@ -506,7 +536,8 @@ function loadQueries(options = {}) {
     if (advance !== 'committed') {
       ok = false;
       problems.push(event.event_id + ' advance ' + advance);
-      receipts.push({ event_id: event.event_id, operation: event.operation, advance, apply: null, message: advanced.result.message || null });
+      if (advanced.state) state = advanced.state;
+      receipts.push({ event_id: event.event_id, operation: event.operation, advance, apply: null, duplicate: false, message: advanced.result.message || null });
       return;
     }
     state = advanced.state;
@@ -515,18 +546,25 @@ function loadQueries(options = {}) {
       event
     });
     const apply = result.result.status;
-    if (apply === 'committed' && result.state) state = result.state;
-    else {
+    const duplicate = result.result.duplicate === true;
+    if (result.state) state = result.state;
+    if (apply !== 'committed') {
       ok = false;
       problems.push(event.event_id + ' ' + (result.result.message || apply));
     }
-    receipts.push({ event_id: event.event_id, operation: event.operation, advance, apply, message: result.result.message || null });
+    if (duplicate) {
+      ok = false;
+      problems.push(event.event_id + ' duplicate receipt');
+    }
+    receipts.push({ event_id: event.event_id, operation: event.operation, advance, apply, duplicate, message: result.result.message || null });
   });
   const wanted = {};
   const committed = {};
+  const duplicates = [];
   for (const event of events) wanted[event.operation] = (wanted[event.operation] || 0) + 1;
   for (const receipt of receipts) {
-    if (receipt.apply === 'committed') committed[receipt.operation] = (committed[receipt.operation] || 0) + 1;
+    if (receipt.duplicate) duplicates.push(receipt.event_id);
+    if (receipt.apply === 'committed' && !receipt.duplicate) committed[receipt.operation] = (committed[receipt.operation] || 0) + 1;
   }
   for (const [operation, count] of Object.entries(wanted)) {
     if ((committed[operation] || 0) !== count) {
@@ -534,31 +572,74 @@ function loadQueries(options = {}) {
       problems.push(operation + ' committed ' + (committed[operation] || 0) + ' of ' + count);
     }
   }
-  const call = name => model.execute(state, 'agent', name, {}).result;
-  const transactions = itemsOf(call('keelcard.transactions.list'), 'transactions');
-  const declines = itemsOf(call('keelcard.declines.list'), 'declines');
-  const statements = itemsOf(call('keelcard.statements.list'), 'statements');
-  const settle = [...events].reverse().find(event => event.operation === 'ledger.settle_due' && receipts.some(receipt => receipt.event_id === event.event_id && receipt.apply === 'committed'));
-  const expectedStatements = settle ? statementsClosedBy(freelancer.statements, settle.at) : [];
-  const actualNew = statements.map(statement => statement.statement_id).filter(id => !freelancer.statements.some(statement => statement.statement_id === id));
-  if (settle && JSON.stringify(actualNew) !== JSON.stringify(expectedStatements)) {
+  for (const read of [household, freelancer]) problems.push(...read.problems);
+  if (household.problems.length || freelancer.problems.length) ok = false;
+  const after = readAccount(model, state, 'b_after_december');
+  if (after.problems.length) {
     ok = false;
-    problems.push('statements ' + actualNew.join(',') + ' expected ' + expectedStatements.join(','));
+    problems.push(...after.problems);
   }
-  if (!settle && actualNew.length) {
+  const listsReady = Array.isArray(freelancer.transactions) && Array.isArray(freelancer.declines) && Array.isArray(freelancer.statements) && Array.isArray(after.transactions) && Array.isArray(after.declines) && Array.isArray(after.statements);
+  let deltas = null;
+  if (listsReady) {
+    deltas = distinctDeltas(freelancer, after);
+    const scheduled = scheduledDecember();
+    if (deltas.approved !== scheduled.approved) {
+      ok = false;
+      problems.push('approved ' + deltas.approved + ' of ' + scheduled.approved);
+    }
+    if (deltas.captured !== scheduled.captured) {
+      ok = false;
+      problems.push('captured ' + deltas.captured + ' of ' + scheduled.captured);
+    }
+    if (deltas.declined !== scheduled.declined) {
+      ok = false;
+      problems.push('declined ' + deltas.declined + ' of ' + scheduled.declined);
+    }
+    const sourced = new Set([
+      ...state.data.authorizations.map(row => row.source_event_id),
+      ...state.data.declines.map(row => row.source_event_id)
+    ]);
+    const seedCaptured = new Set(freelancer.transactions.filter(row => row.captured_at).map(row => row.authorization_id));
+    const capturedKeys = new Set(state.data.authorizations.filter(row => row.captured_at && !seedCaptured.has(row.authorization_id)).map(row => row.capture_key));
+    for (const event of events) {
+      const receipt = receipts.find(item => item.event_id === event.event_id && item.operation === event.operation);
+      if (!receipt || receipt.apply !== 'committed' || receipt.duplicate) continue;
+      if (event.operation === 'authorization.request' && !sourced.has(event.event_id)) {
+        ok = false;
+        problems.push(event.event_id + ' did not add a distinct authorization');
+      }
+      if (event.operation === 'authorization.capture' && !capturedKeys.has(event.payload.capture_key)) {
+        ok = false;
+        problems.push(event.event_id + ' did not capture a distinct authorization');
+      }
+    }
+  }
+  const seedStatements = Array.isArray(freelancer.statements) ? freelancer.statements : require(path.join(pkg, 'fixtures/freelancer.json')).statements;
+  const close = declaredDecemberClose(seedStatements);
+  const statementIds = listsReady ? after.statements.map(statement => statement.statement_id) : null;
+  if (statementIds) {
+    const missing = close.ids.filter(id => !statementIds.includes(id));
+    if (missing.length) {
+      ok = false;
+      problems.push('missing December statements ' + missing.join(', '));
+    }
+  }
+  const settleCommitted = events.some(event => event.operation === 'ledger.settle_due' && event.at === close.settleAt && receipts.some(receipt => receipt.event_id === event.event_id && receipt.apply === 'committed' && !receipt.duplicate));
+  if (!settleCommitted) {
     ok = false;
-    problems.push('statements changed without a committed settle');
+    problems.push('missing December settle at ' + close.settleAt);
   }
   const provenance = provenanceOf(model, state);
-  if (household.provenance.source_id !== 'authored' || household.provenance.kind !== 'synthetic' || household.provenance.records !== 2) {
+  if (household.provenance.source_id !== 'authored' || household.provenance.kind !== 'synthetic' || household.provenance.records !== 2 || !String(household.provenance.description).includes('2 cards') || String(household.provenance.description).includes('two household cards')) {
     ok = false;
     problems.push('household provenance ' + JSON.stringify(household.provenance));
   }
-  if (freelancer.provenance.source_id !== 'freelancer' || freelancer.provenance.kind !== 'synthetic' || freelancer.provenance.records !== 6) {
+  if (freelancer.provenance.source_id !== 'freelancer' || freelancer.provenance.kind !== 'synthetic' || freelancer.provenance.records !== 6 || !String(freelancer.provenance.description).includes('6 cards') || String(freelancer.provenance.description).includes('two household cards')) {
     ok = false;
     problems.push('freelancer provenance ' + JSON.stringify(freelancer.provenance));
   }
-  if (provenance.source_id !== 'freelancer' || provenance.kind !== 'synthetic' || provenance.dataset_id === 'keelcard-runtime-import') {
+  if (provenance.source_id !== 'freelancer' || provenance.kind !== 'synthetic' || provenance.dataset_id === 'keelcard-runtime-import' || !String(provenance.description).includes('6 cards') || String(provenance.description).includes('two household cards')) {
     ok = false;
     problems.push('provenance after events ' + JSON.stringify(provenance));
   }
@@ -566,14 +647,17 @@ function loadQueries(options = {}) {
     basis: 'committed',
     receipts,
     committed,
+    duplicates,
     problems,
-    approved_delta: transactions.length - freelancer.transactions.length,
-    decline_delta: declines.length - freelancer.declines.length,
-    statement_delta: statements.length - freelancer.statements.length,
-    transactions: transactions.length,
-    declines: declines.length,
-    statements: statements.length,
-    last_statements: statements.slice(-3).map(statement => statement.statement_id),
+    denies: state.audit.filter(row => row.decision === 'deny').map(row => ({ tool: row.tool, reason: row.reason })),
+    approved_delta: deltas ? deltas.approved : null,
+    capture_delta: deltas ? deltas.captured : null,
+    decline_delta: deltas ? deltas.declined : null,
+    statement_delta: listsReady ? after.statements.length - freelancer.statements.length : null,
+    transactions: Array.isArray(after.transactions) ? after.transactions.length : null,
+    declines: Array.isArray(after.declines) ? after.declines.length : null,
+    statements: Array.isArray(after.statements) ? after.statements.length : null,
+    last_statements: Array.isArray(after.statements) ? after.statements.slice(-3).map(statement => statement.statement_id) : null,
     clock: state.virtual_now,
     provenance
   };

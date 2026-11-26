@@ -235,15 +235,15 @@ Provenance on the snapshot after load:
 | (b) | keelcard-minimal | freelancer | synthetic | 6 | `apps/keelcard/examples/generate-scale.cjs` |
 | (b) after December | keelcard-minimal | freelancer | synthetic | 6 | `apps/keelcard/examples/generate-scale.cjs` |
 
-`--load` exits unsuccessfully when a receipt is not `committed`, when the committed operation counts disagree with the event file, or when a committed settle does not add the statement ids that follow the seed. A mutated file fails that check:
+Approvals, captures and declines in `--load` are counted from distinct transactions. Captures use `captured_at`. Those deltas have to match the scheduled December file. Duplicate receipts are reported on their own. Each list read has to return `status: ok` and its array. After the staged events the account has to contain `stmt-2026-11` and `stmt-2026-12`. That close comes from the December partition's `settle_at` in `contribution/dataset.json`, together with the seed's last statement. A missing settle, a missing statement, a rejected capture, a duplicate receipt, a reused authorization payload or a denied read exits unsuccessfully and names the gap in `problems`. The loaded bundle description is the selected source description.
+
+A file that drops only `b-settle-2027-01` fails that check:
 
 ```sh
 node -e '
 const { loadQueries } = require("./apps/keelcard/examples/coverage-report.cjs");
-const events = structuredClone(require("./apps/keelcard/examples/events/freelancer-2026-12.json"));
-events.find(event => event.operation === "authorization.capture").payload.amount_cents += 1;
-events.pop();
-const result = loadQueries({ events, runId: "mutated" });
+const events = require("./apps/keelcard/examples/events/freelancer-2026-12.json").filter(event => event.event_id !== "b-settle-2027-01");
+const result = loadQueries({ events, runId: "missing-settle" });
 if (result.ok !== false) process.exit(1);
 console.log(result.stages.b_after_december.problems.join("\n"));
 '
