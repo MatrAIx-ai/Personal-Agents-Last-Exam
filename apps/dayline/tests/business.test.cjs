@@ -313,7 +313,9 @@ test('the evaluation dataset loads at any clock in its window and shows nothing 
   const evalSeed = require('../data/evaluation/seed.json'), evalBinding = require('../data/evaluation/binding.json');
   const meta = require('../data/evaluation/dataset.json');
   assert.equal(meta.expected_counts.records, evalSeed.editions.length);
-  assert.equal(meta.sha256['seed.json'], require('node:crypto').createHash('sha256')
+  const {compile} = require('./schema-validator.cjs');
+  assert.ok(compile(require('../schemas/dataset.schema.json'), require('node:path').resolve(__dirname, '../schemas'))(meta), 'dataset.json follows the dataset schema');
+  assert.equal(meta.sources.find(s => s.source_id === 'generated').generation.parameters.outputs['seed.json'].sha256, require('node:crypto').createHash('sha256')
     .update(require('node:fs').readFileSync(require.resolve('../data/evaluation/seed.json'))).digest('hex'));
   const shown = at => evalSeed.editions.filter(e => Date.parse(e.added_at) <= Date.parse(at));
   for (const at of ['2025-03-15T12:00:00-07:00', '2025-12-31T23:59:00-08:00', require('../data/evaluation/clock.json').initial_time, '2026-12-31T23:59:00-08:00']) {

@@ -709,11 +709,11 @@ write('dataset.json', {
     description: 'Template-generated fictional editions and reading history written by dev/build-dataset.cjs. All outlets, people, places, teams, companies and events are invented; nothing was collected from real websites.',
     uri: null, license: 'MIT', usage: 'permitted', collection: null,
     generation: {method: 'template', tool: 'dev/build-dataset.cjs', tool_version: DATASET_VERSION, seed: 20250101,
-      parameters: {window: ['2025-01-01', '2026-12-31'], time_zone: 'America/Los_Angeles', clock: CLOCK}},
+      parameters: {window: ['2025-01-01', '2026-12-31'], time_zone: 'America/Los_Angeles', clock: CLOCK,
+        outputs: {'seed.json': {bytes: Buffer.byteLength(seedText), sha256: crypto.createHash('sha256').update(seedText).digest('hex')}}}},
   }],
   transformations: ['Fixture editions, stories, front pages, reading history and reading list are copied verbatim; story groups that the fixture shares gain earlier and later editions and an earlier created_at.',
     'Member papers republish some wire dispatches word for word, with a credit to the source edition.'],
   expected_counts: {records: editions.length, assets: 0},
-  sha256: {'seed.json': crypto.createHash('sha256').update(seedText).digest('hex')},
 });
 console.log({editions: editions.length, stories: stories.size, reading_history: reading_history.length, reading_list: reading_list.length, bytes: Buffer.byteLength(seedText), compact_bytes: Buffer.byteLength(JSON.stringify(seed))});

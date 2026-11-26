@@ -17,6 +17,7 @@ const dataset = JSON.parse(fs.readFileSync(path.join(dir, 'dataset.json'), 'utf8
 const clock = JSON.parse(fs.readFileSync(path.join(dir, 'clock.json'), 'utf8')).initial_time;
 const fixture = JSON.parse(fs.readFileSync(path.join(pkg, 'fixtures/minimal.json'), 'utf8'));
 const sha256 = crypto.createHash('sha256').update(seedText).digest('hex');
+const recorded = dataset.sources.find(s => s.source_id === 'generated')?.generation?.parameters?.outputs?.['seed.json']?.sha256;
 
 const localDate = new Intl.DateTimeFormat('en-CA', {timeZone: TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit'});
 const dateOf = iso => {const t = Date.parse(iso); return Number.isNaN(t) ? null : localDate.format(t);};
@@ -95,7 +96,7 @@ for (let i = 0; i < unique.length; i++) for (let j = i + 1; j < unique.length; j
 const report = {
   scope: 'Dayline evaluation dataset as delivered in apps/dayline/data/evaluation/seed.json',
   dataset_id: dataset.dataset_id, dataset_version: dataset.version, seed_sha256: sha256,
-  seed_sha256_matches_dataset_json: dataset.sha256?.['seed.json'] === sha256,
+  seed_sha256_matches_dataset_json: recorded === sha256,
   time_zone: TIME_ZONE, window: WINDOW, dataset_clock: clock,
   method: 'Each record is counted on the calendar date of its authoritative field in America/Los_Angeles. Multiple records on one date count once in the global figure.',
   totals: {records: records.length, counted: counted.length, excluded: excluded.length, invalid: invalid.length,

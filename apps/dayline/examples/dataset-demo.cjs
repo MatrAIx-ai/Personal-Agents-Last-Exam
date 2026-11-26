@@ -38,8 +38,9 @@ async function main() {
   try {
     const infra = await open('infra');
     const empty = await infra.call('env.snapshot');
-    const bundle = structuredClone(empty.snapshot.resources.bundle);
-    bundle.dataset.expected_counts.records = seed.editions.length;
+    // The dataset ships its own dataset.json; it replaces the package's in the load bundle.
+    const bundle = {...structuredClone(empty.snapshot.resources.bundle), dataset: JSON.parse(read('dataset.json'))};
+    ok('The bundle carries the dataset\'s own dataset.json with the matching record count', bundle.dataset.expected_counts.records === seed.editions.length);
     const request = {expected_version: empty.version, request_id: 'load-evaluation', data: seed, binding, policies, bundle, virtual_now: '2025-03-15T12:00:00-07:00'};
     const requestBytes = Buffer.byteLength(JSON.stringify({jsonrpc: '2.0', id: 1, method: 'tools/call', params: {name: 'env.load_seed', arguments: request}}));
     const loaded = await infra.call('env.load_seed', request);
