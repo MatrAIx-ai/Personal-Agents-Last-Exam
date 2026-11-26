@@ -37,8 +37,9 @@ function menu(ctx, data, args) {
   for (const s of schools) {
     const kids = data.children.filter(k => k.school_id === s.id);
     for (const date of c.time.eachDate(start, end)) {
-      if (!c.dayInfo(data, s, date).school_day) continue;
       const m = data.menu_days.find(x => x.school_id === s.id && x.date === date);
+      // The stored calendar holds the current term only: a day before the term is listed when its menu is stored.
+      if (date < s.term.start_date ? !m : !c.dayInfo(data, s, date).school_day) continue;
       days.push({school_id: s.id, date, menu_published: !!m,
         items: m ? m.items.map(i => ({...c.copy(i), excluded_for: kids.filter(k => i.allergens.some(a => k.meal_restrictions.includes(a))).map(k => k.id)})) : []});
     }

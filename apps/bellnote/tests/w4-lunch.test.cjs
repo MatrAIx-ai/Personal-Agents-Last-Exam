@@ -110,3 +110,53 @@ test('T16 menus with allergen tags and excluded_for; restricted_item and over_da
   // The cafeteria is not checked: a restricted item is applied as given.
   assert.equal(f.data.lunch_accounts.find(a => a.id === 'lunch-ines').balance_cents, 310 + 2000 - 645);
 });
+
+test('T16 menus of earlier school years: stored menu days before the term are listed with excluded_for; current-term results are unchanged', () => {
+  const crypto = require('node:crypto'), reference = require('../fixtures/reference.json'), minimal = require('../fixtures/minimal.json');
+  const f = fixture({seed: reference}), before = JSON.stringify(f.data);
+  const list = args => { const {status, ...rest} = f.call('bellnote.menu.list', args); return rest; };
+  const stored = (school, start, end) => reference.menu_days.filter(m => m.school_id === school && m.date >= start && m.date <= end);
+  const shape = d => Object.keys(d).join(',') + '|' + d.items.map(i => Object.keys(i).join(',')).join('|');
+  const current = list({id: 'school-alder', start: '2026-11-16', end: '2026-11-16'}).days[0];
+  // Spring 2025 at Alder: every stored day in the window, in date order, with the same fields as a current day.
+  const spring25 = list({start: '2025-04-01', end: '2025-05-31'});
+  assert.deepEqual(spring25.days.map(d => d.school_id + ' ' + d.date), stored('school-alder', '2025-04-01', '2025-05-31').map(m => m.school_id + ' ' + m.date));
+  assert.equal(spring25.days.length, 10);
+  assert.ok(spring25.days.every(d => d.menu_published && shape(d) === shape(current)));
+  const pb = spring25.days.find(d => d.date === '2025-05-07').items;
+  assert.deepEqual(pb.map(i => [i.id, i.allergens, i.excluded_for]), [['item-pb-sandwich', ['peanut', 'wheat'], ['child-ines']], ['item-turkey', ['wheat'], []]]);
+  // Spring 2026, both schools: Nico's milk restriction excludes Kestrel's yogurt, as on a current day, although the account is not custodial for him.
+  const spring26 = list({start: '2026-03-01', end: '2026-06-28'});
+  assert.deepEqual(spring26.days.map(d => d.school_id + ' ' + d.date),
+    [...stored('school-alder', '2026-03-01', '2026-06-28'), ...stored('school-kestrel', '2026-03-01', '2026-06-28')].map(m => m.school_id + ' ' + m.date));
+  assert.equal(spring26.days.length, 33);
+  const item = (days, school, date, id) => days.find(d => d.school_id === school && d.date === date).items.find(i => i.id === id);
+  assert.deepEqual(item(spring26.days, 'school-kestrel', '2026-03-06', 'item-yogurt').excluded_for, ['child-nico']);
+  assert.deepEqual(item(spring26.days, 'school-alder', '2026-04-01', 'item-almond-bar').excluded_for, ['child-ines']);
+  assert.deepEqual(item(spring26.days, 'school-alder', '2026-03-02', 'item-pizza').excluded_for, []);
+  // Across the term start: the earlier stored days, then the current term's school days, in date order.
+  const across = list({id: 'school-alder', start: '2026-06-01', end: '2026-09-10'});
+  assert.deepEqual(across.days, [...list({id: 'school-alder', start: '2026-06-01', end: '2026-08-25'}).days, ...list({id: 'school-alder', start: '2026-08-26', end: '2026-09-10'}).days]);
+  assert.deepEqual(across.days.filter(d => d.date < '2026-08-26').map(d => d.date), ['2026-06-05', '2026-06-12']);
+  assert.equal(across.days.filter(d => d.date >= '2026-08-26').length, 12);
+  assert.ok(across.days.every((d, i, a) => i === 0 || a[i - 1].date < d.date));
+  // An earlier window with no stored menu lists no day; an earlier school day without a menu is not listed either.
+  const none = list({start: '2025-01-01', end: '2025-01-09'});
+  assert.deepEqual([none.start, none.end, none.days], ['2025-01-01', '2025-01-09', []]);
+  assert.deepEqual(list({start: '2025-07-01', end: '2025-07-31'}).days, []);
+  assert.deepEqual(list({id: 'school-alder', start: '2025-01-13', end: '2025-01-16'}).days, []);
+  assert.equal(f.try('bellnote.menu.list', {start: '2025-05-02', end: '2025-05-01'}).status, 'invalid_window');
+  assert.equal(JSON.stringify(f.data), before, 'Reads never change the data');
+  // Current-term and later windows return exactly what they returned before earlier days were listed (SHA-256 of the result without status).
+  const expected = {
+    'minimal {}': 'f1419f199b931b43', 'minimal {"id":"school-alder"}': '7790f297f8019bc1', 'minimal {"start":"2026-08-26","end":"2026-12-22"}': '2c953c46a5326d4a',
+    'minimal {"start":"2026-08-01","end":"2026-09-10"}': '67cc6a39a35b5c10', 'reference {}': '84c6bc49af3359f7', 'reference {"id":"school-kestrel"}': '26edb39df03b29e8',
+    'reference {"start":"2026-08-26","end":"2026-12-22"}': 'f13f7748c8de8e21', 'reference {"start":"2026-11-16","end":"2026-11-20"}': '67569b50a60d87a0',
+    'reference {"id":"school-kestrel","start":"2026-09-01","end":"2026-12-29"}': '95068a54c0be3902', 'reference {"start":"2027-03-01","end":"2027-06-28"}': 'df33b90c8ce8a144',
+    'reference {"start":"2026-08-01","end":"2026-09-10"}': '67cc6a39a35b5c10'};
+  for (const [key, sha] of Object.entries(expected)) {
+    const [name, args] = [key.slice(0, key.indexOf(' ')), JSON.parse(key.slice(key.indexOf(' ') + 1))];
+    const {status, ...rest} = fixture({seed: {minimal, reference}[name]}).call('bellnote.menu.list', args);
+    assert.equal(crypto.createHash('sha256').update(JSON.stringify(rest)).digest('hex').slice(0, 16), sha, key);
+  }
+});

@@ -309,7 +309,6 @@ async function retrieval() {
 }
 const WHY_NOT = {
   staff: 'no Agent tool lists the staff directory; staff appear by name in attendance marks, reviews and notices',
-  menu_days: 'gap: menu.list lists only school days of the school\'s stored calendar, which holds the current term (from 2026-08-26); the generated menus of the earlier school years are stored and validated but no Agent tool returns them (what a child bought on those days is in lunch_transactions with item and allergens)',
   pickup_people: 'the account holder is not custodial for Nico, so pickup.get refuses his list (not_permitted): by the plan\'s rule a non-custodial guardian learns nothing of that pickup list'
 };
 function retrievalMarkdown(x) {

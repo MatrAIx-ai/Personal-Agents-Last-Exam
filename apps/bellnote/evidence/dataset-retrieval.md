@@ -19,7 +19,7 @@ Produced by `node scripts/dataset-coverage.cjs --retrieval` on the pinned public
 | `form_responses` | 37 | 37 | – |
 | `lunch_accounts` | 3 | 3 | – |
 | `lunch_transactions` | 276 | 276 | – |
-| `menu_days` | 151 | 40 | 111: gap: menu.list lists only school days of the school's stored calendar, which holds the current term (from 2026-08-26); the generated menus of the earlier school years are stored and validated but no Agent tool returns them (what a child bought on those days is in lunch_transactions with item and allergens) |
+| `menu_days` | 151 | 151 | – |
 | `payment_methods` | 2 | 2 | – |
 | `payments` | 34 | 34 | – |
 | `notifications` | 122 | 122 | – |
@@ -35,7 +35,7 @@ Produced by `node scripts/dataset-coverage.cjs --retrieval` on the pinned public
 | `bellnote.forms.list` | `{}` | 28 |
 | `bellnote.forms.get` | `{"id":"form-2025-vision"}` | 1 |
 | `bellnote.attendance.list` | `{"start":"2025-01-01","end":"2025-04-30"}` | 4 |
-| `bellnote.menu.list` | `{"start":"2025-01-01","end":"2025-04-30"}` | 0 |
+| `bellnote.menu.list` | `{"start":"2025-01-01","end":"2025-04-30"}` | 17 |
 | `bellnote.payments.list` | `{"start":"2025-01-01","end":"2025-04-30"}` | 4 |
 | `bellnote.notifications.list` | `{"start":"2025-01-01","end":"2025-04-30"}` | 14 |
 | `bellnote.lunch.account_get` | `{"id":"lunch-theo","start":"2025-01-01","end":"2025-04-30"}` | 16 |
