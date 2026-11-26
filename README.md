@@ -11,7 +11,7 @@
 
 > **📰 News**
 >
-> **Nov 15, 2026** · 📝 Proposal PRs are open: [🏗️ Environment Track](proposals/templates/environment-proposal.md) · [🧪 Task Track](proposals/templates/task-proposal.md). ⚙️ Infrastructure coming soon.
+> **Nov 15, 2026** · 📝 Proposal PRs are open: [🏗️ Environment Track](proposals/templates/environment-proposal.md) · [🧪 Task Track](proposals/templates/task-proposal.md). ⚙️ Infrastructure: [PALE-Infra](https://github.com/MatrAIx-ai/PALE-Infra).
 >
 > **Nov 15, 2026** · 🚀 The **Personal Agents' Last Exam is officially launched!**
 >
