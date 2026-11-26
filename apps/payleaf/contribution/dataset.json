@@ -22,6 +22,26 @@
         "seed": null,
         "parameters": {}
       }
+    },
+    {
+      "source_id": "evaluation-generator",
+      "kind": "synthetic",
+      "description": "The source of the separate evaluation dataset in data/evaluation/ (dataset payleaf-evaluation-2025-2026). Its own dataset.json, passed to env.load_seed, names this same source ID in its record_source_ids, so every record of data/evaluation/seed.json comes from it. The records of this file's fixture come only from authored, so this source is declared here but not listed in record_source_ids above. Every record is synthetic: a scripted history of 1 January 2025 to 31 December 2026, with sick days and mileage lines from a seeded PRNG, replayed through the App. It is not part of the package fixture.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted replay with a seeded PRNG (mulberry32)",
+        "tool": "apps/payleaf/dev/generate-evaluation-data.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20250101,
+        "parameters": {
+          "start": "2025-01-01T00:00:00-05:00",
+          "clock": "2026-12-31T23:00:00-05:00",
+          "timezone": "America/New_York"
+        }
+      }
     }
   ],
   "transformations": [

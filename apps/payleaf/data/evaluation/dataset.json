@@ -1,0 +1,48 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "payleaf-evaluation-2025-2026",
+  "version": "1.0.0",
+  "description": "Synthetic evaluation history of one salaried employee at a fictional employer, from 1 January 2025 to 31 December 2026, read at 2026-12-31T23:00:00-05:00. Every record is synthetic: the product, the employer, the people, the bank accounts and the plans are fictional, and nothing was collected. A development script replays a scripted history, with sick days and mileage lines from a seeded PRNG, through the App's own hooks, so the App computed every deduction, net pay, deposit and leave accrual.",
+  "record_source_ids": [
+    "evaluation-generator"
+  ],
+  "sources": [
+    {
+      "source_id": "evaluation-generator",
+      "kind": "synthetic",
+      "description": "Scripted synthetic history with seeded random variation; no external collection and no real person, employer, bank or carrier. Dates are represented event dates of the fictional history, not collection dates.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "scripted replay with a seeded PRNG (mulberry32)",
+        "tool": "apps/payleaf/dev/generate-evaluation-data.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20250101,
+        "parameters": {
+          "start": "2025-01-01T00:00:00-05:00",
+          "clock": "2026-12-31T23:00:00-05:00",
+          "timezone": "America/New_York"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "None. The seed is the App state after the replay, with the yearly salary in effect at the clock."
+  ],
+  "expected_counts": {
+    "records": 165,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism and variation."
+  }
+}

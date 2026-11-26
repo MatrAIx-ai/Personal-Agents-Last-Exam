@@ -1,0 +1,373 @@
+{
+  "schema": "payleaf.evaluation-integration.v1",
+  "runtime_version": "1.6.0",
+  "app_version": "1.0.0",
+  "node": "v22.23.5",
+  "coverage_report": "data/evaluation/coverage.json",
+  "checks": [
+    {
+      "name": "env.load_seed loads the evaluation seed at its clock 2026-12-31T23:00:00-05:00 with its synthetic provenance bundle",
+      "status": "passed"
+    },
+    {
+      "name": "The loaded record count is the count of coverage.json and of data/evaluation/dataset.json",
+      "status": "passed"
+    },
+    {
+      "name": "The runtime quality check passes for dataset payleaf-evaluation-2025-2026, and its only source is synthetic",
+      "status": "passed"
+    },
+    {
+      "name": "The snapshot holds the seed byte for byte, at the clock of the seed",
+      "status": "passed"
+    },
+    {
+      "name": "pay_statements.list over 2025 to 2026 returns every statement, and their posted days are the pay_statements dates of the report",
+      "status": "passed"
+    },
+    {
+      "name": "Every month of 2025 and 2026 has a pay statement",
+      "status": "passed"
+    },
+    {
+      "name": "pay_statements.get reads every statement, and the deposit updates match the report",
+      "status": "passed"
+    },
+    {
+      "name": "calendar.list: the 52 pay dates of the window are paid, and the 2027 pay dates are planned scheduled rows, as the report lists them",
+      "status": "passed"
+    },
+    {
+      "name": "changes.list returns the setting_changes and setting_cancellations of the report",
+      "status": "passed"
+    },
+    {
+      "name": "inquiries.list returns the pay_inquiries, inquiry_answers and inquiry_withdrawals of the report",
+      "status": "passed"
+    },
+    {
+      "name": "leave.list returns the leave_requests, leave_decisions and leave_cancellations of the report",
+      "status": "passed"
+    },
+    {
+      "name": "notifications.list over 2025 to 2026 returns the notifications of the report",
+      "status": "passed"
+    },
+    {
+      "name": "benefits.windows and benefits.get: two windows, both closed, each with a final set, and the saved choices of the report",
+      "status": "passed"
+    },
+    {
+      "name": "settings.get at the clock: 8 percent is locked for the first pay date of 2027, and the new withholding form waits for the second one",
+      "status": "passed"
+    },
+    {
+      "name": "env.load_seed loads the seed as of 2026-11-19T12:00:00-05:00 with that time as virtual_now",
+      "status": "passed"
+    },
+    {
+      "name": "As of 2026-11-19T12:00:00-05:00, no statement, notification or leave request read through MCP is dated after that time",
+      "status": "passed"
+    },
+    {
+      "name": "As of 2026-11-19T12:00:00-05:00, the pay dates of 20 November, 4 December and 18 December are planned rows with no statement",
+      "status": "passed"
+    },
+    {
+      "name": "As of 2026-11-19T12:00:00-05:00, the statement of 4 December does not exist yet, so inquiries.list on it fails",
+      "status": "passed"
+    }
+  ],
+  "passed": true,
+  "full_window": {
+    "seed": "data/evaluation/seed.json",
+    "virtual_now": "2026-12-31T23:00:00-05:00",
+    "loaded": 165,
+    "quality": {
+      "automated_pass": true,
+      "dataset_id": "payleaf-evaluation-2025-2026"
+    },
+    "counts": {
+      "pay_statements": 52,
+      "calendar_in_window": 52,
+      "calendar_2027": 4,
+      "setting_changes": 16,
+      "inquiries": 9,
+      "leave_requests": 27,
+      "notifications": 99,
+      "windows": 2
+    },
+    "samples": {
+      "employment": {
+        "name": "Kai Moreno",
+        "job_title": "Logistics Analyst",
+        "annual_salary": 83200,
+        "flags": [
+          "change_waiting",
+          "leave_expiring"
+        ]
+      },
+      "first_statement_2025": {
+        "id": "ps-2025-01",
+        "pay_date": "2025-01-03",
+        "posted_at": "2025-01-03T06:00:00-05:00",
+        "earnings": [
+          [
+            "Regular pay",
+            3000
+          ]
+        ],
+        "deductions": [
+          [
+            "Medical: PPO, employee only",
+            120
+          ],
+          [
+            "Dental: Plus, employee only",
+            9.5
+          ],
+          [
+            "Vision: Employee only",
+            3.75
+          ],
+          [
+            "Health care spending account: 1,000.00 a year",
+            38.47
+          ],
+          [
+            "Retirement savings at 4 percent",
+            120
+          ]
+        ],
+        "net_pay": 2115.06,
+        "deposits": [
+          [
+            "Harbor savings",
+            200,
+            "sent"
+          ],
+          [
+            "Everyday checking",
+            1915.06,
+            "sent"
+          ]
+        ]
+      },
+      "bonus_statement_2025": {
+        "id": "ps-2025-06",
+        "pay_date": "2025-03-14",
+        "posted_at": "2025-03-14T06:00:00-04:00",
+        "earnings": [
+          [
+            "Regular pay",
+            3000
+          ],
+          [
+            "Annual bonus",
+            2000
+          ],
+          [
+            "Mileage reimbursement, 84 miles on 12 and 13 February",
+            58.8
+          ]
+        ],
+        "deductions": [
+          [
+            "Medical: PPO, employee only",
+            120
+          ],
+          [
+            "Dental: Plus, employee only",
+            9.5
+          ],
+          [
+            "Vision: Employee only",
+            3.75
+          ],
+          [
+            "Health care spending account: 1,000.00 a year",
+            38.47
+          ],
+          [
+            "Retirement savings at 4 percent",
+            120
+          ]
+        ],
+        "net_pay": 3571.63,
+        "deposits": [
+          [
+            "Harbor savings",
+            250,
+            "sent"
+          ],
+          [
+            "Everyday checking",
+            3321.63,
+            "sent"
+          ]
+        ]
+      },
+      "last_statement_2026": {
+        "id": "ps-2026-26",
+        "pay_date": "2026-12-18",
+        "posted_at": "2026-12-18T06:00:00-05:00",
+        "earnings": [
+          [
+            "Regular pay",
+            2880
+          ],
+          [
+            "Sick pay, 8.0 hours",
+            320
+          ],
+          [
+            "Mileage reimbursement, 61 miles on 19 November",
+            42.7
+          ]
+        ],
+        "deductions": [
+          [
+            "Medical: PPO, employee only",
+            120
+          ],
+          [
+            "Retirement savings at 6 percent",
+            192
+          ]
+        ],
+        "net_pay": 2290.7,
+        "deposits": [
+          [
+            "Joint savings",
+            300,
+            "sent"
+          ],
+          [
+            "Credit union checking",
+            1990.7,
+            "sent"
+          ]
+        ]
+      },
+      "returned_deposit": {
+        "id": "dep-0073",
+        "account": {
+          "label": "Harbor savings",
+          "kind": "savings",
+          "last4": "2290"
+        },
+        "amount": 200,
+        "state": "reissued",
+        "history": [
+          {
+            "at": "2026-05-22T06:00:00-04:00",
+            "state": "sent",
+            "reason": null,
+            "event_id": "ev-pl-1065"
+          },
+          {
+            "at": "2026-05-27T10:00:00-04:00",
+            "state": "returned",
+            "reason": "The receiving account is closed.",
+            "event_id": "ev-pl-1066"
+          },
+          {
+            "at": "2026-05-29T15:00:00-04:00",
+            "state": "reissued",
+            "reason": "Sent again to the checking account on file.",
+            "event_id": "ev-pl-1068"
+          }
+        ],
+        "reissued_to": {
+          "kind": "account",
+          "label": "Everyday checking",
+          "last4": "7731"
+        }
+      },
+      "inquiries": [
+        {
+          "id": "inq-0008",
+          "statement_id": "ps-2026-22",
+          "amount": 412.5,
+          "note": "My travel reimbursement of 412.50 for the client visit on 13 and 14 October is missing.",
+          "state": "answered",
+          "answer": "The reimbursement will be on the pay statement of 20 November."
+        },
+        {
+          "id": "inq-0009",
+          "statement_id": "ps-2026-25",
+          "amount": 42.7,
+          "note": "My mileage of 61 miles for the site visit on 19 November is missing. That is 42.70.",
+          "state": "answered",
+          "answer": "The mileage will be on the pay statement of 18 December."
+        }
+      ],
+      "leave_requests": [
+        {
+          "id": "lv-0026",
+          "type": "sick",
+          "start": "2026-12-08",
+          "end": "2026-12-08",
+          "hours": 8,
+          "state": "taken"
+        },
+        {
+          "id": "lv-0025",
+          "type": "vacation",
+          "start": "2026-12-28",
+          "end": "2026-12-31",
+          "hours": 32,
+          "state": "approved"
+        },
+        {
+          "id": "lv-0027",
+          "type": "vacation",
+          "start": "2027-01-25",
+          "end": "2027-01-26",
+          "hours": 16,
+          "state": "pending"
+        }
+      ],
+      "leave_balances": [
+        {
+          "type": "vacation",
+          "balance": 64,
+          "available": 16,
+          "expiring": 0
+        },
+        {
+          "type": "personal",
+          "balance": 10,
+          "available": 10,
+          "expiring": 10
+        },
+        {
+          "type": "sick",
+          "balance": 30,
+          "available": 30,
+          "expiring": 0
+        }
+      ],
+      "notifications": [
+        {
+          "at": "2026-12-09T11:20:00-05:00",
+          "kind": "inquiry.answered",
+          "title": "Payroll answered your question on pay statement ps-2026-25"
+        },
+        {
+          "at": "2026-12-18T06:00:00-05:00",
+          "kind": "payroll.run_posted",
+          "title": "Your pay for 18 December is posted: 2,290.70 net pay"
+        }
+      ]
+    }
+  },
+  "as_of": {
+    "time": "2026-11-19T12:00:00-05:00",
+    "loaded": 157,
+    "pay_statements": 49,
+    "notifications": 94,
+    "leave_requests": 25,
+    "planned_pay_dates_in_2026": 3
+  }
+}

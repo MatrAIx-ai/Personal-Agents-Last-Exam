@@ -15,11 +15,14 @@ node runtime/cli.cjs verify --app apps/payleaf --output .artifacts/payleaf.json
 node apps/payleaf/tests/mcp.integration.cjs --runtime runtime
 node apps/payleaf/tests/mail.integration.cjs --runtime runtime
 node apps/payleaf/dev/check-fixture.cjs
+node apps/payleaf/dev/generate-evaluation-data.cjs --check
+node apps/payleaf/dev/coverage.cjs --check
+node apps/payleaf/tests/evaluation.integration.cjs --runtime runtime
 ```
 
-The business tests carry the plan's names `T01` to `T20`. A letter after the number marks one more test for that number, for example `T06b`. Five `PKG` tests check the package itself. That is 57 tests. On Node 18 and 22, 55 pass and 2 are skipped. With `PALE_RUNTIME_ROOT=runtime`, all 57 pass. The real MCP script passes 128 of 128 checks, and the Mail script passes 52 of 52. Both scripts take `--report FILE` to write their checks as JSON.
+The business tests carry the plan's names `T01` to `T20`. A letter after the number marks one more test for that number, for example `T06b`. Five `PKG` tests check the package itself, and five `DATA` tests check the evaluation dataset. That is 62 tests. On Node 18 and 22, 59 pass and 3 are skipped. With `PALE_RUNTIME_ROOT=runtime`, all 62 pass. The real MCP script passes 128 of 128 checks, the Mail script passes 52 of 52, and the evaluation data script passes 18 of 18. The three scripts take `--report FILE` to write their checks as JSON.
 
-With only this App folder, run `node --test tests/business.test.cjs` and `node examples/run.cjs` from inside it. Two tests need the public runtime and are skipped there: `T19i` runs `tests/mail.integration.cjs`, and `T20` runs `tests/mcp.integration.cjs`. Set `PALE_RUNTIME_ROOT` to the public `runtime/` directory to run them. `T19i` also needs the public checkout that holds this package as `apps/payleaf` and Mail as `examples/apps/mail`, so in a copy outside the checkout it stays skipped. A script that cannot run prints `SKIP` with the reason and exits with code 77, and its test is then reported as skipped, not as passed. `service.cjs` uses that runtime; it does not embed a second server.
+With only this App folder, run `node --test tests/business.test.cjs` and `node examples/run.cjs` from inside it. Three tests need the public runtime and are skipped there: `T19i` runs `tests/mail.integration.cjs`, `T20` runs `tests/mcp.integration.cjs`, and the last `DATA` test runs `tests/evaluation.integration.cjs`. Set `PALE_RUNTIME_ROOT` to the public `runtime/` directory to run them. `T19i` also needs the public checkout that holds this package as `apps/payleaf` and Mail as `examples/apps/mail`, so in a copy outside the checkout it stays skipped. A script that cannot run prints `SKIP` with the reason and exits with code 77, and its test is then reported as skipped, not as passed. `service.cjs` uses that runtime; it does not embed a second server.
 
 ## Workflows and operations
 
@@ -47,6 +50,18 @@ The App has no timer and no scheduler. It uses `ctx.virtual_now`, and an event i
 Core owns commit receipts and audit; the App owns business history. The state has one activity row for every committed Agent write, one for every applied event and one for each effect of an event: a statement written, a change applied or replaced, leave hours earned and a notification written. Optional `ctx.log` gets the action and the object ID of each row, not amounts or text.
 
 `examples/scenario.json` is one `payleaf.payroll.run_posted` event for the pay date of 6 November, applied through `env.apply_event` at the supplied time. `dev/build.cjs` writes `tools.json` and the seed and event schemas from one set of record shapes. `dev/build-fixture.cjs` writes the fixture: it replays the history in `dev/base.json` through the App's own hooks, so the App's own pay run computed every deduction, net pay and deposit. `dev/check-fixture.cjs` checks the consistency and the counts of the fixture, and `dev/check-plan-examples.cjs` compares the example events and the example message in `tests/` with the approved plan. They are development tools and do not run in the App.
+
+## Evaluation data
+
+`data/evaluation/` holds the evaluation dataset: two years of synthetic history of the same account, from 1 January 2025 to 31 December 2026, read at `2026-12-31T23:00:00-05:00`. Every record is synthetic, and the folder's [README](data/evaluation/README.md) says how it is made. It has 165 App records, among them 52 pay statements, 27 leave requests, 9 pay inquiries, 16 setting changes and 2 enrollment windows, with 99 notifications and 491 activity rows. The actual dated records fall on 138 distinct dates, and every month of the window has some.
+
+- `dev/generate-evaluation-data.cjs` writes the seed by replaying a scripted history, with a seeded PRNG, through the App's own hooks. `--check` compares with the committed files.
+- `dev/coverage.cjs` counts the dates of the seed in `America/New_York` and writes [`coverage.md`](data/evaluation/coverage.md) and `coverage.json`: one date field for each record kind, monthly counts, gaps, exclusions and file hashes. Actual dated records count. Scheduled or future rows, such as pay calendar entries and the pay dates of 2027, are listed apart and never counted.
+- `dev/select-evaluation-seed.cjs --as-of TIME` writes a seed with only the history before that time, each record in its state at that time. A task that starts before the end of 2026 uses it, so it never gets later records as history.
+- `dev/check-fixture.cjs` checks the cross-record rules on the dataset as on the fixture.
+- `tests/evaluation.integration.cjs` loads the dataset with `env.load_seed` on the real runtime and reads it back through MCP.
+
+The small fixtures stay as smoke fixtures. The dataset is not loaded by default.
 
 ## Mail notifications
 
@@ -224,6 +239,7 @@ Each control that returns an error is checked before and after: the data, the ac
 | Mail | Example messages pass Mail's wire schema, and the notice of `ev-pl-402` is the plan's example message | `T19g`, `T19h` |
 | Mail | A notification is a received message in the bound Mail account with a committed receipt, and an identical retry keeps one inbox record | `T19i` |
 | Mail | Without a grant, or without a bound mailbox, the router rejects the delivery and Mail has no record. The App runs fully without Mail | `T19i` |
+| Data | The evaluation dataset of 2025 to 2026 loads through the seed checks and `env.load_seed`, the generator and coverage report reproduce, the cross-record rules hold, and a seed as of a time holds no later record. Report: [`data/evaluation/coverage.md`](data/evaluation/coverage.md) | `DATA` tests, `tests/evaluation.integration.cjs` |
 
 ## Package map
 
@@ -240,8 +256,9 @@ fixtures/                    Initial records, account bindings, policy and clock
 examples/run.cjs             Runnable event example without a host
 examples/scenario.json       Input to an Infra event injection, not an automatic scheduler
 examples/task-data/          Replaceable task seed, binding and policy examples
-tests/                       App-only tests and harness, schema validator, plan examples and two real-runtime scripts
-dev/                         Builders for schemas, tools and the fixture, the fixture check and the plan example check
+data/evaluation/             Synthetic evaluation dataset of 2025 to 2026, its provenance and its coverage report
+tests/                       App-only tests and harness, schema validator, plan examples and three real-runtime scripts
+dev/                         Builders for schemas, tools, the fixture and the evaluation data, the consistency check, the coverage report and the plan example check
 LICENSE                      MIT for this implementation and synthetic fixtures
 ```
 

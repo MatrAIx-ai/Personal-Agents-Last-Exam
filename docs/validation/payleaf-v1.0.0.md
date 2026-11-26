@@ -1,6 +1,6 @@
 # Payleaf employee self-service validation report
 
-Checked 23 November 2026 (America/New_York). Scope: the package `apps/payleaf` version **1.0.0**, public runtime **1.6.0**, Core API **1.2.0**, and Mail **1.3.0** as the optional receiver. The approved plan is [`proposals/environment/payleaf.md`](../../proposals/environment/payleaf.md), approved at commit `134d0815877694df3be208b7ec72b510fe994045`. That file is unchanged: its blob is `f27a0b1eb0eecda3d2422f9c13c0c4f69b9f2b06` at the approved commit and in the candidate tree. The package SHA-256 is `842403ffd3fabe2d5da0df9bec60bd3dedb06f172af1a48a36ffee7d0b588439`. It is the same in both Node runs and in the base-runtime report. The counts of every run and the raw reports are in [`payleaf/index.json`](payleaf/index.json) and the files beside it.
+Checked 26 November 2026 (America/New_York). Scope: the package `apps/payleaf` version **1.0.0**, public runtime **1.6.0**, Core API **1.2.0**, and Mail **1.3.0** as the optional receiver. The approved plan is [`proposals/environment/payleaf.md`](../../proposals/environment/payleaf.md), approved at commit `134d0815877694df3be208b7ec72b510fe994045`. That file is unchanged: its blob is `f27a0b1eb0eecda3d2422f9c13c0c4f69b9f2b06` at the approved commit and in the candidate tree. The package SHA-256 is `108186a95845ecdff346388984612c3301c1be8614570c2c6ec059acff22e91f`. It is the same in both Node runs and in the base-runtime report. The counts of every run and the raw reports are in [`payleaf/index.json`](payleaf/index.json) and the files beside it.
 
 **Automated outcome: passed.** This document records implementation evidence for review. Human workflow acceptance and provenance review remain pending; no approval is claimed.
 
@@ -8,11 +8,13 @@ Checked 23 November 2026 (America/New_York). Scope: the package `apps/payleaf` v
 
 | Evidence | Result | What was actually exercised |
 | --- | --- | --- |
-| App-only business | 57 tests: 55 passed and 2 skipped in a copy of the package alone. In the checkout with `PALE_RUNTIME_ROOT` set, 57 of 57 passed | The real App hooks, the input, output, seed and event schemas, each of the 12 App errors and the order of the error table, every rejected event and seed of the plan's lists, and the rules that the package adds. Also the deposit split, the cut-off rule, the pay run, leave hours and the carryover, window states and the default, notification text, the stored wire message, activity rows, and the Mail sender with a fake router. Five `PKG` tests check the package itself. The 2 skipped tests, `T19i` and `T20`, run the two real-runtime scripts (next rows) |
+| App-only business | 62 tests: 59 passed and 3 skipped in a copy of the package alone. In the checkout with `PALE_RUNTIME_ROOT` set, 62 of 62 passed | The real App hooks, the input, output, seed and event schemas, each of the 12 App errors and the order of the error table, every rejected event and seed of the plan's lists, and the rules that the package adds. Also the deposit split, the cut-off rule, the pay run, leave hours and the carryover, window states and the default, notification text, the stored wire message, activity rows, and the Mail sender with a fake router. Five `PKG` tests check the package itself, and five `DATA` tests check the evaluation dataset. The 3 skipped tests, `T19i`, `T20` and the last `DATA` test, run the three real-runtime scripts (next rows) |
 | Isolated App package | Passed | The public verifier copies the package to a temporary folder with no sibling runtime. It then runs its tests and its event example there, with a 60 second limit |
 | Real public MCP, common checks | 48 checks passed | Discovery, the published input and output of the 14 read tools, Agent denial of the seven `env.*` operations, a caller that tries to override its run or role, a read, history loading, event application and retry, reset, a separate run, a restarted process and an unchanged package |
 | Real public MCP, Payleaf workflows | 128 checks passed | `tests/mcp.integration.cjs`: a task seed with its own `virtual_now`, the 25 Agent tools (14 read and 11 write), the W1 to W4 paths of the plan with its numbers, 13 clock moves with `env.advance_time` and no App event, refused calls and refused events that change nothing, replays, audit and activity records, reset to the loaded seed and time, a second seed in the same run, and a second run that is not affected |
 | Payleaf to Mail | 52 checks passed | `tests/mail.integration.cjs`: the real Router process and the real Mail package. An inbox record and a committed receipt, read through the Mail Agent. Seed history not sent, `email_notices` off and on again, an identical retry, a reset of Payleaf only, a new seed in the same run, a second sender object, no grant, no mailbox for the owner, a refusal by Mail, a reset of Mail, a receiver that does not answer, and Payleaf without Mail |
+| Evaluation data, load and query | 18 checks passed | `tests/evaluation.integration.cjs`: `env.load_seed` loads `data/evaluation/seed.json` (165 records) at `2026-12-31T23:00:00-05:00` with its synthetic provenance bundle, and the runtime quality check passes. The Agent's read tools return the counts of `coverage.json`: 52 pay statements on 52 dates, 16 setting changes, 9 inquiries, 27 leave requests, 99 notifications, 2 closed windows with final sets, and the 4 planned pay dates of 2027. A seed as of 19 November 2026 (157 records) shows no record after that time, and its later pay dates read `planned` |
+| Evaluation data, generation and coverage | Passed | `dev/generate-evaluation-data.cjs --check` (byte-identical, 171 steps), `dev/coverage.cjs --check` (138 distinct dates from 905 actual rows, 1 exclusion, 206 scheduled rows apart), `dev/check-fixture.cjs` on the dataset (4 of 4) |
 | Node 18.20.8 | All rows above, and 22/22 full-suite stages passed | The existing Mail, Calendar, Core and Messaging regression suite with this package present |
 | Node 22.23.5 | All rows above, and 22/22 full-suite stages passed | The same on the second supported runtime family |
 | Independent base validator | All eight discovered packages passed | Unmodified main at `a4bce023953061483c41de5a287ba5e43f4a5648`, on Node 22.23.5, validated the candidate tree: this package (48 checks, the same package hash) and the seven existing ones |
@@ -36,6 +38,10 @@ PALE_RUNTIME_ROOT=$PWD/runtime node --test apps/payleaf/tests/business.test.cjs
 npm run app:verify -- --app apps/payleaf --output .artifacts/payleaf.json
 node apps/payleaf/tests/mcp.integration.cjs --runtime runtime --report .artifacts/payleaf-mcp.json
 node apps/payleaf/tests/mail.integration.cjs --runtime runtime --report .artifacts/payleaf-mail.json
+node apps/payleaf/dev/generate-evaluation-data.cjs --check
+node apps/payleaf/dev/coverage.cjs --check
+node apps/payleaf/dev/check-fixture.cjs apps/payleaf/data/evaluation/seed.json 2026-12-31T23:00:00-05:00
+node apps/payleaf/tests/evaluation.integration.cjs --runtime runtime --report .artifacts/payleaf-evaluation.json
 npm test
 ```
 
@@ -113,6 +119,17 @@ Each point names its test. Two rules have no test, and the README names their co
 ## Data and licence
 
 The fixture is authored and synthetic. `dev/build-fixture.cjs` replays the authored history in `dev/base.json` once through the App's own hooks, in 85 steps. So the App's own pay run computed every deduction, net pay and deposit. It then keeps the 26 newest notifications, to match the count of the plan, and the activity rows from the time of the oldest kept notification on. The result, `fixtures/minimal.json`, holds 81 records in 204,219 bytes, under the 1 MB of the plan. `contribution/dataset.json` records the provenance and the three public pages that were read for the shape of the workflows. No text, data, form, logo or brand was copied. The package has no media (0 assets). Code and fixtures are under the repository's MIT License.
+
+### Evaluation dataset, 2025 to 2026
+
+The reviewer asked for a full-window dataset with reproducible monthly and source counts, provenance and a load and query example, with scheduled or future rows kept apart from actual records. The package adds it in `apps/payleaf/data/evaluation/` ([README](../../apps/payleaf/data/evaluation/README.md), [coverage report](../../apps/payleaf/data/evaluation/coverage.md)). No App behavior changed.
+
+- **Synthetic, all of it.** Payleaf is fictional, so nothing is collected and there is no real anchor. `data/evaluation/dataset.json` names one source, `evaluation-generator` of kind `synthetic`, in `record_source_ids`, and `contribution/dataset.json` declares the same source ID. Real: 0, mixed: 0.
+- **How it is made.** `dev/generate-evaluation-data.cjs` (version 1.0.0, PRNG mulberry32 with seed 20250101) replays 171 scripted steps from 1 January 2025 through the App's own hooks. A rerun is byte-identical, and `manifest.json` has the SHA-256 of each file. The seed is 596,535 bytes.
+- **Clock.** The seed is read at `2026-12-31T23:00:00-05:00`, so every record of 2025 and 2026, December 2026 included, is in the past. `dev/select-evaluation-seed.cjs --as-of TIME` writes a seed with only the history before an earlier time, each record in its state then, for a task that starts earlier.
+- **Counts.** 165 App records: 56 pay calendar entries, 52 pay statements, 16 setting changes, 9 inquiries, 27 leave requests, 2 windows and 3 election sets, with 161 leave entries, 99 notifications and 491 activity rows. 905 actual dated rows fall on 138 distinct dates, from 1 January 2025 to 29 December 2026, and every month has records. The one exclusion is the 2025 election set, submitted on 12 November 2024.
+- **Scheduled rows apart.** Pay calendar entries, cut-offs, enrollment windows, leave days and holidays are counted in their own group and never toward coverage. The rows after the clock are the 4 pay dates of 2027, 3 of their cut-offs, 2 leave days in January 2027 and the holiday of 1 January 2027.
+- **Why 138 dates.** One person's pay portal has a pay run every two weeks and a few acts a month. More dates would need filler.
 
 ## What is not claimed
 

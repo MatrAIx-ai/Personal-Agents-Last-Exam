@@ -1815,3 +1815,85 @@ test('PKG tools.json has exactly the 14 read and 11 write operations of the plan
     assert.ok(needs.every(key => tool.inputSchema.required.includes(key)) && tool.outputSchema.required.includes(gives), tool.name);
   }
 });
+
+// The evaluation dataset of data/evaluation/: two years of synthetic history, apart from the small fixtures above.
+const EVALUATION = path.join(ROOT, 'data/evaluation');
+const evaluation = file => JSON.parse(fs.readFileSync(path.join(EVALUATION, file), 'utf8'));
+const script = (...args) => spawnSync(process.execPath, args, {cwd: ROOT, encoding: 'utf8', timeout: 50000});
+const {records} = require('../src/model.cjs');
+const crypto = require('node:crypto');
+
+test('DATA the evaluation seed passes the App\'s own seed checks at its clock, and its record count and synthetic provenance match its dataset.json', () => {
+  const seed = evaluation('seed.json'), clock = evaluation('clock.json').initial_time, dataset = evaluation('dataset.json');
+  const f = fixture({seed, now: clock, logging: false});
+  assert.ok(compile(require('../schemas/dataset.schema.json'), path.join(ROOT, 'schemas'))(dataset), 'Dataset schema');
+  assert.deepEqual([records(seed).length, dataset.expected_counts.records], [165, 165]);
+  assert.deepEqual(dataset.sources.map(s => [s.source_id, s.kind, s.generation.seed]), [['evaluation-generator', 'synthetic', 20250101]]);
+  assert.deepEqual(dataset.record_source_ids, ['evaluation-generator']);
+  assert.ok(require('../contribution/dataset.json').sources.some(s => s.source_id === 'evaluation-generator' && s.kind === 'synthetic'));
+  const statements = f.call('pay_statements.list', {start: '2025-01-01', end: '2026-12-31'}).items;
+  assert.deepEqual([statements.length, statements[0].pay_date, statements[51].pay_date], [52, '2025-01-03', '2026-12-18']);
+  assert.deepEqual(f.call('calendar.list', {start: '2027-01-01'}).items.map(e => [e.id, e.state]),
+    [['pd-2027-01', 'planned'], ['pd-2027-02', 'planned'], ['pd-2027-03', 'planned'], ['pd-2027-04', 'planned']]);
+});
+
+test('DATA the generator, the coverage report and the consistency script all pass on the committed evaluation files', () => {
+  for (const args of [['dev/generate-evaluation-data.cjs', '--check'], ['dev/coverage.cjs', '--check'],
+    ['dev/check-fixture.cjs', 'data/evaluation/seed.json', evaluation('clock.json').initial_time]]) {
+    const result = script(...args);
+    assert.equal(result.status, 0, args.join(' ') + '\n' + result.stdout + result.stderr);
+  }
+  const manifest = evaluation('manifest.json');
+  for (const name of ['seed.json', 'clock.json', 'dataset.json']) {
+    const text = fs.readFileSync(path.join(EVALUATION, name));
+    assert.equal(crypto.createHash('sha256').update(text).digest('hex'), manifest.files[name].sha256, name);
+  }
+});
+
+test('DATA a seed as of a time holds only the history before it, with each record in its state at that time, and the App accepts it at that time', () => {
+  const {select} = require('../dev/select-evaluation-seed.cjs');
+  const {ACTUAL} = require('../dev/coverage.cjs');
+  const full = evaluation('seed.json');
+  // Every timestamp of a value, at any depth, with its key. Only the due times of a schedule may be later than the seed's time.
+  const stamps = (value, key = '', out = []) => {
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) out.push([key, value]);
+    else if (value && typeof value === 'object') for (const [inner, item] of Object.entries(value)) stamps(item, Array.isArray(value) ? key : inner, out);
+    return out;
+  };
+  const after = (seed, asOf) => stamps(seed).filter(([key, value]) => !['cutoff_at', 'opens_at', 'closes_at'].includes(key) && Date.parse(value) > Date.parse(asOf));
+  assert.ok(after(full, '2026-11-19T12:00:00-05:00').length > 0, 'control: the full seed has timestamps after 19 November');
+  for (const asOf of ['2025-01-01T00:00:00-05:00', '2025-07-15T12:00:00-04:00', '2026-01-01T00:05:00-05:00', '2026-11-19T12:00:00-05:00']) {
+    const seed = select(asOf), f = fixture({seed, now: asOf, logging: false});
+    assert.deepEqual(after(seed, asOf), [], asOf + ': a timestamp after the time of the seed');
+    // Nothing is lost either: each actual row of the full seed up to that time is in the selected seed, with the same date.
+    for (const kind of ACTUAL) {
+      assert.deepEqual(kind.rows(seed), kind.rows(full).filter(([, value]) => Date.parse(value) <= Date.parse(asOf)), asOf + ': ' + kind.kind);
+    }
+    assert.deepEqual(seed.statements.map(s => s.id), full.statements.filter(s => Date.parse(s.posted_at) <= Date.parse(asOf)).map(s => s.id), asOf);
+    assert.ok(records(seed).every(record => records(full).some(x => x.id === record.id)), asOf + ': record IDs are kept');
+    assert.equal(f.call('pay_statements.list').items.length, seed.statements.length);
+  }
+  const mid = select('2026-11-19T12:00:00-05:00');
+  // The pay date of 20 November has not posted yet, and the trip of 28 to 31 December is approved but not taken.
+  assert.deepEqual([mid.calendar.find(e => e.id === 'pd-2026-24').state, mid.leave_requests.find(r => r.start === '2026-12-28').stored_state], ['planned', 'approved']);
+  assert.deepEqual([mid.employment.annual_salary, select('2025-01-01T00:00:00-05:00').employment.annual_salary], [83200, 78000]);
+  assert.deepEqual(select(evaluation('clock.json').initial_time), full);
+  assert.throws(() => select('2027-01-02T00:00:00-05:00'), /not inside/);
+});
+
+test('DATA coverage: every month of 2025 and 2026 has actual records, the only exclusion is the election set of November 2024, and scheduled rows are counted apart', () => {
+  const coverage = evaluation('coverage.json');
+  assert.deepEqual([coverage.timezone, coverage.window, coverage.clock], ['America/New_York', {first: '2025-01-01', last: '2026-12-31'}, evaluation('clock.json').initial_time]);
+  assert.deepEqual(coverage.actual.gaps.months_without_actual_records, []);
+  assert.ok(coverage.actual.monthly.every(m => m.records > 0 && m.by_kind.pay_statements >= 2), 'two pay statements or more in every month');
+  assert.deepEqual(coverage.actual.exclusions.map(x => [x.kind, x.id, x.reason]), [['election_sets', 'els-0001', 'before 2025-01-01']]);
+  assert.deepEqual([coverage.actual.global.distinct_dates, coverage.actual.global.earliest, coverage.actual.global.latest], [138, '2025-01-01', '2026-12-29']);
+  assert.deepEqual([coverage.provenance.real, coverage.provenance.mixed, coverage.provenance.synthetic], [0, 0, coverage.actual.counted_rows]);
+  const scheduled = Object.fromEntries(coverage.scheduled.kinds.map(k => [k.kind, k]));
+  assert.deepEqual([scheduled.pay_calendar.rows, scheduled.pay_calendar.after_clock], [56, 4]);
+  assert.ok(!coverage.actual.kinds.some(k => k.kind in scheduled), 'no kind is in both groups');
+  assert.ok(coverage.scheduled.future_rows.every(x => x.value.slice(0, 4) === '2027'), 'every future row is in 2027');
+});
+
+test('DATA load and query: tests/evaluation.integration.cjs loads the evaluation seed with env.load_seed on the real runtime and reads the counts of the coverage report through MCP',
+  ...withRuntime('tests/evaluation.integration.cjs'));
