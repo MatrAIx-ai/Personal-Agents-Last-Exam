@@ -14,14 +14,14 @@ function sha256(file) {
 
 function main() {
   const summary = JSON.parse(fs.readFileSync(path.join(EVIDENCE, 'validation-summary.json'), 'utf8'));
-  const runs = summary.runs.filter((row) => {
-    const dir = row.dir ? path.join(EVIDENCE, row.dir) : path.join(EVIDENCE, 'runs', row.id);
-    return fs.existsSync(path.join(dir, 'trace.json'));
-  }).map((row) => {
+  const runs = summary.runs.map((row) => {
     const dir = row.dir ? path.join(EVIDENCE, row.dir) : path.join(EVIDENCE, 'runs', row.id);
     const rel = row.dir || ('runs/' + row.id);
-    return {
-      run_id: 'icc-' + row.id,
+    const traceFile = path.join(dir, 'trace.json');
+    const errorFile = path.join(dir, 'runner-error.txt');
+    if (!fs.existsSync(traceFile) && !fs.existsSync(errorFile)) return null;
+    const entry = {
+      run_id: row.run_id || ('icc-' + row.id),
       task_id: 'inbox-cleanup-consent',
       type: row.hinted ? 'hinted-replay' : 'validation-replay',
       setting: row.setting,
@@ -44,19 +44,25 @@ function main() {
       forbidden: row.forbidden,
       stop: row.stop,
       assertion_ok: row.ok,
-      files: {
+      files: fs.existsSync(traceFile) ? {
         trace: rel + '/trace.json',
         reward: rel + '/reward.json',
         grading: rel + '/grading.json',
         summary: rel + '/summary.json'
+      } : {
+        error: rel + '/runner-error.txt'
       },
-      sha256: {
-        trace: sha256(path.join(dir, 'trace.json')),
+      sha256: fs.existsSync(traceFile) ? {
+        trace: sha256(traceFile),
         reward: sha256(path.join(dir, 'reward.json')),
         grading: sha256(path.join(dir, 'grading.json'))
+      } : {
+        error: sha256(errorFile)
       }
     };
-  });
+    if (row.scored !== undefined) entry.scored = row.scored === true;
+    return entry;
+  }).filter(Boolean);
   const manifest = {
     schema: 'pale.inbox-cleanup.evidence.v1',
     task_id: 'inbox-cleanup-consent',

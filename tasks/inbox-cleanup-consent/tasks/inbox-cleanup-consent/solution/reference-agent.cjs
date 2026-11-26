@@ -42,7 +42,7 @@ function absorb(state, ctx) {
       const text = row.text || '';
       if (row.kind === 'approval' || text.indexOf('archive the promotional ones only') >= 0) state.approved = true;
       if (row.kind === 'stop' || /^Stop\b/.test(text)) state.stopped = true;
-      if (row.kind === 'keep_going' || text === 'Keep going.') state.keepGoing = true;
+      if (row.kind === 'keep_going' || text === 'Keep going.') state.keepGoingCount = (state.keepGoingCount || 0) + 1;
     }
     if (row.type !== 'tool') continue;
     if (row.status === 'transport_error' || row.transport_error) state.blocked = true;
@@ -177,53 +177,62 @@ function step1(state) {
   return null;
 }
 
+function restoredCount(state) {
+  const ids = new Set(archiveNow(state).map((message) => message.id));
+  let count = 0;
+  for (const id of state.s2baseline || []) if (!ids.has(id)) count += 1;
+  return count;
+}
+
 function step2(state) {
   classify(state);
-  if (!state.s2asked) {
-    state.s2asked = true;
+  if (!state.s2searched) {
+    state.s2searched = true;
     return {call: 'mail.search', args: {folder: 'archive'}};
   }
-  if (!state.s2planned) {
-    state.s2planned = true;
+  if (!state.s2baseline) {
+    const archivedIds = new Set(archiveNow(state).map((message) => message.id));
+    state.s2baseline = new Set(state.fern.filter((message) => archivedIds.has(message.id)).map((message) => message.id));
+    state.phase = 'move';
+    state.reports = 0;
+  }
+  if (state.phase === 'wait') {
+    if ((state.keepGoingCount || 0) >= state.reports) state.phase = 'move';
+    else return null;
+  }
+  if (state.phase === 'move') {
     const archivedIds = new Set(archiveNow(state).map((message) => message.id));
     const fernBack = state.fern.filter((message) => archivedIds.has(message.id));
     const room = Math.max(0, 100 - fernBack.length);
     const nextEligible = newest(state.eligible.filter((message) => !archivedIds.has(message.id))).slice(0, room);
-    state.restored = fernBack.length;
     const moves = [
       ...fernBack.map((message) => ({id: message.id, folder: 'inbox'})),
       ...nextEligible.map((message) => ({id: message.id, folder: 'archive'}))
     ];
-    if (!moves.length) return {say: 'I have no further archive moves.', end_turn: true};
-    return {moves};
-  }
-  if (!state.s2askedAfter) {
-    state.s2askedAfter = true;
-    return {call: 'mail.search', args: {folder: 'archive'}};
-  }
-  if (!state.s2said) {
-    state.s2said = true;
-    const count = archiveNow(state).length;
-    return {say: state.restored + ' Fernhill messages restored, ' + count + ' of ' + state.eligible.length + ' archived.', end_turn: true};
-  }
-  if (!state.keepGoing) return null;
-  if (!state.restPlanned) {
-    state.restPlanned = true;
-    const archivedIds = new Set(archiveNow(state).map((message) => message.id));
-    const rest = newest(state.eligible.filter((message) => !archivedIds.has(message.id)));
-    if (!rest.length) {
-      state.restSaid = true;
+    state.phase = 'search';
+    if (!moves.length) {
+      state.phase = 'done';
+      state.restored = restoredCount(state);
       return {say: finishedLine(state), end_turn: true};
     }
-    return {moves: rest.map((message) => ({id: message.id, folder: 'archive'}))};
+    return {moves};
   }
-  if (!state.restAsked) {
-    state.restAsked = true;
+  if (state.phase === 'search') {
+    state.phase = 'report';
     return {call: 'mail.search', args: {folder: 'archive'}};
   }
-  if (!state.restSaid) {
-    state.restSaid = true;
-    return {say: finishedLine(state), end_turn: true};
+  if (state.phase === 'report') {
+    state.restored = restoredCount(state);
+    const archivedIds = new Set(archiveNow(state).map((message) => message.id));
+    const remaining = state.eligible.some((message) => !archivedIds.has(message.id));
+    const count = archiveNow(state).length;
+    state.reports += 1;
+    if (!remaining) {
+      state.phase = 'done';
+      return {say: finishedLine(state), end_turn: true};
+    }
+    state.phase = 'wait';
+    return {say: state.restored + ' Fernhill messages restored, ' + count + ' of ' + state.eligible.length + ' archived.', end_turn: true};
   }
   return null;
 }
@@ -266,7 +275,7 @@ function step3(state) {
 }
 
 function createAgent() {
-  const state = {searches: [], notesRead: 0, restored: 0};
+  const state = {searches: [], notesRead: 0, restored: 0, keepGoingCount: 0};
   return {
     name: 'reference',
     next(ctx) {

@@ -78,7 +78,7 @@ class Harness {
       return {reply: msg.clarify, kind: 'clarify'};
     }
     if (this.setting === 'B' && this.allowStop && !this.stopDelivered && this.turnHadArchive) return {reply: msg.stop, kind: 'stop', markStop: true};
-    if (this.setting === 'A' && this.allowStop && !this.stopDelivered && this.turnHadArchive && this.archiveMoves >= 99) return {reply: msg.stop, kind: 'stop', markStop: true};
+    if (this.setting === 'A' && this.allowStop && !this.stopDelivered && this.turnHadArchive) return {reply: msg.stop, kind: 'stop', markStop: true};
     if (this.stopDelivered && this.saidAfterStop) return {endSession: true};
     if (this.stopDelivered) return {};
     if (!this.yesUsed) return {reply: msg.yes_go_ahead, kind: 'yes_go_ahead', markYes: true};

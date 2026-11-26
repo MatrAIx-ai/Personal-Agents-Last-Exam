@@ -218,6 +218,28 @@ function retireFlat(id) {
   }
 }
 
+function runIdFor(id, dir) {
+  return 'icc-' + id + '-' + path.basename(dir);
+}
+
+function attemptKept(row, evidenceRoot) {
+  if (!row || !row.dir) return false;
+  const dir = path.join(evidenceRoot, row.dir);
+  return fs.existsSync(path.join(dir, 'trace.json')) || fs.existsSync(path.join(dir, 'runner-error.txt'));
+}
+
+function markScored(rows) {
+  const chosen = new Map();
+  rows.forEach((row, index) => {
+    if (!row || !row.id || row.id === 'evidence-mutations' || row.score == null) return;
+    chosen.set(row.id, index);
+  });
+  return rows.map((row, index) => {
+    if (!row || row.id === 'evidence-mutations') return row;
+    return {...row, scored: chosen.get(row.id) === index};
+  });
+}
+
 function attemptDir(root, id) {
   const base = path.join(root, id);
   fs.mkdirSync(base, {recursive: true});
@@ -241,8 +263,9 @@ function runOne(row, files) {
   retireFlat(id);
   const out = attemptDir(RUNS, id);
   const rel = path.relative(EVIDENCE, out);
+  const runId = runIdFor(id, out);
   const tracePath = path.join(out, 'trace.json');
-  const args = [RUN, '--setting', setting, '--variant', variant, '--memory', memory, '--run-id', 'icc-' + id, '--out', tracePath];
+  const args = [RUN, '--setting', setting, '--variant', variant, '--memory', memory, '--run-id', runId, '--out', tracePath];
   if (String(plan).startsWith('agent:')) args.splice(1, 0, '--agent-module', path.join(TASK, String(plan).slice('agent:'.length)));
   else args.splice(1, 0, '--plan', path.join(TASK, plan));
   if (hinted) args.push('--hinted');
@@ -251,7 +274,7 @@ function runOne(row, files) {
   const proc = spawnSync(process.execPath, args, {cwd: PACKAGE, encoding: 'utf8', timeout: 180000});
   if (proc.status !== 0) {
     fs.writeFileSync(path.join(out, 'runner-error.txt'), (proc.stdout || '') + '\n' + (proc.stderr || ''));
-    return {id, dir: rel, setting, variant, ok: false, problems: ['runner exit ' + proc.status], seconds: (Date.now() - started) / 1000};
+    return {id, dir: rel, run_id: runId, setting, variant, ok: false, scored: false, problems: ['runner exit ' + proc.status], error_artifact: rel + '/runner-error.txt', seconds: (Date.now() - started) / 1000};
   }
   const trace = JSON.parse(fs.readFileSync(tracePath, 'utf8'));
   const problems = [];
@@ -284,6 +307,7 @@ function runOne(row, files) {
   const summary = {
     id,
     dir: rel,
+    run_id: runId,
     setting,
     variant,
     memory_source: memory,
@@ -342,7 +366,7 @@ function retainedAttempts() {
   if (!fs.existsSync(summaryPath)) return [];
   try {
     const previous = JSON.parse(fs.readFileSync(summaryPath, 'utf8')).runs || [];
-    return previous.filter((row) => row && row.dir && fs.existsSync(path.join(EVIDENCE, row.dir, 'trace.json')));
+    return previous.filter((row) => attemptKept(row, EVIDENCE));
   } catch (err) {
     return [];
   }
@@ -379,7 +403,7 @@ function main() {
     schema: 'pale.inbox-cleanup.validation.v1',
     task_id: 'inbox-cleanup-consent',
     runner: 'stand-in',
-    runs: retainedAttempts().concat(results),
+    runs: markScored(retainedAttempts().concat(results)),
     passed: results.filter((r) => r.ok).length,
     failed: results.filter((r) => !r.ok).length
   };
@@ -389,4 +413,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = {attemptDir};
+module.exports = {attemptDir, runIdFor, attemptKept, markScored};

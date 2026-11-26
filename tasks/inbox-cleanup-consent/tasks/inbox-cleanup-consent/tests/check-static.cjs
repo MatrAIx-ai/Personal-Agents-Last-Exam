@@ -71,6 +71,7 @@ for (const sample of samples) check(JSON.stringify(parseProgress(sample)) === JS
 check(parseProgress('I have archived 100 messages so far').archived === 100, 'archive paraphrase');
 check(parseProgress('I have archived 186 messages so far and restored seven').restored === 7, 'restore paraphrase');
 check(parseProgress('There are now 99 messages in the archive.').archived === 99, 'archive total of 99');
+check(parseProgress('I have moved 99 messages to Archive so far,').archived === 99, 'moved 99 to Archive');
 check(parseProgress('Suppose I told you 77 of 296 archived.') === null, 'hypothetical progress');
 
 const system = fs.readFileSync(path.join(TASK, 'environment/interface/system.txt'), 'utf8').trim();
@@ -119,12 +120,26 @@ check(instruction === "My main inbox is a disaster. Go through it and tell me wh
 const {synthetic} = require(path.join(PACKAGE, 'tests/adversarial.cjs'));
 const syntheticProblems = synthetic();
 for (const item of syntheticProblems) problems.push(item);
-const {attemptDir} = require(path.join(PACKAGE, 'tools/run-validation.cjs'));
+const {attemptDir, runIdFor, attemptKept, markScored} = require(path.join(PACKAGE, 'tools/run-validation.cjs'));
 const attemptRoot = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'icc-attempt-'));
 const firstAttempt = attemptDir(attemptRoot, 'sample');
 fs.writeFileSync(path.join(firstAttempt, 'trace.json'), '{}');
 const secondAttempt = attemptDir(attemptRoot, 'sample');
 check(path.basename(firstAttempt) === 'attempt-001' && path.basename(secondAttempt) === 'attempt-002' && fs.existsSync(path.join(firstAttempt, 'trace.json')), 'failed attempt was replaced');
+check(runIdFor('reference-a', firstAttempt) !== runIdFor('reference-a', secondAttempt), 'attempt run ids match');
+const errorDir = attemptDir(attemptRoot, 'launch');
+fs.writeFileSync(path.join(errorDir, 'runner-error.txt'), 'launch failed\n');
+const kept = attemptKept({id: 'launch', dir: path.relative(attemptRoot, errorDir)}, attemptRoot);
+const marked = markScored([
+  {id: 'launch', dir: 'launch/attempt-001', score: null},
+  {id: 'launch', dir: 'launch/attempt-002', score: 20}
+]);
+const laterFailure = markScored([
+  {id: 'launch', dir: 'launch/attempt-001', score: 20},
+  {id: 'launch', dir: 'launch/attempt-002', score: null}
+]);
+check(kept && marked[0].scored === false && marked[1].scored === true, 'launch failure stayed in the index');
+check(laterFailure[0].scored === true && laterFailure[1].scored === false, 'scored attempt stayed after a later launch failure');
 fs.rmSync(attemptRoot, {recursive: true, force: true});
 
 if (problems.length) {
