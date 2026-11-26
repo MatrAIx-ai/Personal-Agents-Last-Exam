@@ -21,7 +21,7 @@ const diagLine = Object.entries(diag.result.summary).map(([k, v]) => `${k} ${v.a
 // A reference link per workflow (Zendesk documentation) or the reason there is none.
 const refLink = (...names) => names.map(n => {
   const r = ref.references.find(x => x.workflow === n);
-  if (r) return `[${n}](${r.image_url})`;
+  if (r) return `[${n}](${r.attachment_url})`;
   const none = ref.no_public_reference.find(x => x.workflow === n);
   if (!none) throw Error('no reference entry ' + n);
   return `${n}: no public reference`;
@@ -32,6 +32,7 @@ const rows = [
   ['Status of a promised refund; overdue after the due date', 'Required (W1, W4; baseline)', refLink('W1 Case intake', 'W4 Case view'), seqLink('1-status-inquiry'), 'T00, T17; runtime check step 6; MCP write shown in the page (step 5)', 'None', NA, 'Passed'],
   ['Transfer by name or alias; refused by written policy', 'Required (W2)', refLink('W2 Chat with quick actions'), `${seqLink('2-transfer')}; refused: ${seqLink('2-transfer-refused')}`, 'T08; browser check', 'None', NA, 'Passed'],
   ['Offers, two-step acceptance with cancel; expired offer', 'Required (W3)', refLink('W3 Offer with actions', 'W3 Retention offers and W4 commitments'), seqLink('3-accept'), 'T10 to T14; runtime check steps 2 to 4; browser check', 'None', NA, 'Passed'],
+  ['Considering closing: closing offers, account closure, bounded chat', 'Added during implementation for #133 (recorded on #219)', refLink('W3 Offer with actions', 'W3 Retention offers and W4 commitments'), seqLink('3b-closing'), 'T28, T29; recognizer diagnostic', 'None', NA, 'Passed'],
   ['Identity with only the chosen fields; pressure script; mismatch', 'Required (W2)', refLink('W2 Identity in chat'), seqLink('4-identity'), 'T07, T26; browser check', 'None', NA, 'Passed'],
   ['Contest a reported credit; provider reissues; reload', 'Required (W4)', refLink('W4 Case list with status', 'W3 Retention offers and W4 commitments'), seqLink('5-contest'), 'T19, T23; browser check', 'None', NA, 'Passed'],
   ['Report versus settlement', 'Required (review of 80c390f); no #182 integration claimed', 'N/A (no reference product shows a provider ledger)', 'Commitments page note (sequence 5, step 1)', 'T20; T21 join check', `Synthetic ledger file, ${join.result.length} cases: ${join.result.map(c => c.join).join(', ')}`, NA, 'Passed as a contract test'],
@@ -57,7 +58,7 @@ const md = [
   '',
   '## Delivery evidence index',
   '',
-  `All rows: App commit \`${e.commit}\`, Core API ${e.core_api}, the Host and browser above. Reference links open Zendesk's images; the comparison with notes is under "Reference comparison".`,
+  `All rows: App commit \`${e.commit}\`, Core API ${e.core_api}, the Host and browser above. Reference links open the PR attachments; the comparison with notes is under "Reference comparison".`,
   '',
   '| Workflow / requirement | Scope and pinned versions | Reference screenshots | Implemented sequence (screenshots, in order) | Business and MCP tests | Dependency result | Date report / source mapping | Verdict and remaining gap |',
   '| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |',
@@ -77,7 +78,7 @@ const md = [
   `| Runtime check | \`${runtime.command}\` | ${Object.keys(runtime.result).length} steps: ${Object.keys(runtime.result).join(', ')} ([report](reports/runtime-check.json)) |`,
   `| Seeds and retention scripts | \`${fixtures.command}\` | ${fixtures.result.seeds.length} seeds valid; pressure and neutral present ${fixtures.result.retention.offers_presented} identical offers ([report](reports/fixtures.json)) |`,
   `| Recognizer diagnostic | \`${diag.command}\` | ${diagLine}; ${diag.result.differences.length} listed, no accuracy target ([report](reports/recognizer-diagnostic.json)) |`,
-  '| Business tests | `cd apps/counterline && npm test` | T00 to T20 and T22 to T27 |',
+  '| Business tests | `cd apps/counterline && npm test` | T00 to T20 and T22 to T29 |',
   '| Browser check | `node apps/counterline/tests/browser.test.cjs` | 29 checks with real controls, each write verified through Infra MCP |',
   '',
   '## Dependency demonstrations',
@@ -93,11 +94,11 @@ const md = [
   '',
   '## Reference comparison',
   '',
-  `Source: ${ref.source}, retrieved ${ref.retrieved_at}. The reference images are linked, not copied (they are Zendesk's); size and SHA-256 identify the exact image compared. Manifest: [reference/references.json](reference/references.json), built by \`scripts/reference-manifest.cjs\`.`,
+  `Source: ${ref.source}, retrieved ${ref.retrieved_at}. The reference images are linked, not copied into the repository (they are Zendesk's). Stable copies are PR attachments in [the implementation report](${ref.attachments_posted_in}); size and SHA-256 identify the exact image compared. Manifest: [reference/references.json](reference/references.json), built by \`scripts/reference-manifest.cjs\`.`,
   '',
   '| Workflow | Reference page (last updated) | Reference image | Implemented | Intentional differences |',
   '| :--- | :--- | :--- | :--- | :--- |',
-  ...ref.references.map(r => `| ${r.workflow} | [${cell(r.article_title)}](${r.article_url}) (${r.article_updated_at.slice(0, 10)}) | [image](${r.image_url}), ${r.image_size}, \`${r.image_sha256.slice(0, 12)}\` | [screenshot](sequences/${r.implemented.replace(/^sequences\//, '')}) | ${cell(r.intentional_differences)} |`),
+  ...ref.references.map(r => `| ${r.workflow} | [${cell(r.article_title)}](${r.article_url}) (${r.article_updated_at.slice(0, 10)}) | [attachment](${r.attachment_url}), [original](${r.image_url}), ${r.image_size}, \`${r.image_sha256.slice(0, 12)}\` | [screenshot](sequences/${r.implemented.replace(/^sequences\//, '')}) | ${cell(r.intentional_differences)} |`),
   '',
   'No public reference:',
   '',

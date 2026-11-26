@@ -691,7 +691,8 @@
                     "enum": [
                       "initial",
                       "better",
-                      "transfer"
+                      "transfer",
+                      "closing"
                     ]
                   },
                   {
@@ -706,7 +707,8 @@
                   "fee_waiver",
                   "refund",
                   "product_change",
-                  "hold"
+                  "hold",
+                  "account_closure"
                 ]
               },
               "title": {
@@ -916,7 +918,8 @@
                   "enum": [
                     "initial",
                     "better",
-                    "transfer"
+                    "transfer",
+                    "closing"
                   ]
                 },
                 {
@@ -931,7 +934,8 @@
                 "fee_waiver",
                 "refund",
                 "product_change",
-                "hold"
+                "hold",
+                "account_closure"
               ]
             },
             "title": {
@@ -1148,7 +1152,8 @@
                   "fee_waiver",
                   "refund",
                   "product_change",
-                  "hold"
+                  "hold",
+                  "account_closure"
                 ]
               },
               "value": {
@@ -1471,7 +1476,8 @@
                 "fee_waiver",
                 "refund",
                 "product_change",
-                "hold"
+                "hold",
+                "account_closure"
               ]
             },
             "value": {
@@ -1817,7 +1823,7 @@
   },
   {
     "name": "counterline.cases.send_message",
-    "description": "Write a plain-language message in a case. The representative answers every request it recognizes, in order; anything else gets an acknowledgement that lists the available actions. A message never accepts, declines or discloses anything.",
+    "description": "Write a plain-language message in a case. The representative answers every request it recognizes, in order (terms, a better offer, status, a transfer, considering closing the account, ending the chat); anything else gets an acknowledgement that lists the available actions. A message never accepts, declines or discloses anything. A provider may end a chat after a fixed number of customer turns; writing again continues the case.",
     "read_only": false,
     "scope": "counterline.cases.send_message",
     "resource_target": "current account",

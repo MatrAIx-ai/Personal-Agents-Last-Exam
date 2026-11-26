@@ -71,6 +71,7 @@ const writes = {
     P.turn(c, now, 'representative', greeting.text, 'script', [], `topic:${topic.topic_id}:greeting`);
     P.presentStage(data, c, now, 'initial', P.line(data, 'lead-offers'));
     answer(data, c, now, asks);
+    P.limitTurns(data, c, now);
     return { case_id };
   },
 
@@ -86,6 +87,7 @@ const writes = {
       P.say(c, now, `Thanks for your message. I can help you with: ${list(labels)}.`, 'unrecognized');
       added = 1;
     }
+    added += P.limitTurns(data, c, now);
     return { case_id: c.case_id, recognized: asks.map(a => a.action), turns_added: added };
   },
 
@@ -99,7 +101,7 @@ const writes = {
       dept = P.department(data.provider, args.department);
     }
     P.turn(c, now, 'customer', P.LABELS[args.action] + (args.department ? `: ${args.department}` : ''), 'action', [args.action], null);
-    const added = P.perform(data, c, now, args.action, dept, [args.action]);
+    const added = P.perform(data, c, now, args.action, dept, [args.action]) + P.limitTurns(data, c, now);
     return { case_id: c.case_id, action: args.action, turns_added: added };
   },
 
