@@ -1,0 +1,1888 @@
+{
+  "scope": "Environment dataset coverage of the Pegboard full-window evaluation dataset (datasets/full-window), as loaded by tests/dataset.integration.cjs. Not a Task history report.",
+  "dataset": {
+    "dataset_id": "pegboard-full-window",
+    "version": "1.0.0",
+    "clock": "2026-12-31T20:00:00-08:00",
+    "files": {
+      "seed.json": {
+        "bytes": 1608682,
+        "sha256": "aa84c05745f94b0d1c767e097875a931103cfe0c97966b4d7a2b3978026abefa"
+      },
+      "clock.json": {
+        "sha256": "c90d79a8f51321e5b90de9489d0b36082d6a89dcaec31d6347e3509228132fad"
+      },
+      "dataset.json": {
+        "sha256": "076a3cf1806e2e31ac7ac524dd199e27110d9a24dc6d3270821ec69e9aefd1b5"
+      }
+    },
+    "records": 3799,
+    "provenance": [
+      {
+        "source_id": "pegboard-full-window-generator",
+        "kind": "synthetic",
+        "tool": "dev/dataset.cjs",
+        "seed": 20250101
+      }
+    ],
+    "record_ids": "Stable IDs: shifts sh-YYMMDD-NN (local start date and slot), handoffs ho-NNNN, time off to-NNNN, notifications ntf-NNNN, activity rows by seq, weeks by week_start."
+  },
+  "time_zone": "America/Los_Angeles",
+  "window": {
+    "start": "2025-01-01",
+    "end": "2026-12-31",
+    "days": 730
+  },
+  "method": "Each record family has one authoritative date field. Timestamps (all with a UTC offset) are converted to a local date in America/Los_Angeles. A record counts when its local date is in the window and it is not after the dataset clock; missing or unparseable dates are counted as invalid and listed. Distinct dates are counted per family and once globally (a date with several records or families counts once). Shift dates after the clock are posted future schedule, not history: they are excluded and reported under future_posted_shifts.",
+  "families": {
+    "actions": {
+      "label": "Actions: activity log rows (every committed App write and applied event, with its effects)",
+      "date_field": "activity[].at",
+      "provenance": {
+        "synthetic": 777,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 783,
+      "in_window": 777,
+      "excluded": {
+        "before_window": 6,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 333,
+      "earliest": "2025-01-03",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 30,
+          "dates": 13
+        },
+        "2025-02": {
+          "records": 30,
+          "dates": 12
+        },
+        "2025-03": {
+          "records": 23,
+          "dates": 12
+        },
+        "2025-04": {
+          "records": 36,
+          "dates": 14
+        },
+        "2025-05": {
+          "records": 32,
+          "dates": 12
+        },
+        "2025-06": {
+          "records": 29,
+          "dates": 12
+        },
+        "2025-07": {
+          "records": 30,
+          "dates": 14
+        },
+        "2025-08": {
+          "records": 28,
+          "dates": 14
+        },
+        "2025-09": {
+          "records": 34,
+          "dates": 15
+        },
+        "2025-10": {
+          "records": 49,
+          "dates": 19
+        },
+        "2025-11": {
+          "records": 37,
+          "dates": 14
+        },
+        "2025-12": {
+          "records": 29,
+          "dates": 13
+        },
+        "2026-01": {
+          "records": 31,
+          "dates": 13
+        },
+        "2026-02": {
+          "records": 27,
+          "dates": 16
+        },
+        "2026-03": {
+          "records": 32,
+          "dates": 10
+        },
+        "2026-04": {
+          "records": 38,
+          "dates": 17
+        },
+        "2026-05": {
+          "records": 23,
+          "dates": 13
+        },
+        "2026-06": {
+          "records": 37,
+          "dates": 15
+        },
+        "2026-07": {
+          "records": 36,
+          "dates": 19
+        },
+        "2026-08": {
+          "records": 32,
+          "dates": 15
+        },
+        "2026-09": {
+          "records": 30,
+          "dates": 11
+        },
+        "2026-10": {
+          "records": 35,
+          "dates": 13
+        },
+        "2026-11": {
+          "records": 40,
+          "dates": 16
+        },
+        "2026-12": {
+          "records": 29,
+          "dates": 11
+        }
+      }
+    },
+    "account_writes": {
+      "label": "Noor's own writes (activity rows with actor \"agent\")",
+      "date_field": "activity[].at",
+      "provenance": {
+        "synthetic": 112,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 112,
+      "in_window": 112,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 101,
+      "earliest": "2025-01-03",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-02": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-03": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-04": {
+          "records": 7,
+          "dates": 7
+        },
+        "2025-05": {
+          "records": 5,
+          "dates": 4
+        },
+        "2025-06": {
+          "records": 5,
+          "dates": 4
+        },
+        "2025-07": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-08": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-09": {
+          "records": 6,
+          "dates": 5
+        },
+        "2025-10": {
+          "records": 8,
+          "dates": 7
+        },
+        "2025-11": {
+          "records": 6,
+          "dates": 5
+        },
+        "2025-12": {
+          "records": 5,
+          "dates": 5
+        },
+        "2026-01": {
+          "records": 4,
+          "dates": 3
+        },
+        "2026-02": {
+          "records": 5,
+          "dates": 5
+        },
+        "2026-03": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-04": {
+          "records": 8,
+          "dates": 8
+        },
+        "2026-05": {
+          "records": 3,
+          "dates": 3
+        },
+        "2026-06": {
+          "records": 5,
+          "dates": 4
+        },
+        "2026-07": {
+          "records": 5,
+          "dates": 4
+        },
+        "2026-08": {
+          "records": 4,
+          "dates": 3
+        },
+        "2026-09": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-10": {
+          "records": 6,
+          "dates": 5
+        },
+        "2026-11": {
+          "records": 6,
+          "dates": 6
+        },
+        "2026-12": {
+          "records": 5,
+          "dates": 4
+        }
+      }
+    },
+    "workplace_events": {
+      "label": "Events from the workplace: postings, manager changes and decisions, coworker requests and answers (activity rows with actor \"event\", without their effects)",
+      "date_field": "activity[].at",
+      "provenance": {
+        "synthetic": 376,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 379,
+      "in_window": 376,
+      "excluded": {
+        "before_window": 3,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 284,
+      "earliest": "2025-01-06",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 13,
+          "dates": 11
+        },
+        "2025-02": {
+          "records": 17,
+          "dates": 12
+        },
+        "2025-03": {
+          "records": 13,
+          "dates": 10
+        },
+        "2025-04": {
+          "records": 14,
+          "dates": 10
+        },
+        "2025-05": {
+          "records": 16,
+          "dates": 10
+        },
+        "2025-06": {
+          "records": 13,
+          "dates": 10
+        },
+        "2025-07": {
+          "records": 17,
+          "dates": 13
+        },
+        "2025-08": {
+          "records": 16,
+          "dates": 13
+        },
+        "2025-09": {
+          "records": 18,
+          "dates": 14
+        },
+        "2025-10": {
+          "records": 21,
+          "dates": 16
+        },
+        "2025-11": {
+          "records": 17,
+          "dates": 13
+        },
+        "2025-12": {
+          "records": 15,
+          "dates": 9
+        },
+        "2026-01": {
+          "records": 14,
+          "dates": 12
+        },
+        "2026-02": {
+          "records": 14,
+          "dates": 13
+        },
+        "2026-03": {
+          "records": 16,
+          "dates": 10
+        },
+        "2026-04": {
+          "records": 15,
+          "dates": 15
+        },
+        "2026-05": {
+          "records": 12,
+          "dates": 10
+        },
+        "2026-06": {
+          "records": 16,
+          "dates": 11
+        },
+        "2026-07": {
+          "records": 19,
+          "dates": 16
+        },
+        "2026-08": {
+          "records": 17,
+          "dates": 15
+        },
+        "2026-09": {
+          "records": 15,
+          "dates": 9
+        },
+        "2026-10": {
+          "records": 17,
+          "dates": 10
+        },
+        "2026-11": {
+          "records": 19,
+          "dates": 13
+        },
+        "2026-12": {
+          "records": 12,
+          "dates": 9
+        }
+      }
+    },
+    "schedule_postings": {
+      "label": "Weekly schedule postings",
+      "date_field": "weeks[].posted_at",
+      "provenance": {
+        "synthetic": 104,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 107,
+      "in_window": 104,
+      "excluded": {
+        "before_window": 3,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 104,
+      "earliest": "2025-01-06",
+      "latest": "2026-12-28",
+      "by_month": {
+        "2025-01": {
+          "records": 4,
+          "dates": 4
+        },
+        "2025-02": {
+          "records": 4,
+          "dates": 4
+        },
+        "2025-03": {
+          "records": 5,
+          "dates": 5
+        },
+        "2025-04": {
+          "records": 4,
+          "dates": 4
+        },
+        "2025-05": {
+          "records": 4,
+          "dates": 4
+        },
+        "2025-06": {
+          "records": 5,
+          "dates": 5
+        },
+        "2025-07": {
+          "records": 4,
+          "dates": 4
+        },
+        "2025-08": {
+          "records": 4,
+          "dates": 4
+        },
+        "2025-09": {
+          "records": 5,
+          "dates": 5
+        },
+        "2025-10": {
+          "records": 4,
+          "dates": 4
+        },
+        "2025-11": {
+          "records": 4,
+          "dates": 4
+        },
+        "2025-12": {
+          "records": 5,
+          "dates": 5
+        },
+        "2026-01": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-02": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-03": {
+          "records": 5,
+          "dates": 5
+        },
+        "2026-04": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-05": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-06": {
+          "records": 5,
+          "dates": 5
+        },
+        "2026-07": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-08": {
+          "records": 5,
+          "dates": 5
+        },
+        "2026-09": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-10": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-11": {
+          "records": 5,
+          "dates": 5
+        },
+        "2026-12": {
+          "records": 4,
+          "dates": 4
+        }
+      }
+    },
+    "shift_changes": {
+      "label": "Shift history rows after the posting: manager changes, cancellations and handoff moves",
+      "date_field": "shifts[].history[].at",
+      "provenance": {
+        "synthetic": 175,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 175,
+      "in_window": 175,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 141,
+      "earliest": "2025-01-12",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 5,
+          "dates": 5
+        },
+        "2025-02": {
+          "records": 8,
+          "dates": 5
+        },
+        "2025-03": {
+          "records": 7,
+          "dates": 5
+        },
+        "2025-04": {
+          "records": 5,
+          "dates": 3
+        },
+        "2025-05": {
+          "records": 7,
+          "dates": 5
+        },
+        "2025-06": {
+          "records": 5,
+          "dates": 5
+        },
+        "2025-07": {
+          "records": 9,
+          "dates": 7
+        },
+        "2025-08": {
+          "records": 8,
+          "dates": 6
+        },
+        "2025-09": {
+          "records": 8,
+          "dates": 7
+        },
+        "2025-10": {
+          "records": 12,
+          "dates": 9
+        },
+        "2025-11": {
+          "records": 9,
+          "dates": 7
+        },
+        "2025-12": {
+          "records": 5,
+          "dates": 4
+        },
+        "2026-01": {
+          "records": 7,
+          "dates": 6
+        },
+        "2026-02": {
+          "records": 8,
+          "dates": 8
+        },
+        "2026-03": {
+          "records": 5,
+          "dates": 3
+        },
+        "2026-04": {
+          "records": 8,
+          "dates": 8
+        },
+        "2026-05": {
+          "records": 6,
+          "dates": 6
+        },
+        "2026-06": {
+          "records": 6,
+          "dates": 5
+        },
+        "2026-07": {
+          "records": 10,
+          "dates": 8
+        },
+        "2026-08": {
+          "records": 9,
+          "dates": 8
+        },
+        "2026-09": {
+          "records": 6,
+          "dates": 4
+        },
+        "2026-10": {
+          "records": 7,
+          "dates": 6
+        },
+        "2026-11": {
+          "records": 10,
+          "dates": 8
+        },
+        "2026-12": {
+          "records": 5,
+          "dates": 3
+        }
+      }
+    },
+    "handoffs": {
+      "label": "Handoffs: covers, trades, releases and pickups, by request time",
+      "date_field": "handoffs[].created_at",
+      "provenance": {
+        "synthetic": 85,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 85,
+      "in_window": 85,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 79,
+      "earliest": "2025-01-10",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-02": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-03": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-04": {
+          "records": 5,
+          "dates": 5
+        },
+        "2025-05": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-06": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-07": {
+          "records": 2,
+          "dates": 2
+        },
+        "2025-08": {
+          "records": 3,
+          "dates": 3
+        },
+        "2025-09": {
+          "records": 4,
+          "dates": 3
+        },
+        "2025-10": {
+          "records": 6,
+          "dates": 6
+        },
+        "2025-11": {
+          "records": 4,
+          "dates": 4
+        },
+        "2025-12": {
+          "records": 3,
+          "dates": 3
+        },
+        "2026-01": {
+          "records": 4,
+          "dates": 3
+        },
+        "2026-02": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-03": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-04": {
+          "records": 6,
+          "dates": 6
+        },
+        "2026-05": {
+          "records": 2,
+          "dates": 2
+        },
+        "2026-06": {
+          "records": 5,
+          "dates": 4
+        },
+        "2026-07": {
+          "records": 5,
+          "dates": 5
+        },
+        "2026-08": {
+          "records": 3,
+          "dates": 2
+        },
+        "2026-09": {
+          "records": 3,
+          "dates": 3
+        },
+        "2026-10": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-11": {
+          "records": 4,
+          "dates": 4
+        },
+        "2026-12": {
+          "records": 5,
+          "dates": 3
+        }
+      }
+    },
+    "handoff_steps": {
+      "label": "Handoff history rows: requests, answers, decisions, cancellations, voids",
+      "date_field": "handoffs[].history[].at",
+      "provenance": {
+        "synthetic": 173,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 173,
+      "in_window": 173,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 125,
+      "earliest": "2025-01-10",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 7,
+          "dates": 5
+        },
+        "2025-02": {
+          "records": 5,
+          "dates": 4
+        },
+        "2025-03": {
+          "records": 2,
+          "dates": 1
+        },
+        "2025-04": {
+          "records": 12,
+          "dates": 8
+        },
+        "2025-05": {
+          "records": 6,
+          "dates": 4
+        },
+        "2025-06": {
+          "records": 6,
+          "dates": 5
+        },
+        "2025-07": {
+          "records": 5,
+          "dates": 4
+        },
+        "2025-08": {
+          "records": 5,
+          "dates": 3
+        },
+        "2025-09": {
+          "records": 7,
+          "dates": 5
+        },
+        "2025-10": {
+          "records": 15,
+          "dates": 12
+        },
+        "2025-11": {
+          "records": 11,
+          "dates": 9
+        },
+        "2025-12": {
+          "records": 6,
+          "dates": 5
+        },
+        "2026-01": {
+          "records": 8,
+          "dates": 3
+        },
+        "2026-02": {
+          "records": 4,
+          "dates": 3
+        },
+        "2026-03": {
+          "records": 5,
+          "dates": 2
+        },
+        "2026-04": {
+          "records": 12,
+          "dates": 12
+        },
+        "2026-05": {
+          "records": 3,
+          "dates": 3
+        },
+        "2026-06": {
+          "records": 9,
+          "dates": 7
+        },
+        "2026-07": {
+          "records": 8,
+          "dates": 8
+        },
+        "2026-08": {
+          "records": 5,
+          "dates": 2
+        },
+        "2026-09": {
+          "records": 7,
+          "dates": 3
+        },
+        "2026-10": {
+          "records": 9,
+          "dates": 6
+        },
+        "2026-11": {
+          "records": 9,
+          "dates": 8
+        },
+        "2026-12": {
+          "records": 7,
+          "dates": 3
+        }
+      }
+    },
+    "time_off": {
+      "label": "Time-off requests, by request time",
+      "date_field": "time_off[].requested_at",
+      "provenance": {
+        "synthetic": 20,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 20,
+      "in_window": 20,
+      "excluded": {
+        "before_window": 0,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 20,
+      "earliest": "2025-02-25",
+      "latest": "2026-12-21",
+      "by_month": {
+        "2025-01": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-02": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-03": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-04": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-05": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-06": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-07": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-08": {
+          "records": 0,
+          "dates": 0
+        },
+        "2025-09": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-10": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-11": {
+          "records": 1,
+          "dates": 1
+        },
+        "2025-12": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-01": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-02": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-03": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-04": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-05": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-06": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-07": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-08": {
+          "records": 0,
+          "dates": 0
+        },
+        "2026-09": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-10": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-11": {
+          "records": 1,
+          "dates": 1
+        },
+        "2026-12": {
+          "records": 1,
+          "dates": 1
+        }
+      }
+    },
+    "notifications": {
+      "label": "Notifications, by creation time",
+      "date_field": "notifications[].created_at",
+      "provenance": {
+        "synthetic": 256,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 259,
+      "in_window": 256,
+      "excluded": {
+        "before_window": 3,
+        "after_window": 0,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 204,
+      "earliest": "2025-01-06",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 12,
+          "dates": 10
+        },
+        "2025-02": {
+          "records": 10,
+          "dates": 9
+        },
+        "2025-03": {
+          "records": 7,
+          "dates": 7
+        },
+        "2025-04": {
+          "records": 12,
+          "dates": 9
+        },
+        "2025-05": {
+          "records": 11,
+          "dates": 8
+        },
+        "2025-06": {
+          "records": 10,
+          "dates": 8
+        },
+        "2025-07": {
+          "records": 9,
+          "dates": 8
+        },
+        "2025-08": {
+          "records": 9,
+          "dates": 8
+        },
+        "2025-09": {
+          "records": 10,
+          "dates": 8
+        },
+        "2025-10": {
+          "records": 15,
+          "dates": 11
+        },
+        "2025-11": {
+          "records": 11,
+          "dates": 10
+        },
+        "2025-12": {
+          "records": 9,
+          "dates": 6
+        },
+        "2026-01": {
+          "records": 11,
+          "dates": 9
+        },
+        "2026-02": {
+          "records": 7,
+          "dates": 6
+        },
+        "2026-03": {
+          "records": 14,
+          "dates": 10
+        },
+        "2026-04": {
+          "records": 12,
+          "dates": 12
+        },
+        "2026-05": {
+          "records": 7,
+          "dates": 6
+        },
+        "2026-06": {
+          "records": 14,
+          "dates": 10
+        },
+        "2026-07": {
+          "records": 11,
+          "dates": 9
+        },
+        "2026-08": {
+          "records": 11,
+          "dates": 10
+        },
+        "2026-09": {
+          "records": 11,
+          "dates": 6
+        },
+        "2026-10": {
+          "records": 11,
+          "dates": 8
+        },
+        "2026-11": {
+          "records": 12,
+          "dates": 9
+        },
+        "2026-12": {
+          "records": 10,
+          "dates": 7
+        }
+      }
+    },
+    "shifts_worked": {
+      "label": "Shifts by start date, not cancelled (any assignee or open); in the window, all started before the clock",
+      "date_field": "shifts[].start",
+      "provenance": {
+        "synthetic": 3328,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 3404,
+      "in_window": 3328,
+      "excluded": {
+        "before_window": 8,
+        "after_window": 68,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 724,
+      "earliest": "2025-01-02",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 130,
+          "dates": 30
+        },
+        "2025-02": {
+          "records": 119,
+          "dates": 28
+        },
+        "2025-03": {
+          "records": 133,
+          "dates": 31
+        },
+        "2025-04": {
+          "records": 128,
+          "dates": 30
+        },
+        "2025-05": {
+          "records": 147,
+          "dates": 31
+        },
+        "2025-06": {
+          "records": 140,
+          "dates": 30
+        },
+        "2025-07": {
+          "records": 168,
+          "dates": 31
+        },
+        "2025-08": {
+          "records": 171,
+          "dates": 31
+        },
+        "2025-09": {
+          "records": 141,
+          "dates": 30
+        },
+        "2025-10": {
+          "records": 134,
+          "dates": 31
+        },
+        "2025-11": {
+          "records": 124,
+          "dates": 29
+        },
+        "2025-12": {
+          "records": 129,
+          "dates": 30
+        },
+        "2026-01": {
+          "records": 129,
+          "dates": 30
+        },
+        "2026-02": {
+          "records": 121,
+          "dates": 28
+        },
+        "2026-03": {
+          "records": 133,
+          "dates": 31
+        },
+        "2026-04": {
+          "records": 125,
+          "dates": 30
+        },
+        "2026-05": {
+          "records": 149,
+          "dates": 31
+        },
+        "2026-06": {
+          "records": 141,
+          "dates": 30
+        },
+        "2026-07": {
+          "records": 169,
+          "dates": 31
+        },
+        "2026-08": {
+          "records": 169,
+          "dates": 31
+        },
+        "2026-09": {
+          "records": 140,
+          "dates": 30
+        },
+        "2026-10": {
+          "records": 135,
+          "dates": 31
+        },
+        "2026-11": {
+          "records": 125,
+          "dates": 29
+        },
+        "2026-12": {
+          "records": 128,
+          "dates": 30
+        }
+      }
+    },
+    "account_shifts_worked": {
+      "label": "Noor's shifts by start date",
+      "date_field": "shifts[].start",
+      "provenance": {
+        "synthetic": 369,
+        "real": 0,
+        "mixed": 0
+      },
+      "records": 375,
+      "in_window": 369,
+      "excluded": {
+        "before_window": 1,
+        "after_window": 5,
+        "after_clock": 0,
+        "invalid_date": 0
+      },
+      "distinct_dates": 368,
+      "earliest": "2025-01-03",
+      "latest": "2026-12-31",
+      "by_month": {
+        "2025-01": {
+          "records": 17,
+          "dates": 17
+        },
+        "2025-02": {
+          "records": 15,
+          "dates": 15
+        },
+        "2025-03": {
+          "records": 15,
+          "dates": 15
+        },
+        "2025-04": {
+          "records": 16,
+          "dates": 16
+        },
+        "2025-05": {
+          "records": 13,
+          "dates": 13
+        },
+        "2025-06": {
+          "records": 15,
+          "dates": 15
+        },
+        "2025-07": {
+          "records": 17,
+          "dates": 17
+        },
+        "2025-08": {
+          "records": 16,
+          "dates": 16
+        },
+        "2025-09": {
+          "records": 15,
+          "dates": 15
+        },
+        "2025-10": {
+          "records": 15,
+          "dates": 14
+        },
+        "2025-11": {
+          "records": 11,
+          "dates": 11
+        },
+        "2025-12": {
+          "records": 19,
+          "dates": 19
+        },
+        "2026-01": {
+          "records": 16,
+          "dates": 16
+        },
+        "2026-02": {
+          "records": 14,
+          "dates": 14
+        },
+        "2026-03": {
+          "records": 18,
+          "dates": 18
+        },
+        "2026-04": {
+          "records": 14,
+          "dates": 14
+        },
+        "2026-05": {
+          "records": 14,
+          "dates": 14
+        },
+        "2026-06": {
+          "records": 13,
+          "dates": 13
+        },
+        "2026-07": {
+          "records": 18,
+          "dates": 18
+        },
+        "2026-08": {
+          "records": 17,
+          "dates": 17
+        },
+        "2026-09": {
+          "records": 17,
+          "dates": 17
+        },
+        "2026-10": {
+          "records": 16,
+          "dates": 16
+        },
+        "2026-11": {
+          "records": 14,
+          "dates": 14
+        },
+        "2026-12": {
+          "records": 14,
+          "dates": 14
+        }
+      }
+    }
+  },
+  "global": {
+    "actions_only": {
+      "families": [
+        "actions"
+      ],
+      "distinct_dates": 333,
+      "earliest": "2025-01-03",
+      "latest": "2026-12-31",
+      "gaps": {
+        "dates_without_records": 397,
+        "longest": [
+          {
+            "from": "2025-01-28",
+            "to": "2025-02-02",
+            "days": 6
+          },
+          {
+            "from": "2025-03-18",
+            "to": "2025-03-23",
+            "days": 6
+          },
+          {
+            "from": "2025-05-27",
+            "to": "2025-06-01",
+            "days": 6
+          },
+          {
+            "from": "2025-06-17",
+            "to": "2025-06-22",
+            "days": 6
+          },
+          {
+            "from": "2025-06-24",
+            "to": "2025-06-29",
+            "days": 6
+          }
+        ]
+      }
+    },
+    "all_history": {
+      "families": [
+        "actions",
+        "schedule_postings",
+        "shift_changes",
+        "handoffs",
+        "handoff_steps",
+        "time_off",
+        "notifications",
+        "shifts_worked",
+        "account_shifts_worked"
+      ],
+      "distinct_dates": 725,
+      "earliest": "2025-01-02",
+      "latest": "2026-12-31",
+      "gaps": {
+        "dates_without_records": 5,
+        "longest": [
+          {
+            "from": "2025-01-01",
+            "to": "2025-01-01",
+            "days": 1
+          },
+          {
+            "from": "2025-12-25",
+            "to": "2025-12-25",
+            "days": 1
+          },
+          {
+            "from": "2026-01-01",
+            "to": "2026-01-01",
+            "days": 1
+          },
+          {
+            "from": "2026-11-26",
+            "to": "2026-11-26",
+            "days": 1
+          },
+          {
+            "from": "2026-12-25",
+            "to": "2026-12-25",
+            "days": 1
+          }
+        ],
+        "missing_dates": [
+          "2025-01-01",
+          "2025-12-25",
+          "2026-01-01",
+          "2026-11-26",
+          "2026-12-25"
+        ]
+      }
+    }
+  },
+  "future_posted_shifts": {
+    "shifts": 69,
+    "distinct_dates": 16,
+    "first": "2027-01-02",
+    "last": "2027-01-17",
+    "account_shifts": 5,
+    "note": "They are not history and fall outside the window, so every coverage count above excludes them."
+  },
+  "states_at_clock": {
+    "shifts": {
+      "assigned": 3366,
+      "cancelled": 13,
+      "open": 38
+    },
+    "handoffs": {
+      "approved": 26,
+      "awaiting_coworker": 1,
+      "awaiting_me": 1,
+      "cancelled": 7,
+      "declined": 29,
+      "denied": 3,
+      "expired": 15,
+      "void": 3
+    },
+    "handoffs_by_kind": {
+      "cover": 26,
+      "cover (from a coworker)": 28,
+      "pickup": 3,
+      "release": 11,
+      "trade": 10,
+      "trade (from a coworker)": 7
+    },
+    "time_off": {
+      "approved": 15,
+      "cancelled": 3,
+      "denied": 1,
+      "pending": 1
+    },
+    "notifications_by_kind": {
+      "handoff.received": 35,
+      "handoff.updated": 62,
+      "open_shift.posted": 13,
+      "schedule.published": 107,
+      "shift.changed": 26,
+      "time_off.decided": 16
+    }
+  },
+  "invalid_or_missing_dates": [],
+  "monthly": [
+    {
+      "month": "2025-01",
+      "days": 31,
+      "dates_with_any_record": 30,
+      "dates_with_actions": 13,
+      "actions": 30,
+      "account_writes": 3,
+      "workplace_events": 13,
+      "schedule_postings": 4,
+      "shift_changes": 5,
+      "handoffs": 3,
+      "time_off": 0,
+      "notifications": 12,
+      "shifts_worked": 130,
+      "account_shifts_worked": 17,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-02",
+      "days": 28,
+      "dates_with_any_record": 28,
+      "dates_with_actions": 12,
+      "actions": 30,
+      "account_writes": 3,
+      "workplace_events": 17,
+      "schedule_postings": 4,
+      "shift_changes": 8,
+      "handoffs": 3,
+      "time_off": 1,
+      "notifications": 10,
+      "shifts_worked": 119,
+      "account_shifts_worked": 15,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-03",
+      "days": 31,
+      "dates_with_any_record": 31,
+      "dates_with_actions": 12,
+      "actions": 23,
+      "account_writes": 3,
+      "workplace_events": 13,
+      "schedule_postings": 5,
+      "shift_changes": 7,
+      "handoffs": 1,
+      "time_off": 1,
+      "notifications": 7,
+      "shifts_worked": 133,
+      "account_shifts_worked": 15,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-04",
+      "days": 30,
+      "dates_with_any_record": 30,
+      "dates_with_actions": 14,
+      "actions": 36,
+      "account_writes": 7,
+      "workplace_events": 14,
+      "schedule_postings": 4,
+      "shift_changes": 5,
+      "handoffs": 5,
+      "time_off": 1,
+      "notifications": 12,
+      "shifts_worked": 128,
+      "account_shifts_worked": 16,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-05",
+      "days": 31,
+      "dates_with_any_record": 31,
+      "dates_with_actions": 12,
+      "actions": 32,
+      "account_writes": 5,
+      "workplace_events": 16,
+      "schedule_postings": 4,
+      "shift_changes": 7,
+      "handoffs": 3,
+      "time_off": 1,
+      "notifications": 11,
+      "shifts_worked": 147,
+      "account_shifts_worked": 13,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-06",
+      "days": 30,
+      "dates_with_any_record": 30,
+      "dates_with_actions": 12,
+      "actions": 29,
+      "account_writes": 5,
+      "workplace_events": 13,
+      "schedule_postings": 5,
+      "shift_changes": 5,
+      "handoffs": 3,
+      "time_off": 1,
+      "notifications": 10,
+      "shifts_worked": 140,
+      "account_shifts_worked": 15,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-07",
+      "days": 31,
+      "dates_with_any_record": 31,
+      "dates_with_actions": 14,
+      "actions": 30,
+      "account_writes": 3,
+      "workplace_events": 17,
+      "schedule_postings": 4,
+      "shift_changes": 9,
+      "handoffs": 2,
+      "time_off": 1,
+      "notifications": 9,
+      "shifts_worked": 168,
+      "account_shifts_worked": 17,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-08",
+      "days": 31,
+      "dates_with_any_record": 31,
+      "dates_with_actions": 14,
+      "actions": 28,
+      "account_writes": 3,
+      "workplace_events": 16,
+      "schedule_postings": 4,
+      "shift_changes": 8,
+      "handoffs": 3,
+      "time_off": 0,
+      "notifications": 9,
+      "shifts_worked": 171,
+      "account_shifts_worked": 16,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-09",
+      "days": 30,
+      "dates_with_any_record": 30,
+      "dates_with_actions": 15,
+      "actions": 34,
+      "account_writes": 6,
+      "workplace_events": 18,
+      "schedule_postings": 5,
+      "shift_changes": 8,
+      "handoffs": 4,
+      "time_off": 1,
+      "notifications": 10,
+      "shifts_worked": 141,
+      "account_shifts_worked": 15,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-10",
+      "days": 31,
+      "dates_with_any_record": 31,
+      "dates_with_actions": 19,
+      "actions": 49,
+      "account_writes": 8,
+      "workplace_events": 21,
+      "schedule_postings": 4,
+      "shift_changes": 12,
+      "handoffs": 6,
+      "time_off": 1,
+      "notifications": 15,
+      "shifts_worked": 134,
+      "account_shifts_worked": 15,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-11",
+      "days": 30,
+      "dates_with_any_record": 30,
+      "dates_with_actions": 14,
+      "actions": 37,
+      "account_writes": 6,
+      "workplace_events": 17,
+      "schedule_postings": 4,
+      "shift_changes": 9,
+      "handoffs": 4,
+      "time_off": 1,
+      "notifications": 11,
+      "shifts_worked": 124,
+      "account_shifts_worked": 11,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2025-12",
+      "days": 31,
+      "dates_with_any_record": 30,
+      "dates_with_actions": 13,
+      "actions": 29,
+      "account_writes": 5,
+      "workplace_events": 15,
+      "schedule_postings": 5,
+      "shift_changes": 5,
+      "handoffs": 3,
+      "time_off": 1,
+      "notifications": 9,
+      "shifts_worked": 129,
+      "account_shifts_worked": 19,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-01",
+      "days": 31,
+      "dates_with_any_record": 30,
+      "dates_with_actions": 13,
+      "actions": 31,
+      "account_writes": 4,
+      "workplace_events": 14,
+      "schedule_postings": 4,
+      "shift_changes": 7,
+      "handoffs": 4,
+      "time_off": 0,
+      "notifications": 11,
+      "shifts_worked": 129,
+      "account_shifts_worked": 16,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-02",
+      "days": 28,
+      "dates_with_any_record": 28,
+      "dates_with_actions": 16,
+      "actions": 27,
+      "account_writes": 5,
+      "workplace_events": 14,
+      "schedule_postings": 4,
+      "shift_changes": 8,
+      "handoffs": 2,
+      "time_off": 1,
+      "notifications": 7,
+      "shifts_worked": 121,
+      "account_shifts_worked": 14,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-03",
+      "days": 31,
+      "dates_with_any_record": 31,
+      "dates_with_actions": 10,
+      "actions": 32,
+      "account_writes": 2,
+      "workplace_events": 16,
+      "schedule_postings": 5,
+      "shift_changes": 5,
+      "handoffs": 2,
+      "time_off": 1,
+      "notifications": 14,
+      "shifts_worked": 133,
+      "account_shifts_worked": 18,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-04",
+      "days": 30,
+      "dates_with_any_record": 30,
+      "dates_with_actions": 17,
+      "actions": 38,
+      "account_writes": 8,
+      "workplace_events": 15,
+      "schedule_postings": 4,
+      "shift_changes": 8,
+      "handoffs": 6,
+      "time_off": 1,
+      "notifications": 12,
+      "shifts_worked": 125,
+      "account_shifts_worked": 14,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-05",
+      "days": 31,
+      "dates_with_any_record": 31,
+      "dates_with_actions": 13,
+      "actions": 23,
+      "account_writes": 3,
+      "workplace_events": 12,
+      "schedule_postings": 4,
+      "shift_changes": 6,
+      "handoffs": 2,
+      "time_off": 1,
+      "notifications": 7,
+      "shifts_worked": 149,
+      "account_shifts_worked": 14,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-06",
+      "days": 30,
+      "dates_with_any_record": 30,
+      "dates_with_actions": 15,
+      "actions": 37,
+      "account_writes": 5,
+      "workplace_events": 16,
+      "schedule_postings": 5,
+      "shift_changes": 6,
+      "handoffs": 5,
+      "time_off": 1,
+      "notifications": 14,
+      "shifts_worked": 141,
+      "account_shifts_worked": 13,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-07",
+      "days": 31,
+      "dates_with_any_record": 31,
+      "dates_with_actions": 19,
+      "actions": 36,
+      "account_writes": 5,
+      "workplace_events": 19,
+      "schedule_postings": 4,
+      "shift_changes": 10,
+      "handoffs": 5,
+      "time_off": 1,
+      "notifications": 11,
+      "shifts_worked": 169,
+      "account_shifts_worked": 18,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-08",
+      "days": 31,
+      "dates_with_any_record": 31,
+      "dates_with_actions": 15,
+      "actions": 32,
+      "account_writes": 4,
+      "workplace_events": 17,
+      "schedule_postings": 5,
+      "shift_changes": 9,
+      "handoffs": 3,
+      "time_off": 0,
+      "notifications": 11,
+      "shifts_worked": 169,
+      "account_shifts_worked": 17,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-09",
+      "days": 30,
+      "dates_with_any_record": 30,
+      "dates_with_actions": 11,
+      "actions": 30,
+      "account_writes": 2,
+      "workplace_events": 15,
+      "schedule_postings": 4,
+      "shift_changes": 6,
+      "handoffs": 3,
+      "time_off": 1,
+      "notifications": 11,
+      "shifts_worked": 140,
+      "account_shifts_worked": 17,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-10",
+      "days": 31,
+      "dates_with_any_record": 31,
+      "dates_with_actions": 13,
+      "actions": 35,
+      "account_writes": 6,
+      "workplace_events": 17,
+      "schedule_postings": 4,
+      "shift_changes": 7,
+      "handoffs": 4,
+      "time_off": 1,
+      "notifications": 11,
+      "shifts_worked": 135,
+      "account_shifts_worked": 16,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-11",
+      "days": 30,
+      "dates_with_any_record": 29,
+      "dates_with_actions": 16,
+      "actions": 40,
+      "account_writes": 6,
+      "workplace_events": 19,
+      "schedule_postings": 5,
+      "shift_changes": 10,
+      "handoffs": 4,
+      "time_off": 1,
+      "notifications": 12,
+      "shifts_worked": 125,
+      "account_shifts_worked": 14,
+      "provenance": "synthetic"
+    },
+    {
+      "month": "2026-12",
+      "days": 31,
+      "dates_with_any_record": 30,
+      "dates_with_actions": 11,
+      "actions": 29,
+      "account_writes": 5,
+      "workplace_events": 12,
+      "schedule_postings": 4,
+      "shift_changes": 5,
+      "handoffs": 5,
+      "time_off": 1,
+      "notifications": 10,
+      "shifts_worked": 128,
+      "account_shifts_worked": 14,
+      "provenance": "synthetic"
+    }
+  ]
+}

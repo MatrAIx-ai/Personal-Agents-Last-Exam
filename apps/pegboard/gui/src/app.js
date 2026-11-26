@@ -82,11 +82,13 @@ const fmts=new Map();
 const formatter=(tz,options)=>{const key=tz+JSON.stringify(options);if(!fmts.has(key))fmts.set(key,new Intl.DateTimeFormat('en-US',{timeZone:tz,...options}));return fmts.get(key);};
 // Shift times and days are the workplace's; notification times are the account's. Never the browser's.
 let wpZone='UTC';
-const when=(iso,tz)=>iso?formatter(tz,{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(new Date(iso)):'—';
+// A date shows its year when that is not the year of the week the page opened on (a long history).
+const withYear=(iso,tz)=>state.firstWeek&&formatter(tz,{year:'numeric'}).format(new Date(iso))!==state.firstWeek.slice(0,4)?{year:'numeric'}:{};
+const when=(iso,tz)=>iso?formatter(tz,{weekday:'short',month:'short',day:'numeric',...withYear(iso,tz),hour:'numeric',minute:'2-digit'}).format(new Date(iso)):'—';
 const clock=(iso,tz)=>formatter(tz,{hour:'numeric',minute:'2-digit'}).format(new Date(iso));
-const dayOf=(iso,tz)=>formatter(tz,{weekday:'long',month:'short',day:'numeric'}).format(new Date(iso));
-const shiftTime=(s,tz)=>formatter(tz,{weekday:'short',month:'short',day:'numeric'}).format(new Date(s.start))+', '+clock(s.start,tz)+' – '+clock(s.end,tz);
-const dateLabel=d=>formatter('UTC',{weekday:'short',month:'short',day:'numeric'}).format(new Date(d+'T12:00:00Z'));
+const dayOf=(iso,tz)=>formatter(tz,{weekday:'long',month:'short',day:'numeric',...withYear(iso,tz)}).format(new Date(iso));
+const shiftTime=(s,tz)=>formatter(tz,{weekday:'short',month:'short',day:'numeric',...withYear(s.start,tz)}).format(new Date(s.start))+', '+clock(s.start,tz)+' – '+clock(s.end,tz);
+const dateLabel=d=>formatter('UTC',{weekday:'short',month:'short',day:'numeric',...withYear(d+'T12:00:00Z','UTC')}).format(new Date(d+'T12:00:00Z'));
 const addDays=(d,n)=>{const t=new Date(d+'T12:00:00Z');t.setUTCDate(t.getUTCDate()+n);return t.toISOString().slice(0,10);};
 function wall(ms,tz){const o={};for(const p of formatter(tz,{hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}).formatToParts(new Date(ms)))o[p.type]=p.value;return o;}
 const offsetAt=(ms,tz)=>{const o=wall(ms,tz);return Date.UTC(+o.year,+o.month-1,+o.day,+o.hour,+o.minute,+o.second)-Math.floor(ms/1000)*1000;};
@@ -166,18 +168,26 @@ const withMessage=(args,box)=>box.value.trim()?{...args,message:box.value.trim()
 async function load(ui){
   const out={workplace:null,me:null,team:[],preferences:null,availability:[],timeOff:[],handoffs:[],notifications:[],notificationCursor:null,week:null,hours:null};
   if(ui.has(TOOL.workplace)){const r=await ui.call(TOOL.workplace,{});out.workplace=r.workplace;out.me=r.me;wpZone=r.workplace.timezone;}
+  // The first view opens on the week of my next shift that has not ended, by the App's own clock.
+  // The first list holds my shifts from the earliest on, 200 at most: with a long history the next
+  // one is on a later page, so page on until it is found and refresh once onto its week.
+  if(!state.week){
+    let next=ui.records.find(s=>s.phase!=='ended'),last=ui.records.at(-1);
+    if(!next&&ui.records.length>=200){
+      const wide=config.listArgs;let cursor=null;
+      do{const r=await ui.call(TOOL.shifts,{...wide,...(cursor?{cursor}:{})});next=r.shifts.find(s=>s.phase!=='ended');last=r.shifts.at(-1)||last;cursor=r.next_cursor;}while(!next&&cursor);
+    }
+    next=next||last;
+    state.week=state.firstWeek=next?.week_start||null;state.focus=next?.id||null;
+    if(next&&!ui.records.some(s=>s.id===next.id)){await ui.refresh(next.id);return ui.aux;}
+    if(state.week)out.week=(await ui.call(TOOL.shifts,{...weekWindow(),limit:200})).shifts;
+  }
   if(ui.has(TOOL.team))out.team=(await ui.call(TOOL.team,{})).people;
   if(ui.has(TOOL.preferences))out.preferences=(await ui.call(TOOL.preferences,{})).preferences;
   if(ui.has(TOOL.availability))out.availability=(await ui.call(TOOL.availability,{})).blocks;
   if(ui.has(TOOL.timeOff))out.timeOff=(await ui.call(TOOL.timeOff,{include_closed:true})).time_off;
   if(ui.has(TOOL.handoffs))out.handoffs=(await ui.call(TOOL.handoffs,{include_closed:true,limit:100})).handoffs;
   if(ui.has(TOOL.notifications)){const r=await ui.call(TOOL.notifications,notificationArgs());out.notifications=r.notifications;out.notificationCursor=r.next_cursor;}
-  // The first view opens on the week of my next shift that has not ended, by the App's own clock.
-  if(!state.week){
-    const mine=ui.records,next=mine.find(s=>s.phase!=='ended')||mine.at(-1);
-    state.week=state.firstWeek=next?.week_start||null;state.focus=next?.id||null;
-    if(state.week)out.week=(await ui.call(TOOL.shifts,{...weekWindow(),limit:200})).shifts;
-  }
   if(state.week&&ui.has(TOOL.hours))out.hours=(await ui.call(TOOL.hours,weekWindow())).weeks[0]||null;
   return out;
 }
@@ -326,7 +336,7 @@ function shiftView(s,ui){
     ui.call(TOOL.eligibility,{id:s.id}).then(r=>{if(card.isConnected){card.replaceChildren(el('h3',{},'Could you take it?'),...eligibilityParts(ui,r,'You'));loaded(card);}}).catch(e=>{if(card.isConnected)card.replaceChildren(el('p',{role:'alert',class:'pb-error'},e.message));});
   }
   const history=el('ol',{class:'pb-history'});
-  for(const h of s.history||[])history.append(el('li',{},el('strong',{},when(h.at,tz)+' · '+(h.by==='schedule'?'posted':h.by==='handoff'?'handed over':words(h.by))+(h.changed_by?' by '+personName(ui,h.changed_by):'')),
+  for(const h of s.history||[])history.append(el('li',{},el('strong',{},when(h.at,tz)+' · '+(h.by==='schedule'?'posted':h.by==='handoff'?'handed over'+(h.handoff_id?' ('+h.handoff_id+')':''):words(h.by))+(h.changed_by?' by '+personName(ui,h.changed_by):'')),
     el('span',{class:'pb-muted'},Object.entries(h.change||{}).map(([k,v])=>words(k)+': '+fieldValue(ui,k,v.from)+' → '+fieldValue(ui,k,v.to)).join('; '))));
   page.append(el('section',{class:'pb-card','aria-label':'History'},el('h3',{},'History'),history));
   return loaded(page);

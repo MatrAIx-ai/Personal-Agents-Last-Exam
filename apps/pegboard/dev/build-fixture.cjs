@@ -170,5 +170,5 @@ function main() {
   }
 }
 
-module.exports = { build, print, CLOCK };
+module.exports = { build, print, CLOCK, TZ, ME, BOSS, workplace, people, TEMPLATE };
 if (require.main === module) main();

@@ -1160,6 +1160,30 @@ test('the web pages are declared, cover every tool and render text only', () => 
   assert.doesNotMatch(controller, /\bfetch\(|XMLHttpRequest|WebSocket|Date\.now\(|new Date\(\)/, 'the controller calls tools only through the shared client and never reads the browser clock');
 });
 
+test('the full-window dataset is valid at its clock, declared, and counted by its coverage report', () => {
+  // datasets/full-window is the evaluation dataset (2025-01-01 to 2026-12-31); fixtures/minimal.json
+  // stays the smoke fixture. `node dev/dataset.cjs --check` rebuilds it from its seed (about ten
+  // seconds), and tests/dataset.integration.cjs loads it through the public runtime.
+  const dir = path.join(__dirname, '../datasets/full-window'), bytes = fs.readFileSync(path.join(dir, 'seed.json')), seed = JSON.parse(bytes);
+  const clock = JSON.parse(fs.readFileSync(path.join(dir, 'clock.json'), 'utf8')).initial_time, declared = JSON.parse(fs.readFileSync(path.join(dir, 'dataset.json'), 'utf8'));
+  const app = fixture({ seed, now: clock });                                   // seed schema and seed rules at the dataset clock
+  const { compile } = require('./schema-validator.cjs');
+  assert.ok(compile(require('../schemas/dataset.schema.json'), path.join(__dirname, '../schemas'))(declared), 'dataset.json matches the dataset contract');
+  assert.deepEqual([declared.dataset_id, declared.sources.map(s => s.kind), declared.expected_counts], ['pegboard-full-window', ['synthetic'], { records: plugin.objects(seed).length, assets: 0 }]);
+  const sha = require('node:crypto').createHash('sha256').update(bytes).digest('hex');
+  assert.ok(declared.transformations[0].includes(sha), 'dataset.json names the SHA-256 of seed.json');
+  assert.ok(bytes.length < 1.6 * 1024 * 1024, 'one env.load_seed request stays well inside the 2 MiB MCP message limit');
+  // The coverage report is current: a fresh count over these files gives the committed report.
+  const coverage = require('../dev/coverage.cjs').count().json;
+  assert.deepEqual(coverage, JSON.parse(fs.readFileSync(path.join(dir, 'coverage.json'), 'utf8')));
+  assert.ok(coverage.global.actions_only.distinct_dates >= 300 && coverage.global.all_history.earliest === '2025-01-02' && coverage.global.all_history.latest === '2026-12-31');
+  assert.deepEqual(coverage.invalid_or_missing_dates, []);
+  // Reads at the clock see the whole window and the posted future weeks.
+  const jan = app.call('shifts.list', { start: at('2025-01-01', '00:00'), end: at('2025-02-01', '00:00'), limit: 200 }).shifts.length;
+  const next = app.call('shifts.list', { start: at('2027-01-01', '00:00'), end: at('2027-02-01', '00:00'), include_cancelled: true, limit: 200 }).shifts.length;
+  assert.deepEqual([jan, next], [coverage.monthly[0].shifts_worked, coverage.future_posted_shifts.shifts]);
+});
+
 test('the package runs on its own: no import or file path leaves its folder', () => {
   const root = path.resolve(__dirname, '..'), files = [];
   const walk = dir => { for (const e of fs.readdirSync(dir, { withFileTypes: true })) { const f = path.join(dir, e.name); if (e.isDirectory()) walk(f); else if (/\.(cjs|js|mjs)$/.test(e.name)) files.push(f); } };
