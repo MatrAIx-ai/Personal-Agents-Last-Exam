@@ -1,0 +1,859 @@
+{
+  "account_id": "loopvault-maya",
+  "owner_person_id": "person-maya",
+  "policy": {
+    "max_monthly_budget_usd": 25,
+    "auto_run_requires_read_only": true,
+    "allowed_write_scopes": [],
+    "min_holdout_pass_rate": 0.8,
+    "max_goodhart_gap": 0.15,
+    "updated_at": "2025-01-01T08:00:00-08:00"
+  },
+  "skills": [
+    {
+      "id": "skill-inbox-triage",
+      "name": "Inbox Triage Classifier",
+      "description": "Labels newsletters and promotions while protecting urgent medical, legal, and billing notices.",
+      "auto_run": true,
+      "production_version_id": "v3",
+      "asset_ids": [
+        "asset-skill-inbox-triage-eval-curve",
+        "asset-skill-inbox-triage-cost-trend",
+        "asset-skill-inbox-triage-recall-trend"
+      ],
+      "versions": [
+        {
+          "version_id": "v1",
+          "parent_id": null,
+          "rule_summary": "Baseline keyword rules for newsletter sorting.",
+          "rule_tags": [
+            "newsletter_filter"
+          ],
+          "tool_scopes": [
+            "mail.read"
+          ],
+          "projected_monthly_cost_usd": 10,
+          "eval_summary": {
+            "dev_pass_rate": 0.74,
+            "holdout_pass_rate": 0.76,
+            "critical_alert_recall": 0.92
+          },
+          "created_at": "2025-01-01T09:00:00-08:00"
+        },
+        {
+          "version_id": "v2",
+          "parent_id": "v1",
+          "rule_summary": "Added sender allowlist for medical and billing domains.",
+          "rule_tags": [
+            "newsletter_filter",
+            "medical_allowlist"
+          ],
+          "tool_scopes": [
+            "mail.read",
+            "notes.read"
+          ],
+          "projected_monthly_cost_usd": 11,
+          "eval_summary": {
+            "dev_pass_rate": 0.79,
+            "holdout_pass_rate": 0.83,
+            "critical_alert_recall": 0.95
+          },
+          "created_at": "2025-02-05T09:00:00-08:00"
+        },
+        {
+          "version_id": "v3",
+          "parent_id": "v2",
+          "rule_summary": "Balanced priority scoring with strict urgent-notice guard.",
+          "rule_tags": [
+            "newsletter_filter",
+            "medical_allowlist",
+            "billing_guard"
+          ],
+          "tool_scopes": [
+            "mail.read",
+            "notes.read"
+          ],
+          "projected_monthly_cost_usd": 12,
+          "eval_summary": {
+            "dev_pass_rate": 0.82,
+            "holdout_pass_rate": 0.88,
+            "critical_alert_recall": 0.98
+          },
+          "created_at": "2025-03-06T09:00:00-08:00"
+        },
+        {
+          "version_id": "v4",
+          "parent_id": "v3",
+          "rule_summary": "Aggressive dev-tuned archive prompt with expanded full-thread context.",
+          "rule_tags": [
+            "aggressive_archive",
+            "expanded_context"
+          ],
+          "tool_scopes": [
+            "mail.read",
+            "notes.read"
+          ],
+          "projected_monthly_cost_usd": 36,
+          "eval_summary": {
+            "dev_pass_rate": 0.96,
+            "holdout_pass_rate": 0.64,
+            "critical_alert_recall": 0.68
+          },
+          "created_at": "2025-04-07T09:00:00-07:00"
+        }
+      ]
+    },
+    {
+      "id": "skill-expense-categorizer",
+      "name": "Daily Expense Categorizer",
+      "description": "Classifies nightly card transactions into household budget envelopes.",
+      "auto_run": true,
+      "production_version_id": "v1",
+      "asset_ids": [
+        "asset-skill-expense-categorizer-eval-curve",
+        "asset-skill-expense-categorizer-cost-trend",
+        "asset-skill-expense-categorizer-recall-trend"
+      ],
+      "versions": [
+        {
+          "version_id": "v1",
+          "parent_id": null,
+          "rule_summary": "Read-only nightly transaction tagger with merchant lookup.",
+          "rule_tags": [
+            "merchant_map",
+            "read_only"
+          ],
+          "tool_scopes": [
+            "ledger.read"
+          ],
+          "projected_monthly_cost_usd": 9,
+          "eval_summary": {
+            "dev_pass_rate": 0.86,
+            "holdout_pass_rate": 0.85,
+            "critical_alert_recall": 0.97
+          },
+          "created_at": "2025-05-08T09:00:00-07:00"
+        },
+        {
+          "version_id": "v2",
+          "parent_id": "v1",
+          "rule_summary": "Auto-rebalances envelopes via bank transfer with multi-pass LLM audit.",
+          "rule_tags": [
+            "merchant_map",
+            "auto_rebalance"
+          ],
+          "tool_scopes": [
+            "ledger.read",
+            "bank.transfer"
+          ],
+          "projected_monthly_cost_usd": 48,
+          "eval_summary": {
+            "dev_pass_rate": 0.91,
+            "holdout_pass_rate": 0.87,
+            "critical_alert_recall": 0.96
+          },
+          "created_at": "2025-06-09T09:00:00-07:00"
+        }
+      ]
+    },
+    {
+      "id": "skill-morning-brief",
+      "name": "Morning News & Alert Filter",
+      "description": "Summarizes overnight updates while escalating critical work-incident alerts.",
+      "auto_run": true,
+      "production_version_id": "v5",
+      "asset_ids": [
+        "asset-skill-morning-brief-eval-curve",
+        "asset-skill-morning-brief-cost-trend",
+        "asset-skill-morning-brief-recall-trend"
+      ],
+      "versions": [
+        {
+          "version_id": "v1",
+          "parent_id": null,
+          "rule_summary": "Basic RSS digest and pager escalation list.",
+          "rule_tags": [
+            "rss_digest"
+          ],
+          "tool_scopes": [
+            "news.read",
+            "messages.read"
+          ],
+          "projected_monthly_cost_usd": 9,
+          "eval_summary": {
+            "dev_pass_rate": 0.82,
+            "holdout_pass_rate": 0.84,
+            "critical_alert_recall": 0.96
+          },
+          "created_at": "2025-07-10T09:00:00-07:00"
+        },
+        {
+          "version_id": "v2",
+          "parent_id": "v1",
+          "rule_summary": "Deduplicated duplicate wire alerts.",
+          "rule_tags": [
+            "rss_digest",
+            "dedup"
+          ],
+          "tool_scopes": [
+            "news.read",
+            "messages.read"
+          ],
+          "projected_monthly_cost_usd": 10,
+          "eval_summary": {
+            "dev_pass_rate": 0.86,
+            "holdout_pass_rate": 0.88,
+            "critical_alert_recall": 0.98
+          },
+          "created_at": "2025-08-11T09:00:00-07:00"
+        },
+        {
+          "version_id": "v3",
+          "parent_id": "v2",
+          "rule_summary": "Added explicit on-call incident bypass prior to noise filtering.",
+          "rule_tags": [
+            "rss_digest",
+            "dedup",
+            "oncall_bypass"
+          ],
+          "tool_scopes": [
+            "news.read",
+            "messages.read"
+          ],
+          "projected_monthly_cost_usd": 11,
+          "eval_summary": {
+            "dev_pass_rate": 0.9,
+            "holdout_pass_rate": 0.91,
+            "critical_alert_recall": 1
+          },
+          "created_at": "2025-09-12T09:00:00-07:00"
+        },
+        {
+          "version_id": "v4",
+          "parent_id": "v3",
+          "rule_summary": "Introduced broad mute regex for noisy alert channels.",
+          "rule_tags": [
+            "rss_digest",
+            "dedup",
+            "broad_mute_regex"
+          ],
+          "tool_scopes": [
+            "news.read",
+            "messages.read"
+          ],
+          "projected_monthly_cost_usd": 12,
+          "eval_summary": {
+            "dev_pass_rate": 0.93,
+            "holdout_pass_rate": 0.81,
+            "critical_alert_recall": 0.65
+          },
+          "created_at": "2025-10-13T09:00:00-07:00"
+        },
+        {
+          "version_id": "v5",
+          "parent_id": "v4",
+          "rule_summary": "Tightened digest bullet formatting while inheriting v4 mute regex.",
+          "rule_tags": [
+            "rss_digest",
+            "dedup",
+            "broad_mute_regex",
+            "concise_bullets"
+          ],
+          "tool_scopes": [
+            "news.read",
+            "messages.read"
+          ],
+          "projected_monthly_cost_usd": 13,
+          "eval_summary": {
+            "dev_pass_rate": 0.94,
+            "holdout_pass_rate": 0.82,
+            "critical_alert_recall": 0.6
+          },
+          "created_at": "2025-11-14T09:00:00-08:00"
+        }
+      ]
+    },
+    {
+      "id": "skill-calendar-guard",
+      "name": "Calendar Conflict Guard",
+      "description": "Detects double-bookings and insufficient commute buffers before morning standups.",
+      "auto_run": true,
+      "production_version_id": "v2",
+      "asset_ids": [
+        "asset-skill-calendar-guard-eval-curve",
+        "asset-skill-calendar-guard-cost-trend",
+        "asset-skill-calendar-guard-recall-trend",
+        "asset-skill-calendar-guard-v3a-latency",
+        "asset-skill-calendar-guard-v3b-latency"
+      ],
+      "versions": [
+        {
+          "version_id": "v1",
+          "parent_id": null,
+          "rule_summary": "Detects direct overlapping calendar events.",
+          "rule_tags": [
+            "overlap_check"
+          ],
+          "tool_scopes": [
+            "calendar.read"
+          ],
+          "projected_monthly_cost_usd": 7,
+          "eval_summary": {
+            "dev_pass_rate": 0.8,
+            "holdout_pass_rate": 0.81,
+            "critical_alert_recall": 0.93
+          },
+          "created_at": "2025-12-15T09:00:00-08:00"
+        },
+        {
+          "version_id": "v2",
+          "parent_id": "v1",
+          "rule_summary": "Added 20-minute travel buffer checks.",
+          "rule_tags": [
+            "overlap_check",
+            "travel_buffer"
+          ],
+          "tool_scopes": [
+            "calendar.read"
+          ],
+          "projected_monthly_cost_usd": 8,
+          "eval_summary": {
+            "dev_pass_rate": 0.84,
+            "holdout_pass_rate": 0.84,
+            "critical_alert_recall": 0.96
+          },
+          "created_at": "2026-01-16T09:00:00-08:00"
+        },
+        {
+          "version_id": "v3",
+          "parent_id": "v2",
+          "rule_summary": "Timezone-aware flight arrival buffer checks.",
+          "rule_tags": [
+            "overlap_check",
+            "travel_buffer",
+            "tz_flight_buffer"
+          ],
+          "tool_scopes": [
+            "calendar.read"
+          ],
+          "projected_monthly_cost_usd": 10,
+          "eval_summary": {
+            "dev_pass_rate": 0.92,
+            "holdout_pass_rate": 0.9,
+            "critical_alert_recall": 0.99
+          },
+          "created_at": "2026-02-17T09:00:00-08:00"
+        },
+        {
+          "version_id": "v3a",
+          "parent_id": "v2",
+          "rule_summary": "Matched interactive calendar-guard candidate; see attached p95 latency telemetry PNG for 2k-token ceiling check.",
+          "rule_tags": [
+            "overlap_check",
+            "travel_buffer",
+            "interactive_guard"
+          ],
+          "tool_scopes": [
+            "calendar.read"
+          ],
+          "projected_monthly_cost_usd": 10,
+          "eval_summary": {
+            "dev_pass_rate": 0.92,
+            "holdout_pass_rate": 0.9,
+            "critical_alert_recall": 0.99
+          },
+          "created_at": "2026-03-18T09:00:00-08:00"
+        },
+        {
+          "version_id": "v3b",
+          "parent_id": "v2",
+          "rule_summary": "Matched interactive calendar-guard candidate; see attached p95 latency telemetry PNG for 2k-token ceiling check.",
+          "rule_tags": [
+            "overlap_check",
+            "travel_buffer",
+            "interactive_guard"
+          ],
+          "tool_scopes": [
+            "calendar.read"
+          ],
+          "projected_monthly_cost_usd": 10,
+          "eval_summary": {
+            "dev_pass_rate": 0.92,
+            "holdout_pass_rate": 0.9,
+            "critical_alert_recall": 0.99
+          },
+          "created_at": "2026-04-19T09:00:00-07:00"
+        }
+      ]
+    },
+    {
+      "id": "skill-research-digest",
+      "name": "Weekly Research Paper Digest",
+      "description": "Curates arXiv and lab preprints matching active project keywords.",
+      "auto_run": false,
+      "production_version_id": "v3",
+      "asset_ids": [
+        "asset-skill-research-digest-eval-curve",
+        "asset-skill-research-digest-cost-trend",
+        "asset-skill-research-digest-recall-trend"
+      ],
+      "versions": [
+        {
+          "version_id": "v1",
+          "parent_id": null,
+          "rule_summary": "Keyword filter on saved reading list.",
+          "rule_tags": [
+            "keyword_filter"
+          ],
+          "tool_scopes": [
+            "notes.read"
+          ],
+          "projected_monthly_cost_usd": 12,
+          "eval_summary": {
+            "dev_pass_rate": 0.83,
+            "holdout_pass_rate": 0.82,
+            "critical_alert_recall": 0.9
+          },
+          "created_at": "2026-05-20T09:00:00-07:00"
+        },
+        {
+          "version_id": "v2",
+          "parent_id": "v1",
+          "rule_summary": "Added author citation boost.",
+          "rule_tags": [
+            "keyword_filter",
+            "citation_boost"
+          ],
+          "tool_scopes": [
+            "notes.read"
+          ],
+          "projected_monthly_cost_usd": 15,
+          "eval_summary": {
+            "dev_pass_rate": 0.86,
+            "holdout_pass_rate": 0.84,
+            "critical_alert_recall": 0.92
+          },
+          "created_at": "2026-06-21T09:00:00-07:00"
+        },
+        {
+          "version_id": "v3",
+          "parent_id": "v2",
+          "rule_summary": "Structured methodology summary extraction.",
+          "rule_tags": [
+            "keyword_filter",
+            "citation_boost",
+            "method_extract"
+          ],
+          "tool_scopes": [
+            "notes.read"
+          ],
+          "projected_monthly_cost_usd": 18,
+          "eval_summary": {
+            "dev_pass_rate": 0.89,
+            "holdout_pass_rate": 0.87,
+            "critical_alert_recall": 0.95
+          },
+          "created_at": "2026-07-22T09:00:00-07:00"
+        },
+        {
+          "version_id": "v4",
+          "parent_id": "v3",
+          "rule_summary": "Deep full-paper synthesis sitting exactly on policy boundaries.",
+          "rule_tags": [
+            "keyword_filter",
+            "full_synthesis"
+          ],
+          "tool_scopes": [
+            "notes.read"
+          ],
+          "projected_monthly_cost_usd": 25,
+          "eval_summary": {
+            "dev_pass_rate": 0.95,
+            "holdout_pass_rate": 0.8,
+            "critical_alert_recall": 0.96
+          },
+          "created_at": "2026-08-23T09:00:00-07:00"
+        }
+      ]
+    },
+    {
+      "id": "skill-travel-watchdog",
+      "name": "Travel Gate & Weather Watchdog",
+      "description": "Monitors itinerary emails and transit advisories for departure changes.",
+      "auto_run": true,
+      "production_version_id": "v2",
+      "asset_ids": [
+        "asset-skill-travel-watchdog-eval-curve",
+        "asset-skill-travel-watchdog-cost-trend",
+        "asset-skill-travel-watchdog-recall-trend"
+      ],
+      "versions": [
+        {
+          "version_id": "v1",
+          "parent_id": null,
+          "rule_summary": "Basic airline delay parser.",
+          "rule_tags": [
+            "airline_delay"
+          ],
+          "tool_scopes": [
+            "mail.read"
+          ],
+          "projected_monthly_cost_usd": 8,
+          "eval_summary": {
+            "dev_pass_rate": 0.85,
+            "holdout_pass_rate": 0.84,
+            "critical_alert_recall": 0.94
+          },
+          "created_at": "2026-09-04T09:00:00-07:00"
+        },
+        {
+          "version_id": "v2",
+          "parent_id": "v1",
+          "rule_summary": "Added gate-change and airport transfer monitoring.",
+          "rule_tags": [
+            "airline_delay",
+            "gate_change"
+          ],
+          "tool_scopes": [
+            "mail.read",
+            "calendar.read"
+          ],
+          "projected_monthly_cost_usd": 14,
+          "eval_summary": {
+            "dev_pass_rate": 0.88,
+            "holdout_pass_rate": 0.86,
+            "critical_alert_recall": 0.97
+          },
+          "created_at": "2026-10-05T09:00:00-07:00"
+        },
+        {
+          "version_id": "v3",
+          "parent_id": "v2",
+          "rule_summary": "Added alternate airport ground-transport estimate.",
+          "rule_tags": [
+            "airline_delay",
+            "gate_change",
+            "ground_alt"
+          ],
+          "tool_scopes": [
+            "mail.read",
+            "calendar.read"
+          ],
+          "projected_monthly_cost_usd": 15,
+          "eval_summary": {
+            "dev_pass_rate": 0.9,
+            "holdout_pass_rate": 0.88,
+            "critical_alert_recall": 0.98
+          },
+          "created_at": "2026-11-06T09:00:00-08:00"
+        }
+      ]
+    }
+  ],
+  "eval_reports": [
+    {
+      "report_id": "rep-monthly-2025-01",
+      "skill_id": "skill-inbox-triage",
+      "version_id": "v4",
+      "dev_pass_rate": 0.96,
+      "holdout_pass_rate": 0.64,
+      "goodhart_gap": 0.32,
+      "critical_alert_recall": 0.68,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 36,
+      "ran_at": "2025-01-01T14:00:00-08:00"
+    },
+    {
+      "report_id": "rep-monthly-2025-02",
+      "skill_id": "skill-expense-categorizer",
+      "version_id": "v2",
+      "dev_pass_rate": 0.91,
+      "holdout_pass_rate": 0.87,
+      "goodhart_gap": 0.04,
+      "critical_alert_recall": 0.96,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 48,
+      "ran_at": "2025-02-11T14:00:00-08:00"
+    },
+    {
+      "report_id": "rep-monthly-2025-03",
+      "skill_id": "skill-morning-brief",
+      "version_id": "v5",
+      "dev_pass_rate": 0.94,
+      "holdout_pass_rate": 0.82,
+      "goodhart_gap": 0.12,
+      "critical_alert_recall": 0.6,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 13,
+      "ran_at": "2025-03-12T14:00:00-08:00"
+    },
+    {
+      "report_id": "rep-monthly-2025-04",
+      "skill_id": "skill-calendar-guard",
+      "version_id": "v3b",
+      "dev_pass_rate": 0.92,
+      "holdout_pass_rate": 0.9,
+      "goodhart_gap": 0.02,
+      "critical_alert_recall": 0.99,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 10,
+      "ran_at": "2025-04-13T14:00:00-07:00"
+    },
+    {
+      "report_id": "rep-monthly-2025-05",
+      "skill_id": "skill-research-digest",
+      "version_id": "v4",
+      "dev_pass_rate": 0.95,
+      "holdout_pass_rate": 0.8,
+      "goodhart_gap": 0.15,
+      "critical_alert_recall": 0.96,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 25,
+      "ran_at": "2025-05-14T14:00:00-07:00"
+    },
+    {
+      "report_id": "rep-monthly-2025-06",
+      "skill_id": "skill-travel-watchdog",
+      "version_id": "v3",
+      "dev_pass_rate": 0.9,
+      "holdout_pass_rate": 0.88,
+      "goodhart_gap": 0.02,
+      "critical_alert_recall": 0.98,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 15,
+      "ran_at": "2025-06-15T14:00:00-07:00"
+    },
+    {
+      "report_id": "rep-monthly-2025-07",
+      "skill_id": "skill-inbox-triage",
+      "version_id": "v4",
+      "dev_pass_rate": 0.96,
+      "holdout_pass_rate": 0.64,
+      "goodhart_gap": 0.32,
+      "critical_alert_recall": 0.68,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 36,
+      "ran_at": "2025-07-16T14:00:00-07:00"
+    },
+    {
+      "report_id": "rep-monthly-2025-08",
+      "skill_id": "skill-expense-categorizer",
+      "version_id": "v2",
+      "dev_pass_rate": 0.91,
+      "holdout_pass_rate": 0.87,
+      "goodhart_gap": 0.04,
+      "critical_alert_recall": 0.96,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 48,
+      "ran_at": "2025-08-17T14:00:00-07:00"
+    },
+    {
+      "report_id": "rep-monthly-2025-09",
+      "skill_id": "skill-morning-brief",
+      "version_id": "v5",
+      "dev_pass_rate": 0.94,
+      "holdout_pass_rate": 0.82,
+      "goodhart_gap": 0.12,
+      "critical_alert_recall": 0.6,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 13,
+      "ran_at": "2025-09-18T14:00:00-07:00"
+    },
+    {
+      "report_id": "rep-monthly-2025-10",
+      "skill_id": "skill-calendar-guard",
+      "version_id": "v3b",
+      "dev_pass_rate": 0.92,
+      "holdout_pass_rate": 0.9,
+      "goodhart_gap": 0.02,
+      "critical_alert_recall": 0.99,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 10,
+      "ran_at": "2025-10-19T14:00:00-07:00"
+    },
+    {
+      "report_id": "rep-monthly-2025-11",
+      "skill_id": "skill-research-digest",
+      "version_id": "v4",
+      "dev_pass_rate": 0.95,
+      "holdout_pass_rate": 0.8,
+      "goodhart_gap": 0.15,
+      "critical_alert_recall": 0.96,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 25,
+      "ran_at": "2025-11-20T14:00:00-08:00"
+    },
+    {
+      "report_id": "rep-monthly-2025-12",
+      "skill_id": "skill-travel-watchdog",
+      "version_id": "v3",
+      "dev_pass_rate": 0.9,
+      "holdout_pass_rate": 0.88,
+      "goodhart_gap": 0.02,
+      "critical_alert_recall": 0.98,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 15,
+      "ran_at": "2025-12-21T14:00:00-08:00"
+    },
+    {
+      "report_id": "rep-monthly-2026-01",
+      "skill_id": "skill-inbox-triage",
+      "version_id": "v4",
+      "dev_pass_rate": 0.96,
+      "holdout_pass_rate": 0.64,
+      "goodhart_gap": 0.32,
+      "critical_alert_recall": 0.68,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 36,
+      "ran_at": "2026-01-22T14:00:00-08:00"
+    },
+    {
+      "report_id": "rep-monthly-2026-02",
+      "skill_id": "skill-expense-categorizer",
+      "version_id": "v2",
+      "dev_pass_rate": 0.91,
+      "holdout_pass_rate": 0.87,
+      "goodhart_gap": 0.04,
+      "critical_alert_recall": 0.96,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 48,
+      "ran_at": "2026-02-23T14:00:00-08:00"
+    },
+    {
+      "report_id": "rep-monthly-2026-03",
+      "skill_id": "skill-morning-brief",
+      "version_id": "v5",
+      "dev_pass_rate": 0.94,
+      "holdout_pass_rate": 0.82,
+      "goodhart_gap": 0.12,
+      "critical_alert_recall": 0.6,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 13,
+      "ran_at": "2026-03-24T14:00:00-08:00"
+    },
+    {
+      "report_id": "rep-monthly-2026-04",
+      "skill_id": "skill-calendar-guard",
+      "version_id": "v3b",
+      "dev_pass_rate": 0.92,
+      "holdout_pass_rate": 0.9,
+      "goodhart_gap": 0.02,
+      "critical_alert_recall": 0.99,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 10,
+      "ran_at": "2026-04-10T14:00:00-07:00"
+    },
+    {
+      "report_id": "rep-monthly-2026-05",
+      "skill_id": "skill-research-digest",
+      "version_id": "v4",
+      "dev_pass_rate": 0.95,
+      "holdout_pass_rate": 0.8,
+      "goodhart_gap": 0.15,
+      "critical_alert_recall": 0.96,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 25,
+      "ran_at": "2026-05-11T14:00:00-07:00"
+    },
+    {
+      "report_id": "rep-monthly-2026-06",
+      "skill_id": "skill-travel-watchdog",
+      "version_id": "v3",
+      "dev_pass_rate": 0.9,
+      "holdout_pass_rate": 0.88,
+      "goodhart_gap": 0.02,
+      "critical_alert_recall": 0.98,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 15,
+      "ran_at": "2026-06-12T14:00:00-07:00"
+    },
+    {
+      "report_id": "rep-monthly-2026-07",
+      "skill_id": "skill-inbox-triage",
+      "version_id": "v4",
+      "dev_pass_rate": 0.96,
+      "holdout_pass_rate": 0.64,
+      "goodhart_gap": 0.32,
+      "critical_alert_recall": 0.68,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 36,
+      "ran_at": "2026-07-13T14:00:00-07:00"
+    },
+    {
+      "report_id": "rep-monthly-2026-08",
+      "skill_id": "skill-expense-categorizer",
+      "version_id": "v2",
+      "dev_pass_rate": 0.91,
+      "holdout_pass_rate": 0.87,
+      "goodhart_gap": 0.04,
+      "critical_alert_recall": 0.96,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 48,
+      "ran_at": "2026-08-14T14:00:00-07:00"
+    },
+    {
+      "report_id": "rep-monthly-2026-09",
+      "skill_id": "skill-morning-brief",
+      "version_id": "v5",
+      "dev_pass_rate": 0.94,
+      "holdout_pass_rate": 0.82,
+      "goodhart_gap": 0.12,
+      "critical_alert_recall": 0.6,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 13,
+      "ran_at": "2026-09-15T14:00:00-07:00"
+    },
+    {
+      "report_id": "rep-monthly-2026-10",
+      "skill_id": "skill-calendar-guard",
+      "version_id": "v3b",
+      "dev_pass_rate": 0.92,
+      "holdout_pass_rate": 0.9,
+      "goodhart_gap": 0.02,
+      "critical_alert_recall": 0.99,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 10,
+      "ran_at": "2026-10-16T14:00:00-07:00"
+    },
+    {
+      "report_id": "rep-monthly-2026-11",
+      "skill_id": "skill-research-digest",
+      "version_id": "v4",
+      "dev_pass_rate": 0.95,
+      "holdout_pass_rate": 0.8,
+      "goodhart_gap": 0.15,
+      "critical_alert_recall": 0.96,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 25,
+      "ran_at": "2026-11-17T14:00:00-08:00"
+    },
+    {
+      "report_id": "rep-monthly-2026-12",
+      "skill_id": "skill-travel-watchdog",
+      "version_id": "v3",
+      "dev_pass_rate": 0.9,
+      "holdout_pass_rate": 0.88,
+      "goodhart_gap": 0.02,
+      "critical_alert_recall": 0.98,
+      "failed_case_ids": [],
+      "projected_monthly_cost_usd": 15,
+      "ran_at": "2026-12-31T14:00:00-08:00"
+    }
+  ],
+  "alerts": [],
+  "deployments": [
+    {
+      "deployment_id": "dep-hist-1",
+      "action": "promote",
+      "skill_id": "skill-inbox-triage",
+      "from_version_id": "v2",
+      "to_version_id": "v3",
+      "eval_report_id": "rep-monthly-2025-06",
+      "alert_id": null,
+      "reason": "Scheduled mid-2025 promotion.",
+      "at": "2025-06-18T12:00:00-07:00"
+    }
+  ],
+  "version_reviews": [],
+  "approval_requests": []
+}

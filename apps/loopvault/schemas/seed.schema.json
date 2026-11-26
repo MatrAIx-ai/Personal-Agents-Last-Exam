@@ -1,0 +1,556 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "max_monthly_budget_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "auto_run_requires_read_only": {
+          "type": "boolean"
+        },
+        "allowed_write_scopes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "uniqueItems": true
+        },
+        "min_holdout_pass_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "max_goodhart_gap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "max_monthly_budget_usd",
+        "auto_run_requires_read_only",
+        "allowed_write_scopes",
+        "min_holdout_pass_rate",
+        "max_goodhart_gap",
+        "updated_at"
+      ],
+      "additionalProperties": false
+    },
+    "skills": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 140
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 600
+          },
+          "auto_run": {
+            "type": "boolean"
+          },
+          "production_version_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "asset_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 16,
+            "uniqueItems": true
+          },
+          "versions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "properties": {
+                "version_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "parent_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "rule_summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 600
+                },
+                "rule_tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  },
+                  "uniqueItems": true
+                },
+                "tool_scopes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "uniqueItems": true
+                },
+                "projected_monthly_cost_usd": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "eval_summary": {
+                  "type": "object",
+                  "properties": {
+                    "dev_pass_rate": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "holdout_pass_rate": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "critical_alert_recall": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  },
+                  "required": [
+                    "dev_pass_rate",
+                    "holdout_pass_rate",
+                    "critical_alert_recall"
+                  ],
+                  "additionalProperties": false
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "version_id",
+                "parent_id",
+                "rule_summary",
+                "rule_tags",
+                "tool_scopes",
+                "projected_monthly_cost_usd",
+                "eval_summary",
+                "created_at"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "auto_run",
+          "production_version_id",
+          "asset_ids",
+          "versions"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "eval_reports": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "properties": {
+          "report_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "skill_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "version_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "dev_pass_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "holdout_pass_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "goodhart_gap": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1
+          },
+          "critical_alert_recall": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "failed_case_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          },
+          "projected_monthly_cost_usd": {
+            "type": "number",
+            "minimum": 0
+          },
+          "ran_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "report_id",
+          "skill_id",
+          "version_id",
+          "dev_pass_rate",
+          "holdout_pass_rate",
+          "goodhart_gap",
+          "critical_alert_recall",
+          "failed_case_ids",
+          "projected_monthly_cost_usd",
+          "ran_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "alerts": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "properties": {
+          "alert_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "skill_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "version_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "severity": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "metric": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "observed_value": {
+            "type": "number"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 600
+          },
+          "status": {
+            "enum": [
+              "open",
+              "acknowledged"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledged_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resolution_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 600
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "remediated_version_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "alert_id",
+          "skill_id",
+          "version_id",
+          "severity",
+          "metric",
+          "observed_value",
+          "threshold",
+          "summary",
+          "status",
+          "created_at",
+          "acknowledged_at",
+          "resolution_note",
+          "remediated_version_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "deployments": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "properties": {
+          "deployment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "action": {
+            "enum": [
+              "promote",
+              "rollback"
+            ]
+          },
+          "skill_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "from_version_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "to_version_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "eval_report_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "alert_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 600
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "deployment_id",
+          "action",
+          "skill_id",
+          "from_version_id",
+          "to_version_id",
+          "eval_report_id",
+          "alert_id",
+          "reason",
+          "at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "version_reviews": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "properties": {
+          "skill_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "version_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "status": {
+            "enum": [
+              "rejected_regression"
+            ]
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 600
+          },
+          "reviewed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "skill_id",
+          "version_id",
+          "status",
+          "evidence",
+          "reviewed_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "approval_requests": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "properties": {
+          "approval_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "skill_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "version_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "actor": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "status": {
+            "enum": [
+              "pending_approval"
+            ]
+          },
+          "violations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 600
+          },
+          "requested_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "approval_id",
+          "skill_id",
+          "version_id",
+          "actor",
+          "status",
+          "violations",
+          "note",
+          "requested_at"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "policy",
+    "skills",
+    "eval_reports",
+    "alerts",
+    "deployments",
+    "version_reviews",
+    "approval_requests"
+  ],
+  "additionalProperties": false
+}

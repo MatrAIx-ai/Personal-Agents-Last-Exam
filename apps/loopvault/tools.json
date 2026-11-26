@@ -1,0 +1,1263 @@
+[
+  {
+    "name": "loopvault.skills.list",
+    "description": "List personal automation skills with production pointer, derived compliance status, open alert count, and attached chart asset_ids.",
+    "read_only": true,
+    "scope": "loopvault.skills.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "skills"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "loopvault.skills.get",
+    "description": "Read full skill detail including immutable version history, compliance status, pending approvals, rejected reviews, and MCP resource_uris.",
+    "read_only": true,
+    "scope": "loopvault.skills.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "skill_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "skill": {
+          "type": "object"
+        },
+        "pending_approvals": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "version_reviews": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "resource_uris": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "skill",
+        "pending_approvals",
+        "version_reviews",
+        "resource_uris"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "loopvault.skills.lineage",
+    "description": "Trace parent_id lineage chain back to root with structured rule-tag, scope, cost, and metric diffs between versions.",
+    "read_only": true,
+    "scope": "loopvault.skills.lineage",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "skill_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "skill_id": {
+          "type": "string"
+        },
+        "production_version_id": {
+          "type": "string"
+        },
+        "chain": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "diffs": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "skill_id",
+        "production_version_id",
+        "chain",
+        "diffs"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "loopvault.evals.get_report",
+    "description": "Read a deterministic dev and holdout evaluation report by report_id or (skill_id, version_id).",
+    "read_only": true,
+    "scope": "loopvault.evals.get_report",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "report_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "report": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "report"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "loopvault.asset.read",
+    "description": "Read a verified synthetic PNG diagnostic chart attached to a skill via Core ctx.assets.read.",
+    "read_only": true,
+    "scope": "loopvault.asset.read",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "asset_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "skill_id",
+        "asset_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "file": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "file"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "loopvault.policy.get",
+    "description": "Read standing workspace policy thresholds, budget cap, and allowed write scopes.",
+    "read_only": true,
+    "scope": "loopvault.policy.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "policy": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "policy"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "loopvault.policy.check",
+    "description": "Evaluate a candidate or active skill version against standing workspace policy strictly from structured fields.",
+    "read_only": true,
+    "scope": "loopvault.policy.check",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "skill_id",
+        "version_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "skill_id": {
+          "type": "string"
+        },
+        "version_id": {
+          "type": "string"
+        },
+        "allowed": {
+          "type": "boolean"
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "goodhart_gap": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "skill_id",
+        "version_id",
+        "allowed",
+        "violations",
+        "goodhart_gap"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "loopvault.alerts.list",
+    "description": "List production regression alerts, optionally filtered by skill_id or status.",
+    "read_only": true,
+    "scope": "loopvault.alerts.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "status": {
+          "enum": [
+            "open",
+            "acknowledged"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "alerts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "alerts"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "loopvault.skills.create_candidate",
+    "description": "Append a new immutable draft version inheriting from an existing parent_id.",
+    "read_only": false,
+    "scope": "loopvault.skills.create_candidate",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "parent_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "rule_summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "rule_tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "uniqueItems": true
+        },
+        "tool_scopes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "uniqueItems": true
+        },
+        "projected_monthly_cost_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "skill_id",
+        "parent_id",
+        "rule_summary",
+        "tool_scopes",
+        "projected_monthly_cost_usd",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "skill_id": {
+          "type": "string"
+        },
+        "candidate": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "skill_id",
+        "candidate"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "loopvault.evals.run",
+    "description": "Run deterministic fixture-backed dev and holdout checks on a skill version and append a new immutable report.",
+    "read_only": false,
+    "scope": "loopvault.evals.run",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "skill_id",
+        "version_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "report": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "report"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "loopvault.deploy.promote",
+    "description": "Promote a compliant candidate version to production; hard-rejects atomically with policy_violation if any policy check fails.",
+    "read_only": false,
+    "scope": "loopvault.deploy.promote",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "eval_report_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "skill_id",
+        "version_id",
+        "eval_report_id",
+        "reason",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "skill_id": {
+          "type": "string"
+        },
+        "production_version_id": {
+          "type": "string"
+        },
+        "already_active": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "skill_id",
+        "production_version_id",
+        "already_active"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "loopvault.deploy.mark_rejected",
+    "description": "Mark a non-production candidate version as rejected_regression with evidence without modifying production_version_id.",
+    "read_only": false,
+    "scope": "loopvault.deploy.mark_rejected",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "skill_id",
+        "version_id",
+        "evidence",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "review": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "review"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "loopvault.deploy.request_approval",
+    "description": "Record a pending_approval escalation for human review without changing production_version_id.",
+    "read_only": false,
+    "scope": "loopvault.deploy.request_approval",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "skill_id",
+        "version_id",
+        "note",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "approval": {
+          "type": "object"
+        },
+        "production_version_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "approval",
+        "production_version_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "loopvault.deploy.rollback",
+    "description": "Atomically roll back production_version_id to a verified ancestor along parent_id lineage while preserving immutable history.",
+    "read_only": false,
+    "scope": "loopvault.deploy.rollback",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "target_version_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "alert_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "skill_id",
+        "target_version_id",
+        "reason",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "skill_id": {
+          "type": "string"
+        },
+        "from_version_id": {
+          "type": "string"
+        },
+        "production_version_id": {
+          "type": "string"
+        },
+        "already_active": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "skill_id",
+        "production_version_id",
+        "already_active"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "loopvault.alerts.ack",
+    "description": "Acknowledge a production regression alert with resolution note and optional remediated version ID.",
+    "read_only": false,
+    "scope": "loopvault.alerts.ack",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "alert_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "resolution_note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "remediated_version_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "alert_id",
+        "resolution_note",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "loopvault"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "alert": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "alert"
+      ],
+      "additionalProperties": false
+    }
+  }
+]
