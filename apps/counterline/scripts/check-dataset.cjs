@@ -2,24 +2,17 @@
 // Load the delivery dataset through the public runtime and read it back through the Agent tools: the full
 // two years at the window's end, and an as-of selection at mid-2026 with nothing dated after the cut.
 // Run from a full checkout: node apps/counterline/scripts/check-dataset.cjs
-const fs = require('node:fs'), path = require('node:path'), os = require('node:os'), assert = require('node:assert/strict');
-const pkg = path.resolve(__dirname, '..');
-let root = pkg; while (!fs.existsSync(path.join(root, 'runtime/client.cjs'))) { const up = path.dirname(root); if (up === root) throw Error('Run inside the PALE checkout'); root = up; }
-const {Client} = require(path.join(root, 'runtime/client.cjs'));
+const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict');
+const {pkg, openRun} = require('../examples/lib/run.cjs');
 const {select} = require('./select-history.cjs');
 const {END} = require('./generate-dataset.cjs');
 const binding = require('../fixtures/binding.json');
 const CUT = '2026-06-30T23:59:00-04:00';
 
 async function load(run, data, virtual_now) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'counterline-dataset-')), registry = path.join(pkg, 'registry.json');
-  const infra = new Client('counterline', 'infra', run, dir, 'dataset-infra', {registry}); await infra.initialize();
-  const agent = new Client('counterline', 'agent', run, dir, 'dataset-agent', {registry}); await agent.initialize();
-  const close = async () => { await Promise.allSettled([infra.close(), agent.close()]); fs.rmSync(dir, {recursive: true, force: true}); };
-  const s = await infra.call('env.snapshot');
-  const r = await infra.call('env.load_seed', {expected_version: s.version, request_id: 'load-' + run, data, binding, virtual_now});
-  if (r.status !== 'ready') { await close(); throw Error(JSON.stringify(r).slice(0, 400)); }
-  return {agent, close};
+  const r = await openRun(run);
+  try { await r.load(data, binding, virtual_now); } catch (e) { await r.close(); throw e; }
+  return r;
 }
 
 async function main() {

@@ -6,7 +6,7 @@
 // connection. Screenshots and a JSON report go to .artifacts/web/counterline/ (PALE_WEB_REPORT_DIR overrides).
 const assert = require('node:assert/strict'), fs = require('node:fs'), os = require('node:os'), path = require('node:path');
 const pkg = path.resolve(__dirname, '..');
-let root = pkg; while (!fs.existsSync(path.join(root, 'runtime/web/server.cjs'))) { const up = path.dirname(root); if (up === root) { console.log('SKIP: no PALE checkout'); process.exit(0); } root = up; }
+let root = pkg; while (!fs.existsSync(path.join(root, 'runtime/web/server.cjs'))) { const up = path.dirname(root); if (up === root) { console.log('SKIP: no PALE checkout'); process.exit(0); } root = up; }   // skip, not fail, outside a checkout
 let chromium;
 try { ({chromium} = require(require.resolve('playwright', {paths: [root]}))); } catch { try { ({chromium} = require('playwright')); } catch { console.log('SKIP: run `npm ci` and `npx playwright install chromium` first'); process.exit(0); } }
 const {start} = require(path.join(root, 'runtime/web/server.cjs')), {Client} = require(path.join(root, 'runtime/client.cjs'));

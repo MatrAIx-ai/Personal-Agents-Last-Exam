@@ -7,23 +7,16 @@
 // (2) a report with no ledger record, (3) one posted with a different amount and (4) one posted to another
 // account: not settled, while Counterline reads reported_performed. (5) a representative saying the credit
 // was processed, with no report: the commitment stays pending and the join finds no report.
-const fs = require('node:fs'), path = require('node:path'), os = require('node:os'), assert = require('node:assert/strict');
-const pkg = path.resolve(__dirname, '../..');
-let root = pkg; while (!fs.existsSync(path.join(root, 'runtime/client.cjs'))) { const up = path.dirname(root); if (up === root) throw Error('Run inside the PALE checkout'); root = up; }
-const {Client} = require(path.join(root, 'runtime/client.cjs'));
+const assert = require('node:assert/strict');
+const {openRun} = require('../lib/run.cjs');
 const {settle} = require('./join.cjs');
 const ledger = require('./ledger.json').records;
 const report = (event_id, at, reference_id, amount_minor) => ({event_id, at, operation: 'counterline.commitment.performance_reported',
   payload: {commitment_id: 'cm-0001', provider_id: 'issuer-larchmont', reference_id, amount_minor, currency: 'USD', status: 'reported'}});
 
 async function world(run) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'counterline-join-'));
-  const registry = path.join(pkg, 'registry.json');
-  const infra = new Client('counterline', 'infra', run, dir, 'join-infra', {registry}); await infra.initialize();
-  const agent = new Client('counterline', 'agent', run, dir, 'join-agent', {registry}); await agent.initialize();
-  const apply = async event => { const s = await infra.call('env.snapshot'); const r = await infra.call('env.apply_event', {expected_version: s.version, event}); assert.equal(r.status, 'committed', JSON.stringify(r)); };
-  const commitment = async () => (await agent.call('counterline.commitments.get', {commitment_id: 'cm-0001'})).commitment;
-  return {apply, commitment, close: async () => { await Promise.allSettled([infra.close(), agent.close()]); fs.rmSync(dir, {recursive: true, force: true}); }};
+  const r = await openRun(run);
+  return {...r, commitment: async () => (await r.agent.call('counterline.commitments.get', {commitment_id: 'cm-0001'})).commitment};
 }
 
 async function main() {

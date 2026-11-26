@@ -7,9 +7,7 @@
 // copy becomes delivery_failed; (4) with copies off nothing is queued. Local commit, Mail delivery and
 // business confirmation are reported separately; a copy has no business confirmation.
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os'), assert = require('node:assert/strict');
-const pkg = path.resolve(__dirname, '../..');
-let root = pkg; while (!fs.existsSync(path.join(root, 'runtime/client.cjs'))) { const up = path.dirname(root); if (up === root) throw Error('Run inside the PALE checkout'); root = up; }
-const {Client} = require(path.join(root, 'runtime/client.cjs'));
+const {pkg, root, Client} = require('../lib/run.cjs');
 const publisher = require('../../src/publisher.cjs');
 const MAIL_REGISTRY = path.join(root, 'examples/registry.mail.json');
 const ACCT = 'brindle:acct-maya-1234';

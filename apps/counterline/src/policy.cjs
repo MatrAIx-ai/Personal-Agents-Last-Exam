@@ -15,11 +15,11 @@ const OPEN_COMMITMENTS = ['pending', 'partially_reported', 'reported_performed',
 
 // Requests the recognizer understands, matched anywhere in a message and answered in the order written.
 const PATTERNS = [
-  ['explain_terms', /\b((explain|clarify|walk me through)\b.{0,40}\b(terms?|conditions?|offers?|deal|credit|waiver)|(the|these|those|its|your) (terms|conditions)|terms and conditions|fine print|the catch)\b/i],
-  ['ask_for_better_offer', /\b(anything better|something better|better (offer|deal|option)|best (offer|deal|you can do)|anything (else|more)|other (offers?|options?)|improve (the|that|your) offer|more than that)\b/i],
-  ['ask_status', /\b(status|check on|update on|where is|when will|still waiting|has (it|my|the|that)\b.{0,30}\b(posted|processed|arrived|gone through))\b/i],
+  ['explain_terms', /\b((explain|clarify|walk me through)\b.{0,40}\b(terms?|conditions?|offers?|deal|credit|waiver)|(the|these|those|its|your) (terms|conditions)|terms and conditions|fine print|the catch|how does (that|this|the) (offer|credit|waiver) work)\b/i],
+  ['ask_for_better_offer', /\b(anything better|something better|better (offer|deal|option)|best (offer|deal|you can do)|anything (else|more)|other (offers?|options?)|improve (the|that|your) offer|more than that|do better)\b/i],
+  ['ask_status', /\b(status|check on|update on|where is|when will|still waiting|has (it|my|the|that)\b.{0,30}\b(posted|processed|arrived|gone through)|did (it|my|the|that)\b.{0,30}\bgo through)\b/i],
   ['request_transfer', /\b(transfer|connect me|speak (to|with)|talk (to|with)|escalate|put me through|send me to)\b/i],
-  ['end_chat', /\b(that's all|that is all|end (the |this )?chat|goodbye|nothing else|no further questions)\b/i]
+  ['end_chat', /\b(that's all|that is all|end (the |this )?chat|close (the |this )?chat|goodbye|bye|nothing else|no further questions)\b/i]
 ];
 
 function department(provider, text) {
@@ -50,6 +50,10 @@ function turn(c, at, speaker, text, source, recognized, rule) {
   c.transcript.push({ turn_id: `t-${String(c.transcript.length + 1).padStart(4, '0')}`, at, speaker, text, source, recognized, rule });
 }
 const say = (c, now, text, rule, recognized = []) => turn(c, now, 'representative', text, 'system', recognized, rule);
+// The provider's wording for the representative's lead lines (scripts lead-offers, lead-better, no-better).
+// Wording can differ between providers or scripts; which offers appear never depends on it.
+const LINES = { 'lead-offers': 'Here is what I can offer.', 'lead-better': 'Here is what else I can offer.', 'no-better': 'That is the best offer I can make on this case.' };
+const line = (data, id) => data.provider.scripts.find(s => s.script_id === id)?.text || LINES[id];
 
 function describe(o) {
   const value = o.value ? ` (${money(o.value)})` : '';
@@ -113,7 +117,7 @@ function perform(data, c, now, action, dept, recognized) {
     case 'ask_for_better_offer': {
       if (!mayOffer(data, c)) { say(c, now, 'I need to verify your identity before I can look at offers.', rule('identity_first'), recognized); return 1; }
       const shown = present(data, c, now, catalog(data, c, 'better'));
-      say(c, now, shown.length ? `Here is what else I can offer. ${shown.map(describe).join(' ')}` : 'That is the best offer I can make on this case.', rule(shown.length ? 'presented' : 'none'), recognized);
+      say(c, now, shown.length ? `${line(data, 'lead-better')} ${shown.map(describe).join(' ')}` : line(data, 'no-better'), rule(shown.length ? 'presented' : 'none'), recognized);
       if (shown.length) queueCopy(data, now, 'offer_presented', c, shown[0].offer_id, 'new offers in your case', shown.map(describe).join('\n'));
       return 1;
     }
@@ -138,7 +142,7 @@ function perform(data, c, now, action, dept, recognized) {
       c.tier = dept.tier;
       c.status = 'escalated';
       say(c, now, `You are now chatting with ${dept.name} at ${p.name}.`, rule('done'), recognized);
-      return 1 + presentStage(data, c, now, 'transfer', 'Here is what I can offer.');
+      return 1 + presentStage(data, c, now, 'transfer', line(data, 'lead-offers'));
     }
     case 'end_chat':
       c.status = 'resolved';
@@ -149,4 +153,4 @@ function perform(data, c, now, action, dept, recognized) {
   }
 }
 
-module.exports = { queueCopy, LABELS, recognize, department, availableActions, perform, present, presentStage, live, turn, say, describe, list };
+module.exports = { line, queueCopy, LABELS, recognize, department, availableActions, perform, present, presentStage, live, turn, say, describe, list };

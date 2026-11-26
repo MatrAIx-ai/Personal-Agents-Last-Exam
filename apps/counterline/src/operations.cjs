@@ -55,7 +55,7 @@ const writes = {
     data.cases.push(c);
     P.turn(c, now, 'customer', args.message, 'text', [], null);
     P.turn(c, now, 'representative', greeting.text, 'script', [], `topic:${topic.topic_id}:greeting`);
-    P.presentStage(data, c, now, 'initial', 'Here is what I can offer.');
+    P.presentStage(data, c, now, 'initial', P.line(data, 'lead-offers'));
     return { case_id };
   },
 
@@ -128,7 +128,7 @@ const writes = {
     const parts = [missing.length ? `I still need your ${list(missing.map(f => FIELD_LABEL[f]))}.` : matches ? 'Thank you, you are verified.' : 'Those details do not match our records.'];
     if (extra.length) parts.push(`For your security, we never need your ${list(extra.map(f => FIELD_LABEL[f]))} in chat.`);
     P.say(c, now, parts.join(' '), `identity:${matches ? 'verified' : missing.length ? 'missing' : 'mismatch'}`);
-    if (matches && !data.offers.some(o => o.case_id === c.case_id && o.stage === 'initial')) P.presentStage(data, c, now, 'initial', 'Here is what I can offer.');
+    if (matches && !data.offers.some(o => o.case_id === c.case_id && o.stage === 'initial')) P.presentStage(data, c, now, 'initial', P.line(data, 'lead-offers'));
     return { case_id: c.case_id, verified: c.identity.verified, not_needed };
   },
 

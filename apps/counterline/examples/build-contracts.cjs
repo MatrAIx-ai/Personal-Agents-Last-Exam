@@ -198,6 +198,10 @@ contribution.interfaces.find(i => i.interface_id === 'agent-mcp').operations =
   tools.map(t => ({ name: t.name, effect: t.read_only ? 'read' : 'write', caller: 'agent' }));
 contribution.events.accepts = eventTypes.map(type => ({ type, schema_ref: 'schemas/events.schema.json', status: 'implemented' }));
 outputs.set('contribution/contribution.json', json(contribution));
+// schemas/mail-router-message.schema.json is a byte-identical copy of the public Mail wire contract,
+// kept in the package for standalone verification. In a full checkout, a drift from the source is reported.
+const mailSource = path.resolve(root, '../../runtime/contracts/schemas/router-message.schema.json');
+if (fs.existsSync(mailSource)) outputs.set('schemas/mail-router-message.schema.json', fs.readFileSync(mailSource, 'utf8'));
 let drift = [];
 for (const [file, content] of outputs) {
   const p = path.join(root, file);

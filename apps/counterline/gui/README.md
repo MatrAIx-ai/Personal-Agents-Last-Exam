@@ -17,6 +17,13 @@ Open the access link the Host prints. `apps/counterline/registry.json` lists onl
 - **Commitments:** what the provider promised, its reports with references, the overdue flag and any contest, with a note that neither a promise nor a report shows the money arrived. Contest a commitment.
 - **Settings:** email copies of offers and confirmations.
 
+## Not in the page
+
+- `offers.get` and `commitments.get`: the page reads the same records through `cases.get` and `commitments.list`.
+- Mail: copies go to the Mail App's own inbox (open Mail's page there); this page only sets the preference.
+- Attachments, voice, phone menus and a native or mobile app: not in the approved scope.
+- Seed, reset, time and provider events: Infra only, with no route from the page.
+
 ## How it talks to the App
 
 Every value shown comes from a Counterline read on each refresh; there is no browser-side business store. A write carries the version observed when the view loaded, so a stale view reports the conflict instead of overwriting; an unchanged retry reuses its `request_id`, so a lost response does not repeat a committed effect. App text is inserted as text, never as HTML. Styles beyond the shared stylesheet come from a constructed stylesheet.

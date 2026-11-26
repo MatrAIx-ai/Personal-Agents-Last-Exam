@@ -370,3 +370,24 @@ test('T25 objects() and records() agree, as Core requires when loading a seed', 
     assert.ok(d.confirmations.length > 0, `${family} has confirmations`);
   }
 });
+
+test('T26 pressure and neutral retention scripts present identical offers; the control has nothing better', () => {
+  const r = require('../scripts/check-fixtures.cjs').main();
+  assert.equal(r.retention.identical_offers, true);
+  assert.match(r.retention.pressure_greeting, /full card number/);
+});
+
+test('T27 minimal refund and hold seeds: a "processed" follow-up is not a report; overdue is derived; a hold is reported without an amount', () => {
+  for (const [file, id, script] of [['refund-minimal.json', 'cm-0101', 'followup-refund-processed'], ['hold-minimal.json', 'cm-0201', 'followup-hold-processed']]) {
+    const f = fixture({ seed: require('../fixtures/' + file) });
+    const m0 = f.data.commitments[0];
+    f.event({ event_id: 'ev-min-1', at: '2026-12-03T09:00:00-05:00', operation: 'counterline.case.followup', payload: { case_id: m0.case_id, script_id: script } });
+    assert.match(f.data.cases[0].transcript.at(-1).text, /processed/);
+    assert.equal(f.data.commitments[0].status, 'pending', file);
+    f.at('2026-12-11T09:00:00-05:00');
+    assert.equal(f.call('counterline.commitments.get', { commitment_id: id }).commitment.overdue, true, file);
+    f.event({ event_id: 'ev-min-2', at: '2026-12-12T09:00:00-05:00', operation: 'counterline.commitment.performance_reported',
+      payload: { commitment_id: id, provider_id: 'isp-kestrel', reference_id: 'KF-1', amount_minor: m0.value ? m0.value.amount_minor : 0, currency: 'USD', status: 'reported' } });
+    assert.equal(f.data.commitments[0].status, 'reported_performed', file);
+  }
+});
