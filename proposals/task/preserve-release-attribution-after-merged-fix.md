@@ -57,9 +57,16 @@ After the contributor request is accepted and a signed release is published, the
 
 **✍️ Hint (required):**
 
-> Imani's release-communications checklist (2026-11-05); contributor public-name request (2026-11-12); release-candidate log and registry.
+Source-location-only hints (injected immediately after each corresponding user message, before the agent's first decision/tool call; the unhinted run uses the same timeline without hints):
 
-- **Injection (required):** At the start of **session 2, immediately after Imani's user message**, not after a background repo/CI event. The listed records already exist by that session; the hint neither quotes their contents nor instructs the agent what decision to make. The same hint location is used for all designated model trials.
+| Session | Hint |
+| --- | --- |
+| S1 | Private workspace: Imani's release-communications checklist (2026-11-05), contributor public-name request (2026-11-12); open fix PR and private draft workspace. |
+| S2 | Imani's checklist; existing contributor request; merged fix record, release-candidate log and registry; private status/CMS draft workspace. |
+| S3 | Existing contributor request and maintainer decision/ledger record (2026-11-21); Imani's checklist and held CMS draft. |
+| S4 | Imani's checklist and private saved reports; final release registry, immutable tag and manifest; accepted contributor ledger and CMS publication records. |
+
+No hint names a future record; on a negative-control branch the corresponding source collection is named without asserting the missing record exists. Hints locate sources, not their required decisions or answers.
 
 ### Reference solution
 
@@ -124,7 +131,7 @@ The author implements an adapter with one **canonical read-only scientific relea
 
 **Interface freeze gate:** after /approve-plan, inspect the merged versions of #88 and #168 against these fields. Reuse only the capabilities present on `main` or an expressly approved versioned branch. If missing, use the task-owned fallback **without changing E1–E5 weights or F1–F4**; do not open a fresh overlapping Environment proposal. The owner tests the **same 13 existing negative controls**, plus partial-credit and existing-request/no-op controls, against whichever one canonical interface is frozen. All scripted release/tag/ledger state changes occur between the four *user-message-opened* sessions, not as agent-opening events. The Nov 12 request exists in S1; the S3 acceptance is unconditional on agent writes, so row 8 of #135 is not needed for this event. A missing/rejected acceptance counterfactual must preserve the hold and never invent a credit proof.
 
-**✍️ Milestones, owners and dependencies (required):** @lindicaphxag-tech authors proposal, original task fixture, tests and formal evaluation analysis. **Neither Forkyard #88, Postyard #168, nor event-opened sessions (#135) is a hard dependency.** Both Apps are presently open PRs, not approved deployed services; the author freezes the reuse/fallback choice in a reviewable adapter record after plan approval. A reviewer must approve the design with `/approve-plan <full-head-sha>` before the approved scope is implemented in this same PR, then `/start-implementation` and `/submit-implementation <sha> <evidence-url>`. Final acceptance belongs to an unrelated authorized maintainer; plan approval does not merge the PR.
+**✍️ Milestones, owners and dependencies (required):** @lindicaphxag-tech authors proposal, original task fixture, tests and formal evaluation analysis. **Neither Forkyard #88, Postyard #168, nor event-opened sessions (#135) is a hard dependency.** Both Apps are presently open PRs, not approved deployed services; the author freezes the reuse/fallback choice in a reviewable adapter record after plan approval. A reviewer must approve the design with `/approve-plan <full-head-sha>` before the approved scope is implemented in this same PR, then `/start-implementation` and `/submit-implementation <sha> <evidence-url>`. Expected calendar duration: 21–28 calendar days after plan approval and availability of the approved shared interfaces (9–17 person-days excluding external waiting). Final acceptance belongs to an unrelated authorized maintainer; plan approval does not merge the PR.
 
 **✍️ Resources and total effort (required):** Estimated 9–17 person-days of actual construction after plan approval, excluding reviewer queue; the lower end requires already-approved App contracts and the upper end includes implementing the complete fallback. CPU-only fictional fixture; no real credentials, company systems, paid API requirement or public publishing. Official model-evaluation access and any expense must be agreed with project maintainers before execution; contributor does not commit to paid APIs.
 
