@@ -40,7 +40,7 @@ const tokens = name => String(name).normalize('NFKD').replace(/[̀-ͯ]/g, '').to
 const sameName = (a, b) => tokens(a) !== '' && tokens(a) === tokens(b);
 
 // Document facts that must hold for any registered file: real dates, a signature that lapses
-// after it is signed, a return after entry and stays that do not share a night.
+// after it is signed, a return after entry and stays that do not share a night and lie within the travel dates.
 function checkDocuments(documents, bad) {
   const {travel_signature:signature, accommodation, travel} = documents;
   for (const value of [documents.invitation_letter.issued_on, signature.signed_on, signature.valid_until, travel.enter_on, travel.leave_on]) {
@@ -49,6 +49,12 @@ function checkDocuments(documents, bad) {
   if (signature.valid_until <= signature.signed_on) bad('A travel signature must lapse after the day it is signed (valid_until is exclusive).');
   if (travel.leave_on <= travel.enter_on) bad('The return date must be after the entry date.');
   checkStays(accommodation, bad);
+  // Competence counts the file's stays, so a stay outside the trip would change the consulate.
+  for (const stay of accommodation) {
+    if (stay.check_in < travel.enter_on || stay.check_out > travel.leave_on) {
+      bad('The stay ' + stay.check_in + ' to ' + stay.check_out + ' falls outside the travel dates (' + travel.enter_on + ' to ' + travel.leave_on + '); give only the stays of this trip.');
+    }
+  }
 }
 
 // Admission rule for agent submissions: a letter or signature dated after today at the consulate

@@ -262,6 +262,16 @@ test('request_correction records the request, its business-day turnaround and no
   unchanged(f, () => f.call('confdesk.letter.request_correction', {fields:{given_names:'Ming-yu'}}), code('invalid_state'));
 });
 
+test('request_correction honours a task policy that limits the correctable fields', () => {
+  const f = withLetter();
+  f.ctx.virtual_now = '2027-03-10T18:10:00-06:00';
+  f.ctx.policy = {allow:[], constraints:{'confdesk.letter.request_correction':{fields:['surname']}}};
+  unchanged(f, () => f.call('confdesk.letter.request_correction', {fields:{nationality:'Canada'}}), code('permission_denied'));
+  unchanged(f, () => f.call('confdesk.letter.request_correction', {fields:{surname:'ZHAO', nationality:'Canada'}}), code('permission_denied'));
+  assert.deepEqual(f.call('confdesk.letter.request_correction', {fields:{surname:'ZHAO'}}).correction.fields, {surname:'ZHAO'});
+  delete f.ctx.policy;
+});
+
 test('correction.issue issues the corrected letter after its own turnaround and supersedes the first', () => {
   const f = withLetter();
   f.ctx.virtual_now = '2027-03-10T18:10:00-06:00';

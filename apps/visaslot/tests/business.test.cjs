@@ -222,6 +222,9 @@ test('a letter or signature dated after the submission day at the consulate is r
   bad(d => ({...d, travel_signature:{...d.travel_signature, valid_until:'2027-02-01'}}));
   bad(d => ({...d, travel_signature:{...d.travel_signature, valid_until:'2027-02-15'}})); // lapses the day it is signed
   bad(d => ({...d, travel:{enter_on:'2027-04-31', leave_on:'2027-05-02'}}));
+  // Stays outside the travel dates would change the competent consulate: six German nights before a 25 April entry.
+  bad(d => ({...d, travel:{enter_on:'2027-04-25', leave_on:'2027-04-30'}}));
+  bad(d => ({...d, travel:{enter_on:'2027-04-19', leave_on:'2027-04-29'}}));
 });
 
 test('appointment held with a complete file: complete, file locked, recorded once', () => {

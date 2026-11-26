@@ -8,9 +8,9 @@ Public runtime 1.6.0, Core API 1.2.0, Messaging router 1.2.0, Mail 1.3.0 (refere
 
 | Command | Result |
 | --- | --- |
-| `node --test apps/confdesk/tests/business.test.cjs` | 23/23 tests pass |
-| `node --test apps/visaslot/tests/business.test.cjs` | 24/24 tests pass |
-| `node --test apps/passage/tests/business.test.cjs` | 16/16 tests pass |
+| `node --test apps/confdesk/tests/business.test.cjs` | 25/25 tests pass |
+| `node --test apps/visaslot/tests/business.test.cjs` | 25/25 tests pass |
+| `node --test apps/passage/tests/business.test.cjs` | 17/17 tests pass |
 | `node apps/<id>/examples/run.cjs` for each | Runs: registration, misspelled letter, correction, deadline kept and removed (ConfDesk); competence, cancel, book, file replaced, held as complete (VisaSlot); early event refused, signature issued, both Mail messages (Passage) |
 | `node runtime/cli.cjs verify --app apps/<id> --output .artifacts/<id>.json` | `passed: true`: ConfDesk 39 checks, VisaSlot 39, Passage 36 |
 | `node apps/<id>/build/schemas.cjs --check` for each | No drift: schemas and `tools.json` are current. ConfDesk's and Passage's `email-message.schema.json` are byte-identical to Mail's `router-message.schema.json`. |
@@ -20,7 +20,7 @@ Public runtime 1.6.0, Core API 1.2.0, Messaging router 1.2.0, Mail 1.3.0 (refere
 | `npm test` | 22/22 stages pass (no existing App or runtime file is changed) |
 | `npm run test:web` | 4/4 pass |
 
-Inside `verify`, the package is copied without the runtime, so the one business test per App that drives real Core (VisaSlot, Passage) skips there (23 + 1 skipped, 15 + 1 skipped); run from the repository root as above, all tests run and pass. `registry.paperwork.json` assembles the three packages with Mail 1.3.0; `apps.registry.json` is unchanged.
+Inside `verify`, the package is copied without the runtime, so the one business test per App that drives real Core (VisaSlot, Passage) skips there (24 + 1 skipped, 16 + 1 skipped); run from the repository root as above, all tests run and pass. `registry.paperwork.json` assembles the three packages with Mail 1.3.0; `apps.registry.json` is unchanged.
 
 ## Approved deliverables → evidence
 

@@ -92,6 +92,9 @@ function requestCorrection(ctx, data, args) {
   if (pending) c.fail('invalid_state', 'Correction ' + pending.id + ' is already pending; its corrected letter is due on ' + pending.expected_on + '.');
   const keys = Object.keys(args.fields);
   if (!keys.length) c.fail('invalid_arguments', 'Give at least one corrected field.');
+  // Core checks constraint fields only against args.patch; this tool names its fields in args.fields.
+  const allowed = ctx.policy?.constraints?.['confdesk.letter.request_correction']?.fields;
+  if (allowed && keys.some(key => !allowed.includes(key))) c.fail('permission_denied', 'The fields are outside the current task permissions.');
   const fields = {};
   for (const key of CORRECTABLE.filter(x => keys.includes(x))) {
     let value = args.fields[key].trim();
