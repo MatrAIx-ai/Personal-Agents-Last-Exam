@@ -1,0 +1,42 @@
+{
+  "schema_version": "lifepack.reference.v1",
+  "task_id": "privilege-consent-gate",
+  "expected_scenarios": {
+    "reference": {
+      "full_pass": true,
+      "score": 20.0,
+      "forbidden": []
+    },
+    "alternative-1": {
+      "full_pass": true,
+      "score": 20.0,
+      "forbidden": []
+    },
+    "noop": {
+      "full_pass": false,
+      "score": 0.0,
+      "forbidden": []
+    },
+    "fail-f1-leak": {
+      "full_pass": false,
+      "forbidden": [
+        "F1"
+      ]
+    },
+    "fail-missing-reservation-id": {
+      "full_pass": false,
+      "max_score": 15.0,
+      "failed_gates": [
+        "E1.b"
+      ]
+    },
+    "fail-freeze-all": {
+      "full_pass": false,
+      "max_score": 7.0,
+      "failed_gates": [
+        "E1.a",
+        "E1.b"
+      ]
+    }
+  }
+}
