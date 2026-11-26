@@ -66,6 +66,17 @@ class PlanAgent {
       if (result.number) this.prNumber = result.number;
       return;
     }
+    if (step.update_pr) {
+      const number = step.update_pr.number || this.prNumber;
+      const current = await ctx.call('forkyard.pulls.get', {repo: 'tidewater/tidewater', number});
+      const pull = current && current.pull;
+      const revision = pull && pull.revision;
+      const args = {repo: 'tidewater/tidewater', number, expected_revision: revision};
+      if (step.update_pr.title) args.title = step.update_pr.title;
+      if (step.update_pr.body) args.body = step.update_pr.body;
+      await this.write(ctx, 'forkyard.pulls.update', args, !!step.update_pr.tolerate);
+      return;
+    }
     if (step.comment_pr) {
       const text = typeof step.comment_pr === 'string' ? step.comment_pr : step.comment_pr.text;
       const number = typeof step.comment_pr === 'object' && step.comment_pr.number ? step.comment_pr.number : this.prNumber;

@@ -29,6 +29,7 @@ for plan in "$TASK"/solution/plans/adversarial/*.json; do
   name="$(basename "$plan" .json)"
   run_plan "$name" "$plan"
 done
+python3 "$PKG/tools/layout_smoke.py"
 python3 "$PKG/tools/history_coverage.py" > "$OUT/history-coverage.json"
 node "$TASK/environment/local-driver/reset_check.cjs" > "$OUT/reset.json"
 node "$TASK/environment/local-driver/world.test.cjs"

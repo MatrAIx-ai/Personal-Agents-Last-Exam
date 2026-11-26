@@ -3,7 +3,7 @@
 
 Forkyard and Postyard seeds are copied from the pinned checkouts under .deps.
 Postyard scenario policy gains the write tools this task grades. Forkyard
-timestamps before 2025-01-01 are moved forward one year in the task seed.
+timestamps before 2025-01-01 are moved forward 366 days in the task seed.
 The original stamps are kept in date-provenance.json, which is not loaded.
 """
 import base64
@@ -438,6 +438,7 @@ def rebase_forkyard_dates():
         return node
 
     visit(data, [])
+    preserve_parent_order(data, provenance)
     write(path, data)
     write(WS / "forkyard" / "date-provenance.json", {
         "schema": "rpr.forkyard-date-provenance.v1",
@@ -446,6 +447,35 @@ def rebase_forkyard_dates():
         "count": len(provenance),
         "rows": provenance,
     })
+
+
+def preserve_parent_order(data, provenance):
+    commits = data.get("commits") or []
+    by_sha = {commit.get("sha"): commit for commit in commits}
+    changed = True
+    guard = 0
+    while changed and guard < 24:
+        guard += 1
+        changed = False
+        for index, commit in enumerate(commits):
+            for parent_sha in commit.get("parents") or []:
+                parent = by_sha.get(parent_sha)
+                if not parent or not parent.get("committed_at") or not commit.get("committed_at"):
+                    continue
+                child_at = datetime.fromisoformat(commit["committed_at"])
+                parent_at = datetime.fromisoformat(parent["committed_at"])
+                if child_at < parent_at:
+                    loaded = (parent_at + timedelta(minutes=1)).isoformat()
+                    provenance.append({
+                        "path": f"commits.{index}.committed_at",
+                        "sha": commit.get("sha"),
+                        "parent": parent_sha,
+                        "original": commit["committed_at"],
+                        "loaded": loaded,
+                        "reason": "kept after its parent",
+                    })
+                    commit["committed_at"] = loaded
+                    changed = True
 
 
 def main():

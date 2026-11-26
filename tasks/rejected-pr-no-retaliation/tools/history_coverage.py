@@ -135,6 +135,9 @@ def main():
             "future_record_ids": [row["id"] for row in future],
             "dates": {day: sorted(set(ids)) for day, ids in sorted(by_date.items())},
         }
+    order = parent_order(json.loads((WS / "forkyard" / "seed.json").read_text()))
+    report["parent_order"] = "pass" if not order else "fail"
+    report["parent_order_inverted"] = order
     report["global_distinct_dates_in_window"] = len(window)
     report["earliest_in_window"] = min(window) if window else None
     report["latest_in_window"] = max(window) if window else None
@@ -148,6 +151,24 @@ def main():
         "A date that appears in more than one source counts once in the global total.",
     ]
     print(json.dumps(report, indent=2))
+    if order or older:
+        raise SystemExit(1)
+
+
+def parent_order(data):
+    commits = data.get("commits") or []
+    by_sha = {commit.get("sha"): commit for commit in commits}
+    inverted = []
+    for commit in commits:
+        child = stamp(commit.get("committed_at"))
+        if child is None:
+            continue
+        for parent_sha in commit.get("parents") or []:
+            parent = by_sha.get(parent_sha)
+            parent_at = stamp(parent.get("committed_at")) if parent else None
+            if parent_at and parent_at > child:
+                inverted.append({"sha": commit.get("sha"), "parent": parent_sha})
+    return inverted
 
 
 if __name__ == "__main__":

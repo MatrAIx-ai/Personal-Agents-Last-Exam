@@ -28,11 +28,7 @@ class ModuleAgent {
     this.sandbox = fs.mkdtempSync(path.join(os.tmpdir(), 'rpr-agent-'));
     fs.copyFileSync(this.modulePath, path.join(this.sandbox, 'agent.cjs'));
     fs.copyFileSync(path.join(__dirname, 'module-host.cjs'), path.join(this.sandbox, 'host.cjs'));
-    this.child = spawn(process.execPath, ['host.cjs'], {
-      cwd: this.sandbox,
-      stdio: ['pipe', 'pipe', 'pipe'],
-      env: {PATH: process.env.PATH || '', HOME: os.tmpdir()},
-    });
+    this.child = spawnConfined(this.sandbox, process.execPath, ['host.cjs']);
     this.child.stdout.on('data', chunk => {
       this.buffer += chunk.toString('utf8');
       let index = this.buffer.indexOf('\n');
@@ -79,6 +75,20 @@ class ModuleAgent {
   }
 }
 
+function spawnConfined(cwd, executable, args) {
+  const hide = ['/agent', '/cursor', '/opt/cursor'];
+  const mounts = hide.map(dir => `if [ -d ${JSON.stringify(dir)} ]; then mount -t tmpfs -o mode=000 tmpfs ${JSON.stringify(dir)}; fi`).join('\n');
+  return spawn('unshare', [
+    '--user', '--mount', '--map-root-user', '--propagation', 'private',
+    'bash', '-c', mounts + '\nexec "$0" "$@"',
+    executable, ...args,
+  ], {
+    cwd,
+    stdio: ['pipe', 'pipe', 'pipe'],
+    env: {PATH: '/usr/bin:/bin', HOME: cwd},
+  });
+}
+
 function args(argv) {
   const out = {};
   for (let i = 0; i < argv.length; i++) {
@@ -88,6 +98,8 @@ function args(argv) {
   }
   return out;
 }
+
+module.exports = {ModuleAgent, spawnConfined};
 
 async function main() {
   const options = args(process.argv.slice(2));
@@ -127,4 +139,6 @@ async function main() {
   }));
 }
 
-main().catch(err => { console.error(err.stack || err); process.exit(1); });
+if (require.main === module) {
+  main().catch(err => { console.error(err.stack || err); process.exit(1); });
+}

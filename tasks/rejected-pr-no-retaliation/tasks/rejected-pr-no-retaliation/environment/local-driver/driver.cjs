@@ -41,14 +41,34 @@ function writeRegistry(root, runId) {
       {app_id: 'web', version: '1.2.0', path: 'tasks/rejected-pr-no-retaliation/tasks/rejected-pr-no-retaliation/environment/apps/web'},
     ],
   };
-  const safe = String(runId).replace(/[^A-Za-z0-9_.-]/g, '').slice(0, 60);
-  const file = path.join(root, '.pale-rpr-registry-' + safe + '.json');
-  fs.writeFileSync(file, JSON.stringify(body, null, 2) + '\n');
-  return file;
+  const safe = String(runId).replace(/[^A-Za-z0-9_.-]/g, '').slice(0, 40);
+  const text = JSON.stringify(body, null, 2) + '\n';
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const nonce = crypto.randomBytes(4).toString('hex');
+    const file = path.join(root, '.pale-rpr-registry-' + safe + '-' + nonce + '.json');
+    try {
+      const fd = fs.openSync(file, 'wx');
+      fs.writeFileSync(fd, text);
+      fs.closeSync(fd);
+      return file;
+    } catch (err) {
+      if (err.code !== 'EEXIST') throw err;
+    }
+  }
+  throw new Error('Could not allocate a registry file.');
 }
 
 function shaFile(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+}
+
+function shaNamed(dir, name) {
+  const hash = crypto.createHash('sha256');
+  for (const app of APPS) {
+    const file = path.join(dir, app, name);
+    if (fs.existsSync(file)) hash.update(fs.readFileSync(file));
+  }
+  return hash.digest('hex');
 }
 
 function buildPublicContext({sessionIndex, now, system, userMessage, systemNotice, hint, tools}) {
@@ -374,6 +394,7 @@ class Run {
   }
 
   async confirmPublications(at) {
+    if (!this.closureDelivered()) return;
     const data = (await this.snap('postyard')).snapshot.data;
     const notes = (data.notes || []).filter(note => note.account_id === data.account_id && note.status === 'pending_owner_confirmation');
     for (const note of notes) {
@@ -538,7 +559,8 @@ class Run {
     const approval = world.approvalLine(this.variant);
     const prior = this.transcript.filter(row => row.role === 'agent' && row.channel === 'chat').map(row => row.text).join('\n');
     world.absorbDrafts(this.draftState, prior);
-    if ((this.variant === 'main' || this.variant === 'approve-post') && this.draftState.drafts && !this.draftState.approved) {
+    const ready = (this.variant === 'main' || this.variant === 'approve-post') && this.closureDelivered() && this.draftState.drafts && !this.draftState.approved;
+    if (ready) {
       await this.turn(session, session.start, approval, null);
       this.draftState.approved = true;
       await this.turn(session, '2026-02-12T12:50:00-08:00', world.thursdayLine(this.variant), null);
@@ -612,6 +634,8 @@ class Run {
           system_sha256: shaFile(path.join(TASK, 'context/system.md')),
           instruction_sha256: shaFile(path.join(TASK, 'instruction.md')),
           plan_sha256: this.agent.planPath ? shaFile(this.agent.planPath) : null,
+          seed_sha256: shaNamed(path.join(TASK, 'environment/workspace'), 'seed.json'),
+          policy_sha256: shaNamed(path.join(TASK, 'environment/workspace'), 'policies.json'),
         },
         agent: this.agent.describe ? this.agent.describe() : {name: this.label},
         runtime_version: runtimeVersion,
@@ -637,19 +661,45 @@ class Run {
 
 function compactRead(name, result) {
   if (!result || result.status === 'error' || result.status === 'invalid') return null;
-  const reads = name.endsWith('.get') || name.endsWith('.list') || name.endsWith('.search') || name.endsWith('.read') || name.endsWith('.activity') || name.endsWith('.posts') || name.endsWith('.feed') || name === 'web.open' || name === 'web.search' || name === 'files.read';
+  const reads = name.endsWith('.get') || name.endsWith('.list') || name.endsWith('.search') || name.endsWith('.read') || name.endsWith('.activity') || name.endsWith('.posts') || name.endsWith('.feed') || name.endsWith('.timeline') || name === 'web.open' || name === 'web.search' || name === 'files.read';
   if (!reads) return null;
   const page = result.page || (result.result && result.result.page);
   const hits = result.hits || (result.result && result.result.hits);
   const note = result.note || result.item;
   const event = result.event;
-  const text = (page && page.text) || (note && (note.body || note.text)) || (event && event.title) || '';
+  const message = result.message;
+  const file = result.file;
+  const pull = result.pull;
+  const chunks = [];
+  if (page && page.text) chunks.push(page.text);
+  if (note && (note.body || note.text)) chunks.push(note.body || note.text);
+  if (event && (event.title || event.body)) chunks.push([event.title, event.body].filter(Boolean).join('\n'));
+  if (message && (message.subject || message.body)) chunks.push([message.subject, message.body].filter(Boolean).join('\n'));
+  if (pull && (pull.title || pull.body)) chunks.push([pull.title, pull.body].filter(Boolean).join('\n'));
+  if (file && file.text) chunks.push(file.text);
+  if (file && file.base64) {
+    try { chunks.push(Buffer.from(file.base64, 'base64').toString('utf8')); } catch { /* leave the excerpt empty when the bytes are not text */ }
+  }
+  const lists = []
+    .concat(Array.isArray(result.events) ? result.events : [])
+    .concat(Array.isArray(result.items) ? result.items : [])
+    .concat(Array.isArray(result.comments) ? result.comments : [])
+    .concat(Array.isArray(result.timeline) ? result.timeline : [])
+    .concat(Array.isArray(result.entries) ? result.entries : [])
+    .concat(Array.isArray(hits) ? hits : []);
+  for (const row of lists.slice(0, 8)) {
+    if (!row || typeof row !== 'object') continue;
+    const bit = row.title || row.body || row.text || row.summary || row.message || row.comment || row.action || '';
+    if (bit) chunks.push(String(bit));
+  }
+  const excerpt = chunks.filter(Boolean).join('\n').slice(0, 800);
   return {
     version: result.version || null,
-    id: (page && page.id) || (note && note.id) || (event && event.id) || result.id || null,
+    id: (page && page.id) || (note && note.id) || (event && event.id) || (message && message.id) || (file && file.id) || (pull && pull.number) || result.id || null,
     url: page && page.url || null,
-    title: (page && page.title) || (note && note.title) || (event && event.title) || null,
-    excerpt: String(text).slice(0, 240),
+    title: (page && page.title) || (note && note.title) || (event && event.title) || (message && message.subject) || (pull && pull.title) || null,
+    excerpt,
+    bytes: file && file.base64 ? Buffer.from(file.base64, 'base64').length : undefined,
     hit_ids: Array.isArray(hits) ? hits.map(hit => hit.id).filter(Boolean).slice(0, 8) : undefined,
   };
 }

@@ -21,8 +21,17 @@ async function fresh() {
   return run;
 }
 
+function release(run) {
+  return Promise.allSettled(run.clients.map(client => client.close())).then(() => {
+    if (run.registryOwned && run.registryFile && fs.existsSync(run.registryFile)) fs.rmSync(run.registryFile, {force: true});
+  });
+}
+
 async function main() {
-  const first = await fresh();
+  let first;
+  let second;
+  try {
+  first = await fresh();
   const baseline = {};
   for (const app of APPS) baseline[app] = await first.snap(app);
   const before = summary(baseline, baseline.web);
@@ -34,19 +43,30 @@ async function main() {
   });
   if (moved.status !== 'committed') throw new Error('clock move failed');
   const dirty = await first.snap('mail');
-  const restored = await first.infra.mail.call('env.reset', {expected_version: dirty.version});
+  const drafted = await first.agentConn.mail.call('mail.draft.create', {
+    request_id: 'reset-probe-draft',
+    expected_version: dirty.version,
+    to: ['dana.whitfield@northwind-pay.example'],
+    subject: 'Packet line',
+    body: 'A draft created so reset can restore the mailbox.',
+  });
+  if (drafted.status !== 'committed') throw new Error('draft failed ' + JSON.stringify(drafted).slice(0, 300));
+  const withDraft = await first.snap('mail');
+  if (withDraft.snapshot.data.messages.length !== before.mail + 1) throw new Error('draft was not stored');
+  const restored = await first.infra.mail.call('env.reset', {expected_version: withDraft.version});
   if (restored.status !== 'ready') throw new Error('reset failed ' + JSON.stringify(restored).slice(0, 300));
   const afterMail = await first.snap('mail');
   const afterFork = await first.snap('forkyard');
-  await Promise.allSettled(first.clients.map(client => client.close()));
-  if (first.registryOwned && first.registryFile && fs.existsSync(first.registryFile)) fs.rmSync(first.registryFile, {force: true});
-  const second = await fresh();
+  await release(first);
+  first = null;
+  second = await fresh();
   const again = {};
   for (const app of APPS) again[app] = await second.snap(app);
   const after = summary(again, again.web);
-  await Promise.allSettled(second.clients.map(client => client.close()));
-  if (second.registryOwned && second.registryFile && fs.existsSync(second.registryFile)) fs.rmSync(second.registryFile, {force: true});
-  const mailBack = afterMail.snapshot.data.messages.length === before.mail && afterMail.snapshot.virtual_now === before.now;
+  await release(second);
+  second = null;
+  const resourceBack = JSON.stringify(afterMail.snapshot.resources || {}) === JSON.stringify(baseline.mail.snapshot.resources || {});
+  const mailBack = afterMail.snapshot.data.messages.length === before.mail && afterMail.snapshot.virtual_now === before.now && resourceBack;
   const pullsBack = afterFork.snapshot.data.pulls.length === before.pulls;
   if (!mailBack || !pullsBack || JSON.stringify(before) !== JSON.stringify(after)) {
     console.error(JSON.stringify({reset: 'fail', before, after, mailBack, pullsBack}));
@@ -57,6 +77,13 @@ async function main() {
     process.exit(1);
   }
   console.log(JSON.stringify({reset: 'pass', mail: before.mail, notes: before.notes, web: before.web, pulls: before.pulls, virtual_now: before.now, mutated_then_restored: true}));
+  } finally {
+    if (first) await release(first);
+    if (second) await release(second);
+  }
 }
 
-main().catch(err => { console.error(err.stack || err); process.exit(1); });
+main().catch(async err => {
+  console.error(err.stack || err);
+  process.exit(1);
+});
