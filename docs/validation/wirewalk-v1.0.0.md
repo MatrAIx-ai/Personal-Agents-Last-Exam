@@ -4,11 +4,11 @@ Owner: @byshail. App `wirewalk` 1.0.0 under `apps/wirewalk/`; public runtime 1.6
 - **Scenario dependencies:** the walkthrough alone also uses Mail 1.3.0 and Calendar 1.3.0 from the checkout.
 - **Plan:** it implements the plan in [PR #209](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/209), `proposals/environment/wirewalk.md` at `ef524fc1b1882ead45879862862b96b360ee8cfc`.
 - **Approval:** the assigned Track reviewer approved that plan for implementation on 2026-11-24: review state `APPROVED` at 01:27:28Z, and `/approve-plan` for that commit at 01:27:39Z. The proposal file is unchanged since that commit (blob `79ea5b93c3555b818290b114dd10fed3e669007f`).
-- **Commits:** the package is at commit `a24e61164c36e358536c8abab819979876bf8d29`. This report is added in the next commit, which changes only `docs/validation/`.
+- **Commits:** the package is at commit `108dedbe0661650ae95a7f755f58a18ac27ff88b`. This report is updated in the next commit, which changes only `docs/validation/`. The first submission was `3eb7219` (package `a24e611`); this revision answers the v1 review of 2026-11-26 with the [evaluation dataset](#evaluation-dataset-and-clock-cutoff-added-after-plan-approval-260) and a [statement on CI](#ci-and-the-base-validator-at-the-submitted-revision).
 
 This document records implementation evidence; it claims no acceptance.
 
-Checked on 2026-11-25 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 and v18.20.8. All data is synthetic. The runs used temporary directories and local stdio MCP, with no network, credentials or model API. Versions, the package hash and every count below are in [wirewalk/index.json](wirewalk/index.json), next to the raw reports.
+Checked on 2026-11-26 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 and v18.20.8. All data is synthetic. The runs used temporary directories and local stdio MCP, with no network, credentials or model API. Versions, the package hash and every count below are in [wirewalk/index.json](wirewalk/index.json), next to the raw reports.
 
 **Automated outcome: passed.** Independent reproduction, official CI on the implementation commit and human review are still to come.
 
@@ -16,15 +16,17 @@ Checked on 2026-11-25 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 an
 
 | Evidence | Result | What was exercised |
 | :--- | :--- | :--- |
-| App-only business tests, package alone | 22 passed, on both Node versions | A copy of `apps/wirewalk/` with nothing beside it, run with only `PATH` and `LANG` set. The tests call the real business functions through an App-only harness. The harness mirrors Core's event handling: the clock moves to the event's time before validation, and a failed event rolls back. Every result is checked against `tools.json`, and every refused call or event is checked to leave business data identical |
-| Event example and generated files | Passed, on both | `examples/run.cjs` from the package alone. `dev/build-fixtures.cjs` and `dev/build-contracts.cjs`, run in a copy, leave every committed file byte-identical: fixtures, events, task data, the image, both asset catalogs, dataset counts, schemas and `tools.json`. `npm run build:mail-wire`, which rewrites `examples/mail-wire.json` from a live walkthrough run, was not part of this check. The walkthrough instead asserts that the live wire message equals the committed file (W23) |
+| App-only business tests, package alone | 25 passed, on both Node versions | A copy of `apps/wirewalk/` with nothing beside it, run with only `PATH` and `LANG` set. The tests call the real business functions through an App-only harness. The harness mirrors Core's event handling: the clock moves to the event's time before validation, and a failed event rolls back. Every result is checked against `tools.json`, and every refused call or event is checked to leave business data identical |
+| Event example and generated files | Passed, on both | `examples/run.cjs` from the package alone. `dev/build-fixtures.cjs`, `dev/build-contracts.cjs` and `dev/build-dataset.cjs`, run in a copy, leave every committed file byte-identical: fixtures, events, task data, the image, both asset catalogs, dataset counts, schemas and `tools.json`. `npm run build:mail-wire`, which rewrites `examples/mail-wire.json` from a live walkthrough run, was not part of this check. The walkthrough instead asserts that the live wire message equals the committed file (W23) |
 | Public App verifier | 40 checks passed, on both ([node22](wirewalk/public-runtime.node22.json), [node18](wirewalk/public-runtime.node18.json)) | An isolated package copy, then real MCP: discovery without Infra tools; published input and output of the 6 tools the default `scenario` profile lists; the Agent denied all seven Infra operations; history and asset loading and rejection; the declared event with retry and conflict; reset; a separate run; and a restarted process |
 | CI job, reproduced | `wirewalk: PASS`, on both | `node runtime/ci/verify-submissions.cjs . <out> a4bce02…`, the command of the `public-runtime` job; it selected `wirewalk` only (`full: false`) |
 | Real-MCP walkthrough | 134 checks passed, 572 calls traced, on both ([node22](wirewalk/mcp-walkthrough.node22.json), [node18](wirewalk/mcp-walkthrough.node18.json)) | What the verifier does not exercise for this App: the three approved requests and the delivery proof, run with real Calendar, two real Mail instances (a sending mailbox and the user's inbox) and real Messaging. Each scenario runs under its own run ID: train eastbound and westbound; train eastbound with no grant and with a lost acknowledgement; wildfire; its delayed-turn variant; its cutoff variant and control; markets with two readers; and paging. It also covers both bookmark writes, replays, `idempotency_conflict`, `stale_version`, a concurrent write, rejected events, the task data rebuilt and loaded directly, and reset of data and clock per instance. Every call is joined to run, App, account, connection, request or event ID and Core version, and the retained Core audit rows join back to it |
+| Evaluation dataset over real MCP | 24 checks passed, on both ([node22](wirewalk/dataset-demo.node22.json), [node18](wirewalk/dataset-demo.node18.json)) | `examples/dataset-demo.cjs` loads `data/evaluation/seed.json` with its own `dataset.json` and asset catalog in one `env.load_seed` request (558,381 bytes), queries it at 2025-03-15, advances the clock to the dataset clock and to 2026-12-31 with `env.advance_time`, and queries again; nothing dated after the clock is visible and no record changes |
+| Dataset coverage | 645 distinct dates in 24 of 24 months ([coverage.json](wirewalk/coverage.json)) | `dev/coverage-report.cjs --json` over the delivered file; details below |
 | Repository suite | 22/22 stages passed, on both ([node22](wirewalk/reference-suite.node22.json), [node18](wirewalk/reference-suite.node18.json)) | The unchanged public suite (`npm test`) with this package present |
 | Independent base validator | Passed, 40 checks ([report](wirewalk/base-runtime.json)) | An unmodified export of `main` at `a4bce023953061483c41de5a287ba5e43f4a5648`, the PR's base, validated the candidate checkout with its own `runtime/ci/verify-submissions.cjs`. It selected `wirewalk` only |
-| Package identity | `86d3b53e8fd1e42d24d3b3b18e7b0f66ca59a15e267785bb1bfe34e235584754` | The same package hash appears in the two verifier reports, the base validator report and the two walkthrough reports. Git tree `1caec47c2eca0ebfc8b498365f2340ec996b44cb` |
-| Human review | Pending | Realism of the posts and threads; legibility of the rendered board image; that the accounts, people, places, agencies and companies are fictional |
+| Package identity | `e258a37469af69f1d4b743a32db15d0ec11ad47225ebeb16fc54584253535ebb` | The same package hash appears in the two verifier reports, the base validator report, the two walkthrough reports and the two dataset reports. Git tree `6b7c4245d3a27b50dafc4ec218097d9c0643ef68` |
+| Human review | Pending | Realism of the posts and threads, including the generated dataset; legibility of the rendered board image; that the accounts, people, places, agencies and companies are fictional |
 
 ## Reproduce
 
@@ -35,12 +37,14 @@ cd apps/wirewalk && npm test && npm run example && cd ../..
 npm run app:verify -- --app apps/wirewalk --output .artifacts/wirewalk.json
 node runtime/ci/verify-submissions.cjs . .artifacts/submissions a4bce023953061483c41de5a287ba5e43f4a5648
 node apps/wirewalk/examples/mcp-walkthrough.cjs > .artifacts/wirewalk-walkthrough.json
+node apps/wirewalk/examples/dataset-demo.cjs > .artifacts/wirewalk-dataset-demo.json
+node apps/wirewalk/dev/coverage-report.cjs
 npm test
 ```
 
 **Package alone.** Copy `apps/wirewalk/` to an empty directory and run `npm test` and `npm run example` there.
 
-**Generated files.** Run `npm run build:fixtures` and `npm run build:contracts` in a copy and compare it with the original.
+**Generated files.** Run `npm run build:fixtures`, `npm run build:contracts` and `npm run build:dataset` in a copy and compare it with the original.
 
 **Walkthrough dependencies.** The walkthrough needs the checkout's Mail and Calendar packages, and refuses to run unless both are 1.3.0 (W1).
 
@@ -74,6 +78,92 @@ Each row reads: starting state → action → observed result, then a control th
 | Events | `post.publish` adds an original, reply, quote or repost, public from the event time. The approved example applies verbatim, and the parent's reply count and conversation include it | Each of these is `invalid_event` with state unchanged: an unknown author or referenced post; a reference to a later post or to a repost; the wrong relationship field; text on a repost; a second repost by the same account; an already-published ID. A replayed event ID leaves one reply; changed content under it is `idempotency_conflict`. The Agent cannot inject posts | B4, B5; W4, W9–W10, W124–W126 |
 | Seeds, image, reset and records | `examples/task-data` (Dario, 44 posts) equals the minimal history plus the seven example events. It is rebuilt over MCP and also loads directly with its own dataset and catalog. Reset restores the loaded history, bookmarks and clock of that instance: after the train-east reset `p19` is unavailable again | Inconsistent seeds are refused (`invalid_seed`). A seed loaded before its latest record still loads, and its later posts stay hidden. Core refuses a bundle without the image bytes, or a post naming an uncatalogued image (`invalid_bundle`), with state unchanged. The PNG's pixels equal a render of its alt-text lines | B7, B19, B20, B22; W5–W6, W28, W30–W34, W98–W102, W130–W132 |
 | Evidence join and counting | **Audit join.** Each MCP client is named after its trace connection, and Core stores that name in each audit row. Every retained audit row joins one trace row by connection, tool, request or event ID and status: 21 of 21 for train-east, 29 of 29 for Dario. **Retention.** A snapshot is kept before each reset | Successful replays add no audit row; denials are separate rows with `decision: "deny"`. A logical write is counted once however often it is replayed | W29, W127–W129, W134 |
+
+## Evaluation dataset and clock cutoff (added after plan approval, #260)
+
+The plan was approved on 2026-11-24; #260 published the Environment data rule on 2026-11-25. This scope was added after the plan was approved, to meet the Environment data rule in `docs/submission-evidence.md` sections 3 and 4 and the reviewer's request for a separate, versioned two-year feed with a reproducible count.
+
+**Clock cutoff.** Agent tools show only records dated at or before `ctx.virtual_now`. Nothing is stored for the cutoff; later records appear when `env.advance_time` or an event moves the clock, and no record changes.
+
+| Record | Date field | Class | Before the clock reaches the date |
+| --- | --- | --- | --- |
+| `posts` | `published_at` | happened in the service | `not_found` by ID for reads and bookmark writes; absent from the feed, search, threads, relationship lists and counts, account post counts and cursors |
+| `accounts` | `joined_at` | happened in the service | `wirewalk.account.get` returns `not_found` |
+| `bookmarks` | `saved_at` | happened in the service | absent from `wirewalk.bookmarks.list`; the post shows `bookmarked: false`, `saved_at: null` |
+
+- **No scheduled fields.** Wirewalk has no scheduled or descriptive date fields.
+- **Bookmark visibility is new in this change.** Post and account visibility already worked this way.
+- **Agent add before a later seeded bookmark:** the agent's bookmark replaces the seeded one, leaving one record dated now.
+- **Agent remove before a later seeded bookmark:** returns `changed: false` and keeps the seeded record, which is the approved contract for a post that is not bookmarked.
+- **Events:** `post.publish` is unchanged.
+- **Schemas and error codes:** no tool schema, event schema or error code changed.
+- **Tests:** `tests/business.test.cjs` adds three tests:
+  - an early-clock regression on `examples/task-data` (Dario at 12:00 Monday: reads hide the later reposts and bookmarks, writes on later posts return `not_found` with data unchanged, and moving the clock to 18:00 reveals them with data unchanged);
+  - an agent bookmark that replaces a later seeded bookmark;
+  - the evaluation dataset at four clocks, with its `dataset.json` counts and sha256 checked.
+
+**Dataset.** `apps/wirewalk/data/evaluation/`, dataset `wirewalk-evaluation-2025-2026` version 1.0.0.
+
+- **Seed:** `seed.json` (its sha256 is recorded under the generated source's `generation.parameters.outputs` in `dataset.json`, which a test validates against the dataset schema), sha256 `2fb3a768836b166b4e728fa197e10e11fb857654fe06fe43df52096cdb2894be`, one record per line, 505,511 bytes as compact JSON.
+- **Records:** 23 accounts, 1,864 posts and 127 bookmarks of reader `ww-priya`. The 14 fixture accounts, 37 fixture posts and the fixture bookmark are included verbatim.
+- **Event posts:** the seven event posts in `examples/scenario.json` and `examples/wildfire-events.json` are not in the seed and still apply as `post.publish` events. Generated posts skip Oct. 10-12, 2026.
+- **Dataset clock:** `2026-10-10T21:10:00-07:00`, the fixture clock. The reader's bookmarks end at it. Public posts continue to 2026-12-31, and one account joins on 2026-10-14.
+- **Provenance:** every record is synthetic.
+  - 52 records are copied from the authored fixture (`authored`): 14 accounts, 37 posts and 1 bookmark.
+  - 1,962 are generated by `dev/build-dataset.cjs` (`generated`: template, PRNG seed 20261010).
+  - Of the 1,996 counted records, 38 come from the fixture and 1,958 are generated.
+  - All accounts, people, places, agencies and companies are invented, so there is no real November 2026 anchor.
+- **Counting method:** dates are counted in America/Los_Angeles on `posts.published_at`, `accounts.joined_at` and `bookmarks.saved_at`.
+
+| Measure | Value |
+| --- | --- |
+| Records / counted / excluded / invalid | 2,014 / 1,996 / 18 (accounts that joined before 2025) / 0 |
+| Global distinct dates | 645 (2025-01-01 to 2026-12-31), 24 of 24 months |
+| Distinct dates on or before the dataset clock | 577 |
+| Window days without a record / longest gap | 85 / 3 days (2026-02-05 to 2026-02-07) |
+| Records after the dataset clock | 253 posts, 1 account join, 0 bookmarks |
+| Identical texts / pairs at word 5-gram Jaccard >= 0.8 / highest | 0 / 0 / 0.588 |
+
+Per-source and per-month tables, the gap list and the exclusions come from the report command below.
+
+**Reproduce.** From `apps/wirewalk/`:
+
+```sh
+node dev/build-dataset.cjs          # rewrites data/evaluation/; byte-identical on rerun (checked on Node 22 and 18)
+node dev/coverage-report.cjs        # Markdown report; --json for the same numbers
+npm test                            # includes the dataset test: counts, sha256, four clocks, the seven events applied on top
+node examples/dataset-demo.cjs      # real MCP: env.load_seed in one request, queries at three clocks, env.advance_time
+```
+
+**Results.**
+
+| Command | Node 22.23.2 | Node 18.20.8 |
+| --- | --- | --- |
+| `npm test` | 25/25 | 25/25 |
+| `node runtime/cli.cjs verify --app apps/wirewalk` | passed, 40 checks | passed, 40 checks |
+| `npm run walkthrough` | passed, 134 checks (same checks as before this change) | passed, 134 checks |
+| `node apps/wirewalk/examples/dataset-demo.cjs` | 24 checks; load request 558,381 bytes | 24 checks; load request 558,381 bytes |
+
+All reports carry package sha256 `e258a37469af69f1d4b743a32db15d0ec11ad47225ebeb16fc54584253535ebb`, runtime 1.6.0 and Core API 1.2.0.
+
+The demo checks:
+
+- `env.load_seed` accepts the whole dataset with its own `dataset.json` (which follows `schemas/dataset.schema.json`; the seed's sha256 is under the generated source's `generation.parameters.outputs`) and its own asset catalog;
+- Core stores every record;
+- at 2025-03-15, at the dataset clock and at 2026-12-31 23:59, the feed total equals the posts published by then, and the next later post is `not_found`;
+- bookmarks show only those saved by then, and `cinder-fork-recovery` is `not_found` until Oct. 14;
+- at the dataset clock the feed opens on fixture post `p18` and the latest bookmark is `p01`;
+- each `env.advance_time` changes no record.
+
+**Added scope against the approval baseline:** the dataset and its three scripts, bookmark visibility by `saved_at`, and a larger package: 1,075,355 bytes of tracked files under `apps/wirewalk/`, up from 399,371, mostly `data/evaluation/seed.json`.
+
+## CI and the base validator at the submitted revision
+
+The v1 review asked for an independent validator or CI result at the exact submitted revision, or a statement of what is unavailable.
+
+- **Official PR CI: not available yet.** The fork's `App runtime validation` run for this revision has status `action_required`, waiting for a maintainer to approve it; until then GitHub reports no `public-runtime (18)`, `public-runtime (22)` or `base-runtime-compatibility` result for it. The first submission's head, `3eb7219`, changed only `docs/validation/` and got no run of that workflow; its only run is on `a24e611`, also waiting for approval.
+- **Independent base validator: available.** An unmodified `git archive` export of `main` at `a4bce023953061483c41de5a287ba5e43f4a5648`, the PR's base, ran its own `runtime/ci/verify-submissions.cjs` against this checkout and passed with 40 checks: [wirewalk/base-runtime.json](wirewalk/base-runtime.json). The command is under Reproduce.
+- **CI job command, reproduced locally:** `node runtime/ci/verify-submissions.cjs . <out> a4bce02…` printed `wirewalk: PASS` on Node 22 and 18.
 
 ## Plan and implementation
 
@@ -149,6 +239,7 @@ The package data:
 - **Task data.** `examples/task-data/` holds the second reader's seed (44 posts), binding, policies, dataset and asset catalog.
 - **Image.** One PNG, `assets/fennick-board-crop.png`: 605×125, 35,765 bytes, SHA-256 `990d12006ca3c6ea164261a7242db480af27cc1dab31f99ad2334150cc1a5c7d`. `tests/board-image.cjs` renders it from the two lines quoted in the post's alt text; in the story the rider posts it as a photo. A business test decodes it and compares its pixels with a fresh render of those lines (B7).
 - **Generator.** `dev/build-fixtures.cjs` rebuilds all of the above.
+- **Evaluation dataset.** `data/evaluation/` holds the 2025-2026 dataset described above (1,864 posts, 23 accounts, 127 bookmarks), rebuilt by `dev/build-dataset.cjs`.
 
 All text is original and fictional. Nothing was crawled, copied, translated or adapted, and every link is on the reserved `.example` domain. Provenance is in `contribution/dataset.json`: source `authored` (manual) for the text and `rendered-board` (procedural) for the image. Code, fixtures and the image are under the repository's MIT License. The code, fixtures and this report were prepared with AI assistance (Claude); the author reviews them and is accountable for them.
 
@@ -163,4 +254,4 @@ In `wirewalk/reference-suite.node*.json`, report paths inside stage commands wer
 - **Remaining:**
   - independent maintainer reproduction and acceptance;
   - official PR CI on the implementation commit (`public-runtime (18)`, `public-runtime (22)`, `base-runtime-compatibility`), which waits on maintainer approval of the fork's workflow run;
-  - human review of realism, of the image's legibility, and of the invented accounts, places, agencies and companies.
+  - human review of realism (including the generated dataset), of the image's legibility, and of the invented accounts, places, agencies and companies.
