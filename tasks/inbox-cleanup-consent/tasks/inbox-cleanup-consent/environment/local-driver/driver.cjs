@@ -5,12 +5,18 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const {Harness} = require('./harness.cjs');
+const {Harness, parseProgress} = require('./harness.cjs');
+const {loadTimeline} = require('../../language.cjs');
 
 const TASK = path.resolve(__dirname, '../..');
 const PACKAGE = path.resolve(TASK, '../..');
 
 function repoRoot(start) {
+  const configured = process.env.PALE_REPO_ROOT;
+  if (configured) {
+    if (fs.existsSync(path.join(configured, 'runtime/client.cjs')) && fs.existsSync(path.join(configured, 'apps.registry.json'))) return configured;
+    throw new Error('PALE_REPO_ROOT does not contain the runtime');
+  }
   let dir = start;
   while (dir !== path.dirname(dir)) {
     if (fs.existsSync(path.join(dir, 'runtime/client.cjs')) && fs.existsSync(path.join(dir, 'apps.registry.json'))) return dir;
@@ -86,8 +92,20 @@ class Driver {
     this.runId = options.runId;
     this.agent = options.agent;
     this.script = readJson(path.join(TASK, 'context/user/script.json'));
+    this.timeline = loadTimeline(fs.readFileSync(options.timeline || process.env.PALE_TIMELINE || path.join(TASK, 'context/timeline.yaml'), 'utf8'));
+    for (const [key, id] of [['session1', 's1'], ['approval', 's1-approval'], ['session2', 's2'], ['session3', 's3']]) {
+      if (!this.timeline[id] || !this.timeline[id].at) throw new Error('timeline missing ' + id);
+      this.script.times[key] = this.timeline[id].at;
+    }
     this.systemLine = fs.readFileSync(path.join(TASK, 'environment/interface/system.txt'), 'utf8').trim();
     this.hint = this.hinted ? readJson(path.join(TASK, 'tests/hint-texts.json'))[this.memory] : null;
+    this.faultReads = options.faultReads || 0;
+    this.readFaults = 0;
+    this.transportFailure = false;
+    this.pending = [];
+    this.deliveries = [];
+    this.openedSession = {};
+    this.requestVersions = new Map();
     this.stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pale-icc-'));
     this.clients = [];
     this.seq = 0;
@@ -131,12 +149,12 @@ class Driver {
         notes: await this.open('notes', 'agent')
       };
       const instruction = fs.readFileSync(path.join(TASK, 'instruction.md'), 'utf8').trim();
-      await this.beginSession('s1', this.script.times.session1, instruction, 'opening');
+      await this.beginSession('s1', this.script.times.session1, instruction, 'opening', this.timeline.s1.event_id);
       await this.play('s1');
       const s2text = this.variant === 'no-reply' ? this.script.messages.no_reply : this.script.messages.session2;
-      await this.beginSession('s2', this.script.times.session2, s2text, 'session2');
+      await this.beginSession('s2', this.script.times.session2, s2text, 'session2', this.timeline.s2.event_id);
       await this.play('s2');
-      await this.beginSession('s3', this.script.times.session3, this.script.messages.session3, 'session3');
+      await this.beginSession('s3', this.script.times.session3, this.script.messages.session3, 'session3', this.timeline.s3.event_id);
       await this.play('s3');
       return this.finish();
     } finally {
@@ -216,26 +234,64 @@ class Driver {
     return {record, inbox, virtual_now: snap.snapshot.virtual_now};
   }
 
-  async beginSession(id, at, text, tag) {
+  async beginSession(id, at, text, tag, eventId) {
     await this.advance(at, tag);
     const shot = await this.capture(id + '_start');
+    let measured = null;
+    try {
+      const {countMessages} = require(path.join(PACKAGE, 'tools/tokenize.cjs'));
+      measured = countMessages(shot.inbox.map(projectMessage));
+    } catch (err) {
+      measured = null;
+    }
     this.tokenMeasurements.push({
       label: id + '_start',
       virtual_time: shot.virtual_now,
       inbox_count: shot.inbox.length,
-      tokens: tokenCount(shot.inbox),
-      method: 'ceil(JSON.stringify(projected inbox messages).length / 4)'
+      tokens: measured ? measured.o200k_base : tokenCount(shot.inbox),
+      character_tokens: tokenCount(shot.inbox),
+      o200k_base: measured && measured.o200k_base,
+      cl100k_base: measured && measured.cl100k_base,
+      method: measured ? 'o200k_base on JSON.stringify(projected inbox messages)' : 'ceil(JSON.stringify(projected inbox messages).length / 4)'
     });
     this.harness.setSession(id);
     this.turn += 1;
-    this.event({type: 'user', session_id: id, text, kind: tag === 'opening' ? 'opening' : tag, turn: this.turn});
+    this.event({type: 'user', session_id: id, text, kind: tag === 'opening' ? 'opening' : tag, turn: this.turn, event_id: eventId});
   }
 
   event(fields) {
     this.seq += 1;
     const row = {seq: this.seq, virtual_time: this.virtualNow, turn: this.turn, ...fields};
     this.events.push(row);
+    if (fields.type === 'user') this.pending.push({type: 'user', text: fields.text, kind: fields.kind || null, session_id: fields.session_id});
     return row;
+  }
+
+  visibleHistory() {
+    const history = readJson(path.join(TASK, 'context/user/history.json'));
+    return (history.records || []).filter((row) => {
+      if (row.setting && row.setting !== this.setting) return false;
+      if (this.memory === 'memory') return row.visibility === 'agent' || row.visibility === 'memory';
+      return row.visibility === 'agent';
+    }).map((row) => ({id: row.id, at: row.at, role: row.role, text: row.text}));
+  }
+
+  nextContext(session) {
+    const first = !this.openedSession[session];
+    this.openedSession[session] = true;
+    const system = this.memory === 'notes' ? this.systemLine : '';
+    const hint = first && this.hinted ? this.hint : null;
+    const history = first ? this.visibleHistory() : null;
+    const observations = this.pending.splice(0, this.pending.length);
+    const ctx = {session_id: session, system, hint, history, observations};
+    this.deliveries.push({
+      session_id: session,
+      system,
+      hint,
+      history_ids: history ? history.map((row) => row.id) : null,
+      observations: observations.map((row) => ({type: row.type, kind: row.kind || null, name: row.name || null, status: row.status || null}))
+    });
+    return ctx;
   }
 
   async play(session) {
@@ -243,7 +299,7 @@ class Driver {
     while (guard < 500) {
       guard += 1;
       if (session === 's2' && this.harness.s2Turns >= this.script.session2_turn_cap) break;
-      const step = this.agent.next(session);
+      const step = this.agent.next(this.nextContext(session));
       if (!step) break;
       if (step.call) await this.tool(step.call, step.args || {}, session);
       if (step.moves) {
@@ -260,7 +316,8 @@ class Driver {
         if (decision.advance) await this.advance(decision.advance, 'approval');
         if (decision.reply) {
           this.turn += 1;
-          const row = this.event({type: 'user', session_id: session, text: decision.reply, kind: decision.kind, turn: this.turn});
+          const eventId = decision.kind === 'approval' ? this.timeline['s1-approval'].event_id : decision.kind === 'stop' ? this.timeline['s1-stop'].event_id : undefined;
+          const row = this.event({type: 'user', session_id: session, text: decision.reply, kind: decision.kind, turn: this.turn, event_id: eventId});
           if (decision.kind === 'stop') await this.noteStop(row);
         } else {
           this.turn += 1;
@@ -272,13 +329,13 @@ class Driver {
 
   async say(text, session) {
     const row = this.event({type: 'agent', session_id: session, text, ends_turn: false});
-    if (/(\d+)\s+of\s+\d+\s+archived/i.test(text)) {
+    if (parseProgress(text)) {
       const shot = await this.capture('progress_' + row.seq, {folders: false, store: false});
       this.progressSnapshots.push({seq: row.seq, virtual_time: this.virtualNow, counts: shot.record.counts});
     }
     const injected = this.harness.onSay(text);
     if (injected) {
-      const stopRow = this.event({type: 'user', session_id: session, text: injected.text, kind: injected.kind, turn: this.turn});
+      const stopRow = this.event({type: 'user', session_id: session, text: injected.text, kind: injected.kind, turn: this.turn, event_id: this.timeline['s1-stop'].event_id});
       if (injected.kind === 'stop') await this.noteStop(stopRow);
     }
   }
@@ -290,49 +347,61 @@ class Driver {
 
   async tool(name, args, session) {
     const app = name.startsWith('notes.') ? 'notes' : 'mail';
-    const writes = new Set(['mail.move', 'mail.trash', 'mail.flags.update', 'notes.create', 'notes.update', 'notes.flags']);
+    const writes = new Set(['mail.move', 'mail.trash', 'mail.flags.update', 'notes.create', 'notes.update', 'notes.flags', 'mail.send', 'mail.draft.create', 'mail.draft.update']);
+    const reads = new Set(['mail.search', 'mail.get', 'notes.list', 'notes.get']);
     const callArgs = {...args};
     if (writes.has(name)) {
-      callArgs.expected_version = this.version[app];
-      callArgs.request_id = 'r' + (this.seq + 1);
+      const key = callArgs.request_id ? app + ':' + callArgs.request_id : null;
+      if (key && this.requestVersions.has(key)) callArgs.expected_version = this.requestVersions.get(key);
+      else {
+        if (callArgs.expected_version == null) callArgs.expected_version = this.version[app];
+        if (!callArgs.request_id) callArgs.request_id = 'r' + (this.seq + 1);
+        this.requestVersions.set(app + ':' + callArgs.request_id, callArgs.expected_version);
+      }
     }
     let result;
     let error = null;
+    let transport = false;
     try {
+      if (this.faultReads && reads.has(name) && this.readFaults < this.faultReads) {
+        this.readFaults += 1;
+        throw new Error('transport failure');
+      }
       result = await this.model[app].call(name, callArgs);
     } catch (err) {
+      transport = true;
+      this.transportFailure = true;
       error = String(err.message || err);
-      result = {status: 'error', message: error};
+      result = {status: 'transport_error', transport_error: true, message: error};
     }
     if (result && result.version) this.version[app] = result.version;
     this.harness.onTool(name, callArgs, result);
+    const compact = compactResult(name, result);
     this.event({
       type: 'tool',
       session_id: session,
       name,
       arguments: callArgs,
-      result: compactResult(name, result),
+      result: compact,
       status: result && result.status,
-      error
+      error,
+      transport_error: transport
     });
+    this.pending.push({type: 'tool', name, status: result && result.status, transport_error: transport, result: compact});
     if (this.seq % 50 === 0) process.stderr.write(session + ' seq ' + this.seq + '\n');
   }
 
   agentContext() {
-    const history = readJson(path.join(TASK, 'context/user/history.json'));
-    const visible = (history.records || []).filter((row) => {
-      if (row.setting && row.setting !== this.setting) return false;
-      if (this.memory === 'memory') return row.visibility === 'agent' || row.visibility === 'memory';
-      return row.visibility === 'agent';
-    }).map((row) => ({id: row.id, at: row.at, role: row.role, text: row.text}));
+    const history = this.visibleHistory();
     const system = this.memory === 'notes' ? this.systemLine : '';
     const prompt = this.hint ? (system ? system + '\n' + this.hint : this.hint) : system;
     return {
-      keys: ['instruction', 'system', 'persona', 'goals', 'history'],
+      keys: ['instruction', 'system', 'history'],
       system,
       prompt,
-      history_ids: visible.map((row) => row.id),
-      excluded: ['rubrics', 'rules', 'reference', 'hints_during_unhinted', 'labels', 'script', 'future_events']
+      history_ids: history.map((row) => row.id),
+      delivered: true,
+      excluded: ['rubrics', 'rules', 'reference', 'hints_during_unhinted', 'labels', 'script', 'goals', 'timeline', 'future_events']
     };
   }
 
@@ -373,6 +442,15 @@ class Driver {
       progress_snapshots: this.progressSnapshots,
       events: this.events,
       tool_calls: toolCalls,
+      deliveries: this.deliveries,
+      complete: !this.transportFailure,
+      triggering_events: {
+        s1: this.timeline.s1.event_id,
+        approval: this.timeline['s1-approval'].event_id,
+        stop: this.timeline['s1-stop'].event_id,
+        s2: this.timeline.s2.event_id,
+        s3: this.timeline.s3.event_id
+      },
       runner: {
         kind: 'stand-in',
         adapter: 'tasks/inbox-cleanup-consent/tasks/inbox-cleanup-consent/environment/local-driver',

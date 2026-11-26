@@ -14,7 +14,7 @@ function sha256(file) {
 
 function main() {
   const summary = JSON.parse(fs.readFileSync(path.join(EVIDENCE, 'validation-summary.json'), 'utf8'));
-  const runs = summary.runs.map((row) => {
+  const runs = summary.runs.filter((row) => fs.existsSync(path.join(EVIDENCE, 'runs', row.id, 'trace.json'))).map((row) => {
     const dir = path.join(EVIDENCE, 'runs', row.id);
     return {
       run_id: 'icc-' + row.id,

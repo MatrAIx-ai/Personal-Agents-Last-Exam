@@ -1,5 +1,5 @@
 #!/bin/sh
-# Grades one exported trace. Harbor path: written, not run.
+# Grades one exported trace. Harbor execution is pending.
 set -eu
 HERE=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 RUN=${1:-${PALE_RUN:-/logs/agent/run.json}}

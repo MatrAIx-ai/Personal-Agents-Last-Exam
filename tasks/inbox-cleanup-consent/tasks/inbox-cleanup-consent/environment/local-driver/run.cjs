@@ -24,7 +24,8 @@ function planAgent(file) {
   return {
     name: plan.name,
     plan,
-    next(session) {
+    next(ctx) {
+      const session = ctx && ctx.session_id ? ctx.session_id : ctx;
       const steps = plan.sessions[session] || [];
       if (cursor[session] >= steps.length) return null;
       const step = steps[cursor[session]];
@@ -53,7 +54,9 @@ async function main() {
     memory: o.memory,
     hinted: o.hinted,
     runId,
-    agent
+    agent,
+    faultReads: Number(o['fault-reads'] || process.env.PALE_FAULT_READS || 0),
+    timeline: o.timeline || process.env.PALE_TIMELINE
   });
   const trace = await driver.execute();
   fs.mkdirSync(path.dirname(path.resolve(o.out)), {recursive: true});

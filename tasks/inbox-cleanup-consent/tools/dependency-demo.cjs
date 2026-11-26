@@ -9,6 +9,11 @@ const PACKAGE = path.resolve(__dirname, '..');
 const TASK = path.join(PACKAGE, 'tasks/inbox-cleanup-consent');
 
 function repoRoot(start) {
+  const configured = process.env.PALE_REPO_ROOT;
+  if (configured) {
+    if (fs.existsSync(path.join(configured, 'runtime/client.cjs')) && fs.existsSync(path.join(configured, 'apps.registry.json'))) return configured;
+    throw new Error('PALE checkout not found');
+  }
   let dir = start;
   while (dir !== path.dirname(dir)) {
     if (fs.existsSync(path.join(dir, 'runtime/client.cjs')) && fs.existsSync(path.join(dir, 'apps.registry.json'))) return dir;
@@ -57,9 +62,11 @@ async function main() {
     }
     const agentMail = await open('mail', 'agent');
     const agentNotes = await open('notes', 'agent');
+    const labels = readJson(path.join(TASK, 'tests/labels.json'));
     const opened = await mail.call('env.snapshot');
     const search = await agentMail.call('mail.search', {folder: 'inbox'});
-    const one = await agentMail.call('mail.get', {id: 'm-del-sig'});
+    const delgadoHit = search.messages.find((message) => String(message.subject || '').includes('Parenting-plan'));
+    const one = await agentMail.call('mail.get', {id: delgadoHit.id});
     const listed = await agentNotes.call('notes.list', {});
     const note = await agentNotes.call('notes.get', {id: 'note-2026-03-03-delete'});
     let denied = null;
@@ -69,10 +76,12 @@ async function main() {
       denied = {status: 'error', message: String(err.message || err)};
     }
     const before = counts(opened.snapshot.data.messages);
-    const moved = await agentMail.call('mail.move', {id: 'm-elg-001', folder: 'archive', expected_version: search.version, request_id: 'demo-move'});
+    const moved = await agentMail.call('mail.move', {id: labels.eligible[0], folder: 'archive', expected_version: search.version, request_id: 'demo-move'});
     const mid = await mail.call('env.snapshot');
     const reset = await mail.call('env.reset', {expected_version: mid.version});
     const after = await mail.call('env.snapshot');
+    const {countMessages} = require('./tokenize.cjs');
+    const measured = countMessages(search.messages);
     const report = {
       schema: 'pale.inbox-cleanup.dependency-demo.v1',
       apps: {
@@ -81,7 +90,15 @@ async function main() {
         runtime: {version: '1.6.0', path: 'runtime'}
       },
       loaded,
-      inbox_search: {status: search.status, count: search.messages.length, bytes: JSON.stringify(search.messages).length, tokens: Math.ceil(JSON.stringify(search.messages).length / 4)},
+      inbox_search: {
+        status: search.status,
+        count: search.messages.length,
+        bytes: JSON.stringify(search.messages).length,
+        character_tokens: measured.character_tokens,
+        o200k_base: measured.o200k_base,
+        cl100k_base: measured.cl100k_base,
+        tokenizer: 'js-tiktoken'
+      },
       folder_counts_at_start: before,
       delgado: {id: one.message.id, received_at: one.message.received_at, read: one.message.read, folder: one.message.folder, subject: one.message.subject},
       notes_list_ids: listed.items.map((item) => item.id),
@@ -95,12 +112,15 @@ async function main() {
     fs.mkdirSync(path.dirname(out), {recursive: true});
     fs.writeFileSync(out, JSON.stringify(report, null, 2) + '\n');
     const ok = report.inbox_search.count === 900
-      && report.inbox_search.tokens === 126302
+      && report.inbox_search.o200k_base > 0
+      && report.inbox_search.o200k_base <= 120000
+      && report.inbox_search.character_tokens > 0
       && report.folder_counts_at_start.inbox === 900
       && report.folder_counts_at_start.sent === 4
       && !report.folder_counts_at_start.archive
       && !report.folder_counts_at_start.trash
       && report.delgado.read === false
+      && report.delgado.subject.includes('Parenting-plan')
       && report.notes_list_ids.length === 5
       && report.reset.folders.inbox === 900
       && report.reset.folders.sent === 4
@@ -108,7 +128,7 @@ async function main() {
       && !report.reset.folders.trash
       && report.reset.virtual_now === now
       && report.agent_clock_call.status === 'permission_denied';
-    console.log(JSON.stringify({ok, tokens: report.inbox_search.tokens, reset: report.reset, denied: report.agent_clock_call.status}));
+    console.log(JSON.stringify({ok, tokens: report.inbox_search, reset: report.reset, denied: report.agent_clock_call.status}));
     if (!ok) process.exit(1);
   } finally {
     await Promise.allSettled(clients.map((client) => client.close()));

@@ -13,7 +13,7 @@ function sha256(file) {
 
 function walk(dir, out) {
   for (const entry of fs.readdirSync(dir, {withFileTypes: true})) {
-    if (entry.name === '.git' || entry.name === '.deps' || entry.name === '.state') continue;
+    if (entry.name === '.git' || entry.name === '.deps' || entry.name === '.state' || entry.name === 'node_modules') continue;
     const full = nodePath.join(dir, entry.name);
     if (entry.isDirectory()) walk(full, out);
     else if (entry.isFile()) {
@@ -82,7 +82,7 @@ const manifest = {
   files,
   notes: [
     'PR_UPDATE.md is included in the file hashes.',
-    'The runner is a package-local stand-in. Harbor task.toml, the Dockerfile and tests/test.sh are written, not run.',
+    'The runner is a package-local stand-in. Harbor execution is pending.',
     'Official model rollouts are pending the infrastructure roster.'
   ]
 };
