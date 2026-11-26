@@ -1,6 +1,6 @@
 {
   "schema": "rainshadow.v1-evidence-index",
-  "recorded_at": "2026-11-24T19:28:13Z",
+  "recorded_at": "2026-11-26T19:58:05Z",
   "app_id": "rainshadow",
   "app_version": "1.0.0",
   "runtime_version": "1.6.0",
@@ -8,9 +8,9 @@
   "mail_version": "1.3.0",
   "proposal_commit": "d08ce78fd3b8939c554dcf4e6f8dff683d906943",
   "proposal_status": "plan approved for implementation (/approve-plan on PR #123, recorded 2026-11-22T22:24:35Z); the proposal file is unchanged since that commit",
-  "public_runtime_base_commit": "ae889d2cbbfc72242fc5e70b877f3f2a2f029618",
-  "app_package_sha256": "ec9b7e0dda7e50de78eef2995fffb271f969e0d89fe994ff43d3031e397f1032",
-  "app_package_git_tree": "3e9b43a1fa1f9c7ebe41281ae6c3abbabbf2b6a6",
+  "public_runtime_base_commit": "6933c430942c64f94874083815829e4a4b20920a",
+  "app_package_sha256": "a215e2c9423d6f4c853b371b82a68b10ca46780d5992cf72e875777f3d18e439",
+  "app_package_git_tree": "ffe1bc22bd003d0d38597353b1e0fd44d51115a3",
   "package_hash_agrees_in": [
     "public-runtime.node22.json",
     "public-runtime.node18.json",
@@ -22,7 +22,7 @@
     "22": "v22.23.4",
     "18": "v18.20.8"
   },
-  "tested_os": "Linux 6.18.44-fc-v819 x86_64",
+  "tested_os": "Linux 6.18.44-fc-v880 x86_64",
   "interface": {
     "operations": 21,
     "read": 13,
@@ -32,28 +32,28 @@
   "checks": {
     "standalone_business": {
       "node22": {
-        "tests": 24,
-        "pass": 22,
+        "tests": 25,
+        "pass": 23,
         "fail": 0,
         "skipped": 2
       },
       "node18": {
-        "tests": 24,
-        "pass": 22,
+        "tests": 25,
+        "pass": 23,
         "fail": 0,
         "skipped": 2
       }
     },
     "business_with_runtime": {
       "node22": {
-        "tests": 24,
-        "pass": 24,
+        "tests": 25,
+        "pass": 25,
         "fail": 0,
         "skipped": 0
       },
       "node18": {
-        "tests": 24,
-        "pass": 24,
+        "tests": 25,
+        "pass": 25,
         "fail": 0,
         "skipped": 0
       }
@@ -87,13 +87,20 @@
     },
     "shared_contract_copies": "runtime/sdk/sync.cjs --check and runtime/build-contracts.cjs --check passed on both Node versions",
     "web_pages_in_browser": {
-      "node22": 53,
-      "node18": 53
+      "node22": 61,
+      "node18": 61
+    },
+    "dataset_regeneration": "dev/dataset.cjs --check and dev/coverage.cjs --check passed from the package alone on both Node versions",
+    "dataset_integration": {
+      "node22": 19,
+      "node18": 19
     },
     "browser": "153.0.8010.12"
   },
   "reports": [
     "base-runtime.json",
+    "dataset-integration.node18.json",
+    "dataset-integration.node22.json",
     "mail-integration.node18.json",
     "mail-integration.node22.json",
     "mcp-integration.node18.json",
@@ -116,5 +123,35 @@
     "Independent maintainer reproduction and acceptance.",
     "Official PR CI (public-runtime 18 and 22, base-runtime-compatibility) on the implementation commit.",
     "Human review of realism and of the invented names."
-  ]
+  ],
+  "evaluation_dataset": {
+    "path": "apps/rainshadow/datasets/full-window",
+    "dataset_id": "rainshadow-full-window",
+    "version": "1.0.0",
+    "clock": "2026-12-31T20:00:00-07:00",
+    "seed_sha256": "e1f2d87f6d9c8a603a44f7a664808fe719dda4fac87c2cb817917973d9ec0cfa",
+    "seed_bytes": 1319281,
+    "records_loaded": 692,
+    "time_zone": "America/Denver",
+    "window": {
+      "start": "2025-01-01",
+      "end": "2026-12-31",
+      "days": 730
+    },
+    "distinct_dates": {
+      "actions_only": 310,
+      "all_history": 310
+    },
+    "provenance": "synthetic",
+    "coverage_report": "datasets/full-window/coverage.json"
+  },
+  "web_evidence": {
+    "index": "apps/rainshadow/evidence/README.md",
+    "steps": 36,
+    "sequences": 7,
+    "browser_checks": 61,
+    "package_sha256_without_evidence": "2a90d37e3ebaea1a9d54eea36e9c04ef1f3d45b770de5444bc67f1ff48574778",
+    "browser": "Chrome 153.0.8010.12, headless",
+    "node": "v22.23.4"
+  }
 }
