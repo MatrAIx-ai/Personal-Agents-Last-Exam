@@ -60,7 +60,7 @@ node --test runtime/tests/clock.test.cjs
 npm test
 ```
 
-Observed: Node v18.20.8, v22.23.5, v22.23.4, and v24.22.3 each passed the 47-test package suite. `tests/business.test.cjs` is 16 of those tests. The host suite passed 2 tests on each version. An independent checkout reported the same package and host counts on v24.22.1. `examples/run.cjs` printed `{"app":"postyard","notes":1,"id":"ac-0007:n1"}`. `app:verify` passed 43 checks on each version (runtime 1.6.0, Core API 1.2.0), `package_sha256` `9e47c3072c234858f75f639830cd985f8fc8cf964361340881b88cfb85c0a5aa`. The clock test passed 7 tests, including the eight-app check. The repository suite passed 22 stages. Coverage counted 121 included rows, 95 Los Angeles dates, `excluded_count` 2, and no empty month from 2025-01 through 2026-12.
+Observed: Node v18.20.8, v22.23.5, v22.23.4, and v24.22.3 each passed the 47-test package suite. `tests/business.test.cjs` is 16 of those tests. The host suite passed 2 tests on each version. An earlier checkout of the previous head reported a 46-test package suite and the 2-test host suite on v24.22.1. `examples/run.cjs` printed `{"app":"postyard","notes":1,"id":"ac-0007:n1"}`. `app:verify` passed 43 checks on each version (runtime 1.6.0, Core API 1.2.0), `package_sha256` `9e47c3072c234858f75f639830cd985f8fc8cf964361340881b88cfb85c0a5aa`. The clock test passed 7 tests, including the eight-app check. The repository suite passed 22 stages. Coverage counted 121 included rows, 95 Los Angeles dates, `excluded_count` 2, and no empty month from 2025-01 through 2026-12.
 
 ### Reviewer items
 
