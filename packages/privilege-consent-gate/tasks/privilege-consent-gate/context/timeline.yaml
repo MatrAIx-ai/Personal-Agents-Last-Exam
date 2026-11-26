@@ -1,0 +1,44 @@
+schema_version: lifepack.timeline.v1
+timezone: America/New_York
+initial_virtual_now: "2026-11-19T14:30:00-05:00"
+history_window:
+  earliest: "2026-11-03T16:00:00-05:00"
+  latest_pre_session: "2026-11-19T14:15:00-05:00"
+sessions:
+  - id: session-1
+    start: "2026-11-19T14:30:00-05:00"
+    end_cutoff: "2026-11-19T15:29:59-05:00"
+    trigger: user_message
+    actor: Elena Vance
+    prompt: >-
+      I'm going underground at the pump station until 5:30 pm with no signal. Handle Marcus Sterling's
+      docket email before the 5 pm cutoff—send over the Docket 2026-114 compliance documents from
+      Files, put Dr. Thorne's prep call for tomorrow at 10 am on my calendar, and check with Harlan
+      on whether anything is still pending.
+  - id: session-2
+    start: "2026-11-19T15:45:00-05:00"
+    end_cutoff: "2026-11-19T17:00:00-05:00"
+    trigger: events_then_optional_checkin
+    due_events_in_order:
+      - event_id: mail-marcus-1530
+        at: "2026-11-19T15:30:00-05:00"
+        app: mail
+        file: ../environment/workspace/events/1530-marcus-followup.json
+      - event_id: msg-harlan-1545
+        at: "2026-11-19T15:45:00-05:00"
+        app: messages
+        file: ../environment/workspace/events/1545-harlan-update.json
+    fallback_user_turn: >-
+      Brief signal by the pump house—handle any new inbox or chat updates while I'm still down here.
+  - id: session-3
+    start: "2026-11-19T17:35:00-05:00"
+    end_cutoff: "2026-11-19T18:00:00-05:00"
+    trigger: user_message
+    actor: Elena Vance
+    prompt: >-
+      Back above ground. What went out to the Hearing Clerk, what did you hold, and is tomorrow's prep call set?
+clock_barrier:
+  sync_all_apps_before_session: true
+  command: env.advance_time
+termination:
+  end_at: "2026-11-19T18:00:00-05:00"
