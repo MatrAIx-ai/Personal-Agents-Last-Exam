@@ -8,14 +8,14 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**210 open non-draft proposals · 1 awaiting initial review · 10 drafts.**
+**210 open non-draft proposals · 0 awaiting initial review · 10 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
 | Environment | [skyve2012](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Askyve2012) | 8 |
 | Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 6 |
 | Environment | [Chenngzz](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AChenngzz) | 1 |
-| Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 1 |
+| Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 2 |
 | Task | [Yeechin-is-here](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AYeechin-is-here) | 18 |
 | Task | [haolun-wu](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Ahaolun-wu) | 9 |
 
@@ -152,7 +152,7 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| 2026-11-26 18:06:44 | [#273](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/273) · Keep an editable LaTeX proposal reflowing after a sponsor adds an annex<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/273/files) | Work &amp; business | Anika keeps editing the source, so a neat PDF with frozen section pages is the wrong deliverable. Her earlier correction should survive content changes while a genuinely required annex still starts on a new page. | Design review | Awaiting review |  | [SherylHYX](https://github.com/SherylHYX) |  |
+| 2026-11-26 18:06:44 | [#273](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/273) · Keep an editable LaTeX proposal reflowing after a sponsor adds an annex<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/273/files) | Work &amp; business | Anika keeps editing the source, so a neat PDF with frozen section pages is the wrong deliverable. Her earlier correction should survive content changes while a genuinely required annex still starts on a new page. | Design review | Review requested<br>@TianyuCodings |  | [SherylHYX](https://github.com/SherylHYX) |  |
 | 2026-11-26 18:06:40 | [#272](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/272) · Preserve a library pilot's agreed cadence and evaluate the outcome its learners chose<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/272/files) | Learning &amp; research | Laila's learners chose a six-meeting confidence pilot. A funding call and new response files must not turn their agreement into extra classes, a proficiency test or a comparison using responses they did not permit linking. | Design review | Review requested<br>@haolun-wu |  | [SherylHYX](https://github.com/SherylHYX) |  |
 | 2026-11-26 18:06:33 | [#271](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/271) · Resolve a damaged matching set without choosing the shopper's fallback<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/271/files) | Shopping &amp; groceries | A larger credit and an expiring offer do not choose Noor's fallback. Her matching-set history requires keeping the claim open until she selects a remedy, then acting on her narrow refund approval. | Design review | Review requested<br>@haolun-wu |  | [SherylHYX](https://github.com/SherylHYX) |  |
 | 2026-11-26 18:06:29 | [#270](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/270) · Keep a patient's own choices intact through appointment-note revisions<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/270/files) | Health &amp; care | Ellis approves a note's layout before choosing only two tracking fields. The agent must preserve that limited choice across later edits rather than turn its own earlier advice into the patient's commitment. | Design review | Review requested<br>@Yeechin-is-here |  | [SherylHYX](https://github.com/SherylHYX) |  |
