@@ -113,7 +113,21 @@ function rejectedPr() {
     const at = stamp(year, month, 15, 11, 0);
     const slug = 'note-' + String(n).padStart(2, '0');
     const title = titles[n - 1];
-    const body = 'Post ' + n + '. ' + title + '. This revision is clean history for Tomás and names no person.';
+    const bodies = [
+      'I spent the morning comparing two checksum windows and the quiet one stayed quiet.',
+      'The client retries three times, then it writes the failure down and stops.',
+      'The office clock kept the same minute for a long stretch, and the deploy still landed.',
+      'I named the release after the street outside the office and left the number in the title.',
+      'I read the diff twice, once for the code and once for the comment I almost left in.',
+      'The write tool accepts the same request again and returns the first result.',
+      'The next morning I opened the notebook and the public page matched what I had sent.',
+      'A correction should keep the first wording underneath and say what changed.',
+      'The first hour after a post is when the regular readers still have the tab open.',
+      'Some drafts never grew a comment thread, and that was the right size for them.',
+      'The pull can sit until Monday. The office is empty and the tests are green.',
+      'A year of small release notes fits in one folder if each one says what shipped.'
+    ];
+    const body = bodies[n - 1];
     const id = 'ac-0001:p' + n;
     const item = post(id, 'ac-0001', slug, title, body, at);
     item.followers_at_publish = 2100;
@@ -153,24 +167,24 @@ function rejectedPr() {
     'The home list shows the accounts I follow, plus my own notes.',
     'Ship’s notes are the ones I keep rereading on the people page.',
     'A full handle is a different account from one that only shares a prefix.',
-    'The receipt names the wording that actually went public.',
-    'Throwing away a draft does not hand that number to the next post.',
+    'The public page still shows the sentence I sent on Tuesday.',
+    'I threw out a draft about the loading dock and started a cleaner one.',
     'I checked the title twice before I sent it.',
     'The public page shows the accepted wording.',
-    'A late confirmation still records how long the release waited.',
+    'I confirmed the Tuesday note after lunch and the page showed the delay.',
     'The June post keeps its first public wording in the history.',
-    'Reach stops growing once I take the post down.',
-    'A boost that disappears after unpublish does not change the frozen figure.',
-    'One emoji counts as one character when I am near the limit.',
-    'The bio stays as it is until I accept the edit.',
+    'After I took the post down, the afternoon readers stopped arriving.',
+    'A boost that vanished later did not change the count I had already written down.',
+    'The note about the dock used one small picture and a short caption.',
+    'I left the old bio up while I thought about the new one.',
     'A real mention uses the whole handle.',
     'The thread shows the first note and the grandchild under it.',
     'The note address carries the handle and the note id.',
     'I publish from this profile and nowhere else.',
     'Reads stay available when writes are closed for the day.',
     'December is the last month I plan to fill this year.',
-    'A deleted draft keeps its number out of circulation.',
-    'Running the release a second time does not write another receipt.',
+    'The draft I deleted about the loading dock stayed out of the folder.',
+    'I ran the Tuesday release again and the page did not grow a second copy.',
     'The public correction sits under the new title.',
     'Thank you is enough when the note is really an answer.',
     'I kept the library notes in ordinary sentences.'

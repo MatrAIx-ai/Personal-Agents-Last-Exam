@@ -60,7 +60,7 @@ node --test runtime/tests/clock.test.cjs
 npm test
 ```
 
-Observed: Node v18.20.8, v22.23.5, v22.23.4, and v24.22.3 each passed the 39-test package suite. `tests/business.test.cjs` is 16 of those tests. The host suite passed 1 test on each version. `examples/run.cjs` printed `{"app":"postyard","notes":1,"id":"ac-0007:n1"}`. `app:verify` passed 43 checks on each version (runtime 1.6.0, Core API 1.2.0), `package_sha256` `b7bde869dd18665986a6f71ba8031c5ebe939d50f51eee251302f81ca0c2e0b6`. The clock test passed 7 tests, including the eight-app check. The repository suite passed 22 stages. Coverage counted 121 included rows, 95 Los Angeles dates, `excluded_count` 2, and no empty month from 2025-01 through 2026-12.
+Observed: Node v18.20.8, v22.23.5, v22.23.4, and v24.22.3 each passed the 46-test package suite. `tests/business.test.cjs` is 16 of those tests. The host suite passed 2 tests on each version. An independent checkout reported the same package and host counts on v24.22.1. `examples/run.cjs` printed `{"app":"postyard","notes":1,"id":"ac-0007:n1"}`. `app:verify` passed 43 checks on each version (runtime 1.6.0, Core API 1.2.0), `package_sha256` `b7bde869dd18665986a6f71ba8031c5ebe939d50f51eee251302f81ca0c2e0b6`. The clock test passed 7 tests, including the eight-app check. The repository suite passed 22 stages. Coverage counted 121 included rows, 95 Los Angeles dates, `excluded_count` 2, and no empty month from 2025-01 through 2026-12.
 
 ### Reviewer items
 
@@ -82,7 +82,8 @@ This follows the evidence policy adopted on 2026-11-25. Evaluation records cover
 ### Files changed outside the App
 
 - `apps.registry.json`: register `postyard` 1.0.0 so the shared runtime can launch it.
-- `runtime/tests/clock.test.cjs`: the registry clock test counts packages. It expects eight apps. No `runtime/core`, `runtime/web`, docs, or other App was edited for this delivery.
+- `runtime/tests/clock.test.cjs`: the registry clock test counts packages. It expects eight apps.
+- `runtime/registrations/postyard.json`: parent reads for posts and notes, so a ready cover can be listed and read. No `runtime/core`, `runtime/web`, docs, or other App was edited for this delivery.
 
 ### Downstream tasks
 

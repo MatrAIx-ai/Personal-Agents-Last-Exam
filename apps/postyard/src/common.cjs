@@ -18,24 +18,11 @@ function instant(value, code = 'invalid_arguments') {
   return n;
 }
 const SERIAL = /^[1-9][0-9]*$/;
-const FULL_FOLD = {
-  '\u00DF': 'ss',
-  '\u0130': 'i\u0307',
-  '\u017F': 's',
-  '\u03C2': '\u03C3',
-  '\u1E9E': 'ss',
-  '\uFB00': 'ff',
-  '\uFB01': 'fi',
-  '\uFB02': 'fl',
-  '\uFB03': 'ffi',
-  '\uFB04': 'ffl',
-  '\uFB05': 'st',
-  '\uFB06': 'st'
-};
+const FULL_FOLD = require('./casefold.cjs');
 function chars(value) { return Array.from(String(value)).length; }
 function caseFold(text) {
   let folded = '';
-  for (const ch of String(text).normalize('NFKC')) folded += FULL_FOLD[ch] || ch.toLowerCase();
+  for (const ch of String(text).normalize('NFKC')) folded += Object.prototype.hasOwnProperty.call(FULL_FOLD, ch) ? FULL_FOLD[ch] : ch.toLowerCase();
   return folded.replace(/\s+/g, ' ').trim();
 }
 function speechHash(text) {

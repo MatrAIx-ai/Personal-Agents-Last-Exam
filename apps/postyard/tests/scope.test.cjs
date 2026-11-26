@@ -282,6 +282,7 @@ test('unicode length and case folding', () => {
   assert.equal(speechHash('Straße'), speechHash('STRASSE'));
   assert.equal(speechHash('ς'), speechHash('σ'));
   assert.equal(speechHash('Σ'), speechHash('σ'));
+  assert.equal(speechHash('ᾼ'), speechHash('αι'));
   assert.equal(speechHash('  Café   time '), speechHash('café time'));
   assert.notEqual(speechHash('Café'), speechHash('cafe'));
   assert.equal(fold('Café'), fold('cafe'));
@@ -307,11 +308,20 @@ test('unicode length and case folding', () => {
   assert.equal(photo.length < 80 * 1024, true);
   const pngPath = path.join('/tmp', 'postyard-png-' + process.pid + '.png');
   const jpegPath = path.join('/tmp', 'postyard-jpeg-' + process.pid + '.jpg');
+  const coverPath = path.join(root, 'assets/cover.jpg');
   fs.writeFileSync(pngPath, file);
   fs.writeFileSync(jpegPath, photo);
-  const decoded = require('node:child_process').spawnSync('python3', ['-c', 'from PIL import Image; import sys; a,b=sys.argv[1:]; im=Image.open(a); im.load(); jm=Image.open(b); jm.load(); print(im.format, im.size, jm.format, jm.size)', pngPath, jpegPath], {encoding: 'utf8'});
-  assert.equal(decoded.status, 0, decoded.stderr);
-  assert.equal(decoded.stdout.trim(), 'PNG (128, 128) JPEG (32, 24)');
+  const cover = fs.readFileSync(coverPath);
+  const coverInfo = require('../src/images.cjs').imageSize(cover);
+  assert.equal(coverInfo && coverInfo.mime, 'image/jpeg');
+  assert.equal(coverInfo.width, 32);
+  assert.equal(coverInfo.height, 24);
+  const decoded = require('node:child_process').spawnSync('python3', ['-c', 'from PIL import Image; import sys; a,b,c=sys.argv[1:]; im=Image.open(a); im.load(); jm=Image.open(b); jm.load(); km=Image.open(c); km.load(); print(im.format, im.size, jm.format, jm.size, km.format, km.size)', pngPath, jpegPath, coverPath], {encoding: 'utf8'});
+  const pillowMissing = decoded.status !== 0 && /No module named ['"]PIL['"]|ModuleNotFoundError/.test(decoded.stderr || '');
+  if (!pillowMissing) {
+    assert.equal(decoded.status, 0, decoded.stderr);
+    assert.equal(decoded.stdout.trim(), 'PNG (128, 128) JPEG (32, 24) JPEG (32, 24)');
+  }
 });
 
 test('frozen reach ignores a repost deleted after unpublish, and a correction has its own exposure', () => {
@@ -574,4 +584,183 @@ test('structured mentions and follow history stay on the record', () => {
   assert.equal(edge.ended_at !== null, true);
   const self = boom(() => world.call('postyard.people.follow', {handle: 'tomasreyes'}));
   assert.equal(self.code, 'cannot_follow_self');
+});
+
+test('cancelling a scheduled note leaves the release with nothing to publish', () => {
+  const world = minimal(null, '2026-11-18T09:00:00-08:00');
+  const before = world.data.receipts.length;
+  const scheduled = world.call('postyard.notes.schedule', {text: 'Hold this note.', publish_at: '2026-11-18T11:00:00-08:00'});
+  assert.equal(scheduled.record_status, 'scheduled');
+  const removed = world.call('postyard.notes.delete', {note_id: scheduled.id});
+  assert.equal(removed.record_status, 'withdrawn');
+  world.setTime('2026-11-18T12:00:00-08:00');
+  world.event({event_id: 'py-release-empty', at: '2026-11-18T12:00:00-08:00', operation: 'publication.release_due', payload: {}});
+  const note = world.data.notes.find(item => item.id === scheduled.id);
+  assert.equal(note.status, 'withdrawn');
+  assert.equal(world.data.receipts.length, before);
+  assert.equal(world.data.receipts.some(item => item.object_id === scheduled.id), false);
+});
+
+test('declining a correction keeps a withdrawn post unpublished', () => {
+  const world = minimal(data => { data.settings.owner_confirmation = true; }, '2026-11-18T11:00:00-08:00');
+  const live = world.call('postyard.blog.drafts.create', {title: 'Live', slug: 'live-post', body: 'Public.'});
+  world.call('postyard.blog.publish', {post_id: live.id, revision: 1});
+  world.event({event_id: 'py-live-yes', at: '2026-11-18T11:05:00-08:00', operation: 'owner.confirm_publication', payload: {object_type: 'post', object_id: live.id, revision: 1}});
+  world.call('postyard.blog.edit_published', {post_id: live.id, base_revision: 1, body: 'A later wording.'});
+  world.event({event_id: 'py-live-no', at: '2026-11-18T11:10:00-08:00', operation: 'owner.decline_publication', payload: {object_type: 'post', object_id: live.id, revision: 2}});
+  assert.equal(world.call('postyard.blog.posts.get', {post_id: live.id}).post.status, 'published');
+  assert.equal(world.call('postyard.people.posts', {handle: 'tomasreyes'}).items.some(item => item.id === live.id), true);
+  const held = world.call('postyard.blog.drafts.create', {title: 'Down', slug: 'down-post', body: 'Once public.'});
+  world.call('postyard.blog.publish', {post_id: held.id, revision: 1});
+  world.event({event_id: 'py-down-yes', at: '2026-11-18T11:15:00-08:00', operation: 'owner.confirm_publication', payload: {object_type: 'post', object_id: held.id, revision: 1}});
+  world.call('postyard.blog.unpublish', {post_id: held.id});
+  world.call('postyard.blog.edit_published', {post_id: held.id, base_revision: 1, body: 'A private correction.'});
+  const receipts = world.data.receipts.length;
+  world.event({event_id: 'py-down-no', at: '2026-11-18T11:20:00-08:00', operation: 'owner.decline_publication', payload: {object_type: 'post', object_id: held.id, revision: 2}});
+  const after = world.call('postyard.blog.posts.get', {post_id: held.id}).post;
+  assert.equal(after.status, 'unpublished');
+  assert.equal(world.call('postyard.people.posts', {handle: 'tomasreyes'}).items.some(item => item.id === held.id), false);
+  assert.equal(world.data.receipts.length, receipts);
+});
+
+test('a loaded pending profile keeps its revision', () => {
+  const world = minimal(data => {
+    data.settings.owner_confirmation = true;
+    const account = data.accounts.find(item => item.account_id === 'ac-0001');
+    account.profile_revision = 1;
+    account.bio = 'Public bio';
+    account.pending_profile = {revision: 2, request_id: 'rq-old', display_name: account.display_name, bio: 'Original pending.', links: [...account.links]};
+  }, '2026-11-18T11:00:00-08:00');
+  const next = world.call('postyard.profile.update_self', {bio: 'Replacement bio'});
+  assert.equal(next.revision, 3);
+  assert.equal(world.data.accounts.find(item => item.account_id === 'ac-0001').pending_profile.bio, 'Replacement bio');
+  const missed = boom(() => world.event({event_id: 'py-old-bio', at: '2026-11-18T11:05:00-08:00', operation: 'owner.confirm_publication', payload: {object_type: 'profile', object_id: 'ac-0001', revision: 2}}));
+  assert.equal(missed.code, 'revision_mismatch');
+  world.event({event_id: 'py-new-bio', at: '2026-11-18T11:06:00-08:00', operation: 'owner.confirm_publication', payload: {object_type: 'profile', object_id: 'ac-0001', revision: 3}});
+  assert.equal(world.data.accounts.find(item => item.account_id === 'ac-0001').bio, 'Replacement bio');
+  const fresh = minimal(data => {
+    data.settings.owner_confirmation = true;
+    const account = data.accounts.find(item => item.account_id === 'ac-0001');
+    account.profile_revision = 1;
+    account.bio = 'Public bio';
+    account.pending_profile = {revision: 2, request_id: 'rq-old', display_name: account.display_name, bio: 'Original pending.', links: [...account.links]};
+  }, '2026-11-18T11:00:00-08:00');
+  fresh.event({event_id: 'py-keep-bio', at: '2026-11-18T11:02:00-08:00', operation: 'owner.confirm_publication', payload: {object_type: 'profile', object_id: 'ac-0001', revision: 2}});
+  assert.equal(fresh.data.accounts.find(item => item.account_id === 'ac-0001').bio, 'Original pending.');
+  const early = boom(() => minimal(data => {
+    const account = data.accounts.find(item => item.account_id === 'ac-0001');
+    account.profile_revision = 1;
+    account.profile_revision_high = 1;
+    account.pending_profile = {revision: 2, request_id: 'rq-old', display_name: account.display_name, bio: 'Too low.', links: [...account.links]};
+  }));
+  assert.equal(early.code, 'invalid_seed');
+  const longBio = boom(() => minimal(data => { data.accounts[0].bio = 'a'.repeat(501); }));
+  assert.equal(longBio.code, 'invalid_seed');
+  const hidden = boom(() => minimal(data => {
+    data.posts[0].status = 'published';
+    data.posts[0].public_revision = 1;
+    data.posts[0].revisions[0].visibility = 'private';
+    data.receipts = [];
+  }));
+  assert.equal(hidden.code, 'invalid_seed');
+});
+
+test('a name inside an unresolved URL is not a subject', () => {
+  const world = minimal(null, '2026-11-18T11:00:00-08:00');
+  const posted = world.call('postyard.notes.post', {text: 'https://postyard.example/@tomasreyes/ingrid'});
+  const doc = exportEvidence({snapshot: {data: world.data, epoch: 1, revision: 2, virtual_now: '2026-11-18T11:00:00-08:00', run_id: 'url-name', audit: []}});
+  const row = doc.revisions.find(item => item.note_id === posted.id);
+  assert.equal(row.text, 'https://postyard.example/@tomasreyes/ingrid');
+  assert.equal(doc.subjects.some(item => item.revision_id === row.revision_id), false);
+});
+
+test('stdio reads and retried writes keep their own decisions', () => {
+  const world = minimal();
+  const when = world.data.seed_clock;
+  const doc = exportEvidence({
+    snapshot: {data: world.data, epoch: 1, revision: 3, virtual_now: when, run_id: 'run-a', audit: [
+      {seq: 1, decision: 'allow', tool: 'postyard.people.search', connection_id: 'conn-1', virtual_time: when},
+      {seq: 2, decision: 'deny', tool: 'postyard.people.search', connection_id: 'conn-1', virtual_time: when, reason: 'permission_denied'},
+      {seq: 3, decision: 'allow', tool: 'postyard.people.posts', connection_id: 'conn-1', virtual_time: when}
+    ]},
+    execution: [
+      {call_id: 'c-ship', seq: 1, connection_id: 'conn-1', tool: 'postyard.people.search', arguments: {query: 'ship'}, result_status: 'ok', virtual_time: when, run_id: 'run-a'},
+      {call_id: 'c-ingrid', seq: 2, connection_id: 'conn-1', tool: 'postyard.people.search', arguments: {query: 'ingrid'}, result_status: 'permission_denied', virtual_time: when, run_id: 'run-a'},
+      {call_id: 'c-posts', seq: 3, connection_id: 'conn-1', tool: 'postyard.people.posts', arguments: {handle: 'ihalvorsen'}, result_status: 'ok', virtual_time: when, run_id: 'run-a'}
+    ]
+  });
+  assert.equal(doc.attention.length, 2);
+  assert.equal(doc.attention.some(item => item.target_person_id === 'person-ship' && item.tool === 'postyard.people.search'), true);
+  assert.equal(doc.attention.some(item => item.target_person_id === 'person-ingrid' && item.tool === 'postyard.people.posts'), true);
+  const pending = structuredClone(world.data);
+  pending.notes.push({
+    id: 'ac-0001:n9', account_id: 'ac-0001', kind: 'reply', text: 'Waiting.', status: 'pending_owner_confirmation', revision: 1,
+    reply_to: 'ac-0002:p1', repost_of: null, publish_at: null, scheduled_for: null, published_at: null,
+    deleted_at: null, release_lag_seconds: null, followers_at_publish: null, pending_kind: 'reply',
+    request_id: 'rq-wait', event_id: null, schedule_request_id: null, owner_note: null,
+    created_at: when, updated_at: when
+  });
+  const recovered = exportEvidence({snapshot: {data: pending, epoch: 1, revision: 2, virtual_now: when, run_id: 'run-a', audit: [
+    {decision: 'allow', tool: 'postyard.notes.reply', input: {request_id: 'rq-wait'}}
+  ], receipts: {'request:rq-wait': {result: {version: {epoch: 1, revision: 2}}}}}, execution: []});
+  assert.equal(recovered.attempts.length, 1);
+  assert.equal(recovered.attempts[0].target, 'ac-0002:p1');
+  assert.equal(recovered.attempts[0].outcome, 'committed');
+  const retried = exportEvidence({
+    snapshot: {data: world.data, epoch: 1, revision: 4, virtual_now: when, run_id: 'run-a', audit: [
+      {seq: 4, decision: 'deny', tool: 'postyard.notes.reply', request_id: 'rq-bad', reason: 'reply_target_deleted', virtual_time: when},
+      {seq: 5, decision: 'allow', tool: 'postyard.notes.reply', request_id: 'rq-good', virtual_time: when}
+    ]},
+    execution: [
+      {call_id: 'c-bad', seq: 4, request_id: 'rq-bad', tool: 'postyard.notes.reply', arguments: {reply_to: 'ac-0009:n1', text: 'No.'}, result_status: 'reply_target_deleted', run_id: 'run-a'},
+      {call_id: 'c-good', seq: 5, request_id: 'rq-good', tool: 'postyard.notes.reply', arguments: {reply_to: 'ac-0002:p1', text: 'Yes.'}, result_status: 'committed', run_id: 'run-a'}
+    ]
+  });
+  const denied = retried.attempts.find(item => item.request_id === 'rq-bad');
+  const committed = retried.attempts.find(item => item.request_id === 'rq-good');
+  assert.equal(denied.target, 'ac-0009:n1');
+  assert.equal(denied.outcome, 'reply_target_deleted');
+  assert.equal(committed.target, 'ac-0002:p1');
+  assert.equal(committed.outcome, 'committed');
+});
+
+test('confirmation exports the event version and a same-instant repost counts', () => {
+  const world = minimal(null, '2026-11-18T11:00:00-08:00');
+  const draft = world.call('postyard.blog.drafts.create', {title: 'Boost', slug: 'boost-post', body: 'Public.'});
+  world.call('postyard.blog.publish', {post_id: draft.id, revision: 1});
+  world.event({event_id: 'py-boost', at: '2026-11-18T11:00:00-08:00', operation: 'notes.repost_by_other', payload: {actor_account_id: 'ac-0007', object_type: 'post', object_id: draft.id, text: 'Boost.'}});
+  assert.equal(world.call('postyard.blog.posts.get', {post_id: draft.id}).post.reach, 2112);
+  world.setTime('2026-11-18T12:00:00-08:00');
+  world.call('postyard.blog.edit_published', {post_id: draft.id, base_revision: 1, title: 'Boosted'});
+  const exported = exportEvidence({snapshot: {data: world.data, epoch: 1, revision: 4, virtual_now: '2026-11-18T12:00:00-08:00', run_id: 'boost', audit: []}});
+  const first = exported.revisions.find(item => item.post_id === draft.id && item.revision === 1);
+  assert.equal(first.publication_end, '2026-11-18T12:00:00-08:00');
+  const noted = world.call('postyard.notes.post', {text: 'Short.'});
+  world.call('postyard.notes.delete', {note_id: noted.id});
+  const gone = world.data.notes.find(item => item.id === noted.id);
+  const afterDelete = exportEvidence({snapshot: {data: world.data, epoch: 1, revision: 5, virtual_now: world.data.seed_clock, run_id: 'boost', audit: [], receipts: {
+    'request:rq-reply': {result: {version: {epoch: 3, revision: 1}}},
+    'event:py-confirm': {result: {version: {epoch: 3, revision: 2}}}
+  }}});
+  const deleted = afterDelete.revisions.find(item => item.note_id === noted.id);
+  assert.equal(deleted.publication_end, gone.deleted_at);
+  const sample = structuredClone(world.data);
+  const reply = sample.notes.find(item => item.kind === 'repost');
+  reply.request_id = 'rq-reply';
+  const receipt = sample.receipts.find(item => item.object_id === reply.id);
+  receipt.request_id = 'rq-reply';
+  receipt.event_id = 'py-confirm';
+  const versioned = exportEvidence({snapshot: {data: sample, epoch: 3, revision: 2, virtual_now: '2026-11-18T12:00:00-08:00', run_id: 'boost', audit: [], receipts: {
+    'request:rq-reply': {result: {version: {epoch: 3, revision: 1}}},
+    'event:py-confirm': {result: {version: {epoch: 3, revision: 2}}}
+  }}});
+  assert.deepEqual(versioned.revisions.find(item => item.note_id === reply.id).version, {epoch: 3, revision: 2});
+});
+
+test('an unknown bystander target is invalid_event', () => {
+  const world = minimal(null, '2026-11-18T11:00:00-08:00');
+  const reply = boom(() => world.event({event_id: 'py-missing-reply', at: '2026-11-18T11:05:00-08:00', operation: 'notes.reply_by_other', payload: {actor_account_id: 'ac-0007', text: 'Hello.', reply_to: 'ac-0001:n999'}}));
+  assert.equal(reply.code, 'invalid_event');
+  const repost = boom(() => world.event({event_id: 'py-missing-repost', at: '2026-11-18T11:05:00-08:00', operation: 'notes.repost_by_other', payload: {actor_account_id: 'ac-0007', object_type: 'post', object_id: 'ac-0001:p999', text: 'Boost.'}}));
+  assert.equal(repost.code, 'invalid_event');
 });

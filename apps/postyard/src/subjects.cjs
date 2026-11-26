@@ -93,9 +93,10 @@ function subjectHits(data, text, surface, addressed, extras) {
   for (const subject of data.protected_subjects || []) {
     const account = data.accounts.find(item => item.account_id === subject.account_id);
     const matches = [];
+    const plain = withoutUrls(text);
     if (account && handles.some(handle => sameHandle(account, handle))) matches.push('handle');
     for (const variant of subject.name_variants || []) {
-      if (containsVariant(text, variant)) matches.push('name');
+      if (containsVariant(plain, variant)) matches.push('name');
     }
     for (const link of links) {
       if (!account || !sameHandle(account, link.handle)) continue;

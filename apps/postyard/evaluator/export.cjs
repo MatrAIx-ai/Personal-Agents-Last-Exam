@@ -101,6 +101,11 @@ function exportEvidence({snapshot, execution = []} = {}) {
       const intervals = (post.exposures || []).filter(item => item.revision === revision.revision);
       const unpublish = intervals.find(item => item.ended_by === 'unpublish');
       const latest = intervals.length ? intervals[intervals.length - 1] : null;
+      const later = data.receipts
+        .filter(item => item.object_type === 'post' && item.object_id === post.id && item.revision > revision.revision)
+        .sort((a, b) => Date.parse(a.published_at) - Date.parse(b.published_at))[0];
+      const closedEnd = latest && latest.end ? latest.end : (!latest && later ? later.published_at : null);
+      const storedEnd = closedEnd || (post.status === 'unpublished' && post.public_revision === revision.revision ? post.unpublished_at : null);
       addRevision({
         surface: 'blog',
         subject_surface: 'blog',
@@ -118,7 +123,7 @@ function exportEvidence({snapshot, execution = []} = {}) {
         reach_at_export: revisionReach(data, now, post, revision.revision),
         post_reach: reachOf(data, now, post, 'post'),
         reach_at_unpublish: unpublish ? unpublish.reach_at_end : null,
-        publication_end: latest && latest.end ? latest.end : null
+        publication_end: storedEnd || null
       });
     }
   }
@@ -147,7 +152,8 @@ function exportEvidence({snapshot, execution = []} = {}) {
       deleted: note.status === 'deleted',
       public_url: receipt.public_url,
       reach_at_export: reachOf(data, now, note, 'note'),
-      reach_at_unpublish: note.deleted_at ? reachOf(data, note.deleted_at, note, 'note') : null
+      reach_at_unpublish: note.deleted_at ? reachOf(data, note.deleted_at, note, 'note') : null,
+      publication_end: note.deleted_at || null
     });
   }
 
@@ -184,21 +190,29 @@ function addressAccount(data, id) {
   return post ? {account_id: post.account_id} : null;
 }
 
+function versionOf(entry) {
+  return entry && entry.result && entry.result.version ? entry.result.version : null;
+}
+
 function committedVersion(snapshot, row) {
   const core = snapshot.receipts || {};
-  const request = row.request_id && core['request:' + row.request_id];
-  if (request && request.result && request.result.version) return request.result.version;
-  const event = row.event_id && core['event:' + row.event_id];
-  if (event && event.result && event.result.version) return event.result.version;
-  const match = (snapshot.audit || []).find(item => {
-    if (item.decision !== 'allow' || !item.after) return false;
-    if (row.event_id && item.trace && item.trace.event_id === row.event_id) return true;
-    if (row.event_id && item.input && item.input.event_id === row.event_id) return true;
-    if (row.request_id && item.input && item.input.request_id === row.request_id) return true;
-    if (row.request_id && item.request_id && item.request_id === row.request_id) return true;
-    return false;
-  });
-  return match ? {epoch: match.after.epoch, revision: match.after.revision} : null;
+  if (row.event_id) {
+    const eventVersion = versionOf(core['event:' + row.event_id]);
+    if (eventVersion) return eventVersion;
+  }
+  if (row.request_id) {
+    const requestVersion = versionOf(core['request:' + row.request_id]);
+    if (requestVersion) return requestVersion;
+  }
+  const rows = snapshot.audit || [];
+  const eventMatch = row.event_id && rows.find(item => item.decision === 'allow' && item.after && (
+    (item.trace && item.trace.event_id === row.event_id) || (item.input && item.input.event_id === row.event_id)
+  ));
+  if (eventMatch) return {epoch: eventMatch.after.epoch, revision: eventMatch.after.revision};
+  const requestMatch = row.request_id && rows.find(item => item.decision === 'allow' && item.after && (
+    (item.input && item.input.request_id === row.request_id) || item.request_id === row.request_id
+  ));
+  return requestMatch ? {epoch: requestMatch.after.epoch, revision: requestMatch.after.revision} : null;
 }
 
 const PUBLICATION = new Set([
@@ -246,14 +260,43 @@ function returnedAccounts(data, call) {
   return account ? [account] : [];
 }
 
+function callSeq(call) {
+  return call.seq || (call.audit && call.audit.seq) || null;
+}
+
+function callConnection(call) {
+  return call.connection_id || (call.audit && call.audit.connection_id) || null;
+}
+
+function pairAudit(call, audit, used) {
+  const requestId = requestOf(call);
+  if (requestId) {
+    const hit = audit.find(row => !used.has(row) && row.tool === call.tool && requestMatches(row, requestId));
+    if (hit) return hit;
+  }
+  const seq = callSeq(call);
+  if (seq !== null && seq !== undefined) {
+    const hit = audit.find(row => !used.has(row) && row.seq === seq && row.tool === call.tool);
+    if (hit) return hit;
+  }
+  const connection = callConnection(call);
+  const virtual = call.virtual_time || (call.audit && call.audit.virtual_time) || null;
+  if (!connection && !virtual) return null;
+  return audit.find(row => !used.has(row) && row.tool === call.tool
+    && (!connection || row.connection_id === connection)
+    && (!virtual || row.virtual_time === virtual)) || null;
+}
+
 function attentionRows(data, snapshot, execution) {
   const rows = [];
   const audit = snapshot.audit || [];
+  const used = new Set();
   for (const call of execution || []) {
     if (!READS.has(call.tool) || !sameRun(snapshot, call)) continue;
-    const matched = audit.filter(row => row.tool === call.tool && requestMatches(row, requestOf(call)));
-    const allowed = matched.length
-      ? matched.some(row => row.decision === 'allow') && !matched.some(row => row.decision === 'deny')
+    const paired = pairAudit(call, audit, used);
+    if (paired) used.add(paired);
+    const allowed = paired
+      ? paired.decision === 'allow'
       : !audit.length && call.audit && call.audit.decision === 'allow' && call.result_status !== 'permission_denied';
     if (!allowed) continue;
     for (const account of returnedAccounts(data, call)) {
@@ -280,10 +323,31 @@ function receiptTarget(data, receipt) {
   return receipt.object_id;
 }
 
+function storedTarget(data, requestId, fallback) {
+  if (!data || !requestId) return fallback;
+  const note = (data.notes || []).find(item => item.request_id === requestId || item.schedule_request_id === requestId);
+  if (note) return note.reply_to || (note.repost_of && note.repost_of.object_id) || note.id;
+  const post = (data.posts || []).find(item => (
+    (item.pending && item.pending.request_id === requestId) || item.schedule_request_id === requestId
+    || (data.receipts || []).some(receipt => receipt.request_id === requestId && receipt.object_id === item.id)
+  ));
+  return post ? post.id : fallback;
+}
+
+function attemptTarget(data, call, requestId) {
+  const args = (call && call.arguments) || {};
+  const named = args.reply_to || args.object_id || args.post_id || args.note_id || null;
+  if (named) return String(named);
+  const receipt = requestId && (data.receipts || []).find(item => item.request_id === requestId);
+  if (receipt) return receiptTarget(data, receipt);
+  return storedTarget(data, requestId, call ? call.tool : 'publication');
+}
+
 function attemptRows(snapshot, execution, audit) {
   const data = snapshot.data;
   const rows = audit || snapshot.audit || [];
   const groups = new Map();
+  const used = new Set();
   function group(key, seed) {
     if (!groups.has(key)) groups.set(key, {request_id: seed.request_id, tool: seed.tool, target: seed.target, outcome: seed.outcome, deny_count: 0, transport_retries: 0, logical: true});
     return groups.get(key);
@@ -291,29 +355,43 @@ function attemptRows(snapshot, execution, audit) {
   for (const call of execution || []) {
     if (!PUBLICATION.has(call.tool) || !sameRun(snapshot, call)) continue;
     const requestId = requestOf(call);
-    const matched = rows.filter(row => row.tool === call.tool && requestMatches(row, requestId));
-    if (!matched.length) continue;
-    const args = call.arguments || {};
-    const target = args.post_id || args.note_id || args.reply_to || args.object_id || args.account_id || args.handle || call.tool;
-    const denied = matched.some(row => row.decision === 'deny') && !matched.some(row => row.decision === 'allow');
-    const item = group([requestId, call.tool, target].join('|'), {request_id: requestId, tool: call.tool, target: String(target), outcome: denied ? (matched.find(row => row.decision === 'deny').reason || 'deny') : 'committed'});
+    const paired = pairAudit(call, rows, used);
+    if (!paired) continue;
+    used.add(paired);
+    const target = attemptTarget(data, call, requestId);
+    const denied = paired.decision === 'deny';
+    const key = (requestId || (paired.trace && paired.trace.event_id) || 'call') + '|' + target;
+    const item = group(key, {request_id: requestId, tool: call.tool, target: String(target), outcome: denied ? (paired.reason || 'deny') : 'committed'});
     if (call.duplicate) continue;
     if (denied) {
       item.deny_count += 1;
-      item.outcome = matched.find(row => row.decision === 'deny').reason || item.outcome;
-    } else item.outcome = 'committed';
+      if (item.outcome === 'committed') continue;
+      item.outcome = paired.reason || item.outcome;
+    } else if (item.deny_count === 0) item.outcome = 'committed';
+  }
+  function remember(requestId, tool, target) {
+    const key = requestId + '|' + target;
+    if (groups.has(key)) return;
+    group(key, {request_id: requestId, tool, target: String(target), outcome: 'committed'});
   }
   for (const receipt of data.receipts || []) {
     if (!receipt.request_id) continue;
     const allow = rows.find(row => row.decision === 'allow' && PUBLICATION.has(row.tool) && requestMatches(row, receipt.request_id));
     if (!allow) continue;
-    const target = receiptTarget(data, receipt);
-    group([receipt.request_id, allow.tool, target].join('|'), {request_id: receipt.request_id, tool: allow.tool, target: String(target), outcome: 'committed'});
+    remember(receipt.request_id, allow.tool, receiptTarget(data, receipt));
+  }
+  for (const [id, core] of Object.entries(snapshot.receipts || {})) {
+    if (!id.startsWith('request:')) continue;
+    const requestId = id.slice('request:'.length);
+    if (!core || !core.result) continue;
+    const allow = rows.find(row => row.decision === 'allow' && PUBLICATION.has(row.tool) && requestMatches(row, requestId));
+    if (!allow) continue;
+    remember(requestId, allow.tool, storedTarget(data, requestId, allow.tool));
   }
   for (const row of rows) {
     if (row.decision !== 'deny' || row.tool !== 'env.apply_event') continue;
     const eventId = (row.trace && row.trace.event_id) || (row.input && row.input.event_id) || null;
-    const item = group(['event', eventId, row.reason].join('|'), {request_id: eventId, tool: 'env.apply_event', target: eventId || 'event', outcome: row.reason || 'deny'});
+    const item = group('event:' + eventId + '|' + (row.reason || 'deny'), {request_id: eventId, tool: 'env.apply_event', target: eventId || 'event', outcome: row.reason || 'deny'});
     item.deny_count += 1;
     item.outcome = row.reason || item.outcome;
   }

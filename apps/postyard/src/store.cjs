@@ -115,7 +115,7 @@ function repostReach(data, objectType, objectId, end, start) {
     if (note.repost_of.object_type !== objectType || note.repost_of.object_id !== objectId) continue;
     const published = instant(note.published_at, 'invalid_time');
     if (published > endMs) continue;
-    if (startMs !== null && published <= startMs) continue;
+    if (startMs !== null && published < startMs) continue;
     if (note.deleted_at && instant(note.deleted_at, 'invalid_time') <= endMs) continue;
     sum += note.followers_at_publish || 0;
   }
@@ -170,14 +170,10 @@ function revisionReach(data, now, post, revisionNumber) {
   return Math.min(data.settings.audience_cap, base + extra + Math.floor(data.settings.audience_rate_per_hour * hours));
 }
 
-function mediaView(data, id, role) {
-  if (!id) return null;
-  const asset = (data.media || []).find(item => item.asset_id === id && item.role === role);
-  if (!asset || typeof asset.bytes_base64 !== 'string') return {asset_id: id, status: 'asset_missing'};
-  const bytes = Buffer.from(asset.bytes_base64, 'base64');
+function viewFromBytes(id, role, bytes, declaredMime) {
   const info = imageSize(bytes);
   const limit = MEDIA_LIMITS[role];
-  if (!info || !limit || info.mime !== limit.mime || bytes.length !== asset.byte_length) return {asset_id: id, status: 'asset_missing'};
+  if (!info || !limit || (declaredMime && info.mime !== declaredMime) || info.mime !== limit.mime) return {asset_id: id, status: 'asset_missing'};
   const view = {asset_id: id, mime: info.mime, width: info.width, height: info.height, byte_length: bytes.length};
   if (bytes.length > limit.bytes || (limit.width && (info.width !== limit.width || info.height !== limit.height))) {
     return {...view, status: 'too_large'};
@@ -185,8 +181,26 @@ function mediaView(data, id, role) {
   return {...view, status: 'ready'};
 }
 
-function coverOf(data, post) {
-  return mediaView(data, post.cover_asset_id, 'cover');
+function mediaView(data, ctx, id, role) {
+  if (!id) return null;
+  if (ctx && ctx.assets && typeof ctx.assets.read === 'function') {
+    try {
+      const file = ctx.assets.read(id);
+      return viewFromBytes(id, role, Buffer.from(file.base64, 'base64'), file.mime_type);
+    } catch (error) {
+      if (error && (error.code === 'not_available' || error.code === 'unavailable')) return {asset_id: id, status: 'asset_missing'};
+      throw error;
+    }
+  }
+  const asset = (data.media || []).find(item => item.asset_id === id && item.role === role);
+  if (!asset || typeof asset.bytes_base64 !== 'string') return {asset_id: id, status: 'asset_missing'};
+  const bytes = Buffer.from(asset.bytes_base64, 'base64');
+  if (bytes.length !== asset.byte_length) return {asset_id: id, status: 'asset_missing'};
+  return viewFromBytes(id, role, bytes, asset.mime);
+}
+
+function coverOf(data, ctx, post) {
+  return mediaView(data, ctx, post.cover_asset_id, 'cover');
 }
 
 function closeExposures(data, post, end, endedBy) {
@@ -218,6 +232,13 @@ function makePostPublic(data, ctx, post, number, requestId, eventId) {
   if (!row) fail('revision_mismatch', 'That revision is not on this post.');
   row.visibility = 'public';
   post.slug = row.slug;
+  if (!(post.exposures || []).some(item => item.revision === post.public_revision) && post.public_revision && post.public_revision !== number && post.published_at) {
+    const prior = [...data.receipts].reverse().find(item => item.object_type === 'post' && item.object_id === post.id && item.revision === post.public_revision);
+    const priorFollowers = prior && prior.followers_at_publish !== null && prior.followers_at_publish !== undefined
+      ? prior.followers_at_publish
+      : (post.followers_at_publish || 0);
+    openExposure(post, post.public_revision, prior ? prior.published_at : post.published_at, priorFollowers);
+  }
   closeExposures(data, post, ctx.virtual_now, 'revision');
   const followers = followersOf(data, post.account_id);
   post.public_revision = number;
@@ -505,7 +526,7 @@ function viewPost(data, ctx, post, audience) {
     reach: reachOf(data, ctx.virtual_now, post, 'post'),
     revision_reach: revisionReach(data, ctx.virtual_now, post, shown.revision),
     public_url: account ? publicUrl(account, shown.slug) : null,
-    cover: coverOf(data, post),
+    cover: coverOf(data, ctx, post),
     created_at: post.created_at,
     updated_at: publicUpdatedAt(data, post)
   };
@@ -602,6 +623,42 @@ function createNote(data, ctx, fields) {
   return note;
 }
 
+function noteImageId(data, ctx, note, assetId) {
+  if (!assetId) return null;
+  if (!ctx || !ctx.assets || typeof ctx.assets.add !== 'function') return assetId;
+  const seeded = (data.media || []).find(item => item.asset_id === assetId && typeof item.bytes_base64 === 'string');
+  let base64 = null;
+  let mime = 'image/jpeg';
+  let width = null;
+  let height = null;
+  if (seeded) {
+    const bytes = Buffer.from(seeded.bytes_base64, 'base64');
+    base64 = bytes.toString('base64');
+    mime = seeded.mime || mime;
+    width = seeded.width;
+    height = seeded.height;
+  } else {
+    let file;
+    try { file = ctx.assets.read(assetId); }
+    catch (error) {
+      if (error && (error.code === 'not_available' || error.code === 'unavailable')) fail('invalid_arguments', 'That image is not available for this note.');
+      throw error;
+    }
+    const bytes = Buffer.from(file.base64, 'base64');
+    base64 = bytes.toString('base64');
+    mime = file.mime_type || mime;
+    width = file.media && file.media.image && file.media.image.width;
+    height = file.media && file.media.image && file.media.image.height;
+  }
+  const sha256 = require('node:crypto').createHash('sha256').update(Buffer.from(base64, 'base64')).digest('hex');
+  const filename = String(assetId).replace(/[^A-Za-z0-9._-]/g, '') + '.jpg';
+  const ids = ctx.assets.add({
+    object_type: 'note', object_id: note.id,
+    files: [{filename, mime_type: mime, base64, sha256, media: width ? {image: {width, height}} : {}}]
+  });
+  return ids[0];
+}
+
 function postNote(data, ctx, args) {
   const text = noteText(args.text, 'note_too_long');
   const image = args.image_asset_id || null;
@@ -610,11 +667,13 @@ function postNote(data, ctx, args) {
       account_id: data.account_id, kind: 'note', text, status: 'pending_owner_confirmation',
       pending_kind: 'post', request_id: args.request_id, image_asset_id: image
     });
+    note.image_asset_id = noteImageId(data, ctx, note, image);
     return {id: note.id, record_status: note.status, revision: 1};
   }
   const note = createNote(data, ctx, {
     account_id: data.account_id, kind: 'note', text, status: 'posted', request_id: args.request_id, image_asset_id: image
   });
+  note.image_asset_id = noteImageId(data, ctx, note, image);
   const receipt = publishNote(data, ctx, note, args.request_id, null);
   return {id: note.id, record_status: 'posted', revision: 1, receipt_id: receipt.receipt_id};
 }
@@ -643,9 +702,11 @@ function deleteNote(data, ctx, args) {
   const note = ownNote(data, args.note_id);
   if (note.status === 'deleted' || note.status === 'withdrawn') fail('not_found', 'That note is already withdrawn.');
   if (note.status === 'declined') fail('invalid_arguments', 'A declined note stays in history.');
-  if (note.status === 'pending_owner_confirmation') {
+  if (note.status === 'pending_owner_confirmation' || note.status === 'scheduled') {
     note.status = 'withdrawn';
     note.pending_kind = null;
+    note.publish_at = null;
+    note.schedule_request_id = null;
     touch(ctx, note);
     return {id: note.id, record_status: 'withdrawn'};
   }
@@ -669,7 +730,7 @@ function viewNote(data, ctx, note) {
     created_at: note.created_at, updated_at: note.updated_at
   };
   if (note.account_id === data.account_id) view.owner_note = note.owner_note;
-  if (note.image_asset_id) view.image = mediaView(data, note.image_asset_id, 'note');
+  if (note.image_asset_id) view.image = mediaView(data, ctx, note.image_asset_id, 'note');
   return view;
 }
 
@@ -884,11 +945,12 @@ function declinePost(data, ctx, post, payload) {
   }
   const held = revision(post, post.pending.revision);
   const edit = post.pending.kind === 'edit' && post.public_revision;
+  const priorStatus = post.status;
   if (held) held.visibility = edit ? 'withheld' : 'private';
   post.pending = null;
   post.owner_note = payload.note ? nfc(payload.note) : null;
   post.resolution_code = null;
-  if (edit) post.status = 'published';
+  if (edit) post.status = priorStatus === 'unpublished' ? 'unpublished' : 'published';
   else {
     post.status = 'draft';
     post.publish_at = null;
@@ -980,7 +1042,6 @@ function scheduleNote(data, ctx, args) {
   const text = noteText(args.text, 'note_too_long');
   if (typeof args.publish_at !== 'string') fail('invalid_arguments', 'publish_at is required.');
   if (instant(args.publish_at) <= instant(ctx.virtual_now)) fail('schedule_in_past', 'publish_at must be later than the current virtual time.');
-  if (args.image_asset_id) args.image_asset_id = args.image_asset_id;
   const note = createNote(data, ctx, {
     account_id: data.account_id, kind: 'note', text,
     status: confirms(data) ? 'pending_owner_confirmation' : 'scheduled',
@@ -988,6 +1049,7 @@ function scheduleNote(data, ctx, args) {
     publish_at: args.publish_at, request_id: args.request_id, schedule_request_id: args.request_id,
     image_asset_id: args.image_asset_id || null
   });
+  note.image_asset_id = noteImageId(data, ctx, note, args.image_asset_id || null);
   return {id: note.id, record_status: note.status, revision: 1, publish_at: args.publish_at};
 }
 
@@ -1092,8 +1154,7 @@ function updateSelf(data, ctx, args) {
     fail('invalid_arguments', 'links are invalid.');
   }
   if (confirms(data)) {
-    const high = account.profile_revision_high || account.profile_revision || 1;
-    const revision = high + 1;
+    const revision = profileCeiling(account) + 1;
     account.retired_profile_revisions = account.retired_profile_revisions || [];
     if (account.pending_profile) account.retired_profile_revisions.push(account.pending_profile.revision);
     account.profile_revision_high = revision;
@@ -1103,10 +1164,18 @@ function updateSelf(data, ctx, args) {
   account.display_name = displayName;
   account.bio = bio;
   account.links = [...links];
-  account.profile_revision = (account.profile_revision || 1) + 1;
+  account.profile_revision = profileCeiling(account) + 1;
   account.profile_revision_high = account.profile_revision;
   account.pending_profile = null;
   return {record_status: 'updated', revision: account.profile_revision};
+}
+
+function profileCeiling(account) {
+  let high = account.profile_revision_high || 0;
+  high = Math.max(high, account.profile_revision || 1);
+  if (account.pending_profile) high = Math.max(high, account.pending_profile.revision || 0);
+  for (const number of account.retired_profile_revisions || []) high = Math.max(high, number || 0);
+  return high;
 }
 
 function profileWasPending(account, revisionNumber) {
@@ -1174,7 +1243,8 @@ function replyByOther(data, ctx, event) {
   const text = noteText(payload.text, 'invalid_event');
   if (typeof payload.reply_to !== 'string' || !payload.reply_to) fail('invalid_event', 'reply_to is required.');
   const target = targetRecord(data, payload.reply_to);
-  if (!target || (target.kind === 'note' && target.item.status !== 'posted')) fail('reply_target_deleted', 'The reply target is not public.');
+  if (!target) fail('invalid_event', 'The reply target does not exist.');
+  if (target.kind === 'note' && target.item.status !== 'posted') fail('reply_target_deleted', 'The reply target is not public.');
   if (target.kind === 'post' && target.item.status !== 'published') fail('not_published', 'The reply target is not public.');
   const note = createNote(data, ctx, {
     account_id: actor.account_id, kind: 'reply', text, status: 'posted', reply_to: payload.reply_to,
@@ -1196,7 +1266,7 @@ function repostByOther(data, ctx, event) {
   const text = noteText(payload.text || 'Repost.', 'invalid_event');
   if (payload.object_type !== 'post' && payload.object_type !== 'note') fail('invalid_event', 'object_type is not supported.');
   const target = targetRecord(data, payload.object_id);
-  if (!target || target.kind !== payload.object_type) fail('not_published', 'The repost target is not public.');
+  if (!target || target.kind !== payload.object_type) fail('invalid_event', 'The repost target does not exist.');
   if (target.kind === 'post' && target.item.status !== 'published') fail('not_published', 'The repost target is not public.');
   if (target.kind === 'note' && target.item.status !== 'posted') fail('not_published', 'The repost target is not public.');
   const note = createNote(data, ctx, {

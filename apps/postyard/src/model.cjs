@@ -33,6 +33,22 @@ function validateSeed(ctx, data) {
     if (account.person_id && !ctx.binding.people.some(item => item.person_id === account.person_id)) {
       fail('invalid_seed', 'An account person_id is missing from the binding.');
     }
+    if (chars(account.bio) > 500) fail('invalid_seed', 'A profile bio is longer than 500 characters.');
+    const publishedProfile = account.profile_revision || 1;
+    const pendingProfile = account.pending_profile ? account.pending_profile.revision : null;
+    const retiredProfile = account.retired_profile_revisions || [];
+    if (pendingProfile !== null) {
+      if (chars(account.pending_profile.bio) > 500) fail('invalid_seed', 'A pending profile bio is longer than 500 characters.');
+      if (!Number.isInteger(pendingProfile) || pendingProfile <= publishedProfile) fail('invalid_seed', 'A pending profile revision is not above the public one.');
+      if (retiredProfile.includes(pendingProfile)) fail('invalid_seed', 'A pending profile revision is also retired.');
+    }
+    for (const number of retiredProfile) {
+      if (!Number.isInteger(number) || number === publishedProfile) fail('invalid_seed', 'A retired profile revision repeats the public one.');
+    }
+    if (account.profile_revision_high !== undefined && account.profile_revision_high !== null) {
+      const ceiling = Math.max(publishedProfile, pendingProfile || 0, ...retiredProfile);
+      if (account.profile_revision_high < ceiling) fail('invalid_seed', 'The profile high-water mark is below a stored revision.');
+    }
     const counter = data.counters[account.account_id];
     if (!counter || !Number.isInteger(counter.post) || !Number.isInteger(counter.note) || counter.post < 0 || counter.note < 0) {
       fail('invalid_seed', 'Every account needs post and note counters.');
@@ -57,6 +73,7 @@ function validateSeed(ctx, data) {
     let previous = 0;
     for (const row of post.revisions) {
       if (row.revision !== previous + 1 || !VISIBILITY.has(row.visibility)) fail('invalid_seed', 'Revision numbers must be contiguous.');
+      if (row.correction_note && chars(row.correction_note) > 500) fail('invalid_seed', 'A correction note is longer than 500 characters.');
       previous = row.revision;
       instant(row.created_at, 'invalid_seed');
     }
@@ -120,6 +137,10 @@ function validateSeed(ctx, data) {
     instant(receipt.published_at, 'invalid_seed');
   }
   for (const post of data.posts) {
+    if (post.status === 'published' || post.status === 'unpublished') {
+      const row = post.revisions.find(item => item.revision === post.public_revision);
+      if (!post.public_revision || !row || row.visibility !== 'public') fail('invalid_seed', 'The public revision is not public.');
+    }
     for (const row of post.revisions) {
       if (row.visibility !== 'public') continue;
       if (!published.has('post\0' + post.id + '\0' + row.revision)) fail('invalid_seed', 'A public revision has no receipt.');

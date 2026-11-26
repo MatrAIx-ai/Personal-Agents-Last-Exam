@@ -161,3 +161,49 @@ test('public runtime replay, reset, release, and selector denies', () => {
     prep.cleanup();
   }
 });
+
+test('the public resource interface reads the cover and a note image', () => {
+  const {prepare} = require('../../../runtime/prepare.cjs');
+  const {jpeg} = require('../src/images.cjs');
+  const prep = prepare(root);
+  try {
+    const model = prep.model;
+    let state = model.create('postyard', 'run-media', 'sandbox');
+    assert.equal(model.resource(state, 'cover-checksum').status, 'ok');
+    const bytes = model.resourceBytes(state, 'cover-checksum');
+    assert.equal(bytes.status, 'ok');
+    assert.equal(Buffer.from(bytes.blob, 'base64')[0], 0xff);
+    const photo = jpeg(16, 16, [9, 9, 9]);
+    const data = clone(state.data);
+    data.media = [...(data.media || []), {
+      asset_id: 'note-photo', role: 'note', mime: 'image/jpeg', width: 16, height: 16,
+      byte_length: photo.length, bytes_base64: photo.toString('base64')
+    }];
+    const loaded = model.execute(state, 'infra', 'env.load_seed', {
+      expected_version: model.version(state), request_id: 'load-photo', data,
+      binding: state.binding, policies: state.policies, virtual_now: data.seed_clock
+    });
+    assert.equal(loaded.result.status, 'ready', JSON.stringify(loaded.result));
+    state = loaded.state;
+    const posted = model.execute(state, 'agent', 'postyard.notes.post', {
+      expected_version: model.version(state), request_id: 'rq-photo', text: 'A picture.', image_asset_id: 'note-photo'
+    });
+    assert.equal(posted.result.status, 'committed', JSON.stringify(posted.result));
+    const note = posted.state.data.notes.find(item => item.id === posted.result.id);
+    assert.equal(model.resource(posted.state, note.image_asset_id).status, 'ok');
+    const missing = clone(state.resources.bundle);
+    const cover = missing.catalog.assets.find(item => item.asset_id === 'cover-checksum');
+    cover.availability = {status: 'missing', reason: 'The cover file is not in this bundle.'};
+    delete cover.integrity;
+    delete missing.blobs['cover-checksum'];
+    const hidden = model.execute(posted.state, 'infra', 'env.load_seed', {
+      expected_version: model.version(posted.state), request_id: 'load-missing', data: state.data,
+      binding: state.binding, policies: state.policies, bundle: missing, virtual_now: state.data.seed_clock
+    });
+    assert.equal(hidden.result.status, 'ready', JSON.stringify(hidden.result));
+    const view = model.execute(hidden.state, 'agent', 'postyard.blog.posts.get', {post_id: 'ac-0001:p1'});
+    assert.equal(view.result.post.cover.status, 'asset_missing');
+  } finally {
+    prep.cleanup();
+  }
+});
