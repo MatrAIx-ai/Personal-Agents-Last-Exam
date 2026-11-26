@@ -447,6 +447,43 @@ test('evidence keeps text, subjects, links, attempts and attention', () => {
   splitPerson.revisions[0].person_id = 'person-tomas';
   const splitMissed = exportEvidence({snapshot, execution, batch, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [splitPerson]});
   assert.equal(splitMissed.subjects.some(item => item.revision_id === comment.revision_id && item.match === 'linked_post'), false);
+  const publicationText = 'https://postyard.example/@tomasreyes/checksum-window';
+  const publicationSnapshot = structuredClone(snapshot);
+  publicationSnapshot.data.comments.push({
+    comment_id: 'c-publication', repo: 'tidewater/tidewater', number: 2318, author_account_id: 'fy-tomasreyes', target: 'pull', revision: 1,
+    revisions: [{revision: 1, body: publicationText, at: '2026-11-18T09:12:00-08:00', request_id: 'comment-publication', event_id: null, deleted: false}]
+  });
+  function shaped(spec) {
+    const revisionId = spec.objectId + ':1:0';
+    const handle = spec.handle;
+    const doc = {
+      run_id: 'postyard-shaped', app_id: 'postyard', account_id: spec.actor, epoch: 1, person_id: spec.personId,
+      revisions: [{
+        revision_id: revisionId, surface: spec.surface, repo: null, number: null, object_id: spec.objectId,
+        actor_account_id: spec.actor, person_id: spec.personId, text: 'Checksum window notes.',
+        at: '2026-02-11T11:05:00-08:00', request_id: 'post-shaped', event_id: null, revision: 1, deleted: false,
+        version: {epoch: 1, revision: 4}, provenance: 'request_receipt'
+      }],
+      subjects: [{revision_id: revisionId, person_id: 'person-ingrid', surface: 'other_thread', match: 'name'}],
+      links: [{
+        revision_id: revisionId, kind: 'external', url: 'https://postyard.example/@' + handle + '/' + spec.objectId,
+        app_id: 'postyard', object_type: spec.surface, object_id: spec.objectId, handle
+      }]
+    };
+    if (spec.schema !== 'omit') doc.schema = spec.schema === undefined ? 'urn:pale:public-speech-evidence:1' : spec.schema;
+    return doc;
+  }
+  function publicationJoin(spec) {
+    const exported = exportEvidence({snapshot: publicationSnapshot, execution, batch, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [shaped(spec)]});
+    const row = exported.revisions.find(item => item.text === publicationText);
+    return exported.subjects.some(item => item.revision_id === row.revision_id && item.match === 'linked_post' && item.person_id === 'person-ingrid');
+  }
+  const blogSpec = {handle: 'tomasreyes', objectId: 'checksum-window', surface: 'blog', actor: 'ac-0001', personId: 'person-tomas'};
+  assert.equal(publicationJoin(blogSpec), true);
+  assert.equal(publicationJoin({...blogSpec, surface: 'post'}), true);
+  assert.equal(publicationJoin({...blogSpec, handle: 'tomaswrites'}), false);
+  assert.equal(publicationJoin({...blogSpec, surface: 'note'}), false);
+  assert.equal(publicationJoin({...blogSpec, schema: ''}), false);
   const first = evidence.attempts.find(item => item.request_id === 'reopen-1');
   assert.equal(first.deny_count, 2);
   assert.equal(first.transport_retries, 1);
@@ -542,6 +579,17 @@ test('coverage report counts the delivered window', () => {
   assert.equal(report.global_with_december.distinct_dates_in_window, 325);
   assert.equal(report.global_with_december.window_months_with_activity, 24);
   assert.equal(report.problems.length, 0);
+  const {dateProblem, rowsOf} = require('../examples/coverage-report.cjs');
+  assert.equal(dateProblem('fixtures/minimal.json', 'commit', '77aa310', '2025-01-02T19:00:00-08:00'), null);
+  assert.equal(dateProblem('fixtures/minimal.json', 'commit', '77aa310', '2025-02-30T09:00:00-08:00').reason, 'malformed');
+  assert.equal(dateProblem('fixtures/minimal.json', 'commit', '77aa310', 0).reason, 'malformed');
+  assert.equal(dateProblem('fixtures/minimal.json', 'check', 'c41f2a0:ci/package', null).reason, 'missing');
+  const pullProblems = [];
+  rowsOf({pulls: [{repo: 'tomasreyes/fieldbook', number: 4, state: 'merged', created_at: '2025-01-11T10:00:00-08:00', merged_at: null}]}, 'seed.json', pullProblems);
+  assert.equal(pullProblems.some(item => item.id === 'tomasreyes/fieldbook#4' && item.kind === 'pull_merged' && item.reason === 'missing'), true);
+  const checkProblems = [];
+  rowsOf({checks: [{repo: 'tidewater/tidewater', sha: 'c41f2a0', name: 'ci/package', completed_at: null}]}, 'fixtures/minimal.json', checkProblems);
+  assert.equal(checkProblems.length, 0);
   assert.equal(report.owner_library_with_december.distinct_dates_in_window, 295);
   const library = report.seeds.c_owner_library;
   assert.equal(library.by_kind_all.commit, 293);
@@ -562,22 +610,55 @@ test('fieldbook pull requests describe the notes their reviews read', () => {
   assert.equal(new Set(pulls.map(item => item.body)).size, 30);
   assert.equal(new Set(pulls.map(item => item.title)).size, 30);
   assert.equal(pulls.some(item => item.body === 'Adds notes from the latest trip.'), false);
+  assert.equal(pulls.some(item => item.body.includes('second switchback')), false);
+  assert.equal(new Set(pulls.map(item => item.body.replace(/entry \d+/, 'entry'))).size, 30);
   for (const pull of pulls) {
     const head = seed.commits.find(item => item.sha === pull.head_sha);
     const notes = head.files.find(item => item.path === 'docs/notes.md').content;
     const miles = notes.match(/(\d+(?:\.\d+)?) miles/);
+    const seen = notes.trim().split('\n').at(-1);
     assert.ok(miles, pull.number);
-    assert.equal(notes.includes('The second switchback was dry'), true);
     assert.equal(pull.body.includes('entry ' + notes.match(/entry (\d+)/)[1]), true);
     assert.equal(pull.body.includes(miles[1] + ' miles'), true);
-    assert.equal(pull.body.includes('second switchback was dry'), true);
+    assert.equal(pull.body.includes(seen), true);
     const place = notes.match(/from ([^,]+), entry/)[1];
     const reviews = seed.reviews.filter(item => item.repo === pull.repo && item.number === pull.number);
-    assert.equal(reviews.every(item => item.body.includes(miles[1]) || item.body.includes(place)), true);
+    assert.equal(reviews.every(item => item.body.includes(miles[1]) || item.body.includes(place) || item.body.includes(seen)), true);
     const asked = reviews.find(item => item.state === 'changes_requested');
     if (!asked) continue;
     const approved = reviews.find(item => item.state === 'approved');
-    assert.equal(asked.body.includes('second switchback was dry'), true);
+    assert.equal(asked.body.includes(seen), true);
     assert.equal(approved.body.includes('as written'), true);
   }
+  const executable = source => source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '').replace(/\s+/g, ' ').trim();
+  const previous = {};
+  for (const commit of seed.commits.filter(item => item.repo === 'tomasreyes/fieldbook')) {
+    for (const file of commit.files) {
+      if (file.path !== 'src/fieldbook.js' && file.path !== 'src/units.js') continue;
+      const code = executable(file.content);
+      if (previous[file.path] && commit.message !== 'Start fieldbook') assert.notEqual(code, previous[file.path], commit.message);
+      previous[file.path] = code;
+      if (file.path === 'src/fieldbook.js' && commit.message.startsWith('Parse the ')) {
+        const parsed = commit.message.match(/Parse the ([0-9.]+) mile line for (.+)$/);
+        assert.equal(code.includes(parsed[1]), true, commit.message);
+        assert.equal(code.includes(parsed[2]), true, commit.message);
+        assert.equal(code.includes('function parseMiles'), true);
+      }
+      if (file.path === 'src/units.js' && commit.message.startsWith('Record ')) {
+        const parsed = commit.message.match(/Record ([0-9]+) feet of gain on (.+)$/);
+        assert.equal(code.includes('feetToMeters(' + parsed[1] + ')'), true, commit.message);
+        assert.equal(code.includes(parsed[2]), true, commit.message);
+      }
+    }
+  }
+  const events = require('../examples/events/owner-library-2026-12/events.json');
+  const winterNote = events[0].payload.commits[0].files[0].content;
+  const winterUnits = events[2].payload.commits[0].files[0].content;
+  assert.equal(events[0].payload.commits[0].parents[0], 'e000212');
+  assert.equal(events[2].payload.commits[0].parents[0], 'd000001');
+  assert.equal(winterNote.includes('# Field notes'), true);
+  assert.equal(winterNote.includes('miles'), true);
+  assert.equal(winterUnits.includes('function feetToMeters'), true);
+  assert.equal(winterUnits.includes('function winterNoteGainFeet'), true);
+  assert.equal(winterUnits.includes('revision = 99'), false);
 });

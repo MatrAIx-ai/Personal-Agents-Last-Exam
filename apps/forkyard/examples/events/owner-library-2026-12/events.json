@@ -13,7 +13,7 @@
           "parents": ["e000212"],
           "message": "Winter trail notes",
           "files": [
-            {"path": "docs/notes.md", "content": "# docs/notes.md\n\nWinter trail notes\n", "binary": false}
+            {"path": "docs/notes.md", "content": "# Field notes\n\nWillow Camp from Stinson Beach, winter entry.\n4.2 miles. The gain was written as 335 meters.\nAt 18 minutes, frost on the railing, with ice in the shaded ruts.\n", "binary": false}
           ]
         }
       ]
@@ -46,7 +46,7 @@
           "parents": ["d000001"],
           "message": "Fix elevation units in winter notes",
           "files": [
-            {"path": "src/units.js", "content": "'use strict';\n// src/units.js winter fix\nexport const revision = 99;\n", "binary": false}
+            {"path": "src/units.js", "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function winterNoteGainFeet(meters) {\n  return Math.round(Number(meters) / metersPerFoot);\n}\n", "binary": false}
           ]
         }
       ]

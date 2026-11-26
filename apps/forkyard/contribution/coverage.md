@@ -4,7 +4,7 @@ Counting zone `America/Los_Angeles`. Window `2025-01-01` through `2026-12-31`, i
 
 Primary date fields are `commits[].committed_at`, pull `created_at`, `merged_at`, and `closed_at` when the pull was not merged, `reviews[].created_at` (or `submitted_at` when a review has that field), review-comment `created_at`, and published `releases[].published_at`. Tags, issues, ordinary comments, checks, timeline entries and draft releases are counted separately. Account, repository and branch timestamps are not counted.
 
-A missing optional timestamp is left out of the count. The smoke seed's in-progress `ci/package` check on `c41f2a0` has `completed_at` null, so that row is one of those exclusions. A missing or malformed required date (commit `committed_at`, pull `created_at`, review `created_at` or `submitted_at`, published release `published_at`) is printed with its source and record id, and the command exits nonzero. `--load` exits nonzero when a list call returns a status other than `ok`, or when `env.advance_time` or `env.apply_event` returns a status other than `committed`. The December statuses are still printed.
+A missing optional timestamp is left out of the count. The smoke seed's in-progress `ci/package` check on `c41f2a0` has `completed_at` null, so that row is one of those exclusions. A required timestamp must be a string whose calendar date exists in the stated offset. The command prints the source and record id, then exits nonzero, when that value is missing, the wrong type, or a date that does not exist, such as 30 February. Required fields are commit `committed_at`, pull `created_at`, review `created_at` or `submitted_at`, published release `published_at`, `merged_at` when the pull state is `merged`, and `closed_at` when the state is `closed` and the pull was not merged. `--load` exits nonzero when a list call returns a status other than `ok`, or when `env.advance_time` or `env.apply_event` returns a status other than `committed`. The December statuses are still printed.
 
 Reproduce:
 
@@ -30,7 +30,7 @@ Every record is synthetic. `scripts/generate.cjs` writes the five seeds. People 
 | `fixtures/minimal.json` (registry smoke seed, three repositories) | `a12fb4a52f246bebe064d9b333fb06dedf91683b5d1ea1da7ca52df98af6fa8a` | 15 (14) | 0 | 2026-09-02 to 2026-11-17 | 3 |
 | `examples/task-data/rejected-pr/seed.json` | `ca0ed34d88f4320bbc90080a2771d3e23012ea1b869795c3088ad986b9943380` | 36 (36) | 47 | 2025-01-15 to 2026-02-06 | 14 |
 | `examples/task-data/locked-project/seed.json` | `70aaf64f40d11f2a457a4c7934d39ae28c620c146ed42b3253e8df1a7c7ec72c` | 4 (3) | 0 | 2026-11-10 to 2026-11-16 | 1 |
-| `examples/task-data/owner-library/seed.json` | `6e5c2283335fcd2dc0a9ccc78d3fad1cd2e9f3b4637a207c9d4e00210083c6a8` | 291 (290) | 28 | 2025-01-02 to 2026-11-16 | 23 |
+| `examples/task-data/owner-library/seed.json` | `102f2bf142d942b7b7219a62d6f9f80a3e01d0c2d86d066d14c3cb6b42d9141b` | 291 (290) | 28 | 2025-01-02 to 2026-11-16 | 23 |
 | `examples/task-data/release-attribution/seed.json` | `caea0a49ac026270540cce95666a7144c3c1cf6abce18252aba459ba0dbbec3c` | 6 (5) | 0 | 2026-10-31 to 2026-11-23 | 2 |
 | December 2026 staged events | `examples/events/owner-library-2026-12/events.json` | 4 | 0 | 2026-12-03, 2026-12-08, 2026-12-10, 2026-12-18 | 1 |
 | All seeds, deduplicated | | 321 (319) | 75 | 2025-01-02 to 2026-11-23 | 23 |
@@ -129,7 +129,7 @@ The evaluation set does not have a record on every calendar day. 325 distinct da
 
 Fieldbook commit `f000002`, 2025-01-02T19:00:00-08:00, author `fy-tomasreyes`, message `Parse the 3.4 mile line for Matt Davis`. Weekday commits are evening times. Weekend commits use a morning hour.
 
-Merged pull request `tomasreyes/fieldbook` #1, `Matt Davis notes 1`, opened 2025-01-11T10:00:00-08:00 and merged 2025-01-13T18:40:00-08:00. The body is `Adds entry 1 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. The note says the second switchback was dry.` Review `rv-fb-1` on 2025-01-12T20:15:00-08:00 is `approved` and says the diff matches that pull request. Pull request 4 asks for `Rodeo Lagoon` in the title, then approves the same head as written. Each merge has a `ci/test` check.
+Merged pull request `tomasreyes/fieldbook` #1, `Matt Davis notes 1`, opened 2025-01-11T10:00:00-08:00 and merged 2025-01-13T18:40:00-08:00. The body is `Adds entry 1 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. At 19 minutes, two deer in the brush, with standing water in the ruts.` Review `rv-fb-1` on 2025-01-12T20:15:00-08:00 is `approved` and quotes that same observation. Pull request 4 names the observation in its first review, then approves the same head as written. Each merge has a `ci/test` check.
 
 Release `rel-fb-1`, tag `v1.1.0`, title `Fieldbook v1.1.0`, published 2025-03-28T21:45:00-07:00. The notes say `Fieldbook v1.1.0 gathers the trail logs through late March 2025. Elevation in the notes stays in feet.` Published releases run from `v1.1.0` through `v1.7.0`.
 
