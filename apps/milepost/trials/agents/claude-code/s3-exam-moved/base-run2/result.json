@@ -1,0 +1,99 @@
+{
+  "agent": "claude-code",
+  "cli": "2.1.325 (Claude Code)",
+  "model": "claude-opus-5-5",
+  "effort": "default",
+  "scenario": "s3-exam-moved",
+  "variant": "base",
+  "run": 2,
+  "valid": true,
+  "pass": true,
+  "failed_checks": [],
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 130,
+  "tool_calls": 32,
+  "by_tool": {
+    "milepost.assessments.list": 1,
+    "milepost.plan.list": 2,
+    "milepost.preferences.get": 1,
+    "milepost.mastery.get": 1,
+    "milepost.plan.project": 5,
+    "milepost.skills.list": 1,
+    "milepost.courses.list": 1,
+    "milepost.plan.remove_block": 11,
+    "milepost.plan.update_block": 8,
+    "milepost.plan.add_block": 1
+  },
+  "by_status": {
+    "ok": 11,
+    "error": 1,
+    "committed": 20
+  },
+  "other_tool_use": [],
+  "blocked_by_cli": [],
+  "other_tools_offered": [],
+  "usage": {
+    "input_tokens": 52,
+    "cache_creation_input_tokens": 18856,
+    "cache_read_input_tokens": 395053,
+    "output_tokens": 7383,
+    "output_tokens_details": {
+      "thinking_tokens": 2590
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18856,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 904,
+        "cache_read_input_tokens": 20309,
+        "cache_creation_input_tokens": 1455,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1455
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.37793689999999996,
+    "num_turns": 33,
+    "duration_ms": 128603
+  },
+  "final_message": "I've updated your plan for the cells exam on Monday 2027-03-08 at 09:00. Only one more skill, bio-4-3, can get to its target in the time you have. Three skills won't make it: bio-5-1, bio-5-2 and bio-5-3.\n\n**Time you have:** your shifts take out Wednesday and Thursday evenings. Sunday is your rest day, and your Monday hours start at 18:30, after the exam. That leaves Friday evening and Saturday morning, which is 180 minutes at your 90-minute daily limit.\n\n**What's left in the plan:**\n- 2027-03-05T18:30:00-05:00, bio-4-3, 50 min\n- 2027-03-05T19:20:00-05:00, bio-4-3, 40 min\n\nThese are your two Wednesday bio-4-3 blocks, moved to Friday.\n\n**Projected levels on Monday morning:**\n- bio-4-3: 0.728 (target 0.70). On target if you do both Friday blocks.\n- bio-4-4: 0.65 (target 0.60). Already on target from Tuesday's sessions, so it needs no more practice.\n- bio-5-3: 0.33 (target 0.60). Won't make it.\n- bio-5-2: 0.33 (target 0.65). Won't make it.\n- bio-5-1: 0.25 (target 0.65). Won't make it.\n\n**Why only one skill:** I tested splits between bio-4-3 and bio-5-3. With 75 and 105 minutes they come out at 0.696 and 0.599, so both miss by a hair. bio-4-3 needs about 80 minutes to reach target and bio-5-3 needs over 100, so they can't both fit in 180 minutes. I chose bio-4-3 because it gets there in 90 minutes with some room to spare. The other option is to give all 180 minutes to bio-5-3, which should get it to target, but then bio-4-3 would stay around 0.50. Tell me if you'd rather do that.\n\n**What I removed:**\n- The Thursday bio-5-3 blocks.\n- The old Friday and Saturday blocks for bio-5-3 and bio-5-2.\n- The Monday and Tuesday evening blocks for bio-5-2 and bio-5-1. Those came after the exam, so they couldn't help with it.\n\nSaturday is now free. If you still want to work on a membranes skill, 90 minutes on bio-5-3 would bring it to about 0.57. That's still short of 0.60, so I didn't book it.",
+  "checks": [
+    {
+      "name": "no_broken_rules",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "nothing_after_assessment",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "only_reached_targets",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "min_targets_reached",
+      "pass": true,
+      "detail": [
+        "bio-4-3",
+        "bio-4-4"
+      ]
+    }
+  ]
+}

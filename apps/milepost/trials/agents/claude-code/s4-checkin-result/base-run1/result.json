@@ -1,0 +1,100 @@
+{
+  "agent": "claude-code",
+  "cli": "2.1.325 (Claude Code)",
+  "model": "claude-opus-5-5",
+  "effort": "default",
+  "scenario": "s4-checkin-result",
+  "variant": "base",
+  "run": 1,
+  "valid": true,
+  "pass": true,
+  "failed_checks": [],
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 44,
+  "tool_calls": 17,
+  "by_tool": {
+    "milepost.assessments.list": 1,
+    "milepost.plan.list": 1,
+    "milepost.preferences.get": 1,
+    "milepost.mastery.get": 1,
+    "milepost.plan.project": 6,
+    "milepost.skills.list": 2,
+    "milepost.plan.update_block": 1,
+    "milepost.plan.remove_block": 3,
+    "milepost.plan.add_block": 1
+  },
+  "by_status": {
+    "ok": 11,
+    "error": 1,
+    "committed": 5
+  },
+  "other_tool_use": [],
+  "blocked_by_cli": [],
+  "other_tools_offered": [],
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 16247,
+    "cache_read_input_tokens": 124279,
+    "output_tokens": 3201,
+    "output_tokens_details": {
+      "thinking_tokens": 817
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 16247,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1136,
+        "cache_read_input_tokens": 18387,
+        "cache_creation_input_tokens": 603,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 603
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.2190627,
+    "num_turns": 18,
+    "duration_ms": 42400
+  },
+  "final_message": "Your plan for the factoring quiz (Fri 2027-03-12T10:00:00-05:00) now has every skill projected at or above its target. I also cut 150 minutes of practice you no longer need.\n\n**What the check-in showed:** alg-7-3 (factoring ax² + bx + c) came in at 0.42, under its 0.65 target. Both alg-7-3 blocks this week were missed (Wednesday and this morning), and under the old plan it would only have reached 0.599 by the quiz. alg-7-5 (choosing a factoring method) came in at 0.66, already above its 0.60 target, but the old plan still gave it three blocks (240 minutes).\n\n**Changes:**\n- **Sat 2027-03-06T09:00:00-05:00 (90 min):** switched from alg-7-5 to alg-7-3. This keeps the right order, since alg-7-3 is a prerequisite for alg-7-5.\n- **Removed Sun 2027-03-07T09:00:00-05:00 (90 min, alg-7-5).**\n- **Removed Thu 2027-03-11T06:30:00-05:00 (60 min, alg-7-3).** You don't need it after Saturday's session, and that's also the morning of your cells exam.\n- I also tested dropping the Wed 2027-03-10T06:30:00-05:00 alg-7-5 block, but alg-7-5 would then fade to 0.585, below target. So I put it back at the same time and length (60 min).\n\n**Your factoring schedule now:**\n- Sat 03-06, 09:00: alg-7-3, 90 min\n- Sat 03-06, 10:45: alg-7-4, 60 min\n- Mon 03-08, 06:30: alg-7-2, 90 min\n- Tue 03-09, 06:30: alg-7-4, 60 min\n- Wed 03-10, 06:30: alg-7-5, 60 min\n\n**Projected levels on quiz day if you complete every block:**\n| Skill | Projected | Target |\n|---|---|---|\n| alg-7-2 | 0.721 | 0.70 |\n| alg-7-3 | 0.652 | 0.65 |\n| alg-7-4 | 0.662 | 0.65 |\n| alg-7-5 | 0.710 | 0.60 |\n\nThe margins are small, especially for alg-7-3. If you miss Saturday's alg-7-3 block, it will fall short again, so that's the one to protect. I didn't change the other blocks; their margins look too thin to drop any of them.",
+  "checks": [
+    {
+      "name": "all_targets_reached",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no_broken_rules",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no_unneeded_practice",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "blocks_in_scope",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "max_planned_minutes",
+      "pass": true,
+      "detail": 360
+    }
+  ]
+}

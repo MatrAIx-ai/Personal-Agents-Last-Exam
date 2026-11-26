@@ -1,0 +1,61 @@
+{
+  "scenario": "s4-checkin-result",
+  "variant": "base",
+  "seed": 3,
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "no_broken_rules"
+  ],
+  "steps": 6,
+  "ended": "answer",
+  "tool_calls": 15,
+  "writes": 12,
+  "refused": 3,
+  "by_tool": {
+    "milepost.mastery.get": 1,
+    "milepost.assessments.list": 1,
+    "milepost.plan.list": 1,
+    "milepost.plan.remove_block": 6,
+    "milepost.plan.add_block": 5,
+    "milepost.plan.update_block": 1
+  },
+  "seconds": 49,
+  "final_message": "The updated block for `alg-7-2` has been added successfully with the new start time of 07:30 on 2027-03-08.\n\nThe study plan now includes the following blocks for the factoring skills to ensure they reach their target levels for the factoring quiz on 2027-03-12:\n\n- `alg-7-2` on 2027-03-08 at 07:30\n- `alg-7-3` on 2027-03-09 at 06:30\n- `alg-7-4` on 2027-03-10 at 06:30\n- `alg-7-5` on 2027-03-11 at 06:30\n\nThis plan should help you prepare for the factoring quiz. If you have any further questions or need additional assistance, feel free to ask!",
+  "checks": [
+    {
+      "name": "all_targets_reached",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no_broken_rules",
+      "pass": false,
+      "detail": [
+        {
+          "rule": "available_hours",
+          "block_ids": [
+            "blk-s4-8"
+          ],
+          "detail": "Outside the student's available hours."
+        }
+      ]
+    },
+    {
+      "name": "no_unneeded_practice",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "blocks_in_scope",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "max_planned_minutes",
+      "pass": true,
+      "detail": 420
+    }
+  ]
+}

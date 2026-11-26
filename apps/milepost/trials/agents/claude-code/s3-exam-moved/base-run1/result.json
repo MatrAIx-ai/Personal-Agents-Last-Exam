@@ -1,0 +1,100 @@
+{
+  "agent": "claude-code",
+  "cli": "2.1.325 (Claude Code)",
+  "model": "claude-opus-5-5",
+  "effort": "default",
+  "scenario": "s3-exam-moved",
+  "variant": "base",
+  "run": 1,
+  "valid": true,
+  "pass": true,
+  "failed_checks": [],
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 115,
+  "tool_calls": 32,
+  "by_tool": {
+    "milepost.assessments.list": 1,
+    "milepost.plan.list": 2,
+    "milepost.preferences.get": 1,
+    "milepost.mastery.get": 1,
+    "milepost.plan.project": 4,
+    "milepost.skills.list": 2,
+    "milepost.practice.list": 1,
+    "milepost.courses.list": 1,
+    "milepost.plan.remove_block": 11,
+    "milepost.plan.update_block": 7,
+    "milepost.plan.add_block": 1
+  },
+  "by_status": {
+    "ok": 12,
+    "error": 1,
+    "committed": 19
+  },
+  "other_tool_use": [],
+  "blocked_by_cli": [],
+  "other_tools_offered": [],
+  "usage": {
+    "input_tokens": 48,
+    "cache_creation_input_tokens": 20763,
+    "cache_read_input_tokens": 399079,
+    "output_tokens": 7507,
+    "output_tokens_details": {
+      "thinking_tokens": 2716
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 20763,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 949,
+        "cache_read_input_tokens": 21831,
+        "cache_creation_input_tokens": 1675,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1675
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.39646560000000014,
+    "num_turns": 33,
+    "duration_ms": 114141
+  },
+  "final_message": "I've rebuilt your plan for Monday's cells exam (2027-03-08T09:00:00-05:00). Only one skill still needs practice to hit its target, and two 90-minute evenings aren't enough to get a second one there.\n\n**Why the time is short:** Wednesday and Thursday are gone to your shifts, Sunday is your rest day, and Monday's study window starts at 18:30, after the exam. That leaves Friday evening and Saturday morning, at most 90 minutes each under your daily limit: 180 minutes in total.\n\n**Your plan now:**\n- 2027-03-06T10:00:00-05:00, 50 min, bio-4-3 (organelles of plant and animal cells)\n- 2027-03-06T10:50:00-05:00, 40 min, bio-4-3\n\nThat brings bio-4-3 to a projected 0.728 against a target of 0.7.\n\n**Projected levels on Monday:**\n- **bio-4-3:** 0.728 (target 0.7), reaches target with Saturday's blocks.\n- **bio-4-4 (ER and Golgi):** 0.65 (target 0.6). Tuesday's sessions already got you there, so no practice needed.\n- **bio-5-3 (pumps and active transport):** 0.328 (target 0.6), won't make it. The most I could fit was 115 minutes, which projected only 0.621 and left bio-4-3 short at 0.67. Getting both over target would take about 185 minutes.\n- **bio-5-2 (diffusion and osmosis):** 0.331 (target 0.65), won't make it. Even 130 minutes before the exam only projected 0.626.\n- **bio-5-1 (fluid mosaic model):** 0.254 (target 0.65), won't make it. It needed far more time than you have.\n\n**What I removed:**\n- The four Wednesday/Thursday blocks that clashed with your shifts.\n- Friday's blocks and the other Saturday bio-5-2 practice, since none of it got a skill to target.\n- The Monday-evening and Tuesday blocks for bio-5-1 and bio-5-2, since they're after the exam.\n\n**Trade-off:** I gave the time to bio-4-3 because it clears its target by a comfortable margin. It's also a prerequisite for bio-5-1, which in turn leads to bio-5-2 and bio-5-3. If you'd rather aim for bio-5-3 instead, I can swap the plan: about 115 minutes across Friday and Saturday gets it to roughly 0.62, but then bio-4-3 won't reach its target.\n\nFriday evening is now free. Practising the bio-5 skills then wouldn't get them to target, but it would still raise them somewhat. Tell me if you want it added back.",
+  "checks": [
+    {
+      "name": "no_broken_rules",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "nothing_after_assessment",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "only_reached_targets",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "min_targets_reached",
+      "pass": true,
+      "detail": [
+        "bio-4-3",
+        "bio-4-4"
+      ]
+    }
+  ]
+}

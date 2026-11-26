@@ -1,0 +1,112 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "milepost-s4-checkin-result-twin",
+  "version": "1.0.0",
+  "description": "Reference scenario s4-checkin-result (twin) on the synthetic student of fixtures/students/daniel: \"A check-in result changes the plan\". Load with env.load_seed at virtual_now 2027-03-01T09:00:00-05:00 with this binding.json and the package's fixtures/policies.json, then apply the setup in ../scenario.json.",
+  "record_source_ids": [
+    "catalog",
+    "profile",
+    "history",
+    "scenario"
+  ],
+  "sources": [
+    {
+      "source_id": "catalog",
+      "kind": "synthetic",
+      "description": "Courses, units, skills, prerequisites, assessments and targets written by hand for Milepost (fixtures/catalog/courses.json). Topic choice and order follow the tables of contents of three OpenStax textbooks, cited per unit and skill in that file: Elementary Algebra 2e (Lynn Marecek, MaryAnne Anthony-Smith, Andrea Honeycutt Mathis; OpenStax, Rice University, 2020; CC BY-NC-SA 4.0; https://openstax.org/details/books/elementary-algebra-2e); Introductory Statistics 2e (Barbara Illowsky, Susan Dean; OpenStax, Rice University, 2023; CC BY-NC-SA 4.0; https://openstax.org/details/books/introductory-statistics-2e); Biology 2e (Mary Ann Clark, Matthew Douglas, Jung Choi; OpenStax, Rice University, 2018; CC BY-NC-SA 4.0; https://openstax.org/details/books/biology-2e). Names are Milepost's own wording; no text, figures or exercises from the books are included.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "Milepost fixture authoring",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "profile",
+      "kind": "synthetic",
+      "description": "Hand-written student profile fixtures/profiles/daniel.json: name, time zone, study preferences, weekly habits, starting strengths and learner parameters. Invented.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "Milepost fixture authoring",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "history",
+      "kind": "synthetic",
+      "description": "Starting mastery, practice sessions, the planned week and the results of past assessments, simulated from the profile with a seeded PRNG (mulberry32) and the learner rule.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "seeded simulation",
+        "tool": "apps/milepost/scripts/build-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": 2202,
+        "parameters": {
+          "learner_rule": "milepost-learner/1",
+          "history_start": "2027-02-01T09:00:00-05:00",
+          "now": "2027-03-01T09:00:00-05:00",
+          "planned_week_start": "2027-02-22",
+          "depth_penalty": 0.03,
+          "baseline_noise": 0.05,
+          "result_noise": 0.05,
+          "stability_days": [
+            6,
+            20
+          ]
+        }
+      }
+    },
+    {
+      "source_id": "scenario",
+      "kind": "synthetic",
+      "description": "Records written by hand for the scenario (examples/scenarios/s4-checkin-result/scenario.json). Both members: A plan Daniel made on Sunday evening for the factoring quiz: 11 blocks, 870 minutes, prerequisites first and no alg-7-5 practice before the weekend. During the setup the check-in is added, Tuesday and Thursday are done, Wednesday and Friday are missed, and the check-in result is posted. Twin only: Three spaced platform sessions on alg-7-5 in February (Saturdays 02-06, 02-13 and 02-20, 14:00-14:45). The check-in measures the same level; the skill is held longer.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "apps/milepost/scripts/build-scenarios.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "scenario": "s4-checkin-result",
+          "variant": "twin"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Catalog and profile written by hand; the generator expands them into one seed and checks it against the seed schema and validateSeed.",
+    "Results are the learner rule's level at each past assessment plus seeded noise of at most 0.05, posted two days and two hours later.",
+    "Scenario changes applied to the full fixture daniel, then the twin changes; sessions sorted by end time and blocks by start."
+  ],
+  "expected_counts": {
+    "records": 127,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, variation and reuse permissions."
+  }
+}

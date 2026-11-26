@@ -1,0 +1,631 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:milepost:seed:1",
+  "description": "One student account: course catalog, the student record and evaluator-only data.",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "student": {
+      "type": "object",
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "time_zone": {
+          "type": "string",
+          "pattern": "^(?:UTC|[A-Za-z_]+(?:/[A-Za-z0-9_+-]+)+)$",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "display_name",
+        "time_zone"
+      ],
+      "additionalProperties": false
+    },
+    "courses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20
+    },
+    "units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "course_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        },
+        "required": [
+          "id",
+          "course_id",
+          "title",
+          "position"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "unit_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "prerequisites": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 20,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "id",
+          "unit_id",
+          "title",
+          "prerequisites"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "mastery": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "skill_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "level": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "stability_days": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 365
+          },
+          "as_of": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "last_practised_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "skill_id",
+          "level",
+          "stability_days",
+          "as_of",
+          "last_practised_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "assessments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "skill_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "level": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "skill_id",
+                "level"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100,
+            "minItems": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "date",
+          "targets",
+          "created_at",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "assessment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "posted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "levels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "skill_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "level": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "skill_id",
+                "level"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "id",
+          "assessment_id",
+          "posted_at",
+          "levels"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "practice": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "skill_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "minutes": {
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 300
+          },
+          "ended_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "enum": [
+              "platform",
+              "student_report"
+            ]
+          },
+          "block_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "skill_id",
+          "minutes",
+          "ended_at",
+          "source",
+          "block_id",
+          "recorded_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 5000
+    },
+    "plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "skill_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "minutes": {
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 240
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "done": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "skill_id",
+          "start",
+          "minutes",
+          "created_at",
+          "updated_at",
+          "done"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "preferences": {
+      "type": "object",
+      "properties": {
+        "available_hours": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "day": {
+                "enum": [
+                  "Mon",
+                  "Tue",
+                  "Wed",
+                  "Thu",
+                  "Fri",
+                  "Sat",
+                  "Sun"
+                ]
+              },
+              "from": {
+                "type": "string",
+                "pattern": "^(?:(?:[01][0-9]|2[0-3]):[0-5][0-9]|24:00)$"
+              },
+              "to": {
+                "type": "string",
+                "pattern": "^(?:(?:[01][0-9]|2[0-3]):[0-5][0-9]|24:00)$"
+              }
+            },
+            "required": [
+              "day",
+              "from",
+              "to"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 21
+        },
+        "daily_cap_minutes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 720
+        },
+        "rest_days": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "Mon",
+              "Tue",
+              "Wed",
+              "Thu",
+              "Fri",
+              "Sat",
+              "Sun"
+            ]
+          },
+          "maxItems": 7,
+          "uniqueItems": true
+        },
+        "block_minutes": {
+          "type": "object",
+          "properties": {
+            "min": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 240
+            },
+            "max": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 240
+            }
+          },
+          "required": [
+            "min",
+            "max"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "available_hours",
+        "daily_cap_minutes",
+        "rest_days",
+        "block_minutes"
+      ],
+      "additionalProperties": false
+    },
+    "evaluator": {
+      "type": "object",
+      "properties": {
+        "learner_params": {
+          "type": "object",
+          "properties": {
+            "learning_rate": {
+              "type": "number",
+              "minimum": 0.0001,
+              "maximum": 10
+            },
+            "prerequisite_floor": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "retention_base": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.9999
+            },
+            "stability_growth": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "spacing_bonus": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "min_stability_days": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 365
+            },
+            "max_stability_days": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 365
+            }
+          },
+          "required": [
+            "learning_rate",
+            "prerequisite_floor",
+            "retention_base",
+            "stability_growth",
+            "spacing_bonus",
+            "min_stability_days",
+            "max_stability_days"
+          ],
+          "additionalProperties": false
+        },
+        "activity_log": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "seq": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "operation": {
+                "enum": [
+                  "milepost.practice.record",
+                  "milepost.practice.remove",
+                  "milepost.plan.add_block",
+                  "milepost.plan.update_block",
+                  "milepost.plan.remove_block"
+                ]
+              },
+              "request_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "expected_version": {
+                "type": "object",
+                "properties": {
+                  "epoch": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "epoch",
+                  "revision"
+                ],
+                "additionalProperties": false
+              },
+              "object_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "details": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "seq",
+              "at",
+              "operation",
+              "request_id",
+              "expected_version",
+              "object_id",
+              "details"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "learner_params",
+        "activity_log"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "student",
+    "courses",
+    "units",
+    "skills",
+    "mastery",
+    "assessments",
+    "results",
+    "practice",
+    "plan",
+    "preferences",
+    "evaluator"
+  ],
+  "additionalProperties": false
+}

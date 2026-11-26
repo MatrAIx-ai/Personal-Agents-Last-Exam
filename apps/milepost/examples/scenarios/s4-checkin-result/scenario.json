@@ -1,0 +1,475 @@
+{
+  "id": "s4-checkin-result",
+  "title": "A check-in result changes the plan",
+  "workflows": [
+    1,
+    2,
+    4
+  ],
+  "student": "daniel",
+  "assessment_id": "alg-quiz-factoring",
+  "request": "My factoring check-in results came in. Update my plan for next Friday's factoring quiz: every skill should reach its target, but drop any practice I no longer need.",
+  "load_at": "2027-03-01T09:00:00-05:00",
+  "setup": [
+    {
+      "event": {
+        "event_id": "ev-s4-added",
+        "at": "2027-03-01T09:30:00-05:00",
+        "operation": "milepost.assessment.added",
+        "payload": {
+          "assessment_id": "alg-checkin",
+          "title": "Factoring check-in",
+          "date": "2027-03-04T10:00:00-05:00",
+          "targets": [
+            {
+              "skill_id": "alg-7-3",
+              "level": 0.65
+            },
+            {
+              "skill_id": "alg-7-5",
+              "level": 0.6
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": {
+        "event_id": "ev-s4-tue",
+        "at": "2027-03-02T08:00:00-05:00",
+        "operation": "milepost.practice.completed",
+        "payload": {
+          "skill_id": "alg-7-2",
+          "minutes": 90,
+          "block_id": "blk-s4-1"
+        }
+      }
+    },
+    {
+      "event": {
+        "event_id": "ev-s4-thu",
+        "at": "2027-03-04T08:00:00-05:00",
+        "operation": "milepost.practice.completed",
+        "payload": {
+          "skill_id": "alg-7-4",
+          "minutes": 90,
+          "block_id": "blk-s4-3"
+        }
+      }
+    },
+    {
+      "event": {
+        "event_id": "ev-s4-result",
+        "at": "2027-03-05T12:00:00-05:00",
+        "operation": "milepost.assessment.result_posted",
+        "payload": {
+          "assessment_id": "alg-checkin",
+          "results": [
+            {
+              "skill_id": "alg-7-3",
+              "level": 0.42
+            },
+            {
+              "skill_id": "alg-7-5",
+              "level": 0.66
+            }
+          ]
+        }
+      }
+    },
+    {
+      "advance_to": "2027-03-05T12:30:00-05:00"
+    }
+  ],
+  "ask_at": "2027-03-05T12:30:00-05:00",
+  "changes": {
+    "describe": "A plan Daniel made on Sunday evening for the factoring quiz: 11 blocks, 870 minutes, prerequisites first and no alg-7-5 practice before the weekend. During the setup the check-in is added, Tuesday and Thursday are done, Wednesday and Friday are missed, and the check-in result is posted.",
+    "add": {
+      "plan": [
+        {
+          "id": "blk-s4-1",
+          "skill_id": "alg-7-2",
+          "start": "2027-03-02T06:30:00-05:00",
+          "minutes": 90,
+          "created_at": "2027-02-28T20:00:00-05:00",
+          "updated_at": "2027-02-28T20:00:00-05:00",
+          "done": false
+        },
+        {
+          "id": "blk-s4-2",
+          "skill_id": "alg-7-3",
+          "start": "2027-03-03T06:30:00-05:00",
+          "minutes": 90,
+          "created_at": "2027-02-28T20:00:00-05:00",
+          "updated_at": "2027-02-28T20:00:00-05:00",
+          "done": false
+        },
+        {
+          "id": "blk-s4-3",
+          "skill_id": "alg-7-4",
+          "start": "2027-03-04T06:30:00-05:00",
+          "minutes": 90,
+          "created_at": "2027-02-28T20:00:00-05:00",
+          "updated_at": "2027-02-28T20:00:00-05:00",
+          "done": false
+        },
+        {
+          "id": "blk-s4-4",
+          "skill_id": "alg-7-3",
+          "start": "2027-03-05T06:30:00-05:00",
+          "minutes": 90,
+          "created_at": "2027-02-28T20:00:00-05:00",
+          "updated_at": "2027-02-28T20:00:00-05:00",
+          "done": false
+        },
+        {
+          "id": "blk-s4-5",
+          "skill_id": "alg-7-5",
+          "start": "2027-03-06T09:00:00-05:00",
+          "minutes": 90,
+          "created_at": "2027-02-28T20:00:00-05:00",
+          "updated_at": "2027-02-28T20:00:00-05:00",
+          "done": false
+        },
+        {
+          "id": "blk-s4-6",
+          "skill_id": "alg-7-4",
+          "start": "2027-03-06T10:45:00-05:00",
+          "minutes": 60,
+          "created_at": "2027-02-28T20:00:00-05:00",
+          "updated_at": "2027-02-28T20:00:00-05:00",
+          "done": false
+        },
+        {
+          "id": "blk-s4-7",
+          "skill_id": "alg-7-5",
+          "start": "2027-03-07T09:00:00-05:00",
+          "minutes": 90,
+          "created_at": "2027-02-28T20:00:00-05:00",
+          "updated_at": "2027-02-28T20:00:00-05:00",
+          "done": false
+        },
+        {
+          "id": "blk-s4-8",
+          "skill_id": "alg-7-2",
+          "start": "2027-03-08T06:30:00-05:00",
+          "minutes": 90,
+          "created_at": "2027-02-28T20:00:00-05:00",
+          "updated_at": "2027-02-28T20:00:00-05:00",
+          "done": false
+        },
+        {
+          "id": "blk-s4-9",
+          "skill_id": "alg-7-4",
+          "start": "2027-03-09T06:30:00-05:00",
+          "minutes": 60,
+          "created_at": "2027-02-28T20:00:00-05:00",
+          "updated_at": "2027-02-28T20:00:00-05:00",
+          "done": false
+        },
+        {
+          "id": "blk-s4-10",
+          "skill_id": "alg-7-5",
+          "start": "2027-03-10T06:30:00-05:00",
+          "minutes": 60,
+          "created_at": "2027-02-28T20:00:00-05:00",
+          "updated_at": "2027-02-28T20:00:00-05:00",
+          "done": false
+        },
+        {
+          "id": "blk-s4-11",
+          "skill_id": "alg-7-3",
+          "start": "2027-03-11T06:30:00-05:00",
+          "minutes": 60,
+          "created_at": "2027-02-28T20:00:00-05:00",
+          "updated_at": "2027-02-28T20:00:00-05:00",
+          "done": false
+        }
+      ]
+    }
+  },
+  "twin": {
+    "describe": "Three spaced platform sessions on alg-7-5 in February (Saturdays 02-06, 02-13 and 02-20, 14:00-14:45). The check-in measures the same level; the skill is held longer.",
+    "changes": {
+      "add": {
+        "practice": [
+          {
+            "id": "ses-s4-t1",
+            "skill_id": "alg-7-5",
+            "minutes": 45,
+            "ended_at": "2027-02-06T14:45:00-05:00",
+            "source": "platform",
+            "block_id": null,
+            "recorded_at": "2027-02-06T14:45:00-05:00"
+          },
+          {
+            "id": "ses-s4-t2",
+            "skill_id": "alg-7-5",
+            "minutes": 45,
+            "ended_at": "2027-02-13T14:45:00-05:00",
+            "source": "platform",
+            "block_id": null,
+            "recorded_at": "2027-02-13T14:45:00-05:00"
+          },
+          {
+            "id": "ses-s4-t3",
+            "skill_id": "alg-7-5",
+            "minutes": 45,
+            "ended_at": "2027-02-20T14:45:00-05:00",
+            "source": "platform",
+            "block_id": null,
+            "recorded_at": "2027-02-20T14:45:00-05:00"
+          }
+        ]
+      }
+    },
+    "decision": "Base: alg-7-5 was measured at 0.66 but was last practised in January, so it falls to 0.585 by the quiz and needs one short review. Twin: after spaced practice it holds at 0.642, so every alg-7-5 block is practice the student no longer needs.",
+    "proof": "In the base, alg-7-5 is below its target at the quiz without practice, so a passing base plan has an alg-7-5 block; in the twin it reaches the target without practice, so that block fails no_unneeded_practice."
+  },
+  "success": {
+    "base": [
+      "all_targets_reached",
+      "no_broken_rules",
+      "no_unneeded_practice",
+      "blocks_in_scope",
+      {
+        "max_planned_minutes": 585
+      }
+    ],
+    "twin": [
+      "all_targets_reached",
+      "no_broken_rules",
+      "no_unneeded_practice",
+      "blocks_in_scope",
+      {
+        "max_planned_minutes": 540
+      }
+    ]
+  },
+  "runs": {
+    "base": {
+      "reference": [
+        [
+          "milepost.plan.update_block",
+          {
+            "id": "blk-s4-5",
+            "patch": {
+              "skill_id": "alg-7-3"
+            }
+          }
+        ],
+        [
+          "milepost.plan.remove_block",
+          {
+            "id": "blk-s4-7"
+          }
+        ],
+        [
+          "milepost.plan.update_block",
+          {
+            "id": "blk-s4-10",
+            "patch": {
+              "minutes": 30
+            }
+          }
+        ]
+      ],
+      "alternatives": [
+        [
+          [
+            "milepost.plan.remove_block",
+            {
+              "id": "blk-s4-5"
+            }
+          ],
+          [
+            "milepost.plan.remove_block",
+            {
+              "id": "blk-s4-7"
+            }
+          ],
+          [
+            "milepost.plan.add_block",
+            {
+              "skill_id": "alg-7-3",
+              "start": "2027-03-06T09:00:00-05:00",
+              "minutes": 75
+            }
+          ],
+          [
+            "milepost.plan.add_block",
+            {
+              "skill_id": "alg-7-3",
+              "start": "2027-03-07T09:00:00-05:00",
+              "minutes": 45
+            }
+          ],
+          [
+            "milepost.plan.update_block",
+            {
+              "id": "blk-s4-10",
+              "patch": {
+                "minutes": 45
+              }
+            }
+          ]
+        ]
+      ],
+      "controls": [
+        {
+          "name": "no action",
+          "calls": [],
+          "fails": [
+            "all_targets_reached"
+          ]
+        },
+        {
+          "name": "drops every alg-7-5 block",
+          "calls": [
+            [
+              "milepost.plan.update_block",
+              {
+                "id": "blk-s4-5",
+                "patch": {
+                  "skill_id": "alg-7-3"
+                }
+              }
+            ],
+            [
+              "milepost.plan.remove_block",
+              {
+                "id": "blk-s4-7"
+              }
+            ],
+            [
+              "milepost.plan.remove_block",
+              {
+                "id": "blk-s4-10"
+              }
+            ]
+          ],
+          "fails": [
+            "all_targets_reached"
+          ]
+        },
+        {
+          "name": "keeps everything and adds alg-7-3 practice",
+          "calls": [
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "alg-7-3",
+                "start": "2027-03-12T06:30:00-05:00",
+                "minutes": 90
+              }
+            ]
+          ],
+          "fails": [
+            "max_planned_minutes"
+          ]
+        },
+        {
+          "name": "rule-breaking: alg-7-3 on Wednesday evening",
+          "calls": [
+            [
+              "milepost.plan.remove_block",
+              {
+                "id": "blk-s4-5"
+              }
+            ],
+            [
+              "milepost.plan.remove_block",
+              {
+                "id": "blk-s4-7"
+              }
+            ],
+            [
+              "milepost.plan.update_block",
+              {
+                "id": "blk-s4-10",
+                "patch": {
+                  "minutes": 30
+                }
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "alg-7-3",
+                "start": "2027-03-10T19:00:00-05:00",
+                "minutes": 90
+              }
+            ]
+          ],
+          "fails": [
+            "no_broken_rules"
+          ]
+        }
+      ]
+    },
+    "twin": {
+      "reference": [
+        [
+          "milepost.plan.update_block",
+          {
+            "id": "blk-s4-5",
+            "patch": {
+              "skill_id": "alg-7-3"
+            }
+          }
+        ],
+        [
+          "milepost.plan.remove_block",
+          {
+            "id": "blk-s4-7"
+          }
+        ],
+        [
+          "milepost.plan.remove_block",
+          {
+            "id": "blk-s4-10"
+          }
+        ]
+      ],
+      "alternatives": [],
+      "controls": [
+        {
+          "name": "the base reference plan",
+          "calls": [
+            [
+              "milepost.plan.update_block",
+              {
+                "id": "blk-s4-5",
+                "patch": {
+                  "skill_id": "alg-7-3"
+                }
+              }
+            ],
+            [
+              "milepost.plan.remove_block",
+              {
+                "id": "blk-s4-7"
+              }
+            ],
+            [
+              "milepost.plan.update_block",
+              {
+                "id": "blk-s4-10",
+                "patch": {
+                  "minutes": 30
+                }
+              }
+            ]
+          ],
+          "fails": [
+            "no_unneeded_practice"
+          ]
+        }
+      ]
+    }
+  },
+  "baseline": {
+    "base": true,
+    "twin": true
+  }
+}

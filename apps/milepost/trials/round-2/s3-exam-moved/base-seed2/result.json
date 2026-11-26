@@ -1,0 +1,76 @@
+{
+  "scenario": "s3-exam-moved",
+  "variant": "base",
+  "seed": 2,
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "no_broken_rules",
+    "nothing_after_assessment",
+    "only_reached_targets"
+  ],
+  "steps": 9,
+  "ended": "answer",
+  "tool_calls": 8,
+  "writes": 1,
+  "refused": 2,
+  "by_tool": {
+    "milepost.preferences.get": 1,
+    "milepost.plan.project": 2,
+    "milepost.plan.add_block": 1,
+    "milepost.assessments.list": 4
+  },
+  "seconds": 25,
+  "final_message": "Based on the projected plan, the skills that are projected to meet or exceed their target levels by Monday, March 6th, 2027, at 9 AM are:\n\n- **bio-4-3**: Projected level 0.729, target 0.7\n- **bio-4-4**: Projected level 0.65, target 0.6\n- **bio-5-3**: Projected level 0.669, target 0.6\n\nThe skills that may need additional practice are:\n\n- **bio-5-1**: Projected level 0.254, target 0.65\n- **bio-5-2**: Projected level 0.626, target 0.65\n\nThese are the skills that won't make it to the target level by Monday at 9 AM. You may want to schedule additional practice sessions for these skills to ensure they meet the required level for the exam.\n\nWould you like to add any specific practice sessions for these skills?",
+  "checks": [
+    {
+      "name": "no_broken_rules",
+      "pass": false,
+      "detail": [
+        {
+          "rule": "available_hours",
+          "block_ids": [
+            "blk-s3-3",
+            "blk-s3-4",
+            "blk-s3-5",
+            "blk-s3-6"
+          ],
+          "detail": "Outside the student's available hours."
+        }
+      ]
+    },
+    {
+      "name": "nothing_after_assessment",
+      "pass": false,
+      "detail": [
+        "blk-s3-11",
+        "blk-s3-12",
+        "blk-s3-13",
+        "blk-s3-14"
+      ]
+    },
+    {
+      "name": "only_reached_targets",
+      "pass": false,
+      "detail": [
+        "blk-s3-8",
+        "blk-s3-9",
+        "blk-s3-10",
+        "blk-s3-11",
+        "blk-s3-12",
+        "blk-s3-13",
+        "blk-s3-14"
+      ]
+    },
+    {
+      "name": "min_targets_reached",
+      "pass": true,
+      "detail": [
+        "bio-4-3",
+        "bio-4-4",
+        "bio-5-3"
+      ]
+    }
+  ]
+}

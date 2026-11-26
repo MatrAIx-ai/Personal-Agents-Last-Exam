@@ -1,0 +1,76 @@
+{
+  "scenario": "s3-exam-moved",
+  "variant": "base",
+  "seed": 3,
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "no_broken_rules",
+    "nothing_after_assessment",
+    "only_reached_targets"
+  ],
+  "steps": 3,
+  "ended": "answer",
+  "tool_calls": 6,
+  "writes": 0,
+  "refused": 0,
+  "by_tool": {
+    "milepost.preferences.get": 1,
+    "milepost.plan.list": 2,
+    "milepost.assessments.list": 2,
+    "milepost.plan.project": 1
+  },
+  "seconds": 14,
+  "final_message": "Based on the current plan and the projected levels for the upcoming cells exam on Monday, March 8, 2027, here's the summary of the skills and their projected levels:\n\n- **Skill: bio-4-3**\n  - Target: 0.7\n  - Projected Level: 0.729\n\n- **Skill: bio-4-4**\n  - Target: 0.6\n  - Projected Level: 0.65\n\n- **Skill: bio-5-1**\n  - Target: 0.65\n  - Projected Level: 0.254 (This skill is not projected to reach the target level by the exam date.)\n\n- **Skill: bio-5-2**\n  - Target: 0.65\n  - Projected Level: 0.626\n\n- **Skill: bio-5-3**\n  - Target: 0.6\n  - Projected Level: 0.669\n\nTo ensure that all skills meet their target levels by the exam, you should remove the planned study blocks for bio-5-1, as it is not projected to reach the required level by the exam date. The other skills are projected to meet or exceed their targets.\n\nHere's the updated plan:\n- Keep the practice blocks for bio-4-3 and bio-4-4.\n- Remove the planned blocks for bio-5-1.\n\nAfter making these changes, the skills for the cells exam should be well-prepared by the exam date.",
+  "checks": [
+    {
+      "name": "no_broken_rules",
+      "pass": false,
+      "detail": [
+        {
+          "rule": "available_hours",
+          "block_ids": [
+            "blk-s3-3",
+            "blk-s3-4",
+            "blk-s3-5",
+            "blk-s3-6"
+          ],
+          "detail": "Outside the student's available hours."
+        }
+      ]
+    },
+    {
+      "name": "nothing_after_assessment",
+      "pass": false,
+      "detail": [
+        "blk-s3-11",
+        "blk-s3-12",
+        "blk-s3-13",
+        "blk-s3-14"
+      ]
+    },
+    {
+      "name": "only_reached_targets",
+      "pass": false,
+      "detail": [
+        "blk-s3-8",
+        "blk-s3-9",
+        "blk-s3-10",
+        "blk-s3-11",
+        "blk-s3-12",
+        "blk-s3-13",
+        "blk-s3-14"
+      ]
+    },
+    {
+      "name": "min_targets_reached",
+      "pass": true,
+      "detail": [
+        "bio-4-3",
+        "bio-4-4",
+        "bio-5-3"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "agent": "claude-code",
+  "cli": "2.1.325 (Claude Code)",
+  "model": "claude-opus-5-5",
+  "effort": "default",
+  "scenario": "s1-cells-exam",
+  "variant": "base",
+  "run": 1,
+  "valid": true,
+  "pass": true,
+  "failed_checks": [],
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 56,
+  "tool_calls": 22,
+  "by_tool": {
+    "milepost.assessments.list": 1,
+    "milepost.preferences.get": 1,
+    "milepost.plan.list": 1,
+    "milepost.courses.list": 1,
+    "milepost.mastery.get": 2,
+    "milepost.plan.project": 4,
+    "milepost.skills.list": 1,
+    "milepost.practice.list": 1,
+    "milepost.plan.add_block": 5,
+    "milepost.plan.update_block": 5
+  },
+  "by_status": {
+    "ok": 12,
+    "committed": 10
+  },
+  "other_tool_use": [],
+  "other_tools_offered": [],
+  "usage": {
+    "input_tokens": 26,
+    "cache_creation_input_tokens": 16892,
+    "cache_read_input_tokens": 149734,
+    "output_tokens": 4353,
+    "output_tokens_details": {
+      "thinking_tokens": 1009
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 16892,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 840,
+        "cache_read_input_tokens": 16248,
+        "cache_creation_input_tokens": 644,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 644
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.2523769,
+    "num_turns": 23,
+    "duration_ms": 55195
+  },
+  "final_message": "I added five study blocks for your cells and membranes exam on 2027-03-11T09:00:00-05:00. If you complete all of them, Milepost projects every skill on the exam will reach its target. I couldn't skip any skill: all five were projected to finish below target with no practice.\n\n| Block | Skill | Projected level / target |\n|---|---|---|\n| Sat 2027-03-06T09:00:00-05:00, 75 min | bio-4-3 Organelles of plant and animal cells | 0.712 / 0.70 |\n| Sat 2027-03-06T10:30:00-05:00, 30 min | bio-5-1 The fluid mosaic model | 0.663 / 0.65 |\n| Sun 2027-03-07T09:00:00-05:00, 90 min | bio-5-2 Diffusion and osmosis | 0.661 / 0.65 |\n| Mon 2027-03-08T06:30:00-05:00, 40 min | bio-4-4 How the ER and Golgi make and ship proteins | 0.608 / 0.60 |\n| Tue 2027-03-09T06:30:00-05:00, 30 min | bio-5-3 Pumps and transport that uses energy | 0.647 / 0.60 |\n\n- **Time spent:** I kept each block about as short as it could be while still hitting its target. The total is 4 hours 25 minutes. bio-5-3 ends up a little above its target because 30 minutes is your shortest allowed block.\n- **Your study rules:** Every block falls within your available hours, stays under your 150-minute daily cap and is between 30 and 90 minutes. Milepost doesn't enforce these rules, so I checked them myself.\n- **Topic order:** Organelles comes before ER/Golgi, and membranes go from fluid mosaic to diffusion to pumps, since each topic builds on the one before.\n- **Little room to spare:** Three skills are projected only 0.008 to 0.013 above target. If you miss or shorten a block, especially Sunday's diffusion and osmosis session, that skill will probably fall short. Wednesday 2027-03-10T06:30:00-05:00 is still free if you need to make one up.\n\nI only planned for this exam. Your factoring quiz on the 12th and probability exam on the 15th don't have any blocks yet.",
+  "checks": [
+    {
+      "name": "all_targets_reached",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no_broken_rules",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no_unneeded_practice",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "blocks_in_scope",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "max_planned_minutes",
+      "pass": true,
+      "detail": 265
+    }
+  ]
+}

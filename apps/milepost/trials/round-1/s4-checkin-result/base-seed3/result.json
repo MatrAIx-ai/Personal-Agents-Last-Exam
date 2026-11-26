@@ -1,0 +1,60 @@
+{
+  "scenario": "s4-checkin-result",
+  "variant": "base",
+  "seed": 3,
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "no_broken_rules"
+  ],
+  "steps": 5,
+  "ended": "answer",
+  "tool_calls": 8,
+  "writes": 1,
+  "refused": 3,
+  "by_tool": {
+    "milepost.plan.project": 1,
+    "milepost.practice.list": 3,
+    "milepost.mastery.get": 2,
+    "milepost.assessments.list": 1,
+    "milepost.plan.add_block": 1
+  },
+  "seconds": 22,
+  "final_message": "A practice block for the skill `alg-7-3` has been successfully added. The block is scheduled to start at 2027-03-09T16:00:00-05:00 and will last for 30 minutes.\n\nYour plan is now updated to ensure that you reach the target level for the factoring quiz next Friday.",
+  "checks": [
+    {
+      "name": "all_targets_reached",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no_broken_rules",
+      "pass": false,
+      "detail": [
+        {
+          "rule": "available_hours",
+          "block_ids": [
+            "blk-1"
+          ],
+          "detail": "Outside the student's available hours."
+        }
+      ]
+    },
+    {
+      "name": "no_unneeded_practice",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "blocks_in_scope",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "max_planned_minutes",
+      "pass": true,
+      "detail": 540
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "agent": "claude-code",
+  "cli": "2.1.325 (Claude Code)",
+  "model": "claude-opus-5-5",
+  "effort": "default",
+  "scenario": "s4-checkin-result",
+  "variant": "twin",
+  "run": 1,
+  "valid": true,
+  "pass": true,
+  "failed_checks": [],
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 45,
+  "tool_calls": 12,
+  "by_tool": {
+    "milepost.assessments.list": 1,
+    "milepost.plan.list": 1,
+    "milepost.preferences.get": 1,
+    "milepost.mastery.get": 1,
+    "milepost.plan.project": 4,
+    "milepost.plan.update_block": 2,
+    "milepost.plan.remove_block": 2
+  },
+  "by_status": {
+    "ok": 8,
+    "committed": 4
+  },
+  "other_tool_use": [],
+  "blocked_by_cli": [],
+  "other_tools_offered": [],
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 11051,
+    "cache_read_input_tokens": 78022,
+    "output_tokens": 2728,
+    "output_tokens_details": {
+      "thinking_tokens": 816
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 11051,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 911,
+        "cache_read_input_tokens": 12831,
+        "cache_creation_input_tokens": 1000,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1000
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.1587673,
+    "num_turns": 13,
+    "duration_ms": 43613
+  },
+  "final_message": "I updated your plan for the factoring quiz on Friday, 2027-03-12, and all four skills are now projected to reach their targets.\n\n**What the check-in showed:** alg-7-3 came in at 0.42, well below its 0.65 target. alg-7-5 came in at 0.66, already above its 0.60 target. Under the old plan, alg-7-3 would have reached only 0.599 by the quiz.\n\n**Changes:**\n1. **Sat 2027-03-06, 09:00–09:45-05:00:** this was a 90-minute alg-7-5 block. It's now a 45-minute alg-7-3 block.\n2. **Removed Sun 2027-03-07, 09:00–10:30-05:00 (alg-7-5, 90 min):** you don't need it.\n3. **Removed Wed 2027-03-10, 06:30–07:30-05:00 (alg-7-5, 60 min):** you don't need it.\n\nThat's 195 fewer minutes of study, and alg-7-5 has no blocks left.\n\n**Projected levels on quiz day:**\n| Skill | Projected | Target |\n|---|---|---|\n| alg-7-2 | 0.721 | 0.70 |\n| alg-7-3 | 0.682 | 0.65 |\n| alg-7-4 | 0.662 | 0.65 |\n| alg-7-5 | 0.642 | 0.60 |\n\n**Remaining factoring blocks (unchanged except Saturday's):**\n- Sat 03-06, 09:00 alg-7-3 (45 min) and 10:45 alg-7-4 (60 min)\n- Mon 03-08, 06:30 alg-7-2 (90 min)\n- Tue 03-09, 06:30 alg-7-4 (60 min)\n- Thu 03-11, 06:30 alg-7-3 (60 min)\n\nAll of these fit within your available hours and 150-minute daily cap.\n\n**Two things to know:**\n- **There's very little slack.** Each skill clears its target by only 0.01 to 0.04, so if you miss any of these blocks, that skill will probably fall short. You've already missed both of your recent alg-7-3 blocks (Wednesday and this morning). Please try not to skip the two that are left.\n- **I only changed factoring blocks.** Your exam on cells and membranes (Thursday) and your probability exam (Monday, 03-15) have no blocks in the plan, and I didn't add any.",
+  "checks": [
+    {
+      "name": "all_targets_reached",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no_broken_rules",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no_unneeded_practice",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "blocks_in_scope",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "max_planned_minutes",
+      "pass": true,
+      "detail": 315
+    }
+  ]
+}

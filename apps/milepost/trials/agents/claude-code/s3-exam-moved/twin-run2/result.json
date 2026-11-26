@@ -1,0 +1,94 @@
+{
+  "agent": "claude-code",
+  "cli": "2.1.325 (Claude Code)",
+  "model": "claude-opus-5-5",
+  "effort": "default",
+  "scenario": "s3-exam-moved",
+  "variant": "twin",
+  "run": 2,
+  "valid": true,
+  "pass": true,
+  "failed_checks": [],
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 63,
+  "tool_calls": 19,
+  "by_tool": {
+    "milepost.assessments.list": 1,
+    "milepost.plan.list": 1,
+    "milepost.preferences.get": 1,
+    "milepost.courses.list": 1,
+    "milepost.mastery.get": 1,
+    "milepost.plan.project": 3,
+    "milepost.skills.list": 1,
+    "milepost.plan.remove_block": 8,
+    "milepost.plan.update_block": 2
+  },
+  "by_status": {
+    "ok": 9,
+    "committed": 10
+  },
+  "other_tool_use": [],
+  "blocked_by_cli": [],
+  "other_tools_offered": [],
+  "usage": {
+    "input_tokens": 26,
+    "cache_creation_input_tokens": 12131,
+    "cache_read_input_tokens": 147686,
+    "output_tokens": 4020,
+    "output_tokens_details": {
+      "thinking_tokens": 1090
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 12131,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 971,
+        "cache_read_input_tokens": 14697,
+        "cache_creation_input_tokens": 714,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 714
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.2072225,
+    "num_turns": 20,
+    "duration_ms": 61579
+  },
+  "final_message": "I've fixed your plan, and every skill on the cells exam now reaches its target by Monday, 2027-03-08 at 09:00. No skill falls short, as long as you complete all four remaining blocks.\n\n**What I removed:**\n- Wednesday 2027-03-03, 18:30–20:00: two Organelles blocks (bio-4-3). These clashed with your shift.\n- Thursday 2027-03-04, 18:30–20:00: two Pumps and active transport blocks (bio-5-3). These also clashed with your shift.\n- Monday 2027-03-08 and Tuesday 2027-03-09, 18:30–20:00: four evening blocks (one Diffusion and osmosis, bio-5-2, and three Fluid mosaic model, bio-5-1). They come after the exam, so they can't help with it.\n\n**Your plan before the exam:**\n- Friday 2027-03-05T18:30:00-05:00, 50 min: Pumps and active transport (bio-5-3)\n- Friday 2027-03-05T19:20:00-05:00, 40 min: Diffusion and osmosis (bio-5-2)\n- Saturday 2027-03-06T10:00:00-05:00, 50 min: Organelles of plant and animal cells (bio-4-3). This block used to be Diffusion and osmosis.\n- Saturday 2027-03-06T10:50:00-05:00, 40 min: Fluid mosaic model (bio-5-1). This block also used to be Diffusion and osmosis.\n\nOn Saturday, Diffusion and osmosis was getting far more time than it needed. I moved that time to two skills the old plan left short: Organelles and Fluid mosaic. Both days stay within your 90-minute daily limit and your available hours.\n\n**Projected levels on Monday:**\n| Skill | Projected | Target |\n|---|---|---|\n| Organelles (bio-4-3) | 0.739 | 0.70 |\n| ER and Golgi (bio-4-4) | 0.680 | 0.60 |\n| Fluid mosaic model (bio-5-1) | 0.668 | 0.65 |\n| Diffusion and osmosis (bio-5-2) | 0.710 | 0.65 |\n| Pumps and active transport (bio-5-3) | 0.650 | 0.60 |\n\nER and Golgi doesn't need another block because your practice on Tuesday already puts it over target.\n\nThe margins are thin, especially for Fluid mosaic and Pumps and active transport. If you miss a Friday or Saturday block, that skill will probably fall below target, and Sunday is your rest day, so there's no time left before Monday morning to make it up.",
+  "checks": [
+    {
+      "name": "no_broken_rules",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "nothing_after_assessment",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "only_reached_targets",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "all_targets_reached",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

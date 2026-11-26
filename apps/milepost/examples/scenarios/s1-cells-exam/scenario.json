@@ -1,0 +1,459 @@
+{
+  "id": "s1-cells-exam",
+  "title": "Ready for the cells exam",
+  "workflows": [
+    1,
+    2
+  ],
+  "student": "daniel",
+  "assessment_id": "bio-exam-cells",
+  "request": "My cells exam is on Thursday the 11th at 9. Plan my practice so every skill on it reaches its target, without spending time on what I already know.",
+  "load_at": "2027-03-01T09:00:00-05:00",
+  "setup": [],
+  "ask_at": "2027-03-01T09:00:00-05:00",
+  "changes": {
+    "describe": "None: the full fixture as generated."
+  },
+  "twin": {
+    "describe": "Two more platform sessions on Sun 2027-02-28, when Daniel skipped his algebra block and studied membranes instead: bio-5-1 for 50 minutes (10:30-11:20) and bio-5-3 for 40 minutes (11:20-12:00).",
+    "changes": {
+      "add": {
+        "practice": [
+          {
+            "id": "ses-s1-t1",
+            "skill_id": "bio-5-1",
+            "minutes": 50,
+            "ended_at": "2027-02-28T11:20:00-05:00",
+            "source": "platform",
+            "block_id": null,
+            "recorded_at": "2027-02-28T11:20:00-05:00"
+          },
+          {
+            "id": "ses-s1-t2",
+            "skill_id": "bio-5-3",
+            "minutes": 40,
+            "ended_at": "2027-02-28T12:00:00-05:00",
+            "source": "platform",
+            "block_id": null,
+            "recorded_at": "2027-02-28T12:00:00-05:00"
+          }
+        ]
+      }
+    },
+    "decision": "Base: all five skills need practice. Twin: bio-5-1 and bio-5-3 already reach their targets by the exam, so practising them is time the student asked not to spend.",
+    "proof": "In the base, bio-5-3 is below its target on the exam date without practice and only practice raises a level, so every passing base plan has a bio-5-3 block. In the twin, bio-5-3 reaches its target without practice, so that block fails no_unneeded_practice."
+  },
+  "success": {
+    "base": [
+      "all_targets_reached",
+      "no_broken_rules",
+      "no_unneeded_practice",
+      "blocks_in_scope",
+      {
+        "max_planned_minutes": 390
+      }
+    ],
+    "twin": [
+      "all_targets_reached",
+      "no_broken_rules",
+      "no_unneeded_practice",
+      "blocks_in_scope",
+      {
+        "max_planned_minutes": 300
+      }
+    ]
+  },
+  "runs": {
+    "base": {
+      "reference": [
+        [
+          "milepost.plan.add_block",
+          {
+            "skill_id": "bio-5-2",
+            "start": "2027-03-05T06:30:00-05:00",
+            "minutes": 90
+          }
+        ],
+        [
+          "milepost.plan.add_block",
+          {
+            "skill_id": "bio-4-3",
+            "start": "2027-03-06T09:00:00-05:00",
+            "minutes": 70
+          }
+        ],
+        [
+          "milepost.plan.add_block",
+          {
+            "skill_id": "bio-4-4",
+            "start": "2027-03-07T09:00:00-05:00",
+            "minutes": 40
+          }
+        ],
+        [
+          "milepost.plan.add_block",
+          {
+            "skill_id": "bio-5-1",
+            "start": "2027-03-09T06:30:00-05:00",
+            "minutes": 30
+          }
+        ],
+        [
+          "milepost.plan.add_block",
+          {
+            "skill_id": "bio-5-3",
+            "start": "2027-03-10T06:30:00-05:00",
+            "minutes": 30
+          }
+        ]
+      ],
+      "alternatives": [
+        [
+          [
+            "milepost.plan.add_block",
+            {
+              "skill_id": "bio-4-3",
+              "start": "2027-03-06T09:00:00-05:00",
+              "minutes": 75
+            }
+          ],
+          [
+            "milepost.plan.add_block",
+            {
+              "skill_id": "bio-5-2",
+              "start": "2027-03-06T10:30:00-05:00",
+              "minutes": 60
+            }
+          ],
+          [
+            "milepost.plan.add_block",
+            {
+              "skill_id": "bio-5-2",
+              "start": "2027-03-07T09:00:00-05:00",
+              "minutes": 45
+            }
+          ],
+          [
+            "milepost.plan.add_block",
+            {
+              "skill_id": "bio-4-4",
+              "start": "2027-03-08T06:30:00-05:00",
+              "minutes": 45
+            }
+          ],
+          [
+            "milepost.plan.add_block",
+            {
+              "skill_id": "bio-5-1",
+              "start": "2027-03-09T06:30:00-05:00",
+              "minutes": 30
+            }
+          ],
+          [
+            "milepost.plan.add_block",
+            {
+              "skill_id": "bio-5-3",
+              "start": "2027-03-10T06:30:00-05:00",
+              "minutes": 30
+            }
+          ]
+        ]
+      ],
+      "controls": [
+        {
+          "name": "no action",
+          "calls": [],
+          "fails": [
+            "all_targets_reached"
+          ]
+        },
+        {
+          "name": "over-planning: a 90-minute block every weekday morning",
+          "calls": [
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-4-3",
+                "start": "2027-03-02T06:30:00-05:00",
+                "minutes": 90
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-4-4",
+                "start": "2027-03-03T06:30:00-05:00",
+                "minutes": 90
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-5-1",
+                "start": "2027-03-04T06:30:00-05:00",
+                "minutes": 90
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-5-2",
+                "start": "2027-03-05T06:30:00-05:00",
+                "minutes": 90
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-5-3",
+                "start": "2027-03-08T06:30:00-05:00",
+                "minutes": 90
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-5-2",
+                "start": "2027-03-09T06:30:00-05:00",
+                "minutes": 90
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-4-3",
+                "start": "2027-03-10T06:30:00-05:00",
+                "minutes": 90
+              }
+            ]
+          ],
+          "fails": [
+            "max_planned_minutes"
+          ]
+        },
+        {
+          "name": "rule-breaking: bio-5-1 on a weekday evening",
+          "calls": [
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-5-2",
+                "start": "2027-03-05T06:30:00-05:00",
+                "minutes": 90
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-4-3",
+                "start": "2027-03-06T09:00:00-05:00",
+                "minutes": 70
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-4-4",
+                "start": "2027-03-07T09:00:00-05:00",
+                "minutes": 40
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-5-1",
+                "start": "2027-03-09T19:00:00-05:00",
+                "minutes": 30
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-5-3",
+                "start": "2027-03-10T06:30:00-05:00",
+                "minutes": 30
+              }
+            ]
+          ],
+          "fails": [
+            "no_broken_rules"
+          ]
+        },
+        {
+          "name": "out of scope: an algebra block as well",
+          "calls": [
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-5-2",
+                "start": "2027-03-05T06:30:00-05:00",
+                "minutes": 90
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-4-3",
+                "start": "2027-03-06T09:00:00-05:00",
+                "minutes": 70
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-4-4",
+                "start": "2027-03-07T09:00:00-05:00",
+                "minutes": 40
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-5-1",
+                "start": "2027-03-09T06:30:00-05:00",
+                "minutes": 30
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-5-3",
+                "start": "2027-03-10T06:30:00-05:00",
+                "minutes": 30
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "alg-7-2",
+                "start": "2027-03-08T06:30:00-05:00",
+                "minutes": 45
+              }
+            ]
+          ],
+          "fails": [
+            "blocks_in_scope"
+          ]
+        }
+      ]
+    },
+    "twin": {
+      "reference": [
+        [
+          "milepost.plan.add_block",
+          {
+            "skill_id": "bio-5-2",
+            "start": "2027-03-05T06:30:00-05:00",
+            "minutes": 90
+          }
+        ],
+        [
+          "milepost.plan.add_block",
+          {
+            "skill_id": "bio-4-3",
+            "start": "2027-03-06T09:00:00-05:00",
+            "minutes": 70
+          }
+        ],
+        [
+          "milepost.plan.add_block",
+          {
+            "skill_id": "bio-4-4",
+            "start": "2027-03-07T09:00:00-05:00",
+            "minutes": 40
+          }
+        ]
+      ],
+      "alternatives": [
+        [
+          [
+            "milepost.plan.add_block",
+            {
+              "skill_id": "bio-4-3",
+              "start": "2027-03-06T09:00:00-05:00",
+              "minutes": 75
+            }
+          ],
+          [
+            "milepost.plan.add_block",
+            {
+              "skill_id": "bio-5-2",
+              "start": "2027-03-06T10:30:00-05:00",
+              "minutes": 60
+            }
+          ],
+          [
+            "milepost.plan.add_block",
+            {
+              "skill_id": "bio-5-2",
+              "start": "2027-03-07T09:00:00-05:00",
+              "minutes": 45
+            }
+          ],
+          [
+            "milepost.plan.add_block",
+            {
+              "skill_id": "bio-4-4",
+              "start": "2027-03-08T06:30:00-05:00",
+              "minutes": 45
+            }
+          ]
+        ]
+      ],
+      "controls": [
+        {
+          "name": "the base reference plan",
+          "calls": [
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-5-2",
+                "start": "2027-03-05T06:30:00-05:00",
+                "minutes": 90
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-4-3",
+                "start": "2027-03-06T09:00:00-05:00",
+                "minutes": 70
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-4-4",
+                "start": "2027-03-07T09:00:00-05:00",
+                "minutes": 40
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-5-1",
+                "start": "2027-03-09T06:30:00-05:00",
+                "minutes": 30
+              }
+            ],
+            [
+              "milepost.plan.add_block",
+              {
+                "skill_id": "bio-5-3",
+                "start": "2027-03-10T06:30:00-05:00",
+                "minutes": 30
+              }
+            ]
+          ],
+          "fails": [
+            "no_unneeded_practice"
+          ]
+        }
+      ]
+    }
+  },
+  "baseline": {
+    "base": false,
+    "twin": true
+  }
+}

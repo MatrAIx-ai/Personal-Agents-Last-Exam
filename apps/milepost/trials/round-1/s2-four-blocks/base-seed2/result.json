@@ -1,0 +1,45 @@
+{
+  "scenario": "s2-four-blocks",
+  "variant": "base",
+  "seed": 2,
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "reports_exactly"
+  ],
+  "steps": 3,
+  "ended": "answer",
+  "tool_calls": 5,
+  "writes": 4,
+  "refused": 0,
+  "by_tool": {
+    "milepost.practice.list": 1,
+    "milepost.practice.record": 4
+  },
+  "seconds": 17,
+  "final_message": "Great! The practice sessions for Tuesday, February 28th (alg-7-6), Wednesday, March 1st (bio-4-2), Thursday, March 2nd (alg-4-2), and Friday, March 3rd (bio-3-1) have been added to your record. Now, your practice for this week should be fully accounted for.\n\nHere are the sessions added:\n- Tuesday, February 28th, around 9 PM: alg-7-6\n- Wednesday, March 1st, 7 PM: bio-4-2\n- Thursday, March 2nd, 7 PM: alg-4-2\n- Friday, March 3rd, 7 PM: bio-3-1\n\nYour practice record is now up to date. If you have any more sessions to add or if you need further assistance, feel free to let me know!",
+  "checks": [
+    {
+      "name": "reports_exactly",
+      "pass": false,
+      "detail": {
+        "missing": [
+          "blk-s2-2",
+          "blk-s2-4"
+        ],
+        "extra": [
+          "ses-2",
+          "ses-3",
+          "ses-4",
+          "ses-5"
+        ]
+      }
+    },
+    {
+      "name": "no_plan_changes",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

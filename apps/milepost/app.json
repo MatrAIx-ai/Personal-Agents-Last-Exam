@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "app_id": "milepost",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "GitHub @LixinTu; repository PR #70 or issues tagged app:milepost"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "milepost.practice.completed",
+    "milepost.assessment.result_posted",
+    "milepost.assessment.added",
+    "milepost.assessment.moved",
+    "milepost.preferences.changed"
+  ],
+  "capabilities": {
+    "modes": [
+      "synthetic"
+    ],
+    "resources": false,
+    "ui": "reviewer renderer",
+    "real_delivery": false
+  },
+  "limitations": [
+    "Learner rule v1 (milepost-learner/1) is a declared synthetic model for checkable projections, not a model of real learning.",
+    "The GUI is a read-only reviewer renderer with four views; there is no interactive business Web App.",
+    "One student account per App instance; no lesson content, tutoring dialogue or grading of written answers."
+  ],
+  "dataset": "contribution/dataset.json",
+  "contribution": "contribution/contribution.json"
+}

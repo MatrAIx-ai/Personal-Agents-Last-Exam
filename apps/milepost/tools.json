@@ -1,0 +1,1449 @@
+[
+  {
+    "name": "milepost.courses.list",
+    "description": "List the student's courses with their units and the skills in each unit. Reads change nothing; every read returns the current virtual time as as_of.",
+    "read_only": true,
+    "scope": "milepost.courses.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "milepost"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "courses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "units": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "position": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 1000
+                    },
+                    "skill_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      "maxItems": 500
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "position",
+                    "skill_ids"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 200
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "units"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "courses"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "milepost.skills.list",
+    "description": "List skills (their IDs, titles and prerequisites), optionally for one course ID from courses.list. An unknown course returns not_found.",
+    "read_only": true,
+    "scope": "milepost.skills.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "course_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "milepost"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "course_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "unit_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "prerequisites": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "maxItems": 20
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "course_id",
+              "unit_id",
+              "prerequisites"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "skills"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "milepost.mastery.get",
+    "description": "Current mastery level of each skill (or of the listed skills) and when it was last practised, under learner rule milepost-learner/1. Levels fade with the time since practice. An unknown skill returns not_found.",
+    "read_only": true,
+    "scope": "milepost.mastery.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "milepost"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rule_version": {
+          "const": "milepost-learner/1"
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "skill_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "level": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "last_practised_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "skill_id",
+              "level",
+              "last_practised_at"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 500
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "rule_version",
+        "skills"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "milepost.assessments.list",
+    "description": "Assessments with their ID, date, target level per skill, status and posted result. Use these IDs with plan.project.",
+    "read_only": true,
+    "scope": "milepost.assessments.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "milepost"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "assessments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "date": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "day": {
+                "enum": [
+                  "Mon",
+                  "Tue",
+                  "Wed",
+                  "Thu",
+                  "Fri",
+                  "Sat",
+                  "Sun"
+                ]
+              },
+              "targets": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "skill_id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                    },
+                    "level": {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 1
+                    }
+                  },
+                  "required": [
+                    "skill_id",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 100
+              },
+              "status": {
+                "enum": [
+                  "scheduled",
+                  "assessed"
+                ]
+              },
+              "result": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "posted_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "levels": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "skill_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                            },
+                            "level": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            }
+                          },
+                          "required": [
+                            "skill_id",
+                            "level"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "maxItems": 100
+                      }
+                    },
+                    "required": [
+                      "posted_at",
+                      "levels"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "date",
+              "day",
+              "targets",
+              "status",
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "assessments"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "milepost.practice.list",
+    "description": "Recorded practice sessions, optionally for one skill: platform sessions and practice the student reported. An unknown skill returns not_found.",
+    "read_only": true,
+    "scope": "milepost.practice.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "milepost"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "skill_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "minutes": {
+                "type": "integer",
+                "minimum": 5,
+                "maximum": 300
+              },
+              "started_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "ended_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "day": {
+                "enum": [
+                  "Mon",
+                  "Tue",
+                  "Wed",
+                  "Thu",
+                  "Fri",
+                  "Sat",
+                  "Sun"
+                ]
+              },
+              "source": {
+                "enum": [
+                  "platform",
+                  "student_report"
+                ]
+              },
+              "block_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "skill_id",
+              "minutes",
+              "started_at",
+              "ended_at",
+              "day",
+              "source",
+              "block_id"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 5000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "sessions"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "milepost.plan.list",
+    "description": "Study blocks with their status: planned, done (a completed session names it) or missed (it ended without one).",
+    "read_only": true,
+    "scope": "milepost.plan.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "milepost"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "skill_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "day": {
+                "enum": [
+                  "Mon",
+                  "Tue",
+                  "Wed",
+                  "Thu",
+                  "Fri",
+                  "Sat",
+                  "Sun"
+                ]
+              },
+              "minutes": {
+                "type": "integer",
+                "minimum": 5,
+                "maximum": 240
+              },
+              "status": {
+                "enum": [
+                  "planned",
+                  "done",
+                  "missed"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "skill_id",
+              "start",
+              "end",
+              "day",
+              "minutes",
+              "status"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "blocks"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "milepost.plan.project",
+    "description": "For the stored plan and one future assessment (an ID from assessments.list), the level each target skill would reach on the assessment date if every planned block is completed, under learner rule milepost-learner/1, and whether it reaches its target (judged on the unrounded level, so 0.650 against 0.65 can still be short). Study-rule checks are not included. Unknown assessment: not_found; past assessment: invalid_state.",
+    "read_only": true,
+    "scope": "milepost.plan.project",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "assessment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "assessment_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "milepost"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rule_version": {
+          "const": "milepost-learner/1"
+        },
+        "assessment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "skill_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "projected_level": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "target": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 1
+              },
+              "reaches_target": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "skill_id",
+              "projected_level",
+              "target",
+              "reaches_target"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "rule_version",
+        "assessment_id",
+        "date",
+        "skills"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "milepost.preferences.get",
+    "description": "The student's study rules (available hours, daily cap, rest days, block length) and time zone. Milepost does not enforce these rules.",
+    "read_only": true,
+    "scope": "milepost.preferences.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "milepost"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time_zone": {
+          "type": "string"
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "available_hours": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "day": {
+                    "enum": [
+                      "Mon",
+                      "Tue",
+                      "Wed",
+                      "Thu",
+                      "Fri",
+                      "Sat",
+                      "Sun"
+                    ]
+                  },
+                  "from": {
+                    "type": "string",
+                    "pattern": "^(?:(?:[01][0-9]|2[0-3]):[0-5][0-9]|24:00)$"
+                  },
+                  "to": {
+                    "type": "string",
+                    "pattern": "^(?:(?:[01][0-9]|2[0-3]):[0-5][0-9]|24:00)$"
+                  }
+                },
+                "required": [
+                  "day",
+                  "from",
+                  "to"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 21
+            },
+            "daily_cap_minutes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 720
+            },
+            "rest_days": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "Mon",
+                  "Tue",
+                  "Wed",
+                  "Thu",
+                  "Fri",
+                  "Sat",
+                  "Sun"
+                ]
+              },
+              "maxItems": 7,
+              "uniqueItems": true
+            },
+            "block_minutes": {
+              "type": "object",
+              "properties": {
+                "min": {
+                  "type": "integer",
+                  "minimum": 5,
+                  "maximum": 240
+                },
+                "max": {
+                  "type": "integer",
+                  "minimum": 5,
+                  "maximum": 240
+                }
+              },
+              "required": [
+                "min",
+                "max"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "available_hours",
+            "daily_cap_minutes",
+            "rest_days",
+            "block_minutes"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "as_of",
+        "time_zone",
+        "preferences"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "milepost.practice.record",
+    "description": "Record practice the student reports doing elsewhere, with its skill (an ID from skills.list), minutes and end time. Refused: unknown skill (not_found), a session ending in the future (invalid_time), or one overlapping a recorded session (overlap).",
+    "read_only": false,
+    "scope": "milepost.practice.record",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "minutes": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 300
+        },
+        "ended_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "skill_id",
+        "minutes",
+        "ended_at",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "milepost"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "milepost.practice.remove",
+    "description": "Remove practice the student reported. Sessions recorded by the platform cannot be removed (not_removable). The skill is recomputed from its history; later assessment results stay.",
+    "read_only": false,
+    "scope": "milepost.practice.remove",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "milepost"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "milepost.plan.add_block",
+    "description": "Add a study block for one skill (an ID from skills.list). Refused: unknown skill (not_found), a start in the past (past_block) or an overlap with another block (overlap).",
+    "read_only": false,
+    "scope": "milepost.plan.add_block",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "minutes": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 240
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "skill_id",
+        "start",
+        "minutes",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "milepost"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "milepost.plan.update_block",
+    "description": "Change the skill, start or length of a planned block that has not started. Done or missed blocks are history (invalid_state); a past start (past_block) and overlaps (overlap) are refused.",
+    "read_only": false,
+    "scope": "milepost.plan.update_block",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "patch": {
+          "type": "object",
+          "properties": {
+            "skill_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "minutes": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 240
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "patch",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "milepost"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "milepost.plan.remove_block",
+    "description": "Remove a planned block. Done or missed blocks cannot be removed (invalid_state).",
+    "read_only": false,
+    "scope": "milepost.plan.remove_block",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "milepost"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

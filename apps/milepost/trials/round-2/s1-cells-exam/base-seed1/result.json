@@ -1,0 +1,79 @@
+{
+  "scenario": "s1-cells-exam",
+  "variant": "base",
+  "seed": 1,
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "all_targets_reached",
+    "no_broken_rules"
+  ],
+  "steps": 15,
+  "ended": "answer",
+  "tool_calls": 14,
+  "writes": 11,
+  "refused": 6,
+  "by_tool": {
+    "milepost.preferences.get": 1,
+    "milepost.assessments.list": 1,
+    "milepost.skills.list": 1,
+    "milepost.plan.add_block": 11
+  },
+  "seconds": 44,
+  "final_message": "The 15-minute practice session for the skill `bio-5-3` has been committed for Sunday, March 5th, from 10:00 AM to 10:15 AM.\n\nYour practice plan for the cells exam on Thursday, March 11th, is now set. You have committed 15-minute practice sessions for each of the skills `bio-4-3`, `bio-4-4`, `bio-5-1`, `bio-5-2`, and `bio-5-3` on Sunday, March 5th, from 9:00 AM to 10:15 AM. This should help you reach the target levels for the cells exam without spending time on what you already know.",
+  "checks": [
+    {
+      "name": "all_targets_reached",
+      "pass": false,
+      "detail": [
+        "bio-4-4",
+        "bio-5-1",
+        "bio-5-2"
+      ]
+    },
+    {
+      "name": "no_broken_rules",
+      "pass": false,
+      "detail": [
+        {
+          "rule": "available_hours",
+          "block_ids": [
+            "blk-2",
+            "blk-3",
+            "blk-4",
+            "blk-5",
+            "blk-6"
+          ],
+          "detail": "Outside the student's available hours."
+        },
+        {
+          "rule": "block_minutes",
+          "block_ids": [
+            "blk-2",
+            "blk-3",
+            "blk-4",
+            "blk-5",
+            "blk-6"
+          ],
+          "detail": "Shorter or longer than the student's block length."
+        }
+      ]
+    },
+    {
+      "name": "no_unneeded_practice",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "blocks_in_scope",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "max_planned_minutes",
+      "pass": true,
+      "detail": 135
+    }
+  ]
+}

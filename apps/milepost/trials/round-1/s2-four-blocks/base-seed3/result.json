@@ -1,0 +1,39 @@
+{
+  "scenario": "s2-four-blocks",
+  "variant": "base",
+  "seed": 3,
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "reports_exactly"
+  ],
+  "steps": 2,
+  "ended": "answer",
+  "tool_calls": 1,
+  "writes": 0,
+  "refused": 0,
+  "by_tool": {
+    "milepost.practice.list": 1
+  },
+  "seconds": 10,
+  "final_message": "Based on the practice sessions recorded by the app, it appears that the following blocks were recorded for this week:\n\n- Tuesday, February 1, 2027: 35 minutes of practice in algebra 7.6.\n- Wednesday, February 2, 2027: 30 minutes of practice in biology 3.1.\n- Thursday, February 3, 2027: 40 minutes of practice in algebra 4.2.\n- Friday, February 4, 2027: 35 minutes of practice in biology 4.2.\n- Tuesday, February 8, 2027: 40 minutes of practice in algebra 7.2.\n- Wednesday, February 9, 2027: 40 minutes of practice in biology 3.3.\n- Thursday, February 10, 2027: 45 minutes of practice in algebra 4.1.\n- Friday, February 11, 2027: 30 minutes of practice in statistics 3.1.\n\nIt seems that the app did not record the practice sessions for Tuesday, February 7, 2027, and the practice sessions for Tuesday, February 12, 2027, to Friday, February 16, 2027, which you mentioned. Additionally, it appears that the practice sessions for Monday, February 6, 2027, and Monday, February 20, 2027, were not recorded.\n\nTo ensure your practice record is correct, you can record the missing sessions using the `milepost__practice__record` function. Let me know if you would like me to do that for you.",
+  "checks": [
+    {
+      "name": "reports_exactly",
+      "pass": false,
+      "detail": {
+        "missing": [
+          "blk-s2-2",
+          "blk-s2-4"
+        ],
+        "extra": []
+      }
+    },
+    {
+      "name": "no_plan_changes",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

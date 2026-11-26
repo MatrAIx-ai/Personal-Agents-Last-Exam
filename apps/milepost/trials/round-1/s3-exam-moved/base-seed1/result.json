@@ -1,0 +1,75 @@
+{
+  "scenario": "s3-exam-moved",
+  "variant": "base",
+  "seed": 1,
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "no_broken_rules",
+    "nothing_after_assessment",
+    "only_reached_targets"
+  ],
+  "steps": 3,
+  "ended": "answer",
+  "tool_calls": 3,
+  "writes": 0,
+  "refused": 1,
+  "by_tool": {
+    "milepost.plan.project": 1,
+    "milepost.preferences.get": 1,
+    "milepost.mastery.get": 1
+  },
+  "seconds": 28,
+  "final_message": "Based on the current mastery levels of your skills, here are the skills that may not reach their target by Monday at 9:\n\n- **alg-7-5**: Level 0.25, last practised on 2027-01-26T09:00:00-05:00\n- **sta-1-1**: Level 0.338, last practised on 2027-01-22T09:00:00-05:00\n- **sta-1-2**: Level 0.298, last practised on 2027-01-27T09:00:00-05:00\n- **sta-1-3**: Level 0.309, last practised on 2027-01-22T09:00:00-05:00\n- **sta-1-4**: Level 0.279, last practised on 2027-01-20T09:00:00-05:00\n- **sta-2-2**: Level 0.268, last practised on 2027-01-26T09:00:00-05:00\n- **sta-2-3**: Level 0.295, last practised on 2027-01-20T09:00:00-05:00\n- **sta-2-4**: Level 0.208, last practised on 2027-01-15T09:00:00-05:00\n- **sta-2-5**: Level 0.254, last practised on 2027-01-13T09:00:00-05:00\n- **sta-2-6**: Level 0.36, last practised on 2027-02-20T11:10:00-05:00\n- **sta-2-7**: Level 0.302, last practised on 2027-01-16T09:00:00-05:00\n- **sta-3-3**: Level 0.226, last practised on 2027-01-27T09:00:00-05:00\n- **sta-3-4**: Level 0.289, last practised on 2027-01-21T09:00:00-05:00\n- **sta-3-5**: Level 0.395, last practised on 2027-02-06T11:05:00-05:00\n- **sta-6-1**: Level 0.221, last practised on 2027-01-18T09:00:00-05:00\n- **sta-6-2**: Level 0.209, last practised on 2027-01-27T09:00:00-05:00\n- **sta-8-1**: Level 0.16, last practised on 2027-01-13T09:00:00-05:00\n- **sta-8-2**: Level 0.183, last practised on 2027-01-17T09:00:00-05:00\n- **sta-8-3**: Level 0.129, last practised on 2027-01-25",
+  "checks": [
+    {
+      "name": "no_broken_rules",
+      "pass": false,
+      "detail": [
+        {
+          "rule": "available_hours",
+          "block_ids": [
+            "blk-s3-3",
+            "blk-s3-4",
+            "blk-s3-5",
+            "blk-s3-6"
+          ],
+          "detail": "Outside the student's available hours."
+        }
+      ]
+    },
+    {
+      "name": "nothing_after_assessment",
+      "pass": false,
+      "detail": [
+        "blk-s3-11",
+        "blk-s3-12",
+        "blk-s3-13",
+        "blk-s3-14"
+      ]
+    },
+    {
+      "name": "only_reached_targets",
+      "pass": false,
+      "detail": [
+        "blk-s3-8",
+        "blk-s3-9",
+        "blk-s3-10",
+        "blk-s3-11",
+        "blk-s3-12",
+        "blk-s3-13",
+        "blk-s3-14"
+      ]
+    },
+    {
+      "name": "min_targets_reached",
+      "pass": true,
+      "detail": [
+        "bio-4-3",
+        "bio-4-4",
+        "bio-5-3"
+      ]
+    }
+  ]
+}

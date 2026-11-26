@@ -1,0 +1,76 @@
+{
+  "scenario": "s3-exam-moved",
+  "variant": "base",
+  "seed": 2,
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "no_broken_rules",
+    "nothing_after_assessment",
+    "only_reached_targets"
+  ],
+  "steps": 13,
+  "ended": "answer",
+  "tool_calls": 12,
+  "writes": 8,
+  "refused": 10,
+  "by_tool": {
+    "milepost.preferences.get": 1,
+    "milepost.plan.project": 1,
+    "milepost.plan.add_block": 8,
+    "milepost.practice.list": 2
+  },
+  "seconds": 59,
+  "final_message": "Based on your practice sessions, here are the skills and their last practice dates:\n\n1. **Skill: alg-7-6**\n   - Last Practiced: 2027-02-01T19:00:00-05:00\n\n2. **Skill: bio-3-1**\n   - Last Practiced: 2027-02-02T19:30:00-05:00\n\n3. **Skill: alg-4-2**\n   - Last Practiced: 2027-02-03T19:00:00-05:00\n\n4. **Skill: bio-4-2**\n   - Last Practiced: 2027-02-04T19:30:00-05:00\n\n5. **Skill: alg-6-4**\n   - Last Practiced: 2027-02-05T19:00:00-05:00\n\n6. **Skill: sta-3-5**\n   - Last Practiced: 2027-02-06T10:30:00-05:00\n\n7. **Skill: bio-4-3**\n   - Last Practiced: 2027-02-09T19:30:00-05:00\n\n8. **Skill: alg-7-2**\n   - Last Practiced: 2027-02-10T19:00:00-05:00\n\n9. **Skill: bio-3-3**\n   - Last Practiced: 2027-02-11T19:30:00-05:00\n\n10. **Skill: alg-4-1**\n    - Last Practiced: 2027-02-12T19:00:00-05:00\n\n11. **Skill: sta-3-1**\n    - Last Practiced: 2027-02-13T10:30:00-05:00\n\n12. **Skill: alg-7-1**\n    - Last Practiced: 2027-02-15T19:00:00-05:00\n\n13. **Skill: bio-3-5**\n    - Last Practiced: 2027-02-16T19:30:00-05:00\n\n14. **Skill: bio-3-4**\n    - Last Practiced: 2027-02-18T19:30:00-05:00\n\n15. **Skill: alg-6-1**\n    - Last Practiced: 2027-02-19T19:00:00-05:00\n\n16. **Skill: sta-2-6**\n    - Last Practiced: 2027-02-20T10:30:00-05:00\n\n17. **Skill: alg-4-4**\n    - Last Practiced: 2027-02-22T19:00:00-05:00\n\n18. **Skill: bio-3-2**\n    - Last Practiced: 2027-02-23T19:30:00-05:00\n\n19. **Skill: alg-6-3**\n    - Last Practiced: 2027-02-24T19:00:00-05:00\n\n20. **Skill: alg-7-3**\n    - Last Practiced: 2027-02-26T19:00:00",
+  "checks": [
+    {
+      "name": "no_broken_rules",
+      "pass": false,
+      "detail": [
+        {
+          "rule": "available_hours",
+          "block_ids": [
+            "blk-s3-3",
+            "blk-s3-4",
+            "blk-s3-5",
+            "blk-s3-6"
+          ],
+          "detail": "Outside the student's available hours."
+        }
+      ]
+    },
+    {
+      "name": "nothing_after_assessment",
+      "pass": false,
+      "detail": [
+        "blk-s3-11",
+        "blk-s3-12",
+        "blk-s3-13",
+        "blk-s3-14"
+      ]
+    },
+    {
+      "name": "only_reached_targets",
+      "pass": false,
+      "detail": [
+        "blk-s3-8",
+        "blk-s3-9",
+        "blk-s3-10",
+        "blk-s3-11",
+        "blk-s3-12",
+        "blk-s3-13",
+        "blk-s3-14"
+      ]
+    },
+    {
+      "name": "min_targets_reached",
+      "pass": true,
+      "detail": [
+        "bio-4-3",
+        "bio-4-4",
+        "bio-5-3"
+      ]
+    }
+  ]
+}

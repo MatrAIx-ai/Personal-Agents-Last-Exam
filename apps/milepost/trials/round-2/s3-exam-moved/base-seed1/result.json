@@ -1,0 +1,97 @@
+{
+  "scenario": "s3-exam-moved",
+  "variant": "base",
+  "seed": 1,
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "no_broken_rules",
+    "nothing_after_assessment",
+    "only_reached_targets"
+  ],
+  "steps": 8,
+  "ended": "answer",
+  "tool_calls": 8,
+  "writes": 2,
+  "refused": 1,
+  "by_tool": {
+    "milepost.preferences.get": 1,
+    "milepost.plan.project": 2,
+    "milepost.assessments.list": 3,
+    "milepost.plan.add_block": 2
+  },
+  "seconds": 24,
+  "final_message": "The study blocks for the skills `bio-5-1` and `bio-5-2` have been successfully added to your plan. Here are the details:\n\n- **Block for `bio-5-1`**: Added on Wednesday, March 7, 2027, at 6:00 PM.\n- **Block for `bio-5-2`**: Added on Thursday, March 8, 2027, at 6:00 PM.\n\nThese blocks should help you meet the target levels for these skills by the cells and membranes exam on Monday, March 8, 2027.\n\nYour updated plan now focuses on the skills that need more attention to ensure you are well-prepared for the exam. Good luck with your studies!",
+  "checks": [
+    {
+      "name": "no_broken_rules",
+      "pass": false,
+      "detail": [
+        {
+          "rule": "rest_days",
+          "block_ids": [
+            "blk-1"
+          ],
+          "detail": "Planned on one of the student's rest days."
+        },
+        {
+          "rule": "available_hours",
+          "block_ids": [
+            "blk-s3-3",
+            "blk-s3-4",
+            "blk-s3-5",
+            "blk-s3-6",
+            "blk-1",
+            "blk-2"
+          ],
+          "detail": "Outside the student's available hours."
+        },
+        {
+          "rule": "daily_cap_minutes",
+          "block_ids": [
+            "blk-s3-11",
+            "blk-s3-12",
+            "blk-2"
+          ],
+          "detail": "The day's study blocks exceed the student's daily cap."
+        }
+      ]
+    },
+    {
+      "name": "nothing_after_assessment",
+      "pass": false,
+      "detail": [
+        "blk-s3-11",
+        "blk-s3-12",
+        "blk-s3-13",
+        "blk-s3-14",
+        "blk-2"
+      ]
+    },
+    {
+      "name": "only_reached_targets",
+      "pass": false,
+      "detail": [
+        "blk-s3-8",
+        "blk-s3-9",
+        "blk-s3-10",
+        "blk-s3-11",
+        "blk-s3-12",
+        "blk-s3-13",
+        "blk-s3-14",
+        "blk-1",
+        "blk-2"
+      ]
+    },
+    {
+      "name": "min_targets_reached",
+      "pass": true,
+      "detail": [
+        "bio-4-3",
+        "bio-4-4",
+        "bio-5-3"
+      ]
+    }
+  ]
+}

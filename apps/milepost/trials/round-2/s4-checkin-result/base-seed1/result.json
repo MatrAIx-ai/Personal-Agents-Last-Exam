@@ -1,0 +1,57 @@
+{
+  "scenario": "s4-checkin-result",
+  "variant": "base",
+  "seed": 1,
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "all_targets_reached"
+  ],
+  "steps": 8,
+  "ended": "answer",
+  "tool_calls": 128,
+  "writes": 0,
+  "refused": 29,
+  "by_tool": {
+    "milepost.mastery.get": 4,
+    "milepost.assessments.list": 87,
+    "milepost.plan.list": 3,
+    "milepost.preferences.get": 3,
+    "milepost.plan.project": 1,
+    "milepost.practice.list": 2,
+    "milepost.skills.list": 27,
+    "milepost.courses.list": 1
+  },
+  "seconds": 91,
+  "final_message": "The list of courses includes:\n\n- **Course: Algebra 1**\n  - Units:\n    - **Unit: Linear equations and inequalities**\n    - **Unit: Graphing lines**\n    - **Unit: Working with polynomials**\n    - **Unit: Factoring**\n\n- **Course: Introductory Statistics**\n  - Units:\n    - **Unit: Collecting data**\n    - **Unit: Summarising data**\n    - **Unit: Probability**\n    - **Unit: The normal curve**\n    - **Unit: Estimating with confidence**\n\n- **Course: Biology**\n  - Units:\n    - **Unit: Chemistry for biology**\n    - **Unit: Large molecules of life**\n    - **Unit: Cells**\n    - **Unit: Membranes and transport**\n    - **Unit: Energy and enzymes**\n    - **Unit: How cells divide**\n    - **Unit: Inheritance**\n\nFrom the list, the relevant course for factoring is **Course: Algebra 1**. Let's now get the skills for the factoring unit.\n\nLet's call `milepost__skills__list` with the course ID `course-algebra`.\n",
+  "checks": [
+    {
+      "name": "all_targets_reached",
+      "pass": false,
+      "detail": [
+        "alg-7-3"
+      ]
+    },
+    {
+      "name": "no_broken_rules",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no_unneeded_practice",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "blocks_in_scope",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "max_planned_minutes",
+      "pass": true,
+      "detail": 510
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "agent": "codex",
+  "cli": "codex-cli 0.171.0-alpha.13",
+  "model": "gpt-6.2-astra",
+  "effort": "xhigh",
+  "scenario": "s2-four-blocks",
+  "variant": "base",
+  "run": 1,
+  "valid": true,
+  "pass": true,
+  "failed_checks": [],
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 29,
+  "tool_calls": 7,
+  "by_tool": {
+    "milepost.skills.list": 1,
+    "milepost.plan.list": 2,
+    "milepost.practice.list": 2,
+    "milepost.practice.record": 2
+  },
+  "by_status": {
+    "ok": 5,
+    "committed": 2
+  },
+  "other_tool_use": [],
+  "blocked_by_cli": [],
+  "other_tools_offered": [],
+  "usage": {
+    "input_tokens": 137797,
+    "cached_input_tokens": 126848,
+    "output_tokens": 641,
+    "reasoning_output_tokens": 25
+  },
+  "final_message": "Your practice history now shows one 40-minute session for each day from Tuesday through Friday, for 160 minutes total. I added Wednesday and Friday at their scheduled times. Milepost had already recorded Tuesday and Thursday.\n\nTuesday’s entry shows a start of 2027-03-02T19:30:00-05:00, earlier than you remember. Milepost doesn’t let me change a platform-recorded session’s time, so I kept that block counted once.\n\nThe plan still labels Wednesday and Friday “missed” because the two sessions I added are in your practice history without a link to their plan blocks.",
+  "checks": [
+    {
+      "name": "reports_exactly",
+      "pass": true,
+      "detail": {
+        "missing": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "no_plan_changes",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

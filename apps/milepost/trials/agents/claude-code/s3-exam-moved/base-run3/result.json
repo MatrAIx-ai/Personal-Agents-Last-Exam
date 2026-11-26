@@ -1,0 +1,97 @@
+{
+  "agent": "claude-code",
+  "cli": "2.1.325 (Claude Code)",
+  "model": "claude-opus-5-5",
+  "effort": "default",
+  "scenario": "s3-exam-moved",
+  "variant": "base",
+  "run": 3,
+  "valid": true,
+  "pass": true,
+  "failed_checks": [],
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 89,
+  "tool_calls": 25,
+  "by_tool": {
+    "milepost.assessments.list": 1,
+    "milepost.plan.list": 2,
+    "milepost.preferences.get": 1,
+    "milepost.courses.list": 1,
+    "milepost.mastery.get": 1,
+    "milepost.skills.list": 1,
+    "milepost.plan.project": 4,
+    "milepost.plan.remove_block": 10,
+    "milepost.plan.update_block": 4
+  },
+  "by_status": {
+    "ok": 11,
+    "committed": 14
+  },
+  "other_tool_use": [],
+  "blocked_by_cli": [],
+  "other_tools_offered": [],
+  "usage": {
+    "input_tokens": 36,
+    "cache_creation_input_tokens": 15663,
+    "cache_read_input_tokens": 235186,
+    "output_tokens": 6281,
+    "output_tokens_details": {
+      "thinking_tokens": 2636
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 15663,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1102,
+        "cache_read_input_tokens": 17200,
+        "cache_creation_input_tokens": 1706,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1706
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.2982385,
+    "num_turns": 26,
+    "duration_ms": 87463
+  },
+  "final_message": "I've rebuilt your plan around the Monday 9:00 exam. With your new shifts and your study rules, only one more skill can realistically reach its target. bio-4-4 is already there.\n\n**Your plan before the exam:**\n- Fri 2027-03-05T18:30:00-05:00 to 19:20, 50 min: Organelles of plant and animal cells (bio-4-3)\n- Fri 2027-03-05T19:20:00-05:00 to 20:00, 40 min: same skill\n\n**Projected levels on Monday:**\n- **Will make it:**\n  - Organelles (bio-4-3): 0.73, target 0.70.\n  - ER and Golgi (bio-4-4): 0.65, target 0.60. Tuesday's practice already covers it, so it needs no more blocks.\n- **Won't make it:**\n  - Fluid mosaic model (bio-5-1): 0.25, target 0.65\n  - Diffusion and osmosis (bio-5-2): 0.33, target 0.65\n  - Pumps and active transport (bio-5-3): 0.33, target 0.60\n\n**Why:** Your shifts take out Wednesday and Thursday, Sunday is your rest day, and Monday evening is after the exam. That leaves Friday and Saturday, at most 90 minutes each under your daily cap: 180 minutes in total. I tested splitting it: 90 minutes on Organelles and 90 on Pumps. Organelles reached its target, but Pumps only got to 0.57, short of 0.60. So I removed the Saturday blocks instead of keeping practice that wouldn't get there.\n\n**What I removed:**\n- Tonight's and Thursday's blocks, which clash with your shifts.\n- Saturday's two blocks.\n- The Monday-evening and Tuesday blocks after the exam (Diffusion and osmosis, Fluid mosaic model), since they can't help by Monday.\n\nSaturday 10:00 to 14:00 is now free.\n\n**One trade-off to consider:** You could put your Friday and Saturday time on Pumps (bio-5-3) or Diffusion and osmosis (bio-5-2) instead. My estimate is about 110 minutes for Pumps or about 150 for Diffusion, but I haven't tested either. Any of these choices gets only one skill to target, and Organelles is the cheapest. It's also a prerequisite for the Fluid mosaic model and for later units. If you'd rather switch, tell me and I'll rebuild the plan and check the numbers.",
+  "checks": [
+    {
+      "name": "no_broken_rules",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "nothing_after_assessment",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "only_reached_targets",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "min_targets_reached",
+      "pass": true,
+      "detail": [
+        "bio-4-3",
+        "bio-4-4"
+      ]
+    }
+  ]
+}

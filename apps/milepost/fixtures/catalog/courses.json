@@ -1,0 +1,97 @@
+{
+  "description": "Hand-written course catalog for the full Milepost fixtures. Course, unit and skill names, prerequisites, assessments and targets are Milepost's own. Topic choice and order follow the tables of contents of three OpenStax textbooks; `see` cites the chapter or section that covers each unit or skill. No text, figures or exercises from the books are included. License and authors were checked on openstax.org on 2026-11-21.",
+  "references": {
+    "openstax-elementary-algebra-2e": {"title": "Elementary Algebra 2e", "authors": ["Lynn Marecek", "MaryAnne Anthony-Smith", "Andrea Honeycutt Mathis"], "publisher": "OpenStax, Rice University", "published": "2020-04-22", "license": "CC BY-NC-SA 4.0", "license_uri": "https://creativecommons.org/licenses/by-nc-sa/4.0/", "uri": "https://openstax.org/details/books/elementary-algebra-2e"},
+    "openstax-introductory-statistics-2e": {"title": "Introductory Statistics 2e", "authors": ["Barbara Illowsky", "Susan Dean"], "publisher": "OpenStax, Rice University", "published": "2023-12-13", "license": "CC BY-NC-SA 4.0", "license_uri": "https://creativecommons.org/licenses/by-nc-sa/4.0/", "uri": "https://openstax.org/details/books/introductory-statistics-2e"},
+    "openstax-biology-2e": {"title": "Biology 2e", "authors": ["Mary Ann Clark", "Matthew Douglas", "Jung Choi"], "publisher": "OpenStax, Rice University", "published": "2018-03-28", "license": "CC BY-NC-SA 4.0", "license_uri": "https://creativecommons.org/licenses/by-nc-sa/4.0/", "uri": "https://openstax.org/details/books/biology-2e"}
+  },
+  "courses": [
+    {"id": "course-algebra", "title": "Algebra 1", "reference": "openstax-elementary-algebra-2e", "units": [
+      {"id": "unit-alg-2", "title": "Linear equations and inequalities", "see": "Chapter 2", "skills": [
+        {"id": "alg-2-1", "title": "One-step equations: add or subtract the same amount on both sides", "see": "2.1", "prerequisites": []},
+        {"id": "alg-2-3", "title": "Equations with the variable on both sides", "see": "2.3", "prerequisites": ["alg-2-1"]},
+        {"id": "alg-2-4", "title": "Multi-step linear equations", "see": "2.4", "prerequisites": ["alg-2-3"]},
+        {"id": "alg-2-5", "title": "Clearing fractions and decimals before solving", "see": "2.5", "prerequisites": ["alg-2-4"]},
+        {"id": "alg-2-7", "title": "Solving and graphing linear inequalities", "see": "2.7", "prerequisites": ["alg-2-4"]}]},
+      {"id": "unit-alg-4", "title": "Graphing lines", "see": "Chapter 4", "skills": [
+        {"id": "alg-4-1", "title": "Plotting and reading points on the coordinate plane", "see": "4.1", "prerequisites": []},
+        {"id": "alg-4-2", "title": "Graphing a linear equation from a table of points", "see": "4.2", "prerequisites": ["alg-4-1", "alg-2-4"]},
+        {"id": "alg-4-4", "title": "Finding the slope of a line", "see": "4.4", "prerequisites": ["alg-4-2"]},
+        {"id": "alg-4-5", "title": "Graphing a line from its slope and y-intercept", "see": "4.5", "prerequisites": ["alg-4-4"]},
+        {"id": "alg-4-6", "title": "Writing the equation of a line", "see": "4.6", "prerequisites": ["alg-4-5"]}]},
+      {"id": "unit-alg-6", "title": "Working with polynomials", "see": "Chapter 6", "skills": [
+        {"id": "alg-6-1", "title": "Combining polynomials by adding and subtracting", "see": "6.1", "prerequisites": []},
+        {"id": "alg-6-2", "title": "Exponent rules for products and powers", "see": "6.2", "prerequisites": []},
+        {"id": "alg-6-3", "title": "Multiplying polynomials", "see": "6.3", "prerequisites": ["alg-6-1", "alg-6-2"]},
+        {"id": "alg-6-4", "title": "Squares of binomials and conjugate products", "see": "6.4", "prerequisites": ["alg-6-3"]}]},
+      {"id": "unit-alg-7", "title": "Factoring", "see": "Chapter 7", "skills": [
+        {"id": "alg-7-1", "title": "Pulling out a common factor; factoring by grouping", "see": "7.1", "prerequisites": ["alg-6-3"]},
+        {"id": "alg-7-2", "title": "Factoring x^2 + bx + c", "see": "7.2", "prerequisites": ["alg-7-1"]},
+        {"id": "alg-7-3", "title": "Factoring ax^2 + bx + c when a is not 1", "see": "7.3", "prerequisites": ["alg-7-2"]},
+        {"id": "alg-7-4", "title": "Perfect-square trinomials and differences of squares", "see": "7.4", "prerequisites": ["alg-6-4", "alg-7-2"]},
+        {"id": "alg-7-5", "title": "Choosing a factoring method", "see": "7.5", "prerequisites": ["alg-7-3", "alg-7-4"]},
+        {"id": "alg-7-6", "title": "Solving quadratic equations by factoring", "see": "7.6", "prerequisites": ["alg-7-5", "alg-2-4"]}]}]},
+    {"id": "course-statistics", "title": "Introductory Statistics", "reference": "openstax-introductory-statistics-2e", "units": [
+      {"id": "unit-sta-1", "title": "Collecting data", "see": "Chapter 1", "skills": [
+        {"id": "sta-1-1", "title": "Population, sample, parameter and statistic", "see": "1.1", "prerequisites": []},
+        {"id": "sta-1-2", "title": "Sampling methods and sampling variability", "see": "1.2", "prerequisites": ["sta-1-1"]},
+        {"id": "sta-1-3", "title": "Frequency tables and levels of measurement", "see": "1.3", "prerequisites": ["sta-1-2"]},
+        {"id": "sta-1-4", "title": "Designing experiments and spotting ethical problems", "see": "1.4", "prerequisites": ["sta-1-2"]}]},
+      {"id": "unit-sta-2", "title": "Summarising data", "see": "Chapter 2", "skills": [
+        {"id": "sta-2-2", "title": "Drawing and reading histograms and time-series graphs", "see": "2.2", "prerequisites": ["sta-1-3"]},
+        {"id": "sta-2-3", "title": "Percentiles and quartiles", "see": "2.3", "prerequisites": ["sta-1-3"]},
+        {"id": "sta-2-4", "title": "Drawing and reading box plots", "see": "2.4", "prerequisites": ["sta-2-3"]},
+        {"id": "sta-2-5", "title": "Mean, median and mode", "see": "2.5", "prerequisites": ["sta-1-3"]},
+        {"id": "sta-2-6", "title": "How skew pulls the mean away from the median", "see": "2.6", "prerequisites": ["sta-2-2", "sta-2-5"]},
+        {"id": "sta-2-7", "title": "Standard deviation and spread", "see": "2.7", "prerequisites": ["sta-2-5"]}]},
+      {"id": "unit-sta-3", "title": "Probability", "see": "Chapter 3", "skills": [
+        {"id": "sta-3-1", "title": "Outcomes, events and sample spaces", "see": "3.1", "prerequisites": []},
+        {"id": "sta-3-2", "title": "Telling independent events from mutually exclusive ones", "see": "3.2", "prerequisites": ["sta-3-1"]},
+        {"id": "sta-3-3", "title": "The addition and multiplication rules", "see": "3.3", "prerequisites": ["sta-3-2"]},
+        {"id": "sta-3-4", "title": "Probabilities from two-way tables", "see": "3.4", "prerequisites": ["sta-3-3"]},
+        {"id": "sta-3-5", "title": "Using tree diagrams and Venn diagrams", "see": "3.5", "prerequisites": ["sta-3-3"]}]},
+      {"id": "unit-sta-6", "title": "The normal curve", "see": "Chapter 6", "skills": [
+        {"id": "sta-6-1", "title": "z-scores and the standard normal curve", "see": "6.1", "prerequisites": ["sta-2-7"]},
+        {"id": "sta-6-2", "title": "Finding probabilities under a normal curve", "see": "6.2", "prerequisites": ["sta-6-1"]}]},
+      {"id": "unit-sta-8", "title": "Estimating with confidence", "see": "Chapter 8", "skills": [
+        {"id": "sta-8-1", "title": "Interval for a mean when the population SD is known", "see": "8.1", "prerequisites": ["sta-6-2"]},
+        {"id": "sta-8-2", "title": "Interval for a mean with the t distribution", "see": "8.2", "prerequisites": ["sta-8-1"]},
+        {"id": "sta-8-3", "title": "Interval for a proportion", "see": "8.3", "prerequisites": ["sta-8-1", "sta-3-3"]}]}]},
+    {"id": "course-biology", "title": "Biology", "reference": "openstax-biology-2e", "units": [
+      {"id": "unit-bio-2", "title": "Chemistry for biology", "see": "Chapter 2", "skills": [
+        {"id": "bio-2-1", "title": "Atoms, isotopes, ions and chemical bonds", "see": "2.1", "prerequisites": []},
+        {"id": "bio-2-2", "title": "Why water behaves the way it does", "see": "2.2", "prerequisites": ["bio-2-1"]},
+        {"id": "bio-2-3", "title": "Carbon as the backbone of organic molecules", "see": "2.3", "prerequisites": ["bio-2-1"]}]},
+      {"id": "unit-bio-3", "title": "Large molecules of life", "see": "Chapter 3", "skills": [
+        {"id": "bio-3-1", "title": "Building and breaking polymers: dehydration and hydrolysis", "see": "3.1", "prerequisites": ["bio-2-3"]},
+        {"id": "bio-3-2", "title": "Sugars and starches", "see": "3.2", "prerequisites": ["bio-3-1"]},
+        {"id": "bio-3-3", "title": "Fats, phospholipids and steroids", "see": "3.3", "prerequisites": ["bio-3-1"]},
+        {"id": "bio-3-4", "title": "Amino acids and protein folding", "see": "3.4", "prerequisites": ["bio-3-1"]},
+        {"id": "bio-3-5", "title": "DNA and RNA building blocks", "see": "3.5", "prerequisites": ["bio-3-1"]}]},
+      {"id": "unit-bio-4", "title": "Cells", "see": "Chapter 4", "skills": [
+        {"id": "bio-4-2", "title": "Parts of a bacterial cell", "see": "4.2", "prerequisites": ["bio-3-1"]},
+        {"id": "bio-4-3", "title": "Organelles of plant and animal cells", "see": "4.3", "prerequisites": ["bio-4-2"]},
+        {"id": "bio-4-4", "title": "How the ER and Golgi make and ship proteins", "see": "4.4", "prerequisites": ["bio-4-3", "bio-3-4"]}]},
+      {"id": "unit-bio-5", "title": "Membranes and transport", "see": "Chapter 5", "skills": [
+        {"id": "bio-5-1", "title": "The fluid mosaic model", "see": "5.1", "prerequisites": ["bio-3-3", "bio-4-3"]},
+        {"id": "bio-5-2", "title": "Diffusion and osmosis", "see": "5.2", "prerequisites": ["bio-5-1", "bio-2-2"]},
+        {"id": "bio-5-3", "title": "Pumps and transport that uses energy", "see": "5.3", "prerequisites": ["bio-5-2"]}]},
+      {"id": "unit-bio-6", "title": "Energy and enzymes", "see": "Chapter 6", "skills": [
+        {"id": "bio-6-4", "title": "ATP as the cell's energy currency", "see": "6.4", "prerequisites": ["bio-3-5"]},
+        {"id": "bio-6-5", "title": "How enzymes speed up reactions", "see": "6.5", "prerequisites": ["bio-3-4"]}]},
+      {"id": "unit-bio-10", "title": "How cells divide", "see": "Chapter 10", "skills": [
+        {"id": "bio-10-1", "title": "Chromosomes and copying the genome before division", "see": "10.1", "prerequisites": ["bio-4-3"]},
+        {"id": "bio-10-2", "title": "Stages of the cell cycle and mitosis", "see": "10.2", "prerequisites": ["bio-10-1"]}]},
+      {"id": "unit-bio-12", "title": "Inheritance", "see": "Chapter 12", "skills": [
+        {"id": "bio-12-1", "title": "Mendel's pea crosses and probability", "see": "12.1", "prerequisites": ["bio-10-2", "sta-3-3"]},
+        {"id": "bio-12-3", "title": "Segregation and independent assortment", "see": "12.3", "prerequisites": ["bio-12-1"]}]}]}
+  ],
+  "assessments": [
+    {"id": "alg-midterm", "course": "course-algebra", "title": "Algebra midterm: equations and graphs", "date": "2027-02-19T10:00:00-05:00", "targets": {"alg-2-4": 0.7, "alg-2-5": 0.65, "alg-2-7": 0.65, "alg-4-4": 0.65, "alg-4-5": 0.65}},
+    {"id": "alg-quiz-factoring", "course": "course-algebra", "title": "Quiz: factoring", "date": "2027-03-12T10:00:00-05:00", "targets": {"alg-7-2": 0.7, "alg-7-3": 0.65, "alg-7-4": 0.65, "alg-7-5": 0.6}},
+    {"id": "sta-quiz-descriptive", "course": "course-statistics", "title": "Quiz: descriptive statistics", "date": "2027-02-24T11:00:00-05:00", "targets": {"sta-2-3": 0.65, "sta-2-5": 0.7, "sta-2-7": 0.6}},
+    {"id": "sta-exam-probability", "course": "course-statistics", "title": "Exam: probability and the normal distribution", "date": "2027-03-15T11:00:00-04:00", "targets": {"sta-3-3": 0.7, "sta-3-4": 0.65, "sta-6-1": 0.65, "sta-6-2": 0.6}},
+    {"id": "bio-quiz-macromolecules", "course": "course-biology", "title": "Quiz: biological macromolecules", "date": "2027-02-26T09:00:00-05:00", "targets": {"bio-3-2": 0.65, "bio-3-3": 0.65, "bio-3-4": 0.7, "bio-3-5": 0.65}},
+    {"id": "bio-exam-cells", "course": "course-biology", "title": "Exam: cells and membranes", "date": "2027-03-11T09:00:00-05:00", "targets": {"bio-4-3": 0.7, "bio-4-4": 0.6, "bio-5-1": 0.65, "bio-5-2": 0.65, "bio-5-3": 0.6}}
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "agent": "claude-code",
+  "cli": "2.1.325 (Claude Code)",
+  "model": "claude-opus-5-5",
+  "effort": "default",
+  "scenario": "s1-cells-exam",
+  "variant": "base",
+  "run": 2,
+  "valid": true,
+  "pass": true,
+  "failed_checks": [],
+  "exit_code": 0,
+  "timed_out": false,
+  "seconds": 53,
+  "tool_calls": 20,
+  "by_tool": {
+    "milepost.assessments.list": 1,
+    "milepost.preferences.get": 1,
+    "milepost.plan.list": 1,
+    "milepost.courses.list": 1,
+    "milepost.plan.project": 4,
+    "milepost.mastery.get": 2,
+    "milepost.skills.list": 1,
+    "milepost.practice.list": 1,
+    "milepost.plan.add_block": 6,
+    "milepost.plan.update_block": 2
+  },
+  "by_status": {
+    "ok": 12,
+    "committed": 8
+  },
+  "other_tool_use": [],
+  "other_tools_offered": [],
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 13758,
+    "cache_read_input_tokens": 111417,
+    "output_tokens": 4068,
+    "output_tokens_details": {
+      "thinking_tokens": 983
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 13758,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 792,
+        "cache_read_input_tokens": 16319,
+        "cache_creation_input_tokens": 344,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 344
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.21391750000000004,
+    "num_turns": 21,
+    "duration_ms": 51440
+  },
+  "final_message": "I've planned six study blocks, 255 minutes in total, before your cells and membranes exam on Thursday, March 11 at 9:00. If you complete every block, Milepost projects that all five skills on the exam will reach their targets.\n\nNone of the five is on track yet, so each one gets some practice. I gave each skill only the time it needs to reach its target. Most blocks are the 30‑minute minimum you set.\n\n| When | Skill | Minutes | Projected on exam day / target |\n|---|---|---|---|\n| 2027-03-02T06:30:00-05:00 (Tue) | bio-5-2 Diffusion and osmosis | 60 | 0.651 / 0.65 (with Saturday's block) |\n| 2027-03-03T06:30:00-05:00 (Wed) | bio-4-3 Organelles of plant and animal cells | 70 | 0.705 / 0.70 |\n| 2027-03-04T06:30:00-05:00 (Thu) | bio-4-4 How the ER and Golgi make and ship proteins | 35 | 0.602 / 0.60 |\n| 2027-03-05T06:30:00-05:00 (Fri) | bio-5-1 The fluid mosaic model | 30 | 0.664 / 0.65 |\n| 2027-03-06T09:00:00-05:00 (Sat) | bio-5-2 Diffusion and osmosis | 30 | (see above) |\n| 2027-03-08T06:30:00-05:00 (Mon) | bio-5-3 Pumps and transport that uses energy | 30 | 0.647 / 0.60 |\n\n- **Your study rules:** every block falls inside your available hours and is between 30 and 90 minutes. No day goes over your 150‑minute cap.\n- **Order:** organelles (bio-4-3) comes before the ER and Golgi and the fluid mosaic model, because it's a prerequisite for both.\n- **Thin margins:** diffusion and osmosis (0.651 vs 0.65), ER and Golgi (0.602 vs 0.60) and organelles (0.705 vs 0.70) only just reach their targets. If you shorten or miss any of those blocks, that skill will probably fall short. Tell me and I'll add a few minutes or reschedule the block.",
+  "checks": [
+    {
+      "name": "all_targets_reached",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no_broken_rules",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no_unneeded_practice",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "blocks_in_scope",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "max_planned_minutes",
+      "pass": true,
+      "detail": 255
+    }
+  ]
+}
