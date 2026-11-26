@@ -8,7 +8,7 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**205 open non-draft proposals · 0 awaiting initial review · 13 drafts.**
+**205 open non-draft proposals · 0 awaiting initial review · 15 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
@@ -148,10 +148,12 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🧪 Task Track
 
-**110 proposals.**
+**112 proposals.**
 
 | Submitted (UTC) | PR / task title | Primary domain | Personalization insight | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-26 18:06:44 | [#273](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/273) · Keep an editable LaTeX proposal reflowing after a sponsor adds an annex<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/273/files) | Work &amp; business | Anika keeps editing the source, so a neat PDF with frozen section pages is the wrong deliverable. Her earlier correction should survive content changes while a genuinely required annex still starts on a new page. | Draft | Awaiting review |  | [SherylHYX](https://github.com/SherylHYX) |  |
+| 2026-11-26 18:06:40 | [#272](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/272) · Preserve a library pilot's agreed cadence and evaluate the outcome its learners chose<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/272/files) | Learning &amp; research | Laila's learners chose a six-meeting confidence pilot. A funding call and new response files must not turn their agreement into extra classes, a proficiency test or a comparison using responses they did not permit linking. | Draft | Awaiting review |  | [SherylHYX](https://github.com/SherylHYX) |  |
 | 2026-11-26 18:06:33 | [#271](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/271) · Resolve a damaged matching set without choosing the shopper's fallback<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/271/files) | Shopping &amp; groceries | A larger credit and an expiring offer do not choose Noor's fallback. Her matching-set history requires keeping the claim open until she selects a remedy, then acting on her narrow refund approval. | Draft | Awaiting review |  | [SherylHYX](https://github.com/SherylHYX) |  |
 | 2026-11-26 18:06:29 | [#270](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/270) · Keep a patient's own choices intact through appointment-note revisions<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/270/files) | Health &amp; care | Ellis approves a note's layout before choosing only two tracking fields. The agent must preserve that limited choice across later edits rather than turn its own earlier advice into the patient's commitment. | Draft | Awaiting review |  | [SherylHYX](https://github.com/SherylHYX) |  |
 | 2026-11-26 18:05:53 | [#269](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/269) · Adapt an archive grant after a maker withdraws public-use permission<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/269/files) | Work &amp; business<br>Also: Learning &amp; research | Mara's workshop-only scope and separate worksheet permission let the agent finish a fundable learning package after a maker withdraws public use, without treating an appealing video idea as her decision. | Draft | Awaiting review |  | [SherylHYX](https://github.com/SherylHYX) |  |
