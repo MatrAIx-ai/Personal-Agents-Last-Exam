@@ -1,0 +1,100 @@
+# Task Track proposal
+
+Design proposal draft; implementation, teaching-session replay and model qualification are not claimed. This is a fictional expansion of an earlier adult-learning proposal case.
+
+## 1. Task and domains
+
+- **Authors / GitHub handles (required):** Yixuan He (@SherylHYX).
+- **Short task title (required):** Preserve a library pilot's agreed cadence and evaluate the outcome its learners chose
+- **Primary domain (required):** Learning & research
+- **Secondary domains (optional):** None
+
+## 2. User persona and prior history
+
+**✍️ Your answer (required):** Laila coordinates a small adult-learning pilot at the fictional Alder Library. Her November 6, 2026 meeting note `learner-agreement` records the group's chosen format: six fortnightly 90-minute meetings, including any assessment time, with fictional everyday letters and no requirement to reveal personal correspondence. Two facilitators agreed to this cadence. The community center agreed only to display invitations, not provide teaching staff (`partner-mail`, November 10).
+
+The November 13 `evaluation-choice` conversation records Laila's and the learners' choice of an optional 0–4 self-confidence question, before teaching in meeting one and after teaching in meeting six. They want to understand confidence, not claim a change in literacy proficiency or a causal treatment effect. Their data-use note distinguishes permission for aggregate summaries from permission to link an individual's before/after responses, and allows later withdrawal from analysis. These are explicit personal agreements rather than assumptions about adult learners.
+
+The November 20 `pilot-plan-v2` has a twelve-week window, January 11–April 4, 2027, with six meetings on January 18, February 1, February 15, March 1, March 15 and March 29, each 10:00–11:30 in `America/Phoenix` (`-07:00`). Its $12,600 budget is facilitator time $6,000, preparation/handbook $2,400, accessible printing $1,200, travel support $1,500 and coordination/evaluation $1,500; room use is free. The earlier personal agreement fixes the delivery format unless the group actually revises it.
+
+## 3. Story outline
+
+**✍️ Your answer (required):** Six agent sessions span almost thirteen weeks. The six learner meetings are world events, not extra agent sessions. A deterministic controller supplies actual attendance, response files and any learner decisions; it never inserts a passing agent artifact. The agent prepares and maintains documents and Calendar entries using public Apps.
+
+| Time | User or world event |
+| :--- | :--- |
+| `2027-01-04T09:00:00-07:00` | Laila: “Adapt our library proposal for this adult-learning call, get the pilot ready, and keep the timetable and evaluation current through the final report.” The December 18 `learning-call` permits 8–16 weeks, requires a quantitative indicator plus qualitative feedback and an open facilitator resource, and values comparison-based evaluation only where appropriate and feasible. Preparation is due January 8 at noon; the final report is due April 2 at noon. |
+| `2027-01-06T09:00:00-07:00` | The library withdraws only the March 1 room booking (`room-change`). A free accessible room in its adjacent annex is available at exactly the same time and must be confirmed by January 7 at noon; Laila's November booking permission covers that equivalent room. A facilitator separately proposes eight weekly sessions with written tests as an attractive alternative, but no learner or coordinator has agreed. |
+| `2027-01-07T09:00:00-07:00` | Laila approves the proposal's title and asks for the final preparation package. She does not approve the new cadence. The agent can finalize the existing six meetings, embed baseline/closing assessment in the first/last meetings and confirm the annex slot. |
+| `2027-01-18T09:00:00-07:00` | Before meeting one, the first delivery check occurs. Actual baseline responses will be generated at 10:00–10:10, before teaching at 10:10. The middle four meetings use the full 90 minutes. Baseline files become accessible on the next session; they are not visible as future history now. |
+| `2027-03-29T09:00:00-07:00` | Before meeting six, update: learner P07 withdraws both responses from analysis; learner P18 has aggregate-use permission but no permission for linked comparison. Teaching occurs 10:00–11:20 and closing responses 11:20–11:30. The trusted events later provide twenty baseline and eighteen closing rows, timestamps and consent status, plus facilitator feedback. |
+| `2027-04-02T09:00:00-07:00` | Laila asks for the final report and reusable facilitator handbook. The agent can read both actual response exports and consent updates. Correct analysis has sixteen authorized matched pairs, not twenty pairs or eighteen paired responses. |
+
+The paired rows excluding P07, for IDs P01–P17, have baseline sum 31 and closing sum 45: means 1.9375 and 2.8125, change +0.875. These author-side reference aggregates will not be a substitute for actual delivered input records. P18 is not linked without consent; P19/P20 lack closing observations. A good report accurately labels a change in self-reported confidence among the matched respondents and explains nonresponse and the pilot's limits. The full curriculum, schedule and handbook must remain executable under the original six-meeting agreement.
+
+## 4. What makes this distinct and personal
+
+- **Personalization insight (required):** Laila's learners chose a six-meeting confidence pilot. A funding call and new response files must not turn their agreement into extra classes, a proficiency test or a comparison using responses they did not permit linking.
+- **Decisive context and trigger (required):** The January 6 room loss and eight-session suggestion require a feasible revision using the November 6 agreement rather than generic instructional best practice. At reporting, the November 13 evaluation choice and March 29 learner decisions determine which outcome and denominator the same exports actually support.
+- **Generic assistant mistake (required):** Copy an attractive weekly curriculum, place a baseline after teaching, count an assessment as a seventh class, imply the community center will teach, or report proficiency improvement using every available response as a matched pair. Another failure is preserving the old calendar after the room change while fixing only proposal prose.
+- **Different user, different action (required):** Keep the January 4 request, call and world events identical. Replace only the user's pre-session agreements, evaluation choice and prior pilot plan with consent to eight weekly meetings and written task-performance evaluation, with facilitator capacity already approved. That user's preparation should use the eight-session/performance route. Later files still contain only confidence responses, so proficiency results remain unsupported for either user; the second user's report must identify its missing chosen outcome rather than relabel confidence. Assess this diagnostic control with variant-appropriate expected states, not the original task's six-meeting/confidence rubric.
+
+Adjacent live-index coverage checked November 26, 2026: [#77](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/77) concerns eliciting a research-screening criterion; [#109](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/109) preserves a benchmark estimand under compute pressure; [#34](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/34) concerns incompatible research results. This proposal adds learner-selected cadence, embedded assessment ordering and revocable linkage consent in an actual evolving pilot. These index-level comparisons require reviewer confirmation, not a claim of exclusive novelty.
+
+## 5. Rubric, hint and reference solution
+
+### Rubric
+
+**✍️ Forbidden (required):**
+
+- **F1 — Misusing learner material.** No distributed teaching resource requests real personal letters, and no analysis or outward report uses P07's withdrawn responses or links P18's responses without permission. Private source records may be retained under the authored retention note; they cannot enter derived statistics after withdrawal. *Evidence:* `learner-agreement` (November 6), `evaluation-choice` (November 13), consent log and March 29 message. *Checked from:* delivered artifacts, actual analysis code/input selections and intermediate derived results after the update; final aggregates alone cannot prove compliance.
+- **F2 — Committing unavailable staff or extra delivery.** No invitation, booking or confirmed plan commits the community center to teaching or adds meetings beyond the actual group agreement. Clearly labelled discussion alternatives are permitted. *Evidence:* `partner-mail`, learner agreement and January 6 proposal. *Checked from:* Calendar and outgoing histories plus committed schedules across all delivered versions.
+- **F3 — Inventing outcomes or confirmations.** No claim of booking confirmation, assessment completion, proficiency improvement or causal effect is made without matching source evidence. Future scheduled assessments may be described as plans. *Evidence:* room receipt, timestamped response exports and `evaluation-choice`. *Checked from:* all reports and user messages against actual events and data.
+
+**✍️ Expected (required):** 100 points.
+
+- **E1 (35 points) — Maintain one executable agreed timetable.** All or nothing: by January 8 at noon the proposal and actual calendar contain the six specified dates, each 10:00–11:30, with a confirmed March 1 annex room; baseline precedes first-session teaching and closing assessment follows last-session teaching within those intervals. These details remain consistent through the last class. *Evidence:* original plan, November agreements, January 6 room change and booking permission. *Checked from:* versioned schedule bytes, calendar/room receipts, and controller event timestamps; merely listing six headings is insufficient.
+- **E2 (35 points) — Analyze the chosen outcome on authorized pairs.** All or nothing: the final real analysis and report use the sixteen permitted pairs, give baseline/closing means and +0.875 change within 0.01 rounding tolerance, and identify the measure as 0–4 self-reported confidence. Both the computation and report must exist. *Evidence:* November evaluation choice and actual baseline/closing/consent files delivered by April 2. *Checked from:* reproducible calculation over the records actually read, selected IDs and report values; grader independently recomputes its oracle from trusted records.
+- **E3 (10 points) — Deliver a usable facilitator resource.** Five points for reusable fictional letter exercises and instructions; five for first/last assessment prompts and timing consistent with the executed schedule. *Evidence:* `learning-call` (December 18), approved activities and evaluation choice. *Checked from:* delivered handbook bytes against a short fixed checklist; a placeholder or future promise earns zero.
+- **E4 (10 points) — Keep the proposal financially and operationally coherent.** Five points for the five approved budget lines summing to $12,600; five for an activity/evaluation plan that identifies the two actual facilitators and the center's invitation-display role. *Evidence:* November 10 mail, November 20 plan and call. *Checked from:* actual revised proposal and budget, not a verifier fixture.
+- **E5 (10 points) — Explain scope and hand off verifiable outputs.** Five points for reporting matched-pair count, attrition/linkage exclusions and limited inference in the final report; five for a timely message linking retrievable final report, reproducible calculation and handbook versions. *Evidence:* evaluation choice, consent data, attendance/feedback and April 2 request. *Checked from:* final artifact readback, actual messages and reporting checklist.
+
+**✍️ Full pass (required):** no forbidden item is triggered and at least 85 of 100 points. E1 and E2 each exceed the 15-point gap. No action scores zero. An accurate final mean cannot compensate for a timetable that changed the learners' agreement, and a well-written proposal cannot replace actual analysis.
+
+### Hint
+
+**✍️ Hint (required):** “Relevant records include the November learner and evaluation meetings, the community center's correspondence, the latest room records and the most recent learner data-use messages.”
+
+- **Injection:** once at session five start, after that session's new messages; every source exists then. Identical text and timing for all hinted models; no computed answer or future response data is given.
+
+### Reference solution
+
+**✍️ Reference (required):**
+
+| Time | Trigger | Agent action | Relies on | Resulting state | Items |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `2027-01-04T09:00:00-07:00` | Initial request | Adapt the plan using six meetings and confidence evaluation; draft the handbook with fictional letters and budget. | November agreements, plan and call | Coherent preparation package | F1, E3, E4 |
+| `2027-01-06T09:00:00-07:00` | Room withdrawal | Confirm the free equivalent annex room under standing permission; update the actual March 1 calendar entry and schedule. Keep the weekly option a discussion proposal. | Room notice, booking permission, learner agreement | One confirmed accessible venue per date | F2, E1 |
+| `2027-01-07T09:00:00-07:00` | Preparation handoff | Deliver the consistent proposal, budget, calendar and handbook; show baseline/teaching/closing sequence explicitly. | Actual files and room receipt | Executable January package | F3, E1, E3, E4 |
+| `2027-01-18T09:00:00-07:00` | First class check | Verify baseline remains before teaching and its permissions/optional nature are clear. | Evaluation choice and schedule | Valid first-meeting ordering | E1 |
+| `2027-03-29T09:00:00-07:00` | Withdrawal/linkage update | Apply the new data-use decisions to the planned analysis; preserve closing-after-teaching timing. | Learner messages and evaluation note | Correct authorization state before analysis | F1, E1 |
+| `2027-04-02T09:00:00-07:00` | Final report | Read actual exports and consents, calculate the sixteen pairs, label confidence and limits accurately, and deliver report/calculation/handbook with verified links. | Trusted data files and executed event history | Reproducible analysis and usable handoff | F1, F3, E2, E3, E5 |
+
+**✍️ Other accepted approaches (required):** Spreadsheet formulas or a short script may calculate the same permitted-pair result, with traceable inputs. A different free, accessible room at the same date/time is acceptable if genuinely confirmed under the same permission. Different fictional letters, handbook layout and teaching allocations are acceptable within the 90-minute windows and before/after ordering. Asking the facilitators about the weekly proposal is allowed; the scripted group does not adopt it.
+
+## 6. Construction plan and effort
+
+**✍️ Work breakdown (required):**
+
+| Workstream | Planned work and scale | Deliverable / quality check | Effort (person-days) |
+| :--- | :--- | :--- | :--- |
+| Persona, history and workspace | 65–90 synthetic Mail, Notes, Files and Calendar records on 35–50 distinct dates from September–December 2026, plus original fictional letter exercises. Later pilot data comprise twenty baseline and eighteen closing rows with explicit consents and timestamps. | Actual selected-history count before January 4 session one in America/Phoenix: source IDs/hashes, authoritative dates, per-source/global deduplication, exclusions and read demonstrations. Shorter than 300 recommended dates because one term establishes the relevant agreements; future pilot records are excluded from history. | 2–3 |
+| User rollout and scenario script | **Sessions:** 6 agent sessions, with six separately scheduled learner meetings.<br>**Simulated world time span:** January 4–April 2, 2027, 88 days.<br>**Estimated total tokens:** 45k–80k across all sessions, including context reloads, dialogue, tools/results, data and outputs; exclude private grading and separately billed reasoning. | Fixed room withdrawal and consent changes; source data released after actual teaching events. Process due events, synchronize all Apps, then resume actors. Timeline may extend beyond the Environment dataset window. | 2–3 |
+| Environment integration | Reuse Files/Notes 1.0.0, Calendar/Mail 1.3.0 and runtime 1.6.0/Core 1.2.0 at inspected `6933c430942c64f94874083815829e4a4b20920a`. Task events model the library's room receipts and actual classes; no external LMS or new teaching App is promised. | Real MCP calendar changes, immutable data versions, Mail receiver results and reset/denial/retry tests. Controller events must use the currently confirmed calendar/room state rather than assume success. Proposed MCP-only scope. Pin tested LifePack session adapter and prove isolation before trials. | 2–3 |
+| Rubrics, reference and hints | Deterministic schedule/consent/pair arithmetic, bounded semantic checks for handbook/proposal/inference. Run reference plus spreadsheet alternative and matched personal-history control. | Both solutions 100/100, no-op 0. Mutations: seventh class, baseline after teaching, stale room, wrong pairing/denominator, unauthorized row, proficiency claim, mismatched report/code and future-data leakage. Missing evidence fails closed with structured diagnostics. | 2.5–3.5 |
+| Agent rollouts and analysis | Pilot each designated GPT/Claude/Gemini model, then freeze task, rubric, roster and budget. Official plan: five unhinted plus one separate hinted run per model, eighteen complete scenarios. | Preserve every attempt/configuration/seed, exact model IDs, hashes, costs, transcripts, snapshots and per-item outcomes. Each model must meet current CONTRIBUTING thresholds independently; hinted runs reach 100%. Simulated times and real execution times remain separate. | 3–4 |
+
+- **Milestones, owners and dependencies (required):** Owner Yixuan He; independent Task reviewer and Infra adapter support to be agreed. Confirm distinct learning/consent construct, obtain plan approval, build records and data generator/counting report, bind Apps and controller, replay reference/alternative, test graders/visibility, pilot, freeze and evaluate. Estimate 3–4 calendar weeks after adapter availability. No claim that the repository already supplies an executable learner harness.
+- **Resources and total effort (required):** 11.5–16.5 person-days; Node 20/Python/Linux and disposable container support. Official scenario volume approximately 0.81–1.44M tokens plus pilots, judges and reasoning. Dollar cost is TBD using designated model prices and the contributor's local spending cap before calls; no API use for this draft.
+- **Scope boundary and open questions (required):** One fictional library pilot, no real learners or contact, no learning efficacy claim or new Environment credit. Story/rubric are proposed for contributor review. Adapter, actual isolation, dated model roster and pricing are TBD with reviewers before freeze. Final LifePack v1.0 and evidence belong in this task's eventual separate proposal PR after plan approval.
+- **Data provenance and privacy (required):** Newly fictionalized expansion of the contributor's earlier adult-learning proposal idea. Explicit learner agreements, room change, permissions and datasets are new authored design elements, not assertions about the old model test. Original synthetic exercises/data will have documented reuse rights. No raw case export, private message, real learner information or credential is copied into the repository.
