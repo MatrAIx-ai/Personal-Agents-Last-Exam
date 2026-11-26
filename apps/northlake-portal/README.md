@@ -7,9 +7,12 @@ Self-contained PALE App package, version 1.0.0, Core API 1.2.0, built for enviro
 Requires Node.js 18 or newer. No package install, account or remote service is needed (from the repository root):
 
 ```sh
-node --test apps/northlake-portal/tests/business.test.cjs
-node apps/northlake-portal/examples/run.cjs
-npm run app:verify -- --app apps/northlake-portal --output .artifacts/northlake-portal.json
+node --test apps/northlake-portal/tests/business.test.cjs                 # 19 App-only business tests
+node apps/northlake-portal/examples/run.cjs                              # event example on the App-only harness
+npm run app:verify -- --app apps/northlake-portal --with examples/apps/mail --output .artifacts/northlake-portal.json
+node apps/northlake-portal/examples/mail-notice.cjs evidence/mail-notice-trace.json   # real MCP: portal -> Messaging -> Mail, Files, rejected delivery, replay
+node apps/northlake-portal/scripts/coverage-report.cjs                   # data coverage over 2025-01-01 .. 2026-12-31
+node apps/northlake-portal/evidence/capture.cjs                          # GUI screenshot sequences with MCP state checks (Chrome, Node 22+)
 node runtime/web/server.cjs --app northlake-portal --registry apps/northlake-portal/registry.json --run web-demo --profile sandbox
 ```
 
@@ -17,7 +20,7 @@ node runtime/web/server.cjs --app northlake-portal --registry apps/northlake-por
 
 ## Operations
 
-Thirty-one agent operations in `tools.json`, fifteen reads and sixteen writes, each named `northlake-portal.<area>.<verb>` (the proposal wrote them as `portal.<area>.<verb>`; the platform requires the App ID as the first segment). Amounts are integer cents. Every write takes Core's `expected_version` and `request_id`; a repeated `request_id` returns the stored receipt and a stale version is rejected before the handler runs. Core owns the `status` of every result (`ok`, `committed`, or an error code), so an operation's own result is reported in `outcome`.
+Thirty-one agent operations in `tools.json`, fifteen reads and sixteen writes, each named `northlake-portal.<area>.<verb>` (the proposal wrote them as `portal.<area>.<verb>`; the platform requires the App ID as the first segment). Every view object a read returns carries `id`, the value the matching operation's `id` argument expects, next to its typed key (`thread_id`, `claim_id`, ...). Amounts are integer cents. Every write takes Core's `expected_version` and `request_id`; a repeated `request_id` returns the stored receipt and a stale version is rejected before the handler runs. Core owns the `status` of every result (`ok`, `committed`, or an error code), so an operation's own result is reported in `outcome`.
 
 Business errors arrive as the result `status` with a plain-language `message` that carries the figures the proposal promises: `thread_closed`, `attachment_invalid`, `exceeds_balance`, `claim_not_final`, `preview_stale` (with the current figures), `slot_unavailable` (with the nearest open slots), `identity_required`, `approval_required`, `offer_expired`, `interstitial_pending`, `user_action_required`, `not_found`, `invalid_state`.
 
@@ -35,7 +38,7 @@ Twelve events in `schemas/events.schema.json` are applied by Infra through `env.
 
 ## Integration and review
 
-`contribution/contribution.json` declares the operations (derived by `node runtime/build-contracts.cjs`), the twelve accepted events and the messaging directions. Notices to Mail 1.3.0 (new message, statement ready, request decided, appointment confirmation, clinic-side change, waitlist offer, reminder) are built and published by a host-run publisher after the portal's own commit; the App never observes delivery outcomes and stores no notice status. Files and Calendar are reached only by the agent's own tools. `app.json.dependencies` is empty: the package runs with the shared runtime alone.
+`contribution/contribution.json` declares the operations (derived by `node runtime/build-contracts.cjs`), the twelve accepted events and one send-only messaging direction: `channel.email`, wire `urn:pale:email-message:2` (`schemas/router-message.schema.json`, a byte-identical copy of Mail's), payload `urn:pale:email-payload:1`, event type `org.pale.mail.notification.v1`. The seven notice kinds (new message, statement ready, request decided, appointment confirmation, clinic-side change, waitlist offer, reminder) are built in `src/notices.cjs` from the public tool views only, so a notice can carry nothing an authorized reader could not already see, and message bodies stay in the portal. `src/publisher.cjs` is the host-run publisher: after the portal's own commit, Infra runs it with a trusted Agent connection and a trusted publishing connection (`runtime/messaging/service.cjs --config apps/northlake-portal/examples/router.json --publisher northlake-portal`); it reads the committed record, builds the CloudEvents envelope and calls `router.publish`. The receipt returns to that caller; the portal never observes delivery and stores no notice status, which the connected example verifies by comparing snapshots. `examples/mail-notice.cjs` runs the declared flow over real MCP processes: a `statement_ready` event, the notice committed in the real Mail 1.3.0 App, the agent saving the statement with `files.put` and attaching it to a Mail draft with the same SHA-256 in all three Apps, a delivery without a recipient grant rejected as `recipient_not_authorized` with Mail and the portal unchanged, and a replay deduplicated on the receipt. Files and Calendar are reached only by the agent's own tools. `app.json.dependencies` is empty: the package runs with the shared runtime alone.
 
 ## Package map
 
@@ -54,15 +57,23 @@ src/billing.cjs              Ledger reads, payment preview/confirm, questions, r
 src/appointments.cjs         Providers, slots, booking, cancel, reschedule, waitlist, interstitial
 src/documents.cjs            Thread export text and statement PDF writer
 src/events.cjs               The twelve event handlers
+src/notices.cjs               The seven Mail notices, built from public tool views
+src/publisher.cjs             Host-run publisher: read the committed record, build the notice, router.publish
+scripts/coverage-report.cjs  Reproducible data coverage report over 2025-01-01 .. 2026-12-31
 src/model.cjs                validateSeed and data-relationship hooks
 schemas/                     Generated seed/events/state schemas and copied public media contracts
 contribution/                Capabilities, GUI declaration, media catalog and dataset provenance
 gui/                         Business pages (pale.web) and the compatible reviewer renderer
 fixtures/                    Generated records, binding, policies and clock
-examples/                    Verifier event, ten-event schedule, standalone runner, editable task data
+examples/                    Verifier event, ten-event schedule, standalone runner, editable task data, Messaging config and the connected Mail/Files example
+evidence/                    Review index, data coverage report, Mail trace, GUI capture script, screenshots and sequences
 tests/                       App-only tests, schema validator and transaction-local harness
 ```
 
 ## Interactive business Web App
 
-See [GUI startup and boundaries](gui/README.md). From the repository root run `node runtime/web/server.cjs --app northlake-portal --registry apps/northlake-portal/registry.json --run web-demo --profile sandbox`. The App owns its pages in `gui/src/app.js`; the shared Host exposes only the fixed Agent connection.
+See [GUI startup and boundaries](gui/README.md). From the repository root run `node runtime/web/server.cjs --app northlake-portal --registry apps/northlake-portal/registry.json --run web-demo --profile sandbox`. The App owns its pages in `gui/src/app.js`; the shared Host exposes only the fixed Agent connection and allows no inline styles, so the App's presentation rules are a constructed stylesheet in the controller. Pages in this version: inbox and thread (reply, read flags, export, attachments), billing ledger (balance summary, charges with insurer status and flags, payments), claim (insurer arithmetic, payments applied, history, related threads, billing question, refund or waiver request, two-step payment) and statements (download of the text PDF). Deep links travel in the URL fragment next to the Host's access token: `/#page=billing&claim=<id>`, `/#page=statements&statement=<id>`; the notices' `deep_link` fields use the same route IDs. Provider search, booking, appointment and waitlist pages are remaining work for the next milestone.
+
+## Evidence
+
+[`evidence/README.md`](evidence/README.md) indexes the delivery evidence: the verifier report, the business tests, the real-MCP Mail and Files trace, the data coverage report, the GUI screenshot sequences with their MCP state checks, the reference-product comparison plan and the remaining work.

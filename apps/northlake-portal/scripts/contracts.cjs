@@ -136,18 +136,19 @@ const EVENT_SCHEMA = {
 // ---- tool contracts ---------------------------------------------------------
 const CLINIC_SUMMARY = obj({clinic_id:ID, name:TEXT(200), address:ADDRESS, phone:TEXT(40), hours:TEXT(300), parking_note:NULLABLE(TEXT(300))});
 const SLOT_VIEW = obj({slot_id:ID, provider_id:ID, clinic_id:ID, start:DATE, end:DATE, visit_types:arr(VISIT_TYPE), status:SLOT_STATUS});
-const PROVIDER_VIEW = obj({...PROVIDER.properties, clinic:CLINIC_SUMMARY, network_status:ENUM('in_network', 'out_of_network', 'unknown'),
+const PROVIDER_VIEW = obj({id:ID, ...PROVIDER.properties, clinic:CLINIC_SUMMARY, network_status:ENUM('in_network', 'out_of_network', 'unknown'),
   rating_label:TEXT(80), next_available:NULLABLE(SLOT_VIEW)});
-const APPOINTMENT_VIEW = obj({...APPOINTMENT.properties, provider_name:TEXT(200), specialty:TEXT(100), clinic_name:TEXT(200), clinic_address:ADDRESS});
-const THREAD_SUMMARY = obj({thread_id:ID, subject:TEXT(200), recipient:RECIPIENT, status:ENUM('open', 'closed'), awaiting:NULLABLE(ENUM('staff', 'patient')),
+const APPOINTMENT_VIEW = obj({id:ID, ...APPOINTMENT.properties, provider_name:TEXT(200), specialty:TEXT(100), clinic_name:TEXT(200), clinic_address:ADDRESS});
+const THREAD_SUMMARY = obj({id:ID, thread_id:ID, subject:TEXT(200), recipient:RECIPIENT, status:ENUM('open', 'closed'), awaiting:NULLABLE(ENUM('staff', 'patient')),
   closed_reason:NULLABLE(TEXT(200)), related:RELATED, opened_at:DATE, updated_at:DATE, message_count:INT(0), unread_count:INT(0),
   last_message_at:NULLABLE(DATE), last_message_preview:TEXT(200, 0), last_author:NULLABLE(AUTHOR)});
 const CLAIM_FLAGS = arr(ENUM('unstatemented', 'past_due'), {uniqueItems:true});
-const CLAIM_SUMMARY = obj({...CLAIM.properties, paid_by_patient_cents:CENTS, open_balance_cents:CENTS, flags:CLAIM_FLAGS});
+const CLAIM_SUMMARY = obj({id:ID, ...CLAIM.properties, paid_by_patient_cents:CENTS, open_balance_cents:CENTS, flags:CLAIM_FLAGS});
 const BALANCE_SUMMARY = obj({balance_due_cents:CENTS, past_due_cents:CENTS, pending_insurance_cents:CENTS, open_claims:INT(0), unread_messages:INT(0), upcoming_appointments:INT(0)});
-const STATEMENT_SUMMARY = obj({...STATEMENT.properties});
-const WAITLIST_VIEW = obj({...WAITLIST_ENTRY.properties, provider_name:TEXT(200), offer_slot:NULLABLE(SLOT_VIEW)});
-const PAYMENT_VIEW = obj({...PAYMENT.properties});
+const STATEMENT_SUMMARY = obj({id:ID, ...STATEMENT.properties});
+const THREAD_VIEW = obj({id:ID, ...THREAD.properties});
+const WAITLIST_VIEW = obj({id:ID, ...WAITLIST_ENTRY.properties, provider_name:TEXT(200), offer_slot:NULLABLE(SLOT_VIEW)});
+const PAYMENT_VIEW = obj({id:ID, ...PAYMENT.properties});
 
 const read = (name, description, input, output) => ({name:PREFIX + name, description, read_only:true, input, output});
 const write = (name, description, input, output) => ({name:PREFIX + name, description, read_only:false, input, output});
@@ -159,7 +160,7 @@ const TOOLS = [
     obj({category:ENUM('clinic', 'nurse_line', 'billing_office', 'all'), status:ENUM('open', 'closed', 'all'), query:TEXT(200, 0), unread_only:BOOL}, []),
     obj({threads:arr(THREAD_SUMMARY, {maxItems:200})})),
   read('messages.get', 'Read one thread with every message, author, read flag and attachment IDs. Reading does not mark messages read; use messages.flags.',
-    obj({id:ID}), obj({thread:THREAD})),
+    obj({id:ID}), obj({thread:THREAD_VIEW})),
   read('messages.export', 'Export one thread as UTF-8 plain text: filename, MIME type, base64 bytes and SHA-256, in the shape files.put and mail.attachment.add accept.',
     obj({id:ID}), obj({thread_id:ID, file:FILE_OUT})),
   read('messages.attachment.get', 'Read the bytes of one attachment on one message. id is the message ID; the asset must belong to that message.',
@@ -222,6 +223,7 @@ const TOOLS = [
     obj({id:ID}), obj({id:ID, outcome:{const:'cleared'}}))
 ];
 
+// Every view object also carries `id`, the value the matching operation's `id` argument expects.
 // Core adds these to every result and owns the top-level status, so App outcomes are reported as `outcome`; the write contract requires the idempotency key and observed version.
 function toolEntry(t) {
   const input = structuredClone(t.input);

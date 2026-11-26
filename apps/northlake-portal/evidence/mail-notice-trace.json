@@ -1,0 +1,249 @@
+{
+  "schema": "pale.northlake-portal.mail-notice-trace.v1",
+  "checked_at": "2026-11-26T07:27:57.225Z",
+  "run_id": "northlake-notice-477ff0c1-486",
+  "passed": true,
+  "checks": [
+    {
+      "label": "Mail account for Rosa loads",
+      "passed": true
+    },
+    {
+      "label": "Files account for Rosa loads",
+      "passed": true
+    },
+    {
+      "label": "Portal starts from its fixture",
+      "passed": true
+    },
+    {
+      "label": "statement_ready event commits",
+      "passed": true
+    },
+    {
+      "label": "Mail clock advances to the session time",
+      "passed": true,
+      "detail": {
+        "status": "committed",
+        "request_id": "clock-mail-2026-12-01",
+        "previous_virtual_now": "2026-11-15T09:00:00-08:00",
+        "virtual_now": "2026-12-01T06:00:00-08:00",
+        "advanced": true,
+        "app_id": "mail",
+        "version": {
+          "epoch": 2,
+          "revision": 1
+        }
+      }
+    },
+    {
+      "label": "Files clock advances to the session time",
+      "passed": true,
+      "detail": {
+        "status": "committed",
+        "request_id": "clock-files-2026-12-01",
+        "previous_virtual_now": "2026-11-18T09:00:00-08:00",
+        "virtual_now": "2026-12-01T06:00:00-08:00",
+        "advanced": true,
+        "app_id": "files",
+        "version": {
+          "epoch": 2,
+          "revision": 1
+        }
+      }
+    },
+    {
+      "label": "Statement record exists with the period and balance",
+      "passed": true
+    },
+    {
+      "label": "Publishing and Agent connections expose no Infra tools",
+      "passed": true
+    },
+    {
+      "label": "Messaging commits the delivery and returns a receipt",
+      "passed": true
+    },
+    {
+      "label": "Publishing changes nothing in the portal (no notice status is stored)",
+      "passed": true
+    },
+    {
+      "label": "The real Mail App holds one unread notice with the published title and text",
+      "passed": true
+    },
+    {
+      "label": "Mail has exactly one message",
+      "passed": true
+    },
+    {
+      "label": "billing.statement returns a PDF with a SHA-256 that matches its bytes",
+      "passed": true
+    },
+    {
+      "label": "files.put stores the statement as an immutable version",
+      "passed": true
+    },
+    {
+      "label": "Files returns the same bytes and SHA-256",
+      "passed": true
+    },
+    {
+      "label": "mail.draft.create stores a draft",
+      "passed": true
+    },
+    {
+      "label": "mail.attachment.add accepts the PDF",
+      "passed": true
+    },
+    {
+      "label": "The Mail attachment carries the same SHA-256 as the portal response and the Files version",
+      "passed": true
+    },
+    {
+      "label": "A delivery without a grant is rejected as recipient_not_authorized",
+      "passed": true,
+      "detail": {
+        "stage": "router_rejected",
+        "code": "recipient_not_authorized"
+      }
+    },
+    {
+      "label": "The rejected delivery leaves Mail and the portal unchanged",
+      "passed": true
+    },
+    {
+      "label": "Replaying the request returns the first receipt and sends nothing",
+      "passed": true,
+      "detail": {
+        "replay": {
+          "duplicate": true,
+          "event_id": "router-509bc4a5dd3593003419c0990cf2ae60"
+        },
+        "again": {
+          "duplicate": true,
+          "event_id": "router-509bc4a5dd3593003419c0990cf2ae60"
+        }
+      }
+    }
+  ],
+  "versions": {
+    "node": "v24.16.0",
+    "runtime": "1.6.0",
+    "mail": "1.3.0",
+    "files": "1.0.0",
+    "northlake-portal": "1.0.0"
+  },
+  "event": {
+    "event_id": "evt-example-stmt-2026-11",
+    "at": "2026-12-01T06:00:00-08:00",
+    "operation": "portal.billing.statement_ready",
+    "payload": {
+      "statement_id": "stmt-2026-11",
+      "period_start": "2026-11-01",
+      "period_end": "2026-11-30",
+      "past_due_note": true
+    }
+  },
+  "notice": {
+    "specversion": "1.0",
+    "id": "northlake-portal-notice-statement-ready-stmt-2026-11",
+    "source": "urn:pale:app:northlake-portal:account:acct-rosa",
+    "type": "org.pale.mail.notification.v1",
+    "datacontenttype": "application/json",
+    "dataschema": "urn:pale:email-payload:1",
+    "time": "2026-12-01T06:00:00-08:00",
+    "subject": "stmt-2026-11",
+    "data": {
+      "channel": "channel.email",
+      "recipient": {
+        "kind": "person_ref",
+        "id": "person-rosa"
+      },
+      "source_object": {
+        "app_id": "northlake-portal",
+        "account_id": "acct-rosa",
+        "object_type": "statement",
+        "object_id": "stmt-2026-11"
+      },
+      "content": {
+        "title": "Your Northlake Health statement for November 2026 is ready",
+        "body": {
+          "format": "text/plain",
+          "text": "Your statement for November 1, 2026 to November 30, 2026 is ready in the Northlake Patient Portal. Balance due: $170.00, of which $90.00 is past due. Balances more than 30 days past due may be referred to collections. Open Billing to view or download the itemized statement."
+        },
+        "asset_ids": [],
+        "deep_link": {
+          "app_id": "northlake-portal",
+          "route_id": "billing",
+          "object_id": "stmt-2026-11"
+        }
+      },
+      "extensions": []
+    }
+  },
+  "receipt": {
+    "received_at": "2026-11-26T07:27:56.787Z",
+    "status": "committed",
+    "run_id": "northlake-notice-477ff0c1-486",
+    "source_app": "northlake-portal",
+    "channel": "channel.email",
+    "target": {
+      "app_id": "mail",
+      "account_id": "mail-rosa"
+    },
+    "cloud_event": {
+      "source": "urn:pale:app:northlake-portal:account:acct-rosa",
+      "id": "northlake-portal-notice-statement-ready-stmt-2026-11",
+      "type": "org.pale.mail.notification.v1",
+      "time": "2026-12-01T06:00:00-08:00"
+    },
+    "event_id": "router-509bc4a5dd3593003419c0990cf2ae60",
+    "version": {
+      "epoch": 2,
+      "revision": 2
+    },
+    "applied_at": "2026-12-01T06:00:00-08:00",
+    "committed_at": "2026-11-26T07:27:56.803Z",
+    "receiver_trace": {
+      "run_id": "northlake-notice-477ff0c1-486",
+      "app_id": "mail",
+      "event_id": "router-509bc4a5dd3593003419c0990cf2ae60",
+      "cloud_event": {
+        "source": "urn:pale:app:northlake-portal:account:acct-rosa",
+        "id": "northlake-portal-notice-statement-ready-stmt-2026-11",
+        "type": "org.pale.mail.notification.v1",
+        "time": "2026-12-01T06:00:00-08:00"
+      },
+      "received_at": "2026-11-26T07:27:56.794Z",
+      "virtual_received_at": "2026-12-01T06:00:00-08:00",
+      "applied_at": "2026-12-01T06:00:00-08:00",
+      "processed_at": "2026-11-26T07:27:56.795Z"
+    }
+  },
+  "mail_record": {
+    "id": "router-509bc4a5dd3593003419c0990cf2ae60",
+    "folder": "inbox",
+    "from": "northlake-portal@pale.example",
+    "subject": "Your Northlake Health statement for November 2026 is ready",
+    "read": false,
+    "received_at": "2026-12-01T06:00:00-08:00"
+  },
+  "sha256": {
+    "portal_statement": "105e29fe900cfd654f8939cc35779a36d632106110dd121c7416750a5528d0f9",
+    "files_version": "105e29fe900cfd654f8939cc35779a36d632106110dd121c7416750a5528d0f9",
+    "mail_attachment": "105e29fe900cfd654f8939cc35779a36d632106110dd121c7416750a5528d0f9",
+    "files_id": "file-1",
+    "mail_draft_id": "draft-1"
+  },
+  "rejected": {
+    "stage": "router_rejected",
+    "code": "recipient_not_authorized",
+    "kind": "new_message"
+  },
+  "replay": {
+    "duplicate": true,
+    "event_id": "router-509bc4a5dd3593003419c0990cf2ae60",
+    "new_request_duplicate": true
+  }
+}

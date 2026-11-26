@@ -311,6 +311,50 @@ test('optional diagnostics cannot change business results', () => {
   broken.event(scenario); assert.deepEqual(broken.data, off.data);
 });
 
+test('notices: each kind builds a valid, deterministic Mail wire message from public views only', () => {
+  const path = require('node:path');
+  const {compile} = require('./schema-validator.cjs');
+  const dir = path.resolve(__dirname, '../schemas');
+  const wire = compile(require('../schemas/router-message.schema.json'), dir), payload = compile(require('../schemas/email-payload.schema.json'), dir);
+  const notices = require('../src/notices.cjs');
+  const f = fixture();
+  f.event(require('../examples/scenario.json'));
+  const schedule = require('../examples/schedule.json');
+  for (const e of schedule.slice(0, 2)) f.event(e);                      // slot taken, waitlist offer
+  const entry = f.call(T + 'waitlist.list', {}).entries.find(e => e.waitlist_entry_id === 'wl-77');
+  for (const e of schedule.slice(2)) f.event(e);                         // interstitial, decision, reminder, move, closure, statement
+  const w = f.call(T + 'billing.requests.create', {id:'clm-0820', kind:'fee_waiver', reason:'Cancelled through the scheduling thread on October 20.'});
+  f.event(ev('evt-3090', '2026-12-02T10:00:00-08:00', 'portal.billing.request_decided', {request_id:w.id, decision:'granted', note:'Cancellation message found in the scheduling thread.'}));
+  const account = f.call(T + 'account.get', {}).account, bind = {account:'acct-rosa', person:'person-rosa'};
+  const thread = f.call(T + 'messages.get', {id:'thr-billing-0928'}).thread;
+  const moved = f.call(T + 'appointments.get', {id:'appt-5102'}).appointment, replacement = f.call(T + 'appointments.get', {id:moved.replaced_by}).appointment;
+  const views = {
+    new_message:{account, thread, message_id:thread.messages[thread.messages.length - 1].message_id},
+    statement_ready:{account, statement:f.call(T + 'billing.list', {}).statements.find(s => s.statement_id === 'stmt-2026-11')},
+    request_decided:{account, request:f.call(T + 'billing.requests.list', {}).requests[0]},
+    appointment_confirmation:{account, appointment:replacement},
+    appointment_changed:{account, appointment:moved, replacement},
+    waitlist_offer:{account, entry},
+    appointment_reminder:{account, appointment:moved}
+  };
+  assert.deepEqual(Object.keys(views).sort(), [...notices.KINDS].sort());
+  for (const kind of notices.KINDS) {
+    const m = notices.build(kind, views[kind], bind);
+    assert.ok(wire(m), kind + ': wire message (urn:pale:email-message:2)');
+    assert.ok(payload(m.data), kind + ': payload (urn:pale:email-payload:1)');
+    assert.deepEqual(notices.build(kind, views[kind], bind), m, kind + ': deterministic');
+    assert.equal(m.source, 'urn:pale:app:northlake-portal:account:acct-rosa'); assert.deepEqual(m.data.recipient, {kind:'person_ref', id:'person-rosa'});
+    assert.ok(m.id.startsWith('northlake-portal-notice-') && m.data.channel === 'channel.email' && m.data.content.asset_ids.length === 0);
+  }
+  const s = notices.build('statement_ready', views.statement_ready, bind);
+  assert.ok(s.data.content.title.includes('November 2026') && s.data.content.body.text.includes('Balance due: $') && s.data.content.body.text.includes('collections'));
+  assert.equal(s.time, views.statement_ready.statement.generated_at); assert.equal(s.data.source_object.object_id, 'stmt-2026-11');
+  assert.ok(!notices.build('new_message', views.new_message, bind).data.content.body.text.includes(thread.messages[thread.messages.length - 1].body.slice(0, 40)), 'message bodies stay in the portal');
+  assert.throws(() => notices.build('statement_ready', {account}, bind), /statement view/);
+  assert.throws(() => notices.build('nope', views.statement_ready, bind), /Unknown notice kind/);
+  assert.throws(() => notices.build('waitlist_offer', {account, entry:{...entry, offer:null}}, bind), /no open offer/);
+});
+
 test('generated contract files match scripts/contracts.cjs and the fixture matches its generator', () => {
   require('../scripts/build.cjs').build({check:true});
   const tools = require('../tools.json');

@@ -132,7 +132,7 @@ function claimView(data, c, nowMs) {
   const flags = [];
   if (c.statement_id === null) flags.push('unstatemented');
   if (isPastDue(data, c, nowMs)) flags.push('past_due');
-  return {...copy(c), paid_by_patient_cents:paidByPatient(data, c.claim_id), open_balance_cents:openBalance(data, c), flags};
+  return {id:c.claim_id, ...copy(c), paid_by_patient_cents:paidByPatient(data, c.claim_id), open_balance_cents:openBalance(data, c), flags};
 }
 function summary(data, nowMs) {
   const open = data.claims.filter(c => openBalance(data, c) > 0);

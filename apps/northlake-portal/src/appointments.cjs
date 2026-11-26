@@ -25,7 +25,7 @@ function openSlots(data, providerId, nowMs, visitType) {
   return data.slots.filter(s => s.provider_id === providerId && s.status === 'open' && parse(s.start) > nowMs && (!visitType || s.visit_types.includes(visitType))).sort((a, b) => parse(a.start) - parse(b.start)).map(copy);
 }
 function providerView(data, p, nowMs, visitType) {
-  return {...copy(p), clinic:copy(c.clinic(data, p.clinic_id)), network_status:networkStatus(data, p), rating_label:ratingLabel(p), next_available:openSlots(data, p.provider_id, nowMs, visitType)[0] || null};
+  return {id:p.provider_id, ...copy(p), clinic:copy(c.clinic(data, p.clinic_id)), network_status:networkStatus(data, p), rating_label:ratingLabel(p), next_available:openSlots(data, p.provider_id, nowMs, visitType)[0] || null};
 }
 function providersSearch(ctx, data, args) {
   const nowMs = c.now(ctx), q = (args.query || '').toLocaleLowerCase(), specialty = (args.specialty || '').toLocaleLowerCase();
@@ -58,7 +58,7 @@ function slots(ctx, data, args) {
 const effectiveStatus = (a, nowMs) => a.status === 'booked' && parse(a.end) < nowMs ? 'completed' : a.status;
 function appointmentView(data, a, nowMs) {
   const p = c.provider(data, a.provider_id), cl = c.clinic(data, a.clinic_id);
-  return {...copy(a), status:effectiveStatus(a, nowMs), provider_name:p.name + ', ' + p.credentials, specialty:p.specialty, clinic_name:cl.name, clinic_address:copy(cl.address)};
+  return {id:a.appointment_id, ...copy(a), status:effectiveStatus(a, nowMs), provider_name:p.name + ', ' + p.credentials, specialty:p.specialty, clinic_name:cl.name, clinic_address:copy(cl.address)};
 }
 function list(ctx, data, args) {
   const nowMs = c.now(ctx), status = args.status || 'all';
@@ -147,7 +147,7 @@ function expireOffers(ctx, data) {
   for (const e of data.waitlist) if (offerExpired(e, nowMs)) {e.status = 'expired'; c.stamp(ctx, e, 'waitlist_entry_id', 'offer_expired', 'Offer ' + e.offer.offer_id + ' was not answered by ' + e.offer.offer_expires_at);}
 }
 function waitlistView(data, e, nowMs) {
-  return {...copy(e), status:offerExpired(e, nowMs) ? 'expired' : e.status, provider_name:c.provider(data, e.provider_id).name, offer_slot:e.offer ? copy(c.slot(data, e.offer.slot_id)) : null};
+  return {id:e.waitlist_entry_id, ...copy(e), status:offerExpired(e, nowMs) ? 'expired' : e.status, provider_name:c.provider(data, e.provider_id).name, offer_slot:e.offer ? copy(c.slot(data, e.offer.slot_id)) : null};
 }
 const waitlistList = (ctx, data) => {const nowMs = c.now(ctx); return {entries:data.waitlist.map(e => waitlistView(data, e, nowMs))};};
 function waitlistJoin(ctx, data, args) {

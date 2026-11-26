@@ -1,0 +1,243 @@
+{
+  "schema": "pale.gui-sequences.v1",
+  "app_id": "northlake-portal",
+  "captured_at": "2026-11-26T07:43:04.452Z",
+  "node": "v24.16.0",
+  "browser": "Chrome/158.0.8127.37",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "hosts": [
+    {
+      "run": "capture-sandbox",
+      "profile": "sandbox",
+      "url": "http://127.0.0.1:51032"
+    },
+    {
+      "run": "capture-scenario",
+      "profile": "scenario",
+      "url": "http://127.0.0.1:51036"
+    }
+  ],
+  "passed": true,
+  "steps": [
+    {
+      "id": "01-inbox",
+      "file": "screenshots/01-inbox.png",
+      "workflow": "messaging",
+      "state": "start",
+      "description": "Inbox with the billing thread selected; unread threads marked",
+      "control": null,
+      "checks": [
+        {
+          "label": "Two open threads listed",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "02-reply-form",
+      "file": "screenshots/02-reply-form.png",
+      "workflow": "messaging",
+      "state": "action",
+      "description": "Reply form opened from the thread, body filled",
+      "control": "Reply → body",
+      "checks": []
+    },
+    {
+      "id": "03-reply-sent",
+      "file": "screenshots/03-reply-sent.png",
+      "workflow": "messaging",
+      "state": "result",
+      "description": "Reply appears in the thread; thread now awaits staff",
+      "control": "Send reply",
+      "checks": [
+        {
+          "label": "MCP state: last message is the patient reply",
+          "passed": true
+        },
+        {
+          "label": "MCP state: thread awaits staff",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "04-closed-thread",
+      "file": "screenshots/04-closed-thread.png",
+      "workflow": "messaging",
+      "state": "error",
+      "description": "A closed thread offers no Reply control and explains that replies are not delivered",
+      "control": null,
+      "checks": [
+        {
+          "label": "No Reply control on a closed thread",
+          "passed": true
+        },
+        {
+          "label": "Closed notice shown",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "05-billing-ledger",
+      "file": "screenshots/05-billing-ledger.png",
+      "workflow": "billing",
+      "state": "start",
+      "description": "Billing ledger: balance summary, charges with insurer status and flags, payments",
+      "control": null,
+      "checks": [
+        {
+          "label": "Balance due shown",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "06-claim",
+      "file": "screenshots/06-claim.png",
+      "workflow": "billing",
+      "state": "intermediate",
+      "description": "Claim clm-0815: insurer arithmetic, payments applied, denial and reprocessing history, related thread",
+      "control": "Charge row",
+      "checks": [
+        {
+          "label": "History shows resubmitted and reprocessed",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "07-pay-exceeds-balance",
+      "file": "screenshots/07-pay-exceeds-balance.png",
+      "workflow": "billing",
+      "state": "error",
+      "description": "Preparing $50.00 against a $40.00 charge is refused with the figures; nothing is stored",
+      "control": "Prepare payment (5000)",
+      "checks": [
+        {
+          "label": "exceeds_balance message with figures",
+          "passed": true
+        },
+        {
+          "label": "MCP state: no preview stored",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "08-pay-preview",
+      "file": "screenshots/08-pay-preview.png",
+      "workflow": "billing",
+      "state": "intermediate",
+      "description": "Payment preview: allocation, balance after, expiry; nothing charged yet",
+      "control": "Prepare payment (4000)",
+      "checks": [
+        {
+          "label": "MCP state: one live payment preview, no payment yet",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "09-pay-posted",
+      "file": "screenshots/09-pay-posted.png",
+      "workflow": "billing",
+      "state": "result",
+      "description": "Payment posted: the claim page shows the receipt, a $0.00 open balance and the payment in its history; the ledger balance drops to $130.00",
+      "control": "Confirm payment",
+      "checks": [
+        {
+          "label": "MCP state: payment of 4000 cents allocated to clm-0815",
+          "passed": true
+        },
+        {
+          "label": "MCP state: preview consumed",
+          "passed": true
+        },
+        {
+          "label": "Ledger shows the new balance",
+          "passed": true
+        },
+        {
+          "label": "Claim page shows the receipt and the applied payment",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "10-statement",
+      "file": "screenshots/10-statement.png",
+      "workflow": "billing",
+      "state": "intermediate",
+      "description": "October 2026 statement with its past-due note and the charges it covers",
+      "control": "Statement row",
+      "checks": []
+    },
+    {
+      "id": "11-statement-downloaded",
+      "file": "screenshots/11-statement-downloaded.png",
+      "workflow": "billing",
+      "state": "result",
+      "description": "Download PDF saved the statement; its bytes match billing.statement byte for byte",
+      "control": "Download PDF",
+      "checks": [
+        {
+          "label": "Browser download has the SHA-256 the portal reports",
+          "passed": true
+        },
+        {
+          "label": "Downloaded file is a PDF with the expected name",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "12-billing-question-form",
+      "file": "screenshots/12-billing-question-form.png",
+      "workflow": "billing",
+      "state": "action",
+      "description": "Billing question about the late cancellation fee, opened from the claim",
+      "control": "Ask the billing office → body",
+      "checks": []
+    },
+    {
+      "id": "13-billing-question-sent",
+      "file": "screenshots/13-billing-question-sent.png",
+      "workflow": "billing",
+      "state": "result",
+      "description": "The claim page confirms the question and links the new billing thread",
+      "control": "Send question",
+      "checks": [
+        {
+          "label": "MCP state: billing thread related to clm-0820",
+          "passed": true
+        },
+        {
+          "label": "Claim page names the new thread",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "14-scenario-confirm-withheld",
+      "file": "screenshots/14-scenario-confirm-withheld.png",
+      "workflow": "billing",
+      "state": "error",
+      "description": "Under the scenario policy the preview is prepared but the confirm is not offered: the tool is withheld, not hidden by the page",
+      "control": "Prepare payment (scenario profile)",
+      "checks": [
+        {
+          "label": "Withheld notice shown",
+          "passed": true
+        },
+        {
+          "label": "No confirm control",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

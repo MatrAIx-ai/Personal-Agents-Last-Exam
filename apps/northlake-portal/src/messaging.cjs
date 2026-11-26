@@ -9,7 +9,7 @@ const LABEL = {clinic:'Clinic', nurse_line:'Nurse Line', billing_office:'Billing
 
 function summary(t) {
   const last = t.messages[t.messages.length - 1] || null;
-  return {thread_id:t.thread_id, subject:t.subject, recipient:copy(t.recipient), status:t.status, awaiting:t.awaiting, closed_reason:t.closed_reason,
+  return {id:t.thread_id, thread_id:t.thread_id, subject:t.subject, recipient:copy(t.recipient), status:t.status, awaiting:t.awaiting, closed_reason:t.closed_reason,
     related:copy(t.related), opened_at:t.opened_at, updated_at:t.updated_at, message_count:t.messages.length,
     unread_count:t.messages.filter(m => !m.read).length, last_message_at:last ? last.at : null,
     last_message_preview:last ? last.body.replace(/\s+/g, ' ').trim().slice(0, 200) : '', last_author:last ? copy(last.author) : null};
@@ -22,7 +22,7 @@ function list(ctx, data, args) {
   threads.sort((a, b) => parse(b.updated_at) - parse(a.updated_at));
   return {threads:threads.map(summary)};
 }
-const get = (ctx, data, args) => ({thread:copy(c.thread(data, args.id))});
+const get = (ctx, data, args) => {const t = c.thread(data, args.id); return {thread:{id:t.thread_id, ...copy(t)}};};
 const exportThread = (ctx, data, args) => {const t = c.thread(data, args.id); return {thread_id:t.thread_id, file:documents.exportThread(data, t)};};
 function attachmentGet(ctx, data, args) {
   const {thread, message} = c.message(data, args.id);

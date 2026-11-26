@@ -9,8 +9,8 @@ function list(ctx, data, args) {
   const nowMs = c.now(ctx), status = args.status || 'all';
   const claims = data.claims.filter(cl => status === 'all' || (status === 'open' ? c.openBalance(data, cl) > 0 : cl.status === status))
     .map(cl => c.claimView(data, cl, nowMs)).sort((a, b) => b.service_date.localeCompare(a.service_date) || a.claim_id.localeCompare(b.claim_id));
-  const payments = copy(data.payments).sort((a, b) => parse(b.at) - parse(a.at));
-  const statements = copy(data.statements).sort((a, b) => b.period_start.localeCompare(a.period_start));
+  const payments = data.payments.map(p => ({id:p.payment_id, ...copy(p)})).sort((a, b) => parse(b.at) - parse(a.at));
+  const statements = data.statements.map(s => ({id:s.statement_id, ...copy(s)})).sort((a, b) => b.period_start.localeCompare(a.period_start));
   return {summary:c.summary(data, nowMs), claims, payments, statements};
 }
 function getClaim(ctx, data, args) {
@@ -18,7 +18,7 @@ function getClaim(ctx, data, args) {
   const allocations = data.payments.flatMap(p => p.allocations.filter(a => a.claim_id === cl.claim_id).map(a => ({payment_id:p.payment_id, at:p.at, kind:p.kind, amount_cents:a.amount_cents})));
   return {claim:c.claimView(data, cl, nowMs), allocations, thread_ids:data.threads.filter(t => t.related.claim_id === cl.claim_id).map(t => t.thread_id)};
 }
-const statement = (ctx, data, args) => {const s = c.statement(data, args.id); return {statement:copy(s), file:documents.statementPdf(data, s)};};
+const statement = (ctx, data, args) => {const s = c.statement(data, args.id); return {statement:{id:s.statement_id, ...copy(s)}, file:documents.statementPdf(data, s)};};
 function requestsList(ctx, data, args) {
   const status = args.status || 'all';
   return {requests:copy(data.billing_requests.filter(r => status === 'all' || r.status === status)).sort((a, b) => parse(b.created_at) - parse(a.created_at))};
