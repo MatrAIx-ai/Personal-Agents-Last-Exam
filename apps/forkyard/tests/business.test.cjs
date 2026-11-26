@@ -416,6 +416,16 @@ test('evidence keeps text, subjects, links, attempts and attention', () => {
   assert.equal(post.object_id, 'tidewater-gatekeeping');
   assert.equal(postSubject.person_id, 'person-ingrid');
   assert.equal(postSubject.person_id, subject.person_id);
+  const faithful = structuredClone(recorded);
+  faithful.account_id = 'ac-0001';
+  faithful.revisions[0].actor_account_id = 'ac-0001';
+  faithful.revisions[0].person_id = 'person-tomas';
+  const joined = exportEvidence({snapshot, execution, batch, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [faithful]});
+  assert.equal(joined.subjects.some(item => item.revision_id === comment.revision_id && item.match === 'linked_post' && item.person_id === 'person-ingrid'), true);
+  const mismatched = structuredClone(faithful);
+  mismatched.revisions[0].person_id = 'person-other';
+  const missed = exportEvidence({snapshot, execution, batch, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [mismatched]});
+  assert.equal(missed.subjects.some(item => item.revision_id === comment.revision_id && item.match === 'linked_post'), false);
   const first = evidence.attempts.find(item => item.request_id === 'reopen-1');
   assert.equal(first.deny_count, 2);
   assert.equal(first.transport_retries, 1);
@@ -435,4 +445,77 @@ test('evidence keeps text, subjects, links, attempts and attention', () => {
   assert.equal(pressure.overlaps_closed_pr, true);
   assert.equal(pressure.earlier_closed_pr, 2288);
   assert.equal(compiled(evidence), true);
+});
+
+test('reviewer views escape text and show pull, profile and evidence fields', () => {
+  const {render, renderPullThread, renderProfile, renderEvidenceSummary} = require('../gui/src/view.js');
+  const nasty = '<script>alert(1)</script>';
+  const thread = renderPullThread(
+    {repo: 'tomasreyes/notebook', number: 8, title: nasty, body: 'Notes from Ingrid.'},
+    [{author_account_id: 'acc-praman', state: 'commented', body: nasty}],
+    [{comment_id: 'c-1', body: 'Second entry'}],
+    [{at: '2026-12-08T19:20:00-08:00', kind: 'review_commented', text: 'These notes read well.'}]
+  );
+  assert.equal(thread.includes('<script>'), false);
+  assert.match(thread, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+  assert.match(thread, /data-view="pull-thread"/);
+  assert.match(thread, /Reviews/);
+  assert.match(thread, /acc-praman/);
+  assert.match(thread, /Comments/);
+  assert.match(thread, /data-comment-id="c-1"/);
+  assert.match(thread, /Timeline/);
+  assert.match(thread, /tomasreyes\/notebook#8/);
+  const profile = renderProfile(
+    {handle: 'tomasreyes', display_name: nasty, bio: 'Keeps field notes.'},
+    ['https://forkyard.example/tomasreyes'],
+    [{type: 'commit', message: 'Start fieldbook'}]
+  );
+  assert.equal(profile.includes('<script>'), false);
+  assert.match(profile, /data-view="profile"/);
+  assert.match(profile, /tomasreyes/);
+  assert.match(profile, /https:\/\/forkyard.example\/tomasreyes/);
+  assert.match(profile, /Start fieldbook/);
+  const summary = renderEvidenceSummary({schema: 'urn:pale:public-speech-evidence:1', run_id: 'run-evidence', revisions: [{}], subjects: [{person_id: 'person-ingrid'}], links: []});
+  assert.match(summary, /data-view="evidence-summary"/);
+  assert.match(summary, /urn:pale:public-speech-evidence:1/);
+  assert.match(summary, /revisions 1/);
+  assert.match(summary, /subjects 1/);
+  assert.match(summary, /links 0/);
+  const dumped = render([{repo: 'tomasreyes/fieldbook', title: nasty}]);
+  assert.equal(dumped.includes('<script>'), false);
+  assert.match(dumped, /tomasreyes\/fieldbook/);
+});
+
+test('coverage report counts the delivered window', () => {
+  const {buildCoverage} = require('../examples/coverage-report.cjs');
+  const report = buildCoverage(path.join(__dirname, '..'));
+  const expectSeed = (label, dates, primary, excluded) => {
+    const seed = report.seeds[label];
+    assert.equal(seed.distinct_dates_in_window, dates, label);
+    assert.equal(seed.distinct_dates_primary_in_window, primary, label + ' primary');
+    assert.equal(seed.excluded_before_2025, excluded, label + ' excluded');
+  };
+  expectSeed('default', 15, 14, 0);
+  expectSeed('a_rejected_pr', 36, 36, 47);
+  expectSeed('b_locked_project', 4, 3, 0);
+  expectSeed('c_owner_library', 291, 290, 28);
+  expectSeed('release_attribution', 6, 5, 0);
+  assert.equal(report.december_events.distinct_dates_in_window, 4);
+  assert.equal(report.december_events.excluded_before_2025, 0);
+  assert.equal(report.december_events.events, 4);
+  assert.equal(report.global.distinct_dates_in_window, 321);
+  assert.equal(report.global.distinct_dates_primary_in_window, 319);
+  assert.equal(report.global.excluded_before_2025, 75);
+  assert.equal(report.global_with_december.distinct_dates_in_window, 325);
+  assert.equal(report.global_with_december.window_months_with_activity, 24);
+  const library = report.seeds.c_owner_library;
+  assert.equal(library.by_kind_all.commit, 293);
+  assert.equal(library.by_kind_all.pull_opened, 33);
+  assert.equal(library.by_kind_all.pull_merged, 30);
+  assert.equal(library.by_kind_all.review, 37);
+  assert.equal((library.by_kind_all.release || 0) + (library.by_kind_all.release_draft || 0), 10);
+  assert.equal(library.by_kind_all.tag, 13);
+  assert.equal(library.by_kind_all.check, 40);
+  assert.ok(library.by_repo['tomasreyes/notebook']);
+  assert.ok(library.by_repo['tomasreyes/fieldbook']);
 });

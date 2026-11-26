@@ -512,6 +512,36 @@ test('fixture c is the owner library with tags, releases, checks and a bot pull 
     const compiled = require('./schema-validator.cjs').compile(require('../tools.json').find(item => item.name === 'forkyard.checks.list').outputSchema, path.join(__dirname, '../schemas'));
     assert.equal(compiled({...checks, status: 'ok', app_id: 'forkyard', version: snap.version}), true);
     assert.equal(compiled({checks: [17], status: 'ok'}), false);
+    const fieldbookCommits = [];
+    let cursor = null;
+    let page;
+    do {
+      page = await session.agent.call('forkyard.commits.list', {repo: 'tomasreyes/fieldbook', ref: 'main', limit: 100, ...(cursor ? {cursor} : {})});
+      fieldbookCommits.push(...page.items);
+      cursor = page.next_cursor;
+    } while (cursor);
+    assert.equal(fieldbookCommits.length, 212);
+    const fieldbookPulls = await session.agent.call('forkyard.pulls.list', {repo: 'tomasreyes/fieldbook'});
+    assert.equal(fieldbookPulls.pulls.filter(item => item.state === 'merged').length, 30);
+    const fieldbookReleases = await session.agent.call('forkyard.releases.list', {repo: 'tomasreyes/fieldbook'});
+    assert.equal(fieldbookReleases.releases.length, 7);
+    const notebookMain = [];
+    cursor = null;
+    do {
+      page = await session.agent.call('forkyard.commits.list', {repo: 'tomasreyes/notebook', ref: 'main', limit: 100, ...(cursor ? {cursor} : {})});
+      notebookMain.push(...page.items);
+      cursor = page.next_cursor;
+    } while (cursor);
+    assert.equal(notebookMain.length, 77);
+    const december = require('../examples/events/owner-library-2026-12/events.json');
+    for (const event of december) {
+      const advanced = await session.infra.call('env.advance_time', {expected_version: session.version, request_id: 'adv-' + event.event_id, virtual_now: event.at});
+      assert.equal(advanced.status, 'committed');
+      session.version = advanced.version;
+      const applied = await session.infra.call('env.apply_event', {expected_version: session.version, event});
+      assert.equal(applied.status, 'committed', event.event_id);
+      session.version = applied.version;
+    }
   } finally {
     await session.close();
   }
