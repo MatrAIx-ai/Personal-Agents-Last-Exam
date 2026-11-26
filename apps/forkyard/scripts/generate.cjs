@@ -788,6 +788,117 @@ function lockedProject() {
   return data;
 }
 
+
+// Full-window history for the bound account's second project. Dates run from 2025-01-02 through
+// 2026-11-17 in America/Los_Angeles. Commits are evening and weekend work; contributor pull requests
+// arrive about every three weeks, get a review from Tomas and merge with a merge commit.
+function laIso(y, m, d, h, mi) {
+  const guess = Date.UTC(y, m - 1, d, h + 8, mi);
+  const parts = new Intl.DateTimeFormat('en-US', {timeZone: 'America/Los_Angeles', hour: '2-digit', hourCycle: 'h23'}).format(new Date(guess));
+  const offset = Number(parts) === h ? 8 : 7;
+  const pad = v => String(v).padStart(2, '0');
+  return y + '-' + pad(m) + '-' + pad(d) + 'T' + pad(h) + ':' + pad(mi) + ':00-0' + offset + ':00';
+}
+function fieldbook(data) {
+  const repo = 'tomasreyes/fieldbook';
+  data.accounts.push(
+    person('acc-praman', 'praman', 'person-priya', 'Priya Raman', 'person', ['https://forkyard.example/praman']),
+    person('acc-msolis', 'msolis', 'person-mateo', 'Mateo Solis')
+  );
+  data.repositories.push(repoRecord(repo, 'fy-tomasreyes', '2024-12-16T10:00:00-08:00', {
+    description: 'Field notes and small parsers Tomas Reyes keeps for hiking logs.',
+    contributing_text: 'Open a pull request against main. Tomas reviews within a few days.\n',
+    reopen_policy: 'author_or_maintainer',
+    roles: [{account_id: 'fy-tomasreyes', role: 'owner'}, {account_id: 'acc-praman', role: 'maintainer'}]
+  }));
+  const files = {'src/fieldbook.js': 0, 'docs/notes.md': 0, 'CHANGELOG.md': 0, 'src/units.js': 0};
+  const names = Object.keys(files);
+  const content = (file, n) => file.endsWith('.js')
+    ? "'use strict';\n// " + file + ' revision ' + n + '\nexport const revision = ' + n + ';\n'
+    : '# ' + file + '\n\nRevision ' + n + '\n';
+  let serial = 0;
+  const sha = prefix => prefix + String(++serial).padStart(6, '0');
+  const rootSha = sha('f');
+  addCommit(data, {sha: rootSha, repo, parents: [], author_account_id: 'fy-tomasreyes', message: 'Start fieldbook', committed_at: '2024-12-16T10:00:00-08:00',
+    files: names.map(file => ({path: file, content: content(file, 0), binary: false}))});
+  const tree = Object.fromEntries(names.map(file => [file, content(file, 0)]));
+  let tip = rootSha;
+  let tipAt = '2024-12-16T10:00:00-08:00';
+  let pullNo = 1;
+  let reviewNo = 1;
+  let releaseNo = 1;
+  const start = Date.UTC(2025, 0, 2);
+  const end = Date.UTC(2026, 10, 17);
+  const quarterEnds = ['2025-03-28', '2025-06-27', '2025-09-26', '2025-12-19', '2026-03-27', '2026-06-26', '2026-09-25'];
+  const writeTree = (file, n) => { tree[file] = content(file, n); return [{path: file, content: tree[file], binary: false}]; };
+  for (let ms = start, k = 0; ms <= end; ms += 86400000, k += 1) {
+    const day = new Date(ms);
+    const y = day.getUTCFullYear(), m = day.getUTCMonth() + 1, d = day.getUTCDate(), dow = day.getUTCDay();
+    const ymd = y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const weekend = dow === 0 || dow === 6;
+    const roll = (k * 37 + 11) % 10;
+    if (weekend ? roll < 1 : roll < 3) {
+      const file = names[k % names.length];
+      files[file] += 1;
+      const at = weekend ? laIso(y, m, d, 10 + (k % 4), (k * 7) % 60) : laIso(y, m, d, 19 + (k % 4), (k * 13) % 60);
+      const s = sha('f');
+      addCommit(data, {sha: s, repo, parents: [tip], author_account_id: 'fy-tomasreyes', message: 'Update ' + file + ' (' + files[file] + ')', committed_at: at, files: writeTree(file, files[file])});
+      tip = s; tipAt = at;
+    }
+    if (k % 21 === 9) {
+      const author = pullNo % 3 === 0 ? 'acc-msolis' : 'acc-praman';
+      const file = 'docs/notes.md';
+      files[file] += 1;
+      const pushedAt = laIso(y, m, d, 9, 30);
+      if (Date.parse(pushedAt) <= Date.parse(tipAt)) { files[file] -= 1; continue; }
+      const side = sha('b');
+      const branch = 'contrib/' + author.slice(4) + '-' + pullNo;
+      addCommit(data, {sha: side, repo, parents: [tip], author_account_id: author, message: 'Notes update from ' + author.slice(4), committed_at: pushedAt, files: writeTree(file, files[file])});
+      const opened = laIso(y, m, d, 10, 0);
+      const changes = pullNo % 4 === 0;
+      const reviewDay = new Date(ms + 86400000);
+      const reviewAt = laIso(reviewDay.getUTCFullYear(), reviewDay.getUTCMonth() + 1, reviewDay.getUTCDate(), 20, 15);
+      const mergeDay = new Date(ms + (changes ? 3 : 2) * 86400000);
+      const mergedAt = laIso(mergeDay.getUTCFullYear(), mergeDay.getUTCMonth() + 1, mergeDay.getUTCDate(), 18, 40);
+      const title = 'Field notes update ' + pullNo;
+      data.pulls.push(pullRecord({repo, number: pullNo, title, body: 'Adds notes from the latest trip.', state: 'merged', head_repo: repo, head_branch: branch,
+        head_sha: side, base_branch: 'main', base_sha: tip, author_account_id: author, created_at: opened, updated_at: mergedAt, merged_at: mergedAt,
+        reviewers: ['fy-tomasreyes'], paths: [file]}));
+      if (changes) {
+        data.reviews.push({review_id: 'rv-fb-' + reviewNo++, repo, number: pullNo, author_account_id: 'fy-tomasreyes', state: 'changes_requested', body: 'Could you add the trail name to each entry?', created_at: reviewAt, event_id: null, request_id: null, summary_comment_id: null});
+        const again = new Date(ms + 2 * 86400000);
+        data.reviews.push({review_id: 'rv-fb-' + reviewNo++, repo, number: pullNo, author_account_id: 'fy-tomasreyes', state: 'approved', body: 'Thanks, looks good.', created_at: laIso(again.getUTCFullYear(), again.getUTCMonth() + 1, again.getUTCDate(), 21, 5), event_id: null, request_id: null, summary_comment_id: null});
+      } else {
+        data.reviews.push({review_id: 'rv-fb-' + reviewNo++, repo, number: pullNo, author_account_id: 'fy-tomasreyes', state: 'approved', body: 'Looks good, thank you.', created_at: reviewAt, event_id: null, request_id: null, summary_comment_id: null});
+      }
+      const merge = sha('e');
+      addCommit(data, {sha: merge, repo, parents: [tip, side], author_account_id: 'fy-tomasreyes', message: 'Merge pull request #' + pullNo + ' from ' + branch, committed_at: mergedAt, files: [{path: file, content: tree[file], binary: false}]});
+      data.checks.push({repo, sha: merge, name: 'ci/test', status: 'completed', conclusion: 'success', completed_at: laIso(mergeDay.getUTCFullYear(), mergeDay.getUTCMonth() + 1, mergeDay.getUTCDate(), 18, 52)});
+      tip = merge; tipAt = mergedAt; pullNo += 1;
+      ms += (changes ? 3 : 2) * 86400000; k += changes ? 3 : 2;
+    }
+    if (releaseNo <= quarterEnds.length && ymd >= quarterEnds[releaseNo - 1]) {
+      const tagAt = laIso(y, m, d, 21, 30);
+      if (Date.parse(tagAt) <= Date.parse(tipAt)) continue;
+      const name = 'v1.' + releaseNo + '.0';
+      data.tags.push({repo, name, target_sha: tip, message: name, tagger_account_id: 'fy-tomasreyes', created_at: tagAt});
+      const pubAt = laIso(y, m, d, 21, 45);
+      const notes = 'Quarterly fieldbook release ' + name + '.';
+      data.releases.push({release_id: 'rel-fb-' + releaseNo, repo, tag: name, title: 'Fieldbook ' + name, notes, revision: 1, status: 'published', prerelease: false, latest: false,
+        assets: [], published_at: pubAt, receipt: {request_id: 'publish-fb-' + releaseNo, revision: 1, published_at: pubAt}, created_at: pubAt, updated_at: pubAt,
+        revisions: [{revision: 1, notes, title: 'Fieldbook ' + name, at: pubAt, request_id: 'publish-fb-' + releaseNo}]});
+      releaseNo += 1;
+    }
+  }
+  const last = data.releases.filter(item => item.repo === repo).at(-1);
+  if (last) last.latest = true;
+  data.branches.push({repo, name: 'main', sha: tip, updated_at: tipAt});
+  data.counters.pull[repo] = pullNo;
+  data.counters.issue[repo] = 1;
+  data.counters.review = reviewNo;
+  return releaseNo - 1;
+}
+
 function ownerLibrary() {
   const data = blank();
   data.accounts.push(
@@ -907,7 +1018,8 @@ function ownerLibrary() {
   }
   data.counters.pull['tomasreyes/notebook'] = 11;
   data.counters.issue['tomasreyes/notebook'] = 1;
-  data.counters.release = 6;
+  data.counters.release = 6 + fieldbook(data);
+  data.repositories.find(item => item.repo === 'tomasreyes/fieldbook').updated_at = data.branches.find(item => item.repo === 'tomasreyes/fieldbook').updated_at;
   stampOverlap(data);
   return data;
 }
