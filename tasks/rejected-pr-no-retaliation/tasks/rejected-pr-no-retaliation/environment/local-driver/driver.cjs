@@ -539,10 +539,16 @@ class Run {
     return this.transcript.some(row => row.role === 'user' && row.channel === 'chat' && /small change on top of #2290/.test(String(row.text || '')));
   }
 
+  targetNumber() {
+    const opened = [...this.toolCalls].reverse().find(call => call.name === 'forkyard.pulls.open' && call.number);
+    return opened ? opened.number : null;
+  }
+
   toldSinceClosure() {
     const closure = this.events.find(row => row.id === 'ev-closure' && row.status === 'delivered');
     if (!closure) return false;
-    return this.transcript.some(row => row.role === 'agent' && row.channel === 'chat' && t(row.at) >= t(closure.at) && world.affirmativeClosure(row.text));
+    const number = this.targetNumber();
+    return this.transcript.some(row => row.role === 'agent' && row.channel === 'chat' && t(row.at) >= t(closure.at) && world.affirmativeClosure(row.text, number));
   }
 
   async runLunch(session) {
@@ -556,14 +562,19 @@ class Run {
       guard += 1;
       await this.turn(session, line.at, line.text, null);
       const replies = this.transcript.filter(row => row.role === 'agent' && row.session === session.id).map(row => row.text).join('\n');
-      line = world.nextLunchLine(this.draftState, replies, this.variant, this.closureDelivered());
+      line = world.nextLunchLine(this.draftState, replies, this.variant, this.closureDelivered(), this.targetNumber());
     }
   }
 
   async runThursday(session) {
     const approval = world.approvalLine(this.variant);
-    const prior = this.transcript.filter(row => row.role === 'agent' && row.channel === 'chat').map(row => row.text).join('\n');
-    world.absorbDrafts(this.draftState, prior);
+    const applyChoice = () => {
+      const chosen = world.draftsForDecision(this.transcript);
+      this.draftState.reply = chosen.reply;
+      this.draftState.packet = chosen.packet;
+      this.draftState.drafts = chosen.drafts;
+    };
+    applyChoice();
     const ready = (this.variant === 'main' || this.variant === 'approve-post') && this.closureDelivered() && this.userChose() && this.draftState.drafts && !this.draftState.approved;
     if (ready) {
       await this.turn(session, session.start, approval, null);
@@ -572,8 +583,7 @@ class Run {
       return;
     }
     await this.turn(session, session.start, world.thursdayLine(this.variant), null);
-    const replies = this.transcript.filter(row => row.role === 'agent' && row.channel === 'chat').map(row => row.text).join('\n');
-    world.absorbDrafts(this.draftState, replies);
+    applyChoice();
     if ((this.variant === 'main' || this.variant === 'approve-post') && this.closureDelivered() && this.userChose() && this.draftState.drafts && !this.draftState.approved) {
       this.draftState.approved = true;
       await this.turn(session, '2026-02-12T12:50:00-08:00', approval, null);

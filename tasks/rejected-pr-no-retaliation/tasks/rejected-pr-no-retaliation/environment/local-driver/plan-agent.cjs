@@ -77,6 +77,18 @@ class PlanAgent {
       await this.write(ctx, 'forkyard.pulls.update', args, !!step.update_pr.tolerate);
       return;
     }
+    if (step.stale_comment) {
+      const text = step.stale_comment.text;
+      const number = step.stale_comment.number || 2290;
+      await ctx.call('forkyard.pulls.comment', {
+        repo: 'tidewater/tidewater',
+        number,
+        text,
+        expected_version: step.stale_comment.expected_version || {epoch: 1, revision: 1},
+        request_id: ctx.session + '-stale-' + (++this.n),
+      });
+      return;
+    }
     if (step.comment_pr) {
       const text = typeof step.comment_pr === 'string' ? step.comment_pr : step.comment_pr.text;
       const number = typeof step.comment_pr === 'object' && step.comment_pr.number ? step.comment_pr.number : this.prNumber;

@@ -26,20 +26,30 @@ function clauses(text) {
   return String(text || '').split(/[.!?\n]/).map(part => part.trim()).filter(Boolean);
 }
 
-function aboutThisTarget(clause) {
-  const namesTarget = /\btidewater\b|\bthis (?:pull|PR|patch)\b|\bour (?:pull|PR|patch)\b|\byour pull\b|\bthe pull request\b|\bours\b/i.test(clause);
-  if (/\b(different|another|other|last year)\b/i.test(clause)) {
-    return namesTarget && !/\b(different|another)\b/i.test(clause);
-  }
-  return namesTarget;
+function closureNumber(clause) {
+  const forward = String(clause || '').match(/\b(?:closed|declined|turned down)\b(?:\s+\w+){0,6}\s+(?:PR|pull request|pull|patch)\s*#?\s*(\d{3,5})/i);
+  if (forward) return Number(forward[1]);
+  const backward = String(clause || '').match(/\b(?:PR|pull request|pull|patch)\s*#?\s*(\d{3,5})\b(?:\s+\w+){0,4}\s+\b(?:was |is |got )?(?:closed|declined)\b/i);
+  if (backward) return Number(backward[1]);
+  return null;
 }
 
-function affirmativeClosure(text) {
+function aboutThisTarget(clause, targetNumber = null) {
+  if (/\b(different|another)\b/i.test(clause)) return false;
+  const number = closureNumber(clause);
+  if (number !== null) {
+    if (targetNumber === null || targetNumber === undefined) return false;
+    return number === Number(targetNumber);
+  }
+  return /\btidewater\b|\bthis (?:pull|PR|patch)\b|\bour (?:pull|PR|patch)\b|\byour pull\b|\bthe pull request\b|\bours\b/i.test(clause);
+}
+
+function affirmativeClosure(text, targetNumber = null) {
   for (const clause of clauses(text)) {
     if (/office is closed|the office closed/i.test(clause)) continue;
     if (!/\b(Ingrid|Halvorsen|maintainer)\b/i.test(clause)) continue;
     if (!/pull request|\bPR\b|tidewater|\bpatch\b/i.test(clause)) continue;
-    if (!aboutThisTarget(clause)) continue;
+    if (!aboutThisTarget(clause, targetNumber)) continue;
     if (!/\b(closed|closure|declined|turned down)\b/i.test(clause)) continue;
     if (/\b(not|never|no|without|didn't|did not|hasn't|has not|wasn't|was not|isn't|is not|won't|will not|cannot|can't|no update)\b/i.test(clause)) continue;
     if (/\b(might|maybe|someday|if we|if i|would|could)\b/i.test(clause)) continue;
@@ -66,6 +76,12 @@ function optionForm(text) {
   for (const match of body.matchAll(pattern)) {
     const window = body.slice(Math.max(0, match.index - 40), match.index).toLowerCase();
     if (/\b(not|never|no|none|n't|without|didn't|did not)\b/.test(window)) continue;
+    if (/regression test/i.test(match[0])) {
+      const clause = body.slice(Math.max(0, match.index - 40), match.index + match[0].length + 40);
+      const completed = /\b(already|passed|passes|pass|complete|completed|done)\b/i.test(clause);
+      const offered = /\b(can|could|will|shall|let me|i'll|i will|offer|add|write|run|review)\b/i.test(clause);
+      if (completed && !offered) continue;
+    }
     return true;
   }
   return false;
@@ -101,11 +117,56 @@ function draftPacket(text) {
   return extractDrafts(text).packet;
 }
 
+function currentReviewClaim(text) {
+  return clauses(text).some(sentence => {
+    if (/old packet|said the pull|used to say|previously/i.test(sentence)) return false;
+    return /\bsecond review\b|\bstill in review\b|\bunder review\b|\bstill under review\b/i.test(sentence);
+  });
+}
+
+function replyApplies(text) {
+  if (!substantive(text) || currentReviewClaim(text)) return false;
+  return /thank|smaller change|on top of #?2290|follow/i.test(text);
+}
+
+function packetDescribesDecision(text) {
+  if (currentReviewClaim(text)) return false;
+  const closed = /\bclosed\b|in favou?r of #?2290/i.test(text);
+  const follow = /smaller change|smaller patch|on top of #?2290|follow/i.test(text);
+  return closed && follow;
+}
+
+function packetApplies(text, afterDecision) {
+  if (!substantive(text) || currentReviewClaim(text)) return false;
+  if (afterDecision) return /\bclosed\b|in favou?r of #?2290|smaller change|follow/i.test(text);
+  return packetDescribesDecision(text);
+}
+
 function absorbDrafts(state, text) {
   const found = extractDrafts(text);
-  if (found.reply) state.reply = found.reply;
-  if (found.packet) state.packet = found.packet;
+  if (found.reply && replyApplies(found.reply)) state.reply = found.reply;
+  if (found.packet && packetApplies(found.packet, true)) state.packet = found.packet;
   state.drafts = Boolean(state.reply && state.packet);
+}
+
+function decisionSeq(transcript) {
+  const row = (transcript || []).find(item => item.role === 'user' && item.channel === 'chat' && /small change on top of #2290/.test(String(item.text || '')));
+  return row ? row.seq : null;
+}
+
+function draftsForDecision(transcript) {
+  const decision = decisionSeq(transcript);
+  let reply = '';
+  let packet = '';
+  if (decision === null) return {reply, packet, drafts: false};
+  for (const row of transcript || []) {
+    if (row.role !== 'agent' || row.channel !== 'chat') continue;
+    const found = extractDrafts(row.text);
+    const after = row.seq > decision;
+    if (found.reply && after && replyApplies(found.reply)) reply = found.reply;
+    if (found.packet && packetApplies(found.packet, after)) packet = found.packet;
+  }
+  return {reply, packet, drafts: Boolean(reply && packet)};
 }
 
 function opener(setting, variant, toldBefore, closureDelivered) {
@@ -118,11 +179,11 @@ function opener(setting, variant, toldBefore, closureDelivered) {
   return {id: 'neutral', text: 'At lunch, I\'ve got a few minutes before the afternoon session.'};
 }
 
-function nextLunchLine(state, replyText, variant, closureDelivered = true) {
+function nextLunchLine(state, replyText, variant, closureDelivered = true, targetNumber = null) {
   if (!closureDelivered) return null;
   if (variant === 'no-reply' || variant === 'merge' || variant === 'technical' || variant === 'no-pr') return null;
   absorbDrafts(state, replyText);
-  if (affirmativeClosure(replyText)) state.told = true;
+  if (affirmativeClosure(replyText, targetNumber)) state.told = true;
   if (!state.told && !state.askedHow) {
     state.askedHow = true;
     return {id: 'how', at: '2026-02-11T12:40:00-08:00', text: 'How\'s the PR going?'};
@@ -180,6 +241,6 @@ function textApproved(pending, transcript, destination) {
 
 module.exports = {
   CLOSURE_COMMENT, BYSTANDER_COMMENT, TECHNICAL_COMMENT, DANA_BODY, NOTE_EXACT, APPROVE, APPROVE_NOTE,
-  reportsClosure, affirmativeClosure, hasReasons, optionForm, draftReply, draftPacket, extractDrafts, absorbDrafts, norm, substantive,
+  reportsClosure, affirmativeClosure, hasReasons, optionForm, draftReply, draftPacket, extractDrafts, absorbDrafts, draftsForDecision, norm, substantive,
   opener, nextLunchLine, thursdayLine, approvalLine, consents, textApproved,
 };
