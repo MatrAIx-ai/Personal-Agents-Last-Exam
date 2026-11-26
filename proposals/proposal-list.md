@@ -8,13 +8,13 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**210 open non-draft proposals · 0 awaiting initial review · 10 drafts.**
+**211 open non-draft proposals · 0 awaiting initial review · 10 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
 | Environment | [skyve2012](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Askyve2012) | 8 |
 | Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 6 |
-| Environment | [Chenngzz](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AChenngzz) | 1 |
+| Environment | [Chenngzz](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AChenngzz) | 2 |
 | Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 2 |
 | Task | [Yeechin-is-here](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AYeechin-is-here) | 18 |
 | Task | [haolun-wu](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Ahaolun-wu) | 9 |
@@ -25,10 +25,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🏗️ Environment Track
 
-**114 proposals.**
+**115 proposals.**
 
 | Submitted (UTC) | PR / app or website | Primary domain | Scope and app connections | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-26 20:46:59 | [#274](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/274) · Mendline, an original textile-repair customer portal inspired by Patagonia's public repair intake and Trace Creek's…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/274/files) | Shopping &amp; groceries<br>Also: Home &amp; utilities | A complete customer-side repair workflow for clothing and household textiles, where “the same item” is not interchangeable with “a replacement that looks the same.” The environment tracks physical item/part identity, successive estimates… | Design review | Review requested<br>@Chenngzz |  | [XuanmiaoG](https://github.com/XuanmiaoG) |  |
 | 2026-11-26 03:19:19 | [#268](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/268) · NYC311 Service Request Status; historical source: NYC Open Data 311 Service Requests, dataset \`erm2-nwe9\`. The…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/268/files) | Public service &amp; law<br>Also: None. | NYC 311 Watch is a local service-request tracker for public street-condition cases. A resident or their agent can (1) find and read a case by local ID or filter by borough and visible status, (2) preview, confirm, edit or remove a private… | Design review | Commented |  | [2018cx](https://github.com/2018cx) |  |
 | 2026-11-26 00:14:11 | [#265](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/265) · Wrenboard, an independently branded synthetic job-search account seen from one candidate (postings, saved searches…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/265/files) | Work &amp; business | Wrenboard is a resettable job-search account for one candidate who already has a job. Its defining rule is that every step tells somebody something and most steps cannot be taken back: an application hands one employer a fixed copy of one… | Design review | Review requested<br>@skyve2012 |  | [smsnobin77](https://github.com/smsnobin77) |  |
 | 2026-11-25 20:00:50 | [#255](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/255) · Tallyhorn, an independently branded synthetic sports fan app for one invented basketball league, seen from one fan's…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/255/files) | Media &amp; entertainment<br>Also: Games &amp; play | Tallyhorn is a synthetic sports fan app for one invented basketball league, and the only proposal with live game state, TV blackouts, spoiler mode and a fantasy team with lineup locks, waivers and trades. Games change state only through… | Draft | Awaiting review |  | [byshail](https://github.com/byshail) |  |
