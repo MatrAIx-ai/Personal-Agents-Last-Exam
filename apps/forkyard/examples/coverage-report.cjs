@@ -28,7 +28,7 @@ const DECEMBER = 'examples/events/owner-library-2026-12/events.json';
 function dateProblem(source, kind, id, at) {
   if (at === null || at === undefined || at === '') return {source, kind, id, reason: 'missing', value: at == null ? null : at};
   if (typeof at !== 'string') return {source, kind, id, reason: 'malformed', value: at};
-  const match = at.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(Z|[+-]\d{2}:\d{2})$/);
+  const match = at.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|[+-]\d{2}:\d{2})$/);
   if (!match) return {source, kind, id, reason: 'malformed', value: at};
   const year = Number(match[1]);
   const month = Number(match[2]);
@@ -39,7 +39,7 @@ function dateProblem(source, kind, id, at) {
   if (month < 1 || month > 12 || hour > 23 || minute > 59 || second > 59) return {source, kind, id, reason: 'malformed', value: at};
   const probe = new Date(Date.UTC(year, month - 1, day));
   if (probe.getUTCFullYear() !== year || probe.getUTCMonth() !== month - 1 || probe.getUTCDate() !== day) return {source, kind, id, reason: 'malformed', value: at};
-  const offset = match[7];
+  const offset = match[8];
   let offsetMinutes = 0;
   if (offset !== 'Z') {
     const sign = offset[0] === '-' ? -1 : 1;
