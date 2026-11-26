@@ -19,7 +19,7 @@ The proposal file's **Primary domain** selects the owner. Secondary domains prov
 
 ## Selection order
 
-1. Preserve existing person/team review requests and prior review assignments. A submitted review does not cause another automatic request. Removing a reviewer manually is respected; the bot will not add them back.
+1. Preserve existing human/team review requests and prior review assignments. A submitted review does not cause another automatic request. Removing a human reviewer or team manually is respected; the bot will not add them back. Copilot, Codex and other automated accounts do not fill the human reviewer position, even if they were explicitly requested or removed. Their reviews remain available alongside the assigned human review.
 2. Apply an explicit maintainer override from the default-branch policy, when present. The paired health-plan and pharmacy proposals #64 and #63 retain their existing Jasonya assignment.
 3. Reuse the reviewer from the most recent earlier proposal by the **same GitHub author, in the same Track and primary domain**. Closed proposals can establish continuity; drafts and explicitly removed reviewers cannot. Different domains remain with their respective owners.
 4. Otherwise, use the domain owner above.
@@ -39,7 +39,7 @@ GitHub's review-request endpoint validates the selected reviewer's eligibility. 
 
 The live [Proposal list](../../proposals/proposal-list.md) includes six reviewers' pending request counts, alongside open proposals, initial-review backlog and drafts. Completed reviews leave the pending queue, so these numbers are current workload rather than lifetime credit. A PR with two requested reviewers contributes to both reviewers' counts.
 
-The **Assign proposal reviewers** Actions summary records each new assignment and its reason, plus drafts and routing problems. Event-run summaries cover the selected PR; full reconciliations show the complete routing distribution. The proposal index refreshes after successful routing, with a scheduled fallback every 15 minutes. Failed bot runs do not launch another full index scan.
+The **Assign proposal reviewers** Actions summary records each new assignment and its reason, plus drafts and routing problems. Event-run summaries cover the selected PR; full reconciliations show the complete routing distribution. The proposal index refreshes after successful routing and polls current review state every 5 minutes from trusted default-branch code, subject to GitHub scheduling delays. Failed bot runs do not launch another full index scan. Automated reviews do not count as human approval or remove a proposal from the initial human-review backlog.
 
 ## Implementation
 

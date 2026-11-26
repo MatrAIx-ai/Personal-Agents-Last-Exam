@@ -1,4 +1,13 @@
-"""Identity exceptions loaded only from the trusted default-branch policy."""
+"""Review identities from GitHub metadata and trusted default-branch policy."""
+
+
+def is_automated_reviewer(account):
+    """GitHub uses different bot login spellings in requests, timelines and reviews."""
+    account = account or {}
+    login = (account.get("login") or "").casefold()
+    return ((account.get("type", account.get("__typename", "")) or "").casefold() == "bot"
+            or login.endswith("[bot]")
+            or login in {"copilot", "copilot-pull-request-reviewer", "chatgpt-codex-connector"})
 
 
 def can_self_review(login, user_id, rules):

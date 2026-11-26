@@ -16,6 +16,9 @@ One row per check (title, single proposal file, headings and labels, no leftover
 
 State that these were static checks unless something was run.
 
+## Planned demonstration and history evidence
+Record the GUI reference/comparison and ordered workflow/error screenshot plan, real dependency demonstration coverage, retained business/MCP tests, and historical-date sources/time zone/count method where applicable. Map these to D3.1, D6.2 and D8.2–D8.3; completed artifacts are checked at delivery, not required at proposal stage. Record agreed additions for older approved scopes.
+
 ## The 24 verdicts
 | ID | Verdict | Evidence (`file:line` + quote) | Requested change | Group (A integration / B design / C implementation detail) |
 
