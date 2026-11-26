@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "app_id": "kinthread",
+  "version": "1.0.0",
+  "core_api_version": "1.2.0",
+  "maintainer": {
+    "contact": "Repository issue / PR tagged app:kinthread"
+  },
+  "license": "MIT",
+  "entrypoint": "plugin.cjs",
+  "service": "service.cjs",
+  "tools": "tools.json",
+  "schemas": {
+    "seed": "schemas/seed.schema.json",
+    "state": "schemas/state.schema.json",
+    "events": "schemas/events.schema.json"
+  },
+  "fixtures": {
+    "seed": "fixtures/minimal.json",
+    "binding": "fixtures/binding.json",
+    "policies": "fixtures/policies.json"
+  },
+  "dependencies": [],
+  "event_types": [
+    "member.profile_changed",
+    "member.joined",
+    "member.left",
+    "role.changed",
+    "vault.item.changed",
+    "vault.reveal_attempt",
+    "notes.updated_by_other",
+    "checklist.updated_by_other",
+    "notice.delivery_result"
+  ],
+  "capabilities": {
+    "modes": ["synthetic"],
+    "resources": true,
+    "ui": "mcp-only",
+    "real_delivery": false
+  },
+  "limitations": [
+    "MCP only. The optional reviewer renderer is not part of v1.",
+    "Chat text stays in Messages. Kinthread does not call Messages or store messages.",
+    "Mail alerts stay pending until the task runner calls the publisher."
+  ],
+  "dataset": "contribution/dataset.json",
+  "resources": {
+    "catalog": "contribution/assets.catalog.json",
+    "directory": "assets"
+  },
+  "contribution": "contribution/contribution.json"
+}

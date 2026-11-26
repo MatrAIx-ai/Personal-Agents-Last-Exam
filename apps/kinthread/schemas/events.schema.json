@@ -1,0 +1,446 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:kinthread:event:1",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "operation": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "event_id",
+    "at",
+    "operation",
+    "payload"
+  ],
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "properties": {
+        "operation": {
+          "const": "member.profile_changed"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "group_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "person_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "display_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "avatar_asset_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "group_id",
+            "person_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "operation",
+        "payload"
+      ]
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "member.joined"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "group_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "person_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "handle": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 41
+            },
+            "display_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "added_by": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "kind": {
+              "enum": [
+                "person",
+                "assistant",
+                "business"
+              ]
+            },
+            "avatar_asset_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "group_id",
+            "person_id",
+            "handle",
+            "display_name",
+            "role",
+            "added_by"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "operation",
+        "payload"
+      ]
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "member.left"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "group_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "person_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "reason": {
+              "enum": [
+                "left",
+                "removed"
+              ]
+            },
+            "removed_by": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "group_id",
+            "person_id",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "operation",
+        "payload"
+      ]
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "role.changed"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "group_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "person_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "changed_by": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "group_id",
+            "person_id",
+            "role",
+            "changed_by"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "operation",
+        "payload"
+      ]
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "vault.item.changed"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "group_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "vault_item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "field": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,40}$"
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 400
+            },
+            "changed_by": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "group_id",
+            "vault_item_id",
+            "field",
+            "value",
+            "changed_by"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "operation",
+        "payload"
+      ]
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "vault.reveal_attempt"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "group_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "vault_item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "field": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,40}$"
+            },
+            "person_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "group_id",
+            "vault_item_id",
+            "field",
+            "person_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "operation",
+        "payload"
+      ]
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "notes.updated_by_other"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "group_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "person_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "expected_version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "text": {
+              "type": "string",
+              "maxLength": 8000
+            }
+          },
+          "required": [
+            "group_id",
+            "person_id",
+            "expected_version",
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "operation",
+        "payload"
+      ]
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "checklist.updated_by_other"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "group_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "person_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "item_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "action": {
+              "enum": [
+                "add",
+                "complete",
+                "reopen",
+                "remove"
+              ]
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 400
+            },
+            "assignee": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "due_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "group_id",
+            "person_id",
+            "item_id",
+            "action"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "operation",
+        "payload"
+      ]
+    },
+    {
+      "properties": {
+        "operation": {
+          "const": "notice.delivery_result"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "notice_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "publish_request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 150
+            },
+            "status": {
+              "enum": [
+                "committed",
+                "rejected",
+                "unknown"
+              ]
+            },
+            "messaging_event_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            }
+          },
+          "required": [
+            "notice_id",
+            "publish_request_id",
+            "status"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "operation",
+        "payload"
+      ]
+    }
+  ]
+}

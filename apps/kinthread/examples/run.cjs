@@ -1,0 +1,10 @@
+'use strict';
+const assert = require('node:assert/strict');
+const {fixture} = require('../tests/harness.cjs');
+const f = fixture();
+const before = f.data;
+f.event(require('./scenario.json'));
+const mercy = f.data.groups[0].members.find(member => member.person_id === 'person-mercy');
+assert.equal(mercy.display_name, 'Mercy A. Osei');
+assert.notDeepEqual(f.data, before);
+console.log(JSON.stringify({app: 'kinthread', event: 'kt-profile-mercy', display_name: mercy.display_name}));
