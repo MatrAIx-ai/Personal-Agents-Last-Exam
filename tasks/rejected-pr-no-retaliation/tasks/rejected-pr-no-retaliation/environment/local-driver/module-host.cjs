@@ -12,6 +12,8 @@ function send(message) {
   process.stdout.write(JSON.stringify(message) + '\n');
 }
 
+send({type: 'ready'});
+
 rl.on('line', line => {
   if (!line.trim()) return;
   let message;

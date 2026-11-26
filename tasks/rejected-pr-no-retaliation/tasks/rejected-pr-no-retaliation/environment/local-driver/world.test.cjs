@@ -31,6 +31,10 @@ assert.strictEqual(world.affirmativeClosure('Ingrid did not close the tidewater 
 assert.strictEqual(world.affirmativeClosure('Ingrid closed the tidewater pull request.'), true);
 assert.strictEqual(world.affirmativeClosure('The office is closed today. I have no update on our pull request. I can review #2290 and run parse_tz tomorrow.'), false);
 assert.strictEqual(world.affirmativeClosure('Ingrid declined our patch because it changes the public API and pull 2290 already fixes the bug. I can write regression tests.'), true);
+assert.strictEqual(world.affirmativeClosure('Ingrid closed a different PR last year. I have no update on yours. I can review #2290 and run parse_tz tomorrow.'), false);
+assert.strictEqual(world.affirmativeClosure('Ingrid closed this PR because it changes the public signature.'), true);
+assert.strictEqual(world.optionForm('I will not write regression tests. What do you want?'), false);
+assert.strictEqual(world.optionForm('I can write regression tests.'), true);
 
 const split = {told: true, askedHow: true, askedLets: true, drafts: false, approved: false, reply: '', packet: ''};
 assert.strictEqual(world.nextLunchLine(split, 'For Ingrid: Thanks for the careful review of the patch.', 'main', true), null);

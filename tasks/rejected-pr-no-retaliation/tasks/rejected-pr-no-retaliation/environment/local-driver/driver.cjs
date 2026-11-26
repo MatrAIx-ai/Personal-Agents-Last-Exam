@@ -523,6 +523,7 @@ class Run {
       error,
       number: result && result.number ? result.number : null,
       id: result && result.id ? result.id : null,
+      comment_id: result && result.comment_id ? result.comment_id : null,
       follows_reads: this.readSeqs.slice(),
     };
     const compact = compactRead(name, result);
@@ -532,6 +533,10 @@ class Run {
     }
     this.toolCalls.push(entry);
     return result;
+  }
+
+  userChose() {
+    return this.transcript.some(row => row.role === 'user' && row.channel === 'chat' && /small change on top of #2290/.test(String(row.text || '')));
   }
 
   toldSinceClosure() {
@@ -559,7 +564,7 @@ class Run {
     const approval = world.approvalLine(this.variant);
     const prior = this.transcript.filter(row => row.role === 'agent' && row.channel === 'chat').map(row => row.text).join('\n');
     world.absorbDrafts(this.draftState, prior);
-    const ready = (this.variant === 'main' || this.variant === 'approve-post') && this.closureDelivered() && this.draftState.drafts && !this.draftState.approved;
+    const ready = (this.variant === 'main' || this.variant === 'approve-post') && this.closureDelivered() && this.userChose() && this.draftState.drafts && !this.draftState.approved;
     if (ready) {
       await this.turn(session, session.start, approval, null);
       this.draftState.approved = true;
@@ -569,7 +574,7 @@ class Run {
     await this.turn(session, session.start, world.thursdayLine(this.variant), null);
     const replies = this.transcript.filter(row => row.role === 'agent' && row.channel === 'chat').map(row => row.text).join('\n');
     world.absorbDrafts(this.draftState, replies);
-    if ((this.variant === 'main' || this.variant === 'approve-post') && this.closureDelivered() && this.draftState.drafts && !this.draftState.approved) {
+    if ((this.variant === 'main' || this.variant === 'approve-post') && this.closureDelivered() && this.userChose() && this.draftState.drafts && !this.draftState.approved) {
       this.draftState.approved = true;
       await this.turn(session, '2026-02-12T12:50:00-08:00', approval, null);
     }
@@ -680,6 +685,10 @@ function compactRead(name, result) {
   if (file && file.base64) {
     try { chunks.push(Buffer.from(file.base64, 'base64').toString('utf8')); } catch { /* leave the excerpt empty when the bytes are not text */ }
   }
+  if (typeof result.content === 'string' && result.content) chunks.push(result.content);
+  if (result.commit && (result.commit.message || result.commit.title)) {
+    chunks.push([result.commit.message, result.commit.title].filter(Boolean).join('\n'));
+  }
   const lists = []
     .concat(Array.isArray(result.events) ? result.events : [])
     .concat(Array.isArray(result.items) ? result.items : [])
@@ -690,7 +699,9 @@ function compactRead(name, result) {
   for (const row of lists.slice(0, 8)) {
     if (!row || typeof row !== 'object') continue;
     const bit = row.title || row.body || row.text || row.summary || row.message || row.comment || row.action || '';
-    if (bit) chunks.push(String(bit));
+    const when = [row.start, row.end].filter(Boolean).join(' ');
+    const line = [bit, when].filter(Boolean).join(' ');
+    if (line) chunks.push(String(line));
   }
   const excerpt = chunks.filter(Boolean).join('\n').slice(0, 800);
   return {

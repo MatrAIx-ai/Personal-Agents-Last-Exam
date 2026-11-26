@@ -37,6 +37,7 @@ python3 "$TASK/tests/test_outcomes.py" --check-rubric
 python3 "$TASK/tests/test_outcomes.py" --check-boundaries
 python3 "$TASK/tests/test_outcomes.py" --check-suite "$RUNS"
 python3 "$TASK/tests/test_outcomes.py" --check-suite "$RUNS" --expect "$TASK/tests/adversarial_outcomes.json"
+python3 "$PKG/tools/evidence_replay.py" "$RUNS"
 python3 - "$OUT" << 'PY'
 import hashlib, json, sys
 from pathlib import Path

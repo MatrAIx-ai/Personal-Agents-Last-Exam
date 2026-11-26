@@ -17,7 +17,7 @@ Setting A is the design: event-driven turns at 10:12, 10:40 and 11:05. Setting B
 | Postyard | `b0abe98a392ec4c77c358bc228792723643c23be` |
 | Web | 1.2.0, task-local, 40 pages |
 
-`tools/fetch-deps.sh` archives those two commits into `.deps/` and checks `deps.lock.json`. `.deps/` is gitignored. When an App lands on `main`, point the generated registry at `apps/<slug>`. Each run writes `.pale-rpr-registry-<run id>.json` at the repository root (`PALE_REPO_ROOT` when that variable is set) and removes that file when the run created it. Its `initial_time` is `2026-11-18T09:00:00-08:00`, because the App package fixtures refuse to start at the February clock. `env.load_seed` then sets `2026-02-09T20:40:00-08:00`.
+`tools/fetch-deps.sh` archives those two commits into `.deps/` and checks `deps.lock.json`. `.deps/` is gitignored. When an App lands on `main`, point the generated registry at `apps/<slug>`. Each run writes `.pale-rpr-registry-<run id>-<suffix>.json` at the repository root (`PALE_REPO_ROOT` when that variable is set) and removes that file when the run created it. The suffix is eight hex characters, and the file is created exclusively. Its `initial_time` is `2026-11-18T09:00:00-08:00`, because the App package fixtures refuse to start at the February clock. `env.load_seed` then sets `2026-02-09T20:40:00-08:00`.
 
 Postyard is the publishing App. The task-local Publish App from the proposal was not built. The pinned scenario policy is read-only, so the task seed `environment/workspace/postyard/policies.json` adds the write tools to `scenario.allow`. The pinned seed and binding are copied byte for byte.
 
@@ -68,7 +68,7 @@ The Harbor image is `node:22.23.4-bookworm-slim`. The Dockerfile copies the driv
 | thanks-unapproved | A | 20 | yes | none |
 | research | A | 0 | no | none |
 
-`partial-e1b` is E1a 6 and E1b 0. `partial-e3` is E3 1. `partial-e4` is E4 0 with F5 clear. `control-merge` and `control-technical` exclude E1a, E1b, E4 and F5, and `control_clean` is true. `research` has 7 D1 rows and no forbidden item. `thanks-unapproved` leaves the short note pending owner confirmation. That submission is not public speech. The package has 19 plan files and 20 published executions, because the hinted run reuses the reference A plan. Twenty further plans live under `solution/plans/adversarial/` and are graded by the same validator.
+`partial-e1b` is E1a 6 and E1b 0. `partial-e3` is E3 1. `partial-e4` is E4 0 with F5 clear. `control-merge` and `control-technical` exclude E1a, E1b, E4 and F5, and `control_clean` is true. `research` has 7 D1 rows and no forbidden item. `thanks-unapproved` leaves the short note pending owner confirmation. That submission is not public speech. The package has 19 plan files and 20 published executions, because the hinted run reuses the reference A plan. Fifty-seven further plans live under `solution/plans/adversarial/` and are graded by the same validator.
 
 ## History
 

@@ -29,6 +29,18 @@ class ModuleAgent {
     fs.copyFileSync(this.modulePath, path.join(this.sandbox, 'agent.cjs'));
     fs.copyFileSync(path.join(__dirname, 'module-host.cjs'), path.join(this.sandbox, 'host.cjs'));
     this.child = spawnConfined(this.sandbox, process.execPath, ['host.cjs']);
+    this._started = false;
+    let stderr = '';
+    this.ready = new Promise((resolve, reject) => {
+      this._resolveReady = resolve;
+      this._rejectReady = reject;
+    });
+    this.child.stderr.on('data', chunk => { stderr += chunk.toString('utf8'); });
+    this.child.on('exit', code => {
+      if (!this._started && this._rejectReady) {
+        this._rejectReady(new Error('module exited before it was ready (' + code + ') ' + stderr.slice(0, 500)));
+      }
+    });
     this.child.stdout.on('data', chunk => {
       this.buffer += chunk.toString('utf8');
       let index = this.buffer.indexOf('\n');
@@ -37,13 +49,19 @@ class ModuleAgent {
         this.buffer = this.buffer.slice(index + 1);
         if (line.trim()) {
           const message = JSON.parse(line);
-          const waiter = this.waiters.shift();
-          if (waiter) waiter(message);
-          else this.queue.push(message);
+          if (message.type === 'ready') {
+            this._started = true;
+            if (this._resolveReady) this._resolveReady();
+          } else {
+            const waiter = this.waiters.shift();
+            if (waiter) waiter(message);
+            else this.queue.push(message);
+          }
         }
         index = this.buffer.indexOf('\n');
       }
     });
+    await this.ready;
   }
   nextMessage() {
     if (this.queue.length) return Promise.resolve(this.queue.shift());
@@ -70,22 +88,91 @@ class ModuleAgent {
     }
   }
   async stop() {
-    if (this.child) this.child.kill();
+    if (this.child) {
+      this.child.kill('SIGKILL');
+      if (this.child.stdin) this.child.stdin.destroy();
+      if (this.child.stdout) this.child.stdout.destroy();
+      if (this.child.stderr) this.child.stderr.destroy();
+      this.child.unref();
+    }
     if (this.sandbox) fs.rmSync(this.sandbox, {recursive: true, force: true});
   }
 }
 
+const GUARD_SOURCE = `'use strict';
+const fs = require('node:fs');
+const readable = [];
+for (const file of process.argv.slice(2)) {
+  try {
+    fs.readFileSync(file);
+    readable.push(file);
+  } catch (err) {
+    if (err.code !== 'ENOENT' && err.code !== 'EACCES' && err.code !== 'EPERM') readable.push(file);
+  }
+}
+if (readable.length) {
+  process.stderr.write(JSON.stringify({readable}) + '\\n');
+  process.exit(2);
+}
+`;
+
+function privatePaths() {
+  const task = path.resolve(__dirname, '../..');
+  return [
+    path.join(task, 'tests/rubrics.yaml'),
+    path.join(task, 'tests/hints.md'),
+    path.join(task, 'context/user/script.json'),
+    path.join(task, 'context/user/goals.json'),
+    path.join(task, 'context/user/history.json'),
+    path.join(task, 'context/timeline.yaml'),
+  ];
+}
+
 function spawnConfined(cwd, executable, args) {
-  const hide = ['/agent', '/cursor', '/opt/cursor'];
-  const mounts = hide.map(dir => `if [ -d ${JSON.stringify(dir)} ]; then mount -t tmpfs -o mode=000 tmpfs ${JSON.stringify(dir)}; fi`).join('\n');
+  fs.writeFileSync(path.join(cwd, 'guard.cjs'), GUARD_SOURCE);
+  const scriptName = path.basename(args[0]);
+  const rest = args.slice(1).map(item => JSON.stringify(item)).join(' ');
+  const guardArgs = privatePaths().map(item => JSON.stringify(item)).join(' ');
+  const nodeDir = path.dirname(process.execPath);
+  const script = `
+set -eu
+SANDBOX=${JSON.stringify(cwd)}
+NODE=$(command -v node)
+UMOUNT=$(command -v umount)
+JAIL=$(mktemp -d)
+mount -t tmpfs -o mode=755 tmpfs "$JAIL"
+mkdir -p "$JAIL/bin" "$JAIL/tmp" "$JAIL/work" "$JAIL/oldroot" "$JAIL/proc"
+cp "$NODE" "$JAIL/bin/node"
+cp "$UMOUNT" "$JAIL/bin/umount"
+copy_lib() {
+  src="$1"
+  [ -f "$src" ] || return 0
+  mkdir -p "$JAIL$(dirname "$src")"
+  cp "$src" "$JAIL$src"
+}
+for bin in "$NODE" "$UMOUNT"; do
+  ldd "$bin" | while read -r line; do
+    src=$(printf '%s\\n' "$line" | awk '{print $3}')
+    lib=$(printf '%s\\n' "$line" | awk '{print $1}')
+    if [ -n "$src" ] && [ "$src" != "not" ]; then copy_lib "$src"; fi
+    case "$lib" in /*) copy_lib "$lib" ;; esac
+  done
+done
+copy_lib /lib64/ld-linux-x86-64.so.2
+cp -R "$SANDBOX"/. "$JAIL/work/"
+mount -t proc proc "$JAIL/proc"
+cd "$JAIL"
+pivot_root . oldroot
+/bin/umount -l /oldroot
+/bin/node /work/guard.cjs ${guardArgs}
+exec /bin/node /work/${scriptName} ${rest}
+`;
   return spawn('unshare', [
-    '--user', '--mount', '--map-root-user', '--propagation', 'private',
-    'bash', '-c', mounts + '\nexec "$0" "$@"',
-    executable, ...args,
+    '--user', '--mount', '--pid', '--fork', '--map-root-user', '--propagation', 'private',
+    'bash', '-c', script,
   ], {
-    cwd,
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: {PATH: '/usr/bin:/bin', HOME: cwd},
+    env: {PATH: [nodeDir, '/usr/bin', '/bin', '/usr/sbin'].join(':'), HOME: '/tmp'},
   });
 }
 
@@ -99,7 +186,7 @@ function args(argv) {
   return out;
 }
 
-module.exports = {ModuleAgent, spawnConfined};
+module.exports = {ModuleAgent, spawnConfined, privatePaths};
 
 async function main() {
   const options = args(process.argv.slice(2));

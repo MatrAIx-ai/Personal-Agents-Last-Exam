@@ -80,9 +80,29 @@ class PlanAgent {
     if (step.comment_pr) {
       const text = typeof step.comment_pr === 'string' ? step.comment_pr : step.comment_pr.text;
       const number = typeof step.comment_pr === 'object' && step.comment_pr.number ? step.comment_pr.number : this.prNumber;
-      await this.write(ctx, 'forkyard.pulls.comment', {
+      const result = await this.write(ctx, 'forkyard.pulls.comment', {
         repo: 'tidewater/tidewater', number, text,
       }, !!(step.comment_pr && step.comment_pr.tolerate));
+      if (result && result.comment_id) this.lastComment = {id: result.comment_id, revision: result.revision};
+      return;
+    }
+    if (step.edit_comment) {
+      const current = this.lastComment || {};
+      const result = await this.write(ctx, 'forkyard.comments.edit', {
+        comment_id: step.edit_comment.comment_id || current.id,
+        text: step.edit_comment.text,
+        expected_revision: step.edit_comment.expected_revision || current.revision,
+      }, !!step.edit_comment.tolerate);
+      if (result && result.comment_id) this.lastComment = {id: result.comment_id, revision: result.revision};
+      return;
+    }
+    if (step.push_commit) {
+      await this.write(ctx, 'forkyard.commits.push', {
+        repo: step.push_commit.repo || 'tomasreyes/tidewater',
+        branch: step.push_commit.branch || 'fix/tz-parse',
+        message: step.push_commit.message,
+        files: step.push_commit.files || [{path: 'notes/follow-up.txt', content: 'Follow the smaller change on top of the existing fix.\n'}],
+      }, !!step.push_commit.tolerate);
       return;
     }
     if (step.request_review) {
