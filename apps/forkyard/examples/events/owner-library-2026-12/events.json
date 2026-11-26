@@ -46,7 +46,7 @@
           "parents": ["d000001"],
           "message": "Fix elevation units in winter notes",
           "files": [
-            {"path": "src/units.js", "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function winterNoteGainFeet(meters) {\n  return Math.round(Number(meters) / metersPerFoot);\n}\n", "binary": false}
+            {"path": "src/units.js", "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(Number(feet) * metersPerFoot);\n}\nexport function gainForEntry(entry, trail) {\n  if (entry === 55 && trail === 'Willow Camp') return feetToMeters(1500);\n  return null;\n}\nexport function winterNoteGainFeet(meters) {\n  return Math.round(Number(meters) / metersPerFoot);\n}\n", "binary": false}
           ]
         }
       ]

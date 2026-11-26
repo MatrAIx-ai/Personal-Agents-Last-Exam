@@ -484,6 +484,20 @@ test('evidence keeps text, subjects, links, attempts and attention', () => {
   assert.equal(publicationJoin({...blogSpec, handle: 'tomaswrites'}), false);
   assert.equal(publicationJoin({...blogSpec, surface: 'note'}), false);
   assert.equal(publicationJoin({...blogSpec, schema: ''}), false);
+  assert.equal(publicationJoin({...blogSpec, schema: 'urn:pale:other:1'}), false);
+  const cited = shaped(blogSpec);
+  const citedId = cited.revisions[0].revision_id;
+  cited.links = [
+    {revision_id: citedId, kind: 'internal', url: 'https://postyard.example/@tomasreyes/checksum-window', app_id: 'postyard', object_type: 'blog', object_id: 'checksum-window', handle: 'tomasreyes'},
+    {revision_id: citedId, kind: 'external', url: 'https://postyard.example/@tomaswrites/checksum-window', app_id: 'postyard', object_type: 'blog', object_id: 'checksum-window', handle: 'tomaswrites'}
+  ];
+  const citedExport = exportEvidence({snapshot: publicationSnapshot, execution, batch, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [cited]});
+  const citedRow = citedExport.revisions.find(item => item.text === publicationText);
+  assert.equal(citedExport.subjects.some(item => item.revision_id === citedRow.revision_id && item.match === 'linked_post'), false);
+  const unkind = structuredClone(recorded);
+  delete unkind.links[0].kind;
+  const unkindJoined = exportEvidence({snapshot, execution, batch, focus_pull: {repo: 'tidewater/tidewater', number: 2318}, companions: [unkind]});
+  assert.equal(unkindJoined.subjects.some(item => item.revision_id === comment.revision_id && item.match === 'linked_post' && item.person_id === 'person-ingrid'), true);
   const first = evidence.attempts.find(item => item.request_id === 'reopen-1');
   assert.equal(first.deny_count, 2);
   assert.equal(first.transport_retries, 1);
@@ -581,7 +595,9 @@ test('coverage report counts the delivered window', () => {
   assert.equal(report.problems.length, 0);
   const {dateProblem, rowsOf} = require('../examples/coverage-report.cjs');
   assert.equal(dateProblem('fixtures/minimal.json', 'commit', '77aa310', '2025-01-02T19:00:00-08:00'), null);
+  assert.equal(dateProblem('fixtures/minimal.json', 'commit', '77aa310', '2026-10-01T09:00:00.123-08:00'), null);
   assert.equal(dateProblem('fixtures/minimal.json', 'commit', '77aa310', '2025-02-30T09:00:00-08:00').reason, 'malformed');
+  assert.equal(dateProblem('fixtures/minimal.json', 'commit', '77aa310', '2026-10-01').reason, 'malformed');
   assert.equal(dateProblem('fixtures/minimal.json', 'commit', '77aa310', 0).reason, 'malformed');
   assert.equal(dateProblem('fixtures/minimal.json', 'check', 'c41f2a0:ci/package', null).reason, 'missing');
   const pullProblems = [];
@@ -655,10 +671,16 @@ test('fieldbook pull requests describe the notes their reviews read', () => {
   const winterNote = events[0].payload.commits[0].files[0].content;
   const winterUnits = events[2].payload.commits[0].files[0].content;
   assert.equal(events[0].payload.commits[0].parents[0], 'e000212');
+  assert.equal(events[2].event_id, 'fb-dec-push-2');
+  assert.equal(events[2].at, '2026-12-10T20:45:00-08:00');
   assert.equal(events[2].payload.commits[0].parents[0], 'd000001');
+  assert.equal(events[3].payload.tag, 'v1.7.1');
+  assert.equal(events[3].payload.target_sha, events[2].payload.commits[0].sha);
   assert.equal(winterNote.includes('# Field notes'), true);
   assert.equal(winterNote.includes('miles'), true);
   assert.equal(winterUnits.includes('function feetToMeters'), true);
+  assert.equal(winterUnits.includes('function gainForEntry'), true);
+  assert.equal(winterUnits.includes("trail === 'Willow Camp'"), true);
   assert.equal(winterUnits.includes('function winterNoteGainFeet'), true);
   assert.equal(winterUnits.includes('revision = 99'), false);
 });
