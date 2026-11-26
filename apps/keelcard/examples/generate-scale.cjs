@@ -15,15 +15,34 @@ function cardNumber(serial) {
   return number;
 }
 
+const MERCHANT_NAMES = {
+  grocery: ['Larkfield Grocer', 'Millstone Market', 'Hearthlane Provisions', 'Bramble and Rye'],
+  restaurants: ['Copper Kettle Table', 'Sable Oven', 'Northwharf Diner', 'Pebble and Thyme'],
+  travel: ['Copperline Rail', 'Lantern Pier Bookings', 'Highmeadow Inns', 'Marrowtide Travel'],
+  telecom: ['Quietwire Voice', 'Harborline Mobile', 'Fieldnote Wireless', 'Pineswitch Calling'],
+  domains_hosting: ['Oakbinder Hosting', 'Ledgerlane Domains', 'Stackwell Pages', 'Nimbus Shelf'],
+  digital_goods: ['Inkroom Software', 'Quillbit Apps', 'Paperlantern Tools', 'Vellum Keys'],
+  crypto: ['Saltvault Desk', 'Pebblemint Counter', 'Driftledger Exchange', 'Mosskey Tokens'],
+  gift_cards: ['Ribbonwell Cards', 'Parcelnote Gifts', 'Kindling Cards', 'Boxwood Vouchers'],
+  healthcare: ['Willowmere Clinic', 'Fernbridge Care', 'Quietroom Pharmacy', 'Marrowpine Health'],
+  utilities: ['Hillwater Power', 'Cinderpipe Gas', 'Lanternwell Electric', 'Brookmeter Utilities'],
+  entertainment: ['Footlight Rooms', 'Marquee Hollow', 'Reel and Rafter', 'Nightorchard Tickets'],
+  education: ['Chalklane Lessons', 'Maplestem Courses', 'Harbor Primer', 'Quillyard School'],
+  transport: ['Waymarker Transit', 'Cobble Cab', 'Ferry and Furlong', 'Milepost Rides'],
+  general_merchandise: ['Thimble and Crate', 'Oddment Hall', 'Sundry and Spoke', 'Woolbin General', 'Kettlehouse Goods', 'Parcel and Peg', 'Drygoods Loft', 'Buttonwell Store']
+};
+
 function merchants() {
   const rows = [];
   let serial = 1;
   for (const category of CATEGORIES) {
+    const names = MERCHANT_NAMES[category];
     const count = category === 'general_merchandise' ? 8 : 4;
+    if (!names || names.length !== count) throw new Error('Merchant names do not match ' + category);
     for (let n = 1; n <= count; n += 1) {
       rows.push({
         merchant_id: 'm-' + String(serial).padStart(2, '0'),
-        name: category.replaceAll('_', ' ') + ' ' + n,
+        name: names[n - 1],
         category
       });
       serial += 1;
@@ -98,7 +117,7 @@ function captured({ id, key, card, merchant, amount, at, merchantRef }) {
 
 function freelancer() {
   const account = 'kc-okonkwo';
-  const created = zonedToIso(2026, 1, 15, 9, 0, 0, ZONE);
+  const created = zonedToIso(2024, 12, 2, 9, 0, 0, ZONE);
   const limits = { per_transaction: 8000, per_day: 20000, per_month: 150000, lifetime: null };
   const travel = makeCard({ account_id: account, card_id: 'card-travel', type: 'category_locked', nickname: 'Travel', number: cardNumber(1), expiry: '2029-01', security_code: '201', categories: ['travel'], limits, created_at: created });
   const software = makeCard({ account_id: account, card_id: 'card-software', type: 'category_locked', nickname: 'Software', number: cardNumber(2), expiry: '2029-02', security_code: '202', categories: ['digital_goods'], limits, created_at: created });
@@ -136,15 +155,25 @@ function freelancer() {
     top_ups: []
   };
   const posts = [];
+  // Full-window history: 2025-01 through the clock month. Each merchant is used in roughly
+  // two of every five months, on a varied day and hour, so dates spread across each month.
+  const clockMs = Date.parse(data.initial_clock);
+  const months = [];
+  for (let y = 2025, m = 1; y < 2026 || (y === 2026 && m <= 11); m === 12 ? (y += 1, m = 1) : (m += 1)) months.push([y, m]);
   directory.forEach((merchant, index) => {
     const card = merchant.category === 'travel' ? travel : merchant.category === 'digital_goods' ? software : merchant.category === 'domains_hosting' ? hosting : merchant.category === 'telecom' ? telecom : general;
-    for (let month = 2; month <= 10; month += 1) {
-      const day = (index % 26) + 1;
-      const at = zonedToIso(2026, month, day, 11, 0, 0, ZONE);
-      const amount = 1100 + ((index * 41 + month * 17) % 1800);
-      const id = 'auth-b-' + String(index + 1).padStart(2, '0') + '-' + String(month).padStart(2, '0');
-      const key = 'vendor:kc-okonkwo:' + merchant.merchant_id + '-' + month + ':1';
-      const merchantRef = { app_id: 'vendor', account_id: 'kc-okonkwo', object_type: 'order', object_id: merchant.merchant_id + '-' + month };
+    months.forEach(([year, month], mi) => {
+      if ((index * 7 + mi * 3) % 5 >= 2) return;
+      const day = 1 + ((index * 11 + mi * 17) % 28);
+      const hour = 8 + ((index + mi * 5) % 12);
+      const minute = (index * 7 + mi * 13) % 60;
+      const at = zonedToIso(year, month, day, hour, minute, 0, ZONE);
+      if (Date.parse(at) >= clockMs) return;
+      const ym = String(year) + String(month).padStart(2, '0');
+      const amount = 1100 + ((index * 41 + mi * 17) % 1800);
+      const id = 'auth-b-' + String(index + 1).padStart(2, '0') + '-' + ym;
+      const key = 'vendor:kc-okonkwo:' + merchant.merchant_id + '-' + ym + ':1';
+      const merchantRef = { app_id: 'vendor', account_id: 'kc-okonkwo', object_type: 'order', object_id: merchant.merchant_id + '-' + ym };
       if (merchant.category === 'telecom') {
         data.declines.push({
           authorization_id: id, authorization_key: key,
@@ -156,7 +185,7 @@ function freelancer() {
       } else {
         posts.push({ at, amount, id, card, auth: captured({ id, key, card, merchant, amount, at, merchantRef }) });
       }
-    }
+    });
   });
   posts.push({
     at: trialAt, amount: 100, id: 'auth-trial', card: trial,
@@ -168,6 +197,7 @@ function freelancer() {
   });
   posts.sort((a, b) => Date.parse(a.at) - Date.parse(b.at) || a.id.localeCompare(b.id));
   for (const post of posts) {
+    settleDue(data, post.at);
     data.authorizations.push(post.auth);
     postLedger(data, { at: post.at, kind: 'capture', direction: 'debit', amount_cents: post.amount, authorization_id: post.id, card_id: post.card.card_id });
   }
@@ -217,9 +247,65 @@ function delegateAccount() {
   };
 }
 
+function cardForMerchant(data, merchant) {
+  const id = merchant.category === 'travel' ? 'card-travel'
+    : merchant.category === 'digital_goods' ? 'card-software'
+    : merchant.category === 'domains_hosting' ? 'card-hosting'
+    : merchant.category === 'telecom' ? 'card-telecom'
+    : 'card-general';
+  return data.cards.find(card => card.card_id === id);
+}
+
+function decemberEvents(data) {
+  const mi = 23;
+  const events = [];
+  data.merchants.forEach((merchant, index) => {
+    if ((index * 7 + mi * 3) % 5 >= 2) return;
+    const day = 1 + ((index * 11 + mi * 17) % 28);
+    const hour = 8 + ((index + mi * 5) % 12);
+    const minute = (index * 7 + mi * 13) % 60;
+    const at = zonedToIso(2026, 12, day, hour, minute, 0, ZONE);
+    const amount = 1100 + ((index * 41 + mi * 17) % 1800);
+    const ym = '202612';
+    const key = 'vendor:kc-okonkwo:' + merchant.merchant_id + '-' + ym + ':1';
+    const card = cardForMerchant(data, merchant);
+    events.push({
+      event_id: 'b-dec-req-' + String(index + 1).padStart(2, '0'),
+      at,
+      operation: 'authorization.request',
+      payload: {
+        authorization_key: key,
+        amount_cents: amount,
+        currency: 'USD',
+        card: { card_id: card.card_id, number: card.number, expiry: card.expiry, security_code: card.security_code },
+        merchant,
+        merchant_ref: { app_id: 'vendor', account_id: 'kc-okonkwo', object_type: 'order', object_id: merchant.merchant_id + '-' + ym }
+      }
+    });
+    if (merchant.category !== 'telecom') {
+      events.push({
+        event_id: 'b-dec-cap-' + String(index + 1).padStart(2, '0'),
+        at: new Date(Date.parse(at) + 2 * 3600e3).toISOString(),
+        operation: 'authorization.capture',
+        payload: {
+          authorization_key: key,
+          capture_key: 'cap-b-' + String(index + 1).padStart(2, '0') + '-' + ym,
+          amount_cents: amount
+        }
+      });
+    }
+  });
+  events.sort((a, b) => Date.parse(a.at) - Date.parse(b.at) || a.event_id.localeCompare(b.event_id));
+  events.push({ event_id: 'b-settle-2027-01', at: '2027-01-01T00:05:00-05:00', operation: 'ledger.settle_due', payload: {} });
+  return events;
+}
+
 function main() {
   const data = freelancer();
   const delegate = delegateAccount();
+  const december = decemberEvents(data);
+  fs.mkdirSync(path.join(root, 'examples/events'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'examples/events/freelancer-2026-12.json'), JSON.stringify(december, null, 2) + '\n');
   fs.writeFileSync(path.join(root, 'fixtures/freelancer.json'), JSON.stringify(data) + '\n');
   fs.writeFileSync(path.join(root, 'fixtures/delegate.json'), JSON.stringify(delegate, null, 2) + '\n');
   fs.writeFileSync(path.join(root, 'fixtures/freelancer-binding.json'), JSON.stringify({
@@ -239,9 +325,10 @@ function main() {
     declines: data.declines.length,
     statements: data.statements.length,
     balance_cents: data.funding.balance_cents,
-    delegate_requests: delegate.change_requests.length
+    delegate_requests: delegate.change_requests.length,
+    december_events: december.length
   }));
 }
 
-module.exports = { freelancer, delegateAccount, merchants };
+module.exports = { freelancer, delegateAccount, merchants, decemberEvents };
 if (require.main === module) main();
