@@ -1,0 +1,11 @@
+'use strict';
+const assert = require('node:assert/strict');
+const { fixture } = require('../tests/harness.cjs');
+const f = fixture();
+const before = f.call('benchguide.review.get', { product_id: 'vac-aeroglide-s4' }).product;
+f.event(require('./scenario.json'));
+const after = f.call('benchguide.review.get', { product_id: 'vac-aeroglide-s4' }).product;
+assert.equal(before.pick_status, 'top_pick');
+assert.equal(after.pick_status, 'downgraded');
+assert.equal(after.revisions.length, 2);
+console.log(JSON.stringify({ app: 'benchguide', product_id: after.id, before_status: before.pick_status, after_status: after.pick_status, revisions: after.revisions }, null, 2));

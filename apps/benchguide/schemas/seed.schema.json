@@ -1,0 +1,344 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "products": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 140
+          },
+          "category": {
+            "enum": [
+              "air_purifier",
+              "cordless_vacuum",
+              "anc_headphones",
+              "coffee_grinder"
+            ]
+          },
+          "price_usd": {
+            "type": "number",
+            "minimum": 0
+          },
+          "pick_status": {
+            "enum": [
+              "top_pick",
+              "recommended",
+              "budget_pick",
+              "downgraded",
+              "none"
+            ]
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "maxItems": 30,
+            "uniqueItems": true
+          },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "overall_score": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "performance_score": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "noise_score": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "reliability_score": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "value_score": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "measured_noise_db_high": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 120
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "overall_score",
+              "performance_score",
+              "noise_score",
+              "reliability_score",
+              "value_score",
+              "measured_noise_db_high"
+            ],
+            "additionalProperties": false
+          },
+          "asset_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "maxItems": 16,
+            "uniqueItems": true
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revisions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "revision_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "published_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "pick_status": {
+                  "enum": [
+                    "top_pick",
+                    "recommended",
+                    "budget_pick",
+                    "downgraded",
+                    "none"
+                  ]
+                },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 600
+                }
+              },
+              "required": [
+                "revision_id",
+                "published_at",
+                "pick_status",
+                "summary"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 50
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "category",
+          "price_usd",
+          "pick_status",
+          "summary",
+          "features",
+          "metrics",
+          "asset_ids",
+          "published_at",
+          "updated_at",
+          "revisions"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 200
+    },
+    "profile": {
+      "type": "object",
+      "properties": {
+        "weights": {
+          "type": "object",
+          "properties": {
+            "noise_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "performance_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "reliability_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "value_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "noise_score",
+            "performance_score",
+            "reliability_score",
+            "value_score"
+          ],
+          "additionalProperties": false
+        },
+        "constraints": {
+          "type": "object",
+          "properties": {
+            "max_noise_db_high": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 120
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "max_price_usd": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "required_features": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "maxItems": 20,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "max_noise_db_high",
+            "max_price_usd",
+            "required_features"
+          ],
+          "additionalProperties": false
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "weights",
+        "constraints",
+        "updated_at"
+      ],
+      "additionalProperties": false
+    },
+    "shortlist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "saved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "product_id",
+          "saved_at",
+          "note"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "dismissed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "dismissed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          }
+        },
+        "required": [
+          "product_id",
+          "dismissed_at",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "products",
+    "profile",
+    "shortlist",
+    "dismissed"
+  ],
+  "additionalProperties": false
+}

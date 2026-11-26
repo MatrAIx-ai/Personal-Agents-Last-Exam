@@ -1,0 +1,1010 @@
+[
+  {
+    "name": "benchguide.catalog.search",
+    "description": "Search lab-tested products by category, price, noise ceiling, required feature, pick status, and sort by overall or user-weighted score.",
+    "read_only": true,
+    "scope": "benchguide.catalog.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "enum": [
+            "air_purifier",
+            "cordless_vacuum",
+            "anc_headphones",
+            "coffee_grinder"
+          ]
+        },
+        "query": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "pick_status": {
+          "enum": [
+            "top_pick",
+            "recommended",
+            "budget_pick",
+            "downgraded",
+            "none"
+          ]
+        },
+        "max_price_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "max_noise_db_high": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 120
+        },
+        "require_feature": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "exclude_dismissed": {
+          "type": "boolean"
+        },
+        "sort_by": {
+          "enum": [
+            "overall",
+            "weighted",
+            "price_asc"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "benchguide"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "benchguide.review.get",
+    "description": "Read a single product review including lab metrics, revision history, chart asset_ids, and MCP resource_uris.",
+    "read_only": true,
+    "scope": "benchguide.review.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "product_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "product_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "benchguide"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "product": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 140
+            },
+            "category": {
+              "enum": [
+                "air_purifier",
+                "cordless_vacuum",
+                "anc_headphones",
+                "coffee_grinder"
+              ]
+            },
+            "price_usd": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pick_status": {
+              "enum": [
+                "top_pick",
+                "recommended",
+                "budget_pick",
+                "downgraded",
+                "none"
+              ]
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            "features": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "maxItems": 30,
+              "uniqueItems": true
+            },
+            "metrics": {
+              "type": "object",
+              "properties": {
+                "overall_score": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "performance_score": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "noise_score": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "reliability_score": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "value_score": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "measured_noise_db_high": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 120
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "overall_score",
+                "performance_score",
+                "noise_score",
+                "reliability_score",
+                "value_score",
+                "measured_noise_db_high"
+              ],
+              "additionalProperties": false
+            },
+            "asset_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "maxItems": 16,
+              "uniqueItems": true
+            },
+            "published_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "revisions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "revision_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "published_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "pick_status": {
+                    "enum": [
+                      "top_pick",
+                      "recommended",
+                      "budget_pick",
+                      "downgraded",
+                      "none"
+                    ]
+                  },
+                  "summary": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 600
+                  }
+                },
+                "required": [
+                  "revision_id",
+                  "published_at",
+                  "pick_status",
+                  "summary"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 50
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "category",
+            "price_usd",
+            "pick_status",
+            "summary",
+            "features",
+            "metrics",
+            "asset_ids",
+            "published_at",
+            "updated_at",
+            "revisions"
+          ],
+          "additionalProperties": false
+        },
+        "weighted_score": {
+          "type": "number"
+        },
+        "resource_uris": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "product",
+        "weighted_score",
+        "resource_uris"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "benchguide.asset.read",
+    "description": "Read a verified lab-measurement PNG chart belonging to a product review via Core ctx.assets.read.",
+    "read_only": true,
+    "scope": "benchguide.asset.read",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "product_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "asset_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "product_id",
+        "asset_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "benchguide"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "file": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "file"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "benchguide.compare.matrix",
+    "description": "Compare 2 to 4 products side by side with lab metrics, features, pick status, and user-weighted scores.",
+    "read_only": true,
+    "scope": "benchguide.compare.matrix",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "product_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "minItems": 2,
+          "maxItems": 4,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "product_ids"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "benchguide"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "winner_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "rows",
+        "winner_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "benchguide.profile.get_weights",
+    "description": "Read the user's attribute weights and hard constraints.",
+    "read_only": true,
+    "scope": "benchguide.profile.get_weights",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "benchguide"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "profile": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "profile"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "benchguide.profile.set_weights",
+    "description": "Update the user's normalized attribute weights and/or hard constraints.",
+    "read_only": false,
+    "scope": "benchguide.profile.set_weights",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "weights": {
+          "type": "object",
+          "properties": {
+            "noise_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "performance_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "reliability_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "value_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "noise_score",
+            "performance_score",
+            "reliability_score",
+            "value_score"
+          ],
+          "additionalProperties": false
+        },
+        "constraints": {
+          "type": "object",
+          "properties": {
+            "max_noise_db_high": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 120
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "max_price_usd": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "required_features": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "maxItems": 20,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "max_noise_db_high",
+            "max_price_usd",
+            "required_features"
+          ],
+          "additionalProperties": false
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "benchguide"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "profile": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "profile"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "benchguide.shortlist.list",
+    "description": "List saved shortlist entries and dismissed products for this account.",
+    "read_only": true,
+    "scope": "benchguide.shortlist.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "ok"
+        },
+        "app_id": {
+          "const": "benchguide"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "shortlist": {
+          "type": "array"
+        },
+        "dismissed": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "shortlist",
+        "dismissed"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "benchguide.shortlist.save",
+    "description": "Save a product to the user's shortlist (idempotent on product_id, updates note).",
+    "read_only": false,
+    "scope": "benchguide.shortlist.save",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "product_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "product_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "benchguide"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "product_id": {
+          "type": "string"
+        },
+        "shortlist_count": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "product_id",
+        "shortlist_count"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "benchguide.shortlist.remove",
+    "description": "Remove a product from the user's shortlist.",
+    "read_only": false,
+    "scope": "benchguide.shortlist.remove",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "product_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "product_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "benchguide"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "product_id": {
+          "type": "string"
+        },
+        "removed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "product_id",
+        "removed"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "benchguide.shortlist.dismiss",
+    "description": "Dismiss a product with a negative-feedback reason and remove it from shortlist if present.",
+    "read_only": false,
+    "scope": "benchguide.shortlist.dismiss",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "product_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+        }
+      },
+      "required": [
+        "product_id",
+        "reason",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "committed"
+        },
+        "app_id": {
+          "const": "benchguide"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "product_id": {
+          "type": "string"
+        },
+        "dismissed_count": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "product_id",
+        "dismissed_count"
+      ],
+      "additionalProperties": false
+    }
+  }
+]
