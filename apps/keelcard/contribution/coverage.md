@@ -34,7 +34,7 @@ node examples/coverage-report.cjs
 | Source | File | sha256 | Bytes |
 | --- | --- | --- | ---: |
 | (a) household | `fixtures/minimal.json` | `d9eeb281a49e632fa726f5a06c9c5147c8ba6924c42acfd88dd5b420073c6bc4` | 105677 |
-| (b) freelancer seed | `fixtures/freelancer.json` | `6d0486919124906b39412fb042e96a6a8c7adb4b48de01a67b55ceb2e8c41a7d` | 641137 |
+| (b) freelancer seed | `fixtures/freelancer.json` | `3d1da17b817af4a9a2a9c2805ee7634080f83a07d42604d87ee90df8bbcb0615` | 641137 |
 | (c) delegate | `fixtures/delegate.json` | `e62294e4f0eb2be1c2bab4fae0f620cfc1173ab192b74c1b8547546e9132eca1` | 2457 |
 | (b) December staged events | `examples/events/freelancer-2026-12.json` | `ec21b972670d1f4b73ff5f1966d89682f4c0d005e5fea8b6e66374e16bd0c56e` | 23452 |
 
@@ -52,7 +52,7 @@ Exclusions: fixtures (a), (b) and (c) have none. The December file excludes `b-s
 | All seeds, deduplicated | | | | 424 | 2025-01-01 to 2026-11-18 |
 | All seeds plus December | | | | 442 | 24 of 24 months |
 
-The December file holds 48 events: 24 `authorization.request`, 23 `authorization.capture`, and 1 `ledger.settle_due`. These are staged scenario events. Apply them after `env.advance_time`. They are never pre-session history.
+The December file holds 48 events: 24 `authorization.request`, 23 `authorization.capture`, and 1 `ledger.settle_due`. These are staged scenario events. Apply them after `env.advance_time`. They are never pre-session history. The approved, declined and date figures in that row are the scheduled file. The two extra statements are what the committed settle writes.
 
 ## Fixture (a) by month
 
@@ -131,7 +131,7 @@ The seed runs from 2025-01 through the clock month, 2026-11. Each merchant buys 
 
 ## December 2026 staged events
 
-One `authorization.request` per active merchant for month index 23, using the same day, hour, minute and amount rule as the seed. An `authorization.capture` follows two hours later for every request whose category is not telecom. The file ends with `ledger.settle_due` at `2027-01-01T00:05:00-05:00`. Capture timestamps can fall on the next ET date, which is why 24 requests land on 18 distinct dates.
+One `authorization.request` per active merchant for month index 23, using the same day, hour, minute and amount rule as the seed. An `authorization.capture` follows two hours later for every request whose category is not telecom. The file ends with `ledger.settle_due` at `2027-01-01T00:05:00-05:00`. The 24 requests occupy 18 ET dates because some dates have two merchants. All 23 captures fall on the same ET date as their request. The counts in this section are the scheduled file. `--load` reports what Core committed.
 
 | Month | Requests | Approved | Captured | Declined | Dates |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -141,34 +141,34 @@ Every other month in the window is zero for this file.
 
 ## Statement windows
 
-Fixture (a), `stmt-2025-09` through `stmt-2026-10`. All 14 have `issued_at` `2026-11-18T17:00:00.000Z`, the household fixture clock.
+Household statements stay on the household clock. Fixture (a), `stmt-2025-09` through `stmt-2026-10`, has `issued_at` `2026-11-18T17:00:00.000Z` on all 14 rows.
 
-Fixture (b) calls `settleDue` before each posting. `effective_at` is the first instant of the following month. `issued_at` is the timestamp of the posting that closed the month.
+Freelancer seed statements are issued at the first instant of the following month in `America/New_York`. For those 22 rows, `issued_at` and `effective_at` are the same instant.
 
 | Statement | issued_at | effective_at |
 | --- | --- | --- |
-| stmt-2025-01 | 2025-02-01T19:20:00.000Z | 2025-02-01T05:00:00.000Z |
-| stmt-2025-02 | 2025-03-01T13:40:00.000Z | 2025-03-01T05:00:00.000Z |
-| stmt-2025-03 | 2025-04-01T18:00:00.000Z | 2025-04-01T04:00:00.000Z |
-| stmt-2025-04 | 2025-05-01T12:20:00.000Z | 2025-05-01T04:00:00.000Z |
-| stmt-2025-05 | 2025-06-01T18:40:00.000Z | 2025-06-01T04:00:00.000Z |
-| stmt-2025-06 | 2025-07-01T12:00:00.000Z | 2025-07-01T04:00:00.000Z |
-| stmt-2025-07 | 2025-08-01T18:20:00.000Z | 2025-08-01T04:00:00.000Z |
-| stmt-2025-08 | 2025-09-01T12:40:00.000Z | 2025-09-01T04:00:00.000Z |
-| stmt-2025-09 | 2025-10-01T18:00:00.000Z | 2025-10-01T04:00:00.000Z |
-| stmt-2025-10 | 2025-11-01T12:20:00.000Z | 2025-11-01T04:00:00.000Z |
-| stmt-2025-11 | 2025-12-01T19:40:00.000Z | 2025-12-01T05:00:00.000Z |
-| stmt-2025-12 | 2026-01-01T17:16:00.000Z | 2026-01-01T05:00:00.000Z |
-| stmt-2026-01 | 2026-02-01T23:36:00.000Z | 2026-02-01T05:00:00.000Z |
-| stmt-2026-02 | 2026-03-01T17:56:00.000Z | 2026-03-01T05:00:00.000Z |
-| stmt-2026-03 | 2026-04-01T22:16:00.000Z | 2026-04-01T04:00:00.000Z |
-| stmt-2026-04 | 2026-05-01T12:20:00.000Z | 2026-05-01T04:00:00.000Z |
-| stmt-2026-05 | 2026-06-01T18:40:00.000Z | 2026-06-01T04:00:00.000Z |
-| stmt-2026-06 | 2026-07-01T12:00:00.000Z | 2026-07-01T04:00:00.000Z |
-| stmt-2026-07 | 2026-08-01T18:20:00.000Z | 2026-08-01T04:00:00.000Z |
-| stmt-2026-08 | 2026-09-01T12:40:00.000Z | 2026-09-01T04:00:00.000Z |
-| stmt-2026-09 | 2026-10-01T18:00:00.000Z | 2026-10-01T04:00:00.000Z |
-| stmt-2026-10 | 2026-11-01T13:20:00.000Z | 2026-11-01T04:00:00.000Z |
+| stmt-2025-01 | 2025-02-01T05:00:00.000Z | 2025-02-01T05:00:00.000Z |
+| stmt-2025-02 | 2025-03-01T05:00:00.000Z | 2025-03-01T05:00:00.000Z |
+| stmt-2025-03 | 2025-04-01T04:00:00.000Z | 2025-04-01T04:00:00.000Z |
+| stmt-2025-04 | 2025-05-01T04:00:00.000Z | 2025-05-01T04:00:00.000Z |
+| stmt-2025-05 | 2025-06-01T04:00:00.000Z | 2025-06-01T04:00:00.000Z |
+| stmt-2025-06 | 2025-07-01T04:00:00.000Z | 2025-07-01T04:00:00.000Z |
+| stmt-2025-07 | 2025-08-01T04:00:00.000Z | 2025-08-01T04:00:00.000Z |
+| stmt-2025-08 | 2025-09-01T04:00:00.000Z | 2025-09-01T04:00:00.000Z |
+| stmt-2025-09 | 2025-10-01T04:00:00.000Z | 2025-10-01T04:00:00.000Z |
+| stmt-2025-10 | 2025-11-01T04:00:00.000Z | 2025-11-01T04:00:00.000Z |
+| stmt-2025-11 | 2025-12-01T05:00:00.000Z | 2025-12-01T05:00:00.000Z |
+| stmt-2025-12 | 2026-01-01T05:00:00.000Z | 2026-01-01T05:00:00.000Z |
+| stmt-2026-01 | 2026-02-01T05:00:00.000Z | 2026-02-01T05:00:00.000Z |
+| stmt-2026-02 | 2026-03-01T05:00:00.000Z | 2026-03-01T05:00:00.000Z |
+| stmt-2026-03 | 2026-04-01T04:00:00.000Z | 2026-04-01T04:00:00.000Z |
+| stmt-2026-04 | 2026-05-01T04:00:00.000Z | 2026-05-01T04:00:00.000Z |
+| stmt-2026-05 | 2026-06-01T04:00:00.000Z | 2026-06-01T04:00:00.000Z |
+| stmt-2026-06 | 2026-07-01T04:00:00.000Z | 2026-07-01T04:00:00.000Z |
+| stmt-2026-07 | 2026-08-01T04:00:00.000Z | 2026-08-01T04:00:00.000Z |
+| stmt-2026-08 | 2026-09-01T04:00:00.000Z | 2026-09-01T04:00:00.000Z |
+| stmt-2026-09 | 2026-10-01T04:00:00.000Z | 2026-10-01T04:00:00.000Z |
+| stmt-2026-10 | 2026-11-01T04:00:00.000Z | 2026-11-01T04:00:00.000Z |
 
 The seed stops at `stmt-2026-10`. Applying the December file and its settle writes `stmt-2026-11` and `stmt-2026-12`. Fixture (c) has no statements.
 
@@ -195,7 +195,7 @@ Seeds plus the December events: 442 distinct dates, 2025-01-01 to 2026-12-28, 24
 
 ## Remaining gaps
 
-Fixture (a) activity starts on 2025-09-20. Fixture (b) covers the earlier months of the window. The freelancer seed has no December 2026 activity. That month is the staged event file. Household statements are still all issued at the fixture clock.
+Fixture (a) activity starts on 2025-09-20. Fixture (b) covers the earlier months of the window. The freelancer seed has no December 2026 activity. That month is the staged event file. Household statements stay on the household clock. Freelancer seed statements are issued at the first instant of the following month.
 
 ## Provenance
 
@@ -225,4 +225,26 @@ A December sample request is `b-dec-req-24` at `2026-12-01T19:40:00.000Z`, Vellu
 
 The first household transaction is `auth-w01`, FreshCart, 4200 cents, `2025-09-20T12:12:00.000Z`. The first freelancer transaction is `auth-b-01-202501`, Larkfield Grocer, 1100 cents, `2025-01-01T13:00:00.000Z`.
 
-December apply results: 24 `authorization.request` committed, 23 `authorization.capture` committed, 1 `ledger.settle_due` committed. The clock after the settle is `2027-01-01T00:05:00-05:00`.
+December apply results, from committed receipts: 24 `authorization.request` committed, 23 `authorization.capture` committed, 1 `ledger.settle_due` committed. Approved delta 23, decline delta 1, statement delta 2. The clock after the settle is `2027-01-01T00:05:00-05:00`.
+
+Provenance on the snapshot after load:
+
+| Stage | dataset_id | source_id | kind | records | tool |
+| --- | --- | --- | --- | ---: | --- |
+| (a) | keelcard-minimal | authored | synthetic | 2 | `apps/keelcard/examples/generate-fixture.cjs` |
+| (b) | keelcard-minimal | freelancer | synthetic | 6 | `apps/keelcard/examples/generate-scale.cjs` |
+| (b) after December | keelcard-minimal | freelancer | synthetic | 6 | `apps/keelcard/examples/generate-scale.cjs` |
+
+`--load` exits unsuccessfully when a receipt is not `committed`, when the committed operation counts disagree with the event file, or when a committed settle does not add the statement ids that follow the seed. A mutated file fails that check:
+
+```sh
+node -e '
+const { loadQueries } = require("./apps/keelcard/examples/coverage-report.cjs");
+const events = structuredClone(require("./apps/keelcard/examples/events/freelancer-2026-12.json"));
+events.find(event => event.operation === "authorization.capture").payload.amount_cents += 1;
+events.pop();
+const result = loadQueries({ events, runId: "mutated" });
+if (result.ok !== false) process.exit(1);
+console.log(result.stages.b_after_december.problems.join("\n"));
+'
+```

@@ -1468,6 +1468,29 @@ test('coverage counts match the delivered 2025-26 window', () => {
   assert.equal(delegate.exclusions.length, 0);
   assert.equal(december.exclusions.length, 1);
   assert.equal(december.exclusions[0].reason, 'out_of_window');
+  assert.equal(december.counts.basis, 'scheduled');
+  const { zonedToIso } = require('../src/domain-utils.cjs');
+  const seed = require('../fixtures/freelancer.json');
+  const householdSeed = require('../fixtures/minimal.json');
+  assert.equal(seed.statements.length, 22);
+  assert.equal(seed.statements[0].statement_id, 'stmt-2025-01');
+  assert.equal(seed.statements.at(-1).statement_id, 'stmt-2026-10');
+  for (const statement of seed.statements) {
+    const match = /^stmt-(\d{4})-(\d{2})$/.exec(statement.statement_id);
+    let year = Number(match[1]);
+    let month = Number(match[2]) + 1;
+    if (month === 13) { month = 1; year += 1; }
+    const boundary = zonedToIso(year, month, 1, 0, 0, 0, 'America/New_York');
+    assert.equal(statement.issued_at, boundary, statement.statement_id);
+    assert.equal(statement.effective_at, boundary);
+  }
+  assert.equal(householdSeed.statements.length, 14);
+  assert.equal(householdSeed.statements.every(statement => statement.issued_at === '2026-11-18T17:00:00.000Z'), true);
+  const { emit } = require('../examples/coverage-report.cjs');
+  const skipped = emit({ load: { skipped: true, ok: true, reason: 'Public runtime is not beside the package, so the load query was skipped.' } }, { json: true });
+  assert.equal(JSON.parse(skipped.stdout).load.skipped, true);
+  assert.equal(skipped.stderr, '');
+  assert.equal(skipped.exitCode, 0);
 });
 
 test('reviewer views escape text and omit card secrets', () => {
@@ -1517,4 +1540,27 @@ test('reviewer views escape text and omit card secrets', () => {
   assert.equal(pages[3].includes('4200'), true);
   assert.equal(pages[3].includes('2025-09-20T12:12:00.000Z'), true);
   assert.equal(pages[3].includes('captured'), true);
+  assert.equal(pages[2].includes('7500 cents'), true);
+  assert.equal(pages[2].includes('Unlimited'), true);
+  const nestedEvent = require('../examples/events/freelancer-2026-12.json').find(event => event.event_id === 'b-dec-req-24');
+  const nested = { payload: { card: { card_id: 'card-x', number: '9418000000000099', security_code: '9091' } } };
+  const secretPages = [
+    view.render([nestedEvent]),
+    view.render([nested]),
+    view.renderCardList([nestedEvent, nested]),
+    view.renderCardDetail(nestedEvent),
+    view.renderCardDetail(nested),
+    view.renderTransactions([nestedEvent]),
+    view.renderTransactions([nested])
+  ];
+  for (const html of secretPages) {
+    assert.equal(html.includes('9418000000000023'), false);
+    assert.equal(html.includes('9418000000000099'), false);
+    assert.equal(html.includes('9091'), false);
+    assert.equal(html.includes(number), false);
+    assert.equal(html.includes(code), false);
+  }
+  assert.equal(secretPages[0].includes('202'), false);
+  assert.equal(secretPages[0].includes('card-software'), true);
+  assert.equal(secretPages[0].includes('Vellum Keys'), true);
 });

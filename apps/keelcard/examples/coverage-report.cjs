@@ -296,13 +296,13 @@ function buildCoverage() {
       account: 'kc-okonkwo',
       initial_clock: null,
       counts: {
+        basis: 'scheduled',
         events: events.length,
         requests: stagedRows.filter(row => row.kind === 'authorization' || row.kind === 'decline').length,
         approved: stagedRows.filter(row => row.kind === 'authorization').length,
         captured: stagedRows.filter(row => row.kind === 'capture').length,
         declined: stagedRows.filter(row => row.kind === 'decline').length,
-        settle: stagedRows.filter(row => row.kind === 'settle').length,
-        statements_after_settle: 2
+        settle: stagedRows.filter(row => row.kind === 'settle').length
       },
       statements: [],
       sample: stagedSample ? {
@@ -387,36 +387,83 @@ function itemsOf(result, key) {
   return [];
 }
 
-function loadQueries() {
+function partitionBundle(sourceId, data) {
+  const dataset = structuredClone(require(path.join(pkg, 'contribution/dataset.json')));
+  const source = dataset.sources.find(item => item.source_id === sourceId);
+  if (!source) throw new Error('dataset.json has no source ' + sourceId);
+  const declared = source.generation && source.generation.parameters ? source.generation.parameters.cards : undefined;
+  if (declared !== data.cards.length) throw new Error(sourceId + ' card count does not match dataset.json');
+  dataset.sources = [source];
+  dataset.record_source_ids = [sourceId];
+  dataset.expected_counts = { records: data.cards.length, assets: 0 };
+  const catalog = structuredClone(require(path.join(pkg, 'contribution/assets.catalog.json')));
+  return { dataset, catalog, blobs: {} };
+}
+
+function provenanceOf(model, state) {
+  const snap = model.execute(state, 'infra', 'env.snapshot', {}).result.snapshot;
+  const dataset = snap.resources.bundle.dataset;
+  const source = dataset.sources[0] || null;
+  return {
+    dataset_id: dataset.dataset_id,
+    record_source_ids: dataset.record_source_ids,
+    source_id: source && source.source_id,
+    kind: source && source.kind,
+    tool: source && source.generation && source.generation.tool,
+    records: dataset.expected_counts.records
+  };
+}
+
+function statementsClosedBy(statements, settleAt) {
+  const last = statements[statements.length - 1];
+  const match = last && /^stmt-(\d{4})-(\d{2})$/.exec(last.statement_id);
+  if (!match || !settleAt) return [];
+  const { parts } = require('../src/domain-utils.cjs');
+  const end = parts(settleAt, ZONE);
+  let year = Number(match[1]);
+  let month = Number(match[2]);
+  const ids = [];
+  while (ids.length < 36) {
+    month += 1;
+    if (month === 13) { month = 1; year += 1; }
+    if (year > end.year || (year === end.year && month >= end.month)) break;
+    ids.push('stmt-' + year + '-' + String(month).padStart(2, '0'));
+  }
+  return ids;
+}
+
+function loadQueries(options = {}) {
   const runtimeFile = path.resolve(pkg, '../../runtime/core/runtime.cjs');
   if (!fs.existsSync(runtimeFile)) {
-    console.log('Public runtime is not beside the package, so the load query was skipped.');
-    return { skipped: true };
+    return { skipped: true, ok: true, reason: 'Public runtime is not beside the package, so the load query was skipped.' };
   }
   const { createRuntime } = require(runtimeFile);
   const model = createRuntime({ registryFile: path.resolve(pkg, '../../apps.registry.json') });
   const policies = require(path.join(pkg, 'fixtures/policies.json'));
   const stages = {};
-  function open(label, seedRel, bindingRel) {
+  const runId = options.runId || 'cov';
+  function open(label, seedRel, bindingRel, sourceId) {
     const data = require(path.join(pkg, seedRel));
-    let state = model.create('keelcard', 'cov-' + label, 'sandbox');
+    let state = model.create('keelcard', runId + '-' + label, 'sandbox');
     const loaded = model.execute(state, 'infra', 'env.load_seed', {
       expected_version: model.version(state),
-      request_id: 'cov-load-' + label,
+      request_id: runId + '-load-' + label,
       data,
       binding: require(path.join(pkg, bindingRel)),
       policies,
+      bundle: partitionBundle(sourceId, data),
       virtual_now: data.initial_clock
     });
-    if (loaded.result.status !== 'ready') throw new Error(label + ' load failed: ' + JSON.stringify(loaded.result).slice(0, 300));
+    if (loaded.result.status !== 'ready') throw new Error(label + ' load failed: ' + JSON.stringify(loaded.result).slice(0, 400));
     state = loaded.state;
     const call = name => model.execute(state, 'agent', name, {}).result;
     const transactions = itemsOf(call('keelcard.transactions.list'), 'transactions');
     const declines = itemsOf(call('keelcard.declines.list'), 'declines');
     const statements = itemsOf(call('keelcard.statements.list'), 'statements');
-    return { state, model, transactions, declines, statements };
+    const provenance = provenanceOf(model, state);
+    return { state, transactions, declines, statements, provenance };
   }
-  const household = open('a', 'fixtures/minimal.json', 'fixtures/binding.json');
+  const household = open('a', 'fixtures/minimal.json', 'fixtures/binding.json', 'authored');
   stages.a = {
     transactions: household.transactions.length,
     declines: household.declines.length,
@@ -427,9 +474,10 @@ function loadQueries() {
       merchant_name: household.transactions[0].merchant_name,
       amount_cents: household.transactions[0].amount_cents
     } : null,
-    last_statements: household.statements.slice(-3).map(statement => statement.statement_id)
+    last_statements: household.statements.slice(-3).map(statement => statement.statement_id),
+    provenance: household.provenance
   };
-  const freelancer = open('b', 'fixtures/freelancer.json', 'fixtures/freelancer-binding.json');
+  const freelancer = open('b', 'fixtures/freelancer.json', 'fixtures/freelancer-binding.json', 'freelancer');
   stages.b = {
     transactions: freelancer.transactions.length,
     declines: freelancer.declines.length,
@@ -440,40 +488,103 @@ function loadQueries() {
       merchant_name: freelancer.transactions[0].merchant_name,
       amount_cents: freelancer.transactions[0].amount_cents
     } : null,
-    last_statements: freelancer.statements.slice(-3).map(statement => statement.statement_id)
+    last_statements: freelancer.statements.slice(-3).map(statement => statement.statement_id),
+    provenance: freelancer.provenance
   };
   let state = freelancer.state;
-  const events = require(path.join(pkg, 'examples/events/freelancer-2026-12.json'));
-  const applied = {};
+  const events = options.events || require(path.join(pkg, 'examples/events/freelancer-2026-12.json'));
+  const receipts = [];
+  let ok = true;
+  const problems = [];
   events.forEach((event, index) => {
     const advanced = model.execute(state, 'infra', 'env.advance_time', {
       expected_version: model.version(state),
-      request_id: 'cov-adv-' + index,
+      request_id: runId + '-adv-' + index,
       virtual_now: event.at
     });
-    if (advanced.result.status !== 'committed') throw new Error('advance failed for ' + event.event_id);
+    const advance = advanced.result.status;
+    if (advance !== 'committed') {
+      ok = false;
+      problems.push(event.event_id + ' advance ' + advance);
+      receipts.push({ event_id: event.event_id, operation: event.operation, advance, apply: null, message: advanced.result.message || null });
+      return;
+    }
     state = advanced.state;
     const result = model.execute(state, 'infra', 'env.apply_event', {
       expected_version: model.version(state),
       event
     });
-    const status = result.result.status;
-    applied[event.operation + ':' + status] = (applied[event.operation + ':' + status] || 0) + 1;
-    if (result.state) state = result.state;
+    const apply = result.result.status;
+    if (apply === 'committed' && result.state) state = result.state;
+    else {
+      ok = false;
+      problems.push(event.event_id + ' ' + (result.result.message || apply));
+    }
+    receipts.push({ event_id: event.event_id, operation: event.operation, advance, apply, message: result.result.message || null });
   });
+  const wanted = {};
+  const committed = {};
+  for (const event of events) wanted[event.operation] = (wanted[event.operation] || 0) + 1;
+  for (const receipt of receipts) {
+    if (receipt.apply === 'committed') committed[receipt.operation] = (committed[receipt.operation] || 0) + 1;
+  }
+  for (const [operation, count] of Object.entries(wanted)) {
+    if ((committed[operation] || 0) !== count) {
+      ok = false;
+      problems.push(operation + ' committed ' + (committed[operation] || 0) + ' of ' + count);
+    }
+  }
   const call = name => model.execute(state, 'agent', name, {}).result;
   const transactions = itemsOf(call('keelcard.transactions.list'), 'transactions');
   const declines = itemsOf(call('keelcard.declines.list'), 'declines');
   const statements = itemsOf(call('keelcard.statements.list'), 'statements');
+  const settle = [...events].reverse().find(event => event.operation === 'ledger.settle_due' && receipts.some(receipt => receipt.event_id === event.event_id && receipt.apply === 'committed'));
+  const expectedStatements = settle ? statementsClosedBy(freelancer.statements, settle.at) : [];
+  const actualNew = statements.map(statement => statement.statement_id).filter(id => !freelancer.statements.some(statement => statement.statement_id === id));
+  if (settle && JSON.stringify(actualNew) !== JSON.stringify(expectedStatements)) {
+    ok = false;
+    problems.push('statements ' + actualNew.join(',') + ' expected ' + expectedStatements.join(','));
+  }
+  if (!settle && actualNew.length) {
+    ok = false;
+    problems.push('statements changed without a committed settle');
+  }
+  const provenance = provenanceOf(model, state);
+  if (household.provenance.source_id !== 'authored' || household.provenance.kind !== 'synthetic' || household.provenance.records !== 2) {
+    ok = false;
+    problems.push('household provenance ' + JSON.stringify(household.provenance));
+  }
+  if (freelancer.provenance.source_id !== 'freelancer' || freelancer.provenance.kind !== 'synthetic' || freelancer.provenance.records !== 6) {
+    ok = false;
+    problems.push('freelancer provenance ' + JSON.stringify(freelancer.provenance));
+  }
+  if (provenance.source_id !== 'freelancer' || provenance.kind !== 'synthetic' || provenance.dataset_id === 'keelcard-runtime-import') {
+    ok = false;
+    problems.push('provenance after events ' + JSON.stringify(provenance));
+  }
   stages.b_after_december = {
-    applied,
+    basis: 'committed',
+    receipts,
+    committed,
+    problems,
+    approved_delta: transactions.length - freelancer.transactions.length,
+    decline_delta: declines.length - freelancer.declines.length,
+    statement_delta: statements.length - freelancer.statements.length,
     transactions: transactions.length,
     declines: declines.length,
     statements: statements.length,
     last_statements: statements.slice(-3).map(statement => statement.statement_id),
-    clock: state.virtual_now
+    clock: state.virtual_now,
+    provenance
   };
-  return { skipped: false, stages };
+  return { skipped: false, ok, stages };
+}
+
+function emit(report, options = {}) {
+  const exitCode = report.load && report.load.ok === false ? 1 : 0;
+  if (options.json) return { stdout: JSON.stringify(report), stderr: '', exitCode };
+  const stderr = report.load && report.load.skipped ? report.load.reason : '';
+  return { stdout: '', stderr, exitCode };
 }
 
 function main() {
@@ -481,18 +592,21 @@ function main() {
   const asJson = process.argv.includes('--json');
   const withLoad = process.argv.includes('--load');
   if (withLoad) report.load = loadQueries();
+  const written = emit(report, { json: asJson });
   if (asJson) {
-    console.log(JSON.stringify(report, null, 2));
-    return;
+    console.log(written.stdout);
+  } else {
+    if (written.stderr) console.error(written.stderr);
+    console.log('zone ' + ZONE + ', window ' + START + ' to ' + END);
+    console.log('date fields ' + JSON.stringify(report.date_fields));
+    for (const source of Object.values(report.sources)) printSource(source);
+    console.log('');
+    console.log('global seeds ' + JSON.stringify(report.global.seeds));
+    console.log('global seeds plus december ' + JSON.stringify(report.global.seeds_plus_december));
+    if (withLoad) console.log('load ' + JSON.stringify(report.load, null, 2));
   }
-  console.log('zone ' + ZONE + ', window ' + START + ' to ' + END);
-  console.log('date fields ' + JSON.stringify(report.date_fields));
-  for (const source of Object.values(report.sources)) printSource(source);
-  console.log('');
-  console.log('global seeds ' + JSON.stringify(report.global.seeds));
-  console.log('global seeds plus december ' + JSON.stringify(report.global.seeds_plus_december));
-  if (withLoad) console.log('load ' + JSON.stringify(report.load, null, 2));
+  if (written.exitCode) process.exitCode = written.exitCode;
 }
 
-module.exports = { buildCoverage, pkg };
+module.exports = { buildCoverage, loadQueries, emit, pkg };
 if (require.main === module) main();

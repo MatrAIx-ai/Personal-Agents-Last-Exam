@@ -44,3 +44,26 @@ test('December staged events settle through stmt-2026-12', () => {
   assert.deepEqual(statements.slice(-3).map(statement => statement.statement_id), ['stmt-2026-10', 'stmt-2026-11', 'stmt-2026-12']);
   assert.equal(state.virtual_now, '2027-01-01T00:05:00-05:00');
 });
+
+test('a mutated December file fails the committed load check and provenance stays on the partition', () => {
+  const { loadQueries } = require('../examples/coverage-report.cjs');
+  const shipped = loadQueries({ runId: 'shipped-check' });
+  assert.equal(shipped.ok, true);
+  assert.equal(shipped.stages.a.provenance.source_id, 'authored');
+  assert.equal(shipped.stages.a.provenance.kind, 'synthetic');
+  assert.equal(shipped.stages.a.provenance.records, 2);
+  assert.equal(shipped.stages.b.provenance.source_id, 'freelancer');
+  assert.equal(shipped.stages.b.provenance.kind, 'synthetic');
+  assert.equal(shipped.stages.b.provenance.records, 6);
+  assert.equal(shipped.stages.b.provenance.dataset_id, 'keelcard-minimal');
+  assert.equal(shipped.stages.b_after_december.provenance.source_id, 'freelancer');
+  assert.equal(shipped.stages.b_after_december.transactions, 531);
+  assert.equal(shipped.stages.b_after_december.declines, 38);
+  const events = structuredClone(require('../examples/events/freelancer-2026-12.json'));
+  events.find(event => event.operation === 'authorization.capture').payload.amount_cents += 1;
+  events.pop();
+  const mutated = loadQueries({ events, runId: 'mutated-check' });
+  assert.equal(mutated.ok, false);
+  assert.equal(mutated.stages.b_after_december.committed['authorization.capture'], 22);
+  assert.equal(mutated.stages.b_after_december.statement_delta, 0);
+});
