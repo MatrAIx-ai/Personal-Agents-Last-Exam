@@ -35,6 +35,10 @@ function receive(ctx, data, event) {
   const member = sender && data.household.find(m => m.person_id === sender.owner_person_id && m.waypoint_account_id === sender.account_id);
   if (!member || body.content.member_person_id !== data.owner_person_id) c.fail('permission_denied', 'Points can be combined only from another member of this household.');
   if (data.ledger.some(r => r.id === event.event_id)) c.fail('already_exists', 'Delivered credit already exists.');
+  // Router event IDs are per run and epoch, so a replayed combine arrives under a new ID: dedupe by source combine.
+  if (data.ledger.some(r => r.kind === 'combine_in' && r.ref?.app_id === 'waypoint' && r.ref.account_id === sender.account_id && r.ref.id === body.source_object.object_id)) {
+    c.fail('already_exists', 'Combine ' + body.source_object.object_id + ' is already credited.');
+  }
   c.post(ctx, data, {id:event.event_id, kind:'combine_in', points:body.content.points, description:'Combined from ' + member.name,
     ref:{kind:'message', id:body.source_object.object_id, app_id:'waypoint', account_id:sender.account_id, message_id:message.id, sent_at:message.time ?? null}});
   return data;

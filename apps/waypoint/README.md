@@ -54,7 +54,7 @@ One example of each (`{event_id, at, operation, payload}`):
 
 | Event | Effect | Refused when |
 | --- | --- | --- |
-| `waypoint.receive` | Credits a household combine (`combine_in`), keeping the sender account, message ID and producer time. | Wrong recipient (`invalid_event`); not a household combine (`invalid_event`); the sender is not another bound household member, or the credit names another member (`permission_denied`); the event ID was already credited (`already_exists`). |
+| `waypoint.receive` | Credits a household combine (`combine_in`), keeping the sender account, message ID and producer time. | Wrong recipient (`invalid_event`); not a household combine (`invalid_event`); the sender is not another bound household member, or the credit names another member (`permission_denied`); the event ID, or the same sender's combine (`source_object.object_id`) under another event ID, was already credited (`already_exists`). |
 | `waypoint.transfer.settle` | `credited`: stores the receipt, status `completed`. `rejected`: refunds the points in a `refund` ledger entry, status `rejected`. | Unknown transfer (`not_found`); before `available_at` (`not_due`); already settled (`invalid_state`); the receipt names another account or the payload carries both or neither outcome (`invalid_event`). |
 | `waypoint.bonus.start` | Adds a bonus window for a partner. | Unknown partner (`not_found`); existing ID (`already_exists`); empty or past window (`invalid_event`); overlaps another bonus for that partner (`invalid_seed`). |
 | `waypoint.bonus.end` | Ends a running bonus now. | The bonus has not started or has ended (`invalid_state`). |

@@ -37,7 +37,7 @@ A loyalty credit is rejected, with nothing changed, when:
 2. the source Waypoint account is not in the run binding → `permission_denied`;
 3. `content.kind` is not `partner_transfer` → `invalid_event`;
 4. the source account's owner or `content.member_person_id` is not this member, or `content.member_number` is given and differs → `permission_denied` (points move only between accounts of the same member);
-5. a record with the event ID already exists → `already_exists`.
+5. a record with the event ID already exists, or the same Waypoint transfer (account, `object_type`, `object_id`) is already credited under another event ID → `already_exists`.
 
 ### Errors
 

@@ -17,11 +17,11 @@ const booking = (f, id) => f.call('skyline.trips', {id}).trip;
 const free = (f, id, name) => { const m = cabin(f, id, name); return m.seats.filter(s => !m.taken.includes(s)); };
 
 function credit({points = 120000, account = 'waypoint-daniel', member = 'person-daniel', number = 'SK-48210377', kind = 'partner_transfer',
-  app = 'skyline', to = 'skyline-daniel', id = 'waypoint-transfer-1', time = '2027-08-25T08:59:00-05:00'} = {}) {
+  app = 'skyline', to = 'skyline-daniel', id = 'waypoint-transfer-1', time = '2027-08-25T08:59:00-05:00', object = 'transfer-7'} = {}) {
   return {specversion:'1.0', id, source:'urn:pale:app:waypoint:account:' + account, type:'org.pale.loyalty.credit.v1',
     ...(time ? {time} : {}), datacontenttype:'application/json', dataschema:'urn:pale:loyalty-credit:1',
     data:{channel:'channel.loyalty-credit', recipient:{kind:'app_account_ref', app_id:app, id:to},
-      source_object:{app_id:'waypoint', account_id:account, object_type:'transfer', object_id:'transfer-7'},
+      source_object:{app_id:'waypoint', account_id:account, object_type:'transfer', object_id:object},
       content:{kind, member_person_id:member, member_number:number, points, base_points:points, bonus_pct:0}, extensions:[]}};
 }
 const receive = (eventId, at, message, recipient = 'skyline-daniel') =>
@@ -455,10 +455,12 @@ test('a loyalty credit from the same member is credited once with its provenance
   const entry = f.data.ledger.at(-1);
   assert.deepEqual(entry, {id:'router-1', at:'2027-08-25T09:00:00-05:00', kind:'transfer_in', points:45000, balance_after:77400,
     ref:{app_id:'waypoint', account_id:'waypoint-daniel', object_type:'transfer', object_id:'transfer-7', message_id:'waypoint-transfer-1', sent_at:'2027-08-25T08:59:00-05:00'}});
-  f.event(receive('router-2', '2027-08-25T09:10:00-05:00', credit({points:100, number:null, time:null, id:'waypoint-transfer-2'})));
+  f.event(receive('router-2', '2027-08-25T09:10:00-05:00', credit({points:100, number:null, time:null, id:'waypoint-transfer-2', object:'transfer-8'})));
   assert.deepEqual([f.data.balance, f.data.ledger.at(-1).ref.sent_at], [77500, null]);
   unchanged(f, () => f.event(receive('router-1', '2027-08-25T09:20:00-05:00', credit())), code('already_exists'));
   unchanged(f, () => f.event(receive('booking-1', '2027-08-25T09:20:00-05:00', credit())), code('already_exists'));
+  // A replay of transfer-7 under a new router event ID is the same credit.
+  unchanged(f, () => f.event(receive('router-replay', '2027-08-25T09:20:00-05:00', credit({id:'waypoint-transfer-9'}))), code('already_exists'));
 });
 
 test('a loyalty credit that breaks a receiver rule is rejected without a trace', () => {

@@ -320,8 +320,8 @@ test('a loyalty credit from the member\'s own Waypoint account is credited with 
   const f = fixture();
   f.event(require('../examples/scenario.json'));
   const a = account(f), entry = a.ledger.at(-1);
-  assert.deepEqual(entry, {id:'credit-waypoint-transfer-1', at:'2027-08-24T21:05:00-05:00', kind:'transfer_in', points:30000, balance_after:70000,
-    ref:{app_id:'waypoint', account_id:'waypoint-daniel', object_type:'transfer', object_id:'transfer-1', message_id:'loyalty-credit-transfer-1',
+  assert.deepEqual(entry, {id:'credit-waypoint-transfer-2', at:'2027-08-24T21:05:00-05:00', kind:'transfer_in', points:30000, balance_after:70000,
+    ref:{app_id:'waypoint', account_id:'waypoint-daniel', object_type:'transfer', object_id:'transfer-2', message_id:'loyalty-credit-transfer-2',
       sent_at:'2027-08-24T21:04:30-05:00'}});
   assert.deepEqual([a.balance, a.last_activity_at], [70000, '2027-08-24T21:05:00-05:00']);
   // No member number in the message is accepted; a missing producer time is not invented.
@@ -340,6 +340,10 @@ test('loyalty credits for another account, from unbound or other members\' accou
   unchanged(f, () => f.event(credit({member:'person-mei'})), code('permission_denied'));
   unchanged(f, () => f.event(credit({number:'HH-99999999'})), code('permission_denied'));
   unchanged(f, () => f.event(credit({eventId:'ledger-1'})), code('already_exists'));
+  // The seeded transfer-1 replayed under a new router event ID mints nothing and does not extend expiry.
+  const replay = credit({eventId:'router-replay', points:40000});
+  replay.payload.message.data.source_object.object_id = 'transfer-1';
+  unchanged(f, () => f.event(replay), code('already_exists'));
   // Rule order: a wrong recipient is reported before an unbound sender.
   unchanged(f, () => f.event(credit({recipientAccount:'harbor-mei', source:'waypoint-stranger'})), code('invalid_event'));
 });

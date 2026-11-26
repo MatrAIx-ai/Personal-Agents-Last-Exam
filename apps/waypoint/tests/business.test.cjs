@@ -179,6 +179,7 @@ test('a household combine credits the receiving member once, and every other sen
   assert.deepEqual([row.id, row.kind, row.points, row.balance_after, row.ref.account_id, row.ref.sent_at],
     ['router-c1', 'combine_in', 50000, 231600, 'waypoint-mei', '2027-08-25T07:35:00-05:00']);
   unchanged(f, () => f.event(receive('router-c1', '2027-08-25T07:41:00-05:00', combineMessage())), code('already_exists'));
+  unchanged(f, () => f.event(receive('router-c1-replay', '2027-08-25T07:41:00-05:00', combineMessage())), code('already_exists'));
   unchanged(f, () => f.event(receive('router-c2', '2027-08-25T07:41:00-05:00', combineMessage(), 'waypoint-mei')), code('invalid_event'));
   unchanged(f, () => f.event(receive('router-c3', '2027-08-25T07:41:00-05:00', combineMessage({to:'waypoint-mei'}))), code('invalid_event'));
   unchanged(f, () => f.event(receive('router-c4', '2027-08-25T07:41:00-05:00', combineMessage({kind:'partner_transfer'}))), code('invalid_event'));

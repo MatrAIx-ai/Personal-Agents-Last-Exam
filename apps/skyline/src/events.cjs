@@ -22,6 +22,11 @@ function receive(ctx, data, event) {
     c.fail('permission_denied', 'Points can move only between accounts of the same member.');
   }
   if (c.allIds(data).has(event.event_id)) c.fail('already_exists', 'Delivered record already exists.');
+  // Router event IDs are per run and epoch, so a replayed transfer arrives under a new ID: dedupe by source transfer.
+  if (data.ledger.some(r => r.kind === 'transfer_in' && r.ref?.app_id === 'waypoint' && r.ref.account_id === source.account_id &&
+      r.ref.object_type === source.object_type && r.ref.object_id === source.object_id)) {
+    c.fail('already_exists', 'Waypoint ' + source.object_type + ' ' + source.object_id + ' is already credited.');
+  }
   ledger.post(ctx, data, 'transfer_in', content.points, {app_id:'waypoint', account_id:source.account_id, object_type:source.object_type,
     object_id:source.object_id, message_id:message.id, sent_at:message.time ?? null}, event.event_id);
   return data;
