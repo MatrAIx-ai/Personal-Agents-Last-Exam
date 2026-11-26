@@ -1,6 +1,6 @@
 {
   "schema": "kinodex.v1-evidence-index",
-  "recorded_at": "2026-11-25T18:30:47Z",
+  "recorded_at": "2026-11-26T20:01:30Z",
   "app_id": "kinodex",
   "app_version": "1.0.0",
   "runtime_version": "1.6.0",
@@ -10,15 +10,17 @@
   "proposal_blob_sha": "7eb7aef8ce1cdad0096fa8436e6512c37b65d16c",
   "proposal_status": "plan approved for implementation by the reviewer Chenngzz (/approve-plan for this commit at 2026-11-24T07:08:04Z); the proposal file is unchanged since",
   "public_runtime_base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
-  "app_package_commit": "e2f9debc657a2554612a73f4148853aa63669e04",
-  "app_package_sha256": "8a75a977bf41e1a39113083e966cc9a61f04ae65f42d1fb37c87807ab5c474f0",
-  "app_package_git_tree": "962e8509ae6999e3942499306687a98cb842b4d9",
+  "app_package_commit": "c3031bf725feca240a4dc0dd52db4d29efe419bf",
+  "app_package_sha256": "a30577050afefa464a4044c35ff8866ab10679c176415c01c73002c9ec5e3ac8",
+  "app_package_git_tree": "65e40fba3088ebc3a7b496307bdcc48e2742d5f9",
   "package_hash_agrees_in": [
     "public-runtime.node22.json",
     "public-runtime.node18.json",
     "base-runtime.json",
     "mcp-walkthrough.node22.json",
-    "mcp-walkthrough.node18.json"
+    "mcp-walkthrough.node18.json",
+    "dataset-demo.node22.json",
+    "dataset-demo.node18.json"
   ],
   "tested_node": {
     "18": "v18.20.8",
@@ -34,20 +36,20 @@
   "checks": {
     "standalone_business": {
       "node22": {
-        "tests": 31,
-        "pass": 31,
+        "tests": 38,
+        "pass": 38,
         "fail": 0,
         "skipped": 0
       },
       "node18": {
-        "tests": 31,
-        "pass": 31,
+        "tests": 38,
+        "pass": 38,
         "fail": 0,
         "skipped": 0
       }
     },
     "standalone_event_example": "examples/run.cjs passed from a copy of apps/kinodex alone, with only PATH and LANG set, on both Node versions",
-    "generators_reproduce_committed_files": "dev/build-fixtures.cjs and dev/build-contracts.cjs, run in a copy, left every file byte-identical on both Node versions",
+    "generators_reproduce_committed_files": "Every dev/build-*.cjs generator, including dev/build-dataset.cjs, run in a copy, left every committed file byte-identical on both Node versions",
     "public_app_verifier": {
       "node22": 52,
       "node18": 52,
@@ -117,10 +119,123 @@
           "kinodex"
         ]
       }
+    },
+    "evaluation_dataset": {
+      "path": "apps/kinodex/data/evaluation/seed.json",
+      "version": "1.0.0",
+      "sha256": "95aa56ff242038af932c8332b9bd4a6efb866ccb8759c069f46603f2e7cbbd55",
+      "sha256_matches_dataset_json": true,
+      "time_zone": "America/Los_Angeles",
+      "window": [
+        "2025-01-01",
+        "2026-12-31"
+      ],
+      "dataset_clock": "2026-12-01T09:00:00-08:00",
+      "totals": {
+        "records": 2772,
+        "counted": 1899,
+        "excluded": 873,
+        "invalid": 0,
+        "global_distinct_dates": 606,
+        "earliest": "2025-01-02",
+        "latest": "2026-12-30",
+        "distinct_dates_on_or_before_clock": 585,
+        "distinct_dates_after_clock": 21,
+        "happened_distinct_dates": 459,
+        "happened_longest_gap": {
+          "days": 6,
+          "from": "2025-02-07",
+          "to": "2025-02-12"
+        },
+        "history_distinct_dates": 286,
+        "months_with_records": 24,
+        "longest_gap": {
+          "days": 3,
+          "from": "2025-01-10",
+          "to": "2025-01-12"
+        },
+        "longest_gap_in_history_before_clock": {
+          "days": 10,
+          "from": "2026-11-22",
+          "to": "2026-12-01"
+        }
+      },
+      "real_records": 0,
+      "content": {
+        "fields": [
+          {
+            "field": "Public review text",
+            "texts": 246,
+            "distinct": 246
+          },
+          {
+            "field": "Diary review text",
+            "texts": 39,
+            "distinct": 39
+          },
+          {
+            "field": "Episode synopsis",
+            "texts": 308,
+            "distinct": 308
+          },
+          {
+            "field": "Title synopsis",
+            "texts": 184,
+            "distinct": 184
+          },
+          {
+            "field": "Correction evidence",
+            "texts": 9,
+            "distinct": 9
+          },
+          {
+            "field": "Decision note",
+            "texts": 8,
+            "distinct": 8
+          },
+          {
+            "field": "List description",
+            "texts": 6,
+            "distinct": 6
+          },
+          {
+            "field": "Notice text (App template)",
+            "texts": 22,
+            "distinct": 22
+          }
+        ],
+        "identical_text_groups": 0,
+        "identical_texts": [],
+        "near_duplicate_pairs_at_0_8": 0,
+        "near_duplicates": [],
+        "max_5gram_jaccard": 0.765,
+        "max_pair": [
+          "tt-the-quarrowdale-letters",
+          "tt-ostlefold-station"
+        ],
+        "guide_descriptors": {
+          "item_texts": 849,
+          "distinct": 42,
+          "note": "Parental-guide category summaries and item descriptors come from a fixed vocabulary shared across titles (as on real guide sites, e.g. \"Mild language.\"); they are not checked as prose."
+        }
+      },
+      "real_mcp_demo": {
+        "node22": {
+          "checks": 26,
+          "load_request_bytes": 1323136
+        },
+        "node18": {
+          "checks": 26,
+          "load_request_bytes": 1323136
+        }
+      }
     }
   },
   "reports": [
     "base-runtime.json",
+    "coverage.json",
+    "dataset-demo.node18.json",
+    "dataset-demo.node22.json",
     "mcp-walkthrough.node18.json",
     "mcp-walkthrough.node22.json",
     "public-runtime.node18.json",
@@ -135,5 +250,18 @@
     "production deployment",
     "official PR CI on the implementation commit (awaits maintainer approval of the fork workflow run)",
     "human review of realism and invented names"
-  ]
+  ],
+  "previous_submission": {
+    "head": "cfb382ef4a63e9c664ba721ebe8d47046df14a4c",
+    "app_package_commit": "e2f9debc657a2554612a73f4148853aa63669e04",
+    "app_package_sha256": "8a75a977bf41e1a39113083e966cc9a61f04ae65f42d1fb37c87807ab5c474f0"
+  },
+  "added_scope_after_plan_approval": {
+    "reason": "#260 (docs/submission-evidence.md section 3) merged 2026-11-25, after plan approval; v1 review round of 2026-11-26",
+    "items": [
+      "evaluation dataset in apps/kinodex/data/evaluation/ with dev/build-dataset.cjs, dev/coverage-report.cjs and examples/dataset-demo.cjs",
+      "clock cutoff: tools show only records dated at or before the run clock",
+      "package size 4,594,384 bytes of tracked files (was 3,116,402)"
+    ]
+  }
 }

@@ -1,8 +1,8 @@
 # Kinodex 1.0.0: implementation and verification
 
-Owner: @byshail. App `kinodex` 1.0.0 under `apps/kinodex/`; public runtime 1.6.0, Core API 1.2.0, no App dependencies. It implements the plan in [PR #226](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/226), `proposals/environment/kinodex.md` at `907cc505306baeca5250f4fadbf50cbed2024659`. The reviewer Chenngzz approved that commit for implementation on 2026-11-24 (`/approve-plan` at 07:08:04 UTC), after a review that recommended scope approval and left three items to resolve during implementation. The proposal file is unchanged since that commit (blob `7eb7aef8ce1cdad0096fa8436e6512c37b65d16c`). The package is at commit `e2f9debc657a2554612a73f4148853aa63669e04`; this report is added in the next commit, which changes only `docs/validation/`. This document records implementation evidence; it claims no acceptance.
+Owner: @byshail. App `kinodex` 1.0.0 under `apps/kinodex/`; public runtime 1.6.0, Core API 1.2.0, no App dependencies. It implements the plan in [PR #226](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/226), `proposals/environment/kinodex.md` at `907cc505306baeca5250f4fadbf50cbed2024659`. The reviewer Chenngzz approved that commit for implementation on 2026-11-24 (`/approve-plan` at 07:08:04 UTC), after a review that recommended scope approval and left three items to resolve during implementation. The proposal file is unchanged since that commit (blob `7eb7aef8ce1cdad0096fa8436e6512c37b65d16c`). The package is at commit `c3031bf725feca240a4dc0dd52db4d29efe419bf`; this report is updated in the next commit, which changes only `docs/validation/`. The first submission was `cfb382e` (package `e2f9deb`); this revision adds the clock cutoff and the [evaluation dataset](#evaluation-dataset-and-clock-cutoff-added-after-plan-approval-260) required since #260. This document records implementation evidence; it claims no acceptance.
 
-Checked on 2026-11-25 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 and v18.20.8. All data is synthetic. The runs used temporary directories and local stdio MCP, with no network, credentials or model API. Versions, the package hash and every count below are in [kinodex/index.json](kinodex/index.json), next to the raw reports.
+Checked on 2026-11-26 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 and v18.20.8. All data is synthetic. The runs used temporary directories and local stdio MCP, with no network, credentials or model API. Versions, the package hash and every count below are in [kinodex/index.json](kinodex/index.json), next to the raw reports.
 
 **Automated outcome: passed.** Independent reproduction, official CI on the implementation commit and human review are still to come.
 
@@ -10,15 +10,17 @@ Checked on 2026-11-25 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 an
 
 | Evidence | Result | What was exercised |
 | :--- | :--- | :--- |
-| App-only business tests, package alone | 31 passed, on both Node versions | A copy of `apps/kinodex/` with nothing beside it, run with only `PATH` and `LANG` set. The tests call the real business functions through an App-only harness that mirrors Core: the clock moves to an event's time before validation, a failed write or event rolls back data and clock, and a read must leave the data byte-identical. Every result is checked against `tools.json`, and every refused call or event is checked to leave business data identical |
-| Event example and generated files | Passed, on both | `examples/run.cjs` from the package alone. `dev/build-fixtures.cjs` and `dev/build-contracts.cjs`, run in a copy, leave every committed file byte-identical (both seeds, bindings, policies, clock, the example events, task data, dataset files, schemas and `tools.json`) |
+| App-only business tests, package alone | 38 passed, on both Node versions | A copy of `apps/kinodex/` with nothing beside it, run with only `PATH` and `LANG` set. The tests call the real business functions through an App-only harness that mirrors Core: the clock moves to an event's time before validation, a failed write or event rolls back data and clock, and a read must leave the data byte-identical. Every result is checked against `tools.json`, and every refused call or event is checked to leave business data identical |
+| Event example and generated files | Passed, on both | `examples/run.cjs` from the package alone. `dev/build-fixtures.cjs`, `dev/build-contracts.cjs` and `dev/build-dataset.cjs`, run in a copy, leave every committed file byte-identical (both seeds, bindings, policies, clock, the example events, task data, dataset files, schemas and `tools.json`) |
 | Public App verifier | 52 checks passed, on both ([node22](kinodex/public-runtime.node22.json), [node18](kinodex/public-runtime.node18.json)) | An isolated package copy, then real MCP: discovery without Infra tools, published input and output of the 18 read tools the default `scenario` profile lists, the Agent denied all seven Infra operations, history loading and rejection, the approved `title.update` example with retry and conflict, reset, a separate run and a restarted process |
 | CI job, reproduced | `kinodex: PASS`, on both | `node runtime/ci/verify-submissions.cjs . <out> a4bce02…`, the command of the `public-runtime` job; it selected `kinodex` only (`full: false`) |
 | Real-MCP walkthrough | 119 checks passed, 198 calls traced, on both ([node22](kinodex/mcp-walkthrough.node22.json), [node18](kinodex/mcp-walkthrough.node18.json)) | What the verifier does not exercise for this App: two account instances (Dana in the US, Ines in the UK) loaded with the same catalog, catalog events applied to both, the three example requests answered for both accounts, 10 of the 14 write tools and 13 of the 18 reads (the list tools and `alerts.delete` are covered by B10 and B19), a separate controls instance with a task `constraints` policy, two account-change runs separated by reset, clock-only changes, replays, `idempotency_conflict`, `stale_version`, a failed event with its `deny` audit row, and reset of data and clock. Every call is joined to run, account, connection and request or event ID |
+| Evaluation dataset over real MCP | 26 checks passed, on both ([node22](kinodex/dataset-demo.node22.json), [node18](kinodex/dataset-demo.node18.json)) | `examples/dataset-demo.cjs` loads `data/evaluation/seed.json` with its own `dataset.json` in one `env.load_seed` request (1,323,136 bytes), queries it at 2025-03-15, advances the clock to the dataset clock and to 2026-12-31 with `env.advance_time`, and queries again; nothing dated after the clock is visible and no record changes |
+| Dataset coverage | 606 distinct dates in 24 of 24 months, 459 without scheduled and descriptive dates ([coverage.json](kinodex/coverage.json)) | `dev/coverage-report.cjs --json` over the delivered file; details below |
 | Repository suite | 22/22 stages passed, on both ([node22](kinodex/reference-suite.node22.json), [node18](kinodex/reference-suite.node18.json)) | The unchanged public suite (`npm test`) with this package present |
 | Independent base validator | Passed, 52 checks ([report](kinodex/base-runtime.json)) | An unmodified export of `main` at `a4bce023953061483c41de5a287ba5e43f4a5648`, the PR's base, validated the candidate checkout with its own `runtime/ci/verify-submissions.cjs`; it selected `kinodex` only |
-| Package identity | `8a75a977bf41e1a39113083e966cc9a61f04ae65f42d1fb37c87807ab5c474f0` | The same package hash in the two verifier reports, the base validator report and the two walkthrough reports; git tree `962e8509ae6999e3942499306687a98cb842b4d9` |
-| Human review | Pending | Realism of the catalog, guides, offers and the two account histories; that titles, people, services and prices are fictional (see the name notes under [Data and licence](#data-and-licence)) |
+| Package identity | `a30577050afefa464a4044c35ff8866ab10679c176415c01c73002c9ec5e3ac8` | The same package hash in the two verifier reports, the base validator report, the two walkthrough reports and the two dataset reports; git tree `65e40fba3088ebc3a7b496307bdcc48e2742d5f9` |
+| Human review | Pending | Realism of the catalog, guides, offers and the two account histories, including the generated dataset; that titles, people, services and prices are fictional (see the name notes under [Data and licence](#data-and-licence)) |
 
 ## Reproduce
 
@@ -29,10 +31,12 @@ cd apps/kinodex && npm test && npm run example && cd ../..
 npm run app:verify -- --app apps/kinodex --output .artifacts/kinodex.json
 node runtime/ci/verify-submissions.cjs . .artifacts/submissions a4bce023953061483c41de5a287ba5e43f4a5648
 node apps/kinodex/examples/mcp-walkthrough.cjs > .artifacts/kinodex-walkthrough.json
+node apps/kinodex/examples/dataset-demo.cjs > .artifacts/kinodex-dataset-demo.json
+node apps/kinodex/dev/coverage-report.cjs
 npm test
 ```
 
-The package alone: copy `apps/kinodex/` to an empty directory and run `npm test` and `npm run example` there. To check the generated files, run `npm run build:fixtures` and `npm run build:contracts` in a copy and compare it with the original. The independent check, from a separate export of the base revision:
+The package alone: copy `apps/kinodex/` to an empty directory and run `npm test` and `npm run example` there. To check the generated files, run `npm run build:fixtures`, `npm run build:contracts` and `npm run build:dataset` in a copy and compare it with the original. The independent check, from a separate export of the base revision:
 
 ```sh
 node runtime/ci/verify-submissions.cjs /path/to/candidate /path/to/reports a4bce023953061483c41de5a287ba5e43f4a5648
@@ -57,6 +61,42 @@ Each row: starting state → action → observed result, then a control that mus
 | Events | All four operations commit at their own `at`, move the clock and, for catalog events, evaluate the affected title's active rules. A guide version for a watchlist title writes one notice; *Lantern Hill*, which is not on the watchlist, writes none | An unknown target is `target_not_found`; an unknown service, a region or type the service lacks, a price on a subscription, a reversed window, an existing season, a skipped guide version or dates that would precede diary entries are `invalid_event`. Each failure leaves data and clock unchanged. History loaded under an earlier clock fails writes and events with App errors, never `invalid_seed` | B23–B25; W25–W31, W44–W50 |
 | Core contracts | A committed write or event → the same `request_id` or `event_id` again → the stored receipt marked `duplicate`, with no new version | Changed input: `idempotency_conflict`. An old version: `stale_version`. The default `scenario` policy exposes the 18 reads and denies writes. The Agent calling any Infra operation: `permission_denied` | B30; W1–W7, W27, W30–W31, W40, W68–W70, W108, W117; verifier |
 | Seeds, reset and records | Both accounts load the same catalog; one activity row per committed write or event, each joined to a Core receipt by `request_id` or `event_id` → reset restores the loaded catalog, account and clock of that instance only | Inconsistent seeds are refused (`invalid_seed`), and seed dates are never compared with the clock, because Core validates package fixtures at registration under the registry clock. The fixtures meet the plan's checks: scale, references, offer windows, diary dates between 2025-01-01 and the clock, Dana's mean rating of 3.4. The second account has its own right answers. Diagnostics carry IDs only | B26–B31; W8, W58–W65, W112–W113 |
+
+## Evaluation dataset and clock cutoff (added after plan approval, #260)
+
+The plan was approved on 2026-11-24; #260 published the Environment data rule on 2026-11-25. This scope was added after the plan was approved, for that rule (`docs/submission-evidence.md` sections 3–4). Package `apps/kinodex`, SHA-256 `a30577050afefa464a4044c35ff8866ab10679c176415c01c73002c9ec5e3ac8`.
+
+**Clock cutoff.** Tools show only the records that exist at `ctx.virtual_now` (`visible` in `src/catalog.cjs`); nothing is stored for it. Diary entries (`logged_at`), public reviews (`posted_at`), lists, alert rules (`created_at`), corrections (`submitted_at`), notices (`at`), seasons with their episodes (`added_at`) and guide versions after the first (`published_at`) are hidden until their time: `not_found` by ID and absent from lists, counts and search. Rule triggers and deletions, and correction decisions, amendments and withdrawals dated after the clock are read as of the clock. Release dates, air dates, offer windows, `expires_at` and guide version 1 stay visible. Current-state objects (account settings, watchlist, list contents, diary edits, catalog values changed by approved corrections) are shown as stored. An agent write or event on a record with a later seeded history replaces that history; events that collide with later seeded catalog records fail with `invalid_event`. The `invalid_date` error for editing a diary entry logged after the clock became `not_found`; no tool schema or error code changed. The full field table is in the App README, "Clock cutoff".
+
+**Dataset.** `apps/kinodex/data/evaluation/seed.json`, version 1.0.0, 1,347,301 bytes (1,318,218 compact), sha256 `95aa56ff242038af932c8332b9bd4a6efb866ccb8759c069f46603f2e7cbbd55`, built by `dev/build-dataset.cjs` (generator seed 20250101; reruns are byte-identical on Node 18 and 22). Shared catalog plus Dana Marsh's account, from `fixtures/minimal.json` with every fixture record, ID and date kept; repeated review texts and generated episode synopses rewritten one per record; added 16 guide versions, 2 seasons (10 episodes), 41 public reviews (2026-10-15 to 2026-12-30), 17 alert rules (12 fired by the offer or season they matched, 2 expired, 2 deleted, 1 waiting), 6 corrections, 18 notices and 3 lists. Dataset clock: 2026-12-01T09:00:00-08:00 (the fixture clock); Dana's history ends there; catalog records continue through December (the last on 2026-12-30). All records are synthetic; the approved design uses an invented catalog, services and people, so there is no real November 2026 anchor.
+
+**Coverage** (`node apps/kinodex/dev/coverage-report.cjs`, America/Los_Angeles, each record's own date field):
+
+| Measure | Value |
+| --- | --- |
+| Dated records / counted / excluded / invalid | 2,772 / 1,899 / 873 / 0 |
+| Global distinct dates (2025-01-02 to 2026-12-30) | 606, in 24 of 24 months; 585 on or before the clock; no record on the endpoints 2025-01-01 and 2026-12-31 |
+| Longest gap | 3 days |
+| Distinct dates without offer windows, air dates and release dates | 459 (longest gap 6 days) |
+| Dana's history (diary and account records) | 286 distinct dates |
+| Provenance | 0 real; 1,514 fixture verbatim, 272 fixture with rewritten text, 113 generated |
+| Identical prose texts / pairs at 5-gram Jaccard ≥ 0.8 | 0 / 0 (max 0.765) |
+| Exclusions | 510 pre-2025 release dates, 248 pre-2025 air dates, 39 pre-2025 seasons, 76 offer windows opening in 2027 |
+
+**Loading and queries.** `node apps/kinodex/examples/dataset-demo.cjs` loads the seed with `env.load_seed` over real MCP (one request, 1,323,136 bytes, bundle dataset `data/evaluation/dataset.json`), queries it at 2025-03-15, the dataset clock and 2026-12-31 with `env.advance_time`, and checks that nothing dated later is visible and that advancing time changes no record: 26 checks passed on Node 22.23.2 and 18.20.8.
+
+**Tests and verification.**
+
+| Command | Node 22.23.2 | Node 18.20.8 |
+| --- | --- | --- |
+| `npm test` in `apps/kinodex` | 38 passed | 38 passed |
+| `node runtime/cli.cjs verify --app apps/kinodex` | passed, 52 checks | passed, 52 checks |
+| `npm run walkthrough` | 119 checks passed, same checks as before | 119 checks passed, same checks as before |
+| `node apps/kinodex/examples/dataset-demo.cjs` | 26 checks passed | 26 checks passed |
+
+New tests: `Cutoff: …` (six) and `Evaluation dataset: …` in `apps/kinodex/tests/business.test.cjs`. The walkthrough report is unchanged apart from `package_sha256`.
+
+**Added scope against the approval baseline:** the dataset and its three scripts; the clock cutoff, which replaces the diary-edit `invalid_date` case for entries logged after the clock with `not_found`; and a larger package: 4,594,384 bytes of tracked files under `apps/kinodex/`, up from 3,116,402, mostly `data/evaluation/seed.json`.
 
 ## Plan and implementation
 
@@ -108,6 +148,8 @@ The package imports only Node built-ins and its own files. `service.cjs` is the 
 
 ## Data and licence
 
+`data/evaluation/` holds the 2025-2026 evaluation dataset described above, rebuilt by `dev/build-dataset.cjs`; the fixtures below are unchanged.
+
 `fixtures/minimal.json` (1,247,667 bytes, one record per line) holds the public catalog:
 
 - 160 films and 24 series, 40 of them with two editions;
@@ -141,5 +183,5 @@ In `kinodex/reference-suite.node*.json`, report paths inside stage commands were
 - **Remaining:**
   - independent maintainer reproduction and acceptance;
   - official PR CI on the implementation commit (`public-runtime (18)`, `public-runtime (22)`, `base-runtime-compatibility`), which awaits maintainer approval of the fork's workflow run;
-  - human review of realism and of the invented titles, people, services and names, including the proposal-fixed namesakes above;
+  - human review of realism (including the generated dataset) and of the invented titles, people, services and names, including the proposal-fixed namesakes above;
   - a decision on the short-form `correction_ref`.
