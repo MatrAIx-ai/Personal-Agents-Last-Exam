@@ -13,7 +13,7 @@ function reads(ctx, data, name, args) {
       const owner = c.memberRow(group, data.owner_person_id);
       const historical = owner.membership !== 'member' && owner.left_at;
       const memberCount = historical
-        ? group.members.filter(member => c.memberAt(group, member.person_id, owner.left_at)).length
+        ? c.countedAtDeparture(group, owner)
         : group.members.filter(member => member.membership === 'member').length;
       return {
         group_id: group.group_id,

@@ -739,6 +739,35 @@ test('a departed member list row stays at the departure instant', () => {
   assert.equal(second.groups[0].as_of, '2026-11-18T09:20:00-08:00');
 });
 
+test('a later departure at the same instant leaves the departed list unchanged', () => {
+  const f = fixture();
+  f.event({
+    event_id: 'alex-joined-before',
+    at: '2026-11-18T09:10:00-08:00',
+    operation: 'member.joined',
+    payload: {group_id: HOME, person_id: 'person-alex', handle: 'alex-rivera', display_name: 'Alex Rivera', role: 'member', added_by: 'person-daniel'}
+  });
+  f.call('kinthread.ownership.transfer', {group_id: HOME, person_id: 'person-mercy'});
+  const at = '2026-11-18T09:20:00-08:00';
+  f.event({
+    event_id: 'daniel-left-same',
+    at,
+    operation: 'member.left',
+    payload: {group_id: HOME, person_id: 'person-daniel', reason: 'left'}
+  });
+  const first = f.call('kinthread.groups.list', {});
+  f.event({
+    event_id: 'alex-left-same',
+    at,
+    operation: 'member.left',
+    payload: {group_id: HOME, person_id: 'person-alex', reason: 'left'}
+  });
+  const second = f.call('kinthread.groups.list', {});
+  assert.equal(second.groups[0].member_count, first.groups[0].member_count);
+  assert.equal(second.groups[0].updated_at, at);
+  assert.equal(second.groups[0].as_of, at);
+});
+
 test('an open membership interval cannot sit before a later interval', () => {
   const person = {
     person_id: 'person-daniel',
@@ -858,6 +887,14 @@ test('later message bodies stay distinct after the author and time prefix, and n
   for (const [id, text] of baseline) assert.equal(after.messages.find(row => row.id === id).text, text);
   const october = after.messages.find(row => row.id === 'msg-a-0406');
   assert.equal(october.text.startsWith('Brightpath Backup on October 28, 2026'), true);
+  const laterMessages = read('fixtures/a-family-care/later/messages-seed.json');
+  const laterText = new Map(laterMessages.messages.map(row => [row.id, row.text]));
+  const renameAt = Date.parse('2026-11-14T14:02:00-08:00');
+  for (const row of before.messages) {
+    if (Date.parse(row.sent_at) >= renameAt) continue;
+    assert.equal(laterText.get(row.id), row.text, row.id);
+  }
+  assert.equal(laterText.get('msg-a-0406').startsWith('Brightpath Backup on October 28, 2026'), true);
   const renamed = read('examples/task-data/family-care/after/seed.json').groups[0].changes.find(row => row.event_id === 'rename-brightpath');
   assert.equal(renamed.kind, 'profile');
 });

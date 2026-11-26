@@ -200,6 +200,39 @@ function memberAt(group, personId, instant) {
   });
   return covered ? member : null;
 }
+function lastChangeIndex(group, personId, kinds) {
+  let found = -1;
+  (group.changes || []).forEach((change, index) => {
+    if (change.person_id === personId && kinds.includes(change.kind)) found = index;
+  });
+  return found;
+}
+function countedAtDeparture(group, owner) {
+  const t = at(owner.left_at, 'invalid_seed');
+  const cutoff = lastChangeIndex(group, owner.person_id, ['member_left', 'member_removed']);
+  let count = 0;
+  for (const member of group.members || []) {
+    const intervals = intervalsOf(member);
+    const inside = intervals.some((row, index) => {
+      const joined = at(row.joined_at, 'invalid_seed');
+      if (joined > t) return false;
+      if (joined === t && cutoff >= 0) {
+        const added = lastChangeIndex(group, member.person_id, ['member_added']);
+        if (added > cutoff) return false;
+      }
+      if (!row.left_at && index < intervals.length - 1) return false;
+      if (!row.left_at) return true;
+      const left = at(row.left_at, 'invalid_seed');
+      if (left > t) return true;
+      if (left < t) return false;
+      if (cutoff < 0) return false;
+      const removed = lastChangeIndex(group, member.person_id, ['member_left', 'member_removed']);
+      return removed > cutoff;
+    });
+    if (inside) count += 1;
+  }
+  return count;
+}
 function profileAt(member, instant) {
   const t = at(instant, 'invalid_event');
   let chosen = null;
@@ -278,6 +311,6 @@ module.exports = {
   fail, copy, references, log, at, nfc, fold, handleOf, clockOk, notBefore,
   groupOf, memberRow, activeMember, roleRow, hasPower, boundPerson,
   requireUser, requirePower, grantStatus, revealOutcome, vaultItem, vaultField, mask, intervalsOf, ensureIntervals, take, touch,
-  pushActivity, pushChange, pushNotice, titles, clockLabel, memberAt, profileAt, roleAt, groupForMessage, graphemes,
+  pushActivity, pushChange, pushNotice, titles, clockLabel, memberAt, countedAtDeparture, profileAt, roleAt, groupForMessage, graphemes,
   publicMember, publicField, publicItem, publicGrant
 };

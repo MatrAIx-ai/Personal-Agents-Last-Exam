@@ -113,6 +113,11 @@ async function publishAndRead() {
       publish: {
         status: sent.results[0].result.status,
         event_id: sent.results[0].result.event_id,
+        duplicate: sent.results[0].result.duplicate === true
+      },
+      replay: {
+        status: again.results[0].result.status,
+        event_id: again.results[0].result.event_id,
         duplicate: again.results[0].result.duplicate === true
       },
       mail: {

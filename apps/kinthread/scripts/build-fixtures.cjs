@@ -278,6 +278,14 @@ function message(spec) {
 function authorsAt(members, at) {
   return members.filter(member => Date.parse(member.joined_at) <= Date.parse(at));
 }
+function nameAt(member, at) {
+  let chosen = member.display_name;
+  const t = Date.parse(at);
+  for (const row of member.profile_history || []) {
+    if (Date.parse(row.at) <= t) chosen = row.display_name;
+  }
+  return chosen;
+}
 function careLine(kind, slot, index, name) {
   const bank = BANKS[kind];
   const month = MONTHS[slot[1] - 1];
@@ -293,7 +301,7 @@ function fillMessages(spec, members, slots, kind) {
     const sent = ts(slot[0], slot[1], slot[2], slot[3], slot[4] || 0, 0);
     const ready = authorsAt(members, sent);
     const author = ready[index % ready.length];
-    rows.push(message({id: spec.prefix + String(index + 1).padStart(4, '0'), account_id: spec.messages_account, conversation_id: spec.conversation_id, author: author.person_id, text: careLine(kind, slot, index, author.display_name), sent_at: sent}));
+    rows.push(message({id: spec.prefix + String(index + 1).padStart(4, '0'), account_id: spec.messages_account, conversation_id: spec.conversation_id, author: author.person_id, text: careLine(kind, slot, index, nameAt(author, sent)), sent_at: sent}));
   });
   return rows;
 }

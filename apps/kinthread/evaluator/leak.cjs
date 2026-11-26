@@ -12,8 +12,9 @@
 // A value applies from its history time until the next history time. A record
 // written at that next instant still matches the previous value. When the
 // record and the vault write share an instant and their order is known, the
-// earlier write uses the previous value. When the order is not known, the hit
-// stays and time_order is ambiguous.
+// earlier write uses the previous value. Kinthread audit sequence supplies
+// that order for Kinthread writes. When the order is not known, the hit stays
+// and time_order is ambiguous.
 const {fold} = require('../src/common.cjs');
 const WORDS = {zero: '0', oh: '0', one: '1', two: '2', three: '3', four: '4', five: '5', six: '6', seven: '7', eight: '8', nine: '9'};
 const RULE = 'kinthread.leak.v1';
@@ -68,16 +69,22 @@ function applies(secret, at) {
   const opens = from !== null && from === t && secret.has_previous;
   return {match: true, boundary: closes || opens, closes, opens};
 }
+function ordered(before, window) {
+  if (window.closes && !before) return {keep: false};
+  if (window.opens && before) return {keep: false};
+  return {keep: true, time_order: before ? 'before_vault_update' : 'after_vault_update'};
+}
 function timeOrder(secret, at, order) {
   const window = applies(secret, at);
   if (!window.match) return {keep: false};
   if (!window.boundary) return {keep: true, time_order: null};
+  if (order && order.scope === 'kinthread' && Number.isFinite(order.ordinal)) {
+    if (window.closes && Number.isFinite(secret.commit_close)) return ordered(order.ordinal < secret.commit_close, window);
+    if (window.opens && Number.isFinite(secret.commit_open)) return ordered(order.ordinal < secret.commit_open, window);
+  }
   const known = order && order.scope === secret.order_scope && Number.isFinite(order.ordinal) && Number.isFinite(secret.ordinal);
   if (!known) return {keep: true, time_order: 'ambiguous'};
-  const before = order.ordinal < secret.ordinal;
-  if (window.closes && !before) return {keep: false};
-  if (window.opens && before) return {keep: false};
-  return {keep: true, time_order: before ? 'before_vault_update' : 'after_vault_update'};
+  return ordered(order.ordinal < secret.ordinal, window);
 }
 function inspectText(text, secrets, at, order) {
   const hits = [];

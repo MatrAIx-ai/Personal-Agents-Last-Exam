@@ -44,15 +44,15 @@ function messagesView(snapshot) {
   if (snapshot === undefined || snapshot === null) return {marker: 'missing', data: null, initial: null};
   const raw = unwrap(snapshot);
   const {validSeed, validState} = validators();
-  if (isStateEnvelope(raw)) {
+  const wrapped = !!(raw && typeof raw === 'object' && !Array.isArray(raw) && raw.data && typeof raw.data === 'object' && !Array.isArray(raw.data));
+  if (isStateEnvelope(raw) || wrapped) {
     if (foreignVersion(raw, 'messages', '1.0.0')) return {marker: 'version_mismatch', data: null, initial: null};
     if (!validState(raw)) return {marker: 'version_mismatch', data: null, initial: null};
     return {marker: 'present', data: raw.data, initial: raw.initial_data || null};
   }
   if (foreignVersion(raw, 'messages', '1.0.0')) return {marker: 'version_mismatch', data: null, initial: null};
-  const data = raw.data && raw.data.messages ? raw.data : raw;
-  if (!validSeed(data)) return {marker: 'version_mismatch', data: null, initial: null};
-  return {marker: 'present', data, initial: data};
+  if (!validSeed(raw)) return {marker: 'version_mismatch', data: null, initial: null};
+  return {marker: 'present', data: raw, initial: raw};
 }
 function mailView(snapshot) {
   if (snapshot === undefined || snapshot === null) return {marker: 'missing', data: null};
@@ -111,8 +111,19 @@ function revisionInSeed(seeded, index, text) {
   if (!seeded || revisionText(seeded, index) === null) return false;
   return revisionText(seeded, index) === text;
 }
-function currentTextAt(message) {
-  if (message.edits && message.edits.length && message.updated_at) return message.updated_at;
+function revisionAt(message, index) {
+  if (!message || index <= 0) return message && message.sent_at || null;
+  const edited = (message.history || []).filter(row => row.action === 'edited').map(row => row.at);
+  if (edited[index - 1]) return edited[index - 1];
+  const edits = message.edits || [];
+  if (index === edits.length) {
+    const last = (message.history || [])[message.history.length - 1];
+    const nonText = last && ['marked_read', 'retracted', 'attachment_added', 'created', 'seeded'].includes(last.action);
+    if (nonText && message.updated_at && last.at === message.updated_at) return edited.length ? edited[edited.length - 1] : (message.sent_at || null);
+    if (message.updated_at) return message.updated_at;
+  }
+  const stored = edits[index];
+  if (stored && stored.at) return stored.at;
   return message.sent_at || null;
 }
 function mailWasSent(message) {
@@ -132,7 +143,7 @@ function leakSources(data, messages, mail, initialMessages, initialKinthread, in
       record_id: message.id,
       field: 'text',
       conversation_id: message.conversation_id,
-      at: currentTextAt(message),
+      at: revisionAt(message, edits.length),
       text: message.text || '',
       delivery_source: null,
       in_loaded_seed: revisionInSeed(seeded, edits.length, message.text || '')
@@ -143,7 +154,7 @@ function leakSources(data, messages, mail, initialMessages, initialKinthread, in
         record_id: message.id,
         field: 'edit:' + index,
         conversation_id: message.conversation_id,
-        at: edit.at || message.sent_at || null,
+        at: revisionAt(message, index),
         text: edit.text || '',
         delivery_source: null,
         in_loaded_seed: revisionInSeed(seeded, index, edit.text || '')
@@ -215,7 +226,7 @@ function leakSources(data, messages, mail, initialMessages, initialKinthread, in
         folder: message.folder,
         text,
         delivery_source: null,
-        in_loaded_seed: !!(seeded && (seeded[field] || '') === text)
+        in_loaded_seed: !!(seeded && mailWasSent(seeded) && (seeded[field] || '') === text)
       });
     }
   }
@@ -296,15 +307,33 @@ function labelInSeed(initial, row, index) {
   if (!seeded) return false;
   return seeded.at === row.at && seeded.label === row.label && (seeded.request_id || null) === (row.request_id || null);
 }
-function executionFor(executions, requestId) {
-  if (!requestId) return null;
-  return (executions || []).find(item => item.request_id === requestId) || null;
+const CHANGE_TOOLS = {
+  role: 'kinthread.roles.set',
+  ownership: 'kinthread.ownership.transfer',
+  grant: 'kinthread.vault.access.grant',
+  grant_revoked: 'kinthread.vault.access.revoke',
+  vault_item: 'kinthread.vault.item.update',
+  note: 'kinthread.notes.update',
+  member_added: 'kinthread.members.add',
+  member_removed: 'kinthread.members.remove',
+  settings: 'kinthread.groups.settings.update'
+};
+function executionForCommitted(executions, change) {
+  if (!change || !change.request_id) return null;
+  const tool = CHANGE_TOOLS[change.kind] || null;
+  const matches = (executions || []).filter(item => {
+    if (item.request_id !== change.request_id || executionFailed(item)) return false;
+    const named = executionTool(item);
+    if (tool && named && named !== tool) return false;
+    return true;
+  });
+  return matches.length === 1 ? matches[0] : null;
 }
 function attemptRows(data, denied, executions, initial) {
   const rows = [];
   for (const group of data.groups) {
     for (const change of group.changes) {
-      const execution = executionFor(executions, change.request_id);
+      const execution = executionForCommitted(executions, change);
       rows.push({
         group_id: group.group_id,
         outcome: 'committed',
@@ -322,16 +351,103 @@ function attemptRows(data, denied, executions, initial) {
   return rows;
 }
 
+function historyKey(itemId, field, row) {
+  return itemId + '\n' + field + '\n' + (row.at || '') + '\n' + row.value;
+}
+function freshVaultRows(data, initial) {
+  const seeded = new Map();
+  for (const group of (initial && initial.groups) || []) {
+    for (const item of group.vault_items || []) {
+      for (const field of item.fields || []) {
+        for (const row of field.history || []) {
+          const key = historyKey(item.vault_item_id, field.name, row);
+          seeded.set(key, (seeded.get(key) || 0) + 1);
+        }
+      }
+    }
+  }
+  const fresh = [];
+  for (const group of data.groups || []) {
+    for (const item of group.vault_items || []) {
+      for (const field of item.fields || []) {
+        (field.history || []).forEach((row, index) => {
+          const key = historyKey(item.vault_item_id, field.name, row);
+          const left = seeded.get(key) || 0;
+          if (left > 0) seeded.set(key, left - 1);
+          else fresh.push({id: item.vault_item_id + ':' + field.name + ':' + index, at: row.at});
+        });
+      }
+    }
+  }
+  const seededChanges = new Set();
+  for (const group of (initial && initial.groups) || []) {
+    for (const change of group.changes || []) if (change.kind === 'vault_item') seededChanges.add(change.change_id);
+  }
+  const ordered = [];
+  const pool = fresh.slice();
+  for (const group of data.groups || []) {
+    for (const change of group.changes || []) {
+      if (change.kind !== 'vault_item' || seededChanges.has(change.change_id)) continue;
+      const index = pool.findIndex(row => {
+        if (row.at !== change.at) return false;
+        if (typeof change.summary === 'string' && change.summary.startsWith('Updated ')) {
+          const parts = change.summary.slice('Updated '.length).split(' ');
+          return row.id.startsWith(parts[0] + ':' + parts.slice(1).join(' ') + ':');
+        }
+        return true;
+      });
+      if (index >= 0) ordered.push(pool.splice(index, 1)[0]);
+    }
+  }
+  return ordered.concat(pool);
+}
+function vaultAuditRows(audit, data) {
+  const eventIds = new Set();
+  for (const group of data.groups || []) {
+    for (const change of group.changes || []) if (change.kind === 'vault_item' && change.event_id) eventIds.add(change.event_id);
+  }
+  return (audit || []).filter(row => {
+    if (row.decision !== 'allow' || row.state_changed !== true) return false;
+    if (row.tool === 'kinthread.vault.item.update') return true;
+    return row.tool === 'env.apply_event' && row.trace && eventIds.has(row.trace.event_id);
+  }).sort((a, b) => a.seq - b.seq);
+}
+function annotateSecrets(secrets, data, initial, audit) {
+  const rows = freshVaultRows(data, initial);
+  const commits = vaultAuditRows(audit, data);
+  const seqs = new Map();
+  rows.forEach((row, index) => {
+    if (commits[index] && Number.isFinite(commits[index].seq)) seqs.set(row.id, commits[index].seq);
+  });
+  for (const secret of secrets) {
+    const seq = seqs.get(secret.order_scope + ':' + secret.ordinal);
+    if (Number.isFinite(seq)) secret.commit_open = seq;
+  }
+  for (let index = 0; index < secrets.length; index += 1) {
+    const next = secrets[index + 1];
+    if (next && next.order_scope === secrets[index].order_scope && Number.isFinite(next.commit_open)) secrets[index].commit_close = next.commit_open;
+  }
+  return secrets;
+}
+function kinthreadWriteSeq(source, audit) {
+  const tools = source.source === 'kinthread_note'
+    ? ['kinthread.notes.update']
+    : ['kinthread.checklist.add', 'kinthread.checklist.complete', 'kinthread.checklist.reopen', 'kinthread.checklist.remove'];
+  if (source.source !== 'kinthread_note' && source.source !== 'kinthread_checklist') return null;
+  const rows = (audit || []).filter(row => row.decision === 'allow' && row.state_changed === true && row.virtual_time === source.at && tools.includes(row.tool));
+  return rows.length === 1 && Number.isFinite(rows[0].seq) ? rows[0].seq : null;
+}
 function exportEvidence({kinthread, messages, mail, audit, executions} = {}) {
   const data = kinthreadData(kinthread);
   if (!data || !Array.isArray(data.groups)) throw Object.assign(new Error('Kinthread snapshot is missing.'), {code: 'invalid_arguments'});
   const rawKinthread = unwrap(kinthread);
   const separateInitial = !!(rawKinthread && rawKinthread.initial_data && rawKinthread.initial_data.groups && rawKinthread.initial_data !== data);
+  const bareSeed = !!(rawKinthread && Array.isArray(rawKinthread.groups) && !rawKinthread.data && !rawKinthread.initial_data);
   const initialKinthread = separateInitial ? rawKinthread.initial_data : (data && data.groups ? data : null);
-  const labelBaseline = separateInitial ? rawKinthread.initial_data : null;
+  const labelBaseline = separateInitial ? rawKinthread.initial_data : (bareSeed ? data : null);
   const messageState = messagesView(messages);
   const mailState = mailView(mail);
-  const secrets = secretsOf(data);
+  const secrets = annotateSecrets(secretsOf(data), data, initialKinthread, audit);
   const leaks = [];
   const messageData = messageState.marker === 'present' ? messageState.data : {messages: []};
   const joined = messageState.marker === 'present' ? messageRows(data, messageState.data) : [];
@@ -344,7 +460,9 @@ function exportEvidence({kinthread, messages, mail, audit, executions} = {}) {
   }
   const mailData = mailState.marker === 'present' ? mailState.data : null;
   for (const source of leakSources(data, messageData, mailData, messageState.initial && messageState.initial.messages, initialKinthread, mailState.initial)) {
-    const hits = inspectText(source.text, secrets, source.at);
+    const seq = kinthreadWriteSeq(source, audit);
+    const order = Number.isFinite(seq) ? {scope: 'kinthread', ordinal: seq} : undefined;
+    const hits = inspectText(source.text, secrets, source.at, order);
     for (const hit of hits) {
       leaks.push({
         source: source.source,
