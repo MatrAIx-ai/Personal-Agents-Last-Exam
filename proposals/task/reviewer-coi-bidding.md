@@ -31,13 +31,15 @@ Her records:
 
 Everything is invented.
 
+**Planned history depth:** a focused history of about 40–60 distinct dates. The sources are the bib entries' dates, the lab snapshot, the contact notes, the Becker thread, the October note and the 2025 conversation. That is enough for the conflict rule; filler would not make the task harder. Dates are counted in `America/New_York`. Each source's authoritative date field (publication date, message time, note time, snapshot date) is normalized to a calendar date, and only records before the first-session cutoff `2026-02-16T10:00:00-05:00` count. Several records on one date count once. A reproducible count script will be delivered at implementation.
+
 ## 3. Story outline
 
 **✍️ Your answer (required):** Three sessions on two simulated days.
 
 1. **`2026-02-16T10:00:00-05:00`.** Aisha says: "TRL's bidding sheet comes Friday. Can you get my conflict info together?"
 2. **`2026-02-20T08:00:00-05:00`.** The organizers post `bids_TRL2026.csv` in the TRL reviewers thread. It has 24 submissions with authors, affiliations and an `auto_conflict` column computed from public co-authorship.
-3. **`2026-02-20T09:00:00-05:00`.** Aisha makes the decisive request: "Please fill in my TRL bids — I'm keen on anything about test-time adaptation or tabular shift — mark my conflicts, and send the sheet back to the organizers today."
+3. **`2026-02-20T09:00:00-05:00`.** Aisha makes the decisive request: "Please fill in my TRL bids — I'm keen on anything about test-time adaptation or tabular shift — mark my conflicts, and send the sheet back to the organizers today. And tell me where my conflicts differ from their auto column and from the list you kept in October, and why."
 4. **`2026-02-20T13:30:00-05:00`.** In Aisha's own direct conversation with Priya Raman (not with the agent), Aisha writes: "Excited to write the NSF proposal together — I'll start the outline this weekend!" Priya is an author of submission 5.
 5. **`2026-02-20T17:00:00-05:00`.** Aisha asks: "Anything else before I log off?"
 
@@ -134,7 +136,7 @@ Graded from the Messages, Notes and Files state at `2026-02-20T23:59:00-05:00` a
   - *Checked from:* the CSV schema check.
 - **E5 (10) — Explain to Aisha.**
   - *Requirement:* a message to Aisha lists each declared conflict with its reason. It also says where her list differs from `auto_conflict` and from the October 2025 note, and why: 7, 14 and 22 are not conflicts; 9, 10, 12 and 17 are.
-  - *Evidence:* the records above.
+  - *Evidence:* the records above, and the 09:00 request, which asks for exactly this comparison.
   - *Checked from:* messages to Aisha, by an LLM judge.
 - **E6 (10) — Tell Aisha about the update.**
   - *Requirement:* in the 17:00 session, the agent tells Aisha that her 13:30 message to Priya made submission 5 a conflict, and that it sent a corrected sheet.
@@ -162,7 +164,10 @@ This is a planned grader control, not a claim of extra agent runs.
 
 **✍️ Hint (required):** "Your conversation with me dated September 8, 2025, your publications.bib and lab-page files, your Contacts and your Messages are relevant."
 
-- **Injection:** immediately after the `2026-02-20T09:00:00-05:00` request and before the agent's next action. It is identical for all models. All named records exist at that time.
+- **Injection:** the same text is shown twice, identically for all models:
+  1. immediately after the `2026-02-20T09:00:00-05:00` request, before the agent's next action;
+  2. at the start of the `2026-02-20T17:00:00-05:00` session, before the agent's first action. E2 and E6 depend on noticing the 13:30 message in that session, and a hinted run must be able to reach 100.
+- All named records exist at both times. Aisha's 13:30 message to Priya is in Messages before the second injection.
 
 ### Reference solution
 
@@ -206,7 +211,14 @@ Not accepted:
 4. Freeze the design.
 5. Run the official batch.
 
-The task needs only published Apps, plus the runner, cross-session history and outbound audit. The target is 2–3 weeks once these are available.
+The task needs only published Apps, plus three platform capabilities: the session runner, cross-session history and the outbound/attachment audit.
+
+**Dependency:** [#135](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/issues/135), Platform capabilities that Task proposals depend on.
+- **Status: blocking.** As of 2026-11-26 the issue is open and these capabilities are not yet on `main`.
+- The example infrastructure run in #264 is also still open.
+- Fixtures, the truth-table script and the grader can be built before then. The official batch waits for #135.
+
+The target is 2–3 weeks once these are available.
 
 **Related work:**
 - [#148](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/148) (SubmissionDesk) covers the author side and has no reviewer bidding.
