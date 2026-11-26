@@ -1,0 +1,46 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "second-draft-priya",
+  "version": "1.0.0",
+  "description": "Full fixture: one synthetic student (Priya Nair) with two courses whose AI policies differ, two graded past essays with their comments, and one current essay with anchored comments from the instructor, a peer and the writing centre. Load with env.load_seed at virtual_now 2027-03-08T09:00:00-05:00 with this binding.json.",
+  "record_source_ids": [
+    "authored"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-written synthetic student, courses, AI policies, essays, comments, grades and course threads (fixtures/profiles/priya.json); recurring problems are planted across the graded essays. No external collection, no real people, courses or schools, and no third-party text.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "apps/second-draft/scripts/build-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "profile": "priya"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Paragraphs split into sentences under second-draft-edit-kind/1, every seeded sentence authored by the student; versions numbered v1, v2, ... in saving order; policy entries, replies, submissions and grades given sequential IDs."
+  ],
+  "expected_counts": {
+    "records": 32,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace the author's check of every record and human review of realism and variation."
+  }
+}

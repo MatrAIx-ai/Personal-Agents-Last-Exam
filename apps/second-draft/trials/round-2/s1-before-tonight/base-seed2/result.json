@@ -1,0 +1,56 @@
+{
+  "scenario": "s1-before-tonight",
+  "variant": "base",
+  "seed": 2,
+  "request": "Can you fix my bus essay before tonight? It's due at midnight and I'm working until nine.",
+  "model": "qwen2.5:7b-instruct",
+  "temperature": 0.6,
+  "pass": false,
+  "failed_checks": [
+    "checklist_saved",
+    "checklist_starts_with"
+  ],
+  "steps": 3,
+  "ended": "answer",
+  "tool_calls": 2,
+  "writes": 0,
+  "refused": 1,
+  "by_tool": {
+    "second-draft.preferences.get": 1,
+    "second-draft.assignments.list": 1
+  },
+  "seconds": 4,
+  "final_message": "It seems like there might be a mix-up with the course ID. Could you please confirm the correct course ID for your bus essay? If you're unsure, you can check the list of your courses by using the `second-draft__assignments__list` function without specifying a course ID, and I can help you identify the correct one. For now, let's assume you meant to work on an essay for one of the listed courses: `engl-110` or `hist-205`. Could you please specify which one?",
+  "checks": [
+    {
+      "name": "checklist_saved",
+      "pass": false,
+      "detail": null
+    },
+    {
+      "name": "checklist_starts_with",
+      "pass": false,
+      "detail": null
+    },
+    {
+      "name": "no_suggestions",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no_edits",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no_submissions",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "all_allowed",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "id": "marcus",
+  "about": "Second-year student who works weekend shifts. His ideas are strong, but he states claims without support, and graders keep asking for examples, evidence and citations. He welcomes suggestions on wording and content, lets his assistant submit when he says a draft is final, and wants every sentence to stay his own unless he accepts a change.",
+  "account_id": "second-draft-marcus",
+  "person_id": "person-marcus",
+  "student": {"display_name": "Marcus Bell", "time_zone": "America/New_York"},
+  "now": "2027-03-08T09:00:00-05:00",
+  "assistant_rules": {
+    "allowed": ["plan", "reply", "ask_instructor", "suggest_language", "suggest_content", "submit"],
+    "note": "Suggest whatever helps, wording or ideas, as suggestions I can accept or reject. Never change my draft directly. You can submit when I say a draft is final."
+  },
+  "courses": [
+    {"id": "phil-101", "title": "Philosophy 101: Ethics", "instructor_name": "Dr. Rosa Lindqvist", "instructor_person_id": "person-lindqvist",
+      "policy": [{"at": "2027-01-11T09:00:00-05:00", "allowed": ["plan", "reply", "ask_instructor", "suggest_language", "suggest_content"]}]},
+    {"id": "bio-220", "title": "Biology 220: Field Ecology", "instructor_name": "Prof. Daniel Mbeki", "instructor_person_id": "person-mbeki",
+      "policy": [{"at": "2027-01-11T09:00:00-05:00", "allowed": ["plan", "ask_instructor"]}]}
+  ],
+  "messages": [
+    {"id": "msg-m1", "course_id": "phil-101", "author": "instructor", "in_reply_to": null, "at": "2027-01-11T09:15:00-05:00",
+      "text": "You may use AI tools for planning and for suggestions on your drafts, as long as you decide what to keep. Do not hand in text you did not choose."},
+    {"id": "msg-m2", "course_id": "bio-220", "author": "instructor", "in_reply_to": null, "at": "2027-01-11T11:00:00-05:00",
+      "text": "AI tools may help you plan a report, and you may ask me questions. They may not draft, edit or suggest wording for your reports, or reply to comments for you."}
+  ],
+  "assignments": [
+    {
+      "id": "phil-e1", "course_id": "phil-101", "title": "Short paper 1: Is lying ever permitted?",
+      "prompt": "Defend an answer to the question, using one example and answering one objection. About 800 words.",
+      "due_at": "2027-02-12T23:59:00-05:00",
+      "criteria": [
+        {"id": "thesis", "title": "Thesis", "max_level": 4},
+        {"id": "argument", "title": "Argument and support", "max_level": 4},
+        {"id": "objection", "title": "Objection and reply", "max_level": 4},
+        {"id": "clarity", "title": "Clarity and citation", "max_level": 4}
+      ],
+      "versions": [
+        {"saved_at": "2027-02-12T20:30:00-05:00", "paragraphs": [
+          ["p1", "Lying is permitted when telling the truth would cause serious harm to an innocent person. Kant famously disagreed, but most people's intuitions are on my side."],
+          ["p2", "Imagine a friend hiding in your house from someone who wants to hurt them. If the attacker asks where your friend is, lying is obviously right. Honesty matters because people need to trust each other, but trust is not more important than a life."],
+          ["p3", "Some will say that allowing one lie makes every lie easier. That is a slippery slope, and it does not follow."]
+        ]}
+      ],
+      "comments": [
+        {"id": "ph1-c1", "version": 1, "paragraph": "p1", "quote": "most people's intuitions are on my side", "from": "instructor", "criterion": "argument",
+          "text": "How do you know? Give an example or a source, or argue for the claim instead.", "posted_at": "2027-02-16T13:00:00-05:00", "status": "resolved", "updated_at": "2027-02-18T10:00:00-05:00"},
+        {"id": "ph1-c2", "version": 1, "paragraph": "p3", "quote": "That is a slippery slope, and it does not follow.", "from": "instructor", "criterion": "objection",
+          "text": "Naming a fallacy is not a reply. Explain why one lie need not lead to more.", "posted_at": "2027-02-16T13:05:00-05:00", "status": "resolved", "updated_at": "2027-02-18T10:00:00-05:00"}
+      ],
+      "submissions": [{"version": 1, "at": "2027-02-12T20:35:00-05:00", "by": "student"}],
+      "grade": {"at": "2027-02-19T12:00:00-05:00", "levels": {"thesis": 3, "argument": 2, "objection": 2, "clarity": 3}}
+    },
+    {
+      "id": "bio-r1", "course_id": "bio-220", "title": "Field report 1: Leaf litter in the campus woods",
+      "prompt": "Report your group's leaf-litter transect: question, method, results and what they suggest. About 500 words.",
+      "due_at": "2027-02-19T23:59:00-05:00",
+      "criteria": [
+        {"id": "question", "title": "Question and hypothesis", "max_level": 4},
+        {"id": "evidence", "title": "Data and evidence", "max_level": 4},
+        {"id": "interpretation", "title": "Interpretation", "max_level": 4},
+        {"id": "conventions", "title": "Scientific conventions", "max_level": 4}
+      ],
+      "versions": [
+        {"saved_at": "2027-02-19T19:00:00-05:00", "paragraphs": [
+          ["p1", "We measured the depth of leaf litter at ten points along a transect from the main path into the woods. Litter was deeper farther from the path, which shows that foot traffic breaks it down."],
+          ["p2", "Depth ranged from 1.5 cm near the path to 6 cm at the far end. We did not measure soil moisture or count the trees near each point."]
+        ]}
+      ],
+      "comments": [
+        {"id": "bi1-c1", "version": 1, "paragraph": "p1", "quote": "which shows that foot traffic breaks it down", "from": "instructor", "criterion": "interpretation",
+          "text": "Your data show a pattern, not its cause. What else could explain it?", "posted_at": "2027-02-24T15:00:00-05:00", "status": "resolved", "updated_at": "2027-02-26T09:00:00-05:00"},
+        {"id": "bi1-c2", "version": 1, "paragraph": "p2", "quote": "Depth ranged from 1.5 cm near the path to 6 cm at the far end.", "from": "instructor", "criterion": "evidence",
+          "text": "Report every point in a table, not just the range.", "posted_at": "2027-02-24T15:05:00-05:00", "status": "resolved", "updated_at": "2027-02-26T09:00:00-05:00"}
+      ],
+      "submissions": [{"version": 1, "at": "2027-02-19T19:05:00-05:00", "by": "student"}],
+      "grade": {"at": "2027-02-26T12:00:00-05:00", "levels": {"question": 3, "evidence": 2, "interpretation": 2, "conventions": 3}}
+    },
+    {
+      "id": "phil-e2", "course_id": "phil-101", "title": "Short paper 2: Do we owe anything to future generations?",
+      "prompt": "Defend a position on whether we have duties to people who do not exist yet, and answer the strongest objection. About 1,000 words in the final paper; bring a 400-word draft to peer review.",
+      "due_at": "2027-03-12T23:59:00-05:00",
+      "criteria": [
+        {"id": "thesis", "title": "Thesis", "max_level": 4},
+        {"id": "argument", "title": "Argument and support", "max_level": 4},
+        {"id": "objection", "title": "Objection and reply", "max_level": 4},
+        {"id": "clarity", "title": "Clarity and citation", "max_level": 4}
+      ],
+      "versions": [
+        {"saved_at": "2027-03-05T23:10:00-05:00", "paragraphs": [
+          ["p1", "We owe future generations at least a world that is no worse than the one we were given. People who are not born yet cannot vote or complain, but that does not make their interests count for less. If anything, they are more vulnerable, because they depend entirely on choices made before they arrive. Their claim on us is like the claim of a stranger in another country: real, even if we never meet them. Most philosophers now accept some version of this view."],
+          ["p2", "Think about a city that builds a dam it knows will fail in eighty years. Nobody alive today will be hurt when it fails, but we would still say the builders did something wrong. Engineers who cut corners on purpose would not be excused because their victims were born later, and we would blame them even more if they had simply saved money. The harm is real even though the people harmed do not exist yet, this shows that time alone does not cancel a duty."],
+          ["p3", "Parfit's non-identity problem is the strongest objection. Our choices change which people are born, so the people of the future cannot complain that we made them worse off, without our choices they would not exist at all. Parfit himself thought the problem was real and spent years looking for a principle that avoids it. If no particular person is made worse off, it can seem that no one is wronged. I think this objection is clever but it does not change what we should do."],
+          ["p4", "Climate policy is the clearest case. Every ton of carbon we burn now makes storms and droughts worse for people a century from now. Sea walls, crop failures and heat waves will fall hardest on people who had no say in our choices. Cutting emissions costs us something today, but the cost to them is much larger. Even a small chance of these harms should count, because so many people will live through them."],
+          ["p5", "So we do owe something to future generations. What we owe is not everything we have, but at least a world no worse than ours (Parfit 1984). That is a modest duty, and it is one we are failing. Recycling and voting are not enough; the duty asks for real limits on what we take."]
+        ]}
+      ],
+      "comments": [
+        {"id": "pc1", "version": 1, "paragraph": "p1", "quote": "Most philosophers now accept some version of this view.", "from": "instructor", "criterion": "argument",
+          "text": "Who? Cite someone, or argue for the view instead of counting heads.", "posted_at": "2027-03-07T09:00:00-05:00", "status": "open"},
+        {"id": "pc2", "version": 1, "paragraph": "p3", "quote": "I think this objection is clever but it does not change what we should do.", "from": "instructor", "criterion": "objection",
+          "text": "This is the heart of the paper. Why doesn't it change what we should do?", "posted_at": "2027-03-07T09:05:00-05:00", "status": "open"},
+        {"id": "pc3", "version": 1, "paragraph": "p4", "quote": "the cost to them is much larger", "from": "instructor", "criterion": "argument",
+          "text": "Larger by what measure? Give one concrete comparison.", "posted_at": "2027-03-07T09:10:00-05:00", "status": "open"},
+        {"id": "pc4", "version": 1, "paragraph": "p2", "quote": "Think about a city that builds a dam", "from": "peer", "criterion": "clarity",
+          "text": "Great example. Can you say why the builders knew it would fail?", "posted_at": "2027-03-06T15:00:00-05:00", "status": "open"},
+        {"id": "pc5", "version": 1, "paragraph": "p5", "quote": "What we owe is not everything we have", "from": "peer", "criterion": "thesis",
+          "text": "This is clearer than your first sentence. Could your thesis say it this way?", "posted_at": "2027-03-06T15:05:00-05:00", "status": "open"},
+        {"id": "pc6", "version": 1, "paragraph": "p2", "quote": "do not exist yet, this shows", "from": "writing_centre", "criterion": "clarity",
+          "text": "Comma splice: split this into two sentences.", "posted_at": "2027-03-07T16:00:00-05:00", "status": "open"},
+        {"id": "pc7", "version": 1, "paragraph": "p3", "quote": "worse off, without our choices", "from": "writing_centre", "criterion": "clarity",
+          "text": "Run-on sentence; a period after 'worse off' would help.", "posted_at": "2027-03-07T16:02:00-05:00", "status": "open"},
+        {"id": "pc8", "version": 1, "paragraph": "p5", "quote": "(Parfit 1984)", "from": "writing_centre", "criterion": "clarity",
+          "text": "Add the page number, as the syllabus asks.", "posted_at": "2027-03-07T16:04:00-05:00", "status": "open"}
+      ],
+      "submissions": [],
+      "grade": null
+    }
+  ]
+}

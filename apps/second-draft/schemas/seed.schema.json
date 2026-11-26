@@ -1,0 +1,923 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:second-draft:seed:1",
+  "description": "One student account: courses with their AI-policy history, assignments, the student's drafts and feedback, and evaluator-only records.",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "owner_person_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+    },
+    "student": {
+      "type": "object",
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "time_zone": {
+          "type": "string",
+          "pattern": "^(?:UTC|[A-Za-z_]+(?:/[A-Za-z0-9_+-]+)+)$",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "display_name",
+        "time_zone"
+      ],
+      "additionalProperties": false
+    },
+    "assistant_rules": {
+      "type": "object",
+      "properties": {
+        "allowed": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "plan",
+              "reply",
+              "ask_instructor",
+              "suggest_language",
+              "suggest_content",
+              "edit",
+              "submit"
+            ]
+          },
+          "maxItems": 7,
+          "uniqueItems": true
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "allowed",
+        "note"
+      ],
+      "additionalProperties": false
+    },
+    "courses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "instructor_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "instructor_name"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "course_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "allowed": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "plan",
+                "reply",
+                "ask_instructor",
+                "suggest_language",
+                "suggest_content",
+                "edit"
+              ]
+            },
+            "maxItems": 6,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "id",
+          "course_id",
+          "at",
+          "allowed"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "assignments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "course_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 5000
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "max_level": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "max_level"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 20,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "id",
+          "course_id",
+          "title",
+          "prompt",
+          "due_at",
+          "criteria"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "versions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "assignment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "number": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "saved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "saved_by": {
+            "enum": [
+              "student",
+              "agent",
+              "suggestion"
+            ]
+          },
+          "suggestion_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "paragraphs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "sentences": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 5000,
+                        "pattern": "^[^\\r\\n]*\\S[^\\r\\n]*$"
+                      },
+                      "author": {
+                        "enum": [
+                          "student",
+                          "agent",
+                          "suggestion"
+                        ]
+                      },
+                      "ref": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "text",
+                      "author",
+                      "ref"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 200,
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "id",
+                "sentences"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 200,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "id",
+          "assignment_id",
+          "number",
+          "saved_at",
+          "saved_by",
+          "suggestion_id",
+          "paragraphs"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "comments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "assignment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "version_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "paragraph_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "pattern": "^[^\\r\\n]+$"
+          },
+          "from": {
+            "enum": [
+              "instructor",
+              "peer",
+              "writing_centre"
+            ]
+          },
+          "criterion_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 5000
+          },
+          "posted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "addressed",
+              "resolved"
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "replies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "author": {
+                  "enum": [
+                    "student",
+                    "agent",
+                    "commenter"
+                  ]
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 5000
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "author",
+                "text",
+                "at"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 200
+          }
+        },
+        "required": [
+          "id",
+          "assignment_id",
+          "version_id",
+          "paragraph_id",
+          "quote",
+          "from",
+          "criterion_id",
+          "text",
+          "posted_at",
+          "status",
+          "updated_at",
+          "replies"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "suggestions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "assignment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "version_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "paragraph_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "pattern": "^[^\\r\\n]+$"
+          },
+          "replacement": {
+            "type": "string",
+            "maxLength": 5000,
+            "pattern": "^[^\\r\\n]*$"
+          },
+          "kind": {
+            "enum": [
+              "language",
+              "content"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "enum": [
+                      "accepted",
+                      "rejected"
+                    ]
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "version_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "decision",
+                  "at",
+                  "version_id"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "assignment_id",
+          "version_id",
+          "paragraph_id",
+          "quote",
+          "replacement",
+          "kind",
+          "created_at",
+          "decision"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "checklists": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "assignment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 5000
+                },
+                "comment_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 50,
+                  "uniqueItems": true
+                },
+                "criterion_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  "maxItems": 20,
+                  "uniqueItems": true
+                },
+                "done": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "text",
+                "comment_ids",
+                "criterion_ids",
+                "done"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 50,
+            "minItems": 1
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "assignment_id",
+          "items",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "course_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "author": {
+            "enum": [
+              "student",
+              "agent",
+              "instructor"
+            ]
+          },
+          "in_reply_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 5000
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "course_id",
+          "author",
+          "in_reply_to",
+          "text",
+          "at"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2000
+    },
+    "submissions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "assignment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "version_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "by": {
+            "enum": [
+              "student",
+              "agent"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "assignment_id",
+          "version_id",
+          "at",
+          "by"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 500
+    },
+    "grades": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "assignment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "levels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "criterion_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10
+                }
+              },
+              "required": [
+                "criterion_id",
+                "level"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 20,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "id",
+          "assignment_id",
+          "at",
+          "levels"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "evaluator": {
+      "type": "object",
+      "properties": {
+        "activity_log": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "seq": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "operation": {
+                "enum": [
+                  "second-draft.checklist.save",
+                  "second-draft.comments.reply",
+                  "second-draft.comments.set_status",
+                  "second-draft.suggestions.create",
+                  "second-draft.drafts.edit",
+                  "second-draft.messages.send",
+                  "second-draft.submissions.submit"
+                ]
+              },
+              "request_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "expected_version": {
+                "type": "object",
+                "properties": {
+                  "epoch": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "epoch",
+                  "revision"
+                ],
+                "additionalProperties": false
+              },
+              "object_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "assignment_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "course_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+              },
+              "action": {
+                "enum": [
+                  "plan",
+                  "reply",
+                  "ask_instructor",
+                  "suggest_language",
+                  "suggest_content",
+                  "edit",
+                  "submit"
+                ]
+              },
+              "kind": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "language",
+                      "content"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "course_policy": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "plan",
+                    "reply",
+                    "ask_instructor",
+                    "suggest_language",
+                    "suggest_content",
+                    "edit"
+                  ]
+                },
+                "maxItems": 6,
+                "uniqueItems": true
+              },
+              "student_rules": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "plan",
+                    "reply",
+                    "ask_instructor",
+                    "suggest_language",
+                    "suggest_content",
+                    "edit",
+                    "submit"
+                  ]
+                },
+                "maxItems": 7,
+                "uniqueItems": true
+              },
+              "details": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "seq",
+              "at",
+              "operation",
+              "request_id",
+              "expected_version",
+              "object_id",
+              "assignment_id",
+              "course_id",
+              "action",
+              "kind",
+              "course_policy",
+              "student_rules",
+              "details"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "activity_log"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "account_id",
+    "owner_person_id",
+    "student",
+    "assistant_rules",
+    "courses",
+    "policies",
+    "assignments",
+    "versions",
+    "comments",
+    "suggestions",
+    "checklists",
+    "messages",
+    "submissions",
+    "grades",
+    "evaluator"
+  ],
+  "additionalProperties": false
+}

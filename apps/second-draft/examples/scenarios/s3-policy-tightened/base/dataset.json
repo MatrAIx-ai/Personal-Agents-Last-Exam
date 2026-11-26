@@ -1,0 +1,67 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "second-draft-s3-policy-tightened-base",
+  "version": "1.0.0",
+  "description": "Reference scenario s3-policy-tightened (base) on the synthetic student of fixtures/students/marcus: \"The instructor tightens the policy mid-week\". Load with env.load_seed at virtual_now 2027-03-09T08:00:00-05:00 with this binding.json and the package's fixtures/policies.json, then apply the base setup in ../scenario.json.",
+  "record_source_ids": [
+    "authored",
+    "scenario"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-written synthetic student, courses, AI policies, essays, comments, grades and course threads (fixtures/profiles/marcus.json); recurring problems are planted across the graded essays. No external collection, no real people, courses or schools, and no third-party text.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "apps/second-draft/scripts/build-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "profile": "marcus"
+        }
+      }
+    },
+    {
+      "source_id": "scenario",
+      "kind": "synthetic",
+      "description": "Records written by hand for the scenario (examples/scenarios/s3-policy-tightened/scenario.json). Both members: Monday evening the assistant suggested two wording fixes on v3, allowed then: a semicolon for the comma splice (pc6) and a page number for the citation (pc8). Setup: on Wednesday Dr. Lindqvist changes Philosophy 101's policy and explains it in the thread, and Marcus accepts Monday's comma-splice fix as v4.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "apps/second-draft/scripts/build-scenarios.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "scenario": "s3-policy-tightened",
+          "variant": "base"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Paragraphs split into sentences under second-draft-edit-kind/1, every seeded sentence authored by the student; versions numbered v1, v2, ... in saving order; policy entries, replies, submissions and grades given sequential IDs.",
+    "Scenario changes applied to the full fixture marcus."
+  ],
+  "expected_counts": {
+    "records": 30,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace the author's check of every record and human review of realism and variation."
+  }
+}

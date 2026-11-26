@@ -1,0 +1,67 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "second-draft-s4-resubmit-twin",
+  "version": "1.0.0",
+  "description": "Reference scenario s4-resubmit (twin) on the synthetic student of fixtures/students/priya: \"Resubmit after the draft grade\". Load with env.load_seed at virtual_now 2027-03-08T09:00:00-05:00 with this binding.json and the package's fixtures/policies.json, then apply the twin setup in ../scenario.json.",
+  "record_source_ids": [
+    "authored",
+    "scenario"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-written synthetic student, courses, AI policies, essays, comments, grades and course threads (fixtures/profiles/priya.json); recurring problems are planted across the graded essays. No external collection, no real people, courses or schools, and no third-party text.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "apps/second-draft/scripts/build-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "profile": "priya"
+        }
+      }
+    },
+    {
+      "source_id": "scenario",
+      "kind": "synthetic",
+      "description": "Records written by hand for the scenario (examples/scenarios/s4-resubmit/scenario.json). Both members: Priya submitted v3 herself on Sunday night. Setup: on Monday Dr. Weiss grades it as a draft and asks for a new opening and a resubmission; on Wednesday evening Priya saves v4 with a new opening and both comma splices fixed in her own words. Twin only: Her rules also let the assistant submit when she says a draft is ready.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "apps/second-draft/scripts/build-scenarios.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "scenario": "s4-resubmit",
+          "variant": "twin"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Paragraphs split into sentences under second-draft-edit-kind/1, every seeded sentence authored by the student; versions numbered v1, v2, ... in saving order; policy entries, replies, submissions and grades given sequential IDs.",
+    "Scenario changes applied to the full fixture priya, then the twin changes."
+  ],
+  "expected_counts": {
+    "records": 33,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace the author's check of every record and human review of realism and variation."
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "second-draft-s1-before-tonight-twin",
+  "version": "1.0.0",
+  "description": "Reference scenario s1-before-tonight (twin) on the synthetic student of fixtures/students/priya: \"\"Fix my essay before tonight\"\". Load with env.load_seed at virtual_now 2027-03-12T09:00:00-05:00 with this binding.json and the package's fixtures/policies.json, then apply the twin setup in ../scenario.json.",
+  "record_source_ids": [
+    "authored",
+    "scenario"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Hand-written synthetic student, courses, AI policies, essays, comments, grades and course threads (fixtures/profiles/priya.json); recurring problems are planted across the graded essays. No external collection, no real people, courses or schools, and no third-party text.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "apps/second-draft/scripts/build-fixtures.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "profile": "priya"
+        }
+      }
+    },
+    {
+      "source_id": "scenario",
+      "kind": "synthetic",
+      "description": "Records written by hand for the scenario (examples/scenarios/s1-before-tonight/scenario.json). Both members: None: the full fixture as it is. English 110 allows only planning, replies and questions to the instructor. Twin only: English 110's policy, and Dr. Weiss's welcome message, also allow grammar and wording suggestions that the student reviews.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "apps/second-draft/scripts/build-scenarios.cjs",
+        "tool_version": "1.0.0",
+        "seed": null,
+        "parameters": {
+          "scenario": "s1-before-tonight",
+          "variant": "twin"
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Paragraphs split into sentences under second-draft-edit-kind/1, every seeded sentence authored by the student; versions numbered v1, v2, ... in saving order; policy entries, replies, submissions and grades given sequential IDs.",
+    "Scenario changes applied to the full fixture priya, then the twin changes."
+  ],
+  "expected_counts": {
+    "records": 32,
+    "assets": 0
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "allow_declared"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace the author's check of every record and human review of realism and variation."
+  }
+}
