@@ -11,7 +11,7 @@ function encodings() {
     ({getEncoding} = require('js-tiktoken'));
   } catch (err) {
     const {execFileSync} = require('node:child_process');
-    execFileSync('npm', ['install', '--omit=dev', '--no-audit', '--no-fund'], {
+    execFileSync('npm', ['ci', '--omit=dev', '--no-audit', '--no-fund'], {
       cwd: path.join(__dirname, '..'),
       stdio: 'inherit'
     });

@@ -15,6 +15,5 @@ COPY tasks/inbox-cleanup-consent/tasks/inbox-cleanup-consent/environment/workspa
 COPY tasks/inbox-cleanup-consent/tasks/inbox-cleanup-consent/environment/interface /task/environment/interface
 COPY tasks/inbox-cleanup-consent/tasks/inbox-cleanup-consent/instruction.md /task/instruction.md
 COPY tasks/inbox-cleanup-consent/tasks/inbox-cleanup-consent/context/user/persona.json /task/context/user/persona.json
-COPY tasks/inbox-cleanup-consent/tasks/inbox-cleanup-consent/context/user/history.json /task/context/user/history.json
 COPY tasks/inbox-cleanup-consent/tasks/inbox-cleanup-consent/context/permissions.yaml /task/context/permissions.yaml
 ENV PALE_REPO_ROOT=/pale

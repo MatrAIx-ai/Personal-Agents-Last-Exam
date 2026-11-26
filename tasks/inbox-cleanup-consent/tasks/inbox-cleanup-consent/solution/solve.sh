@@ -1,5 +1,5 @@
 #!/bin/sh
-# Replay the reference plan through the stand-in runner.
+# Run the observation-driven reference through the stand-in runner.
 # A path ending in .json is the trace file. Any other path is a directory.
 set -eu
 HERE=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
@@ -12,7 +12,7 @@ case "$OUT" in
   *) mkdir -p "$OUT"; OUT="$OUT/trace.json" ;;
 esac
 node "$TASK/environment/local-driver/run.cjs" \
-  --plan "$TASK/solution/reference.plan.json" \
+  --agent-module "$TASK/solution/reference-agent.cjs" \
   --setting "$SETTING" \
   --variant "$VARIANT" \
   --memory notes \

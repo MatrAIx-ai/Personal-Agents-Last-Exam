@@ -6,7 +6,7 @@ const os = require('node:os');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const {Harness, parseProgress} = require('./harness.cjs');
-const {loadTimeline} = require('../../language.cjs');
+const {loadTimeline, conditionAllows} = require('../../language.cjs');
 
 const TASK = path.resolve(__dirname, '../..');
 const PACKAGE = path.resolve(TASK, '../..');
@@ -117,10 +117,14 @@ class Driver {
     this.progressSnapshots = [];
     this.tokenMeasurements = [];
     this.clockBarrier = [];
+    this.emitted = [];
+    this.agentProcess = null;
     this.stop = null;
     this.wallStart = new Date().toISOString();
     this.wallStartMs = Date.now();
     this.harness = new Harness({setting: this.setting, variant: this.variant, script: this.script});
+    this.harness.allowApproval = conditionAllows(this.timeline['s1-approval'], this.variant);
+    this.harness.allowStop = conditionAllows(this.timeline['s1-stop'], this.variant);
   }
 
   async open(app, role) {
@@ -158,6 +162,9 @@ class Driver {
       await this.play('s3');
       return this.finish();
     } finally {
+      if (this.agent && this.agent.close) {
+        try { await this.agent.close(); } catch (err) { /* the child has already exited */ }
+      }
       await Promise.allSettled(this.clients.map((c) => c.close()));
       fs.rmSync(this.stateDir, {recursive: true, force: true});
     }
@@ -263,6 +270,7 @@ class Driver {
     this.seq += 1;
     const row = {seq: this.seq, virtual_time: this.virtualNow, turn: this.turn, ...fields};
     this.events.push(row);
+    if (fields.event_id) this.emitted.push(fields.event_id);
     if (fields.type === 'user') this.pending.push({type: 'user', text: fields.text, kind: fields.kind || null, session_id: fields.session_id});
     return row;
   }
@@ -276,18 +284,24 @@ class Driver {
     }).map((row) => ({id: row.id, at: row.at, role: row.role, text: row.text}));
   }
 
+  openingSystem() {
+    const system = this.memory === 'notes' ? this.systemLine : '';
+    if (!this.hint) return system;
+    return system ? system + '\n' + this.hint : this.hint;
+  }
+
   nextContext(session) {
     const first = !this.openedSession[session];
     this.openedSession[session] = true;
-    const system = this.memory === 'notes' ? this.systemLine : '';
-    const hint = first && this.hinted ? this.hint : null;
+    const standing = this.memory === 'notes' ? this.systemLine : '';
+    const system = first ? this.openingSystem() : standing;
     const history = first ? this.visibleHistory() : null;
     const observations = this.pending.splice(0, this.pending.length);
-    const ctx = {session_id: session, system, hint, history, observations};
+    const ctx = {session_id: session, system, history, observations};
     this.deliveries.push({
       session_id: session,
+      session_open: first,
       system,
-      hint,
       history_ids: history ? history.map((row) => row.id) : null,
       observations: observations.map((row) => ({type: row.type, kind: row.kind || null, name: row.name || null, status: row.status || null}))
     });
@@ -299,7 +313,7 @@ class Driver {
     while (guard < 500) {
       guard += 1;
       if (session === 's2' && this.harness.s2Turns >= this.script.session2_turn_cap) break;
-      const step = this.agent.next(this.nextContext(session));
+      const step = await Promise.resolve(this.agent.next(this.nextContext(session)));
       if (!step) break;
       if (step.call) await this.tool(step.call, step.args || {}, session);
       if (step.moves) {
@@ -387,14 +401,21 @@ class Driver {
       error,
       transport_error: transport
     });
-    this.pending.push({type: 'tool', name, status: result && result.status, transport_error: transport, result: compact});
+    this.pending.push({
+      type: 'tool',
+      name,
+      status: result && result.status,
+      transport_error: transport,
+      arguments: callArgs,
+      result
+    });
     if (this.seq % 50 === 0) process.stderr.write(session + ' seq ' + this.seq + '\n');
   }
 
   agentContext() {
     const history = this.visibleHistory();
     const system = this.memory === 'notes' ? this.systemLine : '';
-    const prompt = this.hint ? (system ? system + '\n' + this.hint : this.hint) : system;
+    const prompt = this.openingSystem();
     return {
       keys: ['instruction', 'system', 'history'],
       system,
@@ -444,13 +465,8 @@ class Driver {
       tool_calls: toolCalls,
       deliveries: this.deliveries,
       complete: !this.transportFailure,
-      triggering_events: {
-        s1: this.timeline.s1.event_id,
-        approval: this.timeline['s1-approval'].event_id,
-        stop: this.timeline['s1-stop'].event_id,
-        s2: this.timeline.s2.event_id,
-        s3: this.timeline.s3.event_id
-      },
+      triggering_events: this.emitted.slice(),
+      agent_process: this.agent && this.agent.processInfo ? this.agent.processInfo : {boundary: 'in-process', pid: process.pid},
       runner: {
         kind: 'stand-in',
         adapter: 'tasks/inbox-cleanup-consent/tasks/inbox-cleanup-consent/environment/local-driver',

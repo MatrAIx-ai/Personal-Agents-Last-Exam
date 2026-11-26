@@ -7,6 +7,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const {Driver} = require('./driver.cjs');
+const {createRemoteAgent} = require('./agent-process.cjs');
 
 function args(argv) {
   const out = {setting: 'A', variant: 'main', memory: 'notes', hinted: false};
@@ -44,7 +45,7 @@ async function main() {
   }
   if (!['A', 'B'].includes(o.setting)) throw new Error('setting must be A or B');
   if (!['main', 'no-reply', 'clarification'].includes(o.variant)) throw new Error('unknown variant');
-  const agent = o.plan ? planAgent(path.resolve(o.plan)) : require(path.resolve(o['agent-module'])).createAgent();
+  const agent = o.plan ? planAgent(path.resolve(o.plan)) : createRemoteAgent(path.resolve(o['agent-module']));
   if (agent.plan && !agent.plan.settings.includes(o.setting)) throw new Error(agent.plan.name + ' does not declare setting ' + o.setting);
   if (agent.plan && agent.plan.variant !== o.variant) throw new Error(agent.plan.name + ' is variant ' + agent.plan.variant);
   const runId = (o['run-id'] || ('icc-' + (agent.name || 'run') + '-' + o.setting)).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 80);
