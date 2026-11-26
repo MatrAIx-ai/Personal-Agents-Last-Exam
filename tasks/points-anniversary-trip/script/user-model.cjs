@@ -67,7 +67,8 @@ function daniel(alerts) {
     if (payment) {
       const card = /hilton/i.test(payment) ? 'hilton-honors-amex' : 'debit';
       // He pays the amount the clause names, up to the $642 premium; with no amount, the premium.
-      const stated = /\$\s?(\d{1,3}(?:,\d{3})*|\d+)(?:\.(\d{2}))?/.exec(payment);
+      // The whole numeric token: "$1000" and "$1,000" are both a thousand dollars.
+      const stated = /\$\s?(\d[\d,]*)(?:\.(\d{2}))?/.exec(payment);
       const amount_cents = stated ? Math.min(PREMIUM_CENTS, Number(stated[1].replace(/,/g, '')) * 100 + Number(stated[2] || 0)) : PREMIUM_CENTS;
       actions.push({kind:'card.purchase', at:alert.fire_at, merchant:'Progressive', amount_cents, card,
         posts_at:card === 'debit' ? alert.fire_at : postsAt(alert.fire_at)});
@@ -80,8 +81,9 @@ function daniel(alerts) {
 }
 
 // What makes a text to Mei exact: an amount (a number or "all"), the Combine points method, and Daniel as destination.
-// The amount is the quantity of points asked for: a number with a points unit (points, pts, UR, k), or a
-// number right after send/transfer/move; years, dates and account numbers are not amounts.
+// The amount is the quantity of points asked for: a number with a points unit (points, pts, UR, k), a
+// number right after send/transfer/move, or the number of an amount-entry step ("enter 165,400",
+// "amount: 165400", "> 165,400 >"); years, dates and account numbers are not amounts.
 function amountOf(text) {
   const plain = text.replace(/(\d),(\d{3})/g, '$1$2');
   const unit = plain.match(/\b(\d{1,7}(?:\.\d+)?)\s*(k\b|thousand\b)?\s*(?:chase\s+|ultimate rewards\s+|ur\s+)?(points|pts|ur)\b/i)
@@ -89,7 +91,9 @@ function amountOf(text) {
   if (unit) return Math.round(Number(unit[1]) * (unit[2] ? 1000 : 1));
   if (/\ball\s+(of\s+)?(your|her|the)?\s*(chase\s+|ur\s+)?points\b/i.test(plain)) return 'all';
   const verb = plain.match(/\b(?:send|transfer|move|combine)\b(?:\s+(?:at least|about|exactly|over|me|us|daniel))*\s+(\d{4,7})\b/i);
-  return verb ? Number(verb[1]) : null;
+  if (verb) return Number(verb[1]);
+  const entry = plain.match(/(?:\b(?:enter|type|input|amount)\b\s*:?|>|→)\s*(\d{4,7})(?![\d\/-])\b/i);
+  return entry ? Number(entry[1]) : null;
 }
 // The destination must be part of the transfer instruction: a clause with send/transfer/move/combine/give that
 // says where the points go ("to me", "to Daniel", "into my account", "send me"). "Text me" or "ask me which

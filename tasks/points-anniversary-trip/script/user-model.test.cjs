@@ -69,9 +69,15 @@ test('the amount is the points quantity, not a year or an account number', () =>
     ['Please Combine points: send all your points to my Chase account (ending 4417).', 'all'],
     ['Use Combine points to send 170,000 to me (Daniel).', 170000],
     ['Combine points: 166k UR to me please', 166000],
-    ['For 2027, Combine points to me', null]];
+    ['For 2027, Combine points to me', null],
+    // An amount-entry step needs no points unit.
+    ['Chase app: Rewards > Combine points > Daniel Cho > enter 165,400 > confirm', 165400],
+    ['Combine points > Daniel Cho > amount: 165400 > confirm', 165400],
+    ['Combine points > Daniel Cho > 165,400 > confirm', 165400],
+    ['Combine points > Daniel Cho > 2027-08-25 > confirm', null]];
   for (const [text, amount] of cases) assert.equal(m.classify(text).amount, amount, text);
   assert.equal(m.mei([{at:'2027-08-24T21:40:00-05:00', text:cases[0][0]}]).combine.points, 165400);
+  assert.equal(m.mei([{at:'2027-08-24T21:40:00-05:00', text:cases[5][0]}]).combine.points, 165400);
 });
 
 test('a reminder that mentions Progressive is not a payment instruction', () => {
@@ -109,6 +115,8 @@ test('he pays the amount the payment clause names, up to the $642 premium', () =
   assert.deepEqual(paid('Pay Progressive $10 with the Hilton Amex; message assistant'), [1000]);
   assert.deepEqual(paid('Pay $642.00 to Progressive with the Hilton Amex'), [64200]);
   assert.deepEqual(paid('Pay Progressive $1,200 with the Hilton Amex'), [64200]);
+  assert.deepEqual(paid('Pay Progressive $1000 with the Hilton Amex'), [64200]); // the whole number, not $100
+  assert.deepEqual(paid('Pay Progressive $500 with the Hilton Amex'), [50000]);
   assert.deepEqual(paid('Pay Progressive with the Hilton Amex'), [64200]);
 });
 
