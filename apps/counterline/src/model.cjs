@@ -1,6 +1,6 @@
 'use strict';
 // Seed validation and record enumeration for Core.
-const { fail, unique, ms } = require('./util.cjs');
+const { fail, unique, ms, effectiveReports } = require('./util.cjs');
 function bindingRefs(ctx, data) {
   const person = ctx.binding.people.some(p => p.person_id === data.owner_person_id);
   const account = ctx.binding.accounts.some(a => a.app_id === ctx.app_id && a.account_id === data.account_id && a.owner_person_id === data.owner_person_id);
@@ -63,7 +63,7 @@ function validateSeed(ctx, data) {
     if (o.case_id !== m.case_id || !c || c.account_ref !== m.account_ref) fail('invalid_seed', `Commitment ${m.commitment_id} does not match its offer's case.`);
     if (m.provider_id !== p.provider_id || m.kind !== o.kind || JSON.stringify(m.value) !== JSON.stringify(o.value)) fail('invalid_seed', `Commitment ${m.commitment_id} does not match its provider or offer.`);
     if (m.conditional !== (o.conditions.length > 0)) fail('invalid_seed', `Commitment ${m.commitment_id} conditional flag does not match its offer.`);
-    const reported = m.reports.reduce((sum, r) => sum + r.amount_minor, 0);
+    const reported = effectiveReports(m).reduce((sum, r) => sum + r.amount_minor, 0);
     if (m.value && (reported > m.value.amount_minor || m.reports.some(r => r.currency !== m.value.currency))) fail('invalid_seed', `Commitment ${m.commitment_id} reports exceed or mismatch its value.`);
     if (m.status === 'pending' && m.reports.length && !(m.contest && m.contest.outcome === 'reissued')) fail('invalid_seed', `Commitment ${m.commitment_id} has reports but is still pending.`);
     if ((m.status === 'contested') !== (m.contest !== null && m.contest.outcome === null)) fail('invalid_seed', `Commitment ${m.commitment_id} must carry an open contest exactly when it is contested.`);
@@ -74,6 +74,7 @@ function validateSeed(ctx, data) {
 const records = data => [...data.help_articles, ...data.cases, ...data.offers, ...data.commitments, ...data.confirmations, ...data.outbox];
 const objects = data => [
   ...data.help_articles.map(a => a.article_id), ...data.cases.map(c => c.case_id),
-  ...data.offers.map(o => o.offer_id), ...data.commitments.map(m => m.commitment_id)
+  ...data.offers.map(o => o.offer_id), ...data.commitments.map(m => m.commitment_id),
+  ...data.confirmations.map(x => x.token), ...data.outbox.map(n => n.notification_id)
 ];
 module.exports = { validateSeed, records, objects, references: () => [] };

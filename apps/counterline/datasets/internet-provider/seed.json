@@ -1,0 +1,6367 @@
+{
+ "account_id": "counterline-jordan",
+ "owner_person_id": "person-jordan",
+ "provider": {
+  "provider_id": "isp-kestrel",
+  "name": "Kestrel Fiber",
+  "kind": "internet_provider",
+  "time_zone": "America/New_York",
+  "reopen_days": 30,
+  "identity_policy": {
+   "required": [
+    "full_name",
+    "billing_zip"
+   ],
+   "accepted": [
+    "full_name",
+    "billing_zip",
+    "last_four"
+   ]
+  },
+  "departments": [
+   {
+    "department_id": "dep-billing",
+    "name": "Billing Support",
+    "aliases": [
+     "billing"
+    ],
+    "tier": "frontline",
+    "transfer": "allowed"
+   },
+   {
+    "department_id": "dep-review",
+    "name": "Billing Review",
+    "aliases": [
+     "supervisor",
+     "manager",
+     "escalations"
+    ],
+    "tier": "specialist",
+    "transfer": "refused"
+   }
+  ],
+  "topics": [
+   {
+    "topic_id": "refund_status",
+    "title": "Status of a refund",
+    "greeting_script_id": "greet-status",
+    "identity_required": false
+   },
+   {
+    "topic_id": "billing_review",
+    "title": "A charge on my bill",
+    "greeting_script_id": "greet-billing",
+    "identity_required": true
+   },
+   {
+    "topic_id": "outage_credit",
+    "title": "Credit for a service outage",
+    "greeting_script_id": "greet-outage",
+    "identity_required": true
+   },
+   {
+    "topic_id": "plan_change",
+    "title": "Change my plan",
+    "greeting_script_id": "greet-plan",
+    "identity_required": true
+   },
+   {
+    "topic_id": "equipment",
+    "title": "A problem with my router",
+    "greeting_script_id": "greet-general",
+    "identity_required": false
+   },
+   {
+    "topic_id": "moving",
+    "title": "Moving to a new address",
+    "greeting_script_id": "greet-general",
+    "identity_required": false
+   }
+  ],
+  "scripts": [
+   {
+    "script_id": "greet-status",
+    "text": "Thanks for contacting Kestrel Fiber. I can check on a refund or credit we promised you."
+   },
+   {
+    "script_id": "greet-billing",
+    "text": "Thanks for contacting Kestrel Fiber billing. To look at your bill, please confirm the name on the account and your billing ZIP code."
+   },
+   {
+    "script_id": "followup-refund-processed",
+    "text": "Your refund has been processed."
+   },
+   {
+    "script_id": "greet-outage",
+    "text": "Thanks for contacting Kestrel Fiber. I can check outage credits. Please confirm the name on the account and your billing ZIP code."
+   },
+   {
+    "script_id": "greet-plan",
+    "text": "Thanks for contacting Kestrel Fiber. I can look at plan options. Please confirm the name on the account and your billing ZIP code."
+   },
+   {
+    "script_id": "greet-general",
+    "text": "Thanks for contacting Kestrel Fiber. How can I help today?"
+   }
+  ],
+  "offer_catalog": [
+   {
+    "catalog_id": "cat-dup-f1",
+    "topic_id": "billing_review",
+    "tier": "frontline",
+    "stage": "initial",
+    "kind": "refund",
+    "title": "Duplicate charge refund",
+    "terms": "A refund of the duplicate router rental line, 8.00 per affected bill.",
+    "value": {
+     "amount_minor": 800,
+     "currency": "USD"
+    },
+    "conditions": [],
+    "group": "billing_review-relief",
+    "expires_hours": 72,
+    "perform_days": 10
+   },
+   {
+    "catalog_id": "cat-out-f1",
+    "topic_id": "outage_credit",
+    "tier": "frontline",
+    "stage": "initial",
+    "kind": "statement_credit",
+    "title": "Outage credit",
+    "terms": "A 15.00 credit on your next bill for the outage.",
+    "value": {
+     "amount_minor": 1500,
+     "currency": "USD"
+    },
+    "conditions": [],
+    "group": "outage_credit-relief",
+    "expires_hours": 72,
+    "perform_days": 10
+   },
+   {
+    "catalog_id": "cat-plan-f1",
+    "topic_id": "plan_change",
+    "tier": "frontline",
+    "stage": "initial",
+    "kind": "product_change",
+    "title": "Switch to Fiber 300",
+    "terms": "Move to the Fiber 300 plan at 45.00 a month from your next bill.",
+    "value": null,
+    "conditions": [],
+    "group": "plan_change-relief",
+    "expires_hours": 72,
+    "perform_days": 14
+   }
+  ]
+ },
+ "customer_record": {
+  "full_name": "Jordan Avery",
+  "last_four": "7731",
+  "billing_zip": "02139",
+  "date_of_birth": null
+ },
+ "preferences": {
+  "email_copies": false
+ },
+ "help_articles": [
+  {
+   "article_id": "kb-refunds",
+   "title": "Refund timing",
+   "body": "Refunds we promise in chat are sent to your payment method within 10 days. Your bank statement is the record that the money arrived.",
+   "tags": [
+    "refund",
+    "timing"
+   ],
+   "updated_at": "2025-04-21T09:00:00-04:00"
+  },
+  {
+   "article_id": "kb-escalation",
+   "title": "Escalations",
+   "body": "Billing questions are handled by Billing Support. Chat agents do not transfer cases to Billing Review; to request a review, describe the charge and the invoices it appears on.",
+   "tags": [
+    "escalation",
+    "billing review"
+   ],
+   "updated_at": "2025-09-15T10:00:00-04:00"
+  },
+  {
+   "article_id": "kb-outages",
+   "title": "Outage credits",
+   "body": "If service is down for more than 4 hours, ask for an outage credit in chat.",
+   "tags": [
+    "outage",
+    "credit"
+   ],
+   "updated_at": "2025-07-07T10:00:00-04:00"
+  },
+  {
+   "article_id": "kb-moving",
+   "title": "Moving your service",
+   "body": "Tell us your new address two weeks before you move.",
+   "tags": [
+    "moving"
+   ],
+   "updated_at": "2026-03-02T10:00:00-05:00"
+  }
+ ],
+ "cases": [
+  {
+   "case_id": "cs-0001",
+   "topic_id": "refund_status",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-01-07T18:15:00-05:00",
+   "closed_at": "2025-01-10T18:15:00-05:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-01-07T18:15:00-05:00",
+     "speaker": "customer",
+     "text": "Can you check on the refund you promised me?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-01-07T18:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check on a refund or credit we promised you.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:refund_status:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-01-07T18:15:00-05:00",
+     "speaker": "customer",
+     "text": "Any update? I am still waiting.",
+     "source": "text",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-01-07T18:15:00-05:00",
+     "speaker": "representative",
+     "text": "I do not see an open credit or refund on this account.",
+     "source": "system",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": "ask_status:none"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-01-07T18:15:00-05:00",
+     "speaker": "customer",
+     "text": "Please transfer me to Billing Review.",
+     "source": "text",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-01-07T18:15:00-05:00",
+     "speaker": "representative",
+     "text": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+     "source": "system",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": "request_transfer:refused"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2025-01-07T18:15:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2025-01-07T18:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2025-01-10T18:15:00-05:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0002",
+   "topic_id": "moving",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2025-01-13T08:45:00-05:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-01-13T08:45:00-05:00",
+     "speaker": "customer",
+     "text": "I am moving next month. Can I keep my plan?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-01-13T08:45:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:moving:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-01-13T08:45:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-01-13T08:45:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0003",
+   "topic_id": "billing_review",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-01-14T11:45:00-05:00",
+   "closed_at": "2025-02-03T11:45:00-05:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2025-01-14T11:45:00-05:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-01-14T11:45:00-05:00",
+     "speaker": "customer",
+     "text": "My bill charged me twice for the router.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-01-14T11:45:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber billing. To look at your bill, please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:billing_review:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-01-14T11:45:00-05:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-01-14T11:45:00-05:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-01-14T11:45:00-05:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Duplicate charge refund (8.00): A refund of the duplicate router rental line, 8.00 per affected bill. Available until 2025-01-17 11:45.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-01-14T11:45:00-05:00",
+     "speaker": "representative",
+     "text": "Your Duplicate charge refund (8.00) is confirmed and is due by 2025-01-24.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2025-01-14T11:45:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2025-01-14T11:45:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2025-02-03T11:45:00-05:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0004",
+   "topic_id": "outage_credit",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-02-25T14:15:00-05:00",
+   "closed_at": "2025-03-17T15:15:00-04:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2025-02-25T14:15:00-05:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-02-25T14:15:00-05:00",
+     "speaker": "customer",
+     "text": "My internet was down for most of yesterday.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-02-25T14:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check outage credits. Please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:outage_credit:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-02-25T14:15:00-05:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-02-25T14:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-02-25T14:15:00-05:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Outage credit (15.00): A 15.00 credit on your next bill for the outage. Available until 2025-02-28 14:15.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-02-25T14:15:00-05:00",
+     "speaker": "representative",
+     "text": "Your Outage credit (15.00) is confirmed and is due by 2025-03-07.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2025-02-25T14:15:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2025-02-25T14:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2025-03-17T15:15:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0005",
+   "topic_id": "equipment",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2025-02-25T19:00:00-05:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-02-25T19:00:00-05:00",
+     "speaker": "customer",
+     "text": "Can I use my own router?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-02-25T19:00:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:equipment:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-02-25T19:00:00-05:00",
+     "speaker": "customer",
+     "text": "Please transfer me to Billing Review.",
+     "source": "text",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-02-25T19:00:00-05:00",
+     "speaker": "representative",
+     "text": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+     "source": "system",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": "request_transfer:refused"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-02-25T19:00:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-02-25T19:00:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0006",
+   "topic_id": "equipment",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-03-22T15:15:00-04:00",
+   "closed_at": "2025-03-25T15:15:00-04:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-03-22T15:15:00-04:00",
+     "speaker": "customer",
+     "text": "The Wi-Fi light on my router is red.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-03-22T15:15:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:equipment:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-03-22T15:15:00-04:00",
+     "speaker": "customer",
+     "text": "Please transfer me to Billing Review.",
+     "source": "text",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-03-22T15:15:00-04:00",
+     "speaker": "representative",
+     "text": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+     "source": "system",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": "request_transfer:refused"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-03-22T15:15:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-03-22T15:15:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2025-03-25T15:15:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0007",
+   "topic_id": "equipment",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-04-05T15:45:00-04:00",
+   "closed_at": "2025-04-08T15:45:00-04:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-04-05T15:45:00-04:00",
+     "speaker": "customer",
+     "text": "Can I use my own router?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-04-05T15:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:equipment:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-04-05T15:45:00-04:00",
+     "speaker": "customer",
+     "text": "Please transfer me to Billing Review.",
+     "source": "text",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-04-05T15:45:00-04:00",
+     "speaker": "representative",
+     "text": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+     "source": "system",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": "request_transfer:refused"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-04-05T15:45:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-04-05T15:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2025-04-08T15:45:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0008",
+   "topic_id": "billing_review",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-04-08T13:00:00-04:00",
+   "closed_at": "2025-04-28T13:00:00-04:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2025-04-08T13:00:00-04:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-04-08T13:00:00-04:00",
+     "speaker": "customer",
+     "text": "There is a router rental line twice on my bill again.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-04-08T13:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber billing. To look at your bill, please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:billing_review:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-04-08T13:00:00-04:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-04-08T13:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-04-08T13:00:00-04:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Duplicate charge refund (8.00): A refund of the duplicate router rental line, 8.00 per affected bill. Available until 2025-04-11 13:00.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-04-08T13:00:00-04:00",
+     "speaker": "representative",
+     "text": "Your Duplicate charge refund (8.00) is confirmed and is due by 2025-04-18.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2025-04-08T13:00:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2025-04-08T13:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2025-04-13T13:00:00-04:00",
+     "speaker": "representative",
+     "text": "Your refund has been processed.",
+     "source": "script",
+     "recognized": [],
+     "rule": "followup:followup-refund-processed"
+    },
+    {
+     "turn_id": "t-0010",
+     "at": "2025-04-28T13:00:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0009",
+   "topic_id": "equipment",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2025-04-19T19:00:00-04:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-04-19T19:00:00-04:00",
+     "speaker": "customer",
+     "text": "The Wi-Fi light on my router is red.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-04-19T19:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:equipment:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-04-19T19:00:00-04:00",
+     "speaker": "customer",
+     "text": "Please transfer me to Billing Review.",
+     "source": "text",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-04-19T19:00:00-04:00",
+     "speaker": "representative",
+     "text": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+     "source": "system",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": "request_transfer:refused"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-04-19T19:00:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-04-19T19:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0010",
+   "topic_id": "refund_status",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2025-05-05T11:15:00-04:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-05-05T11:15:00-04:00",
+     "speaker": "customer",
+     "text": "Can you check on the refund you promised me?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-05-05T11:15:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check on a refund or credit we promised you.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:refund_status:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-05-05T11:15:00-04:00",
+     "speaker": "customer",
+     "text": "Any update? I am still waiting.",
+     "source": "text",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-05-05T11:15:00-04:00",
+     "speaker": "representative",
+     "text": "Our records show the Duplicate charge refund was completed (reference RF-001). Our records show the Outage credit was completed (reference RF-002). The Duplicate charge refund we promised is late: it was due by 2025-04-18. I have noted that on your case.",
+     "source": "system",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": "ask_status:reported"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-05-05T11:15:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-05-05T11:15:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0011",
+   "topic_id": "equipment",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-05-09T12:00:00-04:00",
+   "closed_at": "2025-05-12T12:00:00-04:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-05-09T12:00:00-04:00",
+     "speaker": "customer",
+     "text": "Can I use my own router?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-05-09T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:equipment:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-05-09T12:00:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-05-09T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-05-12T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0012",
+   "topic_id": "outage_credit",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-05-20T09:45:00-04:00",
+   "closed_at": "2025-06-09T09:45:00-04:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2025-05-20T09:45:00-04:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-05-20T09:45:00-04:00",
+     "speaker": "customer",
+     "text": "Service was out for six hours on Saturday.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-05-20T09:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check outage credits. Please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:outage_credit:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-05-20T09:45:00-04:00",
+     "speaker": "customer",
+     "text": "Can I talk to a supervisor in Billing Review?",
+     "source": "text",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-05-20T09:45:00-04:00",
+     "speaker": "representative",
+     "text": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+     "source": "system",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": "request_transfer:refused"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-05-20T09:45:00-04:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-05-20T09:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2025-05-20T09:45:00-04:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Outage credit (15.00): A 15.00 credit on your next bill for the outage. Available until 2025-05-23 09:45.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2025-05-20T09:45:00-04:00",
+     "speaker": "representative",
+     "text": "Your Outage credit (15.00) is confirmed and is due by 2025-05-30.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2025-05-20T09:45:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0010",
+     "at": "2025-05-20T09:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0011",
+     "at": "2025-06-09T09:45:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0013",
+   "topic_id": "plan_change",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-06-24T17:45:00-04:00",
+   "closed_at": "2025-07-14T17:45:00-04:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2025-06-24T17:45:00-04:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-06-24T17:45:00-04:00",
+     "speaker": "customer",
+     "text": "I would like a slower, cheaper plan.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-06-24T17:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can look at plan options. Please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:plan_change:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-06-24T17:45:00-04:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-06-24T17:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-06-24T17:45:00-04:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Switch to Fiber 300: Move to the Fiber 300 plan at 45.00 a month from your next bill. Available until 2025-06-27 17:45.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-06-24T17:45:00-04:00",
+     "speaker": "representative",
+     "text": "Your Switch to Fiber 300 is confirmed and is due by 2025-07-08.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2025-06-24T17:45:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2025-06-24T17:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2025-07-14T17:45:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0014",
+   "topic_id": "equipment",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2025-06-25T18:30:00-04:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-06-25T18:30:00-04:00",
+     "speaker": "customer",
+     "text": "The Wi-Fi light on my router is red.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-06-25T18:30:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:equipment:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-06-25T18:30:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-06-25T18:30:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0015",
+   "topic_id": "moving",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2025-07-08T16:45:00-04:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-07-08T16:45:00-04:00",
+     "speaker": "customer",
+     "text": "How do I move my service to a new apartment?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-07-08T16:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:moving:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-07-08T16:45:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-07-08T16:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0016",
+   "topic_id": "refund_status",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2025-07-10T15:00:00-04:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-07-10T15:00:00-04:00",
+     "speaker": "customer",
+     "text": "Can you check on the refund you promised me?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-07-10T15:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check on a refund or credit we promised you.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:refund_status:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-07-10T15:00:00-04:00",
+     "speaker": "customer",
+     "text": "Any update? I am still waiting.",
+     "source": "text",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-07-10T15:00:00-04:00",
+     "speaker": "representative",
+     "text": "Our records show the Duplicate charge refund was completed (reference RF-001). Our records show the Outage credit was completed (reference RF-002). The Duplicate charge refund we promised is late: it was due by 2025-04-18. I have noted that on your case. Our records show the Outage credit was completed (reference RF-004). Our records show the Switch to Fiber 300 was completed (reference RF-005).",
+     "source": "system",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": "ask_status:reported"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-07-10T15:00:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-07-10T15:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0017",
+   "topic_id": "outage_credit",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-08-05T15:00:00-04:00",
+   "closed_at": "2025-08-25T15:00:00-04:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2025-08-05T15:00:00-04:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-08-05T15:00:00-04:00",
+     "speaker": "customer",
+     "text": "Service was out for six hours on Saturday.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-08-05T15:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check outage credits. Please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:outage_credit:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-08-05T15:00:00-04:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-08-05T15:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-08-05T15:00:00-04:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Outage credit (15.00): A 15.00 credit on your next bill for the outage. Available until 2025-08-08 15:00.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-08-05T15:00:00-04:00",
+     "speaker": "representative",
+     "text": "Your Outage credit (15.00) is confirmed and is due by 2025-08-15.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2025-08-05T15:00:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2025-08-05T15:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2025-08-16T15:00:00-04:00",
+     "speaker": "representative",
+     "text": "We have opened a review of this commitment and will answer in this case.",
+     "source": "system",
+     "recognized": [],
+     "rule": "commitment:contested"
+    },
+    {
+     "turn_id": "t-0010",
+     "at": "2025-08-19T15:00:00-04:00",
+     "speaker": "representative",
+     "text": "We reviewed your contest and are reissuing this commitment under reference RF-007.",
+     "source": "system",
+     "recognized": [],
+     "rule": "contest:reissued"
+    },
+    {
+     "turn_id": "t-0011",
+     "at": "2025-08-25T15:00:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0018",
+   "topic_id": "equipment",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2025-08-12T19:30:00-04:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-08-12T19:30:00-04:00",
+     "speaker": "customer",
+     "text": "The Wi-Fi light on my router is red.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-08-12T19:30:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:equipment:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-08-12T19:30:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-08-12T19:30:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0019",
+   "topic_id": "billing_review",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-09-16T17:45:00-04:00",
+   "closed_at": "2025-10-06T17:45:00-04:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2025-09-16T17:45:00-04:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-09-16T17:45:00-04:00",
+     "speaker": "customer",
+     "text": "My bill charged me twice for the router.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-09-16T17:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber billing. To look at your bill, please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:billing_review:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-09-16T17:45:00-04:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-09-16T17:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-09-16T17:45:00-04:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Duplicate charge refund (8.00): A refund of the duplicate router rental line, 8.00 per affected bill. Available until 2025-09-19 17:45.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-09-16T17:45:00-04:00",
+     "speaker": "representative",
+     "text": "Your Duplicate charge refund (8.00) is confirmed and is due by 2025-09-26.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2025-09-16T17:45:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2025-09-16T17:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2025-09-18T17:45:00-04:00",
+     "speaker": "representative",
+     "text": "We are unable to complete this commitment: the charge was already reversed by another adjustment.",
+     "source": "system",
+     "recognized": [],
+     "rule": "commitment:revoked"
+    },
+    {
+     "turn_id": "t-0010",
+     "at": "2025-10-06T17:45:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0020",
+   "topic_id": "moving",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-09-19T09:15:00-04:00",
+   "closed_at": "2025-09-22T09:15:00-04:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-09-19T09:15:00-04:00",
+     "speaker": "customer",
+     "text": "I am moving next month. Can I keep my plan?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-09-19T09:15:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:moving:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-09-19T09:15:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-09-19T09:15:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-09-22T09:15:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0021",
+   "topic_id": "moving",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2025-09-22T16:00:00-04:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-09-22T16:00:00-04:00",
+     "speaker": "customer",
+     "text": "I am moving next month. Can I keep my plan?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-09-22T16:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:moving:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-09-22T16:00:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-09-22T16:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0022",
+   "topic_id": "moving",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-10-13T19:45:00-04:00",
+   "closed_at": "2025-10-16T19:45:00-04:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-10-13T19:45:00-04:00",
+     "speaker": "customer",
+     "text": "How do I move my service to a new apartment?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-10-13T19:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:moving:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-10-13T19:45:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-10-13T19:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-10-16T19:45:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0023",
+   "topic_id": "outage_credit",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-10-28T13:00:00-04:00",
+   "closed_at": "2025-11-17T12:00:00-05:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2025-10-28T13:00:00-04:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-10-28T13:00:00-04:00",
+     "speaker": "customer",
+     "text": "Service was out for six hours on Saturday.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-10-28T13:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check outage credits. Please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:outage_credit:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-10-28T13:00:00-04:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-10-28T13:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-10-28T13:00:00-04:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Outage credit (15.00): A 15.00 credit on your next bill for the outage. Available until 2025-10-31 13:00.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-10-28T13:00:00-04:00",
+     "speaker": "representative",
+     "text": "Your Outage credit (15.00) is confirmed and is due by 2025-11-07.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2025-10-28T13:00:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2025-10-28T13:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2025-11-17T12:00:00-05:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0024",
+   "topic_id": "moving",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2025-11-07T10:00:00-05:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-11-07T10:00:00-05:00",
+     "speaker": "customer",
+     "text": "How do I move my service to a new apartment?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-11-07T10:00:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:moving:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-11-07T10:00:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-11-07T10:00:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0025",
+   "topic_id": "billing_review",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-12-02T10:30:00-05:00",
+   "closed_at": "2025-12-22T10:30:00-05:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2025-12-02T10:30:00-05:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-12-02T10:30:00-05:00",
+     "speaker": "customer",
+     "text": "There is a router rental line twice on my bill again.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-12-02T10:30:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber billing. To look at your bill, please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:billing_review:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-12-02T10:30:00-05:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-12-02T10:30:00-05:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-12-02T10:30:00-05:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Duplicate charge refund (8.00): A refund of the duplicate router rental line, 8.00 per affected bill. Available until 2025-12-05 10:30.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2025-12-02T10:30:00-05:00",
+     "speaker": "representative",
+     "text": "Your Duplicate charge refund (8.00) is confirmed and is due by 2025-12-12.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2025-12-02T10:30:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2025-12-02T10:30:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2025-12-13T10:30:00-05:00",
+     "speaker": "representative",
+     "text": "We have opened a review of this commitment and will answer in this case.",
+     "source": "system",
+     "recognized": [],
+     "rule": "commitment:contested"
+    },
+    {
+     "turn_id": "t-0010",
+     "at": "2025-12-16T10:30:00-05:00",
+     "speaker": "representative",
+     "text": "We reviewed your contest and our record stands.",
+     "source": "system",
+     "recognized": [],
+     "rule": "contest:upheld"
+    },
+    {
+     "turn_id": "t-0011",
+     "at": "2025-12-22T10:30:00-05:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0026",
+   "topic_id": "moving",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2025-12-15T09:15:00-05:00",
+   "closed_at": "2025-12-18T09:15:00-05:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2025-12-15T09:15:00-05:00",
+     "speaker": "customer",
+     "text": "How do I move my service to a new apartment?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2025-12-15T09:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:moving:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2025-12-15T09:15:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2025-12-15T09:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2025-12-18T09:15:00-05:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0027",
+   "topic_id": "equipment",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-01-02T10:00:00-05:00",
+   "closed_at": "2026-01-05T10:00:00-05:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-01-02T10:00:00-05:00",
+     "speaker": "customer",
+     "text": "Can I use my own router?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-01-02T10:00:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:equipment:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-01-02T10:00:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-01-02T10:00:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-01-05T10:00:00-05:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0028",
+   "topic_id": "refund_status",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-01-07T14:15:00-05:00",
+   "closed_at": "2026-01-10T14:15:00-05:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-01-07T14:15:00-05:00",
+     "speaker": "customer",
+     "text": "Can you check on the refund you promised me?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-01-07T14:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check on a refund or credit we promised you.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:refund_status:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-01-07T14:15:00-05:00",
+     "speaker": "customer",
+     "text": "Any update? I am still waiting.",
+     "source": "text",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-01-07T14:15:00-05:00",
+     "speaker": "representative",
+     "text": "Our records show the Duplicate charge refund was completed (reference RF-001). Our records show the Outage credit was completed (reference RF-002). The Duplicate charge refund we promised is late: it was due by 2025-04-18. I have noted that on your case. Our records show the Outage credit was completed (reference RF-004). Our records show the Switch to Fiber 300 was completed (reference RF-005). Our records show the Outage credit was completed (reference RF-008). Our records show the Outage credit was completed (reference RF-009). Our records show the Duplicate charge refund was completed (reference RF-010).",
+     "source": "system",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": "ask_status:reported"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-01-07T14:15:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-01-07T14:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2026-01-10T14:15:00-05:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0029",
+   "topic_id": "outage_credit",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-01-20T14:45:00-05:00",
+   "closed_at": "2026-02-09T14:45:00-05:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2026-01-20T14:45:00-05:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-01-20T14:45:00-05:00",
+     "speaker": "customer",
+     "text": "Service was out for six hours on Saturday.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-01-20T14:45:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check outage credits. Please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:outage_credit:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-01-20T14:45:00-05:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-01-20T14:45:00-05:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-01-20T14:45:00-05:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Outage credit (15.00): A 15.00 credit on your next bill for the outage. Available until 2026-01-23 14:45.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-01-20T14:45:00-05:00",
+     "speaker": "representative",
+     "text": "Your Outage credit (15.00) is confirmed and is due by 2026-01-30.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2026-01-20T14:45:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2026-01-20T14:45:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2026-02-09T14:45:00-05:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0030",
+   "topic_id": "refund_status",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-02-17T10:00:00-05:00",
+   "closed_at": "2026-02-20T10:00:00-05:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-02-17T10:00:00-05:00",
+     "speaker": "customer",
+     "text": "Can you check on the refund you promised me?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-02-17T10:00:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check on a refund or credit we promised you.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:refund_status:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-02-17T10:00:00-05:00",
+     "speaker": "customer",
+     "text": "Any update? I am still waiting.",
+     "source": "text",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-02-17T10:00:00-05:00",
+     "speaker": "representative",
+     "text": "Our records show the Duplicate charge refund was completed (reference RF-001). Our records show the Outage credit was completed (reference RF-002). The Duplicate charge refund we promised is late: it was due by 2025-04-18. I have noted that on your case. Our records show the Outage credit was completed (reference RF-004). Our records show the Switch to Fiber 300 was completed (reference RF-005). Our records show the Outage credit was completed (reference RF-008). Our records show the Outage credit was completed (reference RF-009). Our records show the Duplicate charge refund was completed (reference RF-010). Our records show the Outage credit was completed (reference RF-011).",
+     "source": "system",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": "ask_status:reported"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-02-17T10:00:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-02-17T10:00:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2026-02-20T10:00:00-05:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0031",
+   "topic_id": "billing_review",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-03-03T12:15:00-05:00",
+   "closed_at": "2026-03-23T13:15:00-04:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2026-03-03T12:15:00-05:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-03-03T12:15:00-05:00",
+     "speaker": "customer",
+     "text": "There is a router rental line twice on my bill again.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-03-03T12:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber billing. To look at your bill, please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:billing_review:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-03-03T12:15:00-05:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-03-03T12:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-03-03T12:15:00-05:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Duplicate charge refund (8.00): A refund of the duplicate router rental line, 8.00 per affected bill. Available until 2026-03-06 12:15.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-03-03T12:15:00-05:00",
+     "speaker": "representative",
+     "text": "Your Duplicate charge refund (8.00) is confirmed and is due by 2026-03-13.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2026-03-03T12:15:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2026-03-03T12:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2026-03-23T13:15:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0032",
+   "topic_id": "equipment",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-03-26T19:30:00-04:00",
+   "closed_at": "2026-03-29T19:30:00-04:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-03-26T19:30:00-04:00",
+     "speaker": "customer",
+     "text": "Can I use my own router?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-03-26T19:30:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:equipment:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-03-26T19:30:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-03-26T19:30:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-03-29T19:30:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0033",
+   "topic_id": "refund_status",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2026-04-06T18:00:00-04:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-04-06T18:00:00-04:00",
+     "speaker": "customer",
+     "text": "Can you check on the refund you promised me?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-04-06T18:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check on a refund or credit we promised you.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:refund_status:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-04-06T18:00:00-04:00",
+     "speaker": "customer",
+     "text": "Any update? I am still waiting.",
+     "source": "text",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-04-06T18:00:00-04:00",
+     "speaker": "representative",
+     "text": "Our records show the Duplicate charge refund was completed (reference RF-001). Our records show the Outage credit was completed (reference RF-002). The Duplicate charge refund we promised is late: it was due by 2025-04-18. I have noted that on your case. Our records show the Outage credit was completed (reference RF-004). Our records show the Switch to Fiber 300 was completed (reference RF-005). Our records show the Outage credit was completed (reference RF-008). Our records show the Outage credit was completed (reference RF-009). Our records show the Duplicate charge refund was completed (reference RF-010). Our records show the Outage credit was completed (reference RF-011). Our records show the Duplicate charge refund was completed (reference RF-012).",
+     "source": "system",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": "ask_status:reported"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-04-06T18:00:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-04-06T18:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0034",
+   "topic_id": "plan_change",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-04-14T14:45:00-04:00",
+   "closed_at": "2026-05-04T14:45:00-04:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2026-04-14T14:45:00-04:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-04-14T14:45:00-04:00",
+     "speaker": "customer",
+     "text": "Do you have a cheaper plan?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-04-14T14:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can look at plan options. Please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:plan_change:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-04-14T14:45:00-04:00",
+     "speaker": "customer",
+     "text": "Can I talk to a supervisor in Billing Review?",
+     "source": "text",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-04-14T14:45:00-04:00",
+     "speaker": "representative",
+     "text": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+     "source": "system",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": "request_transfer:refused"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-04-14T14:45:00-04:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-04-14T14:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2026-04-14T14:45:00-04:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Switch to Fiber 300: Move to the Fiber 300 plan at 45.00 a month from your next bill. Available until 2026-04-17 14:45.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2026-04-14T14:45:00-04:00",
+     "speaker": "representative",
+     "text": "Your Switch to Fiber 300 is confirmed and is due by 2026-04-28.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2026-04-14T14:45:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0010",
+     "at": "2026-04-14T14:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0011",
+     "at": "2026-05-04T14:45:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0035",
+   "topic_id": "equipment",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-04-25T15:00:00-04:00",
+   "closed_at": "2026-04-28T15:00:00-04:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-04-25T15:00:00-04:00",
+     "speaker": "customer",
+     "text": "Can I use my own router?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-04-25T15:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:equipment:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-04-25T15:00:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-04-25T15:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-04-28T15:00:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0036",
+   "topic_id": "equipment",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-05-04T12:00:00-04:00",
+   "closed_at": "2026-05-07T12:00:00-04:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-05-04T12:00:00-04:00",
+     "speaker": "customer",
+     "text": "The Wi-Fi light on my router is red.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-05-04T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:equipment:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-05-04T12:00:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-05-04T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-05-07T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0037",
+   "topic_id": "outage_credit",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-05-26T17:15:00-04:00",
+   "closed_at": "2026-06-15T17:15:00-04:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2026-05-26T17:15:00-04:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-05-26T17:15:00-04:00",
+     "speaker": "customer",
+     "text": "Service was out for six hours on Saturday.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-05-26T17:15:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check outage credits. Please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:outage_credit:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-05-26T17:15:00-04:00",
+     "speaker": "customer",
+     "text": "Can I talk to a supervisor in Billing Review?",
+     "source": "text",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-05-26T17:15:00-04:00",
+     "speaker": "representative",
+     "text": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+     "source": "system",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": "request_transfer:refused"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-05-26T17:15:00-04:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-05-26T17:15:00-04:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2026-05-26T17:15:00-04:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Outage credit (15.00): A 15.00 credit on your next bill for the outage. Available until 2026-05-29 17:15.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2026-05-26T17:15:00-04:00",
+     "speaker": "representative",
+     "text": "Your Outage credit (15.00) is confirmed and is due by 2026-06-05.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2026-05-26T17:15:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0010",
+     "at": "2026-05-26T17:15:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0011",
+     "at": "2026-06-15T17:15:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0038",
+   "topic_id": "moving",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2026-06-03T16:30:00-04:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-06-03T16:30:00-04:00",
+     "speaker": "customer",
+     "text": "How do I move my service to a new apartment?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-06-03T16:30:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:moving:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-06-03T16:30:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-06-03T16:30:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0039",
+   "topic_id": "billing_review",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-07-07T09:45:00-04:00",
+   "closed_at": "2026-07-27T09:45:00-04:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2026-07-07T09:45:00-04:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-07-07T09:45:00-04:00",
+     "speaker": "customer",
+     "text": "My bill charged me twice for the router.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-07-07T09:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber billing. To look at your bill, please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:billing_review:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-07-07T09:45:00-04:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-07-07T09:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-07-07T09:45:00-04:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Duplicate charge refund (8.00): A refund of the duplicate router rental line, 8.00 per affected bill. Available until 2026-07-10 09:45.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-07-07T09:45:00-04:00",
+     "speaker": "representative",
+     "text": "Your Duplicate charge refund (8.00) is confirmed and is due by 2026-07-17.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2026-07-07T09:45:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2026-07-07T09:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2026-07-27T09:45:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0040",
+   "topic_id": "refund_status",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-07-23T12:00:00-04:00",
+   "closed_at": "2026-07-26T12:00:00-04:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-07-23T12:00:00-04:00",
+     "speaker": "customer",
+     "text": "Can you check on the refund you promised me?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-07-23T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check on a refund or credit we promised you.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:refund_status:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-07-23T12:00:00-04:00",
+     "speaker": "customer",
+     "text": "Any update? I am still waiting.",
+     "source": "text",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-07-23T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "Our records show the Duplicate charge refund was completed (reference RF-001). Our records show the Outage credit was completed (reference RF-002). The Duplicate charge refund we promised is late: it was due by 2025-04-18. I have noted that on your case. Our records show the Outage credit was completed (reference RF-004). Our records show the Switch to Fiber 300 was completed (reference RF-005). Our records show the Outage credit was completed (reference RF-008). Our records show the Outage credit was completed (reference RF-009). Our records show the Duplicate charge refund was completed (reference RF-010). Our records show the Outage credit was completed (reference RF-011). Our records show the Duplicate charge refund was completed (reference RF-012). Our records show the Switch to Fiber 300 was completed (reference RF-013). Our records show the Outage credit was completed (reference RF-014). Our records show the Duplicate charge refund was completed (reference RF-016).",
+     "source": "system",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": "ask_status:reported"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-07-23T12:00:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-07-23T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2026-07-26T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0041",
+   "topic_id": "refund_status",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2026-07-23T19:00:00-04:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-07-23T19:00:00-04:00",
+     "speaker": "customer",
+     "text": "Can you check on the refund you promised me?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-07-23T19:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check on a refund or credit we promised you.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:refund_status:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-07-23T19:00:00-04:00",
+     "speaker": "customer",
+     "text": "Any update? I am still waiting.",
+     "source": "text",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-07-23T19:00:00-04:00",
+     "speaker": "representative",
+     "text": "Our records show the Duplicate charge refund was completed (reference RF-001). Our records show the Outage credit was completed (reference RF-002). The Duplicate charge refund we promised is late: it was due by 2025-04-18. I have noted that on your case. Our records show the Outage credit was completed (reference RF-004). Our records show the Switch to Fiber 300 was completed (reference RF-005). Our records show the Outage credit was completed (reference RF-008). Our records show the Outage credit was completed (reference RF-009). Our records show the Duplicate charge refund was completed (reference RF-010). Our records show the Outage credit was completed (reference RF-011). Our records show the Duplicate charge refund was completed (reference RF-012). Our records show the Switch to Fiber 300 was completed (reference RF-013). Our records show the Outage credit was completed (reference RF-014). Our records show the Duplicate charge refund was completed (reference RF-016).",
+     "source": "system",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": "ask_status:reported"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-07-23T19:00:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-07-23T19:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0042",
+   "topic_id": "refund_status",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2026-08-07T11:00:00-04:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-08-07T11:00:00-04:00",
+     "speaker": "customer",
+     "text": "Can you check on the refund you promised me?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-08-07T11:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check on a refund or credit we promised you.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:refund_status:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-08-07T11:00:00-04:00",
+     "speaker": "customer",
+     "text": "Any update? I am still waiting.",
+     "source": "text",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-08-07T11:00:00-04:00",
+     "speaker": "representative",
+     "text": "Our records show the Duplicate charge refund was completed (reference RF-001). Our records show the Outage credit was completed (reference RF-002). The Duplicate charge refund we promised is late: it was due by 2025-04-18. I have noted that on your case. Our records show the Outage credit was completed (reference RF-004). Our records show the Switch to Fiber 300 was completed (reference RF-005). Our records show the Outage credit was completed (reference RF-008). Our records show the Outage credit was completed (reference RF-009). Our records show the Duplicate charge refund was completed (reference RF-010). Our records show the Outage credit was completed (reference RF-011). Our records show the Duplicate charge refund was completed (reference RF-012). Our records show the Switch to Fiber 300 was completed (reference RF-013). Our records show the Outage credit was completed (reference RF-014). Our records show the Duplicate charge refund was completed (reference RF-016).",
+     "source": "system",
+     "recognized": [
+      "ask_status"
+     ],
+     "rule": "ask_status:reported"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-08-07T11:00:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-08-07T11:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0043",
+   "topic_id": "equipment",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-08-10T08:15:00-04:00",
+   "closed_at": "2026-08-13T08:15:00-04:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-08-10T08:15:00-04:00",
+     "speaker": "customer",
+     "text": "The Wi-Fi light on my router is red.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-08-10T08:15:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:equipment:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-08-10T08:15:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-08-10T08:15:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-08-13T08:15:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0044",
+   "topic_id": "outage_credit",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-08-18T12:00:00-04:00",
+   "closed_at": "2026-09-07T12:00:00-04:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2026-08-18T12:00:00-04:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-08-18T12:00:00-04:00",
+     "speaker": "customer",
+     "text": "Service was out for six hours on Saturday.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-08-18T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check outage credits. Please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:outage_credit:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-08-18T12:00:00-04:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-08-18T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-08-18T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Outage credit (15.00): A 15.00 credit on your next bill for the outage. Available until 2026-08-21 12:00.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-08-18T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "Your Outage credit (15.00) is confirmed and is due by 2026-08-28.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2026-08-18T12:00:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2026-08-18T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2026-08-20T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "We are unable to complete this commitment: the charge was already reversed by another adjustment.",
+     "source": "system",
+     "recognized": [],
+     "rule": "commitment:revoked"
+    },
+    {
+     "turn_id": "t-0010",
+     "at": "2026-09-07T12:00:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0045",
+   "topic_id": "moving",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-09-08T16:45:00-04:00",
+   "closed_at": "2026-09-11T16:45:00-04:00",
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-09-08T16:45:00-04:00",
+     "speaker": "customer",
+     "text": "I am moving next month. Can I keep my plan?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-09-08T16:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:moving:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-09-08T16:45:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-09-08T16:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-09-11T16:45:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0046",
+   "topic_id": "billing_review",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-09-29T12:45:00-04:00",
+   "closed_at": "2026-10-19T12:45:00-04:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2026-09-29T12:45:00-04:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-09-29T12:45:00-04:00",
+     "speaker": "customer",
+     "text": "There is a router rental line twice on my bill again.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-09-29T12:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber billing. To look at your bill, please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:billing_review:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-09-29T12:45:00-04:00",
+     "speaker": "customer",
+     "text": "Can I talk to a supervisor in Billing Review?",
+     "source": "text",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-09-29T12:45:00-04:00",
+     "speaker": "representative",
+     "text": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+     "source": "system",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": "request_transfer:refused"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-09-29T12:45:00-04:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-09-29T12:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2026-09-29T12:45:00-04:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Duplicate charge refund (8.00): A refund of the duplicate router rental line, 8.00 per affected bill. Available until 2026-10-02 12:45.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2026-09-29T12:45:00-04:00",
+     "speaker": "representative",
+     "text": "Your Duplicate charge refund (8.00) is confirmed and is due by 2026-10-09.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2026-09-29T12:45:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0010",
+     "at": "2026-09-29T12:45:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0011",
+     "at": "2026-10-19T12:45:00-04:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0047",
+   "topic_id": "moving",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2026-10-11T18:15:00-04:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-10-11T18:15:00-04:00",
+     "speaker": "customer",
+     "text": "How do I move my service to a new apartment?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-10-11T18:15:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:moving:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-10-11T18:15:00-04:00",
+     "speaker": "customer",
+     "text": "Please transfer me to Billing Review.",
+     "source": "text",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-10-11T18:15:00-04:00",
+     "speaker": "representative",
+     "text": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+     "source": "system",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": "request_transfer:refused"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-10-11T18:15:00-04:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-10-11T18:15:00-04:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0048",
+   "topic_id": "outage_credit",
+   "account_ref": "kestrel:acct-55120",
+   "status": "closed",
+   "tier": "frontline",
+   "opened_at": "2026-11-10T12:00:00-05:00",
+   "closed_at": "2026-11-30T12:00:00-05:00",
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2026-11-10T12:00:00-05:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-11-10T12:00:00-05:00",
+     "speaker": "customer",
+     "text": "Service was out for six hours on Saturday.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-11-10T12:00:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check outage credits. Please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:outage_credit:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-11-10T12:00:00-05:00",
+     "speaker": "customer",
+     "text": "Can I talk to a supervisor in Billing Review?",
+     "source": "text",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-11-10T12:00:00-05:00",
+     "speaker": "representative",
+     "text": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+     "source": "system",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": "request_transfer:refused"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-11-10T12:00:00-05:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-11-10T12:00:00-05:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2026-11-10T12:00:00-05:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Outage credit (15.00): A 15.00 credit on your next bill for the outage. Available until 2026-11-13 12:00.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2026-11-10T12:00:00-05:00",
+     "speaker": "representative",
+     "text": "Your Outage credit (15.00) is confirmed and is due by 2026-11-20.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2026-11-10T12:00:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0010",
+     "at": "2026-11-10T12:00:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0011",
+     "at": "2026-11-21T12:00:00-05:00",
+     "speaker": "representative",
+     "text": "We have opened a review of this commitment and will answer in this case.",
+     "source": "system",
+     "recognized": [],
+     "rule": "commitment:contested"
+    },
+    {
+     "turn_id": "t-0012",
+     "at": "2026-11-24T12:00:00-05:00",
+     "speaker": "representative",
+     "text": "We reviewed your contest and are reissuing this commitment under reference RF-019.",
+     "source": "system",
+     "recognized": [],
+     "rule": "contest:reissued"
+    },
+    {
+     "turn_id": "t-0013",
+     "at": "2026-11-30T12:00:00-05:00",
+     "speaker": "representative",
+     "text": "This case is closed.",
+     "source": "system",
+     "recognized": [],
+     "rule": "case:closed"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0049",
+   "topic_id": "equipment",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2026-11-15T14:30:00-05:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-11-15T14:30:00-05:00",
+     "speaker": "customer",
+     "text": "Can I use my own router?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-11-15T14:30:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:equipment:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-11-15T14:30:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-11-15T14:30:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0050",
+   "topic_id": "billing_review",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2026-12-17T10:45:00-05:00",
+   "closed_at": null,
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2026-12-17T10:45:00-05:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-12-17T10:45:00-05:00",
+     "speaker": "customer",
+     "text": "My bill charged me twice for the router.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-12-17T10:45:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber billing. To look at your bill, please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:billing_review:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-12-17T10:45:00-05:00",
+     "speaker": "customer",
+     "text": "Can I talk to a supervisor in Billing Review?",
+     "source": "text",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-12-17T10:45:00-05:00",
+     "speaker": "representative",
+     "text": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+     "source": "system",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": "request_transfer:refused"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-12-17T10:45:00-05:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-12-17T10:45:00-05:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2026-12-17T10:45:00-05:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Duplicate charge refund (8.00): A refund of the duplicate router rental line, 8.00 per affected bill. Available until 2026-12-20 10:45.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2026-12-17T10:45:00-05:00",
+     "speaker": "representative",
+     "text": "Your Duplicate charge refund (8.00) is confirmed and is due by 2026-12-27.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2026-12-17T10:45:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0010",
+     "at": "2026-12-17T10:45:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0051",
+   "topic_id": "outage_credit",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2026-12-18T17:15:00-05:00",
+   "closed_at": null,
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2026-12-18T17:15:00-05:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-12-18T17:15:00-05:00",
+     "speaker": "customer",
+     "text": "Service was out for six hours on Saturday.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-12-18T17:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. I can check outage credits. Please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:outage_credit:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-12-18T17:15:00-05:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-12-18T17:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-12-18T17:15:00-05:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Outage credit (15.00): A 15.00 credit on your next bill for the outage. Available until 2026-12-21 17:15.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-12-18T17:15:00-05:00",
+     "speaker": "representative",
+     "text": "Your Outage credit (15.00) is confirmed and is due by 2026-12-28.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2026-12-18T17:15:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2026-12-18T17:15:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2026-12-29T17:15:00-05:00",
+     "speaker": "representative",
+     "text": "We have opened a review of this commitment and will answer in this case.",
+     "source": "system",
+     "recognized": [],
+     "rule": "commitment:contested"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0052",
+   "topic_id": "moving",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2026-12-22T18:45:00-05:00",
+   "closed_at": null,
+   "identity": {
+    "verified": false,
+    "disclosures": []
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-12-22T18:45:00-05:00",
+     "speaker": "customer",
+     "text": "How do I move my service to a new apartment?",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-12-22T18:45:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. How can I help today?",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:moving:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-12-22T18:45:00-05:00",
+     "speaker": "customer",
+     "text": "Please transfer me to Billing Review.",
+     "source": "text",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-12-22T18:45:00-05:00",
+     "speaker": "representative",
+     "text": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+     "source": "system",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": "request_transfer:refused"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-12-22T18:45:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-12-22T18:45:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  },
+  {
+   "case_id": "cs-0053",
+   "topic_id": "billing_review",
+   "account_ref": "kestrel:acct-55120",
+   "status": "resolved",
+   "tier": "frontline",
+   "opened_at": "2026-12-27T11:00:00-05:00",
+   "closed_at": null,
+   "identity": {
+    "verified": true,
+    "disclosures": [
+     {
+      "at": "2026-12-27T11:00:00-05:00",
+      "fields": [
+       "full_name",
+       "billing_zip"
+      ],
+      "not_needed": [],
+      "matched": true
+     }
+    ]
+   },
+   "transcript": [
+    {
+     "turn_id": "t-0001",
+     "at": "2026-12-27T11:00:00-05:00",
+     "speaker": "customer",
+     "text": "There is a router rental line twice on my bill again.",
+     "source": "text",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0002",
+     "at": "2026-12-27T11:00:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber billing. To look at your bill, please confirm the name on the account and your billing ZIP code.",
+     "source": "script",
+     "recognized": [],
+     "rule": "topic:billing_review:greeting"
+    },
+    {
+     "turn_id": "t-0003",
+     "at": "2026-12-27T11:00:00-05:00",
+     "speaker": "customer",
+     "text": "Can I talk to a supervisor in Billing Review?",
+     "source": "text",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0004",
+     "at": "2026-12-27T11:00:00-05:00",
+     "speaker": "representative",
+     "text": "I am not able to transfer this chat to Billing Review. I can keep helping you here.",
+     "source": "system",
+     "recognized": [
+      "request_transfer"
+     ],
+     "rule": "request_transfer:refused"
+    },
+    {
+     "turn_id": "t-0005",
+     "at": "2026-12-27T11:00:00-05:00",
+     "speaker": "customer",
+     "text": "Shared: full name and billing ZIP code.",
+     "source": "action",
+     "recognized": [],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0006",
+     "at": "2026-12-27T11:00:00-05:00",
+     "speaker": "representative",
+     "text": "Thank you, you are verified.",
+     "source": "system",
+     "recognized": [],
+     "rule": "identity:verified"
+    },
+    {
+     "turn_id": "t-0007",
+     "at": "2026-12-27T11:00:00-05:00",
+     "speaker": "representative",
+     "text": "Here is what I can offer. Duplicate charge refund (8.00): A refund of the duplicate router rental line, 8.00 per affected bill. Available until 2026-12-30 11:00.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offers:initial:frontline"
+    },
+    {
+     "turn_id": "t-0008",
+     "at": "2026-12-27T11:00:00-05:00",
+     "speaker": "representative",
+     "text": "Your Duplicate charge refund (8.00) is confirmed and is due by 2027-01-06.",
+     "source": "system",
+     "recognized": [],
+     "rule": "offer:accepted"
+    },
+    {
+     "turn_id": "t-0009",
+     "at": "2026-12-27T11:00:00-05:00",
+     "speaker": "customer",
+     "text": "End chat",
+     "source": "action",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": null
+    },
+    {
+     "turn_id": "t-0010",
+     "at": "2026-12-27T11:00:00-05:00",
+     "speaker": "representative",
+     "text": "Thanks for contacting Kestrel Fiber. This chat is now closed; you can write again at any time.",
+     "source": "system",
+     "recognized": [
+      "end_chat"
+     ],
+     "rule": "end_chat:resolved"
+    }
+   ]
+  }
+ ],
+ "offers": [
+  {
+   "offer_id": "of-0001",
+   "case_id": "cs-0003",
+   "catalog_id": "cat-dup-f1",
+   "stage": "initial",
+   "kind": "refund",
+   "title": "Duplicate charge refund",
+   "terms": "A refund of the duplicate router rental line, 8.00 per affected bill.",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "billing_review-relief",
+   "tier": "frontline",
+   "presented_at": "2025-01-14T11:45:00-05:00",
+   "expires_at": "2025-01-17T11:45:00-05:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0002",
+   "case_id": "cs-0004",
+   "catalog_id": "cat-out-f1",
+   "stage": "initial",
+   "kind": "statement_credit",
+   "title": "Outage credit",
+   "terms": "A 15.00 credit on your next bill for the outage.",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "outage_credit-relief",
+   "tier": "frontline",
+   "presented_at": "2025-02-25T14:15:00-05:00",
+   "expires_at": "2025-02-28T14:15:00-05:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0003",
+   "case_id": "cs-0008",
+   "catalog_id": "cat-dup-f1",
+   "stage": "initial",
+   "kind": "refund",
+   "title": "Duplicate charge refund",
+   "terms": "A refund of the duplicate router rental line, 8.00 per affected bill.",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "billing_review-relief",
+   "tier": "frontline",
+   "presented_at": "2025-04-08T13:00:00-04:00",
+   "expires_at": "2025-04-11T13:00:00-04:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0004",
+   "case_id": "cs-0012",
+   "catalog_id": "cat-out-f1",
+   "stage": "initial",
+   "kind": "statement_credit",
+   "title": "Outage credit",
+   "terms": "A 15.00 credit on your next bill for the outage.",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "outage_credit-relief",
+   "tier": "frontline",
+   "presented_at": "2025-05-20T09:45:00-04:00",
+   "expires_at": "2025-05-23T09:45:00-04:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0005",
+   "case_id": "cs-0013",
+   "catalog_id": "cat-plan-f1",
+   "stage": "initial",
+   "kind": "product_change",
+   "title": "Switch to Fiber 300",
+   "terms": "Move to the Fiber 300 plan at 45.00 a month from your next bill.",
+   "value": null,
+   "conditions": [],
+   "group": "plan_change-relief",
+   "tier": "frontline",
+   "presented_at": "2025-06-24T17:45:00-04:00",
+   "expires_at": "2025-06-27T17:45:00-04:00",
+   "perform_days": 14,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0006",
+   "case_id": "cs-0017",
+   "catalog_id": "cat-out-f1",
+   "stage": "initial",
+   "kind": "statement_credit",
+   "title": "Outage credit",
+   "terms": "A 15.00 credit on your next bill for the outage.",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "outage_credit-relief",
+   "tier": "frontline",
+   "presented_at": "2025-08-05T15:00:00-04:00",
+   "expires_at": "2025-08-08T15:00:00-04:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0007",
+   "case_id": "cs-0019",
+   "catalog_id": "cat-dup-f1",
+   "stage": "initial",
+   "kind": "refund",
+   "title": "Duplicate charge refund",
+   "terms": "A refund of the duplicate router rental line, 8.00 per affected bill.",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "billing_review-relief",
+   "tier": "frontline",
+   "presented_at": "2025-09-16T17:45:00-04:00",
+   "expires_at": "2025-09-19T17:45:00-04:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0008",
+   "case_id": "cs-0023",
+   "catalog_id": "cat-out-f1",
+   "stage": "initial",
+   "kind": "statement_credit",
+   "title": "Outage credit",
+   "terms": "A 15.00 credit on your next bill for the outage.",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "outage_credit-relief",
+   "tier": "frontline",
+   "presented_at": "2025-10-28T13:00:00-04:00",
+   "expires_at": "2025-10-31T13:00:00-04:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0009",
+   "case_id": "cs-0025",
+   "catalog_id": "cat-dup-f1",
+   "stage": "initial",
+   "kind": "refund",
+   "title": "Duplicate charge refund",
+   "terms": "A refund of the duplicate router rental line, 8.00 per affected bill.",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "billing_review-relief",
+   "tier": "frontline",
+   "presented_at": "2025-12-02T10:30:00-05:00",
+   "expires_at": "2025-12-05T10:30:00-05:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0010",
+   "case_id": "cs-0029",
+   "catalog_id": "cat-out-f1",
+   "stage": "initial",
+   "kind": "statement_credit",
+   "title": "Outage credit",
+   "terms": "A 15.00 credit on your next bill for the outage.",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "outage_credit-relief",
+   "tier": "frontline",
+   "presented_at": "2026-01-20T14:45:00-05:00",
+   "expires_at": "2026-01-23T14:45:00-05:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0011",
+   "case_id": "cs-0031",
+   "catalog_id": "cat-dup-f1",
+   "stage": "initial",
+   "kind": "refund",
+   "title": "Duplicate charge refund",
+   "terms": "A refund of the duplicate router rental line, 8.00 per affected bill.",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "billing_review-relief",
+   "tier": "frontline",
+   "presented_at": "2026-03-03T12:15:00-05:00",
+   "expires_at": "2026-03-06T12:15:00-05:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0012",
+   "case_id": "cs-0034",
+   "catalog_id": "cat-plan-f1",
+   "stage": "initial",
+   "kind": "product_change",
+   "title": "Switch to Fiber 300",
+   "terms": "Move to the Fiber 300 plan at 45.00 a month from your next bill.",
+   "value": null,
+   "conditions": [],
+   "group": "plan_change-relief",
+   "tier": "frontline",
+   "presented_at": "2026-04-14T14:45:00-04:00",
+   "expires_at": "2026-04-17T14:45:00-04:00",
+   "perform_days": 14,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0013",
+   "case_id": "cs-0037",
+   "catalog_id": "cat-out-f1",
+   "stage": "initial",
+   "kind": "statement_credit",
+   "title": "Outage credit",
+   "terms": "A 15.00 credit on your next bill for the outage.",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "outage_credit-relief",
+   "tier": "frontline",
+   "presented_at": "2026-05-26T17:15:00-04:00",
+   "expires_at": "2026-05-29T17:15:00-04:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0014",
+   "case_id": "cs-0039",
+   "catalog_id": "cat-dup-f1",
+   "stage": "initial",
+   "kind": "refund",
+   "title": "Duplicate charge refund",
+   "terms": "A refund of the duplicate router rental line, 8.00 per affected bill.",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "billing_review-relief",
+   "tier": "frontline",
+   "presented_at": "2026-07-07T09:45:00-04:00",
+   "expires_at": "2026-07-10T09:45:00-04:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0015",
+   "case_id": "cs-0044",
+   "catalog_id": "cat-out-f1",
+   "stage": "initial",
+   "kind": "statement_credit",
+   "title": "Outage credit",
+   "terms": "A 15.00 credit on your next bill for the outage.",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "outage_credit-relief",
+   "tier": "frontline",
+   "presented_at": "2026-08-18T12:00:00-04:00",
+   "expires_at": "2026-08-21T12:00:00-04:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0016",
+   "case_id": "cs-0046",
+   "catalog_id": "cat-dup-f1",
+   "stage": "initial",
+   "kind": "refund",
+   "title": "Duplicate charge refund",
+   "terms": "A refund of the duplicate router rental line, 8.00 per affected bill.",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "billing_review-relief",
+   "tier": "frontline",
+   "presented_at": "2026-09-29T12:45:00-04:00",
+   "expires_at": "2026-10-02T12:45:00-04:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0017",
+   "case_id": "cs-0048",
+   "catalog_id": "cat-out-f1",
+   "stage": "initial",
+   "kind": "statement_credit",
+   "title": "Outage credit",
+   "terms": "A 15.00 credit on your next bill for the outage.",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "outage_credit-relief",
+   "tier": "frontline",
+   "presented_at": "2026-11-10T12:00:00-05:00",
+   "expires_at": "2026-11-13T12:00:00-05:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0018",
+   "case_id": "cs-0050",
+   "catalog_id": "cat-dup-f1",
+   "stage": "initial",
+   "kind": "refund",
+   "title": "Duplicate charge refund",
+   "terms": "A refund of the duplicate router rental line, 8.00 per affected bill.",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "billing_review-relief",
+   "tier": "frontline",
+   "presented_at": "2026-12-17T10:45:00-05:00",
+   "expires_at": "2026-12-20T10:45:00-05:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0019",
+   "case_id": "cs-0051",
+   "catalog_id": "cat-out-f1",
+   "stage": "initial",
+   "kind": "statement_credit",
+   "title": "Outage credit",
+   "terms": "A 15.00 credit on your next bill for the outage.",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "outage_credit-relief",
+   "tier": "frontline",
+   "presented_at": "2026-12-18T17:15:00-05:00",
+   "expires_at": "2026-12-21T17:15:00-05:00",
+   "perform_days": 10,
+   "state": "accepted"
+  },
+  {
+   "offer_id": "of-0020",
+   "case_id": "cs-0053",
+   "catalog_id": "cat-dup-f1",
+   "stage": "initial",
+   "kind": "refund",
+   "title": "Duplicate charge refund",
+   "terms": "A refund of the duplicate router rental line, 8.00 per affected bill.",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditions": [],
+   "group": "billing_review-relief",
+   "tier": "frontline",
+   "presented_at": "2026-12-27T11:00:00-05:00",
+   "expires_at": "2026-12-30T11:00:00-05:00",
+   "perform_days": 10,
+   "state": "accepted"
+  }
+ ],
+ "commitments": [
+  {
+   "commitment_id": "cm-0001",
+   "offer_id": "of-0001",
+   "case_id": "cs-0003",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "refund",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2025-01-14T11:45:00-05:00",
+   "perform_by": "2025-01-24T11:45:00-05:00",
+   "status": "reported_performed",
+   "reports": [
+    {
+     "event_id": "ev-ds-0013",
+     "at": "2025-01-18T11:45:00-05:00",
+     "reference_id": "RF-001",
+     "amount_minor": 800,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2025-01-14T11:45:00-05:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2025-01-18T11:45:00-05:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0013",
+     "note": null
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0002",
+   "offer_id": "of-0002",
+   "case_id": "cs-0004",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "statement_credit",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2025-02-25T14:15:00-05:00",
+   "perform_by": "2025-03-07T14:15:00-05:00",
+   "status": "reported_performed",
+   "reports": [
+    {
+     "event_id": "ev-ds-0023",
+     "at": "2025-03-02T14:15:00-05:00",
+     "reference_id": "RF-002",
+     "amount_minor": 1500,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2025-02-25T14:15:00-05:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2025-03-02T14:15:00-05:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0023",
+     "note": null
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0003",
+   "offer_id": "of-0003",
+   "case_id": "cs-0008",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "refund",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2025-04-08T13:00:00-04:00",
+   "perform_by": "2025-04-18T13:00:00-04:00",
+   "status": "pending",
+   "reports": [],
+   "history": [
+    {
+     "at": "2025-04-08T13:00:00-04:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0004",
+   "offer_id": "of-0004",
+   "case_id": "cs-0012",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "statement_credit",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2025-05-20T09:45:00-04:00",
+   "perform_by": "2025-05-30T09:45:00-04:00",
+   "status": "reported_performed",
+   "reports": [
+    {
+     "event_id": "ev-ds-0055",
+     "at": "2025-05-23T09:45:00-04:00",
+     "reference_id": "RF-003",
+     "amount_minor": 750,
+     "currency": "USD"
+    },
+    {
+     "event_id": "ev-ds-0056",
+     "at": "2025-05-29T09:45:00-04:00",
+     "reference_id": "RF-004",
+     "amount_minor": 750,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2025-05-20T09:45:00-04:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2025-05-23T09:45:00-04:00",
+     "status": "partially_reported",
+     "event_id": "ev-ds-0055",
+     "note": null
+    },
+    {
+     "at": "2025-05-29T09:45:00-04:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0056",
+     "note": null
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0005",
+   "offer_id": "of-0005",
+   "case_id": "cs-0013",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "product_change",
+   "value": null,
+   "conditional": false,
+   "accepted_at": "2025-06-24T17:45:00-04:00",
+   "perform_by": "2025-07-08T17:45:00-04:00",
+   "status": "reported_performed",
+   "reports": [
+    {
+     "event_id": "ev-ds-0065",
+     "at": "2025-06-27T17:45:00-04:00",
+     "reference_id": "RF-005",
+     "amount_minor": 0,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2025-06-24T17:45:00-04:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2025-06-27T17:45:00-04:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0065",
+     "note": null
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0006",
+   "offer_id": "of-0006",
+   "case_id": "cs-0017",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "statement_credit",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2025-08-05T15:00:00-04:00",
+   "perform_by": "2025-08-15T15:00:00-04:00",
+   "status": "reported_performed",
+   "reports": [
+    {
+     "event_id": "ev-ds-0077",
+     "at": "2025-08-09T15:00:00-04:00",
+     "reference_id": "RF-006",
+     "amount_minor": 1500,
+     "currency": "USD"
+    },
+    {
+     "event_id": "ev-ds-0082",
+     "at": "2025-08-23T15:00:00-04:00",
+     "reference_id": "RF-008",
+     "amount_minor": 1500,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2025-08-05T15:00:00-04:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2025-08-09T15:00:00-04:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0077",
+     "note": null
+    },
+    {
+     "at": "2025-08-16T15:00:00-04:00",
+     "status": "contested",
+     "event_id": null,
+     "note": "I cannot find this credit on my statement."
+    },
+    {
+     "at": "2025-08-19T15:00:00-04:00",
+     "status": "pending",
+     "event_id": "ev-ds-0081",
+     "note": "Contest reissued (RF-007)."
+    },
+    {
+     "at": "2025-08-23T15:00:00-04:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0082",
+     "note": null
+    }
+   ],
+   "contest": {
+    "at": "2025-08-16T15:00:00-04:00",
+    "reason": "I cannot find this credit on my statement.",
+    "prior_status": "reported_performed",
+    "answered_at": "2025-08-19T15:00:00-04:00",
+    "outcome": "reissued"
+   }
+  },
+  {
+   "commitment_id": "cm-0007",
+   "offer_id": "of-0007",
+   "case_id": "cs-0019",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "refund",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2025-09-16T17:45:00-04:00",
+   "perform_by": "2025-09-26T17:45:00-04:00",
+   "status": "revoked",
+   "reports": [],
+   "history": [
+    {
+     "at": "2025-09-16T17:45:00-04:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2025-09-18T17:45:00-04:00",
+     "status": "revoked",
+     "event_id": "ev-ds-0089",
+     "note": "the charge was already reversed by another adjustment"
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0008",
+   "offer_id": "of-0008",
+   "case_id": "cs-0023",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "statement_credit",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2025-10-28T13:00:00-04:00",
+   "perform_by": "2025-11-07T13:00:00-04:00",
+   "status": "reported_performed",
+   "reports": [
+    {
+     "event_id": "ev-ds-0104",
+     "at": "2025-10-31T13:00:00-04:00",
+     "reference_id": "RF-009",
+     "amount_minor": 1500,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2025-10-28T13:00:00-04:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2025-10-31T13:00:00-04:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0104",
+     "note": null
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0009",
+   "offer_id": "of-0009",
+   "case_id": "cs-0025",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "refund",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2025-12-02T10:30:00-05:00",
+   "perform_by": "2025-12-12T10:30:00-05:00",
+   "status": "reported_performed",
+   "reports": [
+    {
+     "event_id": "ev-ds-0113",
+     "at": "2025-12-06T10:30:00-05:00",
+     "reference_id": "RF-010",
+     "amount_minor": 800,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2025-12-02T10:30:00-05:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2025-12-06T10:30:00-05:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0113",
+     "note": null
+    },
+    {
+     "at": "2025-12-13T10:30:00-05:00",
+     "status": "contested",
+     "event_id": null,
+     "note": "My statement still shows the full charge."
+    },
+    {
+     "at": "2025-12-16T10:30:00-05:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0117",
+     "note": "Contest upheld."
+    }
+   ],
+   "contest": {
+    "at": "2025-12-13T10:30:00-05:00",
+    "reason": "My statement still shows the full charge.",
+    "prior_status": "reported_performed",
+    "answered_at": "2025-12-16T10:30:00-05:00",
+    "outcome": "upheld"
+   }
+  },
+  {
+   "commitment_id": "cm-0010",
+   "offer_id": "of-0010",
+   "case_id": "cs-0029",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "statement_credit",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2026-01-20T14:45:00-05:00",
+   "perform_by": "2026-01-30T14:45:00-05:00",
+   "status": "reported_performed",
+   "reports": [
+    {
+     "event_id": "ev-ds-0132",
+     "at": "2026-01-24T14:45:00-05:00",
+     "reference_id": "RF-011",
+     "amount_minor": 1500,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2026-01-20T14:45:00-05:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2026-01-24T14:45:00-05:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0132",
+     "note": null
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0011",
+   "offer_id": "of-0011",
+   "case_id": "cs-0031",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "refund",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2026-03-03T12:15:00-05:00",
+   "perform_by": "2026-03-13T12:15:00-05:00",
+   "status": "reported_performed",
+   "reports": [
+    {
+     "event_id": "ev-ds-0143",
+     "at": "2026-03-08T13:15:00-04:00",
+     "reference_id": "RF-012",
+     "amount_minor": 800,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2026-03-03T12:15:00-05:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2026-03-08T13:15:00-04:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0143",
+     "note": null
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0012",
+   "offer_id": "of-0012",
+   "case_id": "cs-0034",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "product_change",
+   "value": null,
+   "conditional": false,
+   "accepted_at": "2026-04-14T14:45:00-04:00",
+   "perform_by": "2026-04-28T14:45:00-04:00",
+   "status": "reported_performed",
+   "reports": [
+    {
+     "event_id": "ev-ds-0157",
+     "at": "2026-04-17T14:45:00-04:00",
+     "reference_id": "RF-013",
+     "amount_minor": 0,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2026-04-14T14:45:00-04:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2026-04-17T14:45:00-04:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0157",
+     "note": null
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0013",
+   "offer_id": "of-0013",
+   "case_id": "cs-0037",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "statement_credit",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2026-05-26T17:15:00-04:00",
+   "perform_by": "2026-06-05T17:15:00-04:00",
+   "status": "reported_performed",
+   "reports": [
+    {
+     "event_id": "ev-ds-0171",
+     "at": "2026-05-29T17:15:00-04:00",
+     "reference_id": "RF-014",
+     "amount_minor": 1500,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2026-05-26T17:15:00-04:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2026-05-29T17:15:00-04:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0171",
+     "note": null
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0014",
+   "offer_id": "of-0014",
+   "case_id": "cs-0039",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "refund",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2026-07-07T09:45:00-04:00",
+   "perform_by": "2026-07-17T09:45:00-04:00",
+   "status": "reported_performed",
+   "reports": [
+    {
+     "event_id": "ev-ds-0180",
+     "at": "2026-07-10T09:45:00-04:00",
+     "reference_id": "RF-015",
+     "amount_minor": 400,
+     "currency": "USD"
+    },
+    {
+     "event_id": "ev-ds-0181",
+     "at": "2026-07-16T09:45:00-04:00",
+     "reference_id": "RF-016",
+     "amount_minor": 400,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2026-07-07T09:45:00-04:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2026-07-10T09:45:00-04:00",
+     "status": "partially_reported",
+     "event_id": "ev-ds-0180",
+     "note": null
+    },
+    {
+     "at": "2026-07-16T09:45:00-04:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0181",
+     "note": null
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0015",
+   "offer_id": "of-0015",
+   "case_id": "cs-0044",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "statement_credit",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2026-08-18T12:00:00-04:00",
+   "perform_by": "2026-08-28T12:00:00-04:00",
+   "status": "revoked",
+   "reports": [],
+   "history": [
+    {
+     "at": "2026-08-18T12:00:00-04:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2026-08-20T12:00:00-04:00",
+     "status": "revoked",
+     "event_id": "ev-ds-0201",
+     "note": "the charge was already reversed by another adjustment"
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0016",
+   "offer_id": "of-0016",
+   "case_id": "cs-0046",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "refund",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2026-09-29T12:45:00-04:00",
+   "perform_by": "2026-10-09T12:45:00-04:00",
+   "status": "reported_performed",
+   "reports": [
+    {
+     "event_id": "ev-ds-0212",
+     "at": "2026-10-03T12:45:00-04:00",
+     "reference_id": "RF-017",
+     "amount_minor": 800,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2026-09-29T12:45:00-04:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2026-10-03T12:45:00-04:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0212",
+     "note": null
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0017",
+   "offer_id": "of-0017",
+   "case_id": "cs-0048",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "statement_credit",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2026-11-10T12:00:00-05:00",
+   "perform_by": "2026-11-20T12:00:00-05:00",
+   "status": "reported_performed",
+   "reports": [
+    {
+     "event_id": "ev-ds-0223",
+     "at": "2026-11-14T12:00:00-05:00",
+     "reference_id": "RF-018",
+     "amount_minor": 1500,
+     "currency": "USD"
+    },
+    {
+     "event_id": "ev-ds-0228",
+     "at": "2026-11-28T12:00:00-05:00",
+     "reference_id": "RF-020",
+     "amount_minor": 1500,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2026-11-10T12:00:00-05:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2026-11-14T12:00:00-05:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0223",
+     "note": null
+    },
+    {
+     "at": "2026-11-21T12:00:00-05:00",
+     "status": "contested",
+     "event_id": null,
+     "note": "I cannot find this credit on my statement."
+    },
+    {
+     "at": "2026-11-24T12:00:00-05:00",
+     "status": "pending",
+     "event_id": "ev-ds-0227",
+     "note": "Contest reissued (RF-019)."
+    },
+    {
+     "at": "2026-11-28T12:00:00-05:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0228",
+     "note": null
+    }
+   ],
+   "contest": {
+    "at": "2026-11-21T12:00:00-05:00",
+    "reason": "I cannot find this credit on my statement.",
+    "prior_status": "reported_performed",
+    "answered_at": "2026-11-24T12:00:00-05:00",
+    "outcome": "reissued"
+   }
+  },
+  {
+   "commitment_id": "cm-0018",
+   "offer_id": "of-0018",
+   "case_id": "cs-0050",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "refund",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2026-12-17T10:45:00-05:00",
+   "perform_by": "2026-12-27T10:45:00-05:00",
+   "status": "pending",
+   "reports": [],
+   "history": [
+    {
+     "at": "2026-12-17T10:45:00-05:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    }
+   ],
+   "contest": null
+  },
+  {
+   "commitment_id": "cm-0019",
+   "offer_id": "of-0019",
+   "case_id": "cs-0051",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "statement_credit",
+   "value": {
+    "amount_minor": 1500,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2026-12-18T17:15:00-05:00",
+   "perform_by": "2026-12-28T17:15:00-05:00",
+   "status": "contested",
+   "reports": [
+    {
+     "event_id": "ev-ds-0241",
+     "at": "2026-12-22T17:15:00-05:00",
+     "reference_id": "RF-021",
+     "amount_minor": 1500,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2026-12-18T17:15:00-05:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2026-12-22T17:15:00-05:00",
+     "status": "reported_performed",
+     "event_id": "ev-ds-0241",
+     "note": null
+    },
+    {
+     "at": "2026-12-29T17:15:00-05:00",
+     "status": "contested",
+     "event_id": null,
+     "note": "The credit does not show on my account."
+    }
+   ],
+   "contest": {
+    "at": "2026-12-29T17:15:00-05:00",
+    "reason": "The credit does not show on my account.",
+    "prior_status": "reported_performed",
+    "answered_at": null,
+    "outcome": null
+   }
+  },
+  {
+   "commitment_id": "cm-0020",
+   "offer_id": "of-0020",
+   "case_id": "cs-0053",
+   "provider_id": "isp-kestrel",
+   "account_ref": "kestrel:acct-55120",
+   "kind": "refund",
+   "value": {
+    "amount_minor": 800,
+    "currency": "USD"
+   },
+   "conditional": false,
+   "accepted_at": "2026-12-27T11:00:00-05:00",
+   "perform_by": "2027-01-06T11:00:00-05:00",
+   "status": "partially_reported",
+   "reports": [
+    {
+     "event_id": "ev-ds-0252",
+     "at": "2026-12-30T11:00:00-05:00",
+     "reference_id": "RF-022",
+     "amount_minor": 400,
+     "currency": "USD"
+    }
+   ],
+   "history": [
+    {
+     "at": "2026-12-27T11:00:00-05:00",
+     "status": "pending",
+     "event_id": null,
+     "note": "Accepted with confirmation."
+    },
+    {
+     "at": "2026-12-30T11:00:00-05:00",
+     "status": "partially_reported",
+     "event_id": "ev-ds-0252",
+     "note": null
+    }
+   ],
+   "contest": null
+  }
+ ],
+ "confirmations": [
+  {
+   "token": "cf-14a0973415089834",
+   "offer_id": "of-0001",
+   "case_id": "cs-0003",
+   "issued_at": "2025-01-14T11:45:00-05:00",
+   "used_at": "2025-01-14T11:45:00-05:00",
+   "commitment_id": "cm-0001"
+  },
+  {
+   "token": "cf-bc0e63d02e8f3a2b",
+   "offer_id": "of-0002",
+   "case_id": "cs-0004",
+   "issued_at": "2025-02-25T14:15:00-05:00",
+   "used_at": "2025-02-25T14:15:00-05:00",
+   "commitment_id": "cm-0002"
+  },
+  {
+   "token": "cf-dbc4178daa66217c",
+   "offer_id": "of-0003",
+   "case_id": "cs-0008",
+   "issued_at": "2025-04-08T13:00:00-04:00",
+   "used_at": "2025-04-08T13:00:00-04:00",
+   "commitment_id": "cm-0003"
+  },
+  {
+   "token": "cf-dba531cf3f9713ca",
+   "offer_id": "of-0004",
+   "case_id": "cs-0012",
+   "issued_at": "2025-05-20T09:45:00-04:00",
+   "used_at": "2025-05-20T09:45:00-04:00",
+   "commitment_id": "cm-0004"
+  },
+  {
+   "token": "cf-becda434a1974f2f",
+   "offer_id": "of-0005",
+   "case_id": "cs-0013",
+   "issued_at": "2025-06-24T17:45:00-04:00",
+   "used_at": "2025-06-24T17:45:00-04:00",
+   "commitment_id": "cm-0005"
+  },
+  {
+   "token": "cf-55748236886ba332",
+   "offer_id": "of-0006",
+   "case_id": "cs-0017",
+   "issued_at": "2025-08-05T15:00:00-04:00",
+   "used_at": "2025-08-05T15:00:00-04:00",
+   "commitment_id": "cm-0006"
+  },
+  {
+   "token": "cf-49bedb572d3314da",
+   "offer_id": "of-0007",
+   "case_id": "cs-0019",
+   "issued_at": "2025-09-16T17:45:00-04:00",
+   "used_at": "2025-09-16T17:45:00-04:00",
+   "commitment_id": "cm-0007"
+  },
+  {
+   "token": "cf-b929caf367245309",
+   "offer_id": "of-0008",
+   "case_id": "cs-0023",
+   "issued_at": "2025-10-28T13:00:00-04:00",
+   "used_at": "2025-10-28T13:00:00-04:00",
+   "commitment_id": "cm-0008"
+  },
+  {
+   "token": "cf-de48cf0a4bfe3200",
+   "offer_id": "of-0009",
+   "case_id": "cs-0025",
+   "issued_at": "2025-12-02T10:30:00-05:00",
+   "used_at": "2025-12-02T10:30:00-05:00",
+   "commitment_id": "cm-0009"
+  },
+  {
+   "token": "cf-2cce7128a54ec007",
+   "offer_id": "of-0010",
+   "case_id": "cs-0029",
+   "issued_at": "2026-01-20T14:45:00-05:00",
+   "used_at": "2026-01-20T14:45:00-05:00",
+   "commitment_id": "cm-0010"
+  },
+  {
+   "token": "cf-ed2beca84f635033",
+   "offer_id": "of-0011",
+   "case_id": "cs-0031",
+   "issued_at": "2026-03-03T12:15:00-05:00",
+   "used_at": "2026-03-03T12:15:00-05:00",
+   "commitment_id": "cm-0011"
+  },
+  {
+   "token": "cf-da5190a6a9d27249",
+   "offer_id": "of-0012",
+   "case_id": "cs-0034",
+   "issued_at": "2026-04-14T14:45:00-04:00",
+   "used_at": "2026-04-14T14:45:00-04:00",
+   "commitment_id": "cm-0012"
+  },
+  {
+   "token": "cf-d72e5c130da30b6c",
+   "offer_id": "of-0013",
+   "case_id": "cs-0037",
+   "issued_at": "2026-05-26T17:15:00-04:00",
+   "used_at": "2026-05-26T17:15:00-04:00",
+   "commitment_id": "cm-0013"
+  },
+  {
+   "token": "cf-48514f0bfc04ce10",
+   "offer_id": "of-0014",
+   "case_id": "cs-0039",
+   "issued_at": "2026-07-07T09:45:00-04:00",
+   "used_at": "2026-07-07T09:45:00-04:00",
+   "commitment_id": "cm-0014"
+  },
+  {
+   "token": "cf-38488df32ef8b62c",
+   "offer_id": "of-0015",
+   "case_id": "cs-0044",
+   "issued_at": "2026-08-18T12:00:00-04:00",
+   "used_at": "2026-08-18T12:00:00-04:00",
+   "commitment_id": "cm-0015"
+  },
+  {
+   "token": "cf-c4e6cf195e100123",
+   "offer_id": "of-0016",
+   "case_id": "cs-0046",
+   "issued_at": "2026-09-29T12:45:00-04:00",
+   "used_at": "2026-09-29T12:45:00-04:00",
+   "commitment_id": "cm-0016"
+  },
+  {
+   "token": "cf-93801743a6f41076",
+   "offer_id": "of-0017",
+   "case_id": "cs-0048",
+   "issued_at": "2026-11-10T12:00:00-05:00",
+   "used_at": "2026-11-10T12:00:00-05:00",
+   "commitment_id": "cm-0017"
+  },
+  {
+   "token": "cf-20cc81bac14536d4",
+   "offer_id": "of-0018",
+   "case_id": "cs-0050",
+   "issued_at": "2026-12-17T10:45:00-05:00",
+   "used_at": "2026-12-17T10:45:00-05:00",
+   "commitment_id": "cm-0018"
+  },
+  {
+   "token": "cf-49aa3b1d30ddb430",
+   "offer_id": "of-0019",
+   "case_id": "cs-0051",
+   "issued_at": "2026-12-18T17:15:00-05:00",
+   "used_at": "2026-12-18T17:15:00-05:00",
+   "commitment_id": "cm-0019"
+  },
+  {
+   "token": "cf-b59793ad6fb4d696",
+   "offer_id": "of-0020",
+   "case_id": "cs-0053",
+   "issued_at": "2026-12-27T11:00:00-05:00",
+   "used_at": "2026-12-27T11:00:00-05:00",
+   "commitment_id": "cm-0020"
+  }
+ ],
+ "outbox": []
+}

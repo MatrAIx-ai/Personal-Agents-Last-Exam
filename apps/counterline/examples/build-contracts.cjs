@@ -46,7 +46,7 @@ const provider = obj({
 // What the provider holds about the customer, used only to check identity data the customer provides.
 const customerRecord = obj({ full_name: text(120), last_four: text(4), billing_zip: text(10), date_of_birth: nullable(text(10)) });
 const disclosure = obj({ at: time, fields: arr({ enum: IDENTITY_FIELDS }), not_needed: arr({ enum: IDENTITY_FIELDS }), matched: { type: 'boolean' } });
-const article = obj({ article_id: id, title: text(200), body: text(8000), tags: arr(text(60)) });
+const article = obj({ article_id: id, title: text(200), body: text(8000), tags: arr(text(60)), updated_at: time });
 const turn = obj({
   turn_id: id, at: time, speaker: { enum: ['customer', 'representative'] }, text: text(),
   source: { enum: ['text', 'action', 'script', 'system'] }, recognized: arr(text(80)), rule: nullable(text(120))

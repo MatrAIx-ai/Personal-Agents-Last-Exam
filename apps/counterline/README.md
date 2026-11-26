@@ -48,7 +48,8 @@ Infra events: `counterline.commitment.performance_reported`, `counterline.case.f
 From this directory:
 
 ```sh
-npm test                 # business tests (T00 to T20, T22)
+npm test                 # business tests (T00 to T20, T22 to T24)
+npm run dataset:check    # delivery dataset: drift, replay and coverage checks
 npm run example          # one event, before and after
 npm run contracts        # regenerate tools.json, seed/events schemas and the operation list
 npm run contracts:check  # fail if generated files drifted
@@ -62,15 +63,18 @@ node runtime/web/server.cjs --app counterline --registry apps/counterline/regist
 node apps/counterline/tests/browser.test.cjs   # needs `npm ci` and `npx playwright install chromium`
 node apps/counterline/examples/join/run.cjs     # T21 settlement join, real MCP
 node apps/counterline/examples/mail-integration/run.cjs   # Counterline → Messaging → Mail
+node apps/counterline/scripts/check-dataset.cjs           # load and query the delivery dataset through MCP
 ```
 
 ## Data
 
-Two hand-authored synthetic fixture families. `fixtures/minimal.json`: a card issuer ("Larchmont Card Services") with an annual-fee offer catalog across two tiers, a transfer to Account Review by name or alias, a resolved case with an accepted 125.00 credit and a pending commitment. `fixtures/internet-provider.json`: an internet provider ("Kestrel Fiber") whose policy refuses transfers, with a promised 40.00 refund for the baseline status inquiry. No real people, providers or account numbers. Money is in integer minor units.
+**Delivery dataset:** two years (2025-01-01 to 2026-12-31) of synthetic history for each family, generated through Counterline's own operations, with an as-of selection script and a monthly coverage report. See [datasets/README.md](datasets/README.md).
+
+**Scenario fixtures:** two hand-authored synthetic fixture families, kept as smoke and task fixtures. `fixtures/minimal.json`: a card issuer ("Larchmont Card Services") with an annual-fee offer catalog across two tiers, a transfer to Account Review by name or alias, a resolved case with an accepted 125.00 credit and a pending commitment. `fixtures/internet-provider.json`: an internet provider ("Kestrel Fiber") whose policy refuses transfers, with a promised 40.00 refund for the baseline status inquiry. No real people, providers or account numbers. Money is in integer minor units.
 
 ## Not done yet (planned in #219)
 
-The 2025 to 2026 delivery dataset with its coverage report, the reference-product comparison screenshots and the evidence index.
+The reference-product comparison screenshots and the evidence index.
 
 ## Limitations
 

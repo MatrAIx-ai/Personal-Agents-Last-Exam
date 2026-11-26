@@ -326,3 +326,38 @@ test('T22 Mail copies are queued only while email_copies is on, once per present
   unchanged(f, () => f.event({ event_id: 'ev-cl-0602', at: '2026-12-02T09:11:00-05:00', operation: 'counterline.notification.delivery_recorded',
     payload: { notification_id: 'ntf-missing', status: 'committed', code: null, stop_run: false, router_event_id: null } }), /existing notification/);
 });
+
+test('T23 after a contest is reissued, only later reports count toward the commitment', () => {
+  const f = fixture();
+  f.event(scenario);                                         // POST-301, 125.00: reported_performed
+  f.call('counterline.commitments.contest', { commitment_id: 'cm-0001', reason: 'The credit does not show on my card account.' });
+  f.event({ event_id: 'ev-cl-0700', at: '2026-12-06T09:00:00-05:00', operation: 'counterline.contest.answered', payload: { commitment_id: 'cm-0001', outcome: 'reissued', reference_id: 'POST-401' } });
+  assert.equal(f.data.commitments[0].status, 'pending');
+  f.event(report({ event_id: 'ev-cl-0701', at: '2026-12-08T09:00:00-05:00', payload: { reference_id: 'POST-401' } }));
+  assert.equal(f.data.commitments[0].status, 'reported_performed');
+  unchanged(f, () => f.event(report({ event_id: 'ev-cl-0702', at: '2026-12-09T09:00:00-05:00', payload: { reference_id: 'POST-402', amount_minor: 100 } })), /takes no report/);
+});
+
+test('T24 delivery dataset: an as-of selection holds only earlier records, each in its state then', () => {
+  const { select } = require('../scripts/select-history.cjs');
+  const cut = '2026-03-01T00:00:00-05:00';
+  for (const family of ['card-issuer', 'internet-provider']) {
+    const d = select(family, cut), full = require(`../datasets/${family}/seed.json`);
+    const times = [...d.cases.flatMap(c => [c.opened_at, ...c.transcript.map(t => t.at)]), ...d.offers.map(o => o.presented_at),
+      ...d.commitments.flatMap(m => [m.accepted_at, ...m.reports.map(r => r.at), ...m.history.map(h => h.at)]), ...d.help_articles.map(a => a.updated_at)];
+    assert.ok(times.every(t => Date.parse(t) <= Date.parse(cut)), `${family}: nothing after the cut`);
+    assert.ok(d.cases.length > 10 && d.cases.length < full.cases.length);
+    for (const m of d.commitments) {
+      const later = full.commitments.find(x => x.commitment_id === m.commitment_id);
+      assert.deepEqual(m.history, later.history.filter(h => Date.parse(h.at) <= Date.parse(cut)), `${m.commitment_id} history as of the cut`);
+    }
+  }
+});
+
+test('T25 objects() and records() agree, as Core requires when loading a seed', () => {
+  for (const family of ['card-issuer', 'internet-provider']) {
+    const d = require(`../datasets/${family}/seed.json`);
+    assert.equal(plugin.objects(d).length, plugin.records(d).length, family);
+    assert.ok(d.confirmations.length > 0, `${family} has confirmations`);
+  }
+});

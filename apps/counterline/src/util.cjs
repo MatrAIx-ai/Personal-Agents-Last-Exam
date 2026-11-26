@@ -38,4 +38,7 @@ const money = v => `${(v.amount_minor / 100).toFixed(2).replace(/\B(?=(\d{3})+(?
 const list = names => names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
 // A confirmation token: deterministic for the same state, so replays and tests are reproducible.
 const token = (...parts) => 'cf-' + require('node:crypto').createHash('sha256').update(parts.join('|')).digest('hex').slice(0, 16);
-Object.assign(module.exports, { addHours, addDays, money, list, token });
+// Reports that count toward a commitment: after a contest is answered "reissued", earlier reports did not
+// take effect, so only reports after the reissue count.
+const effectiveReports = m => m.contest && m.contest.outcome === 'reissued' ? m.reports.filter(r => Date.parse(r.at) > Date.parse(m.contest.answered_at)) : m.reports;
+Object.assign(module.exports, { addHours, addDays, money, list, token, effectiveReports });

@@ -1,6 +1,6 @@
 'use strict';
 // Infra events. The task chooses timing; Counterline validates and applies the business effect.
-const { fail, byId, ms } = require('./util.cjs');
+const { fail, byId, ms, effectiveReports } = require('./util.cjs');
 const { log } = require('./diagnostics.cjs');
 const APP = 'counterline';
 const OPEN = ['pending', 'partially_reported'];
@@ -12,7 +12,7 @@ function performanceReported(data, event) {
   if (p.provider_id !== m.provider_id) fail('invalid_event', 'The report names a different provider.');
   if (!OPEN.includes(m.status)) fail('invalid_event', `Commitment ${m.commitment_id} is ${m.status} and takes no report.`);
   if (m.reports.some(r => r.reference_id === p.reference_id)) fail('invalid_event', 'This reference was already reported.');
-  const reported = m.reports.reduce((sum, r) => sum + r.amount_minor, 0) + p.amount_minor;
+  const reported = effectiveReports(m).reduce((sum, r) => sum + r.amount_minor, 0) + p.amount_minor;
   if (m.value) {
     if (p.currency !== m.value.currency) fail('invalid_event', 'The report currency differs from the commitment.');
     if (reported > m.value.amount_minor) fail('invalid_event', 'Reports cannot exceed the committed amount.');

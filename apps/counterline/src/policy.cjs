@@ -2,7 +2,7 @@
 // The chat policy: which quick actions a case offers, what the deterministic recognizer understands in
 // free text, and how the representative answers each request. Everything here is computed from the case,
 // the offers presented in it and the provider's records; nothing depends on what the Agent has read.
-const { ms, addHours, money, list, nextId } = require('./util.cjs');
+const { ms, addHours, money, list, nextId, effectiveReports } = require('./util.cjs');
 
 const LABELS = {
   explain_terms: 'Explain these terms',
@@ -124,7 +124,7 @@ function perform(data, c, now, action, dept, recognized) {
         const t = titleOf(m), due = m.perform_by ? m.perform_by.slice(0, 10) : null;
         if (m.status === 'contested') return `Your contest of the ${t} is under review.`;
         if (m.status === 'reported_performed') return `Our records show the ${t} was completed (reference ${m.reports.at(-1).reference_id}).`;
-        if (m.status === 'partially_reported') return `We have completed ${money({ amount_minor: m.reports.reduce((s, r) => s + r.amount_minor, 0), currency: m.value.currency })} of the ${t} so far.`;
+        if (m.status === 'partially_reported') return `We have completed ${money({ amount_minor: effectiveReports(m).reduce((s, r) => s + r.amount_minor, 0), currency: m.value.currency })} of the ${t} so far.`;
         if (due && ms(now) > ms(m.perform_by)) return `The ${t} we promised is late: it was due by ${due}. I have noted that on your case.`;
         return `The ${t}${m.value ? ` (${money(m.value)})` : ''} is still being processed${due ? ` and is due by ${due}` : ''}.`;
       });
