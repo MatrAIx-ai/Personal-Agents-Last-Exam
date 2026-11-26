@@ -42,12 +42,12 @@ const report = {
   latest: sorted[sorted.length - 1],
   dates_on_or_after_first_session: late,
   exclusions: [
-    'The Friday phishing email and the Saturday substitution are timeline events, not history.',
+    'The Friday phishing email and the Saturday substitution are timeline events. They stay out of the history count.',
     'Keelcard weekly captures and FreshCart order summaries share Saturday dates and count once in the global total.',
-    'Dates were not padded toward 300. The depth is the household seed plus the proposal memory and mail.'
+    'The depth is the household seed plus the proposal memory and mail. The count was left at that depth.'
   ]
 };
-const dest = path.join(taskRoot, 'demo/grocery-cap-limit-code/evidence/history-coverage.json');
+const dest = path.join(path.resolve(__dirname, '..'), 'demo/grocery-cap-limit-code/evidence/history-coverage.json');
 fs.mkdirSync(path.dirname(dest), { recursive: true });
 fs.writeFileSync(dest, JSON.stringify(report, null, 2) + '\n');
 process.stdout.write(JSON.stringify({ distinct: report.global_distinct_dates, earliest: report.earliest, latest: report.latest, late: late.length }) + '\n');

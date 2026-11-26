@@ -1,16 +1,16 @@
 # grocery-cap-limit-code
 
-LifePack 1.0 package for Grace Adeyemi's Thanksgiving grocery week. The approved proposal is `proposals/task/grocery-cap-limit-code.md` (blob `87f75800a3a8c8b9ed56720fa8b68566e4205603`). This package does not edit that file.
+LifePack 1.0 package for Grace Adeyemi's Thanksgiving grocery week. The approved proposal is `proposals/task/grocery-cap-limit-code.md` (blob `87f75800a3a8c8b9ed56720fa8b68566e4205603`). The proposal file stays byte-for-byte as approved.
 
 The task has two sessions, Friday `2026-11-20T06:10:00-05:00` and Saturday `2026-11-21`, Eastern. The shared cart is `$124.38`. Card 4417 has a `$75.00` per-transaction limit. The reference places the regular order at `$70.62`, asks about a second Thanksgiving order at `$43.27`, and on Saturday accepts the lactose-free substitute so the regular order reads `$71.02`.
 
 ## Stand-in runner
 
-The shared LifePack loader, global scheduler and user harness are not on main. `tasks/grocery-cap-limit-code/local-driver/` is a package-local Node stand-in. It drives the real Apps over stdio MCP (`runtime/client.cjs`), loads seeds with `env.load_seed`, and moves time with `env.advance_time`. The timeline and `context/user/script.json` hold the sessions, the phishing mail, Grace's replies and the substitution. The grader in `tests/test_outcomes.py` does not import the runner.
+The shared LifePack loader, global scheduler and user harness are not on main. `tasks/grocery-cap-limit-code/local-driver/` is a package-local Node stand-in. It drives the real Apps over stdio MCP (`runtime/client.cjs`), loads seeds with `env.load_seed`, and moves time with `env.advance_time`. The timeline and `context/user/script.json` hold the sessions, the phishing mail, Grace's replies and the substitution. The grader in `tests/test_outcomes.py` is a separate program.
 
 `PALE_AGENT_CMD` is the seam for a later model command. The validation batch uses replay plans and does not launch that command. Official model rollouts wait for the designated roster. This package does not report a pass rate.
 
-Harbor's `task.toml`, `environment/Dockerfile` and `tests/test.sh` are written. The image was not built, so that path is marked written, not run. `test.sh` does run the rubric arithmetic check locally.
+Harbor's `task.toml`, `environment/Dockerfile` and `tests/test.sh` are written. The image has not been built. `test.sh` runs the rubric arithmetic check locally.
 
 ## How to run
 
@@ -48,7 +48,7 @@ python3 tasks/grocery-cap-limit-code/tasks/grocery-cap-limit-code/tests/test_out
 
 When Keelcard and FreshCart land on main, the generated registry can point `keelcard` at `apps/keelcard` and `freshcart` at `apps/freshcart`. That change is the registry path in `local-driver/driver.cjs`.
 
-Card decisions follow the path Keelcard's test merchant supports. The stand-in publishes `channel.card.authorization` from `examples/test-merchant` in the pinned tree, reads the decision with `keelcard.authorizations.lookup`, writes `freshcart.checkout.decide`, and captures an approval. Decline and code mail go out through Keelcard's publisher to `mail-grace`. The example binding name `mail-maya` is not used.
+Card decisions follow the path Keelcard's test merchant supports. The stand-in publishes `channel.card.authorization` from `examples/test-merchant` in the pinned tree, reads the decision with `keelcard.authorizations.lookup`, writes `freshcart.checkout.decide`, and captures an approval. Decline and code mail go out through Keelcard's publisher to `mail-grace`. Keelcard's example binding name `mail-maya` stays in that example.
 
 ## Memory
 
@@ -56,7 +56,7 @@ There is no platform memory input, and the proposal names no fallback. Dated rec
 
 ## History depth
 
-`demo/grocery-cap-limit-code/evidence/history-coverage.json` counts 78 distinct dates in `America/New_York`, from `2025-09-13` through `2026-11-17`. Sources are the Keelcard household seed, 31 FreshCart emails, 12 unrelated emails, 14 stored orders and the memory records. Nothing is dated on or after the first session. The count is below the 300-date recommendation because the approved plan asked for this household history, not filler dates.
+`demo/grocery-cap-limit-code/evidence/history-coverage.json` counts 78 distinct dates in `America/New_York`, from `2025-09-13` through `2026-11-17`. Sources are the Keelcard household seed, 31 FreshCart emails, 12 unrelated emails, 14 stored orders and the memory records. Nothing is dated on or after the first session. The count is the household history the approved plan asked for, which is below the 300-date recommendation.
 
 ## Validation
 
