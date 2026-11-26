@@ -168,8 +168,16 @@ function publicationHandle(entry) {
   return match ? match[1] : null;
 }
 
+function externalPublication(item) {
+  if (!item || item.kind === 'internal') return false;
+  if (item.kind === 'external') return true;
+  if (item.kind) return false;
+  return /^https:\/\/postyard\.example\/@[^/]+\/[^/?#]+$/.test(String(item.url || ''));
+}
+
 function publicationAgrees(companion, revision, link) {
   return (companion.links || []).some(item => {
+    if (!externalPublication(item)) return false;
     if (item.revision_id && revision.revision_id && item.revision_id !== revision.revision_id) return false;
     if (item.app_id !== 'postyard') return false;
     if (item.object_id !== link.object_id) return false;
