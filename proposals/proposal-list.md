@@ -8,11 +8,11 @@ Automatically synchronized from proposal PRs, their proposal files, reviews and 
 
 ## Reviewer distribution
 
-**203 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
+**204 open non-draft proposals · 0 awaiting initial review · 9 drafts.**
 
 | Track | Reviewer | Pending review requests |
 | :--- | :--- | ---: |
-| Environment | [skyve2012](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Askyve2012) | 7 |
+| Environment | [skyve2012](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3Askyve2012) | 8 |
 | Environment | [Jasonya](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AJasonya) | 6 |
 | Environment | [Chenngzz](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3AChenngzz) | 3 |
 | Task | [TianyuCodings](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pulls?q=is%3Apr%20is%3Aopen%20review-requested%3ATianyuCodings) | 2 |
@@ -25,10 +25,11 @@ New proposals follow the [domain and author routing policy](https://github.com/M
 
 ## 🏗️ Environment Track
 
-**112 proposals.**
+**113 proposals.**
 
 | Submitted (UTC) | PR / app or website | Primary domain | Scope and app connections | Progress | Review / reviewer | Environment v1 deadline (UTC) | Author | Merged (UTC) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-26 00:14:11 | [#265](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/265) · Wrenboard, an independently branded synthetic job-search account seen from one candidate (postings, saved searches…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/265/files) | Work &amp; business | Wrenboard is a resettable job-search account for one candidate who already has a job. Its defining rule is that every step tells somebody something and most steps cannot be taken back: an application hands one employer a fixed copy of one… | Design review | Review requested<br>@skyve2012 |  | [smsnobin77](https://github.com/smsnobin77) |  |
 | 2026-11-25 20:00:50 | [#255](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/255) · Tallyhorn, an independently branded synthetic sports fan app for one invented basketball league, seen from one fan's…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/255/files) | Media &amp; entertainment<br>Also: Games &amp; play | Tallyhorn is a synthetic sports fan app for one invented basketball league, and the only proposal with live game state, TV blackouts, spoiler mode and a fantasy team with lineup locks, waivers and trades. Games change state only through… | Draft | Awaiting review |  | [byshail](https://github.com/byshail) |  |
 | 2026-11-25 19:59:57 | [#254](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/254) · Turnrow, an independently branded synthetic fan-to-fan ticket resale marketplace seen from one fan's account that both…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/254/files) | Media &amp; entertainment<br>Also: Shopping &amp; groceries | Turnrow is a fan-to-fan ticket resale marketplace that never sells primary tickets. No other proposal resells tickets with delivery deadlines and penalties, post-show payouts or guarantee claims. The person sells seats they already hold… | Draft | Awaiting review |  | [byshail](https://github.com/byshail) |  |
 | 2026-11-25 19:55:58 | [#253](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/253) · Kitewatch, an independently branded synthetic user-generated video platform seen from one viewer's account, with a…<br>[View changes](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/253/files) | Media &amp; entertainment<br>Also: Social &amp; communities | Kitewatch is the viewer's side of a user-generated video platform, which no existing proposal covers: channel subscriptions with notice levels, a watch history the person can pause and prune, a home feed built by a written rule that gives… | Draft | Awaiting review |  | [byshail](https://github.com/byshail) |  |
