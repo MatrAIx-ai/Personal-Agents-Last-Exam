@@ -4,11 +4,11 @@ Owner: @byshail. App `tidepool` 1.0.0 under `apps/tidepool/`; public runtime 1.6
 
 - **Plan.** It implements the plan in [PR #216](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/216), `proposals/environment/tidepool-audio.md` at `575bb90fec3e44be6a7f46ce66fe6a7577a1029f`. The assigned Track reviewer approved it for implementation on 2026-11-24 with `/approve-plan` for that commit at 07:05:26Z; the bot recorded the approval after a repeated command at 21:56:00Z.
 - **Proposal file.** Unchanged since that commit (blob `307acdf79525bccc546e772a7481c11c9301cfaa`).
-- **Package.** At commit `4149b6c0b494a5b17b4b8a4355c5ea55ef57bb8c`. This report is added in the next commit, which changes only `docs/validation/`.
+- **Package.** At commit `feec7df6c69f4e9b201f4583c9870cb52f6fde03`. This report is updated in the next commit, which changes only `docs/validation/`. The first submission was `e4096de` (package `4149b6c`); this revision adds the clock cutoff and the [evaluation dataset](#evaluation-dataset-and-clock-cutoff-added-after-plan-approval-260) required since #260.
 
 This document records implementation evidence; it claims no acceptance.
 
-Checked on 2026-11-25 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 and v18.20.8. All data is synthetic. The runs used temporary directories and local stdio MCP, with no network, credentials or model API. Versions, the package hash and every count below are in [tidepool/index.json](tidepool/index.json), next to the raw reports.
+Checked on 2026-11-26 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 and v18.20.8. All data is synthetic. The runs used temporary directories and local stdio MCP, with no network, credentials or model API. Versions, the package hash and every count below are in [tidepool/index.json](tidepool/index.json), next to the raw reports.
 
 **Automated outcome: passed.** Independent reproduction, official CI on the implementation commit and human review are still to come.
 
@@ -16,15 +16,17 @@ Checked on 2026-11-25 (UTC) on macOS 27.2.1 (Darwin arm64) with Node v22.23.2 an
 
 | Evidence | Result | What was exercised |
 | :--- | :--- | :--- |
-| App-only business tests, package alone | 21 passed, on both Node versions | A copy of `apps/tidepool/` with nothing beside it, run with only `PATH` and `LANG` set. The tests call the real business functions through an App-only harness that mirrors Core's handling of events and of `env.advance_time`: the clock moves to the event's time before validation, and a failed event rolls back. Every result is checked against `tools.json`, and every refused call or event is checked to leave business data identical. |
-| Event example and generated files | Passed, on both | `examples/run.cjs` from the package alone. `dev/build-fixtures.cjs` and `dev/build-contracts.cjs`, run in a copy, leave every committed file byte-identical: fixtures, example events, policies, task data, dataset counts, schemas and `tools.json`. |
+| App-only business tests, package alone | 30 passed, on both Node versions | A copy of `apps/tidepool/` with nothing beside it, run with only `PATH` and `LANG` set. The tests call the real business functions through an App-only harness that mirrors Core's handling of events and of `env.advance_time`: the clock moves to the event's time before validation, and a failed event rolls back. Every result is checked against `tools.json`, and every refused call or event is checked to leave business data identical. |
+| Event example and generated files | Passed, on both | `examples/run.cjs` from the package alone. `dev/build-fixtures.cjs`, `dev/build-contracts.cjs` and `dev/build-dataset.cjs`, run in a copy, leave every committed file byte-identical: fixtures, example events, policies, task data, dataset counts, schemas and `tools.json`. |
 | Public App verifier | 50 checks passed, on both ([node22](tidepool/public-runtime.node22.json), [node18](tidepool/public-runtime.node18.json)) | An isolated package copy, then real MCP. Agent discovery shows no Infra tools. It covers published input and output of the 16 tools the default `scenario` profile lists, the Agent denied all seven Infra operations, history loading and rejection, the declared event with retry and conflict, reset, a separate run and a restarted process. |
 | CI job, reproduced | `tidepool: PASS`, on both | `node runtime/ci/verify-submissions.cjs . <out> a4bce02…`, the command of the `public-runtime` job. It selected `tidepool` only (`full: false`). |
 | Real-MCP walkthrough | 158 checks passed, 304 calls traced, on both ([node22](tidepool/mcp-walkthrough.node22.json), [node18](tidepool/mcp-walkthrough.node18.json)) | What the verifier does not exercise for this App, across six loaded instances plus a default-policy one. Every call is joined to run, account, connection and request or event ID. See the list below this table. |
+| Evaluation dataset over real MCP | 91 checks passed, on both ([node22](tidepool/dataset-demo.node22.json), [node18](tidepool/dataset-demo.node18.json)) | `examples/dataset-demo.cjs` loads `data/evaluation/seed.json` with its own `dataset.json` as the bundle dataset in one `env.load_seed` request (434,421 bytes), queries it at early, dataset and end-of-2026 clocks with `env.advance_time`, and checks that nothing dated after the clock is visible and no record changes |
+| Dataset coverage | 454 distinct dates in 24 of 24 months ([coverage.json](tidepool/coverage.json)) | `dev/coverage-report.cjs --json` over the delivered file; details below |
 | Repository suite | 22/22 stages passed, on both ([node22](tidepool/reference-suite.node22.json), [node18](tidepool/reference-suite.node18.json)) | The unchanged public suite (`npm test`) with this package present. |
 | Independent base validator | Passed, 50 checks ([report](tidepool/base-runtime.json)) | An unmodified export of `main` at `a4bce023953061483c41de5a287ba5e43f4a5648`, the PR's base, validated the candidate checkout with its own `runtime/ci/verify-submissions.cjs`. It selected `tidepool` only. |
-| Package identity | `3619c1ff4579a7b7d398ed0810c8a8320b702f1d78adc0a897aadd91aab2e10e` | The same package hash appears in the two verifier reports, the base validator report and the two walkthrough reports. Git tree `5dc27e527f84663f8d7a1176cbbb376a57096141`. |
-| Human review | Pending | Realism of the catalog, listening history and billing; that artists, shows, people and prices are fictional. |
+| Package identity | `d6f7edb116e3247306a77d0c72690778a1dd906a85424a044d6b01d1f9b90ba6` | The same package hash appears in the two verifier reports, the base validator report, the two walkthrough reports and the two dataset reports. Git tree `270d22b6ec3ab518df1f734651e953c4c2edb171`. |
+| Human review | Pending | Realism of the catalog, listening history and billing, including the generated dataset; that artists, shows, people and prices are fictional. |
 
 The walkthrough's instances:
 
@@ -55,11 +57,13 @@ cd apps/tidepool && npm test && npm run example && cd ../..
 npm run app:verify -- --app apps/tidepool --output .artifacts/tidepool.json
 node runtime/ci/verify-submissions.cjs . .artifacts/submissions a4bce023953061483c41de5a287ba5e43f4a5648
 node apps/tidepool/examples/mcp-walkthrough.cjs > .artifacts/tidepool-walkthrough.json
+node apps/tidepool/examples/dataset-demo.cjs > .artifacts/tidepool-dataset-demo.json
+node apps/tidepool/dev/coverage-report.cjs
 npm test
 ```
 
 - **Package alone:** copy `apps/tidepool/` to an empty directory and run `npm test` and `npm run example` there.
-- **Generated files:** run `npm run build:fixtures` and `npm run build:contracts` in a copy and compare it with the original.
+- **Generated files:** run `npm run build:fixtures`, `npm run build:contracts` and `npm run build:dataset` in a copy and compare it with the original.
 - **Independent check:** run this from a separate export of the base revision:
 
 ```sh
@@ -90,6 +94,61 @@ Each row reads: starting state → action → observed result, then a control th
 | Time alone (the review's close check) | Six `env.advance_time` steps with no event: download completion, auto-delete, the 30-day check, billing period end, grace end, and period end with a downgrade. Each commits, business data and activity rows stay byte-identical, Core audits only the clock change, and `family.get` agrees with `downloads.list`. | The billing period end moves to Dec. 3 with the invoice pending and the account active; no record is created. | B8, B10, B17, B18; W32–W36, W69–W73, W119–W128, W134–W137, W147–W151 |
 | Core contracts and records | A byte-identical `env.apply_event` resend and an identical `upnext.set` retry are duplicates with no new version. Each of four instances has one activity row per committed write and per applied event, each joined to a Core receipt. | Changed event or request content: `idempotency_conflict`. An old version: `stale_version`. The default policy exposes the 16 reads only and denies writes. The Agent cannot inject events or advance the clock. | B21; W1–W5, W13–W14, W25–W27, W83–W85, W94–W96, W129–W131, W152–W154; verifier |
 | Seeds, reset and instances | The fixture recomputes progress from its sessions. Clean versions match their title and artist, files are under 1 MiB, and no download reaches Priya's phone after its last check-in. The task data loads directly with its own `dataset.json`. Reset restores the loaded family, history, catalog and clock of that instance only. | Inconsistent seeds are refused (`invalid_seed`). The fixture also validates under a January clock, because seed dates are never compared with the run clock. Resetting Priya's instance leaves Sam's as it was. | B1, B2; W132, W155–W158 |
+
+## Evaluation dataset and clock cutoff (added after plan approval, #260)
+
+The plan was approved on 2026-11-24; #260 published the Environment data rule on 2026-11-25. This scope was added after the plan was approved, for that rule (`docs/submission-evidence.md`, sections 3 and 4) and the reviewer's clock-gap finding on a sibling App. Tool schemas, error codes and events are unchanged.
+
+**Clock cutoff** (`src/visible.cjs`):
+- Reads, writes and events see the data as of `ctx.virtual_now`. A record exists from the time it happened: an episode from `published_at`, an album and its tracks from the start of the release day (in the billing anchor's offset), a session from `ended_at`, a download from `requested_at`, a payment from `at`, a member from `joined_at`, and so on.
+- State a record gained later reads as it was before:
+  - a later removal or response is undone;
+  - progress and play counts come from the visible sessions;
+  - a device's later check-in reads as the end of its latest visible session, or its registration.
+- Scheduled fields stay visible: `completes_at`, `auto_delete_at`, timeline `from`.
+- A write or event on a later record fails (`not_found`; `invalid_event` or `target_not_found` for events) and changes nothing.
+- Changed records replace their stored form, including a later stored record with the same key.
+- If later family records cannot coexist with a change (validation fails), the family is stored as it reads at the clock plus the change; later albums, tracks and episodes are kept.
+- Before the bound member's `joined_at`, every tool returns `not_found`.
+- The README carries the field table.
+
+**Dataset** (`data/evaluation/`, version 1.0.0):
+- `seed.json`: sha256 `88a0c16c916f7c557c6bc109b2363078c662c4647a0a82e193f3555e234f22e8`, 434,728 bytes (428,654 compact), 826 records as counted by `plugin.records`.
+- `dataset.json` validates against `schemas/dataset.schema.json` (tested) and records the seed's bytes and sha256 under the generated source's `generation.parameters.outputs['seed.json']`. The demo loads the seed with this file as the bundle's `dataset`.
+- Window 2025-01-01 to 2026-12-31, America/Los_Angeles; dataset clock 2026-11-24T19:00:00-08:00 (the fixture clock).
+- Contents: Priya's 2025 on the Individual plan (123 sessions on her old phone, 12 invoices, one declined and paid); the fixture's 2026, verbatim; and each show's episodes on the fixture cadence from January 2025 to December 28, 2026.
+- Three fixture records change for the 2025 story, and the test lists them: `family.created_at`, Priya's `joined_at`, and `billing` anchor and timeline.
+- All records are synthetic: 512 authored, 2 changed and 337 generated by `dev/build-dataset.cjs` with seed 20250103. No real source exists for the invented catalogue.
+
+**Coverage** (`node apps/tidepool/dev/coverage-report.cjs`):
+- 858 dated records: 851 counted, 7 excluded (albums released 2022-2024, before the window).
+- 454 distinct dates in 24 of 24 months, 444 on or before the dataset clock; the sources include 8 in-window album releases.
+- Longest gap 8 days (2026-12-12 to 2026-12-19).
+- Family records fall on 282 dates; their longest gap before the clock is 16 days (August 2025 vacation).
+- 0 identical episode texts; 0 pairs at word 5-gram Jaccard ≥ 0.8.
+
+| Command | Node 22.23.2 | Node 18.20.8 |
+| --- | --- | --- |
+| `npm test` (apps/tidepool) | 30 tests, 30 pass | 30 tests, 30 pass |
+| `node runtime/cli.cjs verify --app apps/tidepool` | passed, 50 checks | passed, 50 checks |
+| `npm run walkthrough` (apps/tidepool) | passed, 158 checks (same checks and reference replies as the v1.0.0 evidence) | passed, 158 checks (same) |
+| `node apps/tidepool/examples/dataset-demo.cjs` | 91 checks; one `env.load_seed` of 434,421 bytes, with `data/evaluation/dataset.json` as the bundle's `dataset` | 91 checks |
+| `node apps/tidepool/dev/build-dataset.cjs` twice | byte-identical output | — |
+
+All reports carry package sha256 `d6f7edb116e3247306a77d0c72690778a1dd906a85424a044d6b01d1f9b90ba6`.
+
+New tests in `tests/business.test.cjs`:
+- *a seed loaded before its latest record shows only what existed at the clock* (Leila's task data on Oct. 1, 2026, then advanced to Nov. 24 with no data change; and on Feb. 1, 2026, before an album's release);
+- *at a mid-2026 clock a device that played recently reads as checked in then and keeps its downloads*;
+- *a write before a seeded later record with the same key replaces it; other later records stay*;
+- *a write that the later family records cannot coexist with drops them and keeps later episodes*;
+- *before the account exists every tool returns not_found and family events are refused; catalog events apply*;
+- *events count only visible records: playlist positions, newest-n auto-downloads and seeded later IDs*;
+- *the evaluation dataset matches its dataset.json and keeps every fixture record except the three its 2025 story extends*;
+- *at the dataset clock the fixture facts read the same for Priya and Sam*;
+- *the evaluation dataset loads at any clock in its window and shows nothing dated later* (2025-03-15, 2025-12-31, the dataset clock, 2026-12-31).
+
+**Added scope against the approval baseline:** the dataset and its three scripts; the clock cutoff in `src/visible.cjs`, including the rule that stores the family as it reads at the clock when a write conflicts with later family records; and a larger package: 1,668,941 bytes of tracked files under `apps/tidepool/`, up from 1,118,899. The approval review asked to cover seed history from 2026-01-01 where possible; the dataset now covers 2025 as well.
 
 ## Plan and implementation
 
@@ -156,6 +215,7 @@ The suggestion to cover history from 2026-01-01 is followed.
 
 ## Data and licence
 
+- **`data/evaluation/`**: the 2025-2026 evaluation dataset described above, rebuilt by `dev/build-dataset.cjs`. The fixtures below are unchanged.
 - **`fixtures/minimal.json`** (326 KB): a catalog of 10 artists, 15 albums, 120 tracks (12 explicit tracks with clean versions), 8 shows and 150 episodes, and a four-member family with six devices. History runs from January 2026: 198 sessions, progress, follows, downloads, playlists and eleven monthly payments. It counts 506 records.
 - **`examples/task-data/`**: the second family's seed (174 KB, 315 records), binding, policies, dataset and a payment event.
 - **Events and policies:** `examples/events/` holds an example of each event type, and `examples/policies/` holds a narrowing policy.
@@ -178,4 +238,4 @@ In `tidepool/reference-suite.node*.json`, report paths inside stage commands wer
 - Remaining:
   - independent maintainer reproduction and acceptance;
   - official PR CI on the implementation commit (`public-runtime (18)`, `public-runtime (22)`, `base-runtime-compatibility`), which awaits maintainer approval of the fork's workflow run;
-  - human review of realism and of the invented artists, shows, people and names.
+  - human review of realism (including the generated dataset) and of the invented artists, shows, people and names.

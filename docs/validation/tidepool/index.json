@@ -1,6 +1,6 @@
 {
   "schema": "tidepool.v1-evidence-index",
-  "recorded_at": "2026-11-25T18:29:37Z",
+  "recorded_at": "2026-11-26T20:05:02Z",
   "app_id": "tidepool",
   "app_version": "1.0.0",
   "runtime_version": "1.6.0",
@@ -10,15 +10,17 @@
   "proposal_blob_sha": "307acdf79525bccc546e772a7481c11c9301cfaa",
   "proposal_status": "plan approved for implementation by the assigned Track reviewer (/approve-plan for this commit at 2026-11-24T07:05:26Z; the bot recorded it after a repeated command at 2026-11-24T21:56:00Z); the proposal file is unchanged since",
   "public_runtime_base_commit": "a4bce023953061483c41de5a287ba5e43f4a5648",
-  "app_package_commit": "4149b6c0b494a5b17b4b8a4355c5ea55ef57bb8c",
-  "app_package_sha256": "3619c1ff4579a7b7d398ed0810c8a8320b702f1d78adc0a897aadd91aab2e10e",
-  "app_package_git_tree": "5dc27e527f84663f8d7a1176cbbb376a57096141",
+  "app_package_commit": "feec7df6c69f4e9b201f4583c9870cb52f6fde03",
+  "app_package_sha256": "d6f7edb116e3247306a77d0c72690778a1dd906a85424a044d6b01d1f9b90ba6",
+  "app_package_git_tree": "270d22b6ec3ab518df1f734651e953c4c2edb171",
   "package_hash_agrees_in": [
     "public-runtime.node22.json",
     "public-runtime.node18.json",
     "base-runtime.json",
     "mcp-walkthrough.node22.json",
-    "mcp-walkthrough.node18.json"
+    "mcp-walkthrough.node18.json",
+    "dataset-demo.node22.json",
+    "dataset-demo.node18.json"
   ],
   "tested_node": {
     "18": "v18.20.8",
@@ -34,20 +36,20 @@
   "checks": {
     "standalone_business": {
       "node22": {
-        "tests": 21,
-        "pass": 21,
+        "tests": 30,
+        "pass": 30,
         "fail": 0,
         "skipped": 0
       },
       "node18": {
-        "tests": 21,
-        "pass": 21,
+        "tests": 30,
+        "pass": 30,
         "fail": 0,
         "skipped": 0
       }
     },
     "standalone_event_example": "examples/run.cjs passed from a copy of apps/tidepool alone, with only PATH and LANG set, on both Node versions",
-    "generators_reproduce_committed_files": "dev/build-fixtures.cjs and dev/build-contracts.cjs, run in a copy, left every file byte-identical on both Node versions",
+    "generators_reproduce_committed_files": "Every dev/build-*.cjs generator, including dev/build-dataset.cjs, run in a copy, left every committed file byte-identical on both Node versions",
     "public_app_verifier": {
       "node22": 50,
       "node18": 50,
@@ -129,10 +131,72 @@
           "tidepool"
         ]
       }
+    },
+    "evaluation_dataset": {
+      "path": "apps/tidepool/data/evaluation/seed.json",
+      "version": "1.0.0",
+      "sha256": "88a0c16c916f7c557c6bc109b2363078c662c4647a0a82e193f3555e234f22e8",
+      "sha256_matches_dataset_json": true,
+      "time_zone": "America/Los_Angeles",
+      "window": [
+        "2025-01-01",
+        "2026-12-31"
+      ],
+      "dataset_clock": "2026-11-24T19:00:00-08:00",
+      "totals": {
+        "records": 858,
+        "counted": 851,
+        "excluded": 7,
+        "invalid": 0,
+        "global_distinct_dates": 454,
+        "earliest": "2025-01-03",
+        "latest": "2026-12-28",
+        "distinct_dates_on_or_before_clock": 444,
+        "family_distinct_dates": 282,
+        "months_with_records": 24,
+        "months_with_family_records": 23,
+        "longest_gap": {
+          "days": 8,
+          "from": "2026-12-12",
+          "to": "2026-12-19"
+        },
+        "longest_family_gap_before_clock": {
+          "days": 16,
+          "from": "2025-08-04",
+          "to": "2025-08-19"
+        }
+      },
+      "real_records": 0,
+      "content": {
+        "episodes": 347,
+        "identical_episode_texts": 0,
+        "near_duplicate_pairs_at_0_8": {
+          "authored_fixture": 0,
+          "involving_generated": 0
+        },
+        "max_5gram_jaccard": 0.75,
+        "max_pair": [
+          "ep-staticsignal-053",
+          "ep-staticsignal-063"
+        ]
+      },
+      "real_mcp_demo": {
+        "node22": {
+          "checks": 91,
+          "load_request_bytes": 434421
+        },
+        "node18": {
+          "checks": 91,
+          "load_request_bytes": 434421
+        }
+      }
     }
   },
   "reports": [
     "base-runtime.json",
+    "coverage.json",
+    "dataset-demo.node18.json",
+    "dataset-demo.node22.json",
     "mcp-walkthrough.node18.json",
     "mcp-walkthrough.node22.json",
     "public-runtime.node18.json",
@@ -148,5 +212,18 @@
     "family state syncing across App instances",
     "official PR CI on the implementation commit",
     "human review of realism and invented names"
-  ]
+  ],
+  "previous_submission": {
+    "head": "e4096de62486d2e5c78caef150b0ba1e19502e91",
+    "app_package_commit": "4149b6c0b494a5b17b4b8a4355c5ea55ef57bb8c",
+    "app_package_sha256": "3619c1ff4579a7b7d398ed0810c8a8320b702f1d78adc0a897aadd91aab2e10e"
+  },
+  "added_scope_after_plan_approval": {
+    "reason": "#260 (docs/submission-evidence.md section 3) merged 2026-11-25, after plan approval; v1 review round of 2026-11-26",
+    "items": [
+      "evaluation dataset in apps/tidepool/data/evaluation/ with dev/build-dataset.cjs, dev/coverage-report.cjs and examples/dataset-demo.cjs",
+      "clock cutoff: tools show only records dated at or before the run clock",
+      "package size 1,668,941 bytes of tracked files (was 1,118,899)"
+    ]
+  }
 }
