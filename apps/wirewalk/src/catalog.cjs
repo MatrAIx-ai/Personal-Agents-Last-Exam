@@ -22,12 +22,17 @@ function index(data) {
   };
 }
 
-// Everything a read needs at one clock reading. A post is public from its publication time onward;
-// relationship lists and counts only include posts that are already public.
+// Everything a read needs at one clock reading. A post is public from its publication time onward,
+// an account from its join date and a bookmark from its saved_at; relationship lists and counts only
+// include posts that are already public. Nothing is stored for this: later records appear as the clock
+// reaches them. index() stays unfiltered for seed validation and events.
 function view(data, now) {
   const idx = index(data), t = instant(now);
   const isVisible = p => Boolean(p) && instant(p.published_at) <= t;
   const shown = data.posts.filter(isVisible);
+  // Validation keeps saved_at at or after the post's publication, so a shown bookmark's post is public.
+  const marks = data.bookmarks.filter(b => instant(b.saved_at) <= t);
+  idx.bookmarks = new Map(marks.map(b => [b.post_id, b]));
   const rel = {replies: new Map(), quotes: new Map(), reposts: new Map()};
   const add = (map, key, p) => {if (!map.has(key)) map.set(key, []); map.get(key).push(p);};
   for (const p of shown) {
@@ -36,7 +41,7 @@ function view(data, now) {
     if (p.source_id !== undefined) add(rel.reposts, p.source_id, p);
   }
   for (const map of Object.values(rel)) for (const list of map.values()) list.sort(oldestFirst);
-  return {data, idx, now, t, shown, rel, isVisible};
+  return {data, idx, now, t, shown, marks, rel, isVisible};
 }
 
 // An unknown ID and a post that is not public yet get the same answer.

@@ -1,0 +1,95 @@
+{
+  "schema_version": "pale.dataset.v1",
+  "dataset_id": "wirewalk-evaluation-2025-2026",
+  "version": "1.0.0",
+  "description": "Synthetic public post history and one reader's bookmarks covering 2025-01-01 through 2026-12-31 (America/Los_Angeles) for the fictional Corvale area: transit, county emergency notices, a music hall, local news, a glassmaker and its analysts, and residents. The 14 fixture accounts, 37 fixture posts, the board image and Priya Raman's fixture bookmark are included verbatim; the seven example event posts stay events. Loadable with env.load_seed at any clock in the window; Wirewalk shows only records dated at or before the clock.",
+  "record_source_ids": [
+    "authored",
+    "generated"
+  ],
+  "sources": [
+    {
+      "source_id": "authored",
+      "kind": "synthetic",
+      "description": "Original fictional text authored for this package by @byshail. All accounts, people, places, agencies, companies, posts and links are invented; no external posts, articles or alerts were collected, translated or adapted.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "manual",
+        "tool": "PALE fixture authoring",
+        "tool_version": "1.1.0",
+        "seed": null,
+        "parameters": {}
+      }
+    },
+    {
+      "source_id": "rendered-board",
+      "kind": "synthetic",
+      "description": "Original image rendered for this package by @byshail with tests/board-image.cjs (shared by dev/build-fixtures.cjs and the business tests) from the two text lines quoted in the post's alt text. In the story the rider posts it as a cropped photo; it is a rendering, and no photograph, screenshot or external asset was used.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "procedural",
+        "tool": "tests/board-image.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20261010,
+        "parameters": {
+          "font": "5x7 LED",
+          "scale": 5
+        }
+      }
+    },
+    {
+      "source_id": "generated",
+      "kind": "synthetic",
+      "description": "Template-generated fictional posts, accounts and bookmarks written by dev/build-dataset.cjs. All accounts, people, places, agencies, companies, shows and links are invented; nothing was collected from real websites.",
+      "uri": null,
+      "license": "MIT",
+      "usage": "permitted",
+      "collection": null,
+      "generation": {
+        "method": "template",
+        "tool": "dev/build-dataset.cjs",
+        "tool_version": "1.0.0",
+        "seed": 20261010,
+        "parameters": {
+          "window": [
+            "2025-01-01",
+            "2026-12-31"
+          ],
+          "time_zone": "America/Los_Angeles",
+          "clock": "2026-10-10T21:10:00-07:00",
+          "outputs": {
+            "seed.json": {
+              "bytes": 515612,
+              "sha256": "2fb3a768836b166b4e728fa197e10e11fb857654fe06fe43df52096cdb2894be"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "transformations": [
+    "Fixture accounts, posts and the bookmark are copied verbatim; the event posts in examples/scenario.json and examples/wildfire-events.json are not included and still apply as post.publish events.",
+    "Generated posts skip Oct. 10-12, 2026, the authored storyline weekend, and build earlier and later story arcs around it.",
+    "The board image's pixels are a deterministic rendering of its alt-text lines; tests decode the PNG and compare."
+  ],
+  "expected_counts": {
+    "records": 1864,
+    "assets": 1
+  },
+  "quality_policy": {
+    "duplicate_records": "reject",
+    "duplicate_assets": "reject",
+    "missing_assets": "reject"
+  },
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "notes": "Automated checks do not replace human review of realism, image legibility, variation and reuse permissions."
+  }
+}

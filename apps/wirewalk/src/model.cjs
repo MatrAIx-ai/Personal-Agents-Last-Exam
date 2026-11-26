@@ -53,7 +53,8 @@ function validateSeed(ctx, data) {
   unique(data.accounts, 'id', 'account ID');
   unique(data.posts, 'id', 'post ID');
   // Seed dates are not compared with the run clock: Core validates the package fixture at registration,
-  // possibly under an earlier clock. Posts dated after the clock simply stay hidden until it reaches them.
+  // possibly under an earlier clock. Tools show only posts, accounts and bookmarks dated at or before the
+  // clock (catalog.view), so a multi-period seed can load at any point in its window.
   const idx = index(data);
   for (const a of data.accounts) {
     if (!text(a.display_name, 100)) fail('invalid_seed', 'Account display names cannot be blank.');

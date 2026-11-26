@@ -1,5 +1,6 @@
 'use strict';
 // Agent business tools. Reads return the unchanged working copy; writes touch only the reader's bookmarks.
+// Both see only posts, accounts and bookmarks dated at or before the run clock (catalog.view).
 const {fail} = require('./domain-utils.cjs');
 const {log} = require('./diagnostics.cjs');
 const c = require('./catalog.cjs');
@@ -26,9 +27,8 @@ function read(ctx, data, name, args) {
         recent_posts: own.sort(c.newestFirst).slice(0, args.limit ?? 10).map(p => c.summary(v, p))};
     }
     case 'wirewalk.bookmarks.list':
-      // A seeded bookmark on a post that is not public yet stays hidden with the post.
-      return {bookmarks: recentFirst(data.bookmarks).filter(b => v.isVisible(v.idx.posts.get(b.post_id)))
-        .map(b => ({saved_at: b.saved_at, post: c.summary(v, v.idx.posts.get(b.post_id))}))};
+      // Only bookmarks saved at or before the clock (catalog.view); their posts are public by then.
+      return {bookmarks: recentFirst(v.marks).map(b => ({saved_at: b.saved_at, post: c.summary(v, v.idx.posts.get(b.post_id))}))};
     default:
       return null;
   }
@@ -36,13 +36,16 @@ function read(ctx, data, name, args) {
 
 function write(ctx, data, name, args) {
   if (!WRITES.has(name)) fail('unknown_tool', 'Unknown Wirewalk operation.');
+  // A post published after the run clock is not public yet, so it is not_found here too.
   const v = c.view(data, ctx.virtual_now), id = c.post(v, args.id).id;
   if (name === 'wirewalk.bookmarks.add') {
     const changed = !v.idx.bookmarks.has(id);
-    if (changed) data.bookmarks.push({post_id: id, saved_at: ctx.virtual_now});
+    // A seeded bookmark saved after the clock is replaced: the reader has saved the post now.
+    if (changed) data.bookmarks = [...data.bookmarks.filter(b => b.post_id !== id), {post_id: id, saved_at: ctx.virtual_now}];
     log(ctx, 'wirewalk.bookmarks.add', {post_id: id, changed});
     return {post_id: id, bookmarked: true, changed};
   }
+  // A bookmark saved after the clock does not exist yet: changed is false and the stored record stays.
   const changed = v.idx.bookmarks.has(id);
   if (changed) data.bookmarks = data.bookmarks.filter(b => b.post_id !== id);
   log(ctx, 'wirewalk.bookmarks.remove', {post_id: id, changed});

@@ -18,8 +18,8 @@ Self-contained PALE App package, version 1.0.0, Core API 1.2.0. Wirewalk is a fi
 
 - Each App instance holds one reader account (`account_id`, `owner_person_id`, bound through the task binding) and a copy of the run's public history.
 - Two readers are two instances loaded with the same history. **Infra applies every `post.publish` event to every reader instance in the run**, so the histories stay identical. The walkthrough's markets run shows this for two readers.
-- **Visibility.** A post is public from its `published_at` onward.
-  - A seed may carry the scripted history for several days (the fixture runs from Saturday to Monday): posts dated after the run clock stay hidden until the clock reaches them.
+- **Visibility.** A post is public from its `published_at` onward, an account from its `joined_at` and a bookmark from its `saved_at` (see the clock cutoff under [State and time](#state-and-time)).
+  - A seed may carry history past the run clock (the fixture runs from Saturday to Monday; the evaluation dataset runs to the end of 2026): records dated after the run clock stay hidden until the clock reaches them.
   - An unknown post ID and a post that is not public yet get the same `not_found` response ("Post is not available in Wirewalk."). Reply, quote and repost lists and counts include only public posts.
 - **Links.** Every post has a stable link, `https://wirewalk.example/@<author>/posts/<id>`, and every account a profile link. Link cards are fixture metadata (URL, title, description) on the reserved `.example` domain; nothing is fetched.
 
@@ -109,6 +109,17 @@ Infra applies one event type. The payload has `id`, `kind`, `author_id`, the kin
   - replies, quotes and reposts must not predate what they point to;
   - posts must not predate their author's join date;
   - bookmarks must not predate their post.
+- **Clock cutoff.** Tools show only records dated at or before `ctx.virtual_now`. Nothing is stored for this: when `env.advance_time` or an event moves the clock, the later records appear and no record changes. A seed that runs past the clock, such as the evaluation dataset, can therefore load at any point in its window.
+
+  | Record | Date field | Class | Before the clock reaches the date |
+  | --- | --- | --- | --- |
+  | `posts` | `published_at` | Happened in the service: the post exists from publication | `not_found` by ID for every read and both bookmark writes; absent from the feed, search, threads, reply, quote and repost lists and counts, account post counts and cursors |
+  | `accounts` | `joined_at` | Happened in the service: the account exists from joining | `wirewalk.account.get` returns `not_found`. Seed validation keeps every post at or after its author's join date, so a visible post always has a visible author |
+  | `bookmarks` | `saved_at` | Happened in the service: the reader saved the post then | Absent from `wirewalk.bookmarks.list`; the post shows `bookmarked: false` and `saved_at: null` |
+
+  Wirewalk has no scheduled or descriptive date fields. Times written inside post text, such as "results Tuesday, Oct. 13", are content and are not filtered.
+- **Writes before a later record.** Both bookmark tools return `not_found` for a post published after the clock and change nothing. If the agent bookmarks a post that the seed records as bookmarked later than the clock, the agent's bookmark replaces the later one, so the post keeps one bookmark, dated now. `wirewalk.bookmarks.remove` on such a post returns `changed: false` and keeps the seeded record, because at the clock that bookmark does not exist yet.
+- **Events.** `post.publish` has no positions or "latest" logic, so the cutoff changes nothing there. Its checks still run against the stored history: a reference to a post published after the event time fails, and an event that reuses the ID of a seeded later post, or repeats a seeded later repost by the same account, fails with `invalid_event`, because the stored history must stay valid and posts are immutable.
 - `fixtures/clock.json` sets the App-only example time: Saturday, Oct. 10, 2026, 21:10 Pacific, two minutes before the operator's reply.
 
 ## Fixtures
@@ -119,6 +130,7 @@ All text and the image are original and fictional (see `contribution/dataset.jso
 - `examples/scenario.json`: at 21:12 the operator replies to the question `p12` (`p19`).
 - `examples/wildfire-events.json`: six county and neighbor posts on Sunday (`p22`–`p27`).
 - `examples/task-data/`: reader Dario Mendes (`ww-dario`) on Monday evening. His history is the minimal seed plus all seven example events, and he has bookmarked the two analysts' threads. The folder ships its own `dataset.json` and `assets.catalog.json`, with the image bound to his account.
+- `data/evaluation/`: the two-year evaluation dataset, described [below](#evaluation-dataset-2025-01-01-to-2026-12-31). The fixtures stay small smoke data.
 - `assets/fennick-board-crop.png`: one 605×125 PNG (35,765 bytes, asset ID `fennick-board-crop`, SHA-256 in the catalog), attached to `p05`.
   - It is rendered by `tests/board-image.cjs` from the two lines quoted in the post's alt text: "11:40 PM GREEN LINE" / "CANCELED". The crop does not show the direction. In the story the rider posts it as a photo; it is a rendering, and `contribution/dataset.json` says so.
   - The tests decode the PNG and compare its pixels with a fresh render of those lines, so image and text must agree.
@@ -131,6 +143,38 @@ All text and the image are original and fictional (see `contribution/dataset.jso
 
 Expected answers and alert decisions for a real task belong in that task's evaluator, not in this package.
 
+## Evaluation dataset, 2025-01-01 to 2026-12-31
+
+`data/evaluation/` is the delivered evaluation data for the coverage window in [submission evidence, section 3](../../docs/submission-evidence.md#3-environment-dataset-coverage). The fixtures above stay small smoke data. This dataset was added after the plan was approved, when that section was published; it is recorded as added scope in the validation report.
+
+- **Contents.** `seed.json` (version 1.0.0, about 0.5 MB) holds the public history of the fictional Corvale area feed and reader Priya Raman's bookmarks: 23 accounts, 1,864 posts (1,515 original, 194 replies, 38 quotes, 117 reposts) and 127 bookmarks.
+  - It contains the 14 fixture accounts, the 37 fixture posts and Priya's fixture bookmark verbatim.
+  - `binding.json`, `policies.json`, `clock.json`, `dataset.json` and `assets.catalog.json` sit beside it. `dataset.json` records the sources, the post count and the seed's sha256. The catalog binds the board image to Priya under this dataset's ID.
+- **Story arcs** lead into and out of the fixture weekend:
+  - the transit board's Saturday late-service pilot, from the September 2025 proposal through the Sept. 12, 2026 move to 11:40 pm and the report on the Oct. 10 cancellation;
+  - the county's named evacuation zones from May 2025, red flag warnings and an August 2025 warning for LV-3, then the Cinder Fork Fire's containment and recovery after Oct. 12;
+  - Alder Glass's quarterly reorder rates, two Jan. 1 price increases and the Oct. 13 results;
+  - the music hall's weekly lineups, including the Oct. 10 show.
+- **The storyline weekend.** Generated posts skip Saturday to Monday, Oct. 10-12, 2026, so the authored storylines read the same at any clock.
+  - The seven event posts (`p19`, `p22`-`p27`) are not in the seed. A scenario applies them with `post.publish` exactly as on the minimal fixture, and `tests/business.test.cjs` applies all seven to this seed.
+  - Later generated posts are written for a run in which those events happened.
+- **Clock.** The dataset clock is the fixture clock, 21:10 Pacific on Saturday, Oct. 10, 2026.
+  - Priya's bookmarks end there; the last is the fixture's `p01`, saved at 15:05.
+  - Public posts continue to Dec. 31, 2026, and one account (`cinder-fork-recovery`) joins on Oct. 14. Wirewalk shows them as the run clock reaches them (see the clock cutoff above), so they are never pre-session history.
+- **Provenance.** Every record is synthetic: 52 are copied from the authored fixture (14 accounts, 37 posts, 1 bookmark) and the other 1,962 are written by `dev/build-dataset.cjs` from templates and a fixed random seed. All accounts, people, places, agencies, companies and shows are invented, as in the approved design. There is therefore no real source to anchor in November 2026, and nothing was collected from real websites.
+- **Coverage.** Counted in America/Los_Angeles on each record's own date field (`published_at`, `joined_at`, `saved_at`):
+  - 645 distinct dates in all 24 months, 577 of them on or before the dataset clock;
+  - no stretch longer than 3 days without a record;
+  - the 18 accounts that joined before 2025 are excluded from the count;
+  - no two posts share a text, and the highest word 5-gram Jaccard similarity between two posts is 0.59.
+
+```sh
+node dev/build-dataset.cjs          # rebuild data/evaluation/ (byte-identical on rerun)
+node dev/coverage-report.cjs        # coverage by source and month, provenance, gaps, exclusions, content checks
+node dev/coverage-report.cjs --json
+node examples/dataset-demo.cjs      # load it over real MCP and query it at three clocks
+```
+
 ## Commands
 
 From this directory:
@@ -142,6 +186,9 @@ npm run walkthrough      # Real MCP evidence report (JSON on stdout); needs the 
 npm run build:contracts  # Maintainer: regenerate tools.json and the seed/event schemas
 npm run build:fixtures   # Maintainer: regenerate fixtures, events, task data, image, catalogs and counts
 npm run build:mail-wire  # Maintainer: rewrite examples/mail-wire.json from a live run
+npm run build:dataset    # Maintainer: rebuild data/evaluation/ (byte-identical on rerun)
+npm run dataset:coverage # Coverage report for data/evaluation/ (Markdown; add -- --json for JSON)
+npm run dataset:demo     # Real MCP load and query of the evaluation dataset (JSON on stdout); needs the public checkout
 ```
 
 From the repository root:
@@ -153,7 +200,7 @@ node runtime/build-contracts.cjs --check
 
 `npm run walkthrough` finds the runtime, Mail and Calendar the same way `service.cjs` finds the runtime: by walking up to the checkout, or through `PALE_RUNTIME_ROOT`. It needs no network or model API and cleans up its temporary state. It refuses to run unless Mail and Calendar are 1.3.0. The report includes the package SHA-256, runtime, Mail and Calendar versions and the Node version.
 
-Only the walkthrough reads files outside this package; the tests, `examples/run.cjs` and the verifier never load them. These are scenario-only dependencies (proposal §3):
+Only the walkthrough and the dataset demo read files outside this package; the tests, `examples/run.cjs` and the verifier never load them. The dataset demo uses only `runtime/prepare.cjs`, `runtime/client.cjs` and `runtime/verify.cjs` from the first row below. These are scenario-only dependencies (proposal §3):
 
 | File in the checkout | Use |
 | --- | --- |
@@ -248,7 +295,7 @@ These fill in details the proposal leaves open; none adds a workflow or a depend
 - Search also covers image alt text and link cards. Reposts, which have no text, appear only in filter-only searches.
 - The stable link format `https://wirewalk.example/@<author>/posts/<id>`, and link cards limited to the `.example` domain.
 - `post.publish` carries text and link cards but not images.
-- Accounts whose join date is after the clock are hidden like future posts. A seeded bookmark on a post that is not public yet stays hidden with it.
+- Accounts whose join date is after the clock are hidden like future posts. A bookmark is hidden until its `saved_at` (the clock cutoff, added after plan approval).
 - `wirewalk.thread.get` on a repost opens the source's conversation. `wirewalk.bookmarks.remove` on a post that is not bookmarked returns `changed: false`.
 - One repost per account per post, and replies, quotes and reposts must point to a non-repost.
 - A second reader (`examples/task-data`, Dario) for the markets request and the isolation checks.
@@ -272,16 +319,17 @@ These fill in details the proposal leaves open; none adds a workflow or a depend
 | `contribution/` | Contribution declaration, dataset provenance, asset catalog |
 | `assets/` | The rendered station-board PNG |
 | `fixtures/` | Minimal seed (Priya), binding, policies, clock |
-| `examples/` | App-only example, approved event, wildfire events, Mail wire fixture, task data for Dario, real-MCP walkthrough |
+| `data/evaluation/` | The 2025-2026 evaluation dataset: seed, binding, policies, clock, its own `dataset.json` and asset catalog |
+| `examples/` | App-only example, approved event, wildfire events, Mail wire fixture, task data for Dario, real-MCP walkthrough, real-MCP dataset demo |
 | `tests/` | Business tests, App-only harness, board renderer and PNG codec, verifier cases, schema validator |
-| `dev/` | Maintainer scripts that regenerate the schemas, `tools.json`, fixtures, events, task data, image, catalogs and dataset counts. They reproduce the committed files byte for byte and are not run by tests or the verifier. |
+| `dev/` | Maintainer scripts that regenerate the schemas, `tools.json`, fixtures, events, task data, image, catalogs and dataset counts, build the evaluation dataset (`build-dataset.cjs`) and report its coverage (`coverage-report.cjs`). They reproduce the committed files byte for byte and are not run by the verifier; the business tests check the evaluation dataset's counts and hash. |
 
 ## Limitations
 
 - **Reader only.** The Agent searches, reads and bookmarks. It cannot post, reply, repost, like, follow or send direct messages; public posts enter only through the seed or Infra's `post.publish`.
 - **Image bytes.** There is one image: a rendered PNG with alt text. Agent byte reads of it need a platform resource-access registration that this package does not add. The alt text carries the visible text, so tasks run on text reads.
 - **Events.** `post.publish` carries text and link cards, not images. A post's publication time is the event time.
-- **No live ingestion.** Every account, post and link is a synthetic fixture on the reserved `.example` domain; nothing is fetched.
+- **No live ingestion.** Every account, post and link, in the fixtures and in the evaluation dataset, is synthetic and on the reserved `.example` domain; nothing is fetched.
 - **One reader per instance.** Each App instance holds one reader account. The public history is copied into each instance, so Infra applies every `post.publish` event to every reader instance in the run.
 - **Search.** Search matches the start of words, ignoring case and accents. There is no ranking, recommendation or trending.
 - **Notifications.** Wirewalk neither publishes nor receives cross-App notifications; alerts are drafted and sent with Mail.

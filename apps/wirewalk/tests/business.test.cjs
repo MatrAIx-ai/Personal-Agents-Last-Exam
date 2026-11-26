@@ -396,3 +396,96 @@ test('task data ships a dataset and catalog whose counts and owner match its see
   assert.deepEqual(normalize(darioCatalog), normalize(catalog), 'Only the catalog ID, owner account and dataset ID differ');
   assert.equal(darioCatalog.assets[0].provenance.dataset_id, dario.dataset_id);
 });
+
+test('a seed loaded before its latest record shows only the posts and bookmarks that existed at the clock', () => {
+  // Dario's seed runs to 17:02 on Monday. At noon the analysts' threads are public, but four of the six
+  // reposters have not reposted yet and Dario has not bookmarked anything.
+  const NOON = '2026-10-12T12:00:00-07:00', f = fixture({seed: darioSeed, binding: darioBinding, virtual_now: NOON}), before = f.data;
+  const now = Date.parse(NOON), shown = darioSeed.posts.filter(p => Date.parse(p.published_at) <= now);
+  const feed = f.call('wirewalk.feed.list', {limit: 50});
+  assert.equal(feed.total, shown.length);
+  assert.deepEqual(ids(feed.posts).sort(), ids(shown).sort());
+  for (const p of feed.posts) assert.ok(Date.parse(p.published_at) <= now);
+  assert.deepEqual(ids(f.call('wirewalk.search', {kind: 'repost', since: '2026-10-12T00:00:00-07:00'}).posts), ['p34', 'p33']);
+  assert.equal(f.call('wirewalk.post.get', {id: 'p29'}).post.reposted_by.length, 1);
+  assert.equal(f.call('wirewalk.account.get', {id: 'mika-sorensen'}).account.post_count, 2, 'p05 and p11; the 16:05 reposts come later');
+  assert.deepEqual(f.call('wirewalk.bookmarks.list', {}).bookmarks, [], 'Dario bookmarks the threads at 17:00 and 17:02');
+  const p29 = f.call('wirewalk.post.get', {id: 'p29'}).post;
+  assert.deepEqual([p29.bookmarked, p29.saved_at], [false, null]);
+  for (const id of ['p35', 'p44']) {
+    unchanged(f, () => f.call('wirewalk.post.get', {id}), UNAVAILABLE);
+    unchanged(f, () => f.call('wirewalk.thread.get', {id}), UNAVAILABLE);
+    unchanged(f, () => f.call('wirewalk.bookmarks.add', {id}), UNAVAILABLE);
+    unchanged(f, () => f.call('wirewalk.bookmarks.remove', {id}), UNAVAILABLE);
+  }
+  assert.deepEqual(f.call('wirewalk.bookmarks.remove', {id: 'p31'}), {post_id: 'p31', bookmarked: false, changed: false},
+    'The 17:02 bookmark does not exist yet, so there is nothing to remove');
+  assert.deepEqual(f.data, before);
+  // Time passing writes nothing; the later records appear because the clock reached them.
+  f.ctx.virtual_now = MONDAY;
+  assert.deepEqual(f.data, before);
+  assert.equal(f.call('wirewalk.feed.list', {limit: 50}).total, darioSeed.posts.length);
+  assert.equal(f.call('wirewalk.post.get', {id: 'p29'}).post.reposted_by.length, 6);
+  assert.equal(f.call('wirewalk.post.get', {id: 'p44'}).post.source.id, 'p30');
+  assert.deepEqual(f.call('wirewalk.bookmarks.list', {}).bookmarks.map(b => [b.post.id, b.saved_at]),
+    [['p31', '2026-10-12T17:02:00-07:00'], ['p29', '2026-10-12T17:00:00-07:00']]);
+});
+
+test('bookmarking before a seeded later bookmark keeps one bookmark, dated now', () => {
+  // Dario's seed says he bookmarks Odile Park's thread at 17:00; at noon he has not, so the agent's add replaces it.
+  const NOON = '2026-10-12T12:00:00-07:00', f = fixture({seed: darioSeed, binding: darioBinding, virtual_now: NOON});
+  assert.deepEqual(f.call('wirewalk.bookmarks.add', {id: 'p29'}), {post_id: 'p29', bookmarked: true, changed: true});
+  assert.deepEqual(f.data.bookmarks.filter(b => b.post_id === 'p29'), [{post_id: 'p29', saved_at: NOON}]);
+  assert.deepEqual(f.call('wirewalk.bookmarks.add', {id: 'p29'}), {post_id: 'p29', bookmarked: true, changed: false});
+  assert.deepEqual(f.call('wirewalk.bookmarks.list', {}).bookmarks.map(b => b.post.id), ['p29']);
+  f.ctx.virtual_now = MONDAY;
+  assert.deepEqual(f.call('wirewalk.bookmarks.list', {}).bookmarks.map(b => [b.post.id, b.saved_at]),
+    [['p31', '2026-10-12T17:02:00-07:00'], ['p29', NOON]]);
+});
+
+test('the evaluation dataset loads at any clock in its window and shows nothing dated later', () => {
+  const evalSeed = require('../data/evaluation/seed.json'), evalBinding = require('../data/evaluation/binding.json');
+  const meta = require('../data/evaluation/dataset.json'), catalog = require('../data/evaluation/assets.catalog.json');
+  const clock = require('../data/evaluation/clock.json').initial_time;
+  assert.equal(meta.expected_counts.records, plugin.records(evalSeed).length);
+  assert.ok(require('./schema-validator.cjs').compile(require('../schemas/dataset.schema.json'), path.resolve(__dirname, '../schemas'))(meta), 'dataset.json follows the dataset schema');
+  assert.equal(meta.sources.find(s => s.source_id === 'generated').generation.parameters.outputs['seed.json'].sha256, crypto.createHash('sha256').update(fs.readFileSync(path.join(__dirname, '../data/evaluation/seed.json'))).digest('hex'));
+  assert.equal(catalog.assets[0].provenance.dataset_id, meta.dataset_id);
+  assert.equal(catalog.assets[0].subjects[0].account_id, evalSeed.account_id);
+  // The fixture's accounts, posts and bookmark are in the dataset verbatim; the seven event posts are not.
+  for (const p of minimal.posts) assert.deepEqual(evalSeed.posts.find(q => q.id === p.id), p);
+  for (const a of minimal.accounts) assert.deepEqual(evalSeed.accounts.find(b => b.id === a.id), a);
+  assert.deepEqual(evalSeed.bookmarks.at(-1), minimal.bookmarks[0]);
+  for (const e of [scenario, ...wildfire]) assert.ok(!evalSeed.posts.some(p => p.id === e.payload.id));
+  const upTo = (list, field, now) => list.filter(x => Date.parse(x[field]) <= now);
+  for (const at of ['2025-03-15T12:00:00-07:00', '2025-12-31T23:59:00-08:00', clock, '2026-12-31T23:59:00-08:00']) {
+    const f = fixture({seed: evalSeed, binding: evalBinding, virtual_now: at, logging: false}), before = f.data, now = Date.parse(at);
+    const feed = f.call('wirewalk.feed.list', {limit: 50});
+    assert.equal(feed.total, upTo(evalSeed.posts, 'published_at', now).length, 'feed total at ' + at);
+    for (const p of feed.posts) assert.ok(Date.parse(p.published_at) <= now);
+    const found = f.call('wirewalk.search', {query: 'Green Line', limit: 50});
+    for (const p of found.posts) assert.ok(Date.parse(f.call('wirewalk.post.get', {id: p.id}).post.published_at) <= now);
+    const later = evalSeed.posts.find(p => Date.parse(p.published_at) > now);
+    if (later) {
+      unchanged(f, () => f.call('wirewalk.post.get', {id: later.id}), UNAVAILABLE);
+      unchanged(f, () => f.call('wirewalk.bookmarks.add', {id: later.id}), UNAVAILABLE);
+    }
+    const marks = f.call('wirewalk.bookmarks.list', {}).bookmarks;
+    assert.equal(marks.length, upTo(evalSeed.bookmarks, 'saved_at', now).length, 'bookmarks at ' + at);
+    for (const b of marks) assert.ok(Date.parse(b.saved_at) <= now);
+    assert.equal(f.call('wirewalk.account.get', {id: 'green-line-ops'}).account.post_count,
+      upTo(evalSeed.posts.filter(p => p.author_id === 'green-line-ops'), 'published_at', now).length);
+    const recovery = evalSeed.accounts.find(a => a.id === 'cinder-fork-recovery');
+    if (Date.parse(recovery.joined_at) > now) unchanged(f, () => f.call('wirewalk.account.get', {id: recovery.id}), /Account is not available/);
+    else assert.equal(f.call('wirewalk.account.get', {id: recovery.id}).account.id, recovery.id);
+    assert.deepEqual(f.data, before, 'reads change nothing');
+  }
+  // At the dataset clock the reader sees the fixture's Saturday evening, and the seven example events still apply.
+  const f = fixture({seed: evalSeed, binding: evalBinding, virtual_now: clock, logging: false});
+  assert.deepEqual(ids(f.call('wirewalk.feed.list', {limit: 6}).posts), ['p18', 'p17', 'p16', 'p15', 'p14', 'p13']);
+  assert.deepEqual(f.call('wirewalk.bookmarks.list', {}).bookmarks[0].post.id, 'p01');
+  for (const e of [scenario, ...wildfire]) f.event(e);
+  assert.equal(f.call('wirewalk.post.get', {id: 'p19'}).post.parent.id, 'p12');
+  f.ctx.virtual_now = MONDAY;
+  assert.equal(f.call('wirewalk.post.get', {id: 'p29'}).post.reposted_by.length, 6);
+});
