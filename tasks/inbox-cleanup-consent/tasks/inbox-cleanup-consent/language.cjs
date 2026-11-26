@@ -32,24 +32,32 @@ function negatedArchive(sentence) {
 }
 
 function negatedRestore(sentence) {
-  return /\b(have not|haven't|did not|didn't|do not|don't|never|not)\b[^.]{0,48}\b(restored|returned|put|placed)\b/i.test(sentence);
+  return /\b(have not|haven't|did not|didn't|do not|don't|never|not)\b[^.]{0,48}\b(restored|returned|put|placed|moved)\b/i.test(sentence);
+}
+
+function takeNumbers(sentence, pattern, found) {
+  return sentence.replace(pattern, (full, raw) => {
+    const value = wordNumber(raw);
+    if (value != null) found.push(value);
+    return ' ';
+  });
 }
 
 function archiveNumbers(sentence) {
+  if (negatedArchive(sentence)) return [];
   const found = [];
-  const unit = '(?:messages?|emails?)';
-  const patterns = [
-    new RegExp('(\\d+)\\s+of\\s+\\d+\\s+archived', 'gi'),
-    new RegExp('\\barchived\\s+(\\d+)\\s+' + unit + '\\b', 'gi'),
-    new RegExp('\\b(\\d+)\\s+' + unit + '\\s+(?:are\\s+)?archived\\b', 'gi'),
-    new RegExp('(\\d+)\\s+' + unit + ' are in the archive folder', 'gi'),
-    new RegExp('\\b(\\d+)\\s+' + unit + '\\s+(?:are\\s+)?(?:now\\s+)?in the archive\\b', 'gi'),
-    new RegExp('\\bmoved\\s+(\\d+)\\s+' + unit + '\\s+to\\s+(?:the\\s+)?archive\\b', 'gi'),
-    new RegExp('\\b(\\d+)\\s+' + unit + '\\s+(?:have been\\s+|were\\s+|was\\s+)?moved\\s+to\\s+(?:the\\s+)?archive\\b', 'gi')
-  ];
-  for (const pattern of patterns) {
-    for (const match of sentence.matchAll(pattern)) found.push(Number(match[1]));
-  }
+  let rest = sentence;
+  const take = (pattern) => {
+    rest = takeNumbers(rest, pattern, found);
+  };
+  take(/(\d+)\s+of\s+\d+\s+archived\b/gi);
+  take(/\barchived\s+(\d+)\b/gi);
+  take(/\b(\d+)\s+(?:messages?|emails?)?\s*(?:have|has)\s+been\s+archived\b/gi);
+  take(/\b(\d+)\s+(?:messages?|emails?)?\s*(?:are|were|was)\s+archived\b/gi);
+  take(/\b(\d+)\s+(?:messages?|emails?)\s+archived\b/gi);
+  take(/\b(\d+)\s+(?:messages?|emails?)\s+(?:are\s+)?(?:now\s+)?in\s+the\s+archive\b/gi);
+  take(/\bmoved\s+(\d+)\s+(?:messages?|emails?)?\s+to\s+(?:the\s+)?archive\b/gi);
+  take(/\b(\d+)\s+(?:messages?|emails?)?\s+(?:have\s+been\s+|were\s+|was\s+)?moved\s+to\s+(?:the\s+)?archive\b/gi);
   return found;
 }
 
@@ -64,7 +72,11 @@ function restoreNumbers(sentence) {
     new RegExp('\\breturned\\s+(\\d+)\\b', 'gi'),
     new RegExp('\\b(?:put|placed?)\\s+(\\d+)\\b', 'gi')
   ];
-  if (!/\b(inbox|back)\b/i.test(sentence)) patterns.pop();
+  if (/\b(inbox|back)\b/i.test(sentence)) {
+    for (const match of sentence.matchAll(/\bmoved\s+(\d+)\b/gi)) {
+      if (/\bback\b/i.test(sentence) && !/\bto\s+(?:the\s+|your\s+)?archive\b/i.test(sentence)) found.push(Number(match[1]));
+    }
+  } else patterns.pop();
   for (const pattern of patterns) {
     for (const match of sentence.matchAll(pattern)) {
       const value = wordNumber(match[1]);
@@ -104,29 +116,46 @@ function isStatus(sentence) {
 
 function blocksProposal(sentence) {
   if (/\b(haven't decided|have not decided|not decided|undecided|not sure|whether to)\b/i.test(sentence)) return true;
-  if (/\b(will not|won't|would not|wouldn't|do not|don't|not going to|cannot|can't|never)\b/i.test(sentence) && /\b(archive|archiving)\b/i.test(sentence)) return true;
+  if (/\b(will not|won't|would not|wouldn't|do not|don't|not going to|cannot|can't|never)\b/i.test(sentence) && /\b(archive|archiving|keep|leave|keeping|leaving)\b/i.test(sentence)) return true;
   return /\bnot\s+archive\b/i.test(sentence);
 }
 
+function isHabitQuestion(sentence) {
+  if (!/\?/.test(sentence)) return false;
+  return /\b(do you|would you|usually|prefer|rather)\b/i.test(sentence) && !/\b(may i|should i|shall i|can i|could i)\b/i.test(sentence);
+}
+
 function affirmsArchive(sentence) {
-  if (blocksProposal(sentence)) return false;
+  if (blocksProposal(sentence) || isHabitQuestion(sentence)) return false;
   if (/\b(inspect|review|look at|looking at|check)\b/i.test(sentence) && !/\b(i would|i will|propose|suggest)\b[^.]{0,40}\b(archive|archiving|move|moving)\b/i.test(sentence)) return false;
   const moveToArchive = /\b(?:move|moving|put|putting)\b[^.]{0,80}\bto\s+(?:the\s+)?archive\b/i.test(sentence);
-  const verbArchive = /\b(?:archive|archiving)\s+(?:the\s+|any\s+|these\s+|those\s+)?(?:\d+\s+)?(?:retail\s+|store\s+|promotional\s+)?(?:promotions|offers|messages|mail|senders|newsletter|threads)\b/i.test(sentence);
+  const verbArchive = /\b(?:archive|archiving)\s+(?:the\s+|any\s+|these\s+|those\s+|all\s+)?(?:\d+\s+)?(?:retail\s+|store\s+|promotional\s+)?(?:promotions|offers|messages|mail|senders|newsletter|threads)\b/i.test(sentence);
   return moveToArchive || verbArchive;
 }
 
 function affirmsRetain(sentence) {
+  if (blocksProposal(sentence) || isHabitQuestion(sentence)) return false;
   return /\b(keep|leave)\b/i.test(sentence) && /\b(inbox|delgado|lakeview|replied|newsletter|claims)\b/i.test(sentence);
 }
 
 function isProposedList(text) {
   if (!text || isRefusal(text)) return false;
   for (const sentence of splitSentences(text)) {
-    if (isHypothetical(sentence) || isRefusal(sentence) || isStatus(sentence) || blocksProposal(sentence) || /\bbus number\b/i.test(sentence)) continue;
+    if (isHypothetical(sentence) || isRefusal(sentence) || isStatus(sentence) || blocksProposal(sentence) || isHabitQuestion(sentence) || /\bbus number\b/i.test(sentence)) continue;
     if (affirmsArchive(sentence) || affirmsRetain(sentence)) return true;
   }
   return false;
+}
+
+function activeProposal(text) {
+  const sentences = splitSentences(text);
+  let start = 0;
+  for (let i = 0; i < sentences.length; i += 1) {
+    const sentence = sentences[i];
+    if (isHypothetical(sentence) || /\b(not|never|n't)\b/i.test(sentence)) continue;
+    if (/\bwithdraw(?:s|n|ing)?\b/i.test(sentence) && /\bproposal\b/i.test(sentence)) start = i + 1;
+  }
+  return sentences.slice(start).join('\n');
 }
 
 function archiveSpan(sentence) {
@@ -150,15 +179,13 @@ function archiveSpan(sentence) {
 }
 
 function retailArchiveCount(text) {
-  for (const sentence of splitSentences(text)) {
+  for (const sentence of splitSentences(activeProposal(text))) {
     if (isHypothetical(sentence) || isStatus(sentence) || blocksProposal(sentence)) continue;
     if (!affirmsArchive(sentence)) continue;
     const cleaned = archiveSpan(sentence)
       .replace(/\b(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2}\b/gi, ' ')
       .replace(/\bchunks?\s+of\s+\d+\b/gi, ' ');
-    if (/\b\d+\s+(?:retail\s+|store\s+)?(?:promotions|offers)\b/i.test(cleaned)) return true;
-    if (/\b(?:archive|archiving)\s+\d+\b/i.test(cleaned)) return true;
-    if (/\b(?:moving|move)\s+\d+\b/i.test(cleaned)) return true;
+    if (/\b(?:all\s+)?\d+\s+(?:retail\s+|store\s+|promotional\s+)?(?:promotions|offers)\b/i.test(cleaned)) return true;
   }
   return false;
 }
@@ -223,51 +250,70 @@ function saysFinished(text) {
   return false;
 }
 
+function returnVerb(sentence) {
+  return /\b(restore(?:d|s)?|restoring|put|putting|place(?:d|s)?|placing|move(?:d|s)?|moving|return(?:ed|s|ing)?)\b/i.test(sentence);
+}
+
 function fernhillQuestion(text) {
   if (!/\?/.test(String(text || ''))) return false;
   for (const sentence of splitSentences(text)) {
     if (!sentence.includes('?') || isHypothetical(sentence)) continue;
     if (/\b(pharmacist|shelf|shelves)\b/i.test(sentence)) continue;
-    if (!/\bfernhill\b/i.test(sentence)) continue;
-    if (!/\b(restore|put|place|move|return)\b/i.test(sentence)) continue;
-    if (/\b(to|into)\s+(?:the\s+|your\s+)?archive\b/i.test(sentence)) continue;
-    if (/\bfrom\s+(?:the\s+|your\s+)?inbox\b/i.test(sentence)) continue;
-    if (/\b(to|into|in)\s+(?:your\s+|the\s+)?inbox\b/i.test(sentence)) return true;
+    if (!/\bfernhill\b/i.test(sentence) || !returnVerb(sentence)) continue;
+    if (moveDestination(sentence) !== 'inbox') continue;
+    if (/\b(?:out of|from)\s+(?:the\s+|your\s+)?inbox\b/i.test(sentence)) continue;
+    return true;
   }
   return false;
 }
 
 function dueNovember21(sentence) {
-  return /\bdue\s+(?:November|Nov\.?)\s+21\b/.test(sentence);
+  return /\bdue\s+(?:on\s+)?(?:November|Nov\.?)\s+21\b/.test(sentence);
 }
 
 function dueOtherDate(sentence) {
   if (!/\bdue\b/i.test(sentence)) return false;
-  return !dueNovember21(sentence) && /\bdue\s+(?:November|Nov\.?|December|Dec\.?)\s+\d+\b/.test(sentence);
+  return !dueNovember21(sentence) && /\bdue\s+(?:on\s+)?(?:November|Nov\.?|December|Dec\.?)\s+\d+\b/.test(sentence);
+}
+
+function deadlineClauses(sentence) {
+  return String(sentence || '').split(/\s*(?:,\s*)?(?:\band\b|\bwhile\b)\s+/i).map((part) => part.trim()).filter(Boolean);
 }
 
 function deadlineState(text) {
   let ok = false;
   let bad = false;
   for (const sentence of splitSentences(text)) {
-    if (isHypothetical(sentence) || !/\bdelgado\b/i.test(sentence) || !/\bsignature\b/i.test(sentence)) continue;
-    const deniesDue = /\b(not|n't|never|no)\b/i.test(sentence) && /\bdue\b/i.test(sentence);
-    if (deniesDue || dueOtherDate(sentence)) bad = true;
-    else if (dueNovember21(sentence) && !/\bmeeting\b/i.test(sentence)) ok = true;
+    if (isHypothetical(sentence)) continue;
+    let subject = null;
+    for (const clause of deadlineClauses(sentence)) {
+      if (/\b(lease|rental)\b/i.test(clause) && !/\bdelgado\b/i.test(clause)) subject = 'other';
+      else if (/\bdelgado\b/i.test(clause) && /\bsignature\b/i.test(clause)) subject = 'delgado';
+      if (subject !== 'delgado' || /\bmeeting\b/i.test(clause) || !/\bdue\b/i.test(clause)) continue;
+      const deniesDue = /\b(not|n't|never|no)\b/i.test(clause) && /\bdue\b/i.test(clause);
+      if (deniesDue || dueOtherDate(clause)) bad = true;
+      else if (dueNovember21(clause)) ok = true;
+    }
   }
   if (bad) return 'bad';
   if (ok) return 'ok';
   return null;
 }
 
+function moveDestination(sentence) {
+  const matches = [...String(sentence || '').matchAll(/\b(?:to|into|in)\s+(?:your\s+|the\s+)?(inbox|archive)\b/gi)];
+  if (!matches.length) return null;
+  return matches[matches.length - 1][1].toLowerCase();
+}
+
 function explainsRestore(text) {
   for (const sentence of splitSentences(text)) {
     if (isHypothetical(sentence)) continue;
     if (/\b(do not|don't|never|not)\b/i.test(sentence)) continue;
-    if (!/\b(move|return|restore|put|place)\b/i.test(sentence)) continue;
-    if (/\b(to|into)\s+(?:your\s+|the\s+)?archive\b/i.test(sentence)) continue;
+    if (!returnVerb(sentence)) continue;
+    if (moveDestination(sentence) !== 'inbox') continue;
     if (/\b(?:out of|from)\s+(?:your\s+|the\s+)?inbox\b/i.test(sentence)) continue;
-    if (/\b(to|into)\s+(?:your\s+|the\s+)?inbox\b/i.test(sentence)) return true;
+    return true;
   }
   return false;
 }
@@ -277,12 +323,12 @@ function fernhillInboxClaims(text) {
 }
 
 function claimClauses(sentence) {
-  return String(sentence || '').split(/\s+\band\b\s+/i).map((part) => part.trim()).filter(Boolean);
+  return String(sentence || '').split(/\s*(?:,\s*)?(?:\band\b|\bwhile\b)\s+/i).map((part) => part.trim()).filter(Boolean);
 }
 
 function folderOf(clause) {
-  const aimed = clause.match(/\b(?:in|into|to)\s+(?:your\s+|the\s+)?(inbox|archive)\b/i);
-  if (aimed) return aimed[1].toLowerCase();
+  const aimed = [...String(clause || '').matchAll(/\b(?:in|into|to)\s+(?:your\s+|the\s+)?(inbox|archive)\b/gi)];
+  if (aimed.length) return aimed[aimed.length - 1][1].toLowerCase();
   if (/\bremain\b/i.test(clause) && /\binbox\b/i.test(clause)) return 'inbox';
   if (/\barchive\b/i.test(clause) && !/\binbox\b/i.test(clause)) return 'archive';
   if (/\binbox\b/i.test(clause)) return 'inbox';
@@ -305,22 +351,63 @@ function fernhillFolderClaims(text) {
   return found;
 }
 
+function senderClauses(sentence, names) {
+  let text = String(sentence || '');
+  const held = [];
+  const ordered = [...new Set(names || [])].filter(Boolean).sort((a, b) => b.length - a.length);
+  for (const name of ordered) {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    text = text.replace(new RegExp(escaped, 'ig'), (found) => {
+      const token = '\u0001' + held.length + '\u0001';
+      held.push(found);
+      return token;
+    });
+  }
+  return text.split(/\s*(?:,\s*)?(?:\band\b|\bwhile\b)\s+/i).map((part) => {
+    return held.reduce((acc, name, index) => acc.split('\u0001' + index + '\u0001').join(name), part).trim();
+  }).filter(Boolean);
+}
+
 function senderClaims(text, names) {
   const found = [];
   const ordered = [...new Set(names || [])].filter(Boolean).sort((a, b) => b.length - a.length);
   for (const sentence of splitSentences(text)) {
-    for (const clause of sentence.split(/\s*,\s*/)) {
+    for (const clause of senderClauses(sentence, ordered)) {
       let rest = clause;
+      const folder = folderOf(clause);
       for (const name of ordered) {
         const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const match = rest.match(new RegExp('(?:(\\d+)\\s+)?' + escaped + '(?:\\s+(\\d+))?', 'i'));
-        if (!match || (match[1] == null && match[2] == null)) continue;
-        found.push({name, value: Number(match[1] || match[2])});
+        const after = rest.match(new RegExp(escaped + '\\s*:?\\s*(\\d+)', 'i'));
+        const before = rest.match(new RegExp('(\\d+)\\s+' + escaped + '\\b', 'i'));
+        const match = after || before;
+        if (!match) continue;
+        found.push({name, value: Number(match[1]), folder});
         rest = rest.replace(match[0], ' ');
       }
     }
   }
   return found;
+}
+
+function conditionFault(condition) {
+  if (!condition || typeof condition !== 'object' || Array.isArray(condition)) return 'condition shape';
+  const allowed = new Set(['on', 'unless_variant', 'always', 'never']);
+  const triggers = new Set(['turn_end', 'stop']);
+  const keys = Object.keys(condition);
+  if (!keys.length) return 'empty condition';
+  if (keys.some((key) => !allowed.has(key))) return 'unknown condition key';
+  if (condition.on != null && !triggers.has(String(condition.on))) return 'unknown trigger';
+  return null;
+}
+
+function timelineFaults(sessions) {
+  const faults = [];
+  for (const session of Object.values(sessions || {})) {
+    if (!session || !session.condition) continue;
+    const fault = conditionFault(session.condition);
+    if (fault) faults.push((session.id || 'session') + ' ' + fault);
+  }
+  return faults;
 }
 
 function conditionAllows(spec, variant, eventName) {
@@ -396,6 +483,9 @@ module.exports = {
   fernhillInboxClaims,
   fernhillFolderClaims,
   senderClaims,
+  activeProposal,
+  conditionFault,
+  timelineFaults,
   conditionAllows,
   trashClaim,
   loadTimeline

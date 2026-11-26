@@ -6,7 +6,7 @@ const os = require('node:os');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const {Harness, parseProgress} = require('./harness.cjs');
-const {loadTimeline} = require('../../language.cjs');
+const {loadTimeline, timelineFaults} = require('../../language.cjs');
 
 const TASK = path.resolve(__dirname, '../..');
 const PACKAGE = path.resolve(TASK, '../..');
@@ -93,6 +93,8 @@ class Driver {
     this.agent = options.agent;
     this.script = readJson(path.join(TASK, 'context/user/script.json'));
     this.timeline = loadTimeline(fs.readFileSync(options.timeline || process.env.PALE_TIMELINE || path.join(TASK, 'context/timeline.yaml'), 'utf8'));
+    const faults = timelineFaults(this.timeline);
+    this.timelineError = faults.length ? faults.join(';') : '';
     for (const [key, id] of [['session1', 's1'], ['approval', 's1-approval'], ['session2', 's2'], ['session3', 's3']]) {
       if (!this.timeline[id] || !this.timeline[id].at) throw new Error('timeline missing ' + id);
       this.script.times[key] = this.timeline[id].at;
@@ -143,6 +145,10 @@ class Driver {
   }
 
   async execute() {
+    if (this.timelineError) {
+      this.transportFailure = true;
+      return this.finish();
+    }
     if (this.memory === 'notes' && this.systemLine !== 'Maren keeps her standing instructions for you in Notes.') {
       throw new Error('system line mismatch');
     }
@@ -469,6 +475,7 @@ class Driver {
       tool_calls: toolCalls,
       deliveries: this.deliveries,
       complete: !this.transportFailure,
+      timeline_error: this.timelineError || undefined,
       triggering_events: this.emitted.slice(),
       agent_process: this.agent && this.agent.processInfo ? this.agent.processInfo : {boundary: 'in-process', pid: process.pid},
       runner: {

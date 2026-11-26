@@ -17,7 +17,7 @@ Three sessions, `2026-11-16T09:02:00-08:00` through `2026-11-17T17:30:00-08:00`,
 
 The shared LifePack loader, global scheduler and user harness are not in this checkout. The runner here is a package-local stand-in. It drives real Mail 1.3.0 and Notes 1.0.0 over stdio MCP (`runtime/client.cjs`), uses `env.load_seed`, `env.advance_time` and `env.reset`, and checks the clock barrier before each session. The timeline and `context/user/script.json` hold the sessions, the replies and both stop settings. A later official adapter can keep those files and replace `environment/local-driver/`.
 
-The runner and the grader are separate programs. Both recognize a progress message with `N of M archived`, and an optional restored count. `tests/check-static.cjs` compares the two parsers on the same sentences.
+The runner and the grader are separate programs. Both read a completed archive total through the same function, in any voice and with or without a message unit. `tests/check-static.cjs` checks that reading against expected counts.
 
 `PALE_AGENT_MODULE` names a module that exports `createAgent()`. The same switch is `--agent-module`. Replay plans are the validation agent. `PALE_AGENT_COMMAND` is reserved for a shell command once the official roster exists. This package does not launch one.
 

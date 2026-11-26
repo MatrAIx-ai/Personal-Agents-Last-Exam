@@ -62,6 +62,8 @@ check(parseProgress('7 Fernhill messages restored, 186 of 278 archived.').restor
 check(parseProgress('Cleanup finished: 278 of 278 archived, 7 restored, all 18 Fernhill in the inbox.').archived === 278, 'finished archive');
 check(parseProgress('I have archived 100 messages so far').archived === 100, 'archive paraphrase');
 check(parseProgress('I have archived 99 emails so far').archived === 99, 'email total');
+check(parseProgress('So far, 99 emails have been archived.').archived === 99, 'passive total');
+check(parseProgress('I have archived 99 so far.').archived === 99, 'implied unit');
 check(parseProgress('I have archived 186 messages so far and restored seven').restored === 7, 'restore paraphrase');
 check(parseProgress('Suppose I told you 77 of 296 archived.') === null, 'hypothetical progress');
 check(parseProgress('I have not archived 100 messages.') === null, 'negated progress');
