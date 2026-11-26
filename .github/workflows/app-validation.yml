@@ -1,0 +1,119 @@
+name: App runtime validation
+on:
+  pull_request:
+    paths:
+      - 'runtime/**'
+      - 'examples/**'
+      - 'apps/**'
+      - 'package*.json'
+      - 'apps.registry.json'
+      - '.github/workflows/app-validation.yml'
+  push:
+    branches: [main, draft/app-contribution-examples]
+    paths:
+      - 'runtime/**'
+      - 'examples/**'
+      - 'apps/**'
+      - 'package*.json'
+      - 'apps.registry.json'
+      - '.github/workflows/app-validation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [18, 22]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Select affected Apps and their dependents
+        id: selection
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: node runtime/ci/select-apps.cjs . "$BASE_SHA"
+      - name: Reproduce the full reference suite
+        if: steps.selection.outputs.full == 'true'
+        run: npm test
+      - name: Validate submitted App packages
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: node runtime/ci/verify-submissions.cjs . .artifacts/submissions "$BASE_SHA"
+      - name: Save results even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-runtime-node-${{ matrix.node }}
+          path: .artifacts/
+          include-hidden-files: true
+          if-no-files-found: warn
+  base-runtime-compatibility:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          path: trusted-base
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check with the base revision's validator
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          mkdir -p evidence
+          if [ -f trusted-base/runtime/ci/verify-submissions.cjs ]; then
+            node trusted-base/runtime/ci/verify-submissions.cjs candidate evidence "$BASE_SHA"
+          else
+            echo 'Base runtime not available: bootstrap PR needs maintainer review; this is not a compatibility pass.' | tee evidence/NOT-RUN.txt
+            echo 'Base-runtime compatibility: NOT RUN (runtime bootstrap).' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Save independent compatibility evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: base-runtime-compatibility
+          path: evidence/
+
+  business-web:
+    # Match the OS supported by the pinned Playwright/browser dependency.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:web
+      - run: npm run test:web:browser
+      - name: Save browser acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: business-web-acceptance
+          path: .artifacts/web/
+          include-hidden-files: true
