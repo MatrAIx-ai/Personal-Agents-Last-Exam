@@ -790,7 +790,7 @@ function lockedProject() {
 
 
 // Full-window history for the bound account's second project. Dates run from 2025-01-02 through
-// 2026-11-17 in America/Los_Angeles. Commits are evening and weekend work; contributor pull requests
+// 2026-11-16 in America/Los_Angeles. Commits are evening and weekend work; contributor pull requests
 // arrive about every three weeks, get a review from Tomas and merge with a merge commit.
 function laIso(y, m, d, h, mi) {
   const guess = Date.UTC(y, m - 1, d, h + 8, mi);
@@ -813,9 +813,48 @@ function fieldbook(data) {
   }));
   const files = {'src/fieldbook.js': 0, 'docs/notes.md': 0, 'CHANGELOG.md': 0, 'src/units.js': 0};
   const names = Object.keys(files);
-  const content = (file, n) => file.endsWith('.js')
-    ? "'use strict';\n// " + file + ' revision ' + n + '\nexport const revision = ' + n + ';\n'
-    : '# ' + file + '\n\nRevision ' + n + '\n';
+  const trails = [
+    ['Dipsea', 'Mill Valley', '7.1', '1400'],
+    ['Matt Davis', 'Stinson Beach', '3.4', '800'],
+    ['Steep Ravine', 'Pantoll', '2.2', '1100'],
+    ['Coast Trail', 'Muir Beach', '5.0', '600'],
+    ['Bolinas Ridge', 'Bolinas', '8.6', '900'],
+    ['Redwood Creek', 'Muir Woods', '4.1', '500'],
+    ['Cataract', 'Alpine Lake', '2.8', '1200'],
+    ['Willow Camp', 'Stinson Beach', '4.7', '1500'],
+    ['Old Springs', 'Tennessee Valley', '3.1', '700'],
+    ['Miwok', 'Rodeo Lagoon', '5.5', '850'],
+    ['Sierra Trail', 'Mount Tamalpais', '6.2', '1600'],
+    ['Bootjack', 'Mountain Home', '2.9', '950'],
+    ['Fern Creek', 'Muir Woods', '3.6', '750'],
+    ['Dias Ridge', 'Muir Beach', '4.4', '650'],
+    ['Hill 88', 'Marin Headlands', '5.8', '1300'],
+    ['Rodeo Valley', 'Fort Cronkhite', '2.5', '400']
+  ];
+  function trail(n) {
+    const row = trails[n % trails.length];
+    return {name: row[0], place: row[1], miles: row[2], feet: row[3], n};
+  }
+  function content(file, n) {
+    if (n === 0) {
+      if (file === 'src/units.js') return "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n";
+      if (file === 'src/fieldbook.js') return "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n";
+      if (file === 'docs/notes.md') return '# Field notes\n\nHiking logs for Tomas Reyes. Elevation is in feet.\n';
+      return '# Changelog\n\nFieldbook starts here.\n';
+    }
+    const item = trail(n);
+    if (file === 'src/units.js') return "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// " + item.name + ' entry ' + n + ': ' + item.feet + ' feet of gain\n';
+    if (file === 'src/fieldbook.js') return "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// " + item.name + ' from ' + item.place + ', entry ' + n + ': ' + item.miles + ' miles\n';
+    if (file === 'docs/notes.md') return '# Field notes\n\n' + item.name + ' from ' + item.place + ', entry ' + n + '.\n' + item.miles + ' miles, ' + item.feet + ' feet of gain.\nThe second switchback was dry and the creek was clear.\n';
+    return '# Changelog\n\n' + n + '. ' + item.name + ' (' + item.place + '): ' + item.miles + ' miles, ' + item.feet + ' feet of gain.\n';
+  }
+  function commitMessage(file, n) {
+    const item = trail(n);
+    if (file === 'docs/notes.md') return 'Log ' + item.name + ' (' + item.miles + ' miles, entry ' + n + ')';
+    if (file === 'src/units.js') return 'Record ' + item.feet + ' feet of gain on ' + item.name;
+    if (file === 'src/fieldbook.js') return 'Parse the ' + item.miles + ' mile line for ' + item.name;
+    return 'Changelog entry ' + n + ' for ' + item.name;
+  }
   let serial = 0;
   const sha = prefix => prefix + String(++serial).padStart(6, '0');
   const rootSha = sha('f');
@@ -842,7 +881,7 @@ function fieldbook(data) {
       files[file] += 1;
       const at = weekend ? laIso(y, m, d, 10 + (k % 4), (k * 7) % 60) : laIso(y, m, d, 19 + (k % 4), (k * 13) % 60);
       const s = sha('f');
-      addCommit(data, {sha: s, repo, parents: [tip], author_account_id: 'fy-tomasreyes', message: 'Update ' + file + ' (' + files[file] + ')', committed_at: at, files: writeTree(file, files[file])});
+      addCommit(data, {sha: s, repo, parents: [tip], author_account_id: 'fy-tomasreyes', message: commitMessage(file, files[file]), committed_at: at, files: writeTree(file, files[file])});
       tip = s; tipAt = at;
     }
     if (k % 21 === 9) {
@@ -853,23 +892,26 @@ function fieldbook(data) {
       if (Date.parse(pushedAt) <= Date.parse(tipAt)) { files[file] -= 1; continue; }
       const side = sha('b');
       const branch = 'contrib/' + author.slice(4) + '-' + pullNo;
-      addCommit(data, {sha: side, repo, parents: [tip], author_account_id: author, message: 'Notes update from ' + author.slice(4), committed_at: pushedAt, files: writeTree(file, files[file])});
+      const noteN = files[file];
+      const item = trail(noteN);
+      addCommit(data, {sha: side, repo, parents: [tip], author_account_id: author, message: 'Log ' + item.name + ' from ' + item.place + ' (' + noteN + ')', committed_at: pushedAt, files: writeTree(file, noteN)});
       const opened = laIso(y, m, d, 10, 0);
       const changes = pullNo % 4 === 0;
       const reviewDay = new Date(ms + 86400000);
       const reviewAt = laIso(reviewDay.getUTCFullYear(), reviewDay.getUTCMonth() + 1, reviewDay.getUTCDate(), 20, 15);
       const mergeDay = new Date(ms + (changes ? 3 : 2) * 86400000);
       const mergedAt = laIso(mergeDay.getUTCFullYear(), mergeDay.getUTCMonth() + 1, mergeDay.getUTCDate(), 18, 40);
-      const title = 'Field notes update ' + pullNo;
-      data.pulls.push(pullRecord({repo, number: pullNo, title, body: 'Adds notes from the latest trip.', state: 'merged', head_repo: repo, head_branch: branch,
+      const title = item.name + ' notes ' + noteN;
+      const body = 'Adds entry ' + noteN + ' for ' + item.name + ' from ' + item.place + ': ' + item.miles + ' miles and ' + item.feet + ' feet of gain. The note says the second switchback was dry.';
+      data.pulls.push(pullRecord({repo, number: pullNo, title, body, state: 'merged', head_repo: repo, head_branch: branch,
         head_sha: side, base_branch: 'main', base_sha: tip, author_account_id: author, created_at: opened, updated_at: mergedAt, merged_at: mergedAt,
         reviewers: ['fy-tomasreyes'], paths: [file]}));
       if (changes) {
-        data.reviews.push({review_id: 'rv-fb-' + reviewNo++, repo, number: pullNo, author_account_id: 'fy-tomasreyes', state: 'changes_requested', body: 'Could you add the trail name to each entry?', created_at: reviewAt, event_id: null, request_id: null, summary_comment_id: null});
+        data.reviews.push({review_id: 'rv-fb-' + reviewNo++, repo, number: pullNo, author_account_id: 'fy-tomasreyes', state: 'changes_requested', body: 'The ' + item.name + ' entry is in this head: ' + item.miles + ' miles and ' + item.feet + ' feet, and it says the second switchback was dry. I would like the title to name ' + item.place + ' as well.', created_at: reviewAt, event_id: null, request_id: null, summary_comment_id: null});
         const again = new Date(ms + 2 * 86400000);
-        data.reviews.push({review_id: 'rv-fb-' + reviewNo++, repo, number: pullNo, author_account_id: 'fy-tomasreyes', state: 'approved', body: 'Thanks, looks good.', created_at: laIso(again.getUTCFullYear(), again.getUTCMonth() + 1, again.getUTCDate(), 21, 5), event_id: null, request_id: null, summary_comment_id: null});
+        data.reviews.push({review_id: 'rv-fb-' + reviewNo++, repo, number: pullNo, author_account_id: 'fy-tomasreyes', state: 'approved', body: 'Approving this head as written. ' + item.place + ' is already in the note, so this commit can merge without a follow-up.', created_at: laIso(again.getUTCFullYear(), again.getUTCMonth() + 1, again.getUTCDate(), 21, 5), event_id: null, request_id: null, summary_comment_id: null});
       } else {
-        data.reviews.push({review_id: 'rv-fb-' + reviewNo++, repo, number: pullNo, author_account_id: 'fy-tomasreyes', state: 'approved', body: 'Looks good, thank you.', created_at: reviewAt, event_id: null, request_id: null, summary_comment_id: null});
+        data.reviews.push({review_id: 'rv-fb-' + reviewNo++, repo, number: pullNo, author_account_id: 'fy-tomasreyes', state: 'approved', body: 'The diff matches the pull request: ' + item.name + ' from ' + item.place + ', ' + item.miles + ' miles and ' + item.feet + ' feet.', created_at: reviewAt, event_id: null, request_id: null, summary_comment_id: null});
       }
       const merge = sha('e');
       addCommit(data, {sha: merge, repo, parents: [tip, side], author_account_id: 'fy-tomasreyes', message: 'Merge pull request #' + pullNo + ' from ' + branch, committed_at: mergedAt, files: [{path: file, content: tree[file], binary: false}]});
@@ -883,7 +925,8 @@ function fieldbook(data) {
       const name = 'v1.' + releaseNo + '.0';
       data.tags.push({repo, name, target_sha: tip, message: name, tagger_account_id: 'fy-tomasreyes', created_at: tagAt});
       const pubAt = laIso(y, m, d, 21, 45);
-      const notes = 'Quarterly fieldbook release ' + name + '.';
+      const seasons = ['late March 2025', 'late June 2025', 'late September 2025', 'mid December 2025', 'late March 2026', 'late June 2026', 'late September 2026'];
+      const notes = 'Fieldbook ' + name + ' gathers the trail logs through ' + seasons[releaseNo - 1] + '. Elevation in the notes stays in feet.';
       data.releases.push({release_id: 'rel-fb-' + releaseNo, repo, tag: name, title: 'Fieldbook ' + name, notes, revision: 1, status: 'published', prerelease: false, latest: false,
         assets: [], published_at: pubAt, receipt: {request_id: 'publish-fb-' + releaseNo, revision: 1, published_at: pubAt}, created_at: pubAt, updated_at: pubAt,
         revisions: [{revision: 1, notes, title: 'Fieldbook ' + name, at: pubAt, request_id: 'publish-fb-' + releaseNo}]});

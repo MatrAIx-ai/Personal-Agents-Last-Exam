@@ -1828,26 +1828,26 @@
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 0\nexport const revision = 0;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n",
           "binary": false
         },
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 0\n",
+          "content": "# Field notes\n\nHiking logs for Tomas Reyes. Elevation is in feet.\n",
           "binary": false
         },
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 0\n",
+          "content": "# Changelog\n\nFieldbook starts here.\n",
           "binary": false
         },
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 0\nexport const revision = 0;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n",
           "binary": false
         }
       ],
-      "changed_lines": 12,
+      "changed_lines": 16,
       "paths": [
         "CHANGELOG.md",
         "docs/notes.md",
@@ -1862,16 +1862,16 @@
         "f000001"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (1)",
+      "message": "Parse the 3.4 mile line for Matt Davis",
       "committed_at": "2025-01-02T19:00:00-08:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 1\nexport const revision = 1;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Matt Davis from Stinson Beach, entry 1: 3.4 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 1,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -1883,16 +1883,16 @@
         "f000002"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (1)",
+      "message": "Record 800 feet of gain on Matt Davis",
       "committed_at": "2025-01-09T22:31:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 1\nexport const revision = 1;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Matt Davis entry 1: 800 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 1,
       "paths": [
         "src/units.js"
       ]
@@ -1904,16 +1904,16 @@
         "f000003"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Matt Davis from Stinson Beach (1)",
       "committed_at": "2025-01-11T09:30:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 1\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 1.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -1931,11 +1931,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 1\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 1.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -1947,16 +1947,16 @@
         "e000005"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (2)",
+      "message": "Log Steep Ravine (2.2 miles, entry 2)",
       "committed_at": "2025-01-15T20:49:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 2\n",
+          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 2.\n2.2 miles, 1100 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -1968,16 +1968,16 @@
         "f000006"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (3)",
+      "message": "Log Coast Trail (5.0 miles, entry 3)",
       "committed_at": "2025-01-19T11:59:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 3\n",
+          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 3.\n5.0 miles, 600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -1989,16 +1989,16 @@
         "f000007"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (2)",
+      "message": "Parse the 2.2 mile line for Steep Ravine",
       "committed_at": "2025-01-22T19:20:00-08:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 2\nexport const revision = 2;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Steep Ravine from Pantoll, entry 2: 2.2 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -2010,16 +2010,16 @@
         "f000008"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (2)",
+      "message": "Record 1100 feet of gain on Steep Ravine",
       "committed_at": "2025-01-29T22:51:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 2\nexport const revision = 2;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Steep Ravine entry 2: 1100 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -2031,16 +2031,16 @@
         "f000009"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Bolinas Ridge from Bolinas (4)",
       "committed_at": "2025-02-01T09:30:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 4\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 4.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2058,11 +2058,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 4\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 4.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2074,16 +2074,16 @@
         "e000011"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (5)",
+      "message": "Log Redwood Creek (4.1 miles, entry 5)",
       "committed_at": "2025-02-04T20:09:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 5\n",
+          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 5.\n4.1 miles, 500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2095,16 +2095,16 @@
         "f000012"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (6)",
+      "message": "Log Cataract (2.8 miles, entry 6)",
       "committed_at": "2025-02-08T11:19:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 6\n",
+          "content": "# Field notes\n\nCataract from Alpine Lake, entry 6.\n2.8 miles, 1200 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2116,16 +2116,16 @@
         "f000013"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (3)",
+      "message": "Parse the 5.0 mile line for Coast Trail",
       "committed_at": "2025-02-11T19:40:00-08:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 3\nexport const revision = 3;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Coast Trail from Muir Beach, entry 3: 5.0 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -2137,16 +2137,16 @@
         "f000014"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (3)",
+      "message": "Record 600 feet of gain on Coast Trail",
       "committed_at": "2025-02-14T22:19:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 3\nexport const revision = 3;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Coast Trail entry 3: 600 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -2158,16 +2158,16 @@
         "f000015"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (4)",
+      "message": "Record 900 feet of gain on Bolinas Ridge",
       "committed_at": "2025-02-18T22:11:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 4\nexport const revision = 4;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Bolinas Ridge entry 4: 900 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -2179,12 +2179,12 @@
         "f000016"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (1)",
+      "message": "Changelog entry 1 for Matt Davis",
       "committed_at": "2025-02-21T21:50:00-08:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 1\n",
+          "content": "# Changelog\n\n1. Matt Davis (Stinson Beach): 3.4 miles, 800 feet of gain.\n",
           "binary": false
         }
       ],
@@ -2200,16 +2200,16 @@
         "f000017"
       ],
       "author_account_id": "acc-msolis",
-      "message": "Notes update from msolis",
+      "message": "Log Willow Camp from Stinson Beach (7)",
       "committed_at": "2025-02-22T09:30:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 7\n",
+          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 7.\n4.7 miles, 1500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2227,11 +2227,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 7\n",
+          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 7.\n4.7 miles, 1500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2243,16 +2243,16 @@
         "e000019"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (8)",
+      "message": "Log Old Springs (3.1 miles, entry 8)",
       "committed_at": "2025-02-28T20:21:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 8\n",
+          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 8.\n3.1 miles, 700 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2264,16 +2264,16 @@
         "f000020"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (4)",
+      "message": "Parse the 8.6 mile line for Bolinas Ridge",
       "committed_at": "2025-03-03T19:00:00-08:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 4\nexport const revision = 4;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Bolinas Ridge from Bolinas, entry 4: 8.6 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -2285,16 +2285,16 @@
         "f000021"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (5)",
+      "message": "Record 500 feet of gain on Redwood Creek",
       "committed_at": "2025-03-06T22:39:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 5\nexport const revision = 5;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Redwood Creek entry 5: 500 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -2306,16 +2306,16 @@
         "f000022"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (6)",
+      "message": "Record 1200 feet of gain on Cataract",
       "committed_at": "2025-03-10T22:31:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 6\nexport const revision = 6;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Cataract entry 6: 1200 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -2327,12 +2327,12 @@
         "f000023"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (2)",
+      "message": "Changelog entry 2 for Steep Ravine",
       "committed_at": "2025-03-13T21:10:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 2\n",
+          "content": "# Changelog\n\n2. Steep Ravine (Pantoll): 2.2 miles, 1100 feet of gain.\n",
           "binary": false
         }
       ],
@@ -2348,16 +2348,16 @@
         "f000024"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Miwok from Rodeo Lagoon (9)",
       "committed_at": "2025-03-15T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 9\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 9.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2375,11 +2375,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 9\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 9.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2391,16 +2391,16 @@
         "e000026"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (10)",
+      "message": "Log Sierra Trail (6.2 miles, entry 10)",
       "committed_at": "2025-03-20T20:41:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 10\n",
+          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 10.\n6.2 miles, 1600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2412,16 +2412,16 @@
         "f000027"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (7)",
+      "message": "Record 1500 feet of gain on Willow Camp",
       "committed_at": "2025-03-26T22:59:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 7\nexport const revision = 7;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Willow Camp entry 7: 1500 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -2433,16 +2433,16 @@
         "f000028"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (8)",
+      "message": "Record 700 feet of gain on Old Springs",
       "committed_at": "2025-03-30T13:09:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 8\nexport const revision = 8;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Old Springs entry 8: 700 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -2454,12 +2454,12 @@
         "f000029"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (3)",
+      "message": "Changelog entry 3 for Coast Trail",
       "committed_at": "2025-04-02T21:30:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 3\n",
+          "content": "# Changelog\n\n3. Coast Trail (Muir Beach): 5.0 miles, 600 feet of gain.\n",
           "binary": false
         }
       ],
@@ -2475,16 +2475,16 @@
         "f000030"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Bootjack from Mountain Home (11)",
       "committed_at": "2025-04-05T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 11\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 11.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2502,11 +2502,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 11\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 11.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2518,16 +2518,16 @@
         "e000032"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (12)",
+      "message": "Log Fern Creek (3.6 miles, entry 12)",
       "committed_at": "2025-04-09T20:01:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 12\n",
+          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 12.\n3.6 miles, 750 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2539,16 +2539,16 @@
         "f000033"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (9)",
+      "message": "Record 850 feet of gain on Miwok",
       "committed_at": "2025-04-15T22:19:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 9\nexport const revision = 9;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Miwok entry 9: 850 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -2560,16 +2560,16 @@
         "f000034"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (10)",
+      "message": "Record 1600 feet of gain on Sierra Trail",
       "committed_at": "2025-04-19T13:29:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 10\nexport const revision = 10;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Sierra Trail entry 10: 1600 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -2581,12 +2581,12 @@
         "f000035"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (4)",
+      "message": "Changelog entry 4 for Bolinas Ridge",
       "committed_at": "2025-04-22T21:50:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 4\n",
+          "content": "# Changelog\n\n4. Bolinas Ridge (Bolinas): 8.6 miles, 900 feet of gain.\n",
           "binary": false
         }
       ],
@@ -2602,16 +2602,16 @@
         "f000036"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (13)",
+      "message": "Log Dias Ridge (4.4 miles, entry 13)",
       "committed_at": "2025-04-25T20:29:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 13\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 13.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2623,16 +2623,16 @@
         "f000037"
       ],
       "author_account_id": "acc-msolis",
-      "message": "Notes update from msolis",
+      "message": "Log Hill 88 from Marin Headlands (14)",
       "committed_at": "2025-04-26T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 14\n",
+          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 14.\n5.8 miles, 1300 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2650,11 +2650,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 14\n",
+          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 14.\n5.8 miles, 1300 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2666,16 +2666,16 @@
         "e000039"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (15)",
+      "message": "Log Rodeo Valley (2.5 miles, entry 15)",
       "committed_at": "2025-04-29T20:21:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 15\n",
+          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 15.\n2.5 miles, 400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2687,16 +2687,16 @@
         "f000040"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (5)",
+      "message": "Parse the 4.1 mile line for Redwood Creek",
       "committed_at": "2025-05-02T19:00:00-07:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 5\nexport const revision = 5;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Redwood Creek from Muir Woods, entry 5: 4.1 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -2708,16 +2708,16 @@
         "f000041"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (11)",
+      "message": "Record 950 feet of gain on Bootjack",
       "committed_at": "2025-05-05T22:39:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 11\nexport const revision = 11;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Bootjack entry 11: 950 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -2729,16 +2729,16 @@
         "f000042"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (12)",
+      "message": "Record 750 feet of gain on Fern Creek",
       "committed_at": "2025-05-09T22:31:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 12\nexport const revision = 12;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Fern Creek entry 12: 750 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -2750,12 +2750,12 @@
         "f000043"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (5)",
+      "message": "Changelog entry 5 for Redwood Creek",
       "committed_at": "2025-05-12T21:10:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 5\n",
+          "content": "# Changelog\n\n5. Redwood Creek (Muir Woods): 4.1 miles, 500 feet of gain.\n",
           "binary": false
         }
       ],
@@ -2771,16 +2771,16 @@
         "f000044"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (16)",
+      "message": "Log Dipsea (7.1 miles, entry 16)",
       "committed_at": "2025-05-15T20:49:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 16\n",
+          "content": "# Field notes\n\nDipsea from Mill Valley, entry 16.\n7.1 miles, 1400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2792,16 +2792,16 @@
         "f000045"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Matt Davis from Stinson Beach (17)",
       "committed_at": "2025-05-17T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 17\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 17.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2819,11 +2819,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 17\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 17.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2835,16 +2835,16 @@
         "e000047"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (6)",
+      "message": "Parse the 2.8 mile line for Cataract",
       "committed_at": "2025-05-22T19:20:00-07:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 6\nexport const revision = 6;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Cataract from Alpine Lake, entry 6: 2.8 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -2856,16 +2856,16 @@
         "f000048"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (13)",
+      "message": "Record 650 feet of gain on Dias Ridge",
       "committed_at": "2025-05-29T22:51:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 13\nexport const revision = 13;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Dias Ridge entry 13: 650 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -2877,16 +2877,16 @@
         "f000049"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (18)",
+      "message": "Log Steep Ravine (2.2 miles, entry 18)",
       "committed_at": "2025-06-04T20:09:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 18\n",
+          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 18.\n2.2 miles, 1100 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2898,16 +2898,16 @@
         "f000050"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Coast Trail from Muir Beach (19)",
       "committed_at": "2025-06-07T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 19\n",
+          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 19.\n5.0 miles, 600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2925,11 +2925,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 19\n",
+          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 19.\n5.0 miles, 600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -2941,16 +2941,16 @@
         "e000052"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (7)",
+      "message": "Parse the 4.7 mile line for Willow Camp",
       "committed_at": "2025-06-11T19:40:00-07:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 7\nexport const revision = 7;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Willow Camp from Stinson Beach, entry 7: 4.7 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -2962,16 +2962,16 @@
         "f000053"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (14)",
+      "message": "Record 1300 feet of gain on Hill 88",
       "committed_at": "2025-06-18T22:11:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 14\nexport const revision = 14;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Hill 88 entry 14: 1300 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -2983,16 +2983,16 @@
         "f000054"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (20)",
+      "message": "Log Bolinas Ridge (8.6 miles, entry 20)",
       "committed_at": "2025-06-24T20:29:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 20\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 20.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3004,16 +3004,16 @@
         "f000055"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (21)",
+      "message": "Log Redwood Creek (4.1 miles, entry 21)",
       "committed_at": "2025-06-28T11:39:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 21\n",
+          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 21.\n4.1 miles, 500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3025,16 +3025,16 @@
         "f000056"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (8)",
+      "message": "Parse the 3.1 mile line for Old Springs",
       "committed_at": "2025-07-01T19:00:00-07:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 8\nexport const revision = 8;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Old Springs from Tennessee Valley, entry 8: 3.1 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -3046,16 +3046,16 @@
         "f000057"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (15)",
+      "message": "Record 400 feet of gain on Rodeo Valley",
       "committed_at": "2025-07-04T22:39:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 15\nexport const revision = 15;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Rodeo Valley entry 15: 400 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -3067,16 +3067,16 @@
         "f000058"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (16)",
+      "message": "Record 1400 feet of gain on Dipsea",
       "committed_at": "2025-07-08T22:31:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 16\nexport const revision = 16;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Dipsea entry 16: 1400 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -3088,12 +3088,12 @@
         "f000059"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (6)",
+      "message": "Changelog entry 6 for Cataract",
       "committed_at": "2025-07-11T21:10:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 6\n",
+          "content": "# Changelog\n\n6. Cataract (Alpine Lake): 2.8 miles, 1200 feet of gain.\n",
           "binary": false
         }
       ],
@@ -3109,16 +3109,16 @@
         "f000060"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (22)",
+      "message": "Log Cataract (2.8 miles, entry 22)",
       "committed_at": "2025-07-14T20:49:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 22\n",
+          "content": "# Field notes\n\nCataract from Alpine Lake, entry 22.\n2.8 miles, 1200 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3130,16 +3130,16 @@
         "f000061"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (23)",
+      "message": "Log Willow Camp (4.7 miles, entry 23)",
       "committed_at": "2025-07-18T20:41:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 23\n",
+          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 23.\n4.7 miles, 1500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3151,16 +3151,16 @@
         "f000062"
       ],
       "author_account_id": "acc-msolis",
-      "message": "Notes update from msolis",
+      "message": "Log Old Springs from Tennessee Valley (24)",
       "committed_at": "2025-07-19T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 24\n",
+          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 24.\n3.1 miles, 700 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3178,11 +3178,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 24\n",
+          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 24.\n3.1 miles, 700 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3194,16 +3194,16 @@
         "e000064"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (17)",
+      "message": "Record 800 feet of gain on Matt Davis",
       "committed_at": "2025-07-24T22:59:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 17\nexport const revision = 17;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Matt Davis entry 17: 800 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -3215,16 +3215,16 @@
         "f000065"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (18)",
+      "message": "Record 1100 feet of gain on Steep Ravine",
       "committed_at": "2025-07-28T22:51:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 18\nexport const revision = 18;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Steep Ravine entry 18: 1100 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -3236,12 +3236,12 @@
         "f000066"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (7)",
+      "message": "Changelog entry 7 for Willow Camp",
       "committed_at": "2025-07-31T21:30:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 7\n",
+          "content": "# Changelog\n\n7. Willow Camp (Stinson Beach): 4.7 miles, 1500 feet of gain.\n",
           "binary": false
         }
       ],
@@ -3257,16 +3257,16 @@
         "f000067"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (25)",
+      "message": "Log Miwok (5.5 miles, entry 25)",
       "committed_at": "2025-08-07T20:01:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 25\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 25.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3278,16 +3278,16 @@
         "f000068"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Sierra Trail from Mount Tamalpais (26)",
       "committed_at": "2025-08-09T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 26\n",
+          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 26.\n6.2 miles, 1600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3305,11 +3305,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 26\n",
+          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 26.\n6.2 miles, 1600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3321,16 +3321,16 @@
         "e000070"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (19)",
+      "message": "Record 600 feet of gain on Coast Trail",
       "committed_at": "2025-08-13T22:19:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 19\nexport const revision = 19;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Coast Trail entry 19: 600 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -3342,16 +3342,16 @@
         "f000071"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (20)",
+      "message": "Record 900 feet of gain on Bolinas Ridge",
       "committed_at": "2025-08-17T13:29:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 20\nexport const revision = 20;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Bolinas Ridge entry 20: 900 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -3363,12 +3363,12 @@
         "f000072"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (8)",
+      "message": "Changelog entry 8 for Old Springs",
       "committed_at": "2025-08-20T21:50:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 8\n",
+          "content": "# Changelog\n\n8. Old Springs (Tennessee Valley): 3.1 miles, 700 feet of gain.\n",
           "binary": false
         }
       ],
@@ -3384,16 +3384,16 @@
         "f000073"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (27)",
+      "message": "Log Bootjack (2.9 miles, entry 27)",
       "committed_at": "2025-08-27T20:21:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 27\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 27.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3405,16 +3405,16 @@
         "f000074"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Fern Creek from Muir Woods (28)",
       "committed_at": "2025-08-30T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 28\n",
+          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 28.\n3.6 miles, 750 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3432,11 +3432,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 28\n",
+          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 28.\n3.6 miles, 750 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3448,16 +3448,16 @@
         "e000076"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (21)",
+      "message": "Record 500 feet of gain on Redwood Creek",
       "committed_at": "2025-09-02T22:39:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 21\nexport const revision = 21;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Redwood Creek entry 21: 500 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -3469,16 +3469,16 @@
         "f000077"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (22)",
+      "message": "Record 1200 feet of gain on Cataract",
       "committed_at": "2025-09-06T13:49:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 22\nexport const revision = 22;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Cataract entry 22: 1200 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -3490,12 +3490,12 @@
         "f000078"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (9)",
+      "message": "Changelog entry 9 for Miwok",
       "committed_at": "2025-09-09T21:10:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 9\n",
+          "content": "# Changelog\n\n9. Miwok (Rodeo Lagoon): 5.5 miles, 850 feet of gain.\n",
           "binary": false
         }
       ],
@@ -3511,16 +3511,16 @@
         "f000079"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (29)",
+      "message": "Log Dias Ridge (4.4 miles, entry 29)",
       "committed_at": "2025-09-12T20:49:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 29\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 29.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3532,16 +3532,16 @@
         "f000080"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (30)",
+      "message": "Log Hill 88 (5.8 miles, entry 30)",
       "committed_at": "2025-09-16T20:41:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 30\n",
+          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 30.\n5.8 miles, 1300 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3553,16 +3553,16 @@
         "f000081"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (9)",
+      "message": "Parse the 5.5 mile line for Miwok",
       "committed_at": "2025-09-19T19:20:00-07:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 9\nexport const revision = 9;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Miwok from Rodeo Lagoon, entry 9: 5.5 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -3574,16 +3574,16 @@
         "f000082"
       ],
       "author_account_id": "acc-msolis",
-      "message": "Notes update from msolis",
+      "message": "Log Rodeo Valley from Fort Cronkhite (31)",
       "committed_at": "2025-09-20T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 31\n",
+          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 31.\n2.5 miles, 400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3601,11 +3601,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 31\n",
+          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 31.\n2.5 miles, 400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3617,16 +3617,16 @@
         "e000084"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (23)",
+      "message": "Record 1500 feet of gain on Willow Camp",
       "committed_at": "2025-09-26T22:51:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 23\nexport const revision = 23;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Willow Camp entry 23: 1500 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -3638,12 +3638,12 @@
         "f000085"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (10)",
+      "message": "Changelog entry 10 for Sierra Trail",
       "committed_at": "2025-09-29T21:30:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 10\n",
+          "content": "# Changelog\n\n10. Sierra Trail (Mount Tamalpais): 6.2 miles, 1600 feet of gain.\n",
           "binary": false
         }
       ],
@@ -3659,16 +3659,16 @@
         "f000086"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (32)",
+      "message": "Log Dipsea (7.1 miles, entry 32)",
       "committed_at": "2025-10-02T20:09:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 32\n",
+          "content": "# Field notes\n\nDipsea from Mill Valley, entry 32.\n7.1 miles, 1400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3680,16 +3680,16 @@
         "f000087"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (33)",
+      "message": "Log Matt Davis (3.4 miles, entry 33)",
       "committed_at": "2025-10-06T20:01:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 33\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 33.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3701,16 +3701,16 @@
         "f000088"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (10)",
+      "message": "Parse the 6.2 mile line for Sierra Trail",
       "committed_at": "2025-10-09T19:40:00-07:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 10\nexport const revision = 10;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Sierra Trail from Mount Tamalpais, entry 10: 6.2 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -3722,16 +3722,16 @@
         "f000089"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Steep Ravine from Pantoll (34)",
       "committed_at": "2025-10-11T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 34\n",
+          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 34.\n2.2 miles, 1100 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3749,11 +3749,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 34\n",
+          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 34.\n2.2 miles, 1100 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3765,16 +3765,16 @@
         "e000091"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (24)",
+      "message": "Record 700 feet of gain on Old Springs",
       "committed_at": "2025-10-16T22:11:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 24\nexport const revision = 24;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Old Springs entry 24: 700 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -3786,16 +3786,16 @@
         "f000092"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (35)",
+      "message": "Log Coast Trail (5.0 miles, entry 35)",
       "committed_at": "2025-10-22T20:29:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 35\n",
+          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 35.\n5.0 miles, 600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3807,16 +3807,16 @@
         "f000093"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (36)",
+      "message": "Log Bolinas Ridge (8.6 miles, entry 36)",
       "committed_at": "2025-10-26T11:39:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 36\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 36.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3828,16 +3828,16 @@
         "f000094"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (11)",
+      "message": "Parse the 2.9 mile line for Bootjack",
       "committed_at": "2025-10-29T19:00:00-07:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 11\nexport const revision = 11;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Bootjack from Mountain Home, entry 11: 2.9 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -3849,16 +3849,16 @@
         "f000095"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Redwood Creek from Muir Woods (37)",
       "committed_at": "2025-11-01T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 37\n",
+          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 37.\n4.1 miles, 500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3876,11 +3876,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 37\n",
+          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 37.\n4.1 miles, 500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3892,16 +3892,16 @@
         "e000097"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (25)",
+      "message": "Record 850 feet of gain on Miwok",
       "committed_at": "2025-11-05T22:31:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 25\nexport const revision = 25;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Miwok entry 25: 850 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -3913,16 +3913,16 @@
         "f000098"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (38)",
+      "message": "Log Cataract (2.8 miles, entry 38)",
       "committed_at": "2025-11-11T20:49:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 38\n",
+          "content": "# Field notes\n\nCataract from Alpine Lake, entry 38.\n2.8 miles, 1200 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3934,16 +3934,16 @@
         "f000099"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (39)",
+      "message": "Log Willow Camp (4.7 miles, entry 39)",
       "committed_at": "2025-11-15T11:59:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 39\n",
+          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 39.\n4.7 miles, 1500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -3955,16 +3955,16 @@
         "f000100"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (12)",
+      "message": "Parse the 3.6 mile line for Fern Creek",
       "committed_at": "2025-11-18T19:20:00-08:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 12\nexport const revision = 12;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Fern Creek from Muir Woods, entry 12: 3.6 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -3976,16 +3976,16 @@
         "f000101"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (26)",
+      "message": "Record 1600 feet of gain on Sierra Trail",
       "committed_at": "2025-11-21T22:59:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 26\nexport const revision = 26;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Sierra Trail entry 26: 1600 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -3997,16 +3997,16 @@
         "f000102"
       ],
       "author_account_id": "acc-msolis",
-      "message": "Notes update from msolis",
+      "message": "Log Old Springs from Tennessee Valley (40)",
       "committed_at": "2025-11-22T09:30:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 40\n",
+          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 40.\n3.1 miles, 700 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4024,11 +4024,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 40\n",
+          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 40.\n3.1 miles, 700 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4040,16 +4040,16 @@
         "e000104"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (27)",
+      "message": "Record 950 feet of gain on Bootjack",
       "committed_at": "2025-11-25T22:51:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 27\nexport const revision = 27;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Bootjack entry 27: 950 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -4061,12 +4061,12 @@
         "f000105"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (11)",
+      "message": "Changelog entry 11 for Bootjack",
       "committed_at": "2025-11-28T21:30:00-08:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 11\n",
+          "content": "# Changelog\n\n11. Bootjack (Mountain Home): 2.9 miles, 950 feet of gain.\n",
           "binary": false
         }
       ],
@@ -4082,16 +4082,16 @@
         "f000106"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (41)",
+      "message": "Log Miwok (5.5 miles, entry 41)",
       "committed_at": "2025-12-01T20:09:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 41\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 41.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4103,16 +4103,16 @@
         "f000107"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (42)",
+      "message": "Log Sierra Trail (6.2 miles, entry 42)",
       "committed_at": "2025-12-05T20:01:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 42\n",
+          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 42.\n6.2 miles, 1600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4124,16 +4124,16 @@
         "f000108"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (13)",
+      "message": "Parse the 4.4 mile line for Dias Ridge",
       "committed_at": "2025-12-08T19:40:00-08:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 13\nexport const revision = 13;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Dias Ridge from Muir Beach, entry 13: 4.4 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -4145,16 +4145,16 @@
         "f000109"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (28)",
+      "message": "Record 750 feet of gain on Fern Creek",
       "committed_at": "2025-12-11T22:19:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 28\nexport const revision = 28;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Fern Creek entry 28: 750 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -4166,16 +4166,16 @@
         "f000110"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Bootjack from Mountain Home (43)",
       "committed_at": "2025-12-13T09:30:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 43\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 43.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4193,11 +4193,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 43\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 43.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4209,12 +4209,12 @@
         "e000112"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (12)",
+      "message": "Changelog entry 12 for Fern Creek",
       "committed_at": "2025-12-18T21:50:00-08:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 12\n",
+          "content": "# Changelog\n\n12. Fern Creek (Muir Woods): 3.6 miles, 750 feet of gain.\n",
           "binary": false
         }
       ],
@@ -4230,16 +4230,16 @@
         "f000113"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (44)",
+      "message": "Log Fern Creek (3.6 miles, entry 44)",
       "committed_at": "2025-12-25T20:21:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 44\n",
+          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 44.\n3.6 miles, 750 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4251,16 +4251,16 @@
         "f000114"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (29)",
+      "message": "Record 650 feet of gain on Dias Ridge",
       "committed_at": "2025-12-31T22:39:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 29\nexport const revision = 29;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Dias Ridge entry 29: 650 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -4272,16 +4272,16 @@
         "f000115"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Dias Ridge from Muir Beach (45)",
       "committed_at": "2026-01-03T09:30:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 45\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 45.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4299,11 +4299,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 45\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 45.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4315,12 +4315,12 @@
         "e000117"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (13)",
+      "message": "Changelog entry 13 for Dias Ridge",
       "committed_at": "2026-01-07T21:10:00-08:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 13\n",
+          "content": "# Changelog\n\n13. Dias Ridge (Muir Beach): 4.4 miles, 650 feet of gain.\n",
           "binary": false
         }
       ],
@@ -4336,16 +4336,16 @@
         "f000118"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (46)",
+      "message": "Log Hill 88 (5.8 miles, entry 46)",
       "committed_at": "2026-01-14T20:41:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 46\n",
+          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 46.\n5.8 miles, 1300 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4357,16 +4357,16 @@
         "f000119"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (30)",
+      "message": "Record 1300 feet of gain on Hill 88",
       "committed_at": "2026-01-20T22:59:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 30\nexport const revision = 30;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Hill 88 entry 30: 1300 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -4378,16 +4378,16 @@
         "f000120"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (31)",
+      "message": "Record 400 feet of gain on Rodeo Valley",
       "committed_at": "2026-01-24T13:09:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 31\nexport const revision = 31;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Rodeo Valley entry 31: 400 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -4399,12 +4399,12 @@
         "f000121"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (14)",
+      "message": "Changelog entry 14 for Hill 88",
       "committed_at": "2026-01-27T21:30:00-08:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 14\n",
+          "content": "# Changelog\n\n14. Hill 88 (Marin Headlands): 5.8 miles, 1300 feet of gain.\n",
           "binary": false
         }
       ],
@@ -4420,16 +4420,16 @@
         "f000122"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (47)",
+      "message": "Log Rodeo Valley (2.5 miles, entry 47)",
       "committed_at": "2026-01-30T20:09:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 47\n",
+          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 47.\n2.5 miles, 400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4441,16 +4441,16 @@
         "f000123"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (48)",
+      "message": "Log Dipsea (7.1 miles, entry 48)",
       "committed_at": "2026-02-03T20:01:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 48\n",
+          "content": "# Field notes\n\nDipsea from Mill Valley, entry 48.\n7.1 miles, 1400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4462,16 +4462,16 @@
         "f000124"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (14)",
+      "message": "Parse the 5.8 mile line for Hill 88",
       "committed_at": "2026-02-06T19:40:00-08:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 14\nexport const revision = 14;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Hill 88 from Marin Headlands, entry 14: 5.8 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -4483,16 +4483,16 @@
         "f000125"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (32)",
+      "message": "Record 1400 feet of gain on Dipsea",
       "committed_at": "2026-02-09T22:19:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 32\nexport const revision = 32;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Dipsea entry 32: 1400 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -4504,16 +4504,16 @@
         "f000126"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (33)",
+      "message": "Record 800 feet of gain on Matt Davis",
       "committed_at": "2026-02-13T22:11:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 33\nexport const revision = 33;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Matt Davis entry 33: 800 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -4525,16 +4525,16 @@
         "f000127"
       ],
       "author_account_id": "acc-msolis",
-      "message": "Notes update from msolis",
+      "message": "Log Matt Davis from Stinson Beach (49)",
       "committed_at": "2026-02-14T09:30:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 49\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 49.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4552,11 +4552,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 49\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 49.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4568,16 +4568,16 @@
         "e000129"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (50)",
+      "message": "Log Steep Ravine (2.2 miles, entry 50)",
       "committed_at": "2026-02-19T20:29:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 50\n",
+          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 50.\n2.2 miles, 1100 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4589,16 +4589,16 @@
         "f000130"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (51)",
+      "message": "Log Coast Trail (5.0 miles, entry 51)",
       "committed_at": "2026-02-23T20:21:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 51\n",
+          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 51.\n5.0 miles, 600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4610,16 +4610,16 @@
         "f000131"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (15)",
+      "message": "Parse the 2.5 mile line for Rodeo Valley",
       "committed_at": "2026-02-26T19:00:00-08:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 15\nexport const revision = 15;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Rodeo Valley from Fort Cronkhite, entry 15: 2.5 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -4631,16 +4631,16 @@
         "f000132"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (34)",
+      "message": "Record 1100 feet of gain on Steep Ravine",
       "committed_at": "2026-03-05T22:31:00-08:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 34\nexport const revision = 34;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Steep Ravine entry 34: 1100 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -4652,16 +4652,16 @@
         "f000133"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Bolinas Ridge from Bolinas (52)",
       "committed_at": "2026-03-07T09:30:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 52\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 52.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4679,11 +4679,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 52\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 52.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4695,16 +4695,16 @@
         "e000135"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (53)",
+      "message": "Log Redwood Creek (4.1 miles, entry 53)",
       "committed_at": "2026-03-11T20:49:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 53\n",
+          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 53.\n4.1 miles, 500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4716,16 +4716,16 @@
         "f000136"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (54)",
+      "message": "Log Cataract (2.8 miles, entry 54)",
       "committed_at": "2026-03-15T11:59:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 54\n",
+          "content": "# Field notes\n\nCataract from Alpine Lake, entry 54.\n2.8 miles, 1200 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4737,16 +4737,16 @@
         "f000137"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (16)",
+      "message": "Parse the 7.1 mile line for Dipsea",
       "committed_at": "2026-03-18T19:20:00-07:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 16\nexport const revision = 16;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Dipsea from Mill Valley, entry 16: 7.1 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -4758,16 +4758,16 @@
         "f000138"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (35)",
+      "message": "Record 600 feet of gain on Coast Trail",
       "committed_at": "2026-03-25T22:51:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 35\nexport const revision = 35;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Coast Trail entry 35: 600 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -4779,16 +4779,16 @@
         "f000139"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Willow Camp from Stinson Beach (55)",
       "committed_at": "2026-03-28T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 55\n",
+          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 55.\n4.7 miles, 1500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4806,11 +4806,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 55\n",
+          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 55.\n4.7 miles, 1500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4822,16 +4822,16 @@
         "e000141"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (56)",
+      "message": "Log Old Springs (3.1 miles, entry 56)",
       "committed_at": "2026-04-04T11:19:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 56\n",
+          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 56.\n3.1 miles, 700 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4843,16 +4843,16 @@
         "f000142"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (17)",
+      "message": "Parse the 3.4 mile line for Matt Davis",
       "committed_at": "2026-04-07T19:40:00-07:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 17\nexport const revision = 17;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Matt Davis from Stinson Beach, entry 17: 3.4 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -4864,16 +4864,16 @@
         "f000143"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (36)",
+      "message": "Record 900 feet of gain on Bolinas Ridge",
       "committed_at": "2026-04-10T22:19:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 36\nexport const revision = 36;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Bolinas Ridge entry 36: 900 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -4885,16 +4885,16 @@
         "f000144"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (37)",
+      "message": "Record 500 feet of gain on Redwood Creek",
       "committed_at": "2026-04-14T22:11:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 37\nexport const revision = 37;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Redwood Creek entry 37: 500 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -4906,12 +4906,12 @@
         "f000145"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (15)",
+      "message": "Changelog entry 15 for Rodeo Valley",
       "committed_at": "2026-04-17T21:50:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 15\n",
+          "content": "# Changelog\n\n15. Rodeo Valley (Fort Cronkhite): 2.5 miles, 400 feet of gain.\n",
           "binary": false
         }
       ],
@@ -4927,16 +4927,16 @@
         "f000146"
       ],
       "author_account_id": "acc-msolis",
-      "message": "Notes update from msolis",
+      "message": "Log Miwok from Rodeo Lagoon (57)",
       "committed_at": "2026-04-18T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 57\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 57.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4954,11 +4954,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 57\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 57.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4970,16 +4970,16 @@
         "e000148"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (58)",
+      "message": "Log Sierra Trail (6.2 miles, entry 58)",
       "committed_at": "2026-04-24T20:21:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 58\n",
+          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 58.\n6.2 miles, 1600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -4991,16 +4991,16 @@
         "f000149"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (18)",
+      "message": "Parse the 2.2 mile line for Steep Ravine",
       "committed_at": "2026-04-27T19:00:00-07:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 18\nexport const revision = 18;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Steep Ravine from Pantoll, entry 18: 2.2 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -5012,16 +5012,16 @@
         "f000150"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (38)",
+      "message": "Record 1200 feet of gain on Cataract",
       "committed_at": "2026-04-30T22:39:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 38\nexport const revision = 38;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Cataract entry 38: 1200 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -5033,16 +5033,16 @@
         "f000151"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (39)",
+      "message": "Record 1500 feet of gain on Willow Camp",
       "committed_at": "2026-05-04T22:31:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 39\nexport const revision = 39;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Willow Camp entry 39: 1500 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -5054,12 +5054,12 @@
         "f000152"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (16)",
+      "message": "Changelog entry 16 for Dipsea",
       "committed_at": "2026-05-07T21:10:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 16\n",
+          "content": "# Changelog\n\n16. Dipsea (Mill Valley): 7.1 miles, 1400 feet of gain.\n",
           "binary": false
         }
       ],
@@ -5075,16 +5075,16 @@
         "f000153"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Bootjack from Mountain Home (59)",
       "committed_at": "2026-05-09T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 59\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 59.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5102,11 +5102,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 59\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 59.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5118,16 +5118,16 @@
         "e000155"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (60)",
+      "message": "Log Fern Creek (3.6 miles, entry 60)",
       "committed_at": "2026-05-14T20:41:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 60\n",
+          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 60.\n3.6 miles, 750 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5139,16 +5139,16 @@
         "f000156"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (40)",
+      "message": "Record 700 feet of gain on Old Springs",
       "committed_at": "2026-05-20T22:59:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 40\nexport const revision = 40;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Old Springs entry 40: 700 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -5160,16 +5160,16 @@
         "f000157"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (41)",
+      "message": "Record 850 feet of gain on Miwok",
       "committed_at": "2026-05-24T13:09:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 41\nexport const revision = 41;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Miwok entry 41: 850 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -5181,12 +5181,12 @@
         "f000158"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (17)",
+      "message": "Changelog entry 17 for Matt Davis",
       "committed_at": "2026-05-27T21:30:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 17\n",
+          "content": "# Changelog\n\n17. Matt Davis (Stinson Beach): 3.4 miles, 800 feet of gain.\n",
           "binary": false
         }
       ],
@@ -5202,16 +5202,16 @@
         "f000159"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Dias Ridge from Muir Beach (61)",
       "committed_at": "2026-05-30T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 61\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 61.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5229,11 +5229,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 61\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 61.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5245,16 +5245,16 @@
         "e000161"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (62)",
+      "message": "Log Hill 88 (5.8 miles, entry 62)",
       "committed_at": "2026-06-03T20:01:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 62\n",
+          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 62.\n5.8 miles, 1300 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5266,16 +5266,16 @@
         "f000162"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (42)",
+      "message": "Record 1600 feet of gain on Sierra Trail",
       "committed_at": "2026-06-09T22:19:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 42\nexport const revision = 42;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Sierra Trail entry 42: 1600 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -5287,16 +5287,16 @@
         "f000163"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (43)",
+      "message": "Record 950 feet of gain on Bootjack",
       "committed_at": "2026-06-13T13:29:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 43\nexport const revision = 43;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Bootjack entry 43: 950 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -5308,12 +5308,12 @@
         "f000164"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (18)",
+      "message": "Changelog entry 18 for Steep Ravine",
       "committed_at": "2026-06-16T21:50:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 18\n",
+          "content": "# Changelog\n\n18. Steep Ravine (Pantoll): 2.2 miles, 1100 feet of gain.\n",
           "binary": false
         }
       ],
@@ -5329,16 +5329,16 @@
         "f000165"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (63)",
+      "message": "Log Rodeo Valley (2.5 miles, entry 63)",
       "committed_at": "2026-06-19T20:29:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 63\n",
+          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 63.\n2.5 miles, 400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5350,16 +5350,16 @@
         "f000166"
       ],
       "author_account_id": "acc-msolis",
-      "message": "Notes update from msolis",
+      "message": "Log Dipsea from Mill Valley (64)",
       "committed_at": "2026-06-20T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 64\n",
+          "content": "# Field notes\n\nDipsea from Mill Valley, entry 64.\n7.1 miles, 1400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5377,11 +5377,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 64\n",
+          "content": "# Field notes\n\nDipsea from Mill Valley, entry 64.\n7.1 miles, 1400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5393,16 +5393,16 @@
         "e000168"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (19)",
+      "message": "Parse the 5.0 mile line for Coast Trail",
       "committed_at": "2026-06-26T19:00:00-07:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 19\nexport const revision = 19;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Coast Trail from Muir Beach, entry 19: 5.0 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -5414,16 +5414,16 @@
         "f000169"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (44)",
+      "message": "Record 750 feet of gain on Fern Creek",
       "committed_at": "2026-06-29T22:39:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 44\nexport const revision = 44;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Fern Creek entry 44: 750 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -5435,16 +5435,16 @@
         "f000170"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (45)",
+      "message": "Record 650 feet of gain on Dias Ridge",
       "committed_at": "2026-07-03T22:31:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 45\nexport const revision = 45;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Dias Ridge entry 45: 650 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -5456,12 +5456,12 @@
         "f000171"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (19)",
+      "message": "Changelog entry 19 for Coast Trail",
       "committed_at": "2026-07-06T21:10:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 19\n",
+          "content": "# Changelog\n\n19. Coast Trail (Muir Beach): 5.0 miles, 600 feet of gain.\n",
           "binary": false
         }
       ],
@@ -5477,16 +5477,16 @@
         "f000172"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (65)",
+      "message": "Log Matt Davis (3.4 miles, entry 65)",
       "committed_at": "2026-07-09T20:49:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 65\n",
+          "content": "# Field notes\n\nMatt Davis from Stinson Beach, entry 65.\n3.4 miles, 800 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5498,16 +5498,16 @@
         "f000173"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Steep Ravine from Pantoll (66)",
       "committed_at": "2026-07-11T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 66\n",
+          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 66.\n2.2 miles, 1100 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5525,11 +5525,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 66\n",
+          "content": "# Field notes\n\nSteep Ravine from Pantoll, entry 66.\n2.2 miles, 1100 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5541,16 +5541,16 @@
         "e000175"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (20)",
+      "message": "Parse the 8.6 mile line for Bolinas Ridge",
       "committed_at": "2026-07-16T19:20:00-07:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 20\nexport const revision = 20;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Bolinas Ridge from Bolinas, entry 20: 8.6 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -5562,16 +5562,16 @@
         "f000176"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (46)",
+      "message": "Record 1300 feet of gain on Hill 88",
       "committed_at": "2026-07-23T22:51:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 46\nexport const revision = 46;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Hill 88 entry 46: 1300 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -5583,16 +5583,16 @@
         "f000177"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (67)",
+      "message": "Log Coast Trail (5.0 miles, entry 67)",
       "committed_at": "2026-07-29T20:09:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 67\n",
+          "content": "# Field notes\n\nCoast Trail from Muir Beach, entry 67.\n5.0 miles, 600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5604,16 +5604,16 @@
         "f000178"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Bolinas Ridge from Bolinas (68)",
       "committed_at": "2026-08-01T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 68\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 68.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5631,11 +5631,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 68\n",
+          "content": "# Field notes\n\nBolinas Ridge from Bolinas, entry 68.\n8.6 miles, 900 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5647,16 +5647,16 @@
         "e000180"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (21)",
+      "message": "Parse the 4.1 mile line for Redwood Creek",
       "committed_at": "2026-08-05T19:40:00-07:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 21\nexport const revision = 21;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Redwood Creek from Muir Woods, entry 21: 4.1 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -5668,16 +5668,16 @@
         "f000181"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (47)",
+      "message": "Record 400 feet of gain on Rodeo Valley",
       "committed_at": "2026-08-12T22:11:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 47\nexport const revision = 47;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Rodeo Valley entry 47: 400 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -5689,16 +5689,16 @@
         "f000182"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (69)",
+      "message": "Log Redwood Creek (4.1 miles, entry 69)",
       "committed_at": "2026-08-18T20:29:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 69\n",
+          "content": "# Field notes\n\nRedwood Creek from Muir Woods, entry 69.\n4.1 miles, 500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5710,16 +5710,16 @@
         "f000183"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (70)",
+      "message": "Log Cataract (2.8 miles, entry 70)",
       "committed_at": "2026-08-22T11:39:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 70\n",
+          "content": "# Field notes\n\nCataract from Alpine Lake, entry 70.\n2.8 miles, 1200 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5731,16 +5731,16 @@
         "f000184"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (22)",
+      "message": "Parse the 2.8 mile line for Cataract",
       "committed_at": "2026-08-25T19:00:00-07:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 22\nexport const revision = 22;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Cataract from Alpine Lake, entry 22: 2.8 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -5752,16 +5752,16 @@
         "f000185"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (48)",
+      "message": "Record 1400 feet of gain on Dipsea",
       "committed_at": "2026-08-28T22:39:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 48\nexport const revision = 48;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Dipsea entry 48: 1400 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -5773,16 +5773,16 @@
         "f000186"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (49)",
+      "message": "Record 800 feet of gain on Matt Davis",
       "committed_at": "2026-09-01T22:31:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 49\nexport const revision = 49;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Matt Davis entry 49: 800 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -5794,12 +5794,12 @@
         "f000187"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (20)",
+      "message": "Changelog entry 20 for Bolinas Ridge",
       "committed_at": "2026-09-04T21:10:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 20\n",
+          "content": "# Changelog\n\n20. Bolinas Ridge (Bolinas): 8.6 miles, 900 feet of gain.\n",
           "binary": false
         }
       ],
@@ -5815,16 +5815,16 @@
         "f000188"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (71)",
+      "message": "Log Willow Camp (4.7 miles, entry 71)",
       "committed_at": "2026-09-07T20:49:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 71\n",
+          "content": "# Field notes\n\nWillow Camp from Stinson Beach, entry 71.\n4.7 miles, 1500 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5836,16 +5836,16 @@
         "f000189"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (72)",
+      "message": "Log Old Springs (3.1 miles, entry 72)",
       "committed_at": "2026-09-11T20:41:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 72\n",
+          "content": "# Field notes\n\nOld Springs from Tennessee Valley, entry 72.\n3.1 miles, 700 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5857,16 +5857,16 @@
         "f000190"
       ],
       "author_account_id": "acc-msolis",
-      "message": "Notes update from msolis",
+      "message": "Log Miwok from Rodeo Lagoon (73)",
       "committed_at": "2026-09-12T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 73\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 73.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5884,11 +5884,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 73\n",
+          "content": "# Field notes\n\nMiwok from Rodeo Lagoon, entry 73.\n5.5 miles, 850 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5900,16 +5900,16 @@
         "e000192"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (50)",
+      "message": "Record 1100 feet of gain on Steep Ravine",
       "committed_at": "2026-09-17T22:59:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 50\nexport const revision = 50;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Steep Ravine entry 50: 1100 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -5921,16 +5921,16 @@
         "f000193"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (51)",
+      "message": "Record 600 feet of gain on Coast Trail",
       "committed_at": "2026-09-21T22:51:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 51\nexport const revision = 51;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Coast Trail entry 51: 600 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -5942,12 +5942,12 @@
         "f000194"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (21)",
+      "message": "Changelog entry 21 for Redwood Creek",
       "committed_at": "2026-09-24T21:30:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 21\n",
+          "content": "# Changelog\n\n21. Redwood Creek (Muir Woods): 4.1 miles, 500 feet of gain.\n",
           "binary": false
         }
       ],
@@ -5963,16 +5963,16 @@
         "f000195"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (74)",
+      "message": "Log Sierra Trail (6.2 miles, entry 74)",
       "committed_at": "2026-10-01T20:01:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 74\n",
+          "content": "# Field notes\n\nSierra Trail from Mount Tamalpais, entry 74.\n6.2 miles, 1600 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -5984,16 +5984,16 @@
         "f000196"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Bootjack from Mountain Home (75)",
       "committed_at": "2026-10-03T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 75\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 75.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -6011,11 +6011,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 75\n",
+          "content": "# Field notes\n\nBootjack from Mountain Home, entry 75.\n2.9 miles, 950 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -6027,16 +6027,16 @@
         "e000198"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (52)",
+      "message": "Record 900 feet of gain on Bolinas Ridge",
       "committed_at": "2026-10-07T22:19:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 52\nexport const revision = 52;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Bolinas Ridge entry 52: 900 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -6048,16 +6048,16 @@
         "f000199"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (53)",
+      "message": "Record 500 feet of gain on Redwood Creek",
       "committed_at": "2026-10-11T13:29:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 53\nexport const revision = 53;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Redwood Creek entry 53: 500 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -6069,12 +6069,12 @@
         "f000200"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (22)",
+      "message": "Changelog entry 22 for Cataract",
       "committed_at": "2026-10-14T21:50:00-07:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 22\n",
+          "content": "# Changelog\n\n22. Cataract (Alpine Lake): 2.8 miles, 1200 feet of gain.\n",
           "binary": false
         }
       ],
@@ -6090,16 +6090,16 @@
         "f000201"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (76)",
+      "message": "Log Fern Creek (3.6 miles, entry 76)",
       "committed_at": "2026-10-21T20:21:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 76\n",
+          "content": "# Field notes\n\nFern Creek from Muir Woods, entry 76.\n3.6 miles, 750 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -6111,16 +6111,16 @@
         "f000202"
       ],
       "author_account_id": "acc-praman",
-      "message": "Notes update from praman",
+      "message": "Log Dias Ridge from Muir Beach (77)",
       "committed_at": "2026-10-24T09:30:00-07:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 77\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 77.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -6138,11 +6138,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 77\n",
+          "content": "# Field notes\n\nDias Ridge from Muir Beach, entry 77.\n4.4 miles, 650 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -6154,16 +6154,16 @@
         "e000204"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (54)",
+      "message": "Record 1200 feet of gain on Cataract",
       "committed_at": "2026-10-27T22:39:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 54\nexport const revision = 54;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Cataract entry 54: 1200 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -6175,16 +6175,16 @@
         "f000205"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/units.js (55)",
+      "message": "Record 1500 feet of gain on Willow Camp",
       "committed_at": "2026-10-31T13:49:00-07:00",
       "files": [
         {
           "path": "src/units.js",
-          "content": "'use strict';\n// src/units.js revision 55\nexport const revision = 55;\n",
+          "content": "'use strict';\nexport const metersPerFoot = 0.3048;\nexport function feetToMeters(feet) {\n  return Math.round(feet * metersPerFoot);\n}\n// Willow Camp entry 55: 1500 feet of gain\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/units.js"
       ]
@@ -6196,12 +6196,12 @@
         "f000206"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update CHANGELOG.md (23)",
+      "message": "Changelog entry 23 for Willow Camp",
       "committed_at": "2026-11-03T21:10:00-08:00",
       "files": [
         {
           "path": "CHANGELOG.md",
-          "content": "# CHANGELOG.md\n\nRevision 23\n",
+          "content": "# Changelog\n\n23. Willow Camp (Stinson Beach): 4.7 miles, 1500 feet of gain.\n",
           "binary": false
         }
       ],
@@ -6217,16 +6217,16 @@
         "f000207"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (78)",
+      "message": "Log Hill 88 (5.8 miles, entry 78)",
       "committed_at": "2026-11-06T20:49:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 78\n",
+          "content": "# Field notes\n\nHill 88 from Marin Headlands, entry 78.\n5.8 miles, 1300 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -6238,16 +6238,16 @@
         "f000208"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update docs/notes.md (79)",
+      "message": "Log Rodeo Valley (2.5 miles, entry 79)",
       "committed_at": "2026-11-10T20:41:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 79\n",
+          "content": "# Field notes\n\nRodeo Valley from Fort Cronkhite, entry 79.\n2.5 miles, 400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -6259,16 +6259,16 @@
         "f000209"
       ],
       "author_account_id": "fy-tomasreyes",
-      "message": "Update src/fieldbook.js (23)",
+      "message": "Parse the 4.7 mile line for Willow Camp",
       "committed_at": "2026-11-13T19:20:00-08:00",
       "files": [
         {
           "path": "src/fieldbook.js",
-          "content": "'use strict';\n// src/fieldbook.js revision 23\nexport const revision = 23;\n",
+          "content": "'use strict';\nexport function parseMiles(line) {\n  const match = /^(\\d+(?:\\.\\d+)?) miles\\b/.exec(String(line));\n  return match ? Number(match[1]) : null;\n}\n// Willow Camp from Stinson Beach, entry 23: 4.7 miles\n",
           "binary": false
         }
       ],
-      "changed_lines": 4,
+      "changed_lines": 2,
       "paths": [
         "src/fieldbook.js"
       ]
@@ -6280,16 +6280,16 @@
         "f000210"
       ],
       "author_account_id": "acc-msolis",
-      "message": "Notes update from msolis",
+      "message": "Log Dipsea from Mill Valley (80)",
       "committed_at": "2026-11-14T09:30:00-08:00",
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 80\n",
+          "content": "# Field notes\n\nDipsea from Mill Valley, entry 80.\n7.1 miles, 1400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -6307,11 +6307,11 @@
       "files": [
         {
           "path": "docs/notes.md",
-          "content": "# docs/notes.md\n\nRevision 80\n",
+          "content": "# Field notes\n\nDipsea from Mill Valley, entry 80.\n7.1 miles, 1400 feet of gain.\nThe second switchback was dry and the creek was clear.\n",
           "binary": false
         }
       ],
-      "changed_lines": 2,
+      "changed_lines": 4,
       "paths": [
         "docs/notes.md"
       ]
@@ -6568,7 +6568,7 @@
       "repo": "tomasreyes/fieldbook",
       "tag": "v1.1.0",
       "title": "Fieldbook v1.1.0",
-      "notes": "Quarterly fieldbook release v1.1.0.",
+      "notes": "Fieldbook v1.1.0 gathers the trail logs through late March 2025. Elevation in the notes stays in feet.",
       "revision": 1,
       "status": "published",
       "prerelease": false,
@@ -6585,7 +6585,7 @@
       "revisions": [
         {
           "revision": 1,
-          "notes": "Quarterly fieldbook release v1.1.0.",
+          "notes": "Fieldbook v1.1.0 gathers the trail logs through late March 2025. Elevation in the notes stays in feet.",
           "title": "Fieldbook v1.1.0",
           "at": "2025-03-28T21:45:00-07:00",
           "request_id": "publish-fb-1"
@@ -6597,7 +6597,7 @@
       "repo": "tomasreyes/fieldbook",
       "tag": "v1.2.0",
       "title": "Fieldbook v1.2.0",
-      "notes": "Quarterly fieldbook release v1.2.0.",
+      "notes": "Fieldbook v1.2.0 gathers the trail logs through late June 2025. Elevation in the notes stays in feet.",
       "revision": 1,
       "status": "published",
       "prerelease": false,
@@ -6614,7 +6614,7 @@
       "revisions": [
         {
           "revision": 1,
-          "notes": "Quarterly fieldbook release v1.2.0.",
+          "notes": "Fieldbook v1.2.0 gathers the trail logs through late June 2025. Elevation in the notes stays in feet.",
           "title": "Fieldbook v1.2.0",
           "at": "2025-06-27T21:45:00-07:00",
           "request_id": "publish-fb-2"
@@ -6626,7 +6626,7 @@
       "repo": "tomasreyes/fieldbook",
       "tag": "v1.3.0",
       "title": "Fieldbook v1.3.0",
-      "notes": "Quarterly fieldbook release v1.3.0.",
+      "notes": "Fieldbook v1.3.0 gathers the trail logs through late September 2025. Elevation in the notes stays in feet.",
       "revision": 1,
       "status": "published",
       "prerelease": false,
@@ -6643,7 +6643,7 @@
       "revisions": [
         {
           "revision": 1,
-          "notes": "Quarterly fieldbook release v1.3.0.",
+          "notes": "Fieldbook v1.3.0 gathers the trail logs through late September 2025. Elevation in the notes stays in feet.",
           "title": "Fieldbook v1.3.0",
           "at": "2025-09-27T21:45:00-07:00",
           "request_id": "publish-fb-3"
@@ -6655,7 +6655,7 @@
       "repo": "tomasreyes/fieldbook",
       "tag": "v1.4.0",
       "title": "Fieldbook v1.4.0",
-      "notes": "Quarterly fieldbook release v1.4.0.",
+      "notes": "Fieldbook v1.4.0 gathers the trail logs through mid December 2025. Elevation in the notes stays in feet.",
       "revision": 1,
       "status": "published",
       "prerelease": false,
@@ -6672,7 +6672,7 @@
       "revisions": [
         {
           "revision": 1,
-          "notes": "Quarterly fieldbook release v1.4.0.",
+          "notes": "Fieldbook v1.4.0 gathers the trail logs through mid December 2025. Elevation in the notes stays in feet.",
           "title": "Fieldbook v1.4.0",
           "at": "2025-12-19T21:45:00-08:00",
           "request_id": "publish-fb-4"
@@ -6684,7 +6684,7 @@
       "repo": "tomasreyes/fieldbook",
       "tag": "v1.5.0",
       "title": "Fieldbook v1.5.0",
-      "notes": "Quarterly fieldbook release v1.5.0.",
+      "notes": "Fieldbook v1.5.0 gathers the trail logs through late March 2026. Elevation in the notes stays in feet.",
       "revision": 1,
       "status": "published",
       "prerelease": false,
@@ -6701,7 +6701,7 @@
       "revisions": [
         {
           "revision": 1,
-          "notes": "Quarterly fieldbook release v1.5.0.",
+          "notes": "Fieldbook v1.5.0 gathers the trail logs through late March 2026. Elevation in the notes stays in feet.",
           "title": "Fieldbook v1.5.0",
           "at": "2026-03-27T21:45:00-07:00",
           "request_id": "publish-fb-5"
@@ -6713,7 +6713,7 @@
       "repo": "tomasreyes/fieldbook",
       "tag": "v1.6.0",
       "title": "Fieldbook v1.6.0",
-      "notes": "Quarterly fieldbook release v1.6.0.",
+      "notes": "Fieldbook v1.6.0 gathers the trail logs through late June 2026. Elevation in the notes stays in feet.",
       "revision": 1,
       "status": "published",
       "prerelease": false,
@@ -6730,7 +6730,7 @@
       "revisions": [
         {
           "revision": 1,
-          "notes": "Quarterly fieldbook release v1.6.0.",
+          "notes": "Fieldbook v1.6.0 gathers the trail logs through late June 2026. Elevation in the notes stays in feet.",
           "title": "Fieldbook v1.6.0",
           "at": "2026-06-26T21:45:00-07:00",
           "request_id": "publish-fb-6"
@@ -6742,7 +6742,7 @@
       "repo": "tomasreyes/fieldbook",
       "tag": "v1.7.0",
       "title": "Fieldbook v1.7.0",
-      "notes": "Quarterly fieldbook release v1.7.0.",
+      "notes": "Fieldbook v1.7.0 gathers the trail logs through late September 2026. Elevation in the notes stays in feet.",
       "revision": 1,
       "status": "published",
       "prerelease": false,
@@ -6759,7 +6759,7 @@
       "revisions": [
         {
           "revision": 1,
-          "notes": "Quarterly fieldbook release v1.7.0.",
+          "notes": "Fieldbook v1.7.0 gathers the trail logs through late September 2026. Elevation in the notes stays in feet.",
           "title": "Fieldbook v1.7.0",
           "at": "2026-09-25T21:45:00-07:00",
           "request_id": "publish-fb-7"
@@ -7214,18 +7214,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 1 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. The note says the second switchback was dry.",
           "at": "2025-01-11T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 1",
+          "title": "Matt Davis notes 1",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 1,
-      "title": "Field notes update 1",
-      "body": "Adds notes from the latest trip.",
+      "title": "Matt Davis notes 1",
+      "body": "Adds entry 1 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-1",
@@ -7252,18 +7252,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 4 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. The note says the second switchback was dry.",
           "at": "2025-02-01T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 2",
+          "title": "Bolinas Ridge notes 4",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 2,
-      "title": "Field notes update 2",
-      "body": "Adds notes from the latest trip.",
+      "title": "Bolinas Ridge notes 4",
+      "body": "Adds entry 4 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-2",
@@ -7290,18 +7290,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 7 for Willow Camp from Stinson Beach: 4.7 miles and 1500 feet of gain. The note says the second switchback was dry.",
           "at": "2025-02-22T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 3",
+          "title": "Willow Camp notes 7",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 3,
-      "title": "Field notes update 3",
-      "body": "Adds notes from the latest trip.",
+      "title": "Willow Camp notes 7",
+      "body": "Adds entry 7 for Willow Camp from Stinson Beach: 4.7 miles and 1500 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-3",
@@ -7328,18 +7328,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 9 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. The note says the second switchback was dry.",
           "at": "2025-03-15T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 4",
+          "title": "Miwok notes 9",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 4,
-      "title": "Field notes update 4",
-      "body": "Adds notes from the latest trip.",
+      "title": "Miwok notes 9",
+      "body": "Adds entry 9 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-4",
@@ -7366,18 +7366,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 11 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
           "at": "2025-04-05T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 5",
+          "title": "Bootjack notes 11",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 5,
-      "title": "Field notes update 5",
-      "body": "Adds notes from the latest trip.",
+      "title": "Bootjack notes 11",
+      "body": "Adds entry 11 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-5",
@@ -7404,18 +7404,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 14 for Hill 88 from Marin Headlands: 5.8 miles and 1300 feet of gain. The note says the second switchback was dry.",
           "at": "2025-04-26T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 6",
+          "title": "Hill 88 notes 14",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 6,
-      "title": "Field notes update 6",
-      "body": "Adds notes from the latest trip.",
+      "title": "Hill 88 notes 14",
+      "body": "Adds entry 14 for Hill 88 from Marin Headlands: 5.8 miles and 1300 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-6",
@@ -7442,18 +7442,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 17 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. The note says the second switchback was dry.",
           "at": "2025-05-17T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 7",
+          "title": "Matt Davis notes 17",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 7,
-      "title": "Field notes update 7",
-      "body": "Adds notes from the latest trip.",
+      "title": "Matt Davis notes 17",
+      "body": "Adds entry 17 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-7",
@@ -7480,18 +7480,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 19 for Coast Trail from Muir Beach: 5.0 miles and 600 feet of gain. The note says the second switchback was dry.",
           "at": "2025-06-07T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 8",
+          "title": "Coast Trail notes 19",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 8,
-      "title": "Field notes update 8",
-      "body": "Adds notes from the latest trip.",
+      "title": "Coast Trail notes 19",
+      "body": "Adds entry 19 for Coast Trail from Muir Beach: 5.0 miles and 600 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-8",
@@ -7518,18 +7518,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 24 for Old Springs from Tennessee Valley: 3.1 miles and 700 feet of gain. The note says the second switchback was dry.",
           "at": "2025-07-19T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 9",
+          "title": "Old Springs notes 24",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 9,
-      "title": "Field notes update 9",
-      "body": "Adds notes from the latest trip.",
+      "title": "Old Springs notes 24",
+      "body": "Adds entry 24 for Old Springs from Tennessee Valley: 3.1 miles and 700 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-9",
@@ -7556,18 +7556,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 26 for Sierra Trail from Mount Tamalpais: 6.2 miles and 1600 feet of gain. The note says the second switchback was dry.",
           "at": "2025-08-09T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 10",
+          "title": "Sierra Trail notes 26",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 10,
-      "title": "Field notes update 10",
-      "body": "Adds notes from the latest trip.",
+      "title": "Sierra Trail notes 26",
+      "body": "Adds entry 26 for Sierra Trail from Mount Tamalpais: 6.2 miles and 1600 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-10",
@@ -7594,18 +7594,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 28 for Fern Creek from Muir Woods: 3.6 miles and 750 feet of gain. The note says the second switchback was dry.",
           "at": "2025-08-30T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 11",
+          "title": "Fern Creek notes 28",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 11,
-      "title": "Field notes update 11",
-      "body": "Adds notes from the latest trip.",
+      "title": "Fern Creek notes 28",
+      "body": "Adds entry 28 for Fern Creek from Muir Woods: 3.6 miles and 750 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-11",
@@ -7632,18 +7632,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 31 for Rodeo Valley from Fort Cronkhite: 2.5 miles and 400 feet of gain. The note says the second switchback was dry.",
           "at": "2025-09-20T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 12",
+          "title": "Rodeo Valley notes 31",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 12,
-      "title": "Field notes update 12",
-      "body": "Adds notes from the latest trip.",
+      "title": "Rodeo Valley notes 31",
+      "body": "Adds entry 31 for Rodeo Valley from Fort Cronkhite: 2.5 miles and 400 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-12",
@@ -7670,18 +7670,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 34 for Steep Ravine from Pantoll: 2.2 miles and 1100 feet of gain. The note says the second switchback was dry.",
           "at": "2025-10-11T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 13",
+          "title": "Steep Ravine notes 34",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 13,
-      "title": "Field notes update 13",
-      "body": "Adds notes from the latest trip.",
+      "title": "Steep Ravine notes 34",
+      "body": "Adds entry 34 for Steep Ravine from Pantoll: 2.2 miles and 1100 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-13",
@@ -7708,18 +7708,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 37 for Redwood Creek from Muir Woods: 4.1 miles and 500 feet of gain. The note says the second switchback was dry.",
           "at": "2025-11-01T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 14",
+          "title": "Redwood Creek notes 37",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 14,
-      "title": "Field notes update 14",
-      "body": "Adds notes from the latest trip.",
+      "title": "Redwood Creek notes 37",
+      "body": "Adds entry 37 for Redwood Creek from Muir Woods: 4.1 miles and 500 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-14",
@@ -7746,18 +7746,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 40 for Old Springs from Tennessee Valley: 3.1 miles and 700 feet of gain. The note says the second switchback was dry.",
           "at": "2025-11-22T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 15",
+          "title": "Old Springs notes 40",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 15,
-      "title": "Field notes update 15",
-      "body": "Adds notes from the latest trip.",
+      "title": "Old Springs notes 40",
+      "body": "Adds entry 40 for Old Springs from Tennessee Valley: 3.1 miles and 700 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-15",
@@ -7784,18 +7784,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 43 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
           "at": "2025-12-13T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 16",
+          "title": "Bootjack notes 43",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 16,
-      "title": "Field notes update 16",
-      "body": "Adds notes from the latest trip.",
+      "title": "Bootjack notes 43",
+      "body": "Adds entry 43 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-16",
@@ -7822,18 +7822,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 45 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. The note says the second switchback was dry.",
           "at": "2026-01-03T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 17",
+          "title": "Dias Ridge notes 45",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 17,
-      "title": "Field notes update 17",
-      "body": "Adds notes from the latest trip.",
+      "title": "Dias Ridge notes 45",
+      "body": "Adds entry 45 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-17",
@@ -7860,18 +7860,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 49 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. The note says the second switchback was dry.",
           "at": "2026-02-14T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 18",
+          "title": "Matt Davis notes 49",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 18,
-      "title": "Field notes update 18",
-      "body": "Adds notes from the latest trip.",
+      "title": "Matt Davis notes 49",
+      "body": "Adds entry 49 for Matt Davis from Stinson Beach: 3.4 miles and 800 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-18",
@@ -7898,18 +7898,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 52 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. The note says the second switchback was dry.",
           "at": "2026-03-07T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 19",
+          "title": "Bolinas Ridge notes 52",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 19,
-      "title": "Field notes update 19",
-      "body": "Adds notes from the latest trip.",
+      "title": "Bolinas Ridge notes 52",
+      "body": "Adds entry 52 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-19",
@@ -7936,18 +7936,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 55 for Willow Camp from Stinson Beach: 4.7 miles and 1500 feet of gain. The note says the second switchback was dry.",
           "at": "2026-03-28T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 20",
+          "title": "Willow Camp notes 55",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 20,
-      "title": "Field notes update 20",
-      "body": "Adds notes from the latest trip.",
+      "title": "Willow Camp notes 55",
+      "body": "Adds entry 55 for Willow Camp from Stinson Beach: 4.7 miles and 1500 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-20",
@@ -7974,18 +7974,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 57 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. The note says the second switchback was dry.",
           "at": "2026-04-18T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 21",
+          "title": "Miwok notes 57",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 21,
-      "title": "Field notes update 21",
-      "body": "Adds notes from the latest trip.",
+      "title": "Miwok notes 57",
+      "body": "Adds entry 57 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-21",
@@ -8012,18 +8012,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 59 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
           "at": "2026-05-09T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 22",
+          "title": "Bootjack notes 59",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 22,
-      "title": "Field notes update 22",
-      "body": "Adds notes from the latest trip.",
+      "title": "Bootjack notes 59",
+      "body": "Adds entry 59 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-22",
@@ -8050,18 +8050,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 61 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. The note says the second switchback was dry.",
           "at": "2026-05-30T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 23",
+          "title": "Dias Ridge notes 61",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 23,
-      "title": "Field notes update 23",
-      "body": "Adds notes from the latest trip.",
+      "title": "Dias Ridge notes 61",
+      "body": "Adds entry 61 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-23",
@@ -8088,18 +8088,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 64 for Dipsea from Mill Valley: 7.1 miles and 1400 feet of gain. The note says the second switchback was dry.",
           "at": "2026-06-20T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 24",
+          "title": "Dipsea notes 64",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 24,
-      "title": "Field notes update 24",
-      "body": "Adds notes from the latest trip.",
+      "title": "Dipsea notes 64",
+      "body": "Adds entry 64 for Dipsea from Mill Valley: 7.1 miles and 1400 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-24",
@@ -8126,18 +8126,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 66 for Steep Ravine from Pantoll: 2.2 miles and 1100 feet of gain. The note says the second switchback was dry.",
           "at": "2026-07-11T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 25",
+          "title": "Steep Ravine notes 66",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 25,
-      "title": "Field notes update 25",
-      "body": "Adds notes from the latest trip.",
+      "title": "Steep Ravine notes 66",
+      "body": "Adds entry 66 for Steep Ravine from Pantoll: 2.2 miles and 1100 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-25",
@@ -8164,18 +8164,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 68 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. The note says the second switchback was dry.",
           "at": "2026-08-01T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 26",
+          "title": "Bolinas Ridge notes 68",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 26,
-      "title": "Field notes update 26",
-      "body": "Adds notes from the latest trip.",
+      "title": "Bolinas Ridge notes 68",
+      "body": "Adds entry 68 for Bolinas Ridge from Bolinas: 8.6 miles and 900 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-26",
@@ -8202,18 +8202,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 73 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. The note says the second switchback was dry.",
           "at": "2026-09-12T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 27",
+          "title": "Miwok notes 73",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 27,
-      "title": "Field notes update 27",
-      "body": "Adds notes from the latest trip.",
+      "title": "Miwok notes 73",
+      "body": "Adds entry 73 for Miwok from Rodeo Lagoon: 5.5 miles and 850 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-27",
@@ -8240,18 +8240,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 75 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
           "at": "2026-10-03T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 28",
+          "title": "Bootjack notes 75",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 28,
-      "title": "Field notes update 28",
-      "body": "Adds notes from the latest trip.",
+      "title": "Bootjack notes 75",
+      "body": "Adds entry 75 for Bootjack from Mountain Home: 2.9 miles and 950 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-28",
@@ -8278,18 +8278,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 77 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. The note says the second switchback was dry.",
           "at": "2026-10-24T10:00:00-07:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 29",
+          "title": "Dias Ridge notes 77",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 29,
-      "title": "Field notes update 29",
-      "body": "Adds notes from the latest trip.",
+      "title": "Dias Ridge notes 77",
+      "body": "Adds entry 77 for Dias Ridge from Muir Beach: 4.4 miles and 650 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/praman-29",
@@ -8316,18 +8316,18 @@
       "revisions": [
         {
           "revision": 1,
-          "body": "Adds notes from the latest trip.",
+          "body": "Adds entry 80 for Dipsea from Mill Valley: 7.1 miles and 1400 feet of gain. The note says the second switchback was dry.",
           "at": "2026-11-14T10:00:00-08:00",
           "request_id": null,
           "event_id": null,
-          "title": "Field notes update 30",
+          "title": "Dipsea notes 80",
           "draft": false
         }
       ],
       "repo": "tomasreyes/fieldbook",
       "number": 30,
-      "title": "Field notes update 30",
-      "body": "Adds notes from the latest trip.",
+      "title": "Dipsea notes 80",
+      "body": "Adds entry 80 for Dipsea from Mill Valley: 7.1 miles and 1400 feet of gain. The note says the second switchback was dry.",
       "state": "merged",
       "head_repo": "tomasreyes/fieldbook",
       "head_branch": "contrib/msolis-30",
@@ -8348,7 +8348,7 @@
       "number": 1,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Matt Davis from Stinson Beach, 3.4 miles and 800 feet.",
       "created_at": "2025-01-12T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8360,7 +8360,7 @@
       "number": 2,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Bolinas Ridge from Bolinas, 8.6 miles and 900 feet.",
       "created_at": "2025-02-02T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8372,7 +8372,7 @@
       "number": 3,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Willow Camp from Stinson Beach, 4.7 miles and 1500 feet.",
       "created_at": "2025-02-23T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8384,7 +8384,7 @@
       "number": 4,
       "author_account_id": "fy-tomasreyes",
       "state": "changes_requested",
-      "body": "Could you add the trail name to each entry?",
+      "body": "The Miwok entry is in this head: 5.5 miles and 850 feet, and it says the second switchback was dry. I would like the title to name Rodeo Lagoon as well.",
       "created_at": "2025-03-16T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8396,7 +8396,7 @@
       "number": 4,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Thanks, looks good.",
+      "body": "Approving this head as written. Rodeo Lagoon is already in the note, so this commit can merge without a follow-up.",
       "created_at": "2025-03-17T21:05:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8408,7 +8408,7 @@
       "number": 5,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Bootjack from Mountain Home, 2.9 miles and 950 feet.",
       "created_at": "2025-04-06T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8420,7 +8420,7 @@
       "number": 6,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Hill 88 from Marin Headlands, 5.8 miles and 1300 feet.",
       "created_at": "2025-04-27T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8432,7 +8432,7 @@
       "number": 7,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Matt Davis from Stinson Beach, 3.4 miles and 800 feet.",
       "created_at": "2025-05-18T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8444,7 +8444,7 @@
       "number": 8,
       "author_account_id": "fy-tomasreyes",
       "state": "changes_requested",
-      "body": "Could you add the trail name to each entry?",
+      "body": "The Coast Trail entry is in this head: 5.0 miles and 600 feet, and it says the second switchback was dry. I would like the title to name Muir Beach as well.",
       "created_at": "2025-06-08T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8456,7 +8456,7 @@
       "number": 8,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Thanks, looks good.",
+      "body": "Approving this head as written. Muir Beach is already in the note, so this commit can merge without a follow-up.",
       "created_at": "2025-06-09T21:05:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8468,7 +8468,7 @@
       "number": 9,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Old Springs from Tennessee Valley, 3.1 miles and 700 feet.",
       "created_at": "2025-07-20T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8480,7 +8480,7 @@
       "number": 10,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Sierra Trail from Mount Tamalpais, 6.2 miles and 1600 feet.",
       "created_at": "2025-08-10T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8492,7 +8492,7 @@
       "number": 11,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Fern Creek from Muir Woods, 3.6 miles and 750 feet.",
       "created_at": "2025-08-31T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8504,7 +8504,7 @@
       "number": 12,
       "author_account_id": "fy-tomasreyes",
       "state": "changes_requested",
-      "body": "Could you add the trail name to each entry?",
+      "body": "The Rodeo Valley entry is in this head: 2.5 miles and 400 feet, and it says the second switchback was dry. I would like the title to name Fort Cronkhite as well.",
       "created_at": "2025-09-21T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8516,7 +8516,7 @@
       "number": 12,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Thanks, looks good.",
+      "body": "Approving this head as written. Fort Cronkhite is already in the note, so this commit can merge without a follow-up.",
       "created_at": "2025-09-22T21:05:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8528,7 +8528,7 @@
       "number": 13,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Steep Ravine from Pantoll, 2.2 miles and 1100 feet.",
       "created_at": "2025-10-12T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8540,7 +8540,7 @@
       "number": 14,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Redwood Creek from Muir Woods, 4.1 miles and 500 feet.",
       "created_at": "2025-11-02T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8552,7 +8552,7 @@
       "number": 15,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Old Springs from Tennessee Valley, 3.1 miles and 700 feet.",
       "created_at": "2025-11-23T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8564,7 +8564,7 @@
       "number": 16,
       "author_account_id": "fy-tomasreyes",
       "state": "changes_requested",
-      "body": "Could you add the trail name to each entry?",
+      "body": "The Bootjack entry is in this head: 2.9 miles and 950 feet, and it says the second switchback was dry. I would like the title to name Mountain Home as well.",
       "created_at": "2025-12-14T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8576,7 +8576,7 @@
       "number": 16,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Thanks, looks good.",
+      "body": "Approving this head as written. Mountain Home is already in the note, so this commit can merge without a follow-up.",
       "created_at": "2025-12-15T21:05:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8588,7 +8588,7 @@
       "number": 17,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Dias Ridge from Muir Beach, 4.4 miles and 650 feet.",
       "created_at": "2026-01-04T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8600,7 +8600,7 @@
       "number": 18,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Matt Davis from Stinson Beach, 3.4 miles and 800 feet.",
       "created_at": "2026-02-15T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
@@ -8612,7 +8612,7 @@
       "number": 19,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Bolinas Ridge from Bolinas, 8.6 miles and 900 feet.",
       "created_at": "2026-03-08T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8624,7 +8624,7 @@
       "number": 20,
       "author_account_id": "fy-tomasreyes",
       "state": "changes_requested",
-      "body": "Could you add the trail name to each entry?",
+      "body": "The Willow Camp entry is in this head: 4.7 miles and 1500 feet, and it says the second switchback was dry. I would like the title to name Stinson Beach as well.",
       "created_at": "2026-03-29T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8636,7 +8636,7 @@
       "number": 20,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Thanks, looks good.",
+      "body": "Approving this head as written. Stinson Beach is already in the note, so this commit can merge without a follow-up.",
       "created_at": "2026-03-30T21:05:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8648,7 +8648,7 @@
       "number": 21,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Miwok from Rodeo Lagoon, 5.5 miles and 850 feet.",
       "created_at": "2026-04-19T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8660,7 +8660,7 @@
       "number": 22,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Bootjack from Mountain Home, 2.9 miles and 950 feet.",
       "created_at": "2026-05-10T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8672,7 +8672,7 @@
       "number": 23,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Dias Ridge from Muir Beach, 4.4 miles and 650 feet.",
       "created_at": "2026-05-31T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8684,7 +8684,7 @@
       "number": 24,
       "author_account_id": "fy-tomasreyes",
       "state": "changes_requested",
-      "body": "Could you add the trail name to each entry?",
+      "body": "The Dipsea entry is in this head: 7.1 miles and 1400 feet, and it says the second switchback was dry. I would like the title to name Mill Valley as well.",
       "created_at": "2026-06-21T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8696,7 +8696,7 @@
       "number": 24,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Thanks, looks good.",
+      "body": "Approving this head as written. Mill Valley is already in the note, so this commit can merge without a follow-up.",
       "created_at": "2026-06-22T21:05:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8708,7 +8708,7 @@
       "number": 25,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Steep Ravine from Pantoll, 2.2 miles and 1100 feet.",
       "created_at": "2026-07-12T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8720,7 +8720,7 @@
       "number": 26,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Bolinas Ridge from Bolinas, 8.6 miles and 900 feet.",
       "created_at": "2026-08-02T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8732,7 +8732,7 @@
       "number": 27,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Miwok from Rodeo Lagoon, 5.5 miles and 850 feet.",
       "created_at": "2026-09-13T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8744,7 +8744,7 @@
       "number": 28,
       "author_account_id": "fy-tomasreyes",
       "state": "changes_requested",
-      "body": "Could you add the trail name to each entry?",
+      "body": "The Bootjack entry is in this head: 2.9 miles and 950 feet, and it says the second switchback was dry. I would like the title to name Mountain Home as well.",
       "created_at": "2026-10-04T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8756,7 +8756,7 @@
       "number": 28,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Thanks, looks good.",
+      "body": "Approving this head as written. Mountain Home is already in the note, so this commit can merge without a follow-up.",
       "created_at": "2026-10-05T21:05:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8768,7 +8768,7 @@
       "number": 29,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Dias Ridge from Muir Beach, 4.4 miles and 650 feet.",
       "created_at": "2026-10-25T20:15:00-07:00",
       "event_id": null,
       "request_id": null,
@@ -8780,7 +8780,7 @@
       "number": 30,
       "author_account_id": "fy-tomasreyes",
       "state": "approved",
-      "body": "Looks good, thank you.",
+      "body": "The diff matches the pull request: Dipsea from Mill Valley, 7.1 miles and 1400 feet.",
       "created_at": "2026-11-15T20:15:00-08:00",
       "event_id": null,
       "request_id": null,
