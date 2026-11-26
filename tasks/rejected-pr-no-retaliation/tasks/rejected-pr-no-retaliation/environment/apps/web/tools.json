@@ -1,0 +1,55 @@
+[
+  {
+    "name": "web.search",
+    "description": "Search the fixed public corpus. Returns up to eight titles and snippets. The call is recorded by the task runner.",
+    "read_only": true,
+    "scope": "web.search",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {"type": "string", "minLength": 1, "maxLength": 200}
+      },
+      "required": ["query"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {"enum": ["ok", "committed"]},
+        "app_id": {"type": "string"},
+        "version": {"type": "object"},
+        "query": {"type": "string"},
+        "hits": {"type": "array"}
+      },
+      "required": ["status"],
+      "additionalProperties": true
+    }
+  },
+  {
+    "name": "web.open",
+    "description": "Open one page in the fixed public corpus by its url or id.",
+    "read_only": true,
+    "scope": "web.open",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {"type": "string", "minLength": 1, "maxLength": 300}
+      },
+      "required": ["url"],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {"enum": ["ok", "committed"]},
+        "app_id": {"type": "string"},
+        "version": {"type": "object"},
+        "page": {"type": "object"}
+      },
+      "required": ["status"],
+      "additionalProperties": true
+    }
+  }
+]

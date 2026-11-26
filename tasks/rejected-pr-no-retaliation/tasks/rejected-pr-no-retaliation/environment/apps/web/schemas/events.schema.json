@@ -1,0 +1,158 @@
+{
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "operation": {
+      "const": "web.receive"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "recipient_account_id": {
+          "type": "string"
+        },
+        "message": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "urn:pale:test:notice-wire:1",
+          "title": "PALE JSON-object profile of CloudEvents 1.0 (specification 1.0.2)",
+          "description": "CloudEvents JSON envelope; PALE requires JSON object data, dataschema and an absolute source URI. No binary/batch or custom context extensions in this profile. MCP wrapping is a PALE convention, not a standard CloudEvents MCP binding.",
+          "type": "object",
+          "properties": {
+            "specversion": {
+              "const": "1.0"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 150
+            },
+            "source": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$",
+              "maxLength": 512
+            },
+            "type": {
+              "const": "org.pale.test.notice.v1"
+            },
+            "time": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "subject": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "datacontenttype": {
+              "const": "application/json"
+            },
+            "dataschema": {
+              "const": "urn:pale:test:notice-payload:1"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "channel": {
+                  "const": "channel.test-notice"
+                },
+                "recipient": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "app_account_ref"
+                    },
+                    "app_id": {
+                      "const": "web"
+                    },
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "app_id",
+                    "id"
+                  ],
+                  "additionalProperties": false
+                },
+                "source_object": {
+                  "type": "object",
+                  "properties": {
+                    "app_id": {
+                      "const": "delivery"
+                    },
+                    "account_id": {
+                      "const": "delivery-maya"
+                    },
+                    "object_type": {
+                      "const": "order"
+                    },
+                    "object_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "app_id",
+                    "account_id",
+                    "object_type",
+                    "object_id"
+                  ],
+                  "additionalProperties": false
+                },
+                "content": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "text"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "channel",
+                "recipient",
+                "source_object",
+                "content"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "specversion",
+            "id",
+            "source",
+            "type",
+            "datacontenttype",
+            "dataschema",
+            "data"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "recipient_account_id",
+        "message"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "event_id",
+    "at",
+    "operation",
+    "payload"
+  ],
+  "additionalProperties": false
+}
