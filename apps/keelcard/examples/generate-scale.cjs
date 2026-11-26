@@ -2,7 +2,7 @@
 // Builds fixtures (b) and (c). Amounts, dates and card numbers are deterministic.
 const fs = require('node:fs');
 const path = require('node:path');
-const { zonedToIso, luhnComplete, luhnOk, CATEGORIES, addDays } = require('../src/domain-utils.cjs');
+const { zonedToIso, parts, luhnComplete, luhnOk, CATEGORIES, addDays } = require('../src/domain-utils.cjs');
 const { postLedger, settleDue } = require('../src/ledger.cjs');
 const { contentKey } = require('../src/decisions.cjs');
 
@@ -196,11 +196,25 @@ function freelancer() {
     })
   });
   posts.sort((a, b) => Date.parse(a.at) - Date.parse(b.at) || a.id.localeCompare(b.id));
+  const boundary = { year: 2025, month: 1 };
+  function settleThrough(year, month) {
+    while (boundary.year < year || (boundary.year === year && boundary.month < month)) {
+      boundary.month += 1;
+      if (boundary.month === 13) {
+        boundary.month = 1;
+        boundary.year += 1;
+      }
+      settleDue(data, zonedToIso(boundary.year, boundary.month, 1, 0, 0, 0, ZONE));
+    }
+  }
   for (const post of posts) {
+    const when = parts(post.at, ZONE);
+    settleThrough(when.year, when.month);
     settleDue(data, post.at);
     data.authorizations.push(post.auth);
     postLedger(data, { at: post.at, kind: 'capture', direction: 'debit', amount_cents: post.amount, authorization_id: post.id, card_id: post.card.card_id });
   }
+  settleThrough(2026, 11);
   settleDue(data, zonedToIso(2026, 11, 18, 12, 0, 0, ZONE));
   return data;
 }
