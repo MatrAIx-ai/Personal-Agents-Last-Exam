@@ -12,11 +12,11 @@ const eventValid = compile(require('../schemas/events.schema.json'), schemaDir);
 const input = new Map(tools.map(t => [t.name, compile(t.inputSchema, path.resolve(__dirname, '..'))]));
 const output = new Map(tools.map(t => [t.name, compile(t.outputSchema, path.resolve(__dirname, '..'))]));
 const refuse = (code, message) => { throw Object.assign(new Error(message), {code}); };
-// `seed` and `now` replace the package fixture and its clock, as a task does with `env.load_seed`.
-function fixture({logging = true, seed = require('../fixtures/minimal.json'), now = require('../fixtures/clock.json').initial_time} = {}) {
+// `seed`, `now` and `binding` replace the package fixture, its clock and its binding, as a task does with `env.load_seed`.
+function fixture({logging = true, seed = require('../fixtures/minimal.json'), now = require('../fixtures/clock.json').initial_time, binding = require('../fixtures/binding.json')} = {}) {
   let data = structuredClone(seed), seq = 0;
   const logs = [];
-  const ctx = {app_id: app, role: 'agent', virtual_now: now, binding: structuredClone(require('../fixtures/binding.json'))};
+  const ctx = {app_id: app, role: 'agent', virtual_now: now, binding: structuredClone(binding)};
   if (logging) ctx.log = (step, details = {}) => logs.push({step, details: structuredClone(details)});
   const frozen = extra => Object.freeze({...ctx, ...extra});
   function validate(value, at = ctx.virtual_now) { assert.ok(seedValid(value), 'Seed schema'); plugin.validateSeed(frozen({virtual_now: at}), value); }

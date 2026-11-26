@@ -14,6 +14,7 @@ node apps/alderbrook/examples/run.cjs
 node runtime/cli.cjs verify --app apps/alderbrook --output .artifacts/alderbrook.json
 node apps/alderbrook/tests/mcp.integration.cjs --runtime runtime
 node apps/alderbrook/tests/mail.integration.cjs --runtime runtime
+node apps/alderbrook/tests/evaluation.integration.cjs --runtime runtime
 ```
 
 With only this App folder, run `node --test tests/business.test.cjs` and `node examples/run.cjs` from inside it. Two tests need the public runtime and are skipped there: `T19` runs `tests/mcp.integration.cjs`, and `T19b` runs `tests/mail.integration.cjs`. Set `PALE_RUNTIME_ROOT` to the public `runtime/` directory to run them. `T19b` also needs the public checkout that holds this package and Mail, so in a copy outside the checkout it stays skipped. A script that cannot run prints `SKIP` with the reason and exits with code 77, and its test is then reported as skipped, not as passed. `service.cjs` uses that runtime; it does not embed a second server.
@@ -43,6 +44,19 @@ The App has no timer and no scheduler. It uses `ctx.virtual_now`, and an event i
 Core owns commit receipts and audit; the App owns business history. The state has one activity row for every committed Agent write, one for every applied event and one for each effect of a write or an event. Optional `ctx.log` contains identifiers and operation steps, not claim text.
 
 `examples/scenario.json` is one `alderbrook.estimate.submitted` event, applied through `env.apply_event` at the supplied time. `dev/build.cjs` writes `tools.json` and the seed and event schemas from one set of record shapes, `dev/build-fixture.cjs` writes the fixture, `dev/check-fixture.cjs` checks its consistency, and `dev/check-plan-examples.cjs` compares the example events and the example message in `tests/` with the approved plan. They are development tools and do not run in the App.
+
+## Evaluation data
+
+[`data/evaluation/`](data/evaluation/README.md) is the evaluation dataset for 2025-01-01 to 2026-12-31. It is fully synthetic. It has 36 policyholder accounts, one seed and one binding each, with 72 claims and their lifecycle. 5 claims are still open at the seed clock, and the 24 later steps of their stories are not in the seeds. The claim lifecycle steps fall on 362 distinct dates in the window, every month has activity, and every account has activity inside the window. The small fixtures above stay as smoke fixtures.
+
+- `dev/generate-evaluation-data.cjs` writes the seeds from a fixed PRNG seed. It replays every claim story through the App's own hooks. `--check` fails when a committed file differs.
+- `dev/coverage.cjs` counts the dated lifecycle steps in the seed files and writes `coverage.json` and `coverage.md`: one date field per step, in `America/New_York`, by month and by account, with gaps, exclusions and hashes. Policy effective and expiration dates are not counted.
+- `dev/select-evaluation-seed.cjs` writes the seed of one account as of an earlier time, with only the steps before it.
+- `dev/evaluation-scenarios.cjs` defines the claim scenarios, and every claim comes from one of them. `dev/check-fixture.cjs --evaluation` runs the cross-record checks and the story rules of `dev/check-evaluation.cjs` on every seed. `tests/evaluation.integration.cjs` loads every seed with `env.load_seed` and reads it back through the Agent's MCP read tools.
+
+| Requirement | Scope | Business and MCP tests | Date report | Verdict |
+| --- | --- | --- | --- | --- |
+| Environment dataset coverage | 36 synthetic seeds, generator 1.0.0, seed clock `2027-01-01T00:00:00-05:00` | `DATA01` to `DATA05` in `tests/business.test.cjs`; `tests/evaluation.integration.cjs` (182 checks) | [`coverage.md`](data/evaluation/coverage.md), [`coverage.json`](data/evaluation/coverage.json) | Passed locally; realism review pending |
 
 ## Mail notifications
 
@@ -119,11 +133,12 @@ schemas/                     Seed, state and event rules, Mail's wire schema and
 contribution/                Capabilities, the publish declaration, empty media catalog and provenance
 infra/                       Infra-run Mail sender and an example Router grant
 fixtures/                    Initial records, account bindings, policy and clock
+data/evaluation/             Synthetic evaluation seeds, bindings, manifest and coverage report
 examples/run.cjs             Runnable event example without a host
 examples/scenario.json       Input to an Infra event injection, not an automatic scheduler
 examples/task-data/          Replaceable task seed, binding and policy examples
-tests/                       App-only tests and harness, schema validator, and two real-runtime scripts
-dev/                         Builders for schemas, tools and the fixture, and the fixture consistency check
+tests/                       App-only tests and harness, schema validator, and three real-runtime scripts
+dev/                         Builders for schemas, tools, the fixture and the evaluation data, consistency and coverage checks
 LICENSE                      MIT for this implementation and synthetic fixtures
 ```
 

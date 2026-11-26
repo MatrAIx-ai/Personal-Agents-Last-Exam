@@ -1,6 +1,7 @@
 'use strict';
 // Checks that a seed is consistent. The sums are written here by hand and compared with what the App reads through `claims.get`.
 // Run `node dev/check-fixture.cjs [seed.json]`. The default is fixtures/minimal.json, read at the time in fixtures/clock.json. Exits 1 on a failure.
+// `node dev/check-fixture.cjs --evaluation` checks every seed of data/evaluation/manifest.json, each with its own binding and clock.
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const {compile} = require('../tests/schema-validator.cjs');
@@ -104,20 +105,20 @@ const CHECKS = [{title: 'Every loss time is inside its policy term', raw: lossIn
   {title: 'Every money summary matches its lines, offers and payments', read: moneySummary},
   {title: 'Every offer state fits its times', raw: offerTimes, read: offerRead}];
 const MONEY = CHECKS.findIndex(check => check.read === moneySummary);
-function main(file) {
-  const data = require(path.resolve(file)), clock = require('../fixtures/clock.json').initial_time, now = ms(clock), errors = CHECKS.map(() => []);
+function main(file, clock = require('../fixtures/clock.json').initial_time, binding = undefined) {
+  const data = require(path.resolve(file)), now = ms(clock), errors = CHECKS.map(() => []);
   const run = (index, label, check) => { try { check(); } catch (error) { errors[index].push(label + ': ' + error.message); } };
   console.log('Seed: ' + file + ', read at ' + clock);
   if (!seedSchema(data)) {
     console.log('FAIL  The seed does not match schemas/seed.schema.json. No check was run.');
     process.exitCode = 1;
-    return;
+    return 1;
   }
   console.log('Counts: ' + Object.entries(counts(data)).map(([name, value]) => name.replace('_', ' ') + ' ' + value).join(', '));
   CHECKS.forEach(({raw}, index) => { if (raw) for (const claim of data.claims) run(index, claim.id, () => raw(data, claim)); });
   // The money summary is read through the App. A seed that the App refuses fails this check with the reason.
   let f = null;
-  run(MONEY, 'The App refuses the seed', () => { f = require('../tests/harness.cjs').fixture({seed: data, now: clock}); });
+  run(MONEY, 'The App refuses the seed', () => { f = require('../tests/harness.cjs').fixture({seed: data, now: clock, binding}); });
   for (const claim of f ? data.claims : []) {
     let view = null;
     run(MONEY, claim.id, () => { view = f.call('claims.get', {id: claim.id}).claim; });
@@ -127,6 +128,21 @@ function main(file) {
   const failed = errors.filter(list => list.length).length;
   console.log((CHECKS.length - failed) + ' of ' + CHECKS.length + ' checks passed.');
   process.exitCode = failed ? 1 : 0;
+  return failed;
 }
-if (require.main === module) main(process.argv[2] || path.relative(process.cwd(), path.resolve(__dirname, '../fixtures/minimal.json')));
+function evaluation() {
+  const dir = path.resolve(__dirname, '../data/evaluation'), manifest = require(path.join(dir, 'manifest.json'));
+  const failed = manifest.accounts.filter(entry => main(path.join(dir, entry.seed), entry.virtual_now, require(path.join(dir, entry.binding)))).length;
+  // The story rules check that each claim holds together as one story of its scenario.
+  const story = require('./check-evaluation.cjs'), entries = manifest.accounts.map(entry => ({seed: require(path.join(dir, entry.seed)), scenarios: entry.claim_scenarios}));
+  const broken = story.problems(entries), claims = entries.reduce((n, e) => n + e.seed.claims.length, 0);
+  for (const row of broken) console.log('FAIL  story rule "' + row.rule + '": ' + row.account_id + ' ' + row.claim_id + ': ' + row.detail);
+  console.log((manifest.accounts.length - failed) + ' of ' + manifest.accounts.length + ' evaluation seeds pass all ' + CHECKS.length + ' checks, and ' + claims + ' claims have ' + broken.length + ' problems with the ' +
+    story.RULES.length + ' story rules.');
+  process.exitCode = failed || broken.length ? 1 : 0;
+}
+if (require.main === module) {
+  if (process.argv[2] === '--evaluation') evaluation();
+  else main(process.argv[2] || path.relative(process.cwd(), path.resolve(__dirname, '../fixtures/minimal.json')));
+}
 module.exports = {counts};

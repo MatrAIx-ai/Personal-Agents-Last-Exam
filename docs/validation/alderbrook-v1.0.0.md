@@ -1,6 +1,6 @@
 # Alderbrook Mutual claims validation report
 
-Checked November 23, 2026 (America/New_York). Scope: the package `apps/alderbrook` version **1.0.0**, public runtime **1.6.0**, Core API **1.2.0**, Mail **1.3.0**. The approved plan is [`proposals/environment/alderbrook-claims.md`](../../proposals/environment/alderbrook-claims.md) at commit `556d425`, and that file is unchanged. The exact package hash, the counts of every run and the raw reports are in [`alderbrook/index.json`](alderbrook/index.json) and the files beside it. The package hash is the same in both Node runs and in the base-runtime report.
+Checked November 26, 2026 (America/New_York). Scope: the package `apps/alderbrook` version **1.0.0**, public runtime **1.6.0**, Core API **1.2.0**, Mail **1.3.0**. The approved plan is [`proposals/environment/alderbrook-claims.md`](../../proposals/environment/alderbrook-claims.md) at commit `556d425`, and that file is unchanged. The exact package hash, the counts of every run and the raw reports are in [`alderbrook/index.json`](alderbrook/index.json) and the files beside it. The package hash is the same in both Node runs and in the base-runtime report.
 
 **Automated outcome: passed.** This document records implementation evidence for review. Human workflow acceptance and provenance review remain pending; no approval is claimed.
 
@@ -8,15 +8,17 @@ Checked November 23, 2026 (America/New_York). Scope: the package `apps/alderbroo
 
 | Evidence | Result | What was actually exercised |
 | --- | --- | --- |
-| App-only business | 75 tests: 73 passed and 2 skipped in a copy of the package alone | The real App hooks, the input, output, seed and event schemas, every App error, every seed rule of the plan and every invalid event of the plan's list that can occur, every seed rule and event check that the package adds, the money and rental sums, day limits in five time zones, notification text, activity rows, and the sender with fake connections. The 2 skipped tests need the runtime (next rows) |
+| App-only business | 80 tests: 78 passed and 2 skipped in a copy of the package alone | The real App hooks, the input, output, seed and event schemas, every App error, every seed rule of the plan and every invalid event of the plan's list that can occur, every seed rule and event check that the package adds, the money and rental sums, day limits in five time zones, notification text, activity rows, and the sender with fake connections, and the evaluation data (`DATA01` to `DATA05`: seed rules, generator `--check`, coverage `--check`, cross-record checks and story rules, the selection as of a time, and story rules that catch planted contradictions). The 2 skipped tests need the runtime (next rows) |
 | Isolated App package | Passed | The public verifier copies the package with no sibling runtime, then runs its tests and its event example |
 | Real public MCP, common checks | 43 checks passed | Discovery, argument and role restrictions, a read, history loading, event application and retry, reset, a separate run and a restarted process |
 | Real public MCP, Alderbrook workflows | 124 checks passed | `tests/mcp.integration.cjs`: a task seed with its own `virtual_now`, the W2 to W4 paths of the plan with its numbers, time moved with `env.advance_time` and no App event, refused calls and refused events that change nothing, replays, audit and activity records, reset, a second run, Core's `invalid_arguments` for data that breaks a schema, and all reads at the default clock of a registry with no `initial_time` |
 | Alderbrook to Mail | 47 checks passed | `tests/mail.integration.cjs`: the real Router process and the real Mail package. An inbox record and a committed receipt, read through the Mail Agent. Seed history not sent, an identical retry, a missing grant, no mailbox bound to the owner, a new notice after a reset of Alderbrook only, a refusal by Mail, and a receiver that does not answer |
+| Evaluation dataset coverage | 36 synthetic account seeds, 72 claims, 838 counted lifecycle steps on 362 distinct dates from 2025-01-02 to 2026-12-30; every month and every account has activity; 5 claims open at the seed clock; 56 steps from late 2024 excluded; 0 scheduled items | `dev/coverage.cjs` reads the delivered seed files and writes [`coverage.json`](../../apps/alderbrook/data/evaluation/coverage.json) and [`coverage.md`](../../apps/alderbrook/data/evaluation/coverage.md): one date field per lifecycle step (filing, evidence, requests and answers, estimates, determinations, disputes, offers, rentals, payments, repair completion, closing, withdrawal), in `America/New_York`, by month and by account, with gaps, exclusions, file hashes and the record IDs behind each date. Policy effective and expiration dates are not counted |
+| Evaluation load and query | 182 checks passed on Node 18.20.8 and 22.23.5 ([node 18](alderbrook/evaluation-load-node18.json), [node 22](alderbrook/evaluation-load-node22.json)) | `tests/evaluation.integration.cjs`: each of the 36 seeds loaded with `env.load_seed` and its own binding and clock, the snapshot equal to the seed byte for byte, and `policies.list`, `claims.list`, `claims.get`, `payments.list` and `notifications.list` read by the Agent. The lifecycle steps, the distinct dates and the monthly counts of `claims.list` and `payments.list` with monthly windows match `coverage.json`. The report shows representative claims |
 | Node 18.20.8 | All rows above, and 22/22 full-suite stages passed | The existing Mail, Calendar, Core and Messaging regression suite with this package present |
 | Node 22.23.5 | All rows above, and 22/22 full-suite stages passed | The same on the second supported runtime family |
-| Independent base validator | All eight discovered packages passed | Unmodified main at `a4bce023953061483c41de5a287ba5e43f4a5648` validated the candidate tree: this package and the seven existing ones |
-| Development checks | Passed | `dev/build.cjs --check`, `dev/build-fixture.cjs --check`, `dev/check-fixture.cjs` (4 of 4), `dev/check-plan-examples.cjs` (11 of 11), `examples/run.cjs`, `npm run contracts:check` |
+| Independent base validator | All eight discovered packages passed | An unmodified checkout of the `main` commit `a4bce023953061483c41de5a287ba5e43f4a5648` validated the candidate tree: this package and the seven existing ones. That commit is not the newest `main`, and it is not the merge base of this branch (`61b6371`). `git diff` shows that `runtime/` is the same at `61b6371`, at `a4bce02`, at the current `origin/main` `6933c43` and on this branch |
+| Development checks | Passed | `dev/build.cjs --check`, `dev/build-fixture.cjs --check`, `dev/check-fixture.cjs` (4 of 4), `dev/check-fixture.cjs --evaluation` (36 of 36 seeds pass all 4 checks; 72 claims have 0 problems with the 18 story rules), `dev/generate-evaluation-data.cjs --check`, `dev/coverage.cjs --check`, `dev/check-plan-examples.cjs` (11 of 11), `examples/run.cjs`, `npm run contracts:check` |
 | Human review | Pending | Realism of rules, amounts and wording, and provenance; automated green results do not grant acceptance |
 
 The Node binaries were official releases. All test data was synthetic; tests used temporary directories and local stdio MCP, without private services, user credentials or model APIs. The App validation workflow of this repository has not run on this pull request yet: a run from a fork waits for a maintainer.
@@ -30,10 +32,14 @@ node apps/alderbrook/dev/build.cjs --check
 node apps/alderbrook/dev/build-fixture.cjs --check
 node apps/alderbrook/dev/check-fixture.cjs
 node apps/alderbrook/dev/check-plan-examples.cjs
+node apps/alderbrook/dev/generate-evaluation-data.cjs --check
+node apps/alderbrook/dev/coverage.cjs --check
+node apps/alderbrook/dev/check-fixture.cjs --evaluation
 PALE_RUNTIME_ROOT=$PWD/runtime node --test apps/alderbrook/tests/business.test.cjs
 npm run app:verify -- --app apps/alderbrook --output .artifacts/alderbrook.json
 node apps/alderbrook/tests/mcp.integration.cjs --runtime runtime --report .artifacts/alderbrook-mcp.json
 node apps/alderbrook/tests/mail.integration.cjs --runtime runtime --report .artifacts/alderbrook-mail.json
+node apps/alderbrook/tests/evaluation.integration.cjs --runtime runtime --report .artifacts/alderbrook-evaluation-load.json
 npm test
 ```
 
@@ -95,6 +101,8 @@ The package follows the approved plan. The README section ["Plan and implementat
 ## Data and licence
 
 The fixture is authored and synthetic. `dev/build-fixture.cjs` replays the authored history once through the App's own hooks. It then keeps the 22 newest notifications, to match the count of the plan, and every activity row. `contribution/dataset.json` records the provenance and the two public pages that were read for the shape of the workflows. No text, data, form, logo or brand was copied. The package has no media. Code and fixtures are under the repository's MIT License.
+
+The evaluation dataset in [`apps/alderbrook/data/evaluation/`](../../apps/alderbrook/data/evaluation/README.md) is also fully synthetic: 0 real and 0 mixed records. `dev/generate-evaluation-data.cjs` (version 1.0.0, PRNG seed `20251231`) writes 36 account seeds. Each claim is a scripted story that is replayed through the App's own hooks up to the seed clock `2027-01-01T00:00:00-05:00`. `manifest.json` records the SHA-256 of every seed and binding, and `contribution/dataset.json` lists the generator as a second synthetic source. `dev/select-evaluation-seed.cjs` writes a seed as of an earlier time, with only the steps before it, so a task never receives later records as history.
 
 ## Not claimed, and what remains
 

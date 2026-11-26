@@ -1,0 +1,5384 @@
+{
+  "schema": "alderbrook.evaluation-coverage.v1",
+  "scope": "Environment evaluation dataset of the Alderbrook App: every delivered account seed in data/evaluation/, as env.load_seed loads it. This is not a Task history report.",
+  "dataset": {
+    "dataset_id": "alderbrook-evaluation",
+    "version": "1.0.0",
+    "generator": "apps/alderbrook/dev/generate-evaluation-data.cjs",
+    "generator_version": "1.0.0",
+    "seed": 20251231
+  },
+  "provenance": {
+    "real": 0,
+    "mixed": 0,
+    "synthetic": 36,
+    "unit": "account seed",
+    "statement": "Every record is synthetic. The insurer, the people, the shops, the lenders and the policies are fictional. No record was observed or collected."
+  },
+  "time_zone": "America/New_York",
+  "window": {
+    "start": "2025-01-01",
+    "end": "2026-12-31"
+  },
+  "seed_clock": [
+    "2027-01-01T00:00:00-05:00"
+  ],
+  "counting_rule": "Each lifecycle step counts on its calendar day in America/New_York. A step counts when its day is inside the window and its time is before the seed clock. Several steps on one day count once.",
+  "authoritative_fields": [
+    {
+      "kind": "claim_filed",
+      "records": "claims[]",
+      "field": "filed_at"
+    },
+    {
+      "kind": "evidence_added",
+      "records": "claims[].evidence[]",
+      "field": "added_at"
+    },
+    {
+      "kind": "request_issued",
+      "records": "claims[].requests[]",
+      "field": "issued_at"
+    },
+    {
+      "kind": "request_answered",
+      "records": "claims[].requests[].asks[].answer",
+      "field": "answered_at"
+    },
+    {
+      "kind": "estimate_submitted",
+      "records": "claims[].estimates[]",
+      "field": "submitted_at"
+    },
+    {
+      "kind": "determination_issued",
+      "records": "claims[].determinations[]",
+      "field": "issued_at"
+    },
+    {
+      "kind": "dispute_opened",
+      "records": "claims[].disputes[]",
+      "field": "opened_at"
+    },
+    {
+      "kind": "dispute_decided",
+      "records": "claims[].disputes[]",
+      "field": "decided_at"
+    },
+    {
+      "kind": "offer_issued",
+      "records": "claims[].offers[]",
+      "field": "issued_at"
+    },
+    {
+      "kind": "offer_answered",
+      "records": "claims[].offers[]",
+      "field": "answered_at"
+    },
+    {
+      "kind": "rental_started",
+      "records": "claims[].rentals[]",
+      "field": "start_at"
+    },
+    {
+      "kind": "rental_ended",
+      "records": "claims[].rentals[]",
+      "field": "end_at"
+    },
+    {
+      "kind": "payment_issued",
+      "records": "claims[].payments[]",
+      "field": "issued_at"
+    },
+    {
+      "kind": "repair_completed",
+      "records": "claims[]",
+      "field": "repair_completed_at"
+    },
+    {
+      "kind": "claim_closed",
+      "records": "claims[]",
+      "field": "closed_at"
+    },
+    {
+      "kind": "claim_withdrawn",
+      "records": "claims[]",
+      "field": "withdrawn_at"
+    }
+  ],
+  "not_counted": [
+    {
+      "field": "policies[].term.start, policies[].term.end",
+      "reason": "Policy effective and expiration dates are context, not claim activity."
+    },
+    {
+      "field": "claims[].loss_at",
+      "reason": "The time of the loss. The claim counts on its filing day."
+    },
+    {
+      "field": "claims[].evidence[].dated",
+      "reason": "When a photo or receipt was made. The evidence counts on the day it was added to the claim."
+    },
+    {
+      "field": "claims[].estimates[].lines[].decisions[].decided_at",
+      "reason": "A line decision is part of its determination or its dispute decision, and it has the same time. That step already counts."
+    },
+    {
+      "field": "notifications[].at",
+      "reason": "The App writes one notification for each insurer event, at the time of that event. So it repeats a counted date."
+    },
+    {
+      "field": "activity[].at, claims[].history[].at",
+      "reason": "The App log of every write and event. It also holds writes that keep no dated record of their own (payee.set, claims.update, preferences.update). Their dates are left out, so the count is lower than the log. See context.activity_only_dates."
+    },
+    {
+      "field": "requests[].due_at, offers[].respond_by",
+      "reason": "Deadlines. When one is after the seed clock it is listed under scheduled."
+    }
+  ],
+  "files": [
+    {
+      "path": "data/evaluation/manifest.json",
+      "bytes": 29524,
+      "sha256": "27e7f015a3cfef0b41c95bb7a1c92882816e2ea742054b293cdb335b9d64dd16"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-underhill.seed.json",
+      "bytes": 39558,
+      "sha256": "2b8ae0766c137b2c5e3ec3de68757b71c0cc7550e1935f6dd2dcb43d4b9be7b9"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-underhill.binding.json",
+      "bytes": 586,
+      "sha256": "524a0b999f9fbe99ed582833f774f81a9567004d4802d70ce06761cb4e3f8017"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-ingram.seed.json",
+      "bytes": 18970,
+      "sha256": "54f926213f36b8f489ad5129a8fe6003f8c048558e6b7b736a0c0370a7b2aa51"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-ingram.binding.json",
+      "bytes": 388,
+      "sha256": "1b8efa73473c16b658d6165bf06382fa6389834d79312979c419b3eb441486b0"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-galloway.seed.json",
+      "bytes": 13409,
+      "sha256": "0b55868b2d94f09933ffc244808a11c5843f9a2c3d253033a498f000a15c46a5"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-galloway.binding.json",
+      "bytes": 488,
+      "sha256": "b9e8d8cd14cbea7f9a7c494e7141c77765bb0edf05b691ef964e76efaf6c9abe"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-sandoval.seed.json",
+      "bytes": 16197,
+      "sha256": "e717279d9a8edb61715120c241a96c3097b02ec1a9d8e2d39a0c0aaffe52ea73"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-sandoval.binding.json",
+      "bytes": 400,
+      "sha256": "c1439704b971b565dbf306368de0fffbc6f7d9a1c202fc2ccdb7682217af3a95"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-quintero.seed.json",
+      "bytes": 28388,
+      "sha256": "c97b2e290a193fb2188171f4e13e005b9d1c97fc2e76c33ab8ffa04a35dae7c1"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-quintero.binding.json",
+      "bytes": 488,
+      "sha256": "d7ecddc6c68b1915d574b58e2e886ef897af98e6ae06972318a718db54e41b8f"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-okonkwo.seed.json",
+      "bytes": 24374,
+      "sha256": "07275786a673f5b4aa8cf564e1930e00010a6ee7f911eb46eb0419adff4d2b8c"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-okonkwo.binding.json",
+      "bytes": 480,
+      "sha256": "e77002f321f9661561977cf062dae061dc52e3dd5bc58c9b929fce8b4bd267b8"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-lindgren.seed.json",
+      "bytes": 22008,
+      "sha256": "5a7666ab2c911f1b92d4b9a8a15215f49c1bc7ec0817e8947071de2b04e538bd"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-lindgren.binding.json",
+      "bytes": 400,
+      "sha256": "43b7e01e491cfdd387008fbbc79c5679c3524e49c81013a9a37299afbdc181ad"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-moreau.seed.json",
+      "bytes": 20863,
+      "sha256": "25849d35896a25de4656b347546e1bdec3c8a0907384dc106bc76b93475e4771"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-moreau.binding.json",
+      "bytes": 472,
+      "sha256": "e235465450ee598b0391cdb876f19011aa6e34b16d135148b0ee718526d4fd6f"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-yamamoto.seed.json",
+      "bytes": 54531,
+      "sha256": "aaa295332e17b834de4a72b0c6cfdf56b402b4db57b7e07c64d31dd42cf3d95e"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-yamamoto.binding.json",
+      "bytes": 492,
+      "sha256": "a6902961f9428706dae2886e3b407e9a57e4f2c3121e1da9e4c49d9ca2a48b8a"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-kerrigan.seed.json",
+      "bytes": 32984,
+      "sha256": "90be8f4f3d35bf65c6ee46196dd92b7c1ca14f32033d1e0356c1745d64a5803a"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-kerrigan.binding.json",
+      "bytes": 488,
+      "sha256": "a6e20b175e4530e5e7aab9476538b834df7d70d97de59e69a1c57495d3b2cded"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-pellegrino.seed.json",
+      "bytes": 31365,
+      "sha256": "8419197d95d812b649c1431c5fd2c44de813ed450a5d71420c9dc19d9bd9f09d"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-pellegrino.binding.json",
+      "bytes": 504,
+      "sha256": "0cfb023bc54c9b26a6d7ee391e98c7c6fb1621f69c2f6176da4e0864ff32bb11"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-esposito.seed.json",
+      "bytes": 9549,
+      "sha256": "787e51be3f5846ef5ef099d59d66447119b142c3f8f97b84683969a37a22376f"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-esposito.binding.json",
+      "bytes": 404,
+      "sha256": "01613c2d7dac2cbb4c70362a86dafd01645f148445b54406f2a928cb744900da"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-lombardi.seed.json",
+      "bytes": 23578,
+      "sha256": "c30f36b0580abd461df40d52810b9bf4369eadd1e2a32700ffa2dff8ec6b42b6"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-lombardi.binding.json",
+      "bytes": 408,
+      "sha256": "7af75e245e6137a69bbdf58d18a74c649bca8571a6dca26b5ab1554852eced7e"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-delgado.seed.json",
+      "bytes": 13133,
+      "sha256": "17c945644e8739634297eaceead71709d8d81754578ab00701a08dba65427165"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-delgado.binding.json",
+      "bytes": 480,
+      "sha256": "8c9ae4411c1d04c0e409401e70a111ab3b0b7ce214bcc960b08db935de63c5f1"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-kowalczyk.seed.json",
+      "bytes": 24410,
+      "sha256": "38990a8440340e447d83e1a511a4749a16150c65a04880e71b6b324a33e0beb9"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-kowalczyk.binding.json",
+      "bytes": 410,
+      "sha256": "b684c271f292d8c0e1b782fb581020c140549ade017e7a5c92c2f1a2780bb60e"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-ostrowski.seed.json",
+      "bytes": 7773,
+      "sha256": "c937afb29676c88fb3043646170bf27ac6d67c0650cec5cdf8174cfd665f3c13"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-ostrowski.binding.json",
+      "bytes": 490,
+      "sha256": "4d80a8415a49e4e519ac262d951d6440f2ef1cba74bed7110bb816fa74c9a667"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-novak.seed.json",
+      "bytes": 35891,
+      "sha256": "a2fdfa1ba76940140705dcce0eb70d9cf92586e375ad2879ed71675a95503253"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-novak.binding.json",
+      "bytes": 472,
+      "sha256": "3cec59944139b900ded604ab4c173dfea796aaf4b73bf57a86c814bb33d4b044"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-haddad.seed.json",
+      "bytes": 26292,
+      "sha256": "75e6e9e2ef435c1de341ccfc4fee8c4bc06194c6a39c77598336bc9a83843e81"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-haddad.binding.json",
+      "bytes": 558,
+      "sha256": "1b6a93f579cc9731c6bcf7f4acc1a67910cbd33283bc67aee8e3c777d18a7bad"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-castellano.seed.json",
+      "bytes": 22441,
+      "sha256": "7fc30216d39bdd8083089c4b9a91671a31e58ac5ee7acb0e77465afd5830ab7a"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-castellano.binding.json",
+      "bytes": 408,
+      "sha256": "c38010f984a6c446d28b49c58f20942cab97e6e7616b75af9ba6b8348808b30b"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-vasquez.seed.json",
+      "bytes": 29919,
+      "sha256": "2aefbb5a6bdfcb192f52c3f436d468110127425b8a2d500e530d54f434d1c35c"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-vasquez.binding.json",
+      "bytes": 390,
+      "sha256": "3f5c3e5c0d5f86dfdff0bf0c1f03a02a095894223c4554c1d4fe087c2bc7f461"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-fairbanks.seed.json",
+      "bytes": 23185,
+      "sha256": "2494dc2f6b5197e388de614d699d9cf1f50a29980c5c8eb6b3c367296cead0db"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-fairbanks.binding.json",
+      "bytes": 498,
+      "sha256": "f3b502efd9dec19b9fc4a320e2d444a514af40c400139f0831dbd8171e8e7a60"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-gallagher.seed.json",
+      "bytes": 30036,
+      "sha256": "a7c084678f36675aeaeddfb6da569563f19db403911f55f759326684a7998007"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-gallagher.binding.json",
+      "bytes": 402,
+      "sha256": "ece6cf048eaa06ebd21c4c4710615d5b7a66c7f612e2db29c144228dbcab24da"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-zielinski.seed.json",
+      "bytes": 28095,
+      "sha256": "04408cd1e742e87acb09b1cf8439037c83332251a8369186961e48ad93d9814c"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-zielinski.binding.json",
+      "bytes": 498,
+      "sha256": "41d5a94a033fb8fb6cd7853e835fc5a8f213567545ef7add3bfbfcea23cb55c7"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-rasmussen.seed.json",
+      "bytes": 35818,
+      "sha256": "f83848447087c8188d61dbe90de9359fe48de7d118c6bf0da1cb11426e7ef370"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-rasmussen.binding.json",
+      "bytes": 584,
+      "sha256": "dc30e2b23a1f442bdb7e40eae027e3075295f3d0bd516fd84becfc42c229b34c"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-oyelaran.seed.json",
+      "bytes": 50064,
+      "sha256": "afe1b48774076e89e2bf350a0a898525e7b30a4682370b74547e0d145a7d352a"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-oyelaran.binding.json",
+      "bytes": 492,
+      "sha256": "c0aed21fe08f089c39c34dbdc6c71808fee2b0716e378bae4ab0826938adbce3"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-jablonski.seed.json",
+      "bytes": 34423,
+      "sha256": "ea8fe6e4443ce64f5c44edc41d68fa6c992f89c9891894a01ccbcf39facaf2ca"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-jablonski.binding.json",
+      "bytes": 502,
+      "sha256": "4a6116178aaae40afda5a3db7884aead00606678f46740f259074a56a3b81a18"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-prescott.seed.json",
+      "bytes": 16864,
+      "sha256": "c222ad1630a01e7f0bc611a268253659d1d12e38b1995a57e62d3c3e50c6c4fa"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-prescott.binding.json",
+      "bytes": 408,
+      "sha256": "760f721d04069708364c066f2d5fd0a2b3357712215c8ec7bde558f2398380f0"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-nakashima.seed.json",
+      "bytes": 40799,
+      "sha256": "3c5fec8141fc226ec2621ab2c3fedc20875f7acb12d57d7e48511dbe47885c54"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-nakashima.binding.json",
+      "bytes": 588,
+      "sha256": "67a355d82b1599af3ef776d7c4b0eae884b4034b098bbc19708a0b402a150693"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-bergstrom.seed.json",
+      "bytes": 37525,
+      "sha256": "19b46f081d7aeff5e1a0c2aa6a2907b6e8faf554c49de3aec070411bdbdab179"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-bergstrom.binding.json",
+      "bytes": 590,
+      "sha256": "849ef66debc339050a861c0f83241c55636ed25a84ece4ce4359ba2307f784cc"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-abernathy.seed.json",
+      "bytes": 48780,
+      "sha256": "055c1e7c1a4a23a02bbc4d9f538ef64cc12dec6ad7ad8e0662501a0b560b6ed5"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-abernathy.binding.json",
+      "bytes": 406,
+      "sha256": "4623576bfac953f6fbf8d4b668e72be57a795fc81765607035e0b45ab22a072d"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-iverson.seed.json",
+      "bytes": 25565,
+      "sha256": "fd44c334171fd12b29bb88174910f8d32625efd39d5e0752cc18d28355fade3f"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-iverson.binding.json",
+      "bytes": 486,
+      "sha256": "52d2c90ff8d3ece13b4c8088edaa831352677615d362858c248587dfab93ca59"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-donnelly.seed.json",
+      "bytes": 46348,
+      "sha256": "7193957a53aeed31289e1bf3bb4661cfa95ba2253f2c7df0d568e3718ddeb1da"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-donnelly.binding.json",
+      "bytes": 404,
+      "sha256": "ffd25f1c31b30197a8227563b506a3da863afe12501641346304fb056858aa59"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-brightwater.seed.json",
+      "bytes": 16243,
+      "sha256": "f2b0f72208b09e8742b0b90eabd54fd19d28fe23706c6263779ebf50860d09d8"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-brightwater.binding.json",
+      "bytes": 422,
+      "sha256": "2cd038b88ea64810e3ba177666b80597bd8314bd0ade82c7274bff63a7bda8f1"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-whitfield.seed.json",
+      "bytes": 11013,
+      "sha256": "3d1f05c2f06feef2b92df335b128e826dbbff7632dd83f84f8d0acc23c885467"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-whitfield.binding.json",
+      "bytes": 600,
+      "sha256": "09ef2c3411ced24f34b3b3ea93caa318139596b11006f68423673c370f660153"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-hollis.seed.json",
+      "bytes": 28813,
+      "sha256": "08cb9d7ae0647bce454d5212fd1de5d13cf2e1f7047cde0d3c95944d920d9507"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-hollis.binding.json",
+      "bytes": 474,
+      "sha256": "1c09b14f2d260cdabd4e2e0d0f025b33d0a39d5d880ad8033cf3aca27fb8fd70"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-thibodeau.seed.json",
+      "bytes": 14302,
+      "sha256": "d7b7154ea547dd6949cf2533d93cec074c785040f41017c528e5cbdb67358781"
+    },
+    {
+      "path": "data/evaluation/accounts/alderbrook-thibodeau.binding.json",
+      "bytes": 496,
+      "sha256": "9660d3758ae72ecf000be4d9d3e7327ba78fe50d75b3c30b570af75a5318411f"
+    }
+  ],
+  "hash_errors": [],
+  "totals": {
+    "accounts": 36,
+    "policies": 181,
+    "claims": 72,
+    "lifecycle_steps": 894,
+    "counted_steps": 838,
+    "excluded_steps": 56,
+    "scheduled_items": 0
+  },
+  "global": {
+    "distinct_dates": 362,
+    "earliest": "2025-01-02",
+    "latest": "2026-12-30",
+    "window_days": 730,
+    "days_without_activity": 368,
+    "weekend_dates": 40,
+    "weekday_dates": 322,
+    "inactive_weekend_or_holiday_days": 186
+  },
+  "per_kind": [
+    {
+      "kind": "claim_filed",
+      "field": "filed_at",
+      "steps": 66,
+      "excluded": 6,
+      "distinct_dates": 61,
+      "earliest": "2025-01-12",
+      "latest": "2026-12-25"
+    },
+    {
+      "kind": "evidence_added",
+      "field": "added_at",
+      "steps": 216,
+      "excluded": 19,
+      "distinct_dates": 105,
+      "earliest": "2025-01-12",
+      "latest": "2026-12-29"
+    },
+    {
+      "kind": "request_issued",
+      "field": "issued_at",
+      "steps": 62,
+      "excluded": 4,
+      "distinct_dates": 55,
+      "earliest": "2025-01-02",
+      "latest": "2026-12-28"
+    },
+    {
+      "kind": "request_answered",
+      "field": "answered_at",
+      "steps": 109,
+      "excluded": 6,
+      "distinct_dates": 55,
+      "earliest": "2025-01-04",
+      "latest": "2026-12-29"
+    },
+    {
+      "kind": "estimate_submitted",
+      "field": "submitted_at",
+      "steps": 72,
+      "excluded": 5,
+      "distinct_dates": 68,
+      "earliest": "2025-01-03",
+      "latest": "2026-12-30"
+    },
+    {
+      "kind": "determination_issued",
+      "field": "issued_at",
+      "steps": 68,
+      "excluded": 5,
+      "distinct_dates": 66,
+      "earliest": "2025-01-08",
+      "latest": "2026-12-28"
+    },
+    {
+      "kind": "dispute_opened",
+      "field": "opened_at",
+      "steps": 7,
+      "excluded": 0,
+      "distinct_dates": 7,
+      "earliest": "2025-03-08",
+      "latest": "2026-07-19"
+    },
+    {
+      "kind": "dispute_decided",
+      "field": "decided_at",
+      "steps": 7,
+      "excluded": 0,
+      "distinct_dates": 7,
+      "earliest": "2025-03-12",
+      "latest": "2026-07-23"
+    },
+    {
+      "kind": "offer_issued",
+      "field": "issued_at",
+      "steps": 10,
+      "excluded": 0,
+      "distinct_dates": 10,
+      "earliest": "2025-02-05",
+      "latest": "2026-05-21"
+    },
+    {
+      "kind": "offer_answered",
+      "field": "answered_at",
+      "steps": 9,
+      "excluded": 0,
+      "distinct_dates": 9,
+      "earliest": "2025-02-08",
+      "latest": "2026-05-22"
+    },
+    {
+      "kind": "rental_started",
+      "field": "start_at",
+      "steps": 13,
+      "excluded": 0,
+      "distinct_dates": 13,
+      "earliest": "2025-01-13",
+      "latest": "2026-11-04"
+    },
+    {
+      "kind": "rental_ended",
+      "field": "end_at",
+      "steps": 13,
+      "excluded": 0,
+      "distinct_dates": 13,
+      "earliest": "2025-02-05",
+      "latest": "2026-12-07"
+    },
+    {
+      "kind": "payment_issued",
+      "field": "issued_at",
+      "steps": 85,
+      "excluded": 5,
+      "distinct_dates": 81,
+      "earliest": "2025-01-10",
+      "latest": "2026-12-30"
+    },
+    {
+      "kind": "repair_completed",
+      "field": "repair_completed_at",
+      "steps": 37,
+      "excluded": 3,
+      "distinct_dates": 37,
+      "earliest": "2025-01-17",
+      "latest": "2026-12-07"
+    },
+    {
+      "kind": "claim_closed",
+      "field": "closed_at",
+      "steps": 62,
+      "excluded": 3,
+      "distinct_dates": 61,
+      "earliest": "2025-01-08",
+      "latest": "2026-12-16"
+    },
+    {
+      "kind": "claim_withdrawn",
+      "field": "withdrawn_at",
+      "steps": 2,
+      "excluded": 0,
+      "distinct_dates": 2,
+      "earliest": "2026-07-20",
+      "latest": "2026-07-31"
+    }
+  ],
+  "monthly": [
+    {
+      "month": "2025-01",
+      "distinct_dates": 16,
+      "steps": 32,
+      "claims_filed": 2,
+      "by_kind": {
+        "claim_filed": 2,
+        "evidence_added": 5,
+        "request_issued": 3,
+        "request_answered": 5,
+        "estimate_submitted": 4,
+        "determination_issued": 3,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 2,
+        "rental_ended": 0,
+        "payment_issued": 3,
+        "repair_completed": 2,
+        "claim_closed": 3,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2025-02",
+      "distinct_dates": 15,
+      "steps": 37,
+      "claims_filed": 2,
+      "by_kind": {
+        "claim_filed": 2,
+        "evidence_added": 12,
+        "request_issued": 2,
+        "request_answered": 5,
+        "estimate_submitted": 2,
+        "determination_issued": 1,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 2,
+        "offer_answered": 2,
+        "rental_started": 0,
+        "rental_ended": 2,
+        "payment_issued": 5,
+        "repair_completed": 1,
+        "claim_closed": 1,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2025-03",
+      "distinct_dates": 17,
+      "steps": 31,
+      "claims_filed": 2,
+      "by_kind": {
+        "claim_filed": 2,
+        "evidence_added": 7,
+        "request_issued": 2,
+        "request_answered": 4,
+        "estimate_submitted": 3,
+        "determination_issued": 3,
+        "dispute_opened": 1,
+        "dispute_decided": 1,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 1,
+        "rental_ended": 0,
+        "payment_issued": 3,
+        "repair_completed": 1,
+        "claim_closed": 3,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2025-04",
+      "distinct_dates": 10,
+      "steps": 19,
+      "claims_filed": 3,
+      "by_kind": {
+        "claim_filed": 3,
+        "evidence_added": 4,
+        "request_issued": 2,
+        "request_answered": 0,
+        "estimate_submitted": 1,
+        "determination_issued": 2,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 0,
+        "rental_ended": 1,
+        "payment_issued": 2,
+        "repair_completed": 2,
+        "claim_closed": 2,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2025-05",
+      "distinct_dates": 20,
+      "steps": 67,
+      "claims_filed": 5,
+      "by_kind": {
+        "claim_filed": 5,
+        "evidence_added": 25,
+        "request_issued": 4,
+        "request_answered": 10,
+        "estimate_submitted": 6,
+        "determination_issued": 5,
+        "dispute_opened": 1,
+        "dispute_decided": 1,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 2,
+        "rental_ended": 0,
+        "payment_issued": 6,
+        "repair_completed": 0,
+        "claim_closed": 2,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2025-06",
+      "distinct_dates": 18,
+      "steps": 39,
+      "claims_filed": 2,
+      "by_kind": {
+        "claim_filed": 2,
+        "evidence_added": 6,
+        "request_issued": 3,
+        "request_answered": 5,
+        "estimate_submitted": 4,
+        "determination_issued": 5,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 0,
+        "rental_ended": 1,
+        "payment_issued": 5,
+        "repair_completed": 3,
+        "claim_closed": 5,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2025-07",
+      "distinct_dates": 20,
+      "steps": 58,
+      "claims_filed": 4,
+      "by_kind": {
+        "claim_filed": 4,
+        "evidence_added": 16,
+        "request_issued": 4,
+        "request_answered": 6,
+        "estimate_submitted": 6,
+        "determination_issued": 6,
+        "dispute_opened": 2,
+        "dispute_decided": 2,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 0,
+        "rental_ended": 1,
+        "payment_issued": 7,
+        "repair_completed": 1,
+        "claim_closed": 3,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2025-08",
+      "distinct_dates": 10,
+      "steps": 19,
+      "claims_filed": 1,
+      "by_kind": {
+        "claim_filed": 1,
+        "evidence_added": 3,
+        "request_issued": 1,
+        "request_answered": 3,
+        "estimate_submitted": 1,
+        "determination_issued": 1,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 0,
+        "rental_ended": 0,
+        "payment_issued": 2,
+        "repair_completed": 3,
+        "claim_closed": 4,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2025-09",
+      "distinct_dates": 18,
+      "steps": 41,
+      "claims_filed": 3,
+      "by_kind": {
+        "claim_filed": 3,
+        "evidence_added": 13,
+        "request_issued": 3,
+        "request_answered": 5,
+        "estimate_submitted": 4,
+        "determination_issued": 4,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 2,
+        "offer_answered": 2,
+        "rental_started": 0,
+        "rental_ended": 0,
+        "payment_issued": 3,
+        "repair_completed": 0,
+        "claim_closed": 2,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2025-10",
+      "distinct_dates": 9,
+      "steps": 16,
+      "claims_filed": 1,
+      "by_kind": {
+        "claim_filed": 1,
+        "evidence_added": 5,
+        "request_issued": 1,
+        "request_answered": 3,
+        "estimate_submitted": 0,
+        "determination_issued": 0,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 1,
+        "rental_ended": 0,
+        "payment_issued": 1,
+        "repair_completed": 2,
+        "claim_closed": 2,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2025-11",
+      "distinct_dates": 11,
+      "steps": 21,
+      "claims_filed": 3,
+      "by_kind": {
+        "claim_filed": 3,
+        "evidence_added": 7,
+        "request_issued": 1,
+        "request_answered": 2,
+        "estimate_submitted": 3,
+        "determination_issued": 3,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 0,
+        "rental_ended": 0,
+        "payment_issued": 2,
+        "repair_completed": 0,
+        "claim_closed": 0,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2025-12",
+      "distinct_dates": 22,
+      "steps": 50,
+      "claims_filed": 2,
+      "by_kind": {
+        "claim_filed": 2,
+        "evidence_added": 9,
+        "request_issued": 3,
+        "request_answered": 5,
+        "estimate_submitted": 5,
+        "determination_issued": 4,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 2,
+        "offer_answered": 2,
+        "rental_started": 1,
+        "rental_ended": 2,
+        "payment_issued": 7,
+        "repair_completed": 4,
+        "claim_closed": 4,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2026-01",
+      "distinct_dates": 14,
+      "steps": 32,
+      "claims_filed": 3,
+      "by_kind": {
+        "claim_filed": 3,
+        "evidence_added": 12,
+        "request_issued": 2,
+        "request_answered": 4,
+        "estimate_submitted": 2,
+        "determination_issued": 2,
+        "dispute_opened": 1,
+        "dispute_decided": 0,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 0,
+        "rental_ended": 0,
+        "payment_issued": 3,
+        "repair_completed": 1,
+        "claim_closed": 2,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2026-02",
+      "distinct_dates": 15,
+      "steps": 30,
+      "claims_filed": 3,
+      "by_kind": {
+        "claim_filed": 3,
+        "evidence_added": 6,
+        "request_issued": 3,
+        "request_answered": 4,
+        "estimate_submitted": 3,
+        "determination_issued": 2,
+        "dispute_opened": 0,
+        "dispute_decided": 1,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 0,
+        "rental_ended": 0,
+        "payment_issued": 2,
+        "repair_completed": 2,
+        "claim_closed": 4,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2026-03",
+      "distinct_dates": 16,
+      "steps": 34,
+      "claims_filed": 3,
+      "by_kind": {
+        "claim_filed": 3,
+        "evidence_added": 8,
+        "request_issued": 2,
+        "request_answered": 7,
+        "estimate_submitted": 1,
+        "determination_issued": 2,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 2,
+        "offer_answered": 1,
+        "rental_started": 1,
+        "rental_ended": 0,
+        "payment_issued": 3,
+        "repair_completed": 2,
+        "claim_closed": 2,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2026-04",
+      "distinct_dates": 20,
+      "steps": 53,
+      "claims_filed": 4,
+      "by_kind": {
+        "claim_filed": 4,
+        "evidence_added": 9,
+        "request_issued": 4,
+        "request_answered": 7,
+        "estimate_submitted": 7,
+        "determination_issued": 6,
+        "dispute_opened": 1,
+        "dispute_decided": 1,
+        "offer_issued": 1,
+        "offer_answered": 1,
+        "rental_started": 1,
+        "rental_ended": 1,
+        "payment_issued": 6,
+        "repair_completed": 2,
+        "claim_closed": 2,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2026-05",
+      "distinct_dates": 17,
+      "steps": 44,
+      "claims_filed": 3,
+      "by_kind": {
+        "claim_filed": 3,
+        "evidence_added": 11,
+        "request_issued": 3,
+        "request_answered": 6,
+        "estimate_submitted": 3,
+        "determination_issued": 3,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 1,
+        "offer_answered": 1,
+        "rental_started": 1,
+        "rental_ended": 1,
+        "payment_issued": 4,
+        "repair_completed": 2,
+        "claim_closed": 5,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2026-06",
+      "distinct_dates": 17,
+      "steps": 41,
+      "claims_filed": 4,
+      "by_kind": {
+        "claim_filed": 4,
+        "evidence_added": 11,
+        "request_issued": 4,
+        "request_answered": 5,
+        "estimate_submitted": 2,
+        "determination_issued": 2,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 1,
+        "rental_ended": 2,
+        "payment_issued": 4,
+        "repair_completed": 2,
+        "claim_closed": 4,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2026-07",
+      "distinct_dates": 13,
+      "steps": 26,
+      "claims_filed": 3,
+      "by_kind": {
+        "claim_filed": 3,
+        "evidence_added": 9,
+        "request_issued": 2,
+        "request_answered": 2,
+        "estimate_submitted": 1,
+        "determination_issued": 1,
+        "dispute_opened": 1,
+        "dispute_decided": 1,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 0,
+        "rental_ended": 0,
+        "payment_issued": 2,
+        "repair_completed": 0,
+        "claim_closed": 2,
+        "claim_withdrawn": 2
+      }
+    },
+    {
+      "month": "2026-08",
+      "distinct_dates": 8,
+      "steps": 11,
+      "claims_filed": 0,
+      "by_kind": {
+        "claim_filed": 0,
+        "evidence_added": 1,
+        "request_issued": 0,
+        "request_answered": 2,
+        "estimate_submitted": 2,
+        "determination_issued": 2,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 0,
+        "rental_ended": 0,
+        "payment_issued": 2,
+        "repair_completed": 1,
+        "claim_closed": 1,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2026-09",
+      "distinct_dates": 7,
+      "steps": 10,
+      "claims_filed": 1,
+      "by_kind": {
+        "claim_filed": 1,
+        "evidence_added": 3,
+        "request_issued": 1,
+        "request_answered": 1,
+        "estimate_submitted": 1,
+        "determination_issued": 1,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 0,
+        "rental_ended": 0,
+        "payment_issued": 1,
+        "repair_completed": 0,
+        "claim_closed": 1,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2026-10",
+      "distinct_dates": 19,
+      "steps": 44,
+      "claims_filed": 5,
+      "by_kind": {
+        "claim_filed": 5,
+        "evidence_added": 13,
+        "request_issued": 4,
+        "request_answered": 5,
+        "estimate_submitted": 5,
+        "determination_issued": 5,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 1,
+        "rental_ended": 0,
+        "payment_issued": 4,
+        "repair_completed": 1,
+        "claim_closed": 1,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2026-11",
+      "distinct_dates": 17,
+      "steps": 36,
+      "claims_filed": 2,
+      "by_kind": {
+        "claim_filed": 2,
+        "evidence_added": 6,
+        "request_issued": 2,
+        "request_answered": 4,
+        "estimate_submitted": 3,
+        "determination_issued": 3,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 1,
+        "rental_ended": 1,
+        "payment_issued": 5,
+        "repair_completed": 4,
+        "claim_closed": 5,
+        "claim_withdrawn": 0
+      }
+    },
+    {
+      "month": "2026-12",
+      "distinct_dates": 13,
+      "steps": 47,
+      "claims_filed": 5,
+      "by_kind": {
+        "claim_filed": 5,
+        "evidence_added": 15,
+        "request_issued": 6,
+        "request_answered": 9,
+        "estimate_submitted": 3,
+        "determination_issued": 2,
+        "dispute_opened": 0,
+        "dispute_decided": 0,
+        "offer_issued": 0,
+        "offer_answered": 0,
+        "rental_started": 0,
+        "rental_ended": 1,
+        "payment_issued": 3,
+        "repair_completed": 1,
+        "claim_closed": 2,
+        "claim_withdrawn": 0
+      }
+    }
+  ],
+  "gaps": {
+    "months_without_activity": [],
+    "longest": [
+      {
+        "from": "2025-08-15",
+        "days": 11,
+        "to": "2025-08-25"
+      },
+      {
+        "from": "2026-08-21",
+        "days": 10,
+        "to": "2026-08-30"
+      },
+      {
+        "from": "2026-09-05",
+        "days": 10,
+        "to": "2026-09-14"
+      },
+      {
+        "from": "2026-03-14",
+        "days": 9,
+        "to": "2026-03-22"
+      },
+      {
+        "from": "2026-09-25",
+        "days": 8,
+        "to": "2026-10-02"
+      },
+      {
+        "from": "2025-04-17",
+        "days": 7,
+        "to": "2025-04-23"
+      },
+      {
+        "from": "2025-10-21",
+        "days": 6,
+        "to": "2025-10-26"
+      },
+      {
+        "from": "2025-11-01",
+        "days": 6,
+        "to": "2025-11-06"
+      },
+      {
+        "from": "2026-06-16",
+        "days": 6,
+        "to": "2026-06-21"
+      },
+      {
+        "from": "2026-08-11",
+        "days": 6,
+        "to": "2026-08-16"
+      }
+    ],
+    "runs_without_activity": 155
+  },
+  "per_account": [
+    {
+      "account_id": "alderbrook-underhill",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 8,
+      "claims": 2,
+      "claim_states": {
+        "closed:paid": 2
+      },
+      "lifecycle_steps": 29,
+      "counted_steps": 29,
+      "distinct_dates": 19,
+      "earliest": "2026-01-18",
+      "latest": "2026-11-05"
+    },
+    {
+      "account_id": "alderbrook-ingram",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 6,
+      "claims": 2,
+      "claim_states": {
+        "closed:paid": 2
+      },
+      "lifecycle_steps": 20,
+      "counted_steps": 13,
+      "distinct_dates": 9,
+      "earliest": "2025-01-12",
+      "latest": "2025-02-12"
+    },
+    {
+      "account_id": "alderbrook-galloway",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 6,
+      "claims": 1,
+      "claim_states": {
+        "closed:denied": 1
+      },
+      "lifecycle_steps": 11,
+      "counted_steps": 11,
+      "distinct_dates": 6,
+      "earliest": "2025-09-01",
+      "latest": "2025-09-18"
+    },
+    {
+      "account_id": "alderbrook-sandoval",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 3,
+      "claims": 2,
+      "claim_states": {
+        "closed:paid": 1,
+        "withdrawn": 1
+      },
+      "lifecycle_steps": 15,
+      "counted_steps": 15,
+      "distinct_dates": 9,
+      "earliest": "2026-03-05",
+      "latest": "2026-07-20"
+    },
+    {
+      "account_id": "alderbrook-quintero",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 3,
+      "claims": 2,
+      "claim_states": {
+        "closed:paid": 1,
+        "open": 1
+      },
+      "lifecycle_steps": 22,
+      "counted_steps": 22,
+      "distinct_dates": 15,
+      "earliest": "2025-07-06",
+      "latest": "2026-12-30"
+    },
+    {
+      "account_id": "alderbrook-okonkwo",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 7,
+      "claims": 1,
+      "claim_states": {
+        "closed:paid": 1
+      },
+      "lifecycle_steps": 16,
+      "counted_steps": 16,
+      "distinct_dates": 10,
+      "earliest": "2025-11-16",
+      "latest": "2025-12-24"
+    },
+    {
+      "account_id": "alderbrook-lindgren",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 3,
+      "claims": 1,
+      "claim_states": {
+        "closed:paid": 1
+      },
+      "lifecycle_steps": 21,
+      "counted_steps": 21,
+      "distinct_dates": 14,
+      "earliest": "2025-01-17",
+      "latest": "2025-03-07"
+    },
+    {
+      "account_id": "alderbrook-moreau",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 3,
+      "claims": 2,
+      "claim_states": {
+        "closed:paid": 2
+      },
+      "lifecycle_steps": 29,
+      "counted_steps": 16,
+      "distinct_dates": 10,
+      "earliest": "2025-01-08",
+      "latest": "2026-02-13"
+    },
+    {
+      "account_id": "alderbrook-yamamoto",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 3,
+      "claims": 3,
+      "claim_states": {
+        "closed:paid": 3
+      },
+      "lifecycle_steps": 48,
+      "counted_steps": 48,
+      "distinct_dates": 30,
+      "earliest": "2025-02-04",
+      "latest": "2025-12-22"
+    },
+    {
+      "account_id": "alderbrook-kerrigan",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 3,
+      "claims": 3,
+      "claim_states": {
+        "closed:paid": 2,
+        "open": 1
+      },
+      "lifecycle_steps": 32,
+      "counted_steps": 32,
+      "distinct_dates": 18,
+      "earliest": "2025-05-17",
+      "latest": "2026-12-29"
+    },
+    {
+      "account_id": "alderbrook-pellegrino",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 6,
+      "claims": 2,
+      "claim_states": {
+        "closed:paid": 2
+      },
+      "lifecycle_steps": 26,
+      "counted_steps": 26,
+      "distinct_dates": 15,
+      "earliest": "2025-04-27",
+      "latest": "2025-10-20"
+    },
+    {
+      "account_id": "alderbrook-esposito",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 6,
+      "claims": 1,
+      "claim_states": {
+        "closed:denied": 1
+      },
+      "lifecycle_steps": 7,
+      "counted_steps": 7,
+      "distinct_dates": 5,
+      "earliest": "2026-02-01",
+      "latest": "2026-02-17"
+    },
+    {
+      "account_id": "alderbrook-lombardi",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 7,
+      "claims": 1,
+      "claim_states": {
+        "closed:paid": 1
+      },
+      "lifecycle_steps": 13,
+      "counted_steps": 13,
+      "distinct_dates": 11,
+      "earliest": "2025-07-07",
+      "latest": "2025-08-13"
+    },
+    {
+      "account_id": "alderbrook-delgado",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 3,
+      "claims": 1,
+      "claim_states": {
+        "closed:paid": 1
+      },
+      "lifecycle_steps": 7,
+      "counted_steps": 7,
+      "distinct_dates": 5,
+      "earliest": "2026-04-30",
+      "latest": "2026-05-12"
+    },
+    {
+      "account_id": "alderbrook-kowalczyk",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 6,
+      "claims": 2,
+      "claim_states": {
+        "closed:paid": 1,
+        "closed:denied": 1
+      },
+      "lifecycle_steps": 33,
+      "counted_steps": 33,
+      "distinct_dates": 19,
+      "earliest": "2025-12-10",
+      "latest": "2026-06-02"
+    },
+    {
+      "account_id": "alderbrook-ostrowski",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 3,
+      "claims": 1,
+      "claim_states": {
+        "closed:paid": 1
+      },
+      "lifecycle_steps": 7,
+      "counted_steps": 7,
+      "distinct_dates": 6,
+      "earliest": "2026-02-26",
+      "latest": "2026-03-09"
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 7,
+      "claims": 2,
+      "claim_states": {
+        "closed:paid": 2
+      },
+      "lifecycle_steps": 25,
+      "counted_steps": 11,
+      "distinct_dates": 8,
+      "earliest": "2026-04-01",
+      "latest": "2026-05-01"
+    },
+    {
+      "account_id": "alderbrook-haddad",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 7,
+      "claims": 2,
+      "claim_states": {
+        "closed:paid": 2
+      },
+      "lifecycle_steps": 30,
+      "counted_steps": 30,
+      "distinct_dates": 18,
+      "earliest": "2026-01-31",
+      "latest": "2026-09-04"
+    },
+    {
+      "account_id": "alderbrook-castellano",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 4,
+      "claims": 1,
+      "claim_states": {
+        "closed:paid": 1
+      },
+      "lifecycle_steps": 17,
+      "counted_steps": 17,
+      "distinct_dates": 10,
+      "earliest": "2025-03-09",
+      "latest": "2025-04-11"
+    },
+    {
+      "account_id": "alderbrook-vasquez",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 6,
+      "claims": 3,
+      "claim_states": {
+        "closed:paid": 2,
+        "closed:denied": 1
+      },
+      "lifecycle_steps": 41,
+      "counted_steps": 41,
+      "distinct_dates": 24,
+      "earliest": "2025-02-22",
+      "latest": "2026-11-24"
+    },
+    {
+      "account_id": "alderbrook-fairbanks",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 4,
+      "claims": 2,
+      "claim_states": {
+        "closed:paid": 2
+      },
+      "lifecycle_steps": 24,
+      "counted_steps": 20,
+      "distinct_dates": 17,
+      "earliest": "2025-01-02",
+      "latest": "2026-05-04"
+    },
+    {
+      "account_id": "alderbrook-gallagher",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 7,
+      "claims": 3,
+      "claim_states": {
+        "closed:paid": 1,
+        "closed:denied": 1,
+        "withdrawn": 1
+      },
+      "lifecycle_steps": 26,
+      "counted_steps": 26,
+      "distinct_dates": 16,
+      "earliest": "2025-05-16",
+      "latest": "2026-07-31"
+    },
+    {
+      "account_id": "alderbrook-zielinski",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 6,
+      "claims": 2,
+      "claim_states": {
+        "closed:denied": 1,
+        "closed:paid": 1
+      },
+      "lifecycle_steps": 22,
+      "counted_steps": 22,
+      "distinct_dates": 13,
+      "earliest": "2025-04-27",
+      "latest": "2026-08-04"
+    },
+    {
+      "account_id": "alderbrook-rasmussen",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 3,
+      "claims": 2,
+      "claim_states": {
+        "closed:paid": 2
+      },
+      "lifecycle_steps": 31,
+      "counted_steps": 31,
+      "distinct_dates": 18,
+      "earliest": "2026-06-02",
+      "latest": "2026-12-16"
+    },
+    {
+      "account_id": "alderbrook-oyelaran",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 6,
+      "claims": 4,
+      "claim_states": {
+        "closed:paid": 3,
+        "closed:denied": 1
+      },
+      "lifecycle_steps": 46,
+      "counted_steps": 46,
+      "distinct_dates": 27,
+      "earliest": "2025-07-10",
+      "latest": "2026-11-06"
+    },
+    {
+      "account_id": "alderbrook-jablonski",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 3,
+      "claims": 2,
+      "claim_states": {
+        "closed:paid": 2
+      },
+      "lifecycle_steps": 27,
+      "counted_steps": 21,
+      "distinct_dates": 16,
+      "earliest": "2025-01-03",
+      "latest": "2025-06-23"
+    },
+    {
+      "account_id": "alderbrook-prescott",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 4,
+      "claims": 1,
+      "claim_states": {
+        "closed:paid": 1
+      },
+      "lifecycle_steps": 11,
+      "counted_steps": 11,
+      "distinct_dates": 7,
+      "earliest": "2025-12-15",
+      "latest": "2026-01-06"
+    },
+    {
+      "account_id": "alderbrook-nakashima",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 8,
+      "claims": 3,
+      "claim_states": {
+        "closed:paid": 2,
+        "closed:no_response": 1
+      },
+      "lifecycle_steps": 29,
+      "counted_steps": 29,
+      "distinct_dates": 21,
+      "earliest": "2025-11-27",
+      "latest": "2026-11-18"
+    },
+    {
+      "account_id": "alderbrook-bergstrom",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 3,
+      "claims": 4,
+      "claim_states": {
+        "closed:paid": 3,
+        "open": 1
+      },
+      "lifecycle_steps": 51,
+      "counted_steps": 51,
+      "distinct_dates": 31,
+      "earliest": "2025-05-29",
+      "latest": "2026-12-29"
+    },
+    {
+      "account_id": "alderbrook-abernathy",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 6,
+      "claims": 4,
+      "claim_states": {
+        "closed:paid": 4
+      },
+      "lifecycle_steps": 62,
+      "counted_steps": 62,
+      "distinct_dates": 43,
+      "earliest": "2025-05-03",
+      "latest": "2026-05-19"
+    },
+    {
+      "account_id": "alderbrook-iverson",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 6,
+      "claims": 2,
+      "claim_states": {
+        "closed:paid": 1,
+        "open": 1
+      },
+      "lifecycle_steps": 16,
+      "counted_steps": 16,
+      "distinct_dates": 10,
+      "earliest": "2025-11-30",
+      "latest": "2026-12-30"
+    },
+    {
+      "account_id": "alderbrook-donnelly",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 3,
+      "claims": 3,
+      "claim_states": {
+        "closed:paid": 3
+      },
+      "lifecycle_steps": 39,
+      "counted_steps": 27,
+      "distinct_dates": 19,
+      "earliest": "2026-05-14",
+      "latest": "2026-11-25"
+    },
+    {
+      "account_id": "alderbrook-brightwater",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 7,
+      "claims": 1,
+      "claim_states": {
+        "closed:paid": 1
+      },
+      "lifecycle_steps": 16,
+      "counted_steps": 16,
+      "distinct_dates": 10,
+      "earliest": "2025-04-26",
+      "latest": "2025-06-05"
+    },
+    {
+      "account_id": "alderbrook-whitfield",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 6,
+      "claims": 1,
+      "claim_states": {
+        "closed:no_response": 1
+      },
+      "lifecycle_steps": 4,
+      "counted_steps": 4,
+      "distinct_dates": 4,
+      "earliest": "2026-11-18",
+      "latest": "2026-12-14"
+    },
+    {
+      "account_id": "alderbrook-hollis",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 3,
+      "claims": 2,
+      "claim_states": {
+        "closed:paid": 1,
+        "open": 1
+      },
+      "lifecycle_steps": 25,
+      "counted_steps": 25,
+      "distinct_dates": 15,
+      "earliest": "2026-05-08",
+      "latest": "2026-12-30"
+    },
+    {
+      "account_id": "alderbrook-thibodeau",
+      "provenance": "synthetic",
+      "virtual_now": "2027-01-01T00:00:00-05:00",
+      "policies": 6,
+      "claims": 1,
+      "claim_states": {
+        "closed:paid": 1
+      },
+      "lifecycle_steps": 16,
+      "counted_steps": 16,
+      "distinct_dates": 11,
+      "earliest": "2026-03-30",
+      "latest": "2026-05-06"
+    }
+  ],
+  "exclusions": [
+    {
+      "account_id": "alderbrook-ingram",
+      "claim_id": "clm-0001",
+      "kind": "claim_filed",
+      "record_id": "clm-0001",
+      "at": "2024-11-21T15:48:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-ingram",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0001",
+      "at": "2024-11-21T15:55:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-ingram",
+      "claim_id": "clm-0001",
+      "kind": "estimate_submitted",
+      "record_id": "est-0001",
+      "at": "2024-11-25T14:06:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-ingram",
+      "claim_id": "clm-0001",
+      "kind": "determination_issued",
+      "record_id": "det-0001",
+      "at": "2024-11-27T09:48:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-ingram",
+      "claim_id": "clm-0001",
+      "kind": "payment_issued",
+      "record_id": "pay-0001",
+      "at": "2024-12-03T15:40:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-ingram",
+      "claim_id": "clm-0001",
+      "kind": "repair_completed",
+      "record_id": "clm-0001",
+      "at": "2024-12-04T14:10:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-ingram",
+      "claim_id": "clm-0001",
+      "kind": "claim_closed",
+      "record_id": "clm-0001",
+      "at": "2024-12-09T09:40:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-moreau",
+      "claim_id": "clm-0001",
+      "kind": "claim_filed",
+      "record_id": "clm-0001",
+      "at": "2024-12-16T07:02:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-moreau",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0001",
+      "at": "2024-12-16T07:09:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-moreau",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0002",
+      "at": "2024-12-16T07:09:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-moreau",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0003",
+      "at": "2024-12-16T21:20:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-moreau",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0004",
+      "at": "2024-12-16T21:20:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-moreau",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0005",
+      "at": "2024-12-16T21:20:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-moreau",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0006",
+      "at": "2024-12-16T21:20:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-moreau",
+      "claim_id": "clm-0001",
+      "kind": "request_issued",
+      "record_id": "req-0001",
+      "at": "2024-12-16T09:30:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-moreau",
+      "claim_id": "clm-0001",
+      "kind": "request_answered",
+      "record_id": "req-0001#items",
+      "at": "2024-12-16T21:22:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-moreau",
+      "claim_id": "clm-0001",
+      "kind": "request_answered",
+      "record_id": "req-0001#proof",
+      "at": "2024-12-16T21:22:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-moreau",
+      "claim_id": "clm-0001",
+      "kind": "estimate_submitted",
+      "record_id": "est-0001",
+      "at": "2024-12-19T13:10:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-moreau",
+      "claim_id": "clm-0001",
+      "kind": "determination_issued",
+      "record_id": "det-0001",
+      "at": "2024-12-23T09:33:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-moreau",
+      "claim_id": "clm-0001",
+      "kind": "payment_issued",
+      "record_id": "pay-0001",
+      "at": "2024-12-27T11:42:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "claim_id": "clm-0001",
+      "kind": "claim_filed",
+      "record_id": "clm-0001",
+      "at": "2024-11-17T07:51:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0001",
+      "at": "2024-11-17T07:55:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0002",
+      "at": "2024-11-17T07:55:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0003",
+      "at": "2024-11-17T07:55:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "claim_id": "clm-0001",
+      "kind": "request_issued",
+      "record_id": "req-0001",
+      "at": "2024-11-18T12:15:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "claim_id": "clm-0001",
+      "kind": "request_answered",
+      "record_id": "req-0001#other_party",
+      "at": "2024-11-20T08:33:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "claim_id": "clm-0001",
+      "kind": "estimate_submitted",
+      "record_id": "est-0001",
+      "at": "2024-11-27T10:31:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "claim_id": "clm-0001",
+      "kind": "estimate_submitted",
+      "record_id": "est-0002",
+      "at": "2024-12-09T16:19:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "claim_id": "clm-0001",
+      "kind": "determination_issued",
+      "record_id": "det-0001",
+      "at": "2024-12-02T12:02:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "claim_id": "clm-0001",
+      "kind": "determination_issued",
+      "record_id": "det-0002",
+      "at": "2024-12-11T16:36:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "claim_id": "clm-0001",
+      "kind": "payment_issued",
+      "record_id": "pay-0001",
+      "at": "2024-12-03T15:21:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "claim_id": "clm-0001",
+      "kind": "payment_issued",
+      "record_id": "pay-0002",
+      "at": "2024-12-16T09:08:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "claim_id": "clm-0001",
+      "kind": "repair_completed",
+      "record_id": "clm-0001",
+      "at": "2024-12-24T13:05:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-novak",
+      "claim_id": "clm-0001",
+      "kind": "claim_closed",
+      "record_id": "clm-0001",
+      "at": "2024-12-27T09:23:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-fairbanks",
+      "claim_id": "clm-0001",
+      "kind": "claim_filed",
+      "record_id": "clm-0001",
+      "at": "2024-12-31T19:06:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-fairbanks",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0001",
+      "at": "2024-12-31T19:10:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-fairbanks",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0002",
+      "at": "2024-12-31T19:10:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-fairbanks",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0003",
+      "at": "2024-12-31T19:10:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-jablonski",
+      "claim_id": "clm-0001",
+      "kind": "claim_filed",
+      "record_id": "clm-0001",
+      "at": "2024-12-26T15:10:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-jablonski",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0001",
+      "at": "2024-12-26T15:15:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-jablonski",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0002",
+      "at": "2024-12-26T15:15:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-jablonski",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0003",
+      "at": "2024-12-26T15:15:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-jablonski",
+      "claim_id": "clm-0001",
+      "kind": "request_issued",
+      "record_id": "req-0001",
+      "at": "2024-12-27T11:08:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-jablonski",
+      "claim_id": "clm-0001",
+      "kind": "request_answered",
+      "record_id": "req-0001#other_party",
+      "at": "2024-12-27T15:23:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-donnelly",
+      "claim_id": "clm-0001",
+      "kind": "claim_filed",
+      "record_id": "clm-0001",
+      "at": "2024-11-20T19:12:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-donnelly",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0001",
+      "at": "2024-11-20T19:20:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-donnelly",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0002",
+      "at": "2024-11-20T19:20:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-donnelly",
+      "claim_id": "clm-0001",
+      "kind": "evidence_added",
+      "record_id": "evd-0003",
+      "at": "2024-11-23T07:51:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-donnelly",
+      "claim_id": "clm-0001",
+      "kind": "request_issued",
+      "record_id": "req-0001",
+      "at": "2024-11-21T14:02:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-donnelly",
+      "claim_id": "clm-0001",
+      "kind": "request_answered",
+      "record_id": "req-0001#driver",
+      "at": "2024-11-23T07:54:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-donnelly",
+      "claim_id": "clm-0001",
+      "kind": "request_answered",
+      "record_id": "req-0001#photos",
+      "at": "2024-11-23T07:54:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-donnelly",
+      "claim_id": "clm-0001",
+      "kind": "estimate_submitted",
+      "record_id": "est-0001",
+      "at": "2024-11-26T10:22:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-donnelly",
+      "claim_id": "clm-0001",
+      "kind": "determination_issued",
+      "record_id": "det-0001",
+      "at": "2024-12-02T12:04:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-donnelly",
+      "claim_id": "clm-0001",
+      "kind": "payment_issued",
+      "record_id": "pay-0001",
+      "at": "2024-12-03T14:47:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-donnelly",
+      "claim_id": "clm-0001",
+      "kind": "repair_completed",
+      "record_id": "clm-0001",
+      "at": "2024-12-13T11:13:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    },
+    {
+      "account_id": "alderbrook-donnelly",
+      "claim_id": "clm-0001",
+      "kind": "claim_closed",
+      "record_id": "clm-0001",
+      "at": "2024-12-17T16:16:00-05:00",
+      "reason": "Before the coverage window: the claim started in late 2024."
+    }
+  ],
+  "scheduled": {
+    "rule": "Deadlines after the seed clock: the due time of an open request and the answer time of an open offer. They are future items, not past activity.",
+    "items": []
+  },
+  "context": {
+    "policy_terms": 181,
+    "loss_at": {
+      "records": 72,
+      "in_window": 66,
+      "distinct_dates_in_window": 63,
+      "earliest": "2024-11-16",
+      "latest": "2026-12-24"
+    },
+    "evidence_dated": {
+      "records": 235,
+      "in_window": 196,
+      "distinct_dates_in_window": 115,
+      "earliest": "2019-01-14",
+      "latest": "2026-12-29"
+    },
+    "notifications": {
+      "records": 419,
+      "in_window": 394,
+      "distinct_dates_in_window": 281,
+      "earliest": "2024-11-18",
+      "latest": "2026-12-30"
+    },
+    "activity": {
+      "records": 845,
+      "in_window": 793,
+      "distinct_dates_in_window": 366,
+      "earliest": "2024-11-17",
+      "latest": "2026-12-30"
+    },
+    "activity_only_dates": [
+      {
+        "day": "2025-09-10",
+        "actions": [
+          "payee.set"
+        ]
+      },
+      {
+        "day": "2025-12-17",
+        "actions": [
+          "payee.set"
+        ]
+      },
+      {
+        "day": "2026-01-22",
+        "actions": [
+          "payee.set"
+        ]
+      },
+      {
+        "day": "2026-03-29",
+        "actions": [
+          "payee.set"
+        ]
+      }
+    ]
+  },
+  "dates": [
+    {
+      "day": "2025-01-02",
+      "steps": 1,
+      "records": [
+        "alderbrook-fairbanks/clm-0001/request_issued/req-0001"
+      ]
+    },
+    {
+      "day": "2025-01-03",
+      "steps": 1,
+      "records": [
+        "alderbrook-jablonski/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2025-01-04",
+      "steps": 1,
+      "records": [
+        "alderbrook-fairbanks/clm-0001/request_answered/req-0001#driver"
+      ]
+    },
+    {
+      "day": "2025-01-08",
+      "steps": 2,
+      "records": [
+        "alderbrook-moreau/clm-0001/claim_closed/clm-0001",
+        "alderbrook-jablonski/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2025-01-09",
+      "steps": 1,
+      "records": [
+        "alderbrook-fairbanks/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2025-01-10",
+      "steps": 1,
+      "records": [
+        "alderbrook-jablonski/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2025-01-12",
+      "steps": 3,
+      "records": [
+        "alderbrook-ingram/clm-0002/claim_filed/clm-0002",
+        "alderbrook-ingram/clm-0002/evidence_added/evd-0002",
+        "alderbrook-ingram/clm-0002/evidence_added/evd-0003"
+      ]
+    },
+    {
+      "day": "2025-01-13",
+      "steps": 2,
+      "records": [
+        "alderbrook-ingram/clm-0002/request_issued/req-0001",
+        "alderbrook-ingram/clm-0002/rental_started/rnt-0001"
+      ]
+    },
+    {
+      "day": "2025-01-15",
+      "steps": 2,
+      "records": [
+        "alderbrook-ingram/clm-0002/request_answered/req-0001#other_party",
+        "alderbrook-fairbanks/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2025-01-17",
+      "steps": 7,
+      "records": [
+        "alderbrook-ingram/clm-0002/estimate_submitted/est-0002",
+        "alderbrook-lindgren/clm-0001/claim_filed/clm-0001",
+        "alderbrook-lindgren/clm-0001/evidence_added/evd-0001",
+        "alderbrook-lindgren/clm-0001/evidence_added/evd-0002",
+        "alderbrook-lindgren/clm-0001/evidence_added/evd-0003",
+        "alderbrook-fairbanks/clm-0001/payment_issued/pay-0001",
+        "alderbrook-jablonski/clm-0001/repair_completed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-01-18",
+      "steps": 1,
+      "records": [
+        "alderbrook-lindgren/clm-0001/rental_started/rnt-0001"
+      ]
+    },
+    {
+      "day": "2025-01-21",
+      "steps": 1,
+      "records": [
+        "alderbrook-lindgren/clm-0001/request_issued/req-0001"
+      ]
+    },
+    {
+      "day": "2025-01-23",
+      "steps": 6,
+      "records": [
+        "alderbrook-ingram/clm-0002/determination_issued/det-0002",
+        "alderbrook-lindgren/clm-0001/request_answered/req-0001#title",
+        "alderbrook-lindgren/clm-0001/request_answered/req-0001#mileage",
+        "alderbrook-lindgren/clm-0001/request_answered/req-0001#keys",
+        "alderbrook-fairbanks/clm-0001/repair_completed/clm-0001",
+        "alderbrook-jablonski/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-01-27",
+      "steps": 1,
+      "records": [
+        "alderbrook-lindgren/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2025-01-28",
+      "steps": 1,
+      "records": [
+        "alderbrook-ingram/clm-0002/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2025-01-30",
+      "steps": 1,
+      "records": [
+        "alderbrook-fairbanks/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-02-04",
+      "steps": 5,
+      "records": [
+        "alderbrook-yamamoto/clm-0001/claim_filed/clm-0001",
+        "alderbrook-yamamoto/clm-0001/evidence_added/evd-0001",
+        "alderbrook-yamamoto/clm-0001/evidence_added/evd-0002",
+        "alderbrook-yamamoto/clm-0001/evidence_added/evd-0003",
+        "alderbrook-yamamoto/clm-0001/request_issued/req-0001"
+      ]
+    },
+    {
+      "day": "2025-02-05",
+      "steps": 7,
+      "records": [
+        "alderbrook-ingram/clm-0002/rental_ended/rnt-0001",
+        "alderbrook-ingram/clm-0002/repair_completed/clm-0002",
+        "alderbrook-lindgren/clm-0001/offer_issued/off-0001",
+        "alderbrook-yamamoto/clm-0001/evidence_added/evd-0004",
+        "alderbrook-yamamoto/clm-0001/request_answered/req-0001#driver",
+        "alderbrook-yamamoto/clm-0001/request_answered/req-0001#other_party",
+        "alderbrook-yamamoto/clm-0001/request_answered/req-0001#statement"
+      ]
+    },
+    {
+      "day": "2025-02-06",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2025-02-08",
+      "steps": 3,
+      "records": [
+        "alderbrook-lindgren/clm-0001/evidence_added/evd-0004",
+        "alderbrook-lindgren/clm-0001/evidence_added/evd-0005",
+        "alderbrook-lindgren/clm-0001/offer_answered/off-0001"
+      ]
+    },
+    {
+      "day": "2025-02-10",
+      "steps": 1,
+      "records": [
+        "alderbrook-ingram/clm-0002/payment_issued/pay-0003"
+      ]
+    },
+    {
+      "day": "2025-02-12",
+      "steps": 2,
+      "records": [
+        "alderbrook-ingram/clm-0002/claim_closed/clm-0002",
+        "alderbrook-yamamoto/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2025-02-13",
+      "steps": 1,
+      "records": [
+        "alderbrook-lindgren/clm-0001/offer_issued/off-0002"
+      ]
+    },
+    {
+      "day": "2025-02-14",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2025-02-15",
+      "steps": 1,
+      "records": [
+        "alderbrook-lindgren/clm-0001/offer_answered/off-0002"
+      ]
+    },
+    {
+      "day": "2025-02-16",
+      "steps": 1,
+      "records": [
+        "alderbrook-lindgren/clm-0001/rental_ended/rnt-0001"
+      ]
+    },
+    {
+      "day": "2025-02-22",
+      "steps": 3,
+      "records": [
+        "alderbrook-vasquez/clm-0001/claim_filed/clm-0001",
+        "alderbrook-vasquez/clm-0001/evidence_added/evd-0001",
+        "alderbrook-vasquez/clm-0001/evidence_added/evd-0002"
+      ]
+    },
+    {
+      "day": "2025-02-24",
+      "steps": 2,
+      "records": [
+        "alderbrook-lindgren/clm-0001/payment_issued/pay-0001",
+        "alderbrook-vasquez/clm-0001/request_issued/req-0001"
+      ]
+    },
+    {
+      "day": "2025-02-26",
+      "steps": 1,
+      "records": [
+        "alderbrook-lindgren/clm-0001/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2025-02-27",
+      "steps": 6,
+      "records": [
+        "alderbrook-vasquez/clm-0001/evidence_added/evd-0003",
+        "alderbrook-vasquez/clm-0001/evidence_added/evd-0004",
+        "alderbrook-vasquez/clm-0001/evidence_added/evd-0005",
+        "alderbrook-vasquez/clm-0001/evidence_added/evd-0006",
+        "alderbrook-vasquez/clm-0001/request_answered/req-0001#items",
+        "alderbrook-vasquez/clm-0001/request_answered/req-0001#proof"
+      ]
+    },
+    {
+      "day": "2025-02-28",
+      "steps": 2,
+      "records": [
+        "alderbrook-lindgren/clm-0001/payment_issued/pay-0003",
+        "alderbrook-vasquez/clm-0001/estimate_submitted/est-p0001"
+      ]
+    },
+    {
+      "day": "2025-03-05",
+      "steps": 1,
+      "records": [
+        "alderbrook-vasquez/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2025-03-06",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0001/repair_completed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-03-07",
+      "steps": 2,
+      "records": [
+        "alderbrook-lindgren/clm-0001/claim_closed/clm-0001",
+        "alderbrook-vasquez/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2025-03-08",
+      "steps": 2,
+      "records": [
+        "alderbrook-vasquez/clm-0001/evidence_added/evd-0007",
+        "alderbrook-vasquez/clm-0001/dispute_opened/dsp-0001"
+      ]
+    },
+    {
+      "day": "2025-03-09",
+      "steps": 4,
+      "records": [
+        "alderbrook-castellano/clm-0001/claim_filed/clm-0001",
+        "alderbrook-castellano/clm-0001/evidence_added/evd-0001",
+        "alderbrook-castellano/clm-0001/evidence_added/evd-0002",
+        "alderbrook-castellano/clm-0001/evidence_added/evd-0003"
+      ]
+    },
+    {
+      "day": "2025-03-10",
+      "steps": 5,
+      "records": [
+        "alderbrook-castellano/clm-0001/evidence_added/evd-0004",
+        "alderbrook-castellano/clm-0001/request_issued/req-0001",
+        "alderbrook-castellano/clm-0001/request_answered/req-0001#driver",
+        "alderbrook-castellano/clm-0001/request_answered/req-0001#other_party",
+        "alderbrook-castellano/clm-0001/request_answered/req-0001#statement"
+      ]
+    },
+    {
+      "day": "2025-03-12",
+      "steps": 1,
+      "records": [
+        "alderbrook-vasquez/clm-0001/dispute_decided/dsp-0001"
+      ]
+    },
+    {
+      "day": "2025-03-13",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-03-14",
+      "steps": 1,
+      "records": [
+        "alderbrook-castellano/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2025-03-17",
+      "steps": 1,
+      "records": [
+        "alderbrook-castellano/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2025-03-19",
+      "steps": 1,
+      "records": [
+        "alderbrook-castellano/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2025-03-21",
+      "steps": 1,
+      "records": [
+        "alderbrook-vasquez/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-03-24",
+      "steps": 4,
+      "records": [
+        "alderbrook-yamamoto/clm-0002/claim_filed/clm-0002",
+        "alderbrook-yamamoto/clm-0002/evidence_added/evd-0005",
+        "alderbrook-yamamoto/clm-0002/evidence_added/evd-0006",
+        "alderbrook-castellano/clm-0001/estimate_submitted/est-0002"
+      ]
+    },
+    {
+      "day": "2025-03-25",
+      "steps": 2,
+      "records": [
+        "alderbrook-yamamoto/clm-0002/rental_started/rnt-0001",
+        "alderbrook-castellano/clm-0001/determination_issued/det-0002"
+      ]
+    },
+    {
+      "day": "2025-03-26",
+      "steps": 2,
+      "records": [
+        "alderbrook-yamamoto/clm-0002/request_issued/req-0002",
+        "alderbrook-yamamoto/clm-0002/request_answered/req-0002#driver"
+      ]
+    },
+    {
+      "day": "2025-03-28",
+      "steps": 1,
+      "records": [
+        "alderbrook-castellano/clm-0001/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2025-03-31",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0002/estimate_submitted/est-0002"
+      ]
+    },
+    {
+      "day": "2025-04-01",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0002/determination_issued/det-0002"
+      ]
+    },
+    {
+      "day": "2025-04-04",
+      "steps": 2,
+      "records": [
+        "alderbrook-yamamoto/clm-0002/payment_issued/pay-0002",
+        "alderbrook-castellano/clm-0001/repair_completed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-04-10",
+      "steps": 2,
+      "records": [
+        "alderbrook-yamamoto/clm-0002/rental_ended/rnt-0001",
+        "alderbrook-yamamoto/clm-0002/repair_completed/clm-0002"
+      ]
+    },
+    {
+      "day": "2025-04-11",
+      "steps": 1,
+      "records": [
+        "alderbrook-castellano/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-04-16",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0002/payment_issued/pay-0003"
+      ]
+    },
+    {
+      "day": "2025-04-24",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0002/claim_closed/clm-0002"
+      ]
+    },
+    {
+      "day": "2025-04-26",
+      "steps": 3,
+      "records": [
+        "alderbrook-brightwater/clm-0001/claim_filed/clm-0001",
+        "alderbrook-brightwater/clm-0001/evidence_added/evd-0001",
+        "alderbrook-brightwater/clm-0001/evidence_added/evd-0002"
+      ]
+    },
+    {
+      "day": "2025-04-27",
+      "steps": 4,
+      "records": [
+        "alderbrook-pellegrino/clm-0001/claim_filed/clm-0001",
+        "alderbrook-pellegrino/clm-0001/evidence_added/evd-0001",
+        "alderbrook-zielinski/clm-0001/claim_filed/clm-0001",
+        "alderbrook-zielinski/clm-0001/evidence_added/evd-0001"
+      ]
+    },
+    {
+      "day": "2025-04-29",
+      "steps": 2,
+      "records": [
+        "alderbrook-pellegrino/clm-0001/request_issued/req-0001",
+        "alderbrook-brightwater/clm-0001/request_issued/req-0001"
+      ]
+    },
+    {
+      "day": "2025-04-30",
+      "steps": 2,
+      "records": [
+        "alderbrook-zielinski/clm-0001/estimate_submitted/est-0001",
+        "alderbrook-zielinski/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2025-05-01",
+      "steps": 6,
+      "records": [
+        "alderbrook-pellegrino/clm-0001/evidence_added/evd-0002",
+        "alderbrook-pellegrino/clm-0001/evidence_added/evd-0003",
+        "alderbrook-pellegrino/clm-0001/evidence_added/evd-0004",
+        "alderbrook-pellegrino/clm-0001/evidence_added/evd-0005",
+        "alderbrook-pellegrino/clm-0001/request_answered/req-0001#items",
+        "alderbrook-pellegrino/clm-0001/request_answered/req-0001#proof"
+      ]
+    },
+    {
+      "day": "2025-05-02",
+      "steps": 1,
+      "records": [
+        "alderbrook-zielinski/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-05-03",
+      "steps": 9,
+      "records": [
+        "alderbrook-abernathy/clm-0001/claim_filed/clm-0001",
+        "alderbrook-abernathy/clm-0001/evidence_added/evd-0001",
+        "alderbrook-abernathy/clm-0001/evidence_added/evd-0002",
+        "alderbrook-abernathy/clm-0001/evidence_added/evd-0003",
+        "alderbrook-abernathy/clm-0001/rental_started/rnt-0001",
+        "alderbrook-brightwater/clm-0001/evidence_added/evd-0003",
+        "alderbrook-brightwater/clm-0001/evidence_added/evd-0004",
+        "alderbrook-brightwater/clm-0001/request_answered/req-0001#items",
+        "alderbrook-brightwater/clm-0001/request_answered/req-0001#proof"
+      ]
+    },
+    {
+      "day": "2025-05-05",
+      "steps": 1,
+      "records": [
+        "alderbrook-abernathy/clm-0001/request_issued/req-0001"
+      ]
+    },
+    {
+      "day": "2025-05-06",
+      "steps": 2,
+      "records": [
+        "alderbrook-pellegrino/clm-0001/estimate_submitted/est-0001",
+        "alderbrook-brightwater/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2025-05-09",
+      "steps": 4,
+      "records": [
+        "alderbrook-jablonski/clm-0002/claim_filed/clm-0002",
+        "alderbrook-jablonski/clm-0002/evidence_added/evd-0004",
+        "alderbrook-jablonski/clm-0002/evidence_added/evd-0005",
+        "alderbrook-jablonski/clm-0002/evidence_added/evd-0006"
+      ]
+    },
+    {
+      "day": "2025-05-12",
+      "steps": 1,
+      "records": [
+        "alderbrook-jablonski/clm-0002/request_issued/req-0002"
+      ]
+    },
+    {
+      "day": "2025-05-13",
+      "steps": 4,
+      "records": [
+        "alderbrook-pellegrino/clm-0001/determination_issued/det-0001",
+        "alderbrook-jablonski/clm-0002/evidence_added/evd-0007",
+        "alderbrook-jablonski/clm-0002/request_answered/req-0002#photos",
+        "alderbrook-jablonski/clm-0002/request_answered/req-0002#parked"
+      ]
+    },
+    {
+      "day": "2025-05-14",
+      "steps": 2,
+      "records": [
+        "alderbrook-pellegrino/clm-0001/payment_issued/pay-0001",
+        "alderbrook-brightwater/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2025-05-16",
+      "steps": 3,
+      "records": [
+        "alderbrook-gallagher/clm-0001/claim_filed/clm-0001",
+        "alderbrook-gallagher/clm-0001/evidence_added/evd-0001",
+        "alderbrook-jablonski/clm-0002/estimate_submitted/est-0002"
+      ]
+    },
+    {
+      "day": "2025-05-17",
+      "steps": 3,
+      "records": [
+        "alderbrook-kerrigan/clm-0001/claim_filed/clm-0001",
+        "alderbrook-kerrigan/clm-0001/evidence_added/evd-0001",
+        "alderbrook-kerrigan/clm-0001/evidence_added/evd-0002"
+      ]
+    },
+    {
+      "day": "2025-05-18",
+      "steps": 1,
+      "records": [
+        "alderbrook-abernathy/clm-0001/request_answered/req-0001#parked"
+      ]
+    },
+    {
+      "day": "2025-05-19",
+      "steps": 5,
+      "records": [
+        "alderbrook-kerrigan/clm-0001/evidence_added/evd-0003",
+        "alderbrook-kerrigan/clm-0001/request_issued/req-0001",
+        "alderbrook-kerrigan/clm-0001/request_answered/req-0001#statement",
+        "alderbrook-gallagher/clm-0001/request_issued/req-0001",
+        "alderbrook-brightwater/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2025-05-20",
+      "steps": 1,
+      "records": [
+        "alderbrook-pellegrino/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-05-21",
+      "steps": 2,
+      "records": [
+        "alderbrook-brightwater/clm-0001/evidence_added/evd-0005",
+        "alderbrook-brightwater/clm-0001/dispute_opened/dsp-0001"
+      ]
+    },
+    {
+      "day": "2025-05-22",
+      "steps": 7,
+      "records": [
+        "alderbrook-gallagher/clm-0001/evidence_added/evd-0002",
+        "alderbrook-gallagher/clm-0001/evidence_added/evd-0003",
+        "alderbrook-gallagher/clm-0001/evidence_added/evd-0004",
+        "alderbrook-gallagher/clm-0001/evidence_added/evd-0005",
+        "alderbrook-gallagher/clm-0001/request_answered/req-0001#items",
+        "alderbrook-gallagher/clm-0001/request_answered/req-0001#proof",
+        "alderbrook-jablonski/clm-0002/determination_issued/det-0002"
+      ]
+    },
+    {
+      "day": "2025-05-23",
+      "steps": 3,
+      "records": [
+        "alderbrook-gallagher/clm-0001/estimate_submitted/est-p0001",
+        "alderbrook-jablonski/clm-0002/payment_issued/pay-0002",
+        "alderbrook-abernathy/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2025-05-27",
+      "steps": 3,
+      "records": [
+        "alderbrook-kerrigan/clm-0001/estimate_submitted/est-0001",
+        "alderbrook-abernathy/clm-0001/determination_issued/det-0001",
+        "alderbrook-brightwater/clm-0001/dispute_decided/dsp-0001"
+      ]
+    },
+    {
+      "day": "2025-05-29",
+      "steps": 7,
+      "records": [
+        "alderbrook-gallagher/clm-0001/determination_issued/det-0001",
+        "alderbrook-bergstrom/clm-0001/claim_filed/clm-0001",
+        "alderbrook-bergstrom/clm-0001/evidence_added/evd-0001",
+        "alderbrook-bergstrom/clm-0001/evidence_added/evd-0002",
+        "alderbrook-bergstrom/clm-0001/evidence_added/evd-0003",
+        "alderbrook-abernathy/clm-0001/payment_issued/pay-0001",
+        "alderbrook-brightwater/clm-0001/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2025-05-30",
+      "steps": 2,
+      "records": [
+        "alderbrook-gallagher/clm-0001/payment_issued/pay-0001",
+        "alderbrook-bergstrom/clm-0001/rental_started/rnt-0001"
+      ]
+    },
+    {
+      "day": "2025-06-02",
+      "steps": 2,
+      "records": [
+        "alderbrook-kerrigan/clm-0001/determination_issued/det-0001",
+        "alderbrook-bergstrom/clm-0001/request_issued/req-0001"
+      ]
+    },
+    {
+      "day": "2025-06-03",
+      "steps": 2,
+      "records": [
+        "alderbrook-jablonski/clm-0002/estimate_submitted/est-0003",
+        "alderbrook-abernathy/clm-0001/repair_completed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-06-04",
+      "steps": 2,
+      "records": [
+        "alderbrook-kerrigan/clm-0001/payment_issued/pay-0001",
+        "alderbrook-abernathy/clm-0001/rental_ended/rnt-0001"
+      ]
+    },
+    {
+      "day": "2025-06-05",
+      "steps": 2,
+      "records": [
+        "alderbrook-jablonski/clm-0002/determination_issued/det-0003",
+        "alderbrook-brightwater/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-06-06",
+      "steps": 1,
+      "records": [
+        "alderbrook-jablonski/clm-0002/payment_issued/pay-0003"
+      ]
+    },
+    {
+      "day": "2025-06-09",
+      "steps": 2,
+      "records": [
+        "alderbrook-kerrigan/clm-0001/repair_completed/clm-0001",
+        "alderbrook-gallagher/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-06-10",
+      "steps": 1,
+      "records": [
+        "alderbrook-abernathy/clm-0001/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2025-06-12",
+      "steps": 1,
+      "records": [
+        "alderbrook-abernathy/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-06-13",
+      "steps": 2,
+      "records": [
+        "alderbrook-vasquez/clm-0002/claim_filed/clm-0002",
+        "alderbrook-vasquez/clm-0002/evidence_added/evd-0008"
+      ]
+    },
+    {
+      "day": "2025-06-16",
+      "steps": 4,
+      "records": [
+        "alderbrook-kerrigan/clm-0001/claim_closed/clm-0001",
+        "alderbrook-bergstrom/clm-0001/evidence_added/evd-0004",
+        "alderbrook-bergstrom/clm-0001/request_answered/req-0001#photos",
+        "alderbrook-bergstrom/clm-0001/request_answered/req-0001#parked"
+      ]
+    },
+    {
+      "day": "2025-06-17",
+      "steps": 6,
+      "records": [
+        "alderbrook-vasquez/clm-0002/request_issued/req-0002",
+        "alderbrook-jablonski/clm-0002/repair_completed/clm-0002",
+        "alderbrook-abernathy/clm-0002/claim_filed/clm-0002",
+        "alderbrook-abernathy/clm-0002/evidence_added/evd-0004",
+        "alderbrook-abernathy/clm-0002/evidence_added/evd-0005",
+        "alderbrook-abernathy/clm-0002/request_issued/req-0002"
+      ]
+    },
+    {
+      "day": "2025-06-18",
+      "steps": 1,
+      "records": [
+        "alderbrook-vasquez/clm-0002/request_answered/req-0002#use"
+      ]
+    },
+    {
+      "day": "2025-06-20",
+      "steps": 1,
+      "records": [
+        "alderbrook-bergstrom/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2025-06-22",
+      "steps": 4,
+      "records": [
+        "alderbrook-abernathy/clm-0002/evidence_added/evd-0006",
+        "alderbrook-abernathy/clm-0002/evidence_added/evd-0007",
+        "alderbrook-abernathy/clm-0002/request_answered/req-0002#items",
+        "alderbrook-abernathy/clm-0002/request_answered/req-0002#proof"
+      ]
+    },
+    {
+      "day": "2025-06-23",
+      "steps": 2,
+      "records": [
+        "alderbrook-jablonski/clm-0002/claim_closed/clm-0002",
+        "alderbrook-abernathy/clm-0002/estimate_submitted/est-p0001"
+      ]
+    },
+    {
+      "day": "2025-06-25",
+      "steps": 3,
+      "records": [
+        "alderbrook-vasquez/clm-0002/estimate_submitted/est-0001",
+        "alderbrook-bergstrom/clm-0001/determination_issued/det-0001",
+        "alderbrook-abernathy/clm-0002/determination_issued/det-0002"
+      ]
+    },
+    {
+      "day": "2025-06-26",
+      "steps": 2,
+      "records": [
+        "alderbrook-vasquez/clm-0002/determination_issued/det-0002",
+        "alderbrook-bergstrom/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2025-06-27",
+      "steps": 1,
+      "records": [
+        "alderbrook-abernathy/clm-0002/payment_issued/pay-0003"
+      ]
+    },
+    {
+      "day": "2025-07-01",
+      "steps": 2,
+      "records": [
+        "alderbrook-abernathy/clm-0002/evidence_added/evd-0008",
+        "alderbrook-abernathy/clm-0002/dispute_opened/dsp-0001"
+      ]
+    },
+    {
+      "day": "2025-07-02",
+      "steps": 2,
+      "records": [
+        "alderbrook-vasquez/clm-0002/evidence_added/evd-0009",
+        "alderbrook-vasquez/clm-0002/dispute_opened/dsp-0002"
+      ]
+    },
+    {
+      "day": "2025-07-06",
+      "steps": 3,
+      "records": [
+        "alderbrook-quintero/clm-0001/claim_filed/clm-0001",
+        "alderbrook-quintero/clm-0001/evidence_added/evd-0001",
+        "alderbrook-quintero/clm-0001/evidence_added/evd-0002"
+      ]
+    },
+    {
+      "day": "2025-07-07",
+      "steps": 5,
+      "records": [
+        "alderbrook-quintero/clm-0001/request_issued/req-0001",
+        "alderbrook-lombardi/clm-0001/claim_filed/clm-0001",
+        "alderbrook-lombardi/clm-0001/evidence_added/evd-0001",
+        "alderbrook-lombardi/clm-0001/evidence_added/evd-0002",
+        "alderbrook-abernathy/clm-0002/dispute_decided/dsp-0001"
+      ]
+    },
+    {
+      "day": "2025-07-08",
+      "steps": 3,
+      "records": [
+        "alderbrook-quintero/clm-0001/evidence_added/evd-0003",
+        "alderbrook-quintero/clm-0001/request_answered/req-0001#photos",
+        "alderbrook-lombardi/clm-0001/request_issued/req-0001"
+      ]
+    },
+    {
+      "day": "2025-07-09",
+      "steps": 4,
+      "records": [
+        "alderbrook-lombardi/clm-0001/request_answered/req-0001#other_party",
+        "alderbrook-vasquez/clm-0002/dispute_decided/dsp-0002",
+        "alderbrook-bergstrom/clm-0001/rental_ended/rnt-0001",
+        "alderbrook-bergstrom/clm-0001/repair_completed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-07-10",
+      "steps": 4,
+      "records": [
+        "alderbrook-quintero/clm-0001/estimate_submitted/est-0001",
+        "alderbrook-oyelaran/clm-0001/claim_filed/clm-0001",
+        "alderbrook-oyelaran/clm-0001/evidence_added/evd-0001",
+        "alderbrook-abernathy/clm-0002/payment_issued/pay-0004"
+      ]
+    },
+    {
+      "day": "2025-07-11",
+      "steps": 4,
+      "records": [
+        "alderbrook-quintero/clm-0001/determination_issued/det-0001",
+        "alderbrook-vasquez/clm-0002/claim_closed/clm-0002",
+        "alderbrook-oyelaran/clm-0001/request_issued/req-0001",
+        "alderbrook-bergstrom/clm-0001/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2025-07-14",
+      "steps": 2,
+      "records": [
+        "alderbrook-quintero/clm-0001/payment_issued/pay-0001",
+        "alderbrook-lombardi/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2025-07-15",
+      "steps": 6,
+      "records": [
+        "alderbrook-oyelaran/clm-0001/evidence_added/evd-0002",
+        "alderbrook-oyelaran/clm-0001/evidence_added/evd-0003",
+        "alderbrook-oyelaran/clm-0001/evidence_added/evd-0004",
+        "alderbrook-oyelaran/clm-0001/evidence_added/evd-0005",
+        "alderbrook-oyelaran/clm-0001/request_answered/req-0001#items",
+        "alderbrook-oyelaran/clm-0001/request_answered/req-0001#proof"
+      ]
+    },
+    {
+      "day": "2025-07-16",
+      "steps": 3,
+      "records": [
+        "alderbrook-quintero/clm-0001/estimate_submitted/est-0002",
+        "alderbrook-lombardi/clm-0001/determination_issued/det-0001",
+        "alderbrook-bergstrom/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-07-17",
+      "steps": 1,
+      "records": [
+        "alderbrook-abernathy/clm-0002/claim_closed/clm-0002"
+      ]
+    },
+    {
+      "day": "2025-07-18",
+      "steps": 3,
+      "records": [
+        "alderbrook-quintero/clm-0001/determination_issued/det-0002",
+        "alderbrook-lombardi/clm-0001/payment_issued/pay-0001",
+        "alderbrook-oyelaran/clm-0001/estimate_submitted/est-p0001"
+      ]
+    },
+    {
+      "day": "2025-07-22",
+      "steps": 5,
+      "records": [
+        "alderbrook-quintero/clm-0001/payment_issued/pay-0002",
+        "alderbrook-bergstrom/clm-0002/claim_filed/clm-0002",
+        "alderbrook-bergstrom/clm-0002/evidence_added/evd-0005",
+        "alderbrook-bergstrom/clm-0002/evidence_added/evd-0006",
+        "alderbrook-bergstrom/clm-0002/evidence_added/evd-0007"
+      ]
+    },
+    {
+      "day": "2025-07-23",
+      "steps": 5,
+      "records": [
+        "alderbrook-lombardi/clm-0001/estimate_submitted/est-0002",
+        "alderbrook-bergstrom/clm-0002/evidence_added/evd-0008",
+        "alderbrook-bergstrom/clm-0002/request_issued/req-0002",
+        "alderbrook-bergstrom/clm-0002/request_answered/req-0002#photos",
+        "alderbrook-bergstrom/clm-0002/request_answered/req-0002#parked"
+      ]
+    },
+    {
+      "day": "2025-07-24",
+      "steps": 1,
+      "records": [
+        "alderbrook-oyelaran/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2025-07-28",
+      "steps": 2,
+      "records": [
+        "alderbrook-lombardi/clm-0001/determination_issued/det-0002",
+        "alderbrook-bergstrom/clm-0002/estimate_submitted/est-0002"
+      ]
+    },
+    {
+      "day": "2025-07-29",
+      "steps": 1,
+      "records": [
+        "alderbrook-oyelaran/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2025-07-30",
+      "steps": 1,
+      "records": [
+        "alderbrook-lombardi/clm-0001/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2025-07-31",
+      "steps": 1,
+      "records": [
+        "alderbrook-bergstrom/clm-0002/determination_issued/det-0002"
+      ]
+    },
+    {
+      "day": "2025-08-01",
+      "steps": 2,
+      "records": [
+        "alderbrook-quintero/clm-0001/repair_completed/clm-0001",
+        "alderbrook-bergstrom/clm-0002/payment_issued/pay-0003"
+      ]
+    },
+    {
+      "day": "2025-08-05",
+      "steps": 2,
+      "records": [
+        "alderbrook-quintero/clm-0001/claim_closed/clm-0001",
+        "alderbrook-oyelaran/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-08-11",
+      "steps": 2,
+      "records": [
+        "alderbrook-lombardi/clm-0001/repair_completed/clm-0001",
+        "alderbrook-bergstrom/clm-0002/estimate_submitted/est-0003"
+      ]
+    },
+    {
+      "day": "2025-08-12",
+      "steps": 1,
+      "records": [
+        "alderbrook-bergstrom/clm-0002/determination_issued/det-0003"
+      ]
+    },
+    {
+      "day": "2025-08-13",
+      "steps": 1,
+      "records": [
+        "alderbrook-lombardi/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-08-14",
+      "steps": 1,
+      "records": [
+        "alderbrook-bergstrom/clm-0002/payment_issued/pay-0004"
+      ]
+    },
+    {
+      "day": "2025-08-26",
+      "steps": 1,
+      "records": [
+        "alderbrook-bergstrom/clm-0002/repair_completed/clm-0002"
+      ]
+    },
+    {
+      "day": "2025-08-27",
+      "steps": 4,
+      "records": [
+        "alderbrook-kerrigan/clm-0002/claim_filed/clm-0002",
+        "alderbrook-kerrigan/clm-0002/evidence_added/evd-0004",
+        "alderbrook-kerrigan/clm-0002/evidence_added/evd-0005",
+        "alderbrook-kerrigan/clm-0002/evidence_added/evd-0006"
+      ]
+    },
+    {
+      "day": "2025-08-28",
+      "steps": 2,
+      "records": [
+        "alderbrook-kerrigan/clm-0002/request_issued/req-0002",
+        "alderbrook-bergstrom/clm-0002/claim_closed/clm-0002"
+      ]
+    },
+    {
+      "day": "2025-08-29",
+      "steps": 3,
+      "records": [
+        "alderbrook-kerrigan/clm-0002/request_answered/req-0002#title",
+        "alderbrook-kerrigan/clm-0002/request_answered/req-0002#mileage",
+        "alderbrook-kerrigan/clm-0002/request_answered/req-0002#keys"
+      ]
+    },
+    {
+      "day": "2025-09-01",
+      "steps": 3,
+      "records": [
+        "alderbrook-galloway/clm-0001/claim_filed/clm-0001",
+        "alderbrook-galloway/clm-0001/evidence_added/evd-0001",
+        "alderbrook-galloway/clm-0001/evidence_added/evd-0002"
+      ]
+    },
+    {
+      "day": "2025-09-03",
+      "steps": 6,
+      "records": [
+        "alderbrook-galloway/clm-0001/request_issued/req-0001",
+        "alderbrook-kerrigan/clm-0002/offer_issued/off-0001",
+        "alderbrook-pellegrino/clm-0002/claim_filed/clm-0002",
+        "alderbrook-pellegrino/clm-0002/evidence_added/evd-0006",
+        "alderbrook-pellegrino/clm-0002/evidence_added/evd-0007",
+        "alderbrook-pellegrino/clm-0002/evidence_added/evd-0008"
+      ]
+    },
+    {
+      "day": "2025-09-04",
+      "steps": 1,
+      "records": [
+        "alderbrook-pellegrino/clm-0002/request_issued/req-0002"
+      ]
+    },
+    {
+      "day": "2025-09-05",
+      "steps": 7,
+      "records": [
+        "alderbrook-galloway/clm-0001/evidence_added/evd-0003",
+        "alderbrook-galloway/clm-0001/evidence_added/evd-0004",
+        "alderbrook-galloway/clm-0001/request_answered/req-0001#items",
+        "alderbrook-galloway/clm-0001/request_answered/req-0001#proof",
+        "alderbrook-kerrigan/clm-0002/evidence_added/evd-0007",
+        "alderbrook-kerrigan/clm-0002/evidence_added/evd-0008",
+        "alderbrook-kerrigan/clm-0002/offer_answered/off-0001"
+      ]
+    },
+    {
+      "day": "2025-09-06",
+      "steps": 3,
+      "records": [
+        "alderbrook-abernathy/clm-0003/claim_filed/clm-0003",
+        "alderbrook-abernathy/clm-0003/evidence_added/evd-0009",
+        "alderbrook-abernathy/clm-0003/evidence_added/evd-0010"
+      ]
+    },
+    {
+      "day": "2025-09-08",
+      "steps": 2,
+      "records": [
+        "alderbrook-galloway/clm-0001/estimate_submitted/est-p0001",
+        "alderbrook-abernathy/clm-0003/request_issued/req-0003"
+      ]
+    },
+    {
+      "day": "2025-09-09",
+      "steps": 2,
+      "records": [
+        "alderbrook-abernathy/clm-0003/evidence_added/evd-0011",
+        "alderbrook-abernathy/clm-0003/request_answered/req-0003#statement"
+      ]
+    },
+    {
+      "day": "2025-09-11",
+      "steps": 1,
+      "records": [
+        "alderbrook-galloway/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2025-09-12",
+      "steps": 2,
+      "records": [
+        "alderbrook-kerrigan/clm-0002/offer_issued/off-0002",
+        "alderbrook-kerrigan/clm-0002/offer_answered/off-0002"
+      ]
+    },
+    {
+      "day": "2025-09-15",
+      "steps": 1,
+      "records": [
+        "alderbrook-abernathy/clm-0003/estimate_submitted/est-0002"
+      ]
+    },
+    {
+      "day": "2025-09-16",
+      "steps": 1,
+      "records": [
+        "alderbrook-abernathy/clm-0003/determination_issued/det-0003"
+      ]
+    },
+    {
+      "day": "2025-09-17",
+      "steps": 3,
+      "records": [
+        "alderbrook-pellegrino/clm-0002/evidence_added/evd-0009",
+        "alderbrook-pellegrino/clm-0002/request_answered/req-0002#parked",
+        "alderbrook-pellegrino/clm-0002/request_answered/req-0002#statement"
+      ]
+    },
+    {
+      "day": "2025-09-18",
+      "steps": 3,
+      "records": [
+        "alderbrook-galloway/clm-0001/claim_closed/clm-0001",
+        "alderbrook-kerrigan/clm-0002/payment_issued/pay-0002",
+        "alderbrook-abernathy/clm-0003/payment_issued/pay-0005"
+      ]
+    },
+    {
+      "day": "2025-09-24",
+      "steps": 1,
+      "records": [
+        "alderbrook-pellegrino/clm-0002/estimate_submitted/est-0002"
+      ]
+    },
+    {
+      "day": "2025-09-25",
+      "steps": 1,
+      "records": [
+        "alderbrook-kerrigan/clm-0002/claim_closed/clm-0002"
+      ]
+    },
+    {
+      "day": "2025-09-26",
+      "steps": 2,
+      "records": [
+        "alderbrook-pellegrino/clm-0002/determination_issued/det-0002",
+        "alderbrook-abernathy/clm-0003/estimate_submitted/est-0003"
+      ]
+    },
+    {
+      "day": "2025-09-29",
+      "steps": 1,
+      "records": [
+        "alderbrook-abernathy/clm-0003/determination_issued/det-0004"
+      ]
+    },
+    {
+      "day": "2025-09-30",
+      "steps": 1,
+      "records": [
+        "alderbrook-abernathy/clm-0003/payment_issued/pay-0006"
+      ]
+    },
+    {
+      "day": "2025-10-01",
+      "steps": 1,
+      "records": [
+        "alderbrook-pellegrino/clm-0002/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2025-10-07",
+      "steps": 1,
+      "records": [
+        "alderbrook-abernathy/clm-0003/repair_completed/clm-0003"
+      ]
+    },
+    {
+      "day": "2025-10-10",
+      "steps": 1,
+      "records": [
+        "alderbrook-pellegrino/clm-0002/repair_completed/clm-0002"
+      ]
+    },
+    {
+      "day": "2025-10-14",
+      "steps": 1,
+      "records": [
+        "alderbrook-abernathy/clm-0003/claim_closed/clm-0003"
+      ]
+    },
+    {
+      "day": "2025-10-20",
+      "steps": 1,
+      "records": [
+        "alderbrook-pellegrino/clm-0002/claim_closed/clm-0002"
+      ]
+    },
+    {
+      "day": "2025-10-27",
+      "steps": 4,
+      "records": [
+        "alderbrook-yamamoto/clm-0003/claim_filed/clm-0003",
+        "alderbrook-yamamoto/clm-0003/evidence_added/evd-0007",
+        "alderbrook-yamamoto/clm-0003/evidence_added/evd-0008",
+        "alderbrook-yamamoto/clm-0003/evidence_added/evd-0009"
+      ]
+    },
+    {
+      "day": "2025-10-28",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0003/rental_started/rnt-0002"
+      ]
+    },
+    {
+      "day": "2025-10-29",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0003/request_issued/req-0003"
+      ]
+    },
+    {
+      "day": "2025-10-31",
+      "steps": 5,
+      "records": [
+        "alderbrook-yamamoto/clm-0003/evidence_added/evd-0010",
+        "alderbrook-yamamoto/clm-0003/evidence_added/evd-0011",
+        "alderbrook-yamamoto/clm-0003/request_answered/req-0003#other_party",
+        "alderbrook-yamamoto/clm-0003/request_answered/req-0003#photos",
+        "alderbrook-yamamoto/clm-0003/request_answered/req-0003#statement"
+      ]
+    },
+    {
+      "day": "2025-11-07",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0003/estimate_submitted/est-0003"
+      ]
+    },
+    {
+      "day": "2025-11-10",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0003/determination_issued/det-0003"
+      ]
+    },
+    {
+      "day": "2025-11-12",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0003/payment_issued/pay-0004"
+      ]
+    },
+    {
+      "day": "2025-11-16",
+      "steps": 4,
+      "records": [
+        "alderbrook-okonkwo/clm-0001/claim_filed/clm-0001",
+        "alderbrook-okonkwo/clm-0001/evidence_added/evd-0001",
+        "alderbrook-okonkwo/clm-0001/evidence_added/evd-0002",
+        "alderbrook-okonkwo/clm-0001/evidence_added/evd-0003"
+      ]
+    },
+    {
+      "day": "2025-11-17",
+      "steps": 4,
+      "records": [
+        "alderbrook-okonkwo/clm-0001/evidence_added/evd-0004",
+        "alderbrook-okonkwo/clm-0001/request_issued/req-0001",
+        "alderbrook-okonkwo/clm-0001/request_answered/req-0001#other_party",
+        "alderbrook-okonkwo/clm-0001/request_answered/req-0001#photos"
+      ]
+    },
+    {
+      "day": "2025-11-18",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0003/estimate_submitted/est-0004"
+      ]
+    },
+    {
+      "day": "2025-11-20",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0003/determination_issued/det-0004"
+      ]
+    },
+    {
+      "day": "2025-11-24",
+      "steps": 2,
+      "records": [
+        "alderbrook-okonkwo/clm-0001/estimate_submitted/est-0001",
+        "alderbrook-yamamoto/clm-0003/payment_issued/pay-0005"
+      ]
+    },
+    {
+      "day": "2025-11-26",
+      "steps": 1,
+      "records": [
+        "alderbrook-okonkwo/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2025-11-27",
+      "steps": 3,
+      "records": [
+        "alderbrook-nakashima/clm-0001/claim_filed/clm-0001",
+        "alderbrook-nakashima/clm-0001/evidence_added/evd-0001",
+        "alderbrook-nakashima/clm-0001/evidence_added/evd-0002"
+      ]
+    },
+    {
+      "day": "2025-11-30",
+      "steps": 2,
+      "records": [
+        "alderbrook-iverson/clm-0001/claim_filed/clm-0001",
+        "alderbrook-iverson/clm-0001/evidence_added/evd-0001"
+      ]
+    },
+    {
+      "day": "2025-12-01",
+      "steps": 2,
+      "records": [
+        "alderbrook-okonkwo/clm-0001/payment_issued/pay-0001",
+        "alderbrook-nakashima/clm-0001/request_issued/req-0001"
+      ]
+    },
+    {
+      "day": "2025-12-02",
+      "steps": 4,
+      "records": [
+        "alderbrook-nakashima/clm-0001/evidence_added/evd-0003",
+        "alderbrook-nakashima/clm-0001/request_answered/req-0001#statement",
+        "alderbrook-iverson/clm-0001/estimate_submitted/est-0001",
+        "alderbrook-iverson/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2025-12-04",
+      "steps": 2,
+      "records": [
+        "alderbrook-okonkwo/clm-0001/estimate_submitted/est-0002",
+        "alderbrook-yamamoto/clm-0003/repair_completed/clm-0003"
+      ]
+    },
+    {
+      "day": "2025-12-05",
+      "steps": 3,
+      "records": [
+        "alderbrook-yamamoto/clm-0003/rental_ended/rnt-0002",
+        "alderbrook-nakashima/clm-0001/estimate_submitted/est-0001",
+        "alderbrook-iverson/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2025-12-08",
+      "steps": 1,
+      "records": [
+        "alderbrook-okonkwo/clm-0001/determination_issued/det-0002"
+      ]
+    },
+    {
+      "day": "2025-12-09",
+      "steps": 2,
+      "records": [
+        "alderbrook-okonkwo/clm-0001/payment_issued/pay-0002",
+        "alderbrook-iverson/clm-0001/repair_completed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-12-10",
+      "steps": 4,
+      "records": [
+        "alderbrook-kowalczyk/clm-0001/claim_filed/clm-0001",
+        "alderbrook-kowalczyk/clm-0001/evidence_added/evd-0001",
+        "alderbrook-kowalczyk/clm-0001/evidence_added/evd-0002",
+        "alderbrook-kowalczyk/clm-0001/evidence_added/evd-0003"
+      ]
+    },
+    {
+      "day": "2025-12-11",
+      "steps": 4,
+      "records": [
+        "alderbrook-kowalczyk/clm-0001/request_issued/req-0001",
+        "alderbrook-kowalczyk/clm-0001/rental_started/rnt-0001",
+        "alderbrook-nakashima/clm-0001/determination_issued/det-0001",
+        "alderbrook-iverson/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-12-12",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0003/payment_issued/pay-0006"
+      ]
+    },
+    {
+      "day": "2025-12-13",
+      "steps": 3,
+      "records": [
+        "alderbrook-kowalczyk/clm-0001/request_answered/req-0001#title",
+        "alderbrook-kowalczyk/clm-0001/request_answered/req-0001#mileage",
+        "alderbrook-kowalczyk/clm-0001/request_answered/req-0001#keys"
+      ]
+    },
+    {
+      "day": "2025-12-15",
+      "steps": 5,
+      "records": [
+        "alderbrook-kowalczyk/clm-0001/estimate_submitted/est-0001",
+        "alderbrook-prescott/clm-0001/claim_filed/clm-0001",
+        "alderbrook-prescott/clm-0001/evidence_added/evd-0001",
+        "alderbrook-prescott/clm-0001/evidence_added/evd-0002",
+        "alderbrook-nakashima/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2025-12-16",
+      "steps": 4,
+      "records": [
+        "alderbrook-okonkwo/clm-0001/repair_completed/clm-0001",
+        "alderbrook-prescott/clm-0001/evidence_added/evd-0003",
+        "alderbrook-prescott/clm-0001/request_issued/req-0001",
+        "alderbrook-prescott/clm-0001/request_answered/req-0001#photos"
+      ]
+    },
+    {
+      "day": "2025-12-19",
+      "steps": 2,
+      "records": [
+        "alderbrook-kowalczyk/clm-0001/offer_issued/off-0001",
+        "alderbrook-nakashima/clm-0001/repair_completed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-12-20",
+      "steps": 3,
+      "records": [
+        "alderbrook-kowalczyk/clm-0001/evidence_added/evd-0004",
+        "alderbrook-kowalczyk/clm-0001/evidence_added/evd-0005",
+        "alderbrook-kowalczyk/clm-0001/offer_answered/off-0001"
+      ]
+    },
+    {
+      "day": "2025-12-22",
+      "steps": 1,
+      "records": [
+        "alderbrook-yamamoto/clm-0003/claim_closed/clm-0003"
+      ]
+    },
+    {
+      "day": "2025-12-23",
+      "steps": 2,
+      "records": [
+        "alderbrook-kowalczyk/clm-0001/offer_issued/off-0002",
+        "alderbrook-prescott/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2025-12-24",
+      "steps": 1,
+      "records": [
+        "alderbrook-okonkwo/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-12-25",
+      "steps": 1,
+      "records": [
+        "alderbrook-kowalczyk/clm-0001/offer_answered/off-0002"
+      ]
+    },
+    {
+      "day": "2025-12-26",
+      "steps": 1,
+      "records": [
+        "alderbrook-kowalczyk/clm-0001/rental_ended/rnt-0001"
+      ]
+    },
+    {
+      "day": "2025-12-29",
+      "steps": 1,
+      "records": [
+        "alderbrook-prescott/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2025-12-30",
+      "steps": 2,
+      "records": [
+        "alderbrook-prescott/clm-0001/payment_issued/pay-0001",
+        "alderbrook-nakashima/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2025-12-31",
+      "steps": 1,
+      "records": [
+        "alderbrook-kowalczyk/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2026-01-02",
+      "steps": 2,
+      "records": [
+        "alderbrook-kowalczyk/clm-0001/payment_issued/pay-0002",
+        "alderbrook-prescott/clm-0001/repair_completed/clm-0001"
+      ]
+    },
+    {
+      "day": "2026-01-03",
+      "steps": 2,
+      "records": [
+        "alderbrook-moreau/clm-0002/claim_filed/clm-0002",
+        "alderbrook-moreau/clm-0002/evidence_added/evd-0007"
+      ]
+    },
+    {
+      "day": "2026-01-05",
+      "steps": 2,
+      "records": [
+        "alderbrook-moreau/clm-0002/request_issued/req-0002",
+        "alderbrook-kowalczyk/clm-0001/payment_issued/pay-0003"
+      ]
+    },
+    {
+      "day": "2026-01-06",
+      "steps": 1,
+      "records": [
+        "alderbrook-prescott/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2026-01-09",
+      "steps": 6,
+      "records": [
+        "alderbrook-moreau/clm-0002/evidence_added/evd-0008",
+        "alderbrook-moreau/clm-0002/evidence_added/evd-0009",
+        "alderbrook-moreau/clm-0002/evidence_added/evd-0010",
+        "alderbrook-moreau/clm-0002/request_answered/req-0002#items",
+        "alderbrook-moreau/clm-0002/request_answered/req-0002#proof",
+        "alderbrook-kowalczyk/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2026-01-14",
+      "steps": 1,
+      "records": [
+        "alderbrook-moreau/clm-0002/estimate_submitted/est-0002"
+      ]
+    },
+    {
+      "day": "2026-01-18",
+      "steps": 4,
+      "records": [
+        "alderbrook-underhill/clm-0001/claim_filed/clm-0001",
+        "alderbrook-underhill/clm-0001/evidence_added/evd-0001",
+        "alderbrook-underhill/clm-0001/evidence_added/evd-0002",
+        "alderbrook-underhill/clm-0001/evidence_added/evd-0003"
+      ]
+    },
+    {
+      "day": "2026-01-20",
+      "steps": 1,
+      "records": [
+        "alderbrook-underhill/clm-0001/request_issued/req-0001"
+      ]
+    },
+    {
+      "day": "2026-01-21",
+      "steps": 3,
+      "records": [
+        "alderbrook-underhill/clm-0001/evidence_added/evd-0004",
+        "alderbrook-underhill/clm-0001/request_answered/req-0001#other_party",
+        "alderbrook-underhill/clm-0001/request_answered/req-0001#photos"
+      ]
+    },
+    {
+      "day": "2026-01-23",
+      "steps": 1,
+      "records": [
+        "alderbrook-moreau/clm-0002/determination_issued/det-0002"
+      ]
+    },
+    {
+      "day": "2026-01-26",
+      "steps": 1,
+      "records": [
+        "alderbrook-underhill/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2026-01-28",
+      "steps": 1,
+      "records": [
+        "alderbrook-moreau/clm-0002/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2026-01-30",
+      "steps": 3,
+      "records": [
+        "alderbrook-underhill/clm-0001/determination_issued/det-0001",
+        "alderbrook-moreau/clm-0002/evidence_added/evd-0011",
+        "alderbrook-moreau/clm-0002/dispute_opened/dsp-0001"
+      ]
+    },
+    {
+      "day": "2026-01-31",
+      "steps": 4,
+      "records": [
+        "alderbrook-haddad/clm-0001/claim_filed/clm-0001",
+        "alderbrook-haddad/clm-0001/evidence_added/evd-0001",
+        "alderbrook-haddad/clm-0001/evidence_added/evd-0002",
+        "alderbrook-haddad/clm-0001/evidence_added/evd-0003"
+      ]
+    },
+    {
+      "day": "2026-02-01",
+      "steps": 2,
+      "records": [
+        "alderbrook-esposito/clm-0001/claim_filed/clm-0001",
+        "alderbrook-esposito/clm-0001/evidence_added/evd-0001"
+      ]
+    },
+    {
+      "day": "2026-02-02",
+      "steps": 6,
+      "records": [
+        "alderbrook-underhill/clm-0001/payment_issued/pay-0001",
+        "alderbrook-haddad/clm-0001/evidence_added/evd-0004",
+        "alderbrook-haddad/clm-0001/request_issued/req-0001",
+        "alderbrook-haddad/clm-0001/request_answered/req-0001#driver",
+        "alderbrook-haddad/clm-0001/request_answered/req-0001#other_party",
+        "alderbrook-haddad/clm-0001/request_answered/req-0001#photos"
+      ]
+    },
+    {
+      "day": "2026-02-03",
+      "steps": 2,
+      "records": [
+        "alderbrook-esposito/clm-0001/request_issued/req-0001",
+        "alderbrook-esposito/clm-0001/request_answered/req-0001#cause"
+      ]
+    },
+    {
+      "day": "2026-02-04",
+      "steps": 1,
+      "records": [
+        "alderbrook-esposito/clm-0001/estimate_submitted/est-p0001"
+      ]
+    },
+    {
+      "day": "2026-02-05",
+      "steps": 1,
+      "records": [
+        "alderbrook-haddad/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2026-02-06",
+      "steps": 2,
+      "records": [
+        "alderbrook-moreau/clm-0002/dispute_decided/dsp-0001",
+        "alderbrook-esposito/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2026-02-09",
+      "steps": 1,
+      "records": [
+        "alderbrook-haddad/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2026-02-10",
+      "steps": 1,
+      "records": [
+        "alderbrook-haddad/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2026-02-11",
+      "steps": 1,
+      "records": [
+        "alderbrook-underhill/clm-0001/repair_completed/clm-0001"
+      ]
+    },
+    {
+      "day": "2026-02-13",
+      "steps": 2,
+      "records": [
+        "alderbrook-moreau/clm-0002/claim_closed/clm-0002",
+        "alderbrook-haddad/clm-0001/repair_completed/clm-0001"
+      ]
+    },
+    {
+      "day": "2026-02-17",
+      "steps": 1,
+      "records": [
+        "alderbrook-esposito/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2026-02-18",
+      "steps": 1,
+      "records": [
+        "alderbrook-underhill/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2026-02-24",
+      "steps": 1,
+      "records": [
+        "alderbrook-haddad/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2026-02-26",
+      "steps": 6,
+      "records": [
+        "alderbrook-ostrowski/clm-0001/claim_filed/clm-0001",
+        "alderbrook-ostrowski/clm-0001/evidence_added/evd-0001",
+        "alderbrook-oyelaran/clm-0002/claim_filed/clm-0002",
+        "alderbrook-oyelaran/clm-0002/evidence_added/evd-0006",
+        "alderbrook-oyelaran/clm-0002/evidence_added/evd-0007",
+        "alderbrook-oyelaran/clm-0002/evidence_added/evd-0008"
+      ]
+    },
+    {
+      "day": "2026-02-27",
+      "steps": 2,
+      "records": [
+        "alderbrook-ostrowski/clm-0001/estimate_submitted/est-0001",
+        "alderbrook-oyelaran/clm-0002/request_issued/req-0002"
+      ]
+    },
+    {
+      "day": "2026-03-01",
+      "steps": 4,
+      "records": [
+        "alderbrook-oyelaran/clm-0002/evidence_added/evd-0009",
+        "alderbrook-oyelaran/clm-0002/request_answered/req-0002#driver",
+        "alderbrook-oyelaran/clm-0002/request_answered/req-0002#other_party",
+        "alderbrook-oyelaran/clm-0002/request_answered/req-0002#photos"
+      ]
+    },
+    {
+      "day": "2026-03-02",
+      "steps": 1,
+      "records": [
+        "alderbrook-ostrowski/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2026-03-05",
+      "steps": 5,
+      "records": [
+        "alderbrook-sandoval/clm-0001/claim_filed/clm-0001",
+        "alderbrook-sandoval/clm-0001/evidence_added/evd-0001",
+        "alderbrook-sandoval/clm-0001/evidence_added/evd-0002",
+        "alderbrook-sandoval/clm-0001/request_issued/req-0001",
+        "alderbrook-ostrowski/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2026-03-06",
+      "steps": 5,
+      "records": [
+        "alderbrook-sandoval/clm-0001/request_answered/req-0001#title",
+        "alderbrook-sandoval/clm-0001/request_answered/req-0001#mileage",
+        "alderbrook-sandoval/clm-0001/request_answered/req-0001#keys",
+        "alderbrook-ostrowski/clm-0001/repair_completed/clm-0001",
+        "alderbrook-oyelaran/clm-0002/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2026-03-09",
+      "steps": 2,
+      "records": [
+        "alderbrook-ostrowski/clm-0001/claim_closed/clm-0001",
+        "alderbrook-oyelaran/clm-0002/determination_issued/det-0002"
+      ]
+    },
+    {
+      "day": "2026-03-10",
+      "steps": 1,
+      "records": [
+        "alderbrook-oyelaran/clm-0002/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2026-03-11",
+      "steps": 1,
+      "records": [
+        "alderbrook-sandoval/clm-0001/offer_issued/off-0001"
+      ]
+    },
+    {
+      "day": "2026-03-13",
+      "steps": 1,
+      "records": [
+        "alderbrook-oyelaran/clm-0002/repair_completed/clm-0002"
+      ]
+    },
+    {
+      "day": "2026-03-23",
+      "steps": 1,
+      "records": [
+        "alderbrook-oyelaran/clm-0002/claim_closed/clm-0002"
+      ]
+    },
+    {
+      "day": "2026-03-24",
+      "steps": 1,
+      "records": [
+        "alderbrook-sandoval/clm-0001/offer_issued/off-0002"
+      ]
+    },
+    {
+      "day": "2026-03-25",
+      "steps": 1,
+      "records": [
+        "alderbrook-sandoval/clm-0001/offer_answered/off-0002"
+      ]
+    },
+    {
+      "day": "2026-03-26",
+      "steps": 4,
+      "records": [
+        "alderbrook-fairbanks/clm-0002/claim_filed/clm-0002",
+        "alderbrook-fairbanks/clm-0002/evidence_added/evd-0004",
+        "alderbrook-fairbanks/clm-0002/evidence_added/evd-0005",
+        "alderbrook-fairbanks/clm-0002/request_issued/req-0002"
+      ]
+    },
+    {
+      "day": "2026-03-27",
+      "steps": 1,
+      "records": [
+        "alderbrook-sandoval/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2026-03-28",
+      "steps": 1,
+      "records": [
+        "alderbrook-fairbanks/clm-0002/request_answered/req-0002#other_party"
+      ]
+    },
+    {
+      "day": "2026-03-30",
+      "steps": 4,
+      "records": [
+        "alderbrook-thibodeau/clm-0001/claim_filed/clm-0001",
+        "alderbrook-thibodeau/clm-0001/evidence_added/evd-0001",
+        "alderbrook-thibodeau/clm-0001/evidence_added/evd-0002",
+        "alderbrook-thibodeau/clm-0001/evidence_added/evd-0003"
+      ]
+    },
+    {
+      "day": "2026-03-31",
+      "steps": 1,
+      "records": [
+        "alderbrook-thibodeau/clm-0001/rental_started/rnt-0001"
+      ]
+    },
+    {
+      "day": "2026-04-01",
+      "steps": 9,
+      "records": [
+        "alderbrook-novak/clm-0002/claim_filed/clm-0002",
+        "alderbrook-novak/clm-0002/evidence_added/evd-0004",
+        "alderbrook-novak/clm-0002/evidence_added/evd-0005",
+        "alderbrook-novak/clm-0002/evidence_added/evd-0006",
+        "alderbrook-fairbanks/clm-0002/estimate_submitted/est-0002",
+        "alderbrook-gallagher/clm-0002/claim_filed/clm-0002",
+        "alderbrook-gallagher/clm-0002/evidence_added/evd-0006",
+        "alderbrook-gallagher/clm-0002/request_issued/req-0002",
+        "alderbrook-thibodeau/clm-0001/request_issued/req-0001"
+      ]
+    },
+    {
+      "day": "2026-04-02",
+      "steps": 4,
+      "records": [
+        "alderbrook-novak/clm-0002/request_issued/req-0002",
+        "alderbrook-thibodeau/clm-0001/request_answered/req-0001#title",
+        "alderbrook-thibodeau/clm-0001/request_answered/req-0001#mileage",
+        "alderbrook-thibodeau/clm-0001/request_answered/req-0001#keys"
+      ]
+    },
+    {
+      "day": "2026-04-03",
+      "steps": 2,
+      "records": [
+        "alderbrook-novak/clm-0002/request_answered/req-0002#other_party",
+        "alderbrook-gallagher/clm-0002/request_answered/req-0002#use"
+      ]
+    },
+    {
+      "day": "2026-04-05",
+      "steps": 3,
+      "records": [
+        "alderbrook-abernathy/clm-0004/claim_filed/clm-0004",
+        "alderbrook-abernathy/clm-0004/evidence_added/evd-0012",
+        "alderbrook-abernathy/clm-0004/evidence_added/evd-0013"
+      ]
+    },
+    {
+      "day": "2026-04-06",
+      "steps": 4,
+      "records": [
+        "alderbrook-sandoval/clm-0001/claim_closed/clm-0001",
+        "alderbrook-gallagher/clm-0002/estimate_submitted/est-0001",
+        "alderbrook-abernathy/clm-0004/rental_started/rnt-0002",
+        "alderbrook-thibodeau/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2026-04-07",
+      "steps": 3,
+      "records": [
+        "alderbrook-fairbanks/clm-0002/determination_issued/det-0002",
+        "alderbrook-gallagher/clm-0002/determination_issued/det-0002",
+        "alderbrook-abernathy/clm-0004/request_issued/req-0004"
+      ]
+    },
+    {
+      "day": "2026-04-08",
+      "steps": 4,
+      "records": [
+        "alderbrook-novak/clm-0002/estimate_submitted/est-0003",
+        "alderbrook-abernathy/clm-0004/evidence_added/evd-0014",
+        "alderbrook-abernathy/clm-0004/request_answered/req-0004#other_party",
+        "alderbrook-abernathy/clm-0004/request_answered/req-0004#photos"
+      ]
+    },
+    {
+      "day": "2026-04-09",
+      "steps": 1,
+      "records": [
+        "alderbrook-fairbanks/clm-0002/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2026-04-11",
+      "steps": 2,
+      "records": [
+        "alderbrook-gallagher/clm-0002/evidence_added/evd-0007",
+        "alderbrook-gallagher/clm-0002/dispute_opened/dsp-0001"
+      ]
+    },
+    {
+      "day": "2026-04-13",
+      "steps": 2,
+      "records": [
+        "alderbrook-novak/clm-0002/determination_issued/det-0003",
+        "alderbrook-abernathy/clm-0004/estimate_submitted/est-0004"
+      ]
+    },
+    {
+      "day": "2026-04-14",
+      "steps": 1,
+      "records": [
+        "alderbrook-thibodeau/clm-0001/offer_issued/off-0001"
+      ]
+    },
+    {
+      "day": "2026-04-15",
+      "steps": 1,
+      "records": [
+        "alderbrook-novak/clm-0002/payment_issued/pay-0003"
+      ]
+    },
+    {
+      "day": "2026-04-16",
+      "steps": 2,
+      "records": [
+        "alderbrook-fairbanks/clm-0002/estimate_submitted/est-0003",
+        "alderbrook-thibodeau/clm-0001/offer_answered/off-0001"
+      ]
+    },
+    {
+      "day": "2026-04-17",
+      "steps": 2,
+      "records": [
+        "alderbrook-abernathy/clm-0004/determination_issued/det-0005",
+        "alderbrook-thibodeau/clm-0001/rental_ended/rnt-0001"
+      ]
+    },
+    {
+      "day": "2026-04-21",
+      "steps": 2,
+      "records": [
+        "alderbrook-fairbanks/clm-0002/determination_issued/det-0003",
+        "alderbrook-gallagher/clm-0002/dispute_decided/dsp-0001"
+      ]
+    },
+    {
+      "day": "2026-04-22",
+      "steps": 2,
+      "records": [
+        "alderbrook-fairbanks/clm-0002/payment_issued/pay-0003",
+        "alderbrook-abernathy/clm-0004/payment_issued/pay-0007"
+      ]
+    },
+    {
+      "day": "2026-04-27",
+      "steps": 2,
+      "records": [
+        "alderbrook-novak/clm-0002/repair_completed/clm-0002",
+        "alderbrook-gallagher/clm-0002/claim_closed/clm-0002"
+      ]
+    },
+    {
+      "day": "2026-04-28",
+      "steps": 2,
+      "records": [
+        "alderbrook-abernathy/clm-0004/estimate_submitted/est-0005",
+        "alderbrook-thibodeau/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2026-04-29",
+      "steps": 2,
+      "records": [
+        "alderbrook-abernathy/clm-0004/determination_issued/det-0006",
+        "alderbrook-thibodeau/clm-0001/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2026-04-30",
+      "steps": 3,
+      "records": [
+        "alderbrook-delgado/clm-0001/claim_filed/clm-0001",
+        "alderbrook-delgado/clm-0001/evidence_added/evd-0001",
+        "alderbrook-fairbanks/clm-0002/repair_completed/clm-0002"
+      ]
+    },
+    {
+      "day": "2026-05-01",
+      "steps": 1,
+      "records": [
+        "alderbrook-novak/clm-0002/claim_closed/clm-0002"
+      ]
+    },
+    {
+      "day": "2026-05-04",
+      "steps": 3,
+      "records": [
+        "alderbrook-delgado/clm-0001/estimate_submitted/est-0001",
+        "alderbrook-fairbanks/clm-0002/claim_closed/clm-0002",
+        "alderbrook-abernathy/clm-0004/payment_issued/pay-0008"
+      ]
+    },
+    {
+      "day": "2026-05-06",
+      "steps": 2,
+      "records": [
+        "alderbrook-delgado/clm-0001/determination_issued/det-0001",
+        "alderbrook-thibodeau/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2026-05-07",
+      "steps": 2,
+      "records": [
+        "alderbrook-delgado/clm-0001/payment_issued/pay-0001",
+        "alderbrook-delgado/clm-0001/repair_completed/clm-0001"
+      ]
+    },
+    {
+      "day": "2026-05-08",
+      "steps": 5,
+      "records": [
+        "alderbrook-abernathy/clm-0004/rental_ended/rnt-0002",
+        "alderbrook-abernathy/clm-0004/repair_completed/clm-0004",
+        "alderbrook-hollis/clm-0001/claim_filed/clm-0001",
+        "alderbrook-hollis/clm-0001/evidence_added/evd-0001",
+        "alderbrook-hollis/clm-0001/evidence_added/evd-0002"
+      ]
+    },
+    {
+      "day": "2026-05-10",
+      "steps": 1,
+      "records": [
+        "alderbrook-hollis/clm-0001/rental_started/rnt-0001"
+      ]
+    },
+    {
+      "day": "2026-05-11",
+      "steps": 1,
+      "records": [
+        "alderbrook-hollis/clm-0001/request_issued/req-0001"
+      ]
+    },
+    {
+      "day": "2026-05-12",
+      "steps": 4,
+      "records": [
+        "alderbrook-delgado/clm-0001/claim_closed/clm-0001",
+        "alderbrook-abernathy/clm-0004/payment_issued/pay-0009",
+        "alderbrook-hollis/clm-0001/evidence_added/evd-0003",
+        "alderbrook-hollis/clm-0001/request_answered/req-0001#photos"
+      ]
+    },
+    {
+      "day": "2026-05-14",
+      "steps": 5,
+      "records": [
+        "alderbrook-kowalczyk/clm-0002/claim_filed/clm-0002",
+        "alderbrook-kowalczyk/clm-0002/evidence_added/evd-0006",
+        "alderbrook-donnelly/clm-0002/claim_filed/clm-0002",
+        "alderbrook-donnelly/clm-0002/evidence_added/evd-0004",
+        "alderbrook-hollis/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2026-05-15",
+      "steps": 2,
+      "records": [
+        "alderbrook-donnelly/clm-0002/evidence_added/evd-0005",
+        "alderbrook-donnelly/clm-0002/evidence_added/evd-0006"
+      ]
+    },
+    {
+      "day": "2026-05-18",
+      "steps": 2,
+      "records": [
+        "alderbrook-kowalczyk/clm-0002/request_issued/req-0002",
+        "alderbrook-donnelly/clm-0002/request_issued/req-0002"
+      ]
+    },
+    {
+      "day": "2026-05-19",
+      "steps": 4,
+      "records": [
+        "alderbrook-abernathy/clm-0004/claim_closed/clm-0004",
+        "alderbrook-donnelly/clm-0002/request_answered/req-0002#title",
+        "alderbrook-donnelly/clm-0002/request_answered/req-0002#mileage",
+        "alderbrook-donnelly/clm-0002/request_answered/req-0002#keys"
+      ]
+    },
+    {
+      "day": "2026-05-20",
+      "steps": 1,
+      "records": [
+        "alderbrook-hollis/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2026-05-21",
+      "steps": 1,
+      "records": [
+        "alderbrook-donnelly/clm-0002/offer_issued/off-0001"
+      ]
+    },
+    {
+      "day": "2026-05-22",
+      "steps": 8,
+      "records": [
+        "alderbrook-kowalczyk/clm-0002/evidence_added/evd-0007",
+        "alderbrook-kowalczyk/clm-0002/evidence_added/evd-0008",
+        "alderbrook-kowalczyk/clm-0002/evidence_added/evd-0009",
+        "alderbrook-kowalczyk/clm-0002/evidence_added/evd-0010",
+        "alderbrook-kowalczyk/clm-0002/request_answered/req-0002#items",
+        "alderbrook-kowalczyk/clm-0002/request_answered/req-0002#proof",
+        "alderbrook-donnelly/clm-0002/offer_answered/off-0001",
+        "alderbrook-hollis/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2026-05-24",
+      "steps": 1,
+      "records": [
+        "alderbrook-kowalczyk/clm-0002/estimate_submitted/est-p0001"
+      ]
+    },
+    {
+      "day": "2026-05-27",
+      "steps": 1,
+      "records": [
+        "alderbrook-kowalczyk/clm-0002/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2026-06-01",
+      "steps": 4,
+      "records": [
+        "alderbrook-oyelaran/clm-0003/claim_filed/clm-0003",
+        "alderbrook-oyelaran/clm-0003/evidence_added/evd-0010",
+        "alderbrook-oyelaran/clm-0003/evidence_added/evd-0011",
+        "alderbrook-donnelly/clm-0002/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2026-06-02",
+      "steps": 7,
+      "records": [
+        "alderbrook-kowalczyk/clm-0002/claim_closed/clm-0002",
+        "alderbrook-rasmussen/clm-0001/claim_filed/clm-0001",
+        "alderbrook-rasmussen/clm-0001/evidence_added/evd-0001",
+        "alderbrook-rasmussen/clm-0001/evidence_added/evd-0002",
+        "alderbrook-oyelaran/clm-0003/request_issued/req-0003",
+        "alderbrook-hollis/clm-0001/rental_ended/rnt-0001",
+        "alderbrook-hollis/clm-0001/repair_completed/clm-0001"
+      ]
+    },
+    {
+      "day": "2026-06-03",
+      "steps": 2,
+      "records": [
+        "alderbrook-rasmussen/clm-0001/request_issued/req-0001",
+        "alderbrook-rasmussen/clm-0001/rental_started/rnt-0001"
+      ]
+    },
+    {
+      "day": "2026-06-04",
+      "steps": 6,
+      "records": [
+        "alderbrook-rasmussen/clm-0001/evidence_added/evd-0003",
+        "alderbrook-rasmussen/clm-0001/evidence_added/evd-0004",
+        "alderbrook-rasmussen/clm-0001/request_answered/req-0001#other_party",
+        "alderbrook-rasmussen/clm-0001/request_answered/req-0001#photos",
+        "alderbrook-rasmussen/clm-0001/request_answered/req-0001#statement",
+        "alderbrook-donnelly/clm-0002/claim_closed/clm-0002"
+      ]
+    },
+    {
+      "day": "2026-06-05",
+      "steps": 1,
+      "records": [
+        "alderbrook-hollis/clm-0001/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2026-06-06",
+      "steps": 1,
+      "records": [
+        "alderbrook-nakashima/clm-0002/claim_filed/clm-0002"
+      ]
+    },
+    {
+      "day": "2026-06-07",
+      "steps": 5,
+      "records": [
+        "alderbrook-oyelaran/clm-0003/evidence_added/evd-0012",
+        "alderbrook-oyelaran/clm-0003/evidence_added/evd-0013",
+        "alderbrook-oyelaran/clm-0003/evidence_added/evd-0014",
+        "alderbrook-oyelaran/clm-0003/request_answered/req-0003#items",
+        "alderbrook-oyelaran/clm-0003/request_answered/req-0003#proof"
+      ]
+    },
+    {
+      "day": "2026-06-08",
+      "steps": 1,
+      "records": [
+        "alderbrook-rasmussen/clm-0001/estimate_submitted/est-0001"
+      ]
+    },
+    {
+      "day": "2026-06-09",
+      "steps": 2,
+      "records": [
+        "alderbrook-oyelaran/clm-0003/estimate_submitted/est-p0002",
+        "alderbrook-nakashima/clm-0002/request_issued/req-0002"
+      ]
+    },
+    {
+      "day": "2026-06-10",
+      "steps": 1,
+      "records": [
+        "alderbrook-rasmussen/clm-0001/determination_issued/det-0001"
+      ]
+    },
+    {
+      "day": "2026-06-11",
+      "steps": 1,
+      "records": [
+        "alderbrook-oyelaran/clm-0003/determination_issued/det-0003"
+      ]
+    },
+    {
+      "day": "2026-06-12",
+      "steps": 1,
+      "records": [
+        "alderbrook-rasmussen/clm-0001/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2026-06-15",
+      "steps": 1,
+      "records": [
+        "alderbrook-hollis/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2026-06-22",
+      "steps": 2,
+      "records": [
+        "alderbrook-rasmussen/clm-0001/repair_completed/clm-0001",
+        "alderbrook-nakashima/clm-0002/request_issued/req-0003"
+      ]
+    },
+    {
+      "day": "2026-06-23",
+      "steps": 2,
+      "records": [
+        "alderbrook-rasmussen/clm-0001/rental_ended/rnt-0001",
+        "alderbrook-oyelaran/clm-0003/claim_closed/clm-0003"
+      ]
+    },
+    {
+      "day": "2026-06-26",
+      "steps": 1,
+      "records": [
+        "alderbrook-rasmussen/clm-0001/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2026-06-30",
+      "steps": 3,
+      "records": [
+        "alderbrook-zielinski/clm-0002/claim_filed/clm-0002",
+        "alderbrook-zielinski/clm-0002/evidence_added/evd-0002",
+        "alderbrook-zielinski/clm-0002/evidence_added/evd-0003"
+      ]
+    },
+    {
+      "day": "2026-07-01",
+      "steps": 2,
+      "records": [
+        "alderbrook-zielinski/clm-0002/request_issued/req-0001",
+        "alderbrook-rasmussen/clm-0001/claim_closed/clm-0001"
+      ]
+    },
+    {
+      "day": "2026-07-04",
+      "steps": 5,
+      "records": [
+        "alderbrook-zielinski/clm-0002/evidence_added/evd-0004",
+        "alderbrook-zielinski/clm-0002/evidence_added/evd-0005",
+        "alderbrook-zielinski/clm-0002/evidence_added/evd-0006",
+        "alderbrook-zielinski/clm-0002/request_answered/req-0001#items",
+        "alderbrook-zielinski/clm-0002/request_answered/req-0001#proof"
+      ]
+    },
+    {
+      "day": "2026-07-07",
+      "steps": 1,
+      "records": [
+        "alderbrook-nakashima/clm-0002/claim_closed/clm-0002"
+      ]
+    },
+    {
+      "day": "2026-07-08",
+      "steps": 1,
+      "records": [
+        "alderbrook-zielinski/clm-0002/estimate_submitted/est-0002"
+      ]
+    },
+    {
+      "day": "2026-07-13",
+      "steps": 2,
+      "records": [
+        "alderbrook-sandoval/clm-0002/claim_filed/clm-0002",
+        "alderbrook-sandoval/clm-0002/evidence_added/evd-0003"
+      ]
+    },
+    {
+      "day": "2026-07-16",
+      "steps": 1,
+      "records": [
+        "alderbrook-zielinski/clm-0002/determination_issued/det-0002"
+      ]
+    },
+    {
+      "day": "2026-07-17",
+      "steps": 1,
+      "records": [
+        "alderbrook-zielinski/clm-0002/payment_issued/pay-0001"
+      ]
+    },
+    {
+      "day": "2026-07-19",
+      "steps": 6,
+      "records": [
+        "alderbrook-haddad/clm-0002/claim_filed/clm-0002",
+        "alderbrook-haddad/clm-0002/evidence_added/evd-0005",
+        "alderbrook-haddad/clm-0002/evidence_added/evd-0006",
+        "alderbrook-haddad/clm-0002/evidence_added/evd-0007",
+        "alderbrook-zielinski/clm-0002/evidence_added/evd-0007",
+        "alderbrook-zielinski/clm-0002/dispute_opened/dsp-0001"
+      ]
+    },
+    {
+      "day": "2026-07-20",
+      "steps": 2,
+      "records": [
+        "alderbrook-sandoval/clm-0002/claim_withdrawn/clm-0002",
+        "alderbrook-haddad/clm-0002/request_issued/req-0002"
+      ]
+    },
+    {
+      "day": "2026-07-23",
+      "steps": 1,
+      "records": [
+        "alderbrook-zielinski/clm-0002/dispute_decided/dsp-0001"
+      ]
+    },
+    {
+      "day": "2026-07-24",
+      "steps": 1,
+      "records": [
+        "alderbrook-zielinski/clm-0002/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2026-07-28",
+      "steps": 2,
+      "records": [
+        "alderbrook-gallagher/clm-0003/claim_filed/clm-0003",
+        "alderbrook-gallagher/clm-0003/evidence_added/evd-0008"
+      ]
+    },
+    {
+      "day": "2026-07-31",
+      "steps": 1,
+      "records": [
+        "alderbrook-gallagher/clm-0003/claim_withdrawn/clm-0003"
+      ]
+    },
+    {
+      "day": "2026-08-01",
+      "steps": 3,
+      "records": [
+        "alderbrook-haddad/clm-0002/evidence_added/evd-0008",
+        "alderbrook-haddad/clm-0002/request_answered/req-0002#photos",
+        "alderbrook-haddad/clm-0002/request_answered/req-0002#parked"
+      ]
+    },
+    {
+      "day": "2026-08-04",
+      "steps": 2,
+      "records": [
+        "alderbrook-haddad/clm-0002/estimate_submitted/est-0002",
+        "alderbrook-zielinski/clm-0002/claim_closed/clm-0002"
+      ]
+    },
+    {
+      "day": "2026-08-06",
+      "steps": 1,
+      "records": [
+        "alderbrook-haddad/clm-0002/determination_issued/det-0002"
+      ]
+    },
+    {
+      "day": "2026-08-10",
+      "steps": 1,
+      "records": [
+        "alderbrook-haddad/clm-0002/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2026-08-17",
+      "steps": 1,
+      "records": [
+        "alderbrook-haddad/clm-0002/estimate_submitted/est-0003"
+      ]
+    },
+    {
+      "day": "2026-08-18",
+      "steps": 1,
+      "records": [
+        "alderbrook-haddad/clm-0002/determination_issued/det-0003"
+      ]
+    },
+    {
+      "day": "2026-08-20",
+      "steps": 1,
+      "records": [
+        "alderbrook-haddad/clm-0002/payment_issued/pay-0003"
+      ]
+    },
+    {
+      "day": "2026-08-31",
+      "steps": 1,
+      "records": [
+        "alderbrook-haddad/clm-0002/repair_completed/clm-0002"
+      ]
+    },
+    {
+      "day": "2026-09-04",
+      "steps": 1,
+      "records": [
+        "alderbrook-haddad/clm-0002/claim_closed/clm-0002"
+      ]
+    },
+    {
+      "day": "2026-09-15",
+      "steps": 4,
+      "records": [
+        "alderbrook-bergstrom/clm-0003/claim_filed/clm-0003",
+        "alderbrook-bergstrom/clm-0003/evidence_added/evd-0009",
+        "alderbrook-bergstrom/clm-0003/evidence_added/evd-0010",
+        "alderbrook-bergstrom/clm-0003/evidence_added/evd-0011"
+      ]
+    },
+    {
+      "day": "2026-09-16",
+      "steps": 1,
+      "records": [
+        "alderbrook-bergstrom/clm-0003/request_issued/req-0003"
+      ]
+    },
+    {
+      "day": "2026-09-18",
+      "steps": 1,
+      "records": [
+        "alderbrook-bergstrom/clm-0003/request_answered/req-0003#parked"
+      ]
+    },
+    {
+      "day": "2026-09-21",
+      "steps": 1,
+      "records": [
+        "alderbrook-bergstrom/clm-0003/estimate_submitted/est-0004"
+      ]
+    },
+    {
+      "day": "2026-09-23",
+      "steps": 1,
+      "records": [
+        "alderbrook-bergstrom/clm-0003/determination_issued/det-0004"
+      ]
+    },
+    {
+      "day": "2026-09-24",
+      "steps": 1,
+      "records": [
+        "alderbrook-bergstrom/clm-0003/payment_issued/pay-0005"
+      ]
+    },
+    {
+      "day": "2026-10-03",
+      "steps": 4,
+      "records": [
+        "alderbrook-underhill/clm-0002/claim_filed/clm-0002",
+        "alderbrook-underhill/clm-0002/evidence_added/evd-0005",
+        "alderbrook-underhill/clm-0002/evidence_added/evd-0006",
+        "alderbrook-underhill/clm-0002/evidence_added/evd-0007"
+      ]
+    },
+    {
+      "day": "2026-10-05",
+      "steps": 1,
+      "records": [
+        "alderbrook-underhill/clm-0002/request_issued/req-0002"
+      ]
+    },
+    {
+      "day": "2026-10-06",
+      "steps": 4,
+      "records": [
+        "alderbrook-underhill/clm-0002/evidence_added/evd-0008",
+        "alderbrook-underhill/clm-0002/request_answered/req-0002#photos",
+        "alderbrook-underhill/clm-0002/request_answered/req-0002#parked",
+        "alderbrook-bergstrom/clm-0003/repair_completed/clm-0003"
+      ]
+    },
+    {
+      "day": "2026-10-07",
+      "steps": 3,
+      "records": [
+        "alderbrook-nakashima/clm-0003/claim_filed/clm-0003",
+        "alderbrook-nakashima/clm-0003/evidence_added/evd-0004",
+        "alderbrook-nakashima/clm-0003/evidence_added/evd-0005"
+      ]
+    },
+    {
+      "day": "2026-10-08",
+      "steps": 2,
+      "records": [
+        "alderbrook-nakashima/clm-0003/request_issued/req-0004",
+        "alderbrook-nakashima/clm-0003/rental_started/rnt-0001"
+      ]
+    },
+    {
+      "day": "2026-10-13",
+      "steps": 1,
+      "records": [
+        "alderbrook-underhill/clm-0002/estimate_submitted/est-0002"
+      ]
+    },
+    {
+      "day": "2026-10-14",
+      "steps": 1,
+      "records": [
+        "alderbrook-bergstrom/clm-0003/claim_closed/clm-0003"
+      ]
+    },
+    {
+      "day": "2026-10-15",
+      "steps": 1,
+      "records": [
+        "alderbrook-underhill/clm-0002/determination_issued/det-0002"
+      ]
+    },
+    {
+      "day": "2026-10-19",
+      "steps": 1,
+      "records": [
+        "alderbrook-underhill/clm-0002/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2026-10-20",
+      "steps": 3,
+      "records": [
+        "alderbrook-donnelly/clm-0003/claim_filed/clm-0003",
+        "alderbrook-donnelly/clm-0003/evidence_added/evd-0007",
+        "alderbrook-donnelly/clm-0003/evidence_added/evd-0008"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "steps": 3,
+      "records": [
+        "alderbrook-nakashima/clm-0003/evidence_added/evd-0006",
+        "alderbrook-nakashima/clm-0003/request_answered/req-0004#photos",
+        "alderbrook-donnelly/clm-0003/request_issued/req-0003"
+      ]
+    },
+    {
+      "day": "2026-10-22",
+      "steps": 4,
+      "records": [
+        "alderbrook-underhill/clm-0002/estimate_submitted/est-0003",
+        "alderbrook-donnelly/clm-0003/evidence_added/evd-0009",
+        "alderbrook-donnelly/clm-0003/request_answered/req-0003#driver",
+        "alderbrook-donnelly/clm-0003/request_answered/req-0003#photos"
+      ]
+    },
+    {
+      "day": "2026-10-23",
+      "steps": 1,
+      "records": [
+        "alderbrook-underhill/clm-0002/determination_issued/det-0003"
+      ]
+    },
+    {
+      "day": "2026-10-25",
+      "steps": 2,
+      "records": [
+        "alderbrook-oyelaran/clm-0004/claim_filed/clm-0004",
+        "alderbrook-oyelaran/clm-0004/evidence_added/evd-0015"
+      ]
+    },
+    {
+      "day": "2026-10-26",
+      "steps": 1,
+      "records": [
+        "alderbrook-nakashima/clm-0003/estimate_submitted/est-0002"
+      ]
+    },
+    {
+      "day": "2026-10-27",
+      "steps": 5,
+      "records": [
+        "alderbrook-vasquez/clm-0003/claim_filed/clm-0003",
+        "alderbrook-vasquez/clm-0003/evidence_added/evd-0010",
+        "alderbrook-vasquez/clm-0003/evidence_added/evd-0011",
+        "alderbrook-oyelaran/clm-0004/estimate_submitted/est-0002",
+        "alderbrook-donnelly/clm-0003/estimate_submitted/est-0002"
+      ]
+    },
+    {
+      "day": "2026-10-28",
+      "steps": 3,
+      "records": [
+        "alderbrook-underhill/clm-0002/payment_issued/pay-0003",
+        "alderbrook-vasquez/clm-0003/request_issued/req-0003",
+        "alderbrook-oyelaran/clm-0004/determination_issued/det-0004"
+      ]
+    },
+    {
+      "day": "2026-10-29",
+      "steps": 2,
+      "records": [
+        "alderbrook-oyelaran/clm-0004/payment_issued/pay-0003",
+        "alderbrook-donnelly/clm-0003/determination_issued/det-0002"
+      ]
+    },
+    {
+      "day": "2026-10-30",
+      "steps": 2,
+      "records": [
+        "alderbrook-nakashima/clm-0003/determination_issued/det-0002",
+        "alderbrook-donnelly/clm-0003/payment_issued/pay-0003"
+      ]
+    },
+    {
+      "day": "2026-11-01",
+      "steps": 6,
+      "records": [
+        "alderbrook-vasquez/clm-0003/evidence_added/evd-0012",
+        "alderbrook-vasquez/clm-0003/evidence_added/evd-0013",
+        "alderbrook-vasquez/clm-0003/evidence_added/evd-0014",
+        "alderbrook-vasquez/clm-0003/evidence_added/evd-0015",
+        "alderbrook-vasquez/clm-0003/request_answered/req-0003#items",
+        "alderbrook-vasquez/clm-0003/request_answered/req-0003#proof"
+      ]
+    },
+    {
+      "day": "2026-11-02",
+      "steps": 2,
+      "records": [
+        "alderbrook-oyelaran/clm-0004/repair_completed/clm-0004",
+        "alderbrook-nakashima/clm-0003/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2026-11-03",
+      "steps": 4,
+      "records": [
+        "alderbrook-underhill/clm-0002/repair_completed/clm-0002",
+        "alderbrook-rasmussen/clm-0002/claim_filed/clm-0002",
+        "alderbrook-rasmussen/clm-0002/evidence_added/evd-0005",
+        "alderbrook-rasmussen/clm-0002/evidence_added/evd-0006"
+      ]
+    },
+    {
+      "day": "2026-11-04",
+      "steps": 5,
+      "records": [
+        "alderbrook-vasquez/clm-0003/estimate_submitted/est-p0002",
+        "alderbrook-rasmussen/clm-0002/request_issued/req-0002",
+        "alderbrook-rasmussen/clm-0002/request_answered/req-0002#driver",
+        "alderbrook-rasmussen/clm-0002/request_answered/req-0002#other_party",
+        "alderbrook-rasmussen/clm-0002/rental_started/rnt-0002"
+      ]
+    },
+    {
+      "day": "2026-11-05",
+      "steps": 1,
+      "records": [
+        "alderbrook-underhill/clm-0002/claim_closed/clm-0002"
+      ]
+    },
+    {
+      "day": "2026-11-06",
+      "steps": 3,
+      "records": [
+        "alderbrook-oyelaran/clm-0004/claim_closed/clm-0004",
+        "alderbrook-nakashima/clm-0003/rental_ended/rnt-0001",
+        "alderbrook-nakashima/clm-0003/repair_completed/clm-0003"
+      ]
+    },
+    {
+      "day": "2026-11-09",
+      "steps": 1,
+      "records": [
+        "alderbrook-donnelly/clm-0003/estimate_submitted/est-0003"
+      ]
+    },
+    {
+      "day": "2026-11-10",
+      "steps": 1,
+      "records": [
+        "alderbrook-vasquez/clm-0003/determination_issued/det-0003"
+      ]
+    },
+    {
+      "day": "2026-11-12",
+      "steps": 3,
+      "records": [
+        "alderbrook-rasmussen/clm-0002/estimate_submitted/est-0002",
+        "alderbrook-nakashima/clm-0003/payment_issued/pay-0003",
+        "alderbrook-donnelly/clm-0003/determination_issued/det-0003"
+      ]
+    },
+    {
+      "day": "2026-11-16",
+      "steps": 1,
+      "records": [
+        "alderbrook-vasquez/clm-0003/payment_issued/pay-0002"
+      ]
+    },
+    {
+      "day": "2026-11-17",
+      "steps": 1,
+      "records": [
+        "alderbrook-donnelly/clm-0003/payment_issued/pay-0004"
+      ]
+    },
+    {
+      "day": "2026-11-18",
+      "steps": 3,
+      "records": [
+        "alderbrook-rasmussen/clm-0002/determination_issued/det-0002",
+        "alderbrook-nakashima/clm-0003/claim_closed/clm-0003",
+        "alderbrook-whitfield/clm-0001/claim_filed/clm-0001"
+      ]
+    },
+    {
+      "day": "2026-11-19",
+      "steps": 1,
+      "records": [
+        "alderbrook-whitfield/clm-0001/request_issued/req-0001"
+      ]
+    },
+    {
+      "day": "2026-11-20",
+      "steps": 1,
+      "records": [
+        "alderbrook-donnelly/clm-0003/repair_completed/clm-0003"
+      ]
+    },
+    {
+      "day": "2026-11-23",
+      "steps": 1,
+      "records": [
+        "alderbrook-rasmussen/clm-0002/payment_issued/pay-0003"
+      ]
+    },
+    {
+      "day": "2026-11-24",
+      "steps": 1,
+      "records": [
+        "alderbrook-vasquez/clm-0003/claim_closed/clm-0003"
+      ]
+    },
+    {
+      "day": "2026-11-25",
+      "steps": 1,
+      "records": [
+        "alderbrook-donnelly/clm-0003/claim_closed/clm-0003"
+      ]
+    },
+    {
+      "day": "2026-12-01",
+      "steps": 1,
+      "records": [
+        "alderbrook-whitfield/clm-0001/request_issued/req-0002"
+      ]
+    },
+    {
+      "day": "2026-12-07",
+      "steps": 2,
+      "records": [
+        "alderbrook-rasmussen/clm-0002/rental_ended/rnt-0002",
+        "alderbrook-rasmussen/clm-0002/repair_completed/clm-0002"
+      ]
+    },
+    {
+      "day": "2026-12-12",
+      "steps": 3,
+      "records": [
+        "alderbrook-hollis/clm-0002/claim_filed/clm-0002",
+        "alderbrook-hollis/clm-0002/evidence_added/evd-0004",
+        "alderbrook-hollis/clm-0002/evidence_added/evd-0005"
+      ]
+    },
+    {
+      "day": "2026-12-14",
+      "steps": 7,
+      "records": [
+        "alderbrook-rasmussen/clm-0002/payment_issued/pay-0004",
+        "alderbrook-whitfield/clm-0001/claim_closed/clm-0001",
+        "alderbrook-hollis/clm-0002/evidence_added/evd-0006",
+        "alderbrook-hollis/clm-0002/request_issued/req-0002",
+        "alderbrook-hollis/clm-0002/request_answered/req-0002#driver",
+        "alderbrook-hollis/clm-0002/request_answered/req-0002#other_party",
+        "alderbrook-hollis/clm-0002/request_answered/req-0002#statement"
+      ]
+    },
+    {
+      "day": "2026-12-16",
+      "steps": 5,
+      "records": [
+        "alderbrook-rasmussen/clm-0002/claim_closed/clm-0002",
+        "alderbrook-iverson/clm-0002/claim_filed/clm-0002",
+        "alderbrook-iverson/clm-0002/evidence_added/evd-0002",
+        "alderbrook-iverson/clm-0002/evidence_added/evd-0003",
+        "alderbrook-iverson/clm-0002/request_issued/req-0001"
+      ]
+    },
+    {
+      "day": "2026-12-18",
+      "steps": 2,
+      "records": [
+        "alderbrook-iverson/clm-0002/evidence_added/evd-0004",
+        "alderbrook-iverson/clm-0002/request_answered/req-0001#statement"
+      ]
+    },
+    {
+      "day": "2026-12-21",
+      "steps": 1,
+      "records": [
+        "alderbrook-hollis/clm-0002/estimate_submitted/est-0002"
+      ]
+    },
+    {
+      "day": "2026-12-22",
+      "steps": 1,
+      "records": [
+        "alderbrook-iverson/clm-0002/estimate_submitted/est-0002"
+      ]
+    },
+    {
+      "day": "2026-12-24",
+      "steps": 5,
+      "records": [
+        "alderbrook-bergstrom/clm-0004/claim_filed/clm-0004",
+        "alderbrook-bergstrom/clm-0004/evidence_added/evd-0012",
+        "alderbrook-bergstrom/clm-0004/evidence_added/evd-0013",
+        "alderbrook-bergstrom/clm-0004/evidence_added/evd-0014",
+        "alderbrook-iverson/clm-0002/determination_issued/det-0002"
+      ]
+    },
+    {
+      "day": "2026-12-25",
+      "steps": 7,
+      "records": [
+        "alderbrook-quintero/clm-0002/claim_filed/clm-0002",
+        "alderbrook-quintero/clm-0002/evidence_added/evd-0004",
+        "alderbrook-quintero/clm-0002/evidence_added/evd-0005",
+        "alderbrook-quintero/clm-0002/evidence_added/evd-0006",
+        "alderbrook-kerrigan/clm-0003/claim_filed/clm-0003",
+        "alderbrook-kerrigan/clm-0003/evidence_added/evd-0009",
+        "alderbrook-kerrigan/clm-0003/evidence_added/evd-0010"
+      ]
+    },
+    {
+      "day": "2026-12-28",
+      "steps": 4,
+      "records": [
+        "alderbrook-quintero/clm-0002/request_issued/req-0002",
+        "alderbrook-kerrigan/clm-0003/request_issued/req-0003",
+        "alderbrook-bergstrom/clm-0004/request_issued/req-0004",
+        "alderbrook-hollis/clm-0002/determination_issued/det-0002"
+      ]
+    },
+    {
+      "day": "2026-12-29",
+      "steps": 6,
+      "records": [
+        "alderbrook-quintero/clm-0002/evidence_added/evd-0007",
+        "alderbrook-quintero/clm-0002/request_answered/req-0002#statement",
+        "alderbrook-kerrigan/clm-0003/request_answered/req-0003#other_party",
+        "alderbrook-bergstrom/clm-0004/request_answered/req-0004#title",
+        "alderbrook-bergstrom/clm-0004/request_answered/req-0004#mileage",
+        "alderbrook-bergstrom/clm-0004/request_answered/req-0004#keys"
+      ]
+    },
+    {
+      "day": "2026-12-30",
+      "steps": 3,
+      "records": [
+        "alderbrook-quintero/clm-0002/estimate_submitted/est-0003",
+        "alderbrook-iverson/clm-0002/payment_issued/pay-0002",
+        "alderbrook-hollis/clm-0002/payment_issued/pay-0003"
+      ]
+    }
+  ]
+}

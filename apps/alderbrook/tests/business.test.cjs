@@ -1,5 +1,5 @@
 'use strict';
-// Business tests T01 to T19 of the approved plan (section 4, "Acceptance plan").
+// Business tests T01 to T19 of the approved plan (section 4, "Acceptance plan"). DATA tests check the evaluation dataset in data/evaluation/.
 // A test name starts with its plan ID and its workflow. A letter after the ID marks one more test for that ID.
 // PKG tests check the package itself. No test reads a file outside the package.
 // In a copy of the package alone exactly two tests are skipped: T19 and T19b. They need the real runtime.
@@ -9,6 +9,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const {builtinModules} = require('node:module');
 const {spawnSync} = require('node:child_process');
+const crypto = require('node:crypto');
 const plugin = require('../plugin.cjs');
 const tools = require('../tools.json');
 const {createSender} = require('../infra/sender.cjs');
@@ -1961,6 +1962,104 @@ test('T19h [All] Mail sender: after a reset a second sender publishes as <id>.e<
   // A new sender that gets the first epoch publishes the notice under the qualified identity.
   assert.deepEqual(read(await w.sender(first.firstEpoch).publishPending()), [2, 'later', false, [['ntf-0001.e3', 'committed', null]]]);
   assert.deepEqual(w.published[2], {request_id: 'ntf-0001.e3', message: {...g.data.notifications[0].email, id: 'ntf-0001.e3'}});
+});
+
+// The evaluation dataset in data/evaluation/. The real MCP load of every seed is tests/evaluation.integration.cjs.
+const EVALUATION = path.join(ROOT, 'data/evaluation');
+const evaluation = () => JSON.parse(fs.readFileSync(path.join(EVALUATION, 'manifest.json'), 'utf8'));
+const readEvaluation = file => JSON.parse(fs.readFileSync(path.join(EVALUATION, file), 'utf8'));
+const records = require('../dev/evaluation-records.cjs');
+const devScript = (...args) => spawnSync(process.execPath, args, {cwd: ROOT, encoding: 'utf8', timeout: 60000});
+
+test('DATA01 [All] Evaluation data: every account seed passes the seed schema and the App seed rules with its own binding and clock, is synthetic, and matches its hash in manifest.json', () => {
+  const manifest = evaluation();
+  assert.equal(manifest.provenance, 'synthetic');
+  assert.ok(manifest.accounts.length >= 30);
+  for (const entry of manifest.accounts) {
+    const text = fs.readFileSync(path.join(EVALUATION, entry.seed), 'utf8'), seed = JSON.parse(text), binding = readEvaluation(entry.binding);
+    assert.equal(entry.provenance, 'synthetic', entry.account_id);
+    assert.equal(crypto.createHash('sha256').update(text).digest('hex'), entry.seed_sha256, entry.seed);
+    assert.ok(seedSchema(seed), entry.seed);
+    const f = fixture({seed, now: entry.virtual_now, binding, logging: false});
+    assert.equal(f.call('claims.list').items.length, seed.claims.length, entry.account_id);
+    // No timestamp of the seed is at or after its clock, except deadlines and policy term ends. Every evidence item is dated at or before it was added.
+    assert.deepEqual(records.after(seed, entry.virtual_now), [], entry.account_id);
+    for (const claim of seed.claims) for (const item of claim.evidence) assert.ok(Date.parse(item.dated) <= Date.parse(item.added_at), item.id);
+    // Every account has activity inside the window.
+    const inside = records.lifecycle(seed.account_id, seed.claims).filter(row => row.day >= records.WINDOW.start && row.day <= records.WINDOW.end);
+    assert.ok(inside.length > 0, entry.account_id + ' has no activity in the window');
+  }
+});
+
+test('DATA02 [All] Evaluation data: the generator with its fixed seed gives the committed files byte for byte (--check)', () => {
+  const result = devScript('dev/generate-evaluation-data.cjs', '--check');
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /^Checked \d+ files in data\/evaluation/);
+});
+
+test('DATA03 [All] Evaluation data: the coverage report is up to date with the seeds (--check), and the cross-record checks pass on every seed', () => {
+  const coverage = devScript('dev/coverage.cjs', '--check');
+  assert.equal(coverage.status, 0, coverage.stderr);
+  const report = readEvaluation('coverage.json');
+  assert.deepEqual([report.time_zone, report.window, report.hash_errors, report.provenance.real], ['America/New_York', {start: '2025-01-01', end: '2026-12-31'}, [], 0]);
+  assert.ok(report.authoritative_fields.every(f => !/term/.test(f.field)), 'Policy terms are not counted');
+  const consistency = devScript('dev/check-fixture.cjs', '--evaluation');
+  assert.equal(consistency.status, 0, consistency.stdout);
+  assert.match(consistency.stdout, /(\d+) of \1 evaluation seeds pass all 4 checks, and \d+ claims have 0 problems with the \d+ story rules\./);
+});
+
+test('DATA04 [All] Evaluation data: a seed selected as of a time holds only the steps before it, each record in its state then, and at the seed clock it is the delivered seed', () => {
+  const {select} = require('../dev/select-evaluation-seed.cjs');
+  const entry = evaluation().accounts.find(a => a.claims >= 3), delivered = readEvaluation(entry.seed);
+  assert.equal(JSON.stringify(select(entry.account_id, entry.virtual_now).data), JSON.stringify(delivered));
+  const claim = delivered.claims[1], asOf = new Date(Date.parse(claim.filed_at) + 60000).toISOString();
+  const early = select(entry.account_id, asOf).data;
+  // Every timestamp of a selected seed is before the as-of time, except deadlines and policy term ends, for every account every 90 days.
+  assert.deepEqual(records.after(early, asOf), []);
+  for (const account of evaluation().accounts) {
+    for (let t = Date.parse('2025-01-01T12:00:00Z'); t < Date.parse(entry.virtual_now); t += 90 * 86400000) assert.deepEqual(records.after(select(account.account_id, new Date(t).toISOString()).data, new Date(t).toISOString()), []);
+  }
+  // The check finds a planted evidence date after the as-of time.
+  const planted = structuredClone(early);
+  planted.claims[0].evidence[0].dated = new Date(Date.parse(asOf) + 3600000).toISOString();
+  assert.deepEqual(records.after(planted, asOf).map(s => s.path), ['.claims[0].evidence[0].dated']);
+  assert.deepEqual(early.claims.map(c => c.id), delivered.claims.slice(0, 2).map(c => c.id));
+  assert.ok(early.policies.every(p => Date.parse(p.term.start) <= Date.parse(asOf)));
+  // The second claim was just filed: it is open, with no decision and no payment yet.
+  assert.deepEqual([early.claims[1].state, early.claims[1].determinations.length, early.claims[1].payments.length], ['open', 0, 0]);
+  fixture({seed: early, now: asOf, binding: readEvaluation(entry.binding), logging: false});
+});
+
+test('DATA05 [All] Evaluation data: the story rules find a claim that does not hold together', () => {
+  const {problems} = require('../dev/check-evaluation.cjs'), entries = evaluation().accounts.map(entry => ({seed: readEvaluation(entry.seed), scenarios: entry.claim_scenarios}));
+  assert.deepEqual(problems(entries), []);
+  const find = test => { for (const entry of entries) for (const claim of entry.seed.claims) if (test(claim)) return {entry, claim}; return assert.fail('No claim for the test'); };
+  const broken = (test, change) => {
+    const copy = structuredClone(entries), {entry, claim} = find(test), seed = copy[entries.indexOf(entry)].seed, target = seed.claims.find(c => c.id === claim.id);
+    change(target, seed);
+    return [...new Set(problems(copy).map(row => row.rule))];
+  };
+  // An invoice below the approved total, a dispute that answers another decision, an overnight loss at noon, and a line from another scenario.
+  assert.deepEqual(broken(c => c.repair_completed_at, c => { c.final_invoice_total = 1; }), ['invoice']);
+  assert.deepEqual(broken(c => c.disputes.length, c => { c.disputes[0].reason = 'The shop needed this time.'; }), ['disputes']);
+  assert.deepEqual(broken(c => /overnight/.test(c.description), c => { c.loss_at = c.loss_at.slice(0, 11) + '12:00:00' + c.loss_at.slice(19); }), ['loss time']);
+  assert.deepEqual(broken(c => c.estimates.length && c.estimates[0].source === 'shop' && c.coverage === 'comprehensive', c => { c.estimates[0].lines[0].text = 'A/C condenser: replace'; }), ['lines']);
+  // Evidence dated after it was added, and a receipt for a cleaning line.
+  assert.deepEqual(broken(c => c.evidence.length, c => { c.evidence[0].dated = c.evidence[0].added_at.slice(0, 11) + '23:59:00' + c.evidence[0].added_at.slice(19); }), ['evidence times']);
+  assert.ok(broken(c => c.estimates.some(e => e.lines.some(l => /clean/.test(l.text))), c => {
+    const line = c.estimates.flatMap(e => e.lines).find(l => /clean/.test(l.text));
+    c.evidence.push({...c.evidence[0], id: 'evd-9999', kind: 'receipt', dated: c.loss_at, description: 'Receipt for ' + line.text.toLowerCase() + '.'});
+  }).includes('receipts'));
+  // A supplement with no part in front of it, a shared surname, a policyholder estimate under a company name, and an item approved with no proof.
+  assert.ok(broken(c => c.estimates.some(e => e.kind === 'supplement' && e.lines.some(l => /^Coolant/.test(l.text) || /reinforcement bar/.test(l.text))), c => {
+    for (const e of c.estimates.filter(x => x.kind === 'initial')) for (const l of e.lines) l.text = 'Paint materials';
+  }).includes('supplements'));
+  assert.deepEqual(broken(c => c.determinations.length, (c, seed) => { c.determinations[0].issued_by = 'Adjuster Q. ' + seed.policies[0].named_insured.name.split(' ').pop(); }), ['names']);
+  assert.deepEqual(broken(c => c.estimates.some(e => e.source === 'policyholder'), c => { c.estimates.find(e => e.source === 'policyholder').shop_name = 'Flower City Restoration'; }), ['estimate source']);
+  assert.ok(broken(c => c.estimates.some(e => e.lines.some(l => l.decisions.some(d => /No receipt or photo/.test(d.reason || '')))), c => {
+    const line = c.estimates.flatMap(e => e.lines).find(l => l.decisions.some(d => /No receipt or photo/.test(d.reason || '')));
+    line.decisions = [{...line.decisions[0], status: 'approved', amount: line.amount, reason: null}];
+  }).includes('proof'));
 });
 
 test('PKG diagnostics on, off and broken give the same data', () => {

@@ -1,11 +1,11 @@
 {
   "schema": "alderbrook.validation-index.v1",
-  "checked_on": "2026-11-23 (America/New_York)",
+  "checked_on": "2026-11-26 (America/New_York)",
   "app": {
     "app_id": "alderbrook",
     "version": "1.0.0",
     "package": "apps/alderbrook",
-    "package_sha256": "290b545e5095e459a4e633ec6ab2b63cf7d9485a3454f8ca936edf6740dc0650"
+    "package_sha256": "9d88a561cf3e9605b97cfbab5ec363522e1b26dbc4e3efcde400da1fede59a14"
   },
   "runtime": {
     "release": "1.6.0",
@@ -33,20 +33,20 @@
   "node": {
     "v18.20.8": {
       "business_tests_package_alone": {
-        "tests": 75,
-        "pass": 73,
+        "tests": 80,
+        "pass": 78,
         "fail": 0,
         "skipped": 2
       },
       "business_tests_in_checkout": {
-        "tests": 75,
-        "pass": 73,
+        "tests": 80,
+        "pass": 78,
         "fail": 0,
         "skipped": 2
       },
       "business_tests_with_runtime": {
-        "tests": 75,
-        "pass": 75,
+        "tests": 80,
+        "pass": 80,
         "fail": 0,
         "skipped": 0
       },
@@ -69,6 +69,15 @@
         "checks": 47,
         "report": "mail-integration-node18.json"
       },
+      "evaluation_load": {
+        "passed": true,
+        "checks": 182,
+        "accounts": 36,
+        "claims": 72,
+        "distinct_dates": 362,
+        "coverage_sha256": "b3b87484a36ae05914bf40b67c600bd352d6d7d898d54ea955b19dac331e6208",
+        "report": "evaluation-load-node18.json"
+      },
       "reference_suite": {
         "passed": true,
         "stages_passed": 22,
@@ -81,25 +90,28 @@
         "dev/check-fixture.cjs": "4 of 4",
         "dev/check-plan-examples.cjs": "11 of 11",
         "contracts:check": "passed",
-        "examples/run.cjs": "passed"
+        "examples/run.cjs": "passed",
+        "dev/generate-evaluation-data.cjs --check": "Checked 73 files in data/evaluation (36 accounts, 1030086 bytes), generator 1.0.0, seed 20251231.",
+        "dev/coverage.cjs --check": "Checked data/evaluation/coverage.json and coverage.md: 36 accounts, 72 claims, 838 counted steps, 362 distinct dates from 2025-01-02 to 2026-12-30, 56 excluded, 0 scheduled.",
+        "dev/check-fixture.cjs --evaluation": "36 of 36 evaluation seeds pass all 4 checks, and 72 claims have 0 problems with the 18 story rules."
       }
     },
     "v22.23.5": {
       "business_tests_package_alone": {
-        "tests": 75,
-        "pass": 73,
+        "tests": 80,
+        "pass": 78,
         "fail": 0,
         "skipped": 2
       },
       "business_tests_in_checkout": {
-        "tests": 75,
-        "pass": 73,
+        "tests": 80,
+        "pass": 78,
         "fail": 0,
         "skipped": 2
       },
       "business_tests_with_runtime": {
-        "tests": 75,
-        "pass": 75,
+        "tests": 80,
+        "pass": 80,
         "fail": 0,
         "skipped": 0
       },
@@ -122,6 +134,15 @@
         "checks": 47,
         "report": "mail-integration-node22.json"
       },
+      "evaluation_load": {
+        "passed": true,
+        "checks": 182,
+        "accounts": 36,
+        "claims": 72,
+        "distinct_dates": 362,
+        "coverage_sha256": "b3b87484a36ae05914bf40b67c600bd352d6d7d898d54ea955b19dac331e6208",
+        "report": "evaluation-load-node22.json"
+      },
       "reference_suite": {
         "passed": true,
         "stages_passed": 22,
@@ -134,9 +155,41 @@
         "dev/check-fixture.cjs": "4 of 4",
         "dev/check-plan-examples.cjs": "11 of 11",
         "contracts:check": "passed",
-        "examples/run.cjs": "passed"
+        "examples/run.cjs": "passed",
+        "dev/generate-evaluation-data.cjs --check": "Checked 73 files in data/evaluation (36 accounts, 1030086 bytes), generator 1.0.0, seed 20251231.",
+        "dev/coverage.cjs --check": "Checked data/evaluation/coverage.json and coverage.md: 36 accounts, 72 claims, 838 counted steps, 362 distinct dates from 2025-01-02 to 2026-12-30, 56 excluded, 0 scheduled.",
+        "dev/check-fixture.cjs --evaluation": "36 of 36 evaluation seeds pass all 4 checks, and 72 claims have 0 problems with the 18 story rules."
       }
     }
+  },
+  "evaluation_data": {
+    "path": "apps/alderbrook/data/evaluation/",
+    "provenance": {
+      "real": 0,
+      "mixed": 0,
+      "synthetic": 36,
+      "unit": "account seed",
+      "statement": "Every record is synthetic. The insurer, the people, the shops, the lenders and the policies are fictional. No record was observed or collected."
+    },
+    "time_zone": "America/New_York",
+    "window": {
+      "start": "2025-01-01",
+      "end": "2026-12-31"
+    },
+    "totals": {
+      "accounts": 36,
+      "policies": 181,
+      "claims": 72,
+      "lifecycle_steps": 894,
+      "counted_steps": 838,
+      "excluded_steps": 56,
+      "scheduled_items": 0
+    },
+    "distinct_dates": 362,
+    "earliest": "2025-01-02",
+    "latest": "2026-12-30",
+    "coverage_report": "apps/alderbrook/data/evaluation/coverage.json",
+    "files": 73
   },
   "base_runtime": {
     "checkout": "unmodified main",
@@ -156,7 +209,7 @@
     "alderbrook": {
       "passed": true,
       "checks": 43,
-      "package_sha256": "290b545e5095e459a4e633ec6ab2b63cf7d9485a3454f8ca936edf6740dc0650",
+      "package_sha256": "9d88a561cf3e9605b97cfbab5ec363522e1b26dbc4e3efcde400da1fede59a14",
       "report": "base-runtime.json"
     }
   },
