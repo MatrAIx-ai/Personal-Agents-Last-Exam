@@ -22,6 +22,7 @@ const output = new Map(tools.map(t => [t.name, compile(t.outputSchema, pkg)]));
 const deepFreeze = o => { if (o && typeof o === 'object') { Object.freeze(o); Object.values(o).forEach(deepFreeze); } return o; };
 const raise = (code, message) => { throw Object.assign(new Error(message), {code}); };
 
+const validStarts = new Set();
 function fixture({seed = require('../fixtures/minimal.json'), now = require('../fixtures/clock.json').initial_time, mutate, logging = true} = {}) {
   let data = structuredClone(seed);
   if (mutate) mutate(data);
@@ -37,7 +38,10 @@ function fixture({seed = require('../fixtures/minimal.json'), now = require('../
     assert.ok(seedValid(value), 'Seed schema');
     plugin.validateSeed(ctx('agent'), value);
   }
-  validate(data);
+  // The starting data is validated once per content and clock: a household started again from the
+  // same seed at the same time is the same data, so validating it again could not give another answer.
+  const start = now + '\0' + JSON.stringify(data);
+  if (!validStarts.has(start)) { validate(data); validStarts.add(start); }
   // Runs a hook on a working copy; a refusal must leave the working copy untouched.
   function run(fn, read) {
     const before = JSON.stringify(data), work = structuredClone(data);

@@ -1,5 +1,6 @@
 'use strict';
 // Entry point used by `npm test` and the public verifier: runs every Platewright business test module.
+// The full sweeps run separately (tests/deep.test.cjs, `npm run test:deep`).
 require('./package.test.cjs');
 require('./w1-recipes.test.cjs');
 require('./w2-profiles.test.cjs');

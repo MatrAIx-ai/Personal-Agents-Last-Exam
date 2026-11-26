@@ -11,9 +11,11 @@ const tools = require('../tools.json');
 const {fixture, ev} = require('./harness.cjs');
 const P = 'platewright.';
 
-test('generated tools, schemas and fixtures match their builders; 22 operations, 11 reads and 11 writes', () => {
+// The fixtures' own builder check replays 22 months of generated history through the hooks (about
+// 8 s), so it runs in the deep suite (tests/package.deep.test.cjs); here the committed coverage report
+// (tests/fixtures.test.cjs) holds the SHA-256 of every fixture file and of the generator scripts.
+test('generated tools and schemas match their builder; 22 operations, 11 reads and 11 writes', () => {
   assert.deepEqual(require('../scripts/build-contracts.cjs').build({check: true}), []);
-  assert.deepEqual(require('../scripts/build-fixtures.cjs').build({check: true}), []);
   assert.equal(tools.length, 22);
   assert.deepEqual(tools.filter(t => t.read_only).map(t => t.name.slice(P.length)).sort(), Object.keys(plugin.READS).sort());
   assert.deepEqual(tools.filter(t => !t.read_only).map(t => t.name.slice(P.length)).sort(), Object.keys(plugin.WRITES).sort());
