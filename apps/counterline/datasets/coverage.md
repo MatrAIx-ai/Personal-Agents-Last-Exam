@@ -6,7 +6,7 @@ Each timestamp is converted to the provider's declared IANA time zone before its
 
 ## card-issuer
 
-Seed `datasets/card-issuer/seed.json` (sha256 `2b5b58810bc604af…`), counted in America/New_York. 125 distinct dates; months without a case: none; records outside the window: 0.
+Seed `datasets/card-issuer/seed.json` (sha256 `2d87678721b3cae7…`), counted in America/New_York. 129 distinct dates; months without a case: none; records outside the window: 0.
 
 | Field | Records | Distinct dates | Earliest | Latest |
 | :--- | ---: | ---: | :--- | :--- |
@@ -15,9 +15,9 @@ Seed `datasets/card-issuer/seed.json` (sha256 `2b5b58810bc604af…`), counted in
 | offer presented_at | 29 | 22 | 2025-01-20 | 2026-12-26 |
 | commitment accepted_at | 22 | 22 | 2025-01-20 | 2026-12-26 |
 | report at | 20 | 20 | 2025-01-23 | 2026-12-29 |
-| article updated_at | 8 | 8 | 2025-01-14 | 2026-02-09 |
+| article revision at (updated_at is the latest) | 12 | 12 | 2025-01-14 | 2026-05-18 |
 
-| Month | Cases | Turns | Offers | Commitments | Reports | Articles | Distinct dates |
+| Month | Cases | Turns | Offers | Commitments | Reports | Article revisions | Distinct dates |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | 2025-01 | 3 | 24 | 1 | 1 | 1 | 1 | 7 |
 | 2025-02 | 2 | 17 | 1 | 1 | 1 | 1 | 5 |
@@ -27,15 +27,15 @@ Seed `datasets/card-issuer/seed.json` (sha256 `2b5b58810bc604af…`), counted in
 | 2025-06 | 2 | 15 | 0 | 0 | 2 | 1 | 7 |
 | 2025-07 | 3 | 18 | 1 | 1 | 0 | 0 | 5 |
 | 2025-08 | 3 | 23 | 1 | 1 | 1 | 1 | 6 |
-| 2025-09 | 2 | 14 | 1 | 1 | 0 | 0 | 4 |
+| 2025-09 | 2 | 14 | 1 | 1 | 0 | 1 | 5 |
 | 2025-10 | 1 | 5 | 0 | 0 | 1 | 0 | 3 |
-| 2025-11 | 3 | 18 | 4 | 1 | 0 | 0 | 3 |
+| 2025-11 | 3 | 18 | 4 | 1 | 0 | 1 | 4 |
 | 2025-12 | 2 | 18 | 1 | 1 | 1 | 0 | 6 |
 | 2026-01 | 3 | 19 | 1 | 1 | 1 | 1 | 6 |
 | 2026-02 | 2 | 13 | 0 | 0 | 0 | 1 | 6 |
 | 2026-03 | 2 | 16 | 1 | 1 | 1 | 0 | 5 |
-| 2026-04 | 3 | 20 | 1 | 1 | 2 | 0 | 6 |
-| 2026-05 | 1 | 8 | 0 | 0 | 0 | 0 | 3 |
+| 2026-04 | 3 | 20 | 1 | 1 | 2 | 1 | 7 |
+| 2026-05 | 1 | 8 | 0 | 0 | 0 | 1 | 4 |
 | 2026-06 | 2 | 15 | 1 | 1 | 1 | 0 | 4 |
 | 2026-07 | 2 | 14 | 1 | 1 | 1 | 0 | 5 |
 | 2026-08 | 3 | 19 | 1 | 1 | 1 | 0 | 6 |
@@ -46,7 +46,7 @@ Seed `datasets/card-issuer/seed.json` (sha256 `2b5b58810bc604af…`), counted in
 
 ## internet-provider
 
-Seed `datasets/internet-provider/seed.json` (sha256 `15707d3ea843895d…`), counted in America/New_York. 114 distinct dates; months without a case: none; records outside the window: 0.
+Seed `datasets/internet-provider/seed.json` (sha256 `3602db9c2be2def6…`), counted in America/New_York. 114 distinct dates; months without a case: none; records outside the window: 0.
 
 | Field | Records | Distinct dates | Earliest | Latest |
 | :--- | ---: | ---: | :--- | :--- |
@@ -55,9 +55,9 @@ Seed `datasets/internet-provider/seed.json` (sha256 `15707d3ea843895d…`), coun
 | offer presented_at | 20 | 20 | 2025-01-14 | 2026-12-27 |
 | commitment accepted_at | 20 | 20 | 2025-01-14 | 2026-12-27 |
 | report at | 20 | 20 | 2025-01-18 | 2026-12-30 |
-| article updated_at | 4 | 4 | 2025-04-21 | 2026-03-02 |
+| article revision at (updated_at is the latest) | 6 | 6 | 2025-04-21 | 2026-06-15 |
 
-| Month | Cases | Turns | Offers | Commitments | Reports | Articles | Distinct dates |
+| Month | Cases | Turns | Offers | Commitments | Reports | Article revisions | Distinct dates |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | 2025-01 | 3 | 21 | 1 | 1 | 1 | 0 | 5 |
 | 2025-02 | 2 | 15 | 1 | 1 | 0 | 0 | 2 |
@@ -68,7 +68,7 @@ Seed `datasets/internet-provider/seed.json` (sha256 `15707d3ea843895d…`), coun
 | 2025-07 | 2 | 11 | 0 | 0 | 0 | 1 | 4 |
 | 2025-08 | 2 | 15 | 1 | 1 | 2 | 0 | 7 |
 | 2025-09 | 3 | 18 | 1 | 1 | 0 | 1 | 5 |
-| 2025-10 | 2 | 14 | 1 | 1 | 1 | 0 | 5 |
+| 2025-10 | 2 | 14 | 1 | 1 | 1 | 1 | 5 |
 | 2025-11 | 1 | 5 | 0 | 0 | 0 | 0 | 2 |
 | 2025-12 | 2 | 16 | 1 | 1 | 1 | 0 | 7 |
 | 2026-01 | 3 | 20 | 1 | 1 | 1 | 0 | 6 |
@@ -76,7 +76,7 @@ Seed `datasets/internet-provider/seed.json` (sha256 `15707d3ea843895d…`), coun
 | 2026-03 | 2 | 14 | 1 | 1 | 1 | 1 | 6 |
 | 2026-04 | 3 | 21 | 1 | 1 | 1 | 0 | 5 |
 | 2026-05 | 2 | 16 | 1 | 1 | 1 | 0 | 4 |
-| 2026-06 | 1 | 5 | 0 | 0 | 0 | 0 | 2 |
+| 2026-06 | 1 | 5 | 0 | 0 | 0 | 1 | 2 |
 | 2026-07 | 3 | 22 | 1 | 1 | 2 | 0 | 6 |
 | 2026-08 | 3 | 20 | 1 | 1 | 0 | 0 | 5 |
 | 2026-09 | 2 | 16 | 1 | 1 | 0 | 0 | 4 |
@@ -84,4 +84,4 @@ Seed `datasets/internet-provider/seed.json` (sha256 `15707d3ea843895d…`), coun
 | 2026-11 | 2 | 17 | 1 | 1 | 2 | 0 | 7 |
 | 2026-12 | 4 | 35 | 3 | 3 | 2 | 0 | 6 |
 
-Combined distinct dates across both families: 219.
+Combined distinct dates across both families: 221.

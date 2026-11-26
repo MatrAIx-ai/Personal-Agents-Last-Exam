@@ -347,6 +347,15 @@ test('T24 delivery dataset: an as-of selection holds only earlier records, each 
       ...d.commitments.flatMap(m => [m.accepted_at, ...m.reports.map(r => r.at), ...m.history.map(h => h.at)]), ...d.help_articles.map(a => a.updated_at)];
     assert.ok(times.every(t => Date.parse(t) <= Date.parse(cut)), `${family}: nothing after the cut`);
     assert.ok(d.cases.length > 10 && d.cases.length < full.cases.length);
+    for (const a of d.help_articles) {
+      assert.ok(a.revisions.every(r => Date.parse(r.at) <= Date.parse(cut)), `${a.article_id}: no later revision`);
+      assert.equal(a.body, a.revisions.at(-1).body, `${a.article_id}: shows the revision in force`);
+    }
+    if (family === 'card-issuer') {
+      const credits = d.help_articles.find(a => a.article_id === 'kb-credits');
+      assert.match(credits.body, /within 7 days/, 'the April 2026 revision is not yet in force on March 1');
+      assert.match(full.help_articles.find(a => a.article_id === 'kb-credits').body, /5 business days/);
+    }
     for (const m of d.commitments) {
       const later = full.commitments.find(x => x.commitment_id === m.commitment_id);
       assert.deepEqual(m.history, later.history.filter(h => Date.parse(h.at) <= Date.parse(cut)), `${m.commitment_id} history as of the cut`);

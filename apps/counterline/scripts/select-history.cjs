@@ -1,7 +1,7 @@
 'use strict';
 // Rebuild a family's state as of a given time by replaying its logged actions through Counterline's own
-// code. Only records that existed then are present, each in the state it had then; help articles updated
-// later are left out. A task uses this to load history before its first session without exposing later
+// code. Only records that existed then are present, each in the state it had then; a help article shows its
+// revision current then, and one first published later is left out. A task uses this to load history before its first session without exposing later
 // records (docs/submission-evidence.md, section 4).
 //
 // Usage: node scripts/select-history.cjs <family> <as-of RFC 3339 time> [out.json]
@@ -22,7 +22,12 @@ function select(family, asOf) {
     const ctx = {app_id: 'counterline', role: a.type === 'event' ? 'infra' : 'agent', virtual_now: a.at, binding: structuredClone(binding)};
     data = a.type === 'tool' ? plugin.handleTool(ctx, data, a.name, structuredClone(a.args)).data : plugin.applyEvent(ctx, data, structuredClone(a.event));
   }
-  data.help_articles = data.help_articles.filter(x => Date.parse(x.updated_at) <= cut);
+  data.help_articles = data.help_articles.map(a => {
+    const revisions = a.revisions.filter(r => Date.parse(r.at) <= cut);
+    if (!revisions.length) return null;
+    const last = revisions[revisions.length - 1];
+    return { ...a, revisions, updated_at: last.at, body: last.body };
+  }).filter(Boolean);
   plugin.validateSeed({app_id: 'counterline', role: 'infra', virtual_now: asOf, binding}, data);
   return data;
 }

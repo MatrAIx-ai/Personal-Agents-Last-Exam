@@ -58,12 +58,12 @@ function cardBase() {
     cat('cat-fx-f1', 'foreign_fee', 'refund', 'Foreign fee refund', 'The 11.25 foreign transaction fee is refunded as a statement credit.', 1125),
     cat('cat-card-f1', 'card_replacement', 'refund', 'Expedited delivery fee refund', 'The 15.00 expedited delivery fee for your new card is refunded.', 1500, 10));
   d.help_articles.push(
-    { article_id: 'kb-late-fees', title: 'Late fees and courtesy waivers', body: 'A late fee posts if the minimum payment arrives after the due date. Customer Care can review a first late fee.', tags: ['late fee', 'fees'], updated_at: '2025-02-03T10:00:00-05:00' },
-    { article_id: 'kb-travel', title: 'Using your card abroad', body: 'You do not need to tell us before you travel. Foreign transaction fees appear as separate lines on your statement.', tags: ['travel', 'foreign fee'], updated_at: '2025-05-12T10:00:00-04:00' },
-    { article_id: 'kb-replacement', title: 'Replacing a card', body: 'A replacement card arrives in 7 to 10 days. Expedited delivery has a fee.', tags: ['card', 'replacement'], updated_at: '2025-08-18T10:00:00-04:00' },
-    { article_id: 'kb-annual-fee-2026', title: 'Annual fee changes for 2026', body: 'The annual fee stays at 250.00 for accounts renewing in 2026. Fee reviews are handled by Account Review.', tags: ['annual fee'], updated_at: '2026-01-06T09:00:00-05:00' });
+    { article_id: 'kb-late-fees', title: 'Late fees and courtesy waivers', body: 'A late fee posts if the minimum payment arrives after the due date. Customer Care can review a first late fee.', tags: ['late fee', 'fees'], updated_at: '2025-02-03T10:00:00-05:00', revisions: null },
+    { article_id: 'kb-travel', title: 'Using your card abroad', body: 'You do not need to tell us before you travel. Foreign transaction fees appear as separate lines on your statement.', tags: ['travel', 'foreign fee'], updated_at: '2025-05-12T10:00:00-04:00', revisions: null },
+    { article_id: 'kb-replacement', title: 'Replacing a card', body: 'A replacement card arrives in 7 to 10 days. Expedited delivery has a fee.', tags: ['card', 'replacement'], updated_at: '2025-08-18T10:00:00-04:00', revisions: null },
+    { article_id: 'kb-annual-fee-2026', title: 'Annual fee changes for 2026', body: 'The annual fee stays at 250.00 for accounts renewing in 2026. Fee reviews are handled by Account Review.', tags: ['annual fee'], updated_at: '2026-01-06T09:00:00-05:00', revisions: null });
   d.cases = []; d.offers = []; d.commitments = []; d.confirmations = []; d.outbox = [];
-  return d;
+  return withRevisions(d);
 }
 
 function ispBase() {
@@ -85,9 +85,29 @@ function ispBase() {
     cat('cat-out-f1', 'outage_credit', 'statement_credit', 'Outage credit', 'A 15.00 credit on your next bill for the outage.', 1500),
     cat('cat-plan-f1', 'plan_change', 'product_change', 'Switch to Fiber 300', 'Move to the Fiber 300 plan at 45.00 a month from your next bill.', null, 14));
   d.help_articles.push(
-    { article_id: 'kb-outages', title: 'Outage credits', body: 'If service is down for more than 4 hours, ask for an outage credit in chat.', tags: ['outage', 'credit'], updated_at: '2025-07-07T10:00:00-04:00' },
-    { article_id: 'kb-moving', title: 'Moving your service', body: 'Tell us your new address two weeks before you move.', tags: ['moving'], updated_at: '2026-03-02T10:00:00-05:00' });
+    { article_id: 'kb-outages', title: 'Outage credits', body: 'If service is down for more than 4 hours, ask for an outage credit in chat.', tags: ['outage', 'credit'], updated_at: '2025-07-07T10:00:00-04:00', revisions: null },
+    { article_id: 'kb-moving', title: 'Moving your service', body: 'Tell us your new address two weeks before you move.', tags: ['moving'], updated_at: '2026-03-02T10:00:00-05:00', revisions: null });
   d.cases = []; d.offers = []; d.commitments = []; d.confirmations = []; d.outbox = [];
+  return withRevisions(d);
+}
+
+// Help-article revisions across the window: [date, note, new body]. The first revision is the article's
+// publication; an article's title, body and updated_at are those of its latest revision.
+const REVISIONS = {
+  'kb-annual-fee': [['2025-09-22T10:00:00-04:00', 'Added how to reach Account Review in chat.', 'The annual fee posts on your card anniversary. If you have questions about the fee or the value of your card, our Account Review team handles fee reviews. In chat, ask to be transferred to Account Review; you can also call the number on the back of your card.']],
+  'kb-identity': [['2025-11-03T09:00:00-05:00', 'Clarified that we never ask for a full card number.', 'We verify you with the last four digits of your card and your billing ZIP code. We never need your full card number or Social Security number in chat, and a representative will never ask for them.']],
+  'kb-credits': [['2026-04-06T09:00:00-04:00', 'Changed the usual posting time from 7 to 5 business days.', 'A statement credit you accept in chat usually posts within 5 business days. Check your card account to confirm it posted; a message saying it was processed is not the same as a posted credit.']],
+  'kb-late-fees': [['2026-05-18T10:00:00-04:00', 'Late fee amount updated for 2026.', 'A late fee of up to 40.00 posts if the minimum payment arrives after the due date. Customer Care can review a first late fee.']],
+  'kb-refunds': [['2025-10-13T09:00:00-04:00', 'Refunds now go to the original payment method by default.', 'Refunds we promise in chat are sent to your original payment method within 10 days. Your bank statement is the record that the money arrived.']],
+  'kb-outages': [['2026-06-15T10:00:00-04:00', 'Outage threshold lowered from 4 to 3 hours.', 'If service is down for more than 3 hours, ask for an outage credit in chat.']]
+};
+function withRevisions(d) {
+  for (const a of d.help_articles) {
+    const first = a.revisions?.[0] || { at: a.updated_at, note: 'Published.', body: a.body };
+    a.revisions = [first, ...(REVISIONS[a.article_id] || []).map(([at, note, body]) => ({ at, note, body }))];
+    const last = a.revisions.at(-1);
+    a.updated_at = last.at; a.body = last.body;
+  }
   return d;
 }
 

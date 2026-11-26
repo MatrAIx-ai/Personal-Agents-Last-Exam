@@ -21,6 +21,12 @@ function validateSeed(ctx, data) {
   unique(p.offer_catalog, 'catalog_id', 'catalog offer');
   for (const e of p.offer_catalog) if (!p.topics.some(t => t.topic_id === e.topic_id)) fail('invalid_seed', `Catalog offer ${e.catalog_id} names an unknown topic.`);
   unique(data.help_articles, 'article_id', 'article');
+  for (const a of data.help_articles) {
+    const last = a.revisions[a.revisions.length - 1];
+    if (!last) fail('invalid_seed', `Article ${a.article_id} has no revision.`);
+    ordered(a.revisions.map(r => r.at), `Article ${a.article_id} revision`);
+    if (a.updated_at !== last.at || a.body !== last.body) fail('invalid_seed', `Article ${a.article_id} must show its latest revision.`);
+  }
   unique(data.cases, 'case_id', 'case');
   unique(data.offers, 'offer_id', 'offer');
   unique(data.commitments, 'commitment_id', 'commitment');

@@ -48,7 +48,7 @@ Infra events: `counterline.commitment.performance_reported`, `counterline.case.f
 From this directory:
 
 ```sh
-npm test                 # business tests (T00 to T20, T22 to T24)
+npm test                 # business tests (T00 to T20, T22 to T25)
 npm run dataset:check    # delivery dataset: drift, replay and coverage checks
 npm run example          # one event, before and after
 npm run contracts        # regenerate tools.json, seed/events schemas and the operation list

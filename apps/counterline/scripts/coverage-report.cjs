@@ -13,7 +13,7 @@ const FIELDS = [
   ['offers', 'offer presented_at', d => d.offers.map(o => o.presented_at)],
   ['commitments', 'commitment accepted_at', d => d.commitments.map(m => m.accepted_at)],
   ['reports', 'report at', d => d.commitments.flatMap(m => m.reports.map(r => r.at))],
-  ['articles', 'article updated_at', d => d.help_articles.map(a => a.updated_at)]
+  ['articles', 'article revision at (updated_at is the latest)', d => d.help_articles.flatMap(a => a.revisions.map(r => r.at))]
 ];
 const months = []; for (let y = 2025; y <= 2026; y++) for (let m = 1; m <= 12; m++) months.push(`${y}-${String(m).padStart(2, '0')}`);
 
@@ -51,7 +51,7 @@ function markdown(r) {
     lines.push(`## ${family}`, '', `Seed \`${f.seed}\` (sha256 \`${f.sha256.slice(0, 16)}…\`), counted in ${f.time_zone}. ${f.distinct_dates} distinct dates; months without a case: ${f.gaps.length ? f.gaps.join(', ') : 'none'}; records outside the window: ${f.excluded.length}.`, '',
       '| Field | Records | Distinct dates | Earliest | Latest |', '| :--- | ---: | ---: | :--- | :--- |',
       ...Object.values(f.fields).map(x => `| ${x.date_field} | ${x.records} | ${x.distinct_dates} | ${x.earliest} | ${x.latest} |`), '',
-      '| Month | Cases | Turns | Offers | Commitments | Reports | Articles | Distinct dates |', '| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |',
+      '| Month | Cases | Turns | Offers | Commitments | Reports | Article revisions | Distinct dates |', '| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |',
       ...Object.entries(f.monthly).map(([m, x]) => `| ${m} | ${x.cases} | ${x.turns} | ${x.offers} | ${x.commitments} | ${x.reports} | ${x.articles} | ${x.distinct_dates} |`), '');
   }
   lines.push(`Combined distinct dates across both families: ${r.combined_distinct_dates}.`, '');

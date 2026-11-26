@@ -159,6 +159,34 @@
             "updated_at": {
               "type": "string",
               "format": "date-time"
+            },
+            "revisions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "note": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 400
+                  },
+                  "body": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 8000
+                  }
+                },
+                "required": [
+                  "at",
+                  "note",
+                  "body"
+                ],
+                "additionalProperties": false
+              }
             }
           },
           "required": [
@@ -166,7 +194,8 @@
             "title",
             "body",
             "tags",
-            "updated_at"
+            "updated_at",
+            "revisions"
           ],
           "additionalProperties": false
         }
