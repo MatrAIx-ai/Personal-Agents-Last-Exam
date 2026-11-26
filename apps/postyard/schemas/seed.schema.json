@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["account_id", "owner_person_id", "seed_clock", "settings", "accounts", "counters", "posts", "notes", "follows", "blocks", "notifications", "receipts", "protected_subjects"],
+  "properties": {
+    "account_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+    "owner_person_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+    "seed_clock": {"type": "string", "format": "date-time"},
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner_confirmation", "audience_rate_per_hour", "audience_cap"],
+      "properties": {
+        "owner_confirmation": {"type": "boolean"},
+        "audience_rate_per_hour": {"type": "integer", "minimum": 0},
+        "audience_cap": {"type": "integer", "minimum": 1}
+      }
+    },
+    "counters": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["post", "note"],
+        "properties": {
+          "post": {"type": "integer", "minimum": 0},
+          "note": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+    "accounts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["account_id", "handle", "display_name", "bio", "links", "kind", "person_id", "follower_count", "following_count", "created_at"],
+        "properties": {
+          "account_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+          "handle": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_]{0,39}$"},
+          "display_name": {"type": "string", "minLength": 1, "maxLength": 80},
+          "bio": {"type": "string", "maxLength": 500},
+          "links": {"type": "array", "maxItems": 8, "items": {"type": "string", "minLength": 1, "maxLength": 200}},
+          "kind": {"type": "string", "enum": ["person", "audience", "bot"]},
+          "person_id": {"anyOf": [{"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"}, {"type": "null"}]},
+          "follower_count": {"type": "integer", "minimum": 0},
+          "following_count": {"type": "integer", "minimum": 0},
+          "created_at": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "posts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "account_id", "slug", "status", "public_revision", "head_revision", "revisions", "pending", "publish_at", "scheduled_for", "published_at", "unpublished_at", "release_lag_seconds", "followers_at_publish", "owner_note", "schedule_request_id", "created_at", "updated_at"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+          "account_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+          "slug": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$"},
+          "status": {"type": "string", "enum": ["draft", "pending_owner_confirmation", "scheduled", "published", "unpublished"]},
+          "public_revision": {"anyOf": [{"type": "integer", "minimum": 1}, {"type": "null"}]},
+          "head_revision": {"type": "integer", "minimum": 1},
+          "revisions": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["revision", "title", "body", "tags", "slug", "correction_note", "created_at", "request_id", "visibility"],
+              "properties": {
+                "revision": {"type": "integer", "minimum": 1},
+                "title": {"type": "string", "minLength": 1, "maxLength": 200},
+                "body": {"type": "string", "minLength": 1, "maxLength": 20000},
+                "tags": {"type": "array", "maxItems": 20, "items": {"type": "string", "minLength": 1, "maxLength": 40}},
+                "slug": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$"},
+                "correction_note": {"anyOf": [{"type": "string", "maxLength": 500}, {"type": "null"}]},
+                "created_at": {"type": "string", "format": "date-time"},
+                "request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                "visibility": {"type": "string", "enum": ["private", "pending", "public", "withheld"]}
+              }
+            }
+          },
+          "pending": {
+            "anyOf": [
+              {"type": "null"},
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["kind", "revision", "request_id", "publish_at"],
+                "properties": {
+                  "kind": {"type": "string", "enum": ["publish", "schedule", "edit"]},
+                  "revision": {"type": "integer", "minimum": 1},
+                  "request_id": {"type": "string"},
+                  "publish_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]}
+                }
+              }
+            ]
+          },
+          "publish_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "scheduled_for": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "published_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "unpublished_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "release_lag_seconds": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+          "followers_at_publish": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+          "owner_note": {"anyOf": [{"type": "string", "maxLength": 500}, {"type": "null"}]},
+          "schedule_request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "created_at": {"type": "string", "format": "date-time"},
+          "updated_at": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "account_id", "kind", "text", "status", "revision", "reply_to", "repost_of", "publish_at", "scheduled_for", "published_at", "deleted_at", "release_lag_seconds", "followers_at_publish", "pending_kind", "request_id", "event_id", "schedule_request_id", "owner_note", "created_at", "updated_at"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+          "account_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+          "kind": {"type": "string", "enum": ["note", "reply", "repost"]},
+          "text": {"type": "string", "minLength": 1, "maxLength": 500},
+          "status": {"type": "string", "enum": ["posted", "scheduled", "deleted", "pending_owner_confirmation", "declined", "withdrawn"]},
+          "revision": {"const": 1},
+          "reply_to": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "repost_of": {
+            "anyOf": [
+              {"type": "null"},
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["object_type", "object_id"],
+                "properties": {
+                  "object_type": {"type": "string", "enum": ["post", "note"]},
+                  "object_id": {"type": "string"}
+                }
+              }
+            ]
+          },
+          "publish_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "scheduled_for": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "published_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "deleted_at": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+          "release_lag_seconds": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+          "followers_at_publish": {"anyOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+          "pending_kind": {"anyOf": [{"type": "string", "enum": ["post", "reply", "schedule", "repost"]}, {"type": "null"}]},
+          "request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "event_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "schedule_request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "owner_note": {"anyOf": [{"type": "string", "maxLength": 500}, {"type": "null"}]},
+          "created_at": {"type": "string", "format": "date-time"},
+          "updated_at": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "follows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["follower_account_id", "target_account_id", "at", "request_id"],
+        "properties": {
+          "follower_account_id": {"type": "string"},
+          "target_account_id": {"type": "string"},
+          "at": {"type": "string", "format": "date-time"},
+          "request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]}
+        }
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["account_id", "target_account_id", "at"],
+        "properties": {
+          "account_id": {"type": "string"},
+          "target_account_id": {"type": "string"},
+          "at": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "notifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "account_id", "actor_account_id", "kind", "object_id", "at", "read"],
+        "properties": {
+          "id": {"type": "string"},
+          "account_id": {"type": "string"},
+          "actor_account_id": {"type": "string"},
+          "kind": {"type": "string"},
+          "object_id": {"type": "string"},
+          "at": {"type": "string", "format": "date-time"},
+          "read": {"type": "boolean"}
+        }
+      }
+    },
+    "receipts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["receipt_id", "object_type", "object_id", "revision", "published_at", "public_url", "request_id", "event_id"],
+        "properties": {
+          "receipt_id": {"type": "string", "pattern": "^pr-\\d+$"},
+          "object_type": {"type": "string", "enum": ["post", "note"]},
+          "object_id": {"type": "string"},
+          "revision": {"type": "integer", "minimum": 1},
+          "published_at": {"type": "string", "format": "date-time"},
+          "public_url": {"type": "string", "minLength": 1},
+          "request_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+          "event_id": {"anyOf": [{"type": "string"}, {"type": "null"}]}
+        }
+      }
+    },
+    "protected_subjects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["person_id", "account_id", "name_variants", "owned_refs"],
+        "properties": {
+          "person_id": {"type": "string"},
+          "account_id": {"type": "string"},
+          "name_variants": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "owned_refs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["app_id", "object_type", "object_id"],
+              "properties": {
+                "app_id": {"type": "string"},
+                "object_type": {"type": "string"},
+                "object_id": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
