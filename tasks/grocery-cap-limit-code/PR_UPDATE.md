@@ -72,7 +72,7 @@ Keelcard `c481a2ae10b4bb17725c69f692203f22af793bb9` on `environment-proposal/kee
 
 ## History coverage
 
-78 distinct dates, one zone `America/New_York`, earliest `2025-09-13`, latest `2026-11-17`, none on or after the first session. The depth is the household seed, 31 store emails, 12 unrelated emails, 14 orders and the memory records. It is not padded toward 300.
+78 distinct dates, one zone `America/New_York`, earliest `2025-09-13`, latest `2026-11-17`, none on or after the first session. The depth is the household seed, 31 store emails, 12 unrelated emails, 14 orders and the memory records. The count stays at that depth.
 
 ## Validation results
 
