@@ -1,0 +1,20 @@
+{
+  "schema": "grocery-cap-limit-code.workspace.v1",
+  "start": "seed",
+  "seed_clock": "2026-11-18T09:00:00-08:00",
+  "session_clock": "2026-11-20T06:10:00-05:00",
+  "time_zone": "America/New_York",
+  "apps": {
+    "keelcard": {
+      "account_id": "kc-adeyemi",
+      "seed": "pinned fixture fixtures/minimal.json",
+      "binding": "keelcard/binding.json",
+      "policies": "keelcard/policies.json"
+    },
+    "mail": { "account_id": "mail-grace", "seed": "mail/seed.json", "bundle": "mail/bundle.json" },
+    "freshcart": { "account_id": "fc-grace", "seed": "freshcart/seed.json", "under_cap_seed": "freshcart/seed-under-cap.json", "bundle": "freshcart/bundle.json" },
+    "webstub": { "account_id": "web-grace", "seed": "webstub/seed.json", "bundle": "webstub/bundle.json" }
+  },
+  "variants": ["main", "no-reply", "clarification", "control-under-cap", "control-express", "control-authentic"],
+  "reset": "env.reset restores the seed loaded at the seed clock. The stand-in then advances the clock again from the timeline."
+}

@@ -1,0 +1,1069 @@
+[
+  {
+    "name": "freshcart.catalog.list",
+    "description": "List catalog items and prices.",
+    "read_only": true,
+    "scope": "freshcart.catalog.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "maxLength": 200
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "freshcart"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "freshcart.list.get",
+    "description": "Read the shared grocery list and its total.",
+    "read_only": true,
+    "scope": "freshcart.list.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "freshcart"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "list_total_cents": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "items",
+        "list_total_cents"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "freshcart.cart.get",
+    "description": "Read the current cart.",
+    "read_only": true,
+    "scope": "freshcart.cart.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "freshcart"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "lines"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "freshcart.preview",
+    "description": "Preview list and cart totals before any card is charged.",
+    "read_only": true,
+    "scope": "freshcart.preview",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "freshcart"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "list_subtotal_cents": {
+          "type": "integer"
+        },
+        "cart_subtotal_cents": {
+          "type": "integer"
+        },
+        "delivery_cents": {
+          "type": "integer"
+        },
+        "list_total_cents": {
+          "type": "integer"
+        },
+        "cart_total_cents": {
+          "type": "integer"
+        },
+        "list_lines": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "cart_lines": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "list_subtotal_cents",
+        "cart_subtotal_cents",
+        "delivery_cents",
+        "list_total_cents",
+        "cart_total_cents",
+        "list_lines",
+        "cart_lines"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "freshcart.payments.list",
+    "description": "List saved payment methods. Full card numbers stay off this result.",
+    "read_only": true,
+    "scope": "freshcart.payments.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "freshcart"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "payment_methods": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "payment_methods"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "freshcart.orders.list",
+    "description": "List orders, including historical Saturday orders.",
+    "read_only": true,
+    "scope": "freshcart.orders.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "freshcart"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "orders"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "freshcart.orders.get",
+    "description": "Read one order.",
+    "read_only": true,
+    "scope": "freshcart.orders.get",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "freshcart"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "order": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "order"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "freshcart.substitutions.list",
+    "description": "List shopper substitution offers.",
+    "read_only": true,
+    "scope": "freshcart.substitutions.list",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "freshcart"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "substitutions": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "substitutions"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "freshcart.checkout.attempts",
+    "description": "List checkout attempts, including abandoned and declined attempts.",
+    "read_only": true,
+    "scope": "freshcart.checkout.attempts",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "freshcart"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "attempts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "attempts"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "freshcart.cart.set",
+    "description": "Replace the cart with these lines. The shared list stays as Grace and Femi left it.",
+    "read_only": false,
+    "scope": "freshcart.cart.set",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "qty": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "item_id",
+              "qty"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 40
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "lines",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "freshcart"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "line_count": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "line_count"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "freshcart.payments.select",
+    "description": "Select a saved payment method. An earlier unused selection is marked abandoned.",
+    "read_only": false,
+    "scope": "freshcart.payments.select",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "payment_method_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "payment_method_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "freshcart"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "payment_method_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "last_four": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "selection_id",
+        "payment_method_id",
+        "last_four"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "freshcart.checkout.place",
+    "description": "Start checkout for the current cart. A Keelcard method waits for Infra to apply the authorization. Nothing is charged inside this call.",
+    "read_only": false,
+    "scope": "freshcart.checkout.place",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "freshcart"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "attempt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "order_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "total_cents": {
+          "type": "integer"
+        },
+        "outcome": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "authorization_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payment_method_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "attempt_id",
+        "order_id",
+        "total_cents",
+        "outcome",
+        "authorization_key",
+        "payment_method_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "freshcart.substitutions.respond",
+    "description": "Accept one substitution offer. A price difference waits for a separate authorization on the same order.",
+    "read_only": false,
+    "scope": "freshcart.substitutions.respond",
+    "resource_target": "current account",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "substitution_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "offer_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "expected_version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "substitution_id",
+        "offer_id",
+        "expected_version",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "committed",
+            "ready"
+          ]
+        },
+        "app_id": {
+          "const": "freshcart"
+        },
+        "version": {
+          "type": "object",
+          "properties": {
+            "epoch": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "epoch",
+            "revision"
+          ],
+          "additionalProperties": false
+        },
+        "duplicate": {
+          "type": "boolean"
+        },
+        "substitution_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "substitution_status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "delta_cents": {
+          "type": "integer"
+        },
+        "outcome": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "attempt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "authorization_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "status",
+        "app_id",
+        "version",
+        "substitution_id",
+        "substitution_status",
+        "delta_cents",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

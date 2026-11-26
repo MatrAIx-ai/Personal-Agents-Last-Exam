@@ -1,0 +1,36 @@
+{
+  "id": "f5-energy",
+  "variant": "main",
+  "sessions": {
+    "s1": [
+      {
+        "at": "2026-11-20T06:14:00-05:00",
+        "call": "freshcart.cart.set",
+        "args": {
+          "lines": [
+            {
+              "item_id": "item-energy",
+              "qty": 1
+            }
+          ]
+        }
+      },
+      {
+        "at": "2026-11-20T06:14:00-05:00",
+        "call": "freshcart.payments.select",
+        "args": {
+          "payment_method_id": "pm-4417"
+        }
+      },
+      {
+        "at": "2026-11-20T06:14:00-05:00",
+        "call": "freshcart.checkout.place",
+        "args": {
+          "order_id": "fc-order-energy"
+        },
+        "expect": "approved"
+      }
+    ],
+    "s2": []
+  }
+}

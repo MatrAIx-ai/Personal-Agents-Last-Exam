@@ -1,0 +1,55 @@
+{
+  "dataset": {
+    "schema_version": "pale.dataset.v1",
+    "dataset_id": "freshcart-task",
+    "version": "1.0.0",
+    "description": "Hand-authored synthetic records for grocery-cap-limit-code.",
+    "record_source_ids": [
+      "authored"
+    ],
+    "sources": [
+      {
+        "source_id": "authored",
+        "kind": "synthetic",
+        "description": "Hand-authored synthetic records. No external collection.",
+        "uri": null,
+        "license": "MIT",
+        "usage": "permitted",
+        "collection": null,
+        "generation": {
+          "method": "manual",
+          "tool": "tools/build-workspace.cjs",
+          "tool_version": "1.0.0",
+          "seed": null,
+          "parameters": {}
+        }
+      }
+    ],
+    "transformations": [
+      "Normalized cents, account ids and Eastern timestamps."
+    ],
+    "expected_counts": {
+      "records": 56,
+      "assets": 0
+    },
+    "quality_policy": {
+      "duplicate_records": "reject",
+      "duplicate_assets": "reject",
+      "missing_assets": "allow_declared"
+    },
+    "review": {
+      "status": "pending",
+      "reviewer": null,
+      "notes": "Automated checks do not replace human review."
+    }
+  },
+  "catalog": {
+    "schema_version": "pale.asset-catalog.v1",
+    "catalog_id": "freshcart-task-assets",
+    "app_id": "freshcart",
+    "dataset_ref": "dataset.json",
+    "assets": [],
+    "extensions": []
+  },
+  "blobs": {}
+}
