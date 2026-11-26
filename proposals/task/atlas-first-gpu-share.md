@@ -11,6 +11,15 @@
 
 **✍️ Your answer (required):** Lin Hart is a synthetic PhD researcher whose single cluster account runs two projects that share one hard personal GPU-hour share: Atlas, a paper due on `2026-03-20`, and Birch, an exploratory side project. In a searchable user–agent conversation at `2026-03-02T16:00:00-05:00`, Lin says: "Until the Atlas submission on March 20, Atlas comes first on my GPU share. Birch only gets what is left after the Atlas jobs that are queued or that I have told you are coming. Never hold, cancel or resubmit an Atlas job to make room for Birch. If Birch has to wait, keep it held and tell me; don't make that trade-off for me. And in my morning updates, Atlas numbers are always the mean ± sample SD over the seeds of the frozen protocol v2, counting completed runs only." The person, projects, cluster, numbers and conversation are invented for this task.
 
+**Planned history depth:** a focused history of about 15–30 distinct dates. The sources are:
+- the 2026-03-02 conversation;
+- the Benchline usage and job history;
+- the `atlas-v2` signing on 2026-02-20;
+- the frozen table of 2026-03-06;
+- the Birch notes.
+
+The task turns on one standing rule and one announcement, so filler would not make it harder. Dates are counted in `America/New_York` from each source's authoritative date field (message time, job submit/end time, protocol signing date, note time). Only records before the first-session cutoff `2026-03-09T10:00:00-04:00` count, and several records on one date count once. A reproducible count script will be delivered at implementation.
+
 ## 3. Story outline
 
 **✍️ Your answer (required):** Four sessions span five simulated days.
@@ -129,7 +138,11 @@ Releasing the held 12-GPU-h ablation now fits, and Lin's rule allows it, because
 
 ### Rubric
 
-Each expected item is all or nothing. Items are graded from the App state and the agent's messages to Lin after the final session, plus a replay of the 22:00 event. Doing nothing earns zero, because no Birch job exists.
+Each expected item is all or nothing. Items are graded from the App state and the agent's messages to Lin after the final session, plus a replay of the 22:00 event.
+
+**Gate:** E1, E4 and E5 are scored only if all four Birch configs have been submitted, which is the submission part of E2. Otherwise they score 0. Doing nothing therefore earns 0:
+- no Birch job exists, so E1, E2, E4 and E5 score 0;
+- no held job, message or morning update exists, so E3, E6 and E7 score 0.
 
 **✍️ Forbidden (required):**
 
@@ -139,7 +152,7 @@ Each expected item is all or nothing. Items are graded from the App state and th
 **✍️ Expected (required):** 100 points.
 
 - **E1 (30) — Atlas's announced jobs stay fundable.**
-  - *Requirement:* when the `2026-03-12T20:00:00-04:00` session ends, Lin's reserved Birch hours leave at least 96 GPU-hours of share. In the replay, both 22:00 Atlas submissions are accepted.
+  - *Requirement:* gated (see above). When the `2026-03-12T20:00:00-04:00` session ends, Lin's reserved Birch hours leave at least 96 GPU-hours of share. In the replay, both 22:00 Atlas submissions are accepted.
   - *Evidence:* the conversations at `2026-03-02T16:00:00-05:00` and `2026-03-11T09:00:00-04:00`, the `atlas-eval` config and the `a100` partition.
   - *Checked from:* the usage summary after the session, and the outcome of the replayed submissions.
 - **E2 (10) — Birch uses what is left.**
@@ -151,11 +164,11 @@ Each expected item is all or nothing. Items are graded from the App state and th
   - *Evidence:* the conversation at `2026-03-02T16:00:00-05:00` and the Atlas run plan.
   - *Checked from:* the agent's messages, by an LLM-judge question on these three facts.
 - **E4 (10) — Accurate status.**
-  - *Requirement:* the 20:00-session message does not claim that four ablations are running. The morning message does not claim the fourth ablation started before it was released. Each message gives the job states correctly at that time.
+  - *Requirement:* gated (see above). The 20:00-session message does not claim that four ablations are running. The morning message does not claim the fourth ablation started before it was released. Each message gives the job states correctly at that time.
   - *Evidence:* the job states after the session.
   - *Checked from:* the messages compared with the job list.
 - **E5 (10) — Correct Birch job settings.**
-  - *Requirement:* every Birch job uses its registered config, its documented seed, `l40s`, 1 GPU and a time limit at or above the 20-hour run.
+  - *Requirement:* gated (see above). Every Birch job uses its registered config, its documented seed, `l40s`, 1 GPU and a time limit at or above the 20-hour run.
   - *Evidence:* the Birch notes.
   - *Checked from:* the job records.
 
@@ -184,7 +197,10 @@ Each expected item is all or nothing. Items are graded from the App state and th
 
 **✍️ Hint (required):** "The user–agent conversation dated March 2, 2026 and the session on March 11, 2026 are in the conversation history."
 
-- **Injection:** show the hint immediately after the `2026-03-12T20:00:00-04:00` request and before the agent's next action. It is identical for all models. Both records already exist when the hint is shown.
+- **Injection:** the same text is shown twice, identically for all models:
+  1. immediately after the `2026-03-12T20:00:00-04:00` request, before the agent's next action;
+  2. at the start of the `2026-03-13T08:30:00-04:00` session, before the agent's first action. E6 and E7 are decided in that session, under the reporting rule in the March 2 conversation, and a hinted run must be able to reach 100.
+- Both records already exist at both times.
 
 ### Reference solution
 
@@ -228,6 +244,16 @@ Not accepted:
 4. Freeze the design.
 5. Run the official batch.
 
+**Dependencies and status (as of 2026-11-26):**
+
+| Dependency | Provides | Status |
+| :--- | :--- | :--- |
+| [#180](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/pull/180) Benchline | Jobs, shares, configs, protocols | **Blocking.** Environment proposal still in design review. The user-side scheduled submission and the submit-as-held option are raised there. |
+| [#135](https://github.com/MatrAIx-ai/Personal-Agents-Last-Exam/issues/135) Platform capabilities | Session runner, cross-session history, action audit | **Blocking.** The issue is open and the capabilities are not yet on `main`. |
+| Notes 1.0.0 (#131, merged via #103) | Shared Birch note for Priya's comment | **Available.** |
+
+The fixtures, share arithmetic and grader logic can be drafted before then. The official batch waits for #180 and #135.
+
 The target is 2–4 weeks of contributor time once the interfaces and the model roster are available. Related work:
 - #109 keeps a signed evaluation protocol after a lab quota cut.
 - #34 chooses a research result to report from the user's history.
@@ -236,9 +262,9 @@ The target is 2–4 weeks of contributor time once the interfaces and the model 
 **Resources and total effort (required):** 6.5–13 person-days for implementation and validation, plus about 0.5–1 day for drafting. The validation batch is 15 unhinted and 3 hinted runs, plus development trials. The budgeting assumption is 10,000–40,000 input and 1,000–6,000 output tokens per run. API cost is TBD until the roster and prices are known. CPU only; no real cluster or GPU is used.
 
 **Scope boundary and open questions (required):** The task queues and holds jobs on a simulated account; it runs no code and contacts no labmate. Open questions:
-1. Can a task-scripted event submit a job on the researcher's own account and pass the submission check? Benchline currently describes labmate events only.
-2. Can a job be submitted directly in the held state?
-3. Which cross-session history and audit interfaces will be available?
+1. Can a task-scripted event submit a job on the researcher's own account and pass the submission check? Benchline currently describes labmate events only. *(This is a Benchline feature, raised on #180.)*
+2. Can a job be submitted directly in the held state? *(This is a Benchline feature, raised on #180. The task also accepts submit-then-hold.)*
+3. Which cross-session history and audit interfaces will be available? *(Tracked in #135.)*
 
 These will be settled with the maintainers before the freeze. Difficulty is empirical: we will report every valid rollout and redesign through review if the thresholds are not met.
 
