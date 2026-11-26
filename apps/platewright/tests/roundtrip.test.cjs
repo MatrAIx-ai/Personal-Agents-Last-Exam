@@ -40,11 +40,11 @@ const CASES = [
     'members.constraint.set', ({m, c}) => ({id: m.person_id, constraint: pick(c, CONSTRAINT_KEYS)})],
   ['household.get', f => f.call('platewright.household.get', {}).members.flatMap(m => m.constraints.map(c => ({m, c}))),
     'members.constraint.remove', ({m, c}) => ({id: m.person_id, constraint_id: c.id})],
-  ['recipes.get', f => f.call('platewright.recipes.search', {include_archived: true, limit: 100}).items.map(r => f.call('platewright.recipes.get', {id: r.id}).recipe),
+  ['recipes.get', f => recipes(f, true),
     'recipes.update', r => ({id: r.id, patch: {...pick(r, ['title', 'servings', 'method_tags', 'steps', 'tags', 'active_minutes', 'total_minutes']),
       lines: r.lines.map(l => pick(l, ['ingredient_id', 'quantity', 'unit', 'optional', 'note']))}})],
   // The same with the title changed, so the unchanged lines (notes included) are saved as a revision.
-  ['recipes.get', f => f.call('platewright.recipes.search', {limit: 100}).items.map(r => f.call('platewright.recipes.get', {id: r.id}).recipe),
+  ['recipes.get', f => recipes(f, false),
     'recipes.update', r => ({id: r.id, patch: {title: r.title + ' (family)', lines: r.lines.map(l => pick(l, ['ingredient_id', 'quantity', 'unit', 'optional', 'note']))}})],
   ['plan.get', f => plan(f), 'plan.slot.set', s => ({id: s.id, dishes: s.dishes.map(dishOf), attendees: s.attendees, guests: guestsOf(s), note: s.note})],
   ['plan.get', f => plan(f).filter(s => s.cooked), 'plan.slot.mark',
@@ -61,6 +61,25 @@ const CASES = [
   ['shopping.get', f => lines(f), 'shopping.item.remove', l => ({id: l.id})],
   ['shopping.get', f => [f.call('platewright.shopping.get', {}).list].filter(Boolean), 'shopping.generate', l => ({start: l.start, end: l.end})]
 ];
+// Whether an input is accepted depends on its shape: which fields are present and which are null, text,
+// numbers or lists. Records are sent once per shape and state (a slot's state and phase, a
+// constraint's state, a line's kind and state, a recipe's state and whether it is a variant), so every
+// shape a read returns is written back without sending hundreds of records that look the same.
+const shape = v => (v === null ? 'null' : Array.isArray(v) ? [...new Set(v.map(x => JSON.stringify(shape(x))))].sort()
+  : typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, shape(v[k])])) : typeof v);
+const stateOf = r => JSON.stringify(['state', 'phase', 'kind', 'variant_of', 'freshness'].map(k => (r.c || r.s || r)[k] ?? null).concat(r.variant ? 'variant' : []));
+// The recipes read with recipes.get: one per shape of what is stored for it (archived or not, a
+// variant or not, which fields and line notes are empty), chosen from the recipes recipes.search lists.
+function recipes(f, includeArchived) {
+  const stored = new Map(f.data.recipes.map(r => [r.id, r]));
+  const seen = new Set();
+  return f.call('platewright.recipes.search', {include_archived: includeArchived, limit: 100}).items.filter(item => {
+    const r = stored.get(item.id), key = JSON.stringify([shape({...r, revisions: null, history: null, origin: null}), r.archived, !!r.variant]);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).map(item => f.call('platewright.recipes.get', {id: item.id}).recipe);
+}
 // Every slot of the reference household's last six weeks and the minimal household's plan.
 function plan(f) {
   return [['2026-10-04', '2026-11-14'], ['2026-11-15', '2026-12-26']].flatMap(([start, end]) => f.call('platewright.plan.get', {start, end}).slots);
@@ -80,8 +99,11 @@ for (const [seedName, seed] of Object.entries(SEEDS)) {
     const failures = [], outcomes = CASES.map(() => ({}));
     for (const [index, [read, records, write, build]] of CASES.entries()) {
       const f = fixture({seed, logging: false});
+      const sent = new Set();
       for (const record of records(f)) {
-        const args = build(record);
+        const args = build(record), key = JSON.stringify(shape(args)) + stateOf(record);
+        if (sent.has(key)) continue;
+        sent.add(key);
         // The page accepts what the contract accepts: a form re-sending this record is not stopped.
         const problem = schemaProblem(inputSchema(write), args);
         if (problem) failures.push(`${read} -> ${write} ${JSON.stringify(args).slice(0, 300)}: the page's form check says "${problem}"`);
