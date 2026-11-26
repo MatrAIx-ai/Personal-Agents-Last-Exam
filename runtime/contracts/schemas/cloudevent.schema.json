@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pale:cloudevents-json-profile:1",
+  "title": "PALE JSON-object profile of CloudEvents 1.0 (specification 1.0.2)",
+  "description": "CloudEvents JSON envelope; PALE requires JSON object data, dataschema and an absolute source URI. No binary/batch or custom context extensions in this profile. MCP wrapping is a PALE convention, not a standard CloudEvents MCP binding.",
+  "type": "object",
+  "properties": {
+    "specversion": {
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 150
+    },
+    "source": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$",
+      "maxLength": 512
+    },
+    "type": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "datacontenttype": {
+      "const": "application/json"
+    },
+    "dataschema": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$",
+      "maxLength": 512
+    },
+    "data": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "specversion",
+    "id",
+    "source",
+    "type",
+    "datacontenttype",
+    "dataschema",
+    "data"
+  ],
+  "additionalProperties": false
+}

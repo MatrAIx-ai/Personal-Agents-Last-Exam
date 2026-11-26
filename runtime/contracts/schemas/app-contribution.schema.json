@@ -1,0 +1,607 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "pale.app-contribution.v1"
+    },
+    "contract_revision": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "app_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+    },
+    "app_categories": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "personal",
+          "external",
+          "device"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "runtime_manifest_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "interfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "interface_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          },
+          "transport": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$"
+          },
+          "audience": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "agent",
+                "infra",
+                "reviewer"
+              ]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "status": {
+            "enum": [
+              "implemented",
+              "declared",
+              "unsupported"
+            ]
+          },
+          "entrypoint_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "operations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "effect": {
+                  "enum": [
+                    "read",
+                    "write",
+                    "admin"
+                  ]
+                },
+                "caller": {
+                  "enum": [
+                    "agent",
+                    "infra",
+                    "reviewer"
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "effect",
+                "caller"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "interface_id",
+          "transport",
+          "audience",
+          "status",
+          "operations"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "state": {
+      "type": "object",
+      "properties": {
+        "owner": {
+          "const": "app"
+        },
+        "isolation_keys": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "run_id",
+              "app_id",
+              "instance_id"
+            ]
+          },
+          "minItems": 2,
+          "uniqueItems": true
+        },
+        "seed_schema_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot_includes_assets": {
+          "type": "boolean"
+        },
+        "reset_scope": {
+          "enum": [
+            "app_instance",
+            "run"
+          ]
+        },
+        "version_checks": {
+          "enum": [
+            "implemented",
+            "declared",
+            "unsupported"
+          ]
+        },
+        "idempotent_writes": {
+          "enum": [
+            "implemented",
+            "declared",
+            "unsupported"
+          ]
+        },
+        "concurrency_control": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit_confirmation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outbox_atomic_with_business_state": {
+          "enum": [
+            "implemented",
+            "declared",
+            "unsupported"
+          ]
+        }
+      },
+      "required": [
+        "owner",
+        "isolation_keys",
+        "seed_schema_ref",
+        "snapshot_includes_assets",
+        "reset_scope",
+        "version_checks",
+        "idempotent_writes",
+        "concurrency_control",
+        "commit_confirmation",
+        "outbox_atomic_with_business_state"
+      ],
+      "additionalProperties": false
+    },
+    "events": {
+      "type": "object",
+      "properties": {
+        "accepts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$"
+              },
+              "schema_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "implemented",
+                  "declared",
+                  "unsupported"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "schema_ref",
+              "status"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "emits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$"
+              },
+              "schema_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "implemented",
+                  "declared",
+                  "unsupported"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "schema_ref",
+              "status"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "trigger_owner": {
+          "const": "task_and_infra"
+        }
+      },
+      "required": [
+        "accepts",
+        "emits",
+        "trigger_owner"
+      ],
+      "additionalProperties": false
+    },
+    "shared_data": {
+      "type": "object",
+      "properties": {
+        "identity_binding_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "account_model_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cross_app_references": {
+          "type": "boolean"
+        },
+        "asset_catalog_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "identity_binding_ref",
+        "account_model_ref",
+        "cross_app_references",
+        "asset_catalog_refs"
+      ],
+      "additionalProperties": false
+    },
+    "gui_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "notification_channels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$"
+      },
+      "uniqueItems": true
+    },
+    "subscriptions": {
+      "type": "object",
+      "properties": {
+        "business_owner": {
+          "const": "source_app"
+        },
+        "routing_owner": {
+          "const": "infra"
+        },
+        "task_binding_required": {
+          "type": "boolean"
+        },
+        "preferences_seed_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "implemented",
+            "declared",
+            "unsupported"
+          ]
+        }
+      },
+      "required": [
+        "business_owner",
+        "routing_owner",
+        "task_binding_required",
+        "preferences_seed_ref",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "core_api": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required_apps": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          },
+          "uniqueItems": true
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$"
+              },
+              "status": {
+                "enum": [
+                  "implemented",
+                  "declared",
+                  "unsupported"
+                ]
+              },
+              "owner": {
+                "enum": [
+                  "core",
+                  "infra",
+                  "app"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "status",
+              "owner"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "core_api",
+        "required_apps",
+        "services"
+      ],
+      "additionalProperties": false
+    },
+    "extensions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "namespace",
+          "version",
+          "required",
+          "data"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "asset_runtime": {
+      "type": "object",
+      "properties": {
+        "implemented_descriptor_versions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "implemented_mime_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "implemented_storage_adapters": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "max_assets": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_bundle_bytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "implemented_descriptor_versions",
+        "implemented_mime_types",
+        "implemented_storage_adapters",
+        "max_assets",
+        "max_bundle_bytes"
+      ],
+      "additionalProperties": false
+    },
+    "messaging": {
+      "type": "object",
+      "properties": {
+        "publishes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "channel": {
+                "type": "string",
+                "minLength": 1
+              },
+              "schema_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "schema_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "implemented",
+                  "declared",
+                  "unsupported"
+                ]
+              },
+              "event_type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "payload_schema_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "channel",
+              "schema_id",
+              "schema_ref",
+              "status",
+              "event_type",
+              "payload_schema_id"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "receives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "channel": {
+                "type": "string",
+                "minLength": 1
+              },
+              "schema_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "schema_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "implemented",
+                  "declared",
+                  "unsupported"
+                ]
+              },
+              "mcp_tool": {
+                "const": "env.apply_event"
+              },
+              "operation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "event_type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "payload_schema_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "channel",
+              "schema_id",
+              "schema_ref",
+              "status",
+              "mcp_tool",
+              "operation",
+              "event_type",
+              "payload_schema_id"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "envelope": {
+          "const": "cloudevents/1.0"
+        }
+      },
+      "required": [
+        "publishes",
+        "receives",
+        "envelope"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_revision",
+    "app_id",
+    "app_categories",
+    "runtime_manifest_ref",
+    "interfaces",
+    "state",
+    "events",
+    "shared_data",
+    "gui_ref",
+    "notification_channels",
+    "subscriptions",
+    "dependencies",
+    "extensions",
+    "asset_runtime",
+    "messaging"
+  ],
+  "additionalProperties": false
+}
