@@ -13,6 +13,7 @@ The public checkout now contains the same local Core and Messaging implementatio
 - [Public runtime](../runtime/README.md): launch, validation, state, diagnostics and current limitations.
 - [Proposal review](review/environment-proposal.md) and [implementation review](review/app-implementation.md): review expectations.
 - [App implementation acceptance checklist](review/app-implementation-checklist.md): scope, public delivery, actual GUI/MCP workflows and evidence required for acceptance.
+- [Submission evidence](submission-evidence.md): reference/implemented GUI comparisons, ordered workflow screenshots, real dependency demonstrations and historical-date coverage.
 
 Keep the reference Mail and Calendar under `examples/apps/`. New contributed Apps go under `apps/<app-id>/`, subject to maintainer scope/location review. Personal and external Apps use the same package contract. Do not copy an existing receiving App into your package to implement an integration.
 
@@ -53,7 +54,7 @@ apps/<app-id>/
 │   ├── binding.json          # Example people, accounts and object relationships
 │   └── policies.json         # Provided local policy samples, applied by Core
 ├── assets/                   # Optional real fixture bytes; records reference asset IDs
-├── gui/                      # Optional App-owned renderer; describe its actual intended audience
+├── gui/                      # App-owned interactive pages when GUI is in scope; state the audience
 │   ├── src/                  # Components/pages use authorized interfaces and the same App state
 │   └── README.md             # Host requirements, supported interactions and unimplemented UI scope
 ├── examples/                 # Runnable walkthrough and valid event/message inputs
@@ -64,7 +65,8 @@ apps/<app-id>/
 │   ├── business.test.cjs     # Domain success/failure tests; may delegate to additional test modules
 │   ├── harness.cjs           # App-only in-memory test context; not a second Core implementation
 │   └── cases.json            # Valid business-call input for the public verifier, including a read
-├── README.md                 # Setup, workflow coverage, dependencies, commands and limitations
+├── evidence/                 # Review index, GUI comparisons/sequences and links to test/run artifacts
+├── README.md                 # Setup, workflow coverage, dependencies, evidence index and limitations
 └── LICENSE                   # Code license; data/media reuse conditions belong in dataset.json
 ```
 
@@ -99,6 +101,8 @@ First inspect the receiving App's `tools.json`, `contribution/contribution.json`
 
 A message declaration is a capability, not a grant. Infra supplies permitted sources, target accounts and explicit grants. Do not choose arbitrary receiver URLs, write another App's state files, create a shadow inbox/calendar, or bypass its business handler.
 
+Demonstrate each connection claimed as implemented with the real pinned dependency, including optional connections you deliver and separate Agent tool calls. Link the initiating action to the dependency's actual records, recipient, file/version and receipt. A fake client or sender-only test is business-test evidence, not an integration demonstration. Use the [dependency evidence requirements](submission-evidence.md#2-demonstrate-declared-app-dependencies).
+
 ## Business results and optional diagnostics
 
 `{ data, result }` remains the business return. An optional `ctx.log(step, details)` channel records checks and prepared changes separately. The App-local diagnostics helper tolerates a missing or failing hook; it never decides that a commit occurred.
@@ -110,6 +114,8 @@ The public local host writes `<state-dir>/<run>/<app>.debug.jsonl`. Reset retain
 ## Data, media and history
 
 `fixtures/` holds small reusable examples, not a complete evaluation task. A Task can supply different historical records using the same seed schema. Store asset bytes under `assets/`, associate them by ID, and describe MIME, integrity, parent objects and provenance in the catalog. UI images and content attachments are distinct uses.
+
+Deliver evaluation data covering **2025-01-01 through 2026-12-31**, with working loading/retrieval and meaningful date fields. When earlier website data cannot be retrieved, use real data from around November 2026 and synthesize missing periods with clear provenance. Report monthly/source coverage and real versus synthetic portions under the [Environment data requirements](submission-evidence.md#3-environment-dataset-coverage). Small smoke fixtures are valid for local tests but do not substitute for the full delivery dataset. Individual Tasks can select shorter histories; 300 distinct dates is a Task recommendation, not an App minimum.
 
 The reference profile supports PDF, UTF-8 text, ICS, PNG/JPEG, MP3/WAV, MP4 and JSON in local bundles of at most 64 assets / 1 MiB. Attachment operations accept up to eight files per call. File storage and format checks do not perform OCR. New App resource-access mappings require platform review; unknown mappings deny access rather than trusting App-supplied authorization code.
 
@@ -144,6 +150,8 @@ The verifier copies exact packages to temporary state, loads real Core, uses sep
 ## Submit and review
 
 Submit the App package, exact commands, package/runtime versions, verification reports, workflow-to-test mapping and provenance. Generated state/logs stay out of source control. Reports should use synthetic data and be attached as review evidence.
+
+For required GUIs, attach original-product screenshots with sources, corresponding implemented screenshots, and an ordered before/action/intermediate/result sequence for every core workflow and relevant failure path. Explain intentional differences. Link these to browser steps, actual persisted state and MCP tests. Provide an [evidence index](submission-evidence.md#delivery-evidence-index) covering both App-local behavior and each delivered dependency flow. Review screenshots are not runtime assets; screenshots alone never replace executable tests.
 
 CI reruns checks without production credentials. For App-only PRs, a separate job uses the base revision's public validator; modifying the candidate's validator cannot establish independent compatibility. Runtime changes require Infra review. During the initial runtime bootstrap, unavailable base-runtime checks are explicitly not run.
 
