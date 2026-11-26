@@ -12,10 +12,10 @@ import re
 import sys
 
 try:
-    from .review_identity import can_self_review
+    from .review_identity import can_self_review, is_automated_reviewer
     from .sync_proposals import APIError, GitHub, RateLimited, rate_limit_notice, PROPOSAL_PATH, TITLE, decode_file, domains_from_readme, field, labels, track
 except ImportError:
-    from review_identity import can_self_review
+    from review_identity import can_self_review, is_automated_reviewer
     from sync_proposals import APIError, GitHub, RateLimited, rate_limit_notice, PROPOSAL_PATH, TITLE, decode_file, domains_from_readme, field, labels, track
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -60,6 +60,10 @@ def authors(pr, text, pool):
 
 def requested(pr):
     return [u["login"] for u in pr.get("requested_reviewers", [])]
+
+
+def human_requested(pr):
+    return [u["login"] for u in pr.get("requested_reviewers", []) if not is_automated_reviewer(u)]
 
 
 def history_owners(pr, events, reviews, pool):
@@ -125,11 +129,14 @@ class Router:
         return self.history_cache[n]
 
     def established(self, pr, refresh=False):
-        if requested(pr) or pr.get("requested_teams"):
+        if human_requested(pr) or pr.get("requested_teams"):
             return True
         events, reviews = self.history(pr, refresh)
-        # Even a manually removed request is deliberate. Do not restore it.
-        if any(e.get("event") in {"review_requested", "review_request_removed"} for e in events):
+        # Preserve human/team routing, including deliberate removals. Requests
+        # to Copilot or another bot do not fill the human reviewer position.
+        if any(e.get("event") in {"review_requested", "review_request_removed"}
+               and (e.get("requested_team") or (e.get("requested_reviewer")
+                    and not is_automated_reviewer(e["requested_reviewer"]))) for e in events):
             return True
         pool = self.rules["reviewers"][named_track(pr)]
         return bool(history_owners(pr, events, reviews, pool))
@@ -178,7 +185,7 @@ class Router:
             rows.append(row)
             if pr["base"]["ref"] != self.branch:
                 row.update(status="manual", reason="Proposal does not target the default branch"); continue
-            if requested(pr) or pr.get("requested_teams"):
+            if human_requested(pr) or pr.get("requested_teams"):
                 continue
             if can_self_review(pr["user"]["login"], pr["user"].get("id"), self.rules):
                 row.update(status="self-managed", reason="Owner reviews and accepts their own changes; no automatic reviewer request")

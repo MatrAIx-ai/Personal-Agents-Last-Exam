@@ -53,6 +53,8 @@ For example, Task proposal `#57` can depend on Environment proposal `#42`. These
 
 The [App delivery guide](docs/app-contribution.md) and [public Core / Messaging runtime](runtime/README.md) provide reproducible local business and integration checks. Consult [existing App interfaces](docs/app-integrations.md) before building cross-App connections. Use the separate [proposal review](docs/review/environment-proposal.md) and [implementation review](docs/review/app-implementation.md) criteria; local runtime success does not replace maintainer acceptance or deployment-specific checks.
 
+Plan and deliver the [submission evidence](docs/submission-evidence.md): reference/implemented GUI comparisons when GUI is in scope, real demonstrations of delivered dependencies alongside business/MCP tests, and Environment evaluation data covering **2025-01-01 through 2026-12-31**. Where older website data are unavailable, anchor the dataset in real data from around **November 2026** and synthesize missing periods with explicit provenance. Proposal review checks the plan; implementation review checks the artifacts.
+
 Propose a website or app you would like to build and the main workflows it could support. Choose one primary domain and any relevant secondary domains from the list below. Use these exact names in the proposal and PR title.
 
 <a name="environment-domains"></a>
@@ -96,6 +98,8 @@ Start with a realistic user situation and a clear personalization idea. The prop
 - **Construction plan and effort:** persona/history/workspace construction, user rollout and scenario scripting, environment integration, rubrics/reference/hints, and agent rollouts with analysis. For each workstream, specify planned coverage, deliverables, quality checks and effort in person-days, plus owners, dependencies, milestone order and expected resources.
 
 After plan approval, task authors develop the executable scenario, precise timeline, context, grader and replayable reference solution from the approved rubric. Authors then run the required model evaluations themselves and submit traces, scores, configurations, hint-assisted results and failure analysis for implementation review.
+
+History covering **at least 300 distinct dates is strongly recommended, not mandatory**, across a Task's actual historical sources. Shorter histories are valid when appropriate to the task and its environment dependencies; explain the selected scope and report actual coverage. Tasks may reuse a versioned Environment dataset and select only relevant records preceding their first session. Follow the [Task history and evidence guidance](docs/submission-evidence.md#4-task-history-depth); the Environment dataset window does not cap Task session or event dates.
 
 The user rollout describes planned user interactions, responses and branches across the story. Specify the **number of sessions**, **simulated world time span**, and **estimated total tokens for one complete scenario across all sessions**, including the token estimate's scope (dialogue, prior context, tool outputs, etc.). The scenario script implements user behavior and world events. An agent rollout is an actual model execution against the script. Plan the work for both; allow multiple valid agent strategies.
 
