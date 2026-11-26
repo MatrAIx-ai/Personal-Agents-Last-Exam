@@ -10,3 +10,4 @@ require('./events.test.cjs');
 require('./fixtures.test.cjs');
 require('./inputs.test.cjs');
 require('./refusals.test.cjs');
+require('./roundtrip.test.cjs');

@@ -184,6 +184,22 @@ async function run() {
     const peer = await open('infra', 'platewright-other');
     const other = (await peer.call('env.snapshot')).snapshot;
     check('A separate run starts from the package reference seed', other.data.recipes.length === 66 && other.data.plan.length === 880 && other.virtual_now === '2026-11-08T08:00:00-05:00');
+    // A meal read with plan.get is written back with plan.slot.set as it was read: Saturday's dinner,
+    // whose guests Ines and Maya have needs that read with note null.
+    const otherAgent = await open('agent', 'platewright-other');
+    const ready = await peer.call('env.reset', {expected_version: (await peer.call('env.snapshot')).version, profile: 'sandbox'});
+    const week = await otherAgent.call('platewright.plan.get', {start: '2026-11-14', end: '2026-11-14'});
+    const dinner = week.slots.find(x => x.id === '2026-11-14:dinner');
+    check('plan.get returns Saturday\'s dinner with Ines\'s and Maya\'s needs, each with note null', ready.status === 'ready' &&
+      same(dinner.guests.filter(g => g.constraints.length).map(g => [g.name, g.constraints.map(x => x.note)]), [['Ines', [null]], ['Maya', [null]]]), dinner && dinner.guests);
+    const echo = await otherAgent.call('platewright.plan.slot.set', {id: dinner.id, expected_version: week.version, request_id: 'echo-1', attendees: dinner.attendees,
+      guests: dinner.guests, note: dinner.note,
+      dishes: dinner.dishes.map(d => d.kind === 'leftovers' ? {leftovers_of: d.leftovers_of, recipe_id: d.recipe_id, portions: d.portions}
+        : {recipe_id: d.recipe_id, ...(d.servings_source === 'explicit' ? {servings: d.servings} : {})})});
+    const reread = (await otherAgent.call('platewright.plan.get', {start: '2026-11-14', end: '2026-11-14'})).slots.find(x => x.id === dinner.id);
+    check('plan.slot.set with the guests, attendees, dishes and note as read commits and the meal reads the same, with one more history row', echo.status === 'committed' &&
+      same(reread.guests, dinner.guests) && same(reread.dishes, dinner.dishes) && reread.note === null && reread.history.length === dinner.history.length + 1 &&
+      reread.history.at(-1).action === 'replaced', echo);
     return {schema: 'platewright.real-mcp.v1', runtime_version: require(path.join(runtime, 'package.json')).version, node: process.version, passed: true, checks};
   } catch (e) {
     return {schema: 'platewright.real-mcp.v1', node: process.version, passed: false, error: e.message, checks};

@@ -77,6 +77,17 @@ async function main() {
     check('A slot shows what the check found for each guest', detail.includes('Maya: Unsafe') && detail.includes('Ines: Unsuitable'), detail.slice(0, 300));
     await readable('Meal plan with a meal selected');
     await shot('02-slot-flags-1280');
+    // W4: Saturday's dinner, whose guests have recorded needs, is changed through the form as it opens.
+    const saturday = async () => (await mcp.call(P + 'plan.get', {start: '2026-11-14', end: '2026-11-14'})).slots.find(s => s.id === '2026-11-14:dinner');
+    const satBefore = await saturday();
+    await page.click('.pw-actions button:has-text("Change meal")');
+    const satForm = dialog(P + 'plan.slot.set'); await satForm.waitFor(WAIT);
+    await submit(P + 'plan.slot.set'); await closed(P + 'plan.slot.set'); await idle();
+    const satAfter = await saturday();
+    check('Changing a meal whose guests have recorded needs commits; guests, needs and dishes read back unchanged (MCP read)',
+      JSON.stringify(satAfter.guests) === JSON.stringify(satBefore.guests) && satBefore.guests.some(g => g.constraints.length) &&
+      JSON.stringify(satAfter.dishes) === JSON.stringify(satBefore.dishes) && satAfter.history.length === satBefore.history.length + 1 &&
+      satAfter.history.at(-1).action === 'replaced', satAfter.history.at(-1));
 
     // W4: plan Tuesday's breakfast with a guest whose name is hostile text.
     await page.click('button[aria-label^="Plan a meal on Tuesday"]');
@@ -167,6 +178,9 @@ async function main() {
     await submit(P + 'shopping.item.set'); await closed(P + 'shopping.item.set'); await idle();
     const napkins = (await mcp.call(P + 'shopping.get', {})).list.lines.filter(l => l.text === 'Paper napkins');
     check('A retried form after a lost response commits once (same request ID)', dropped && napkins.length === 1, napkins.length);
+    check('After Add item the list and the detail show the item just added, not the line selected before',
+      await page.textContent('.detail h2') === 'Paper napkins' && await page.getAttribute(`.pw-row[data-line-id="${napkins[0].id}"]`, 'aria-pressed') === 'true' &&
+      await page.getAttribute(`.pw-row[data-line-id="${lineId}"]`, 'aria-pressed') === 'false', await page.textContent('.detail h2'));
 
     // W5: pantry; a stale form shows the conflict, then a fresh one saves.
     await nav('Pantry');
@@ -193,6 +207,15 @@ async function main() {
     await set.locator('input[type=number]').fill('18');
     await submit(P + 'pantry.set'); await closed(P + 'pantry.set'); await idle();
     check('Updating stock commits (MCP read)', (await mcp.call(P + 'pantry.list', {})).items.find(i => i.ingredient_id === 'ing-egg').quantity === 18);
+    // Adding an item while another is selected shows the item just added.
+    await page.click('.pw-bar button:has-text("Add item")');
+    await set.waitFor(WAIT);
+    await set.locator('select[aria-label="Ingredient"]').selectOption('ing-grapefruit');
+    await set.locator('input[type=number]').fill('2');
+    await submit(P + 'pantry.set'); await closed(P + 'pantry.set'); await idle();
+    check('After Add item in the pantry the detail shows the item just added (MCP read)',
+      (await mcp.call(P + 'pantry.list', {})).items.some(i => i.ingredient_id === 'ing-grapefruit' && i.quantity === 2) &&
+      await page.textContent('.detail h2') === 'Grapefruit' && await page.getAttribute('[data-item-id="ing-grapefruit"]', 'aria-pressed') === 'true', await page.textContent('.detail h2'));
 
     // W2: a need whose end is before its start is refused with the App's code; corrected, it saves.
     await nav('Household');

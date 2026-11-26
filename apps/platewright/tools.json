@@ -1988,9 +1988,16 @@
                       "type": "number"
                     },
                     "note": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 500
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -2985,9 +2992,16 @@
                       "type": "number"
                     },
                     "note": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 500
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -6142,9 +6156,16 @@
                 "type": "boolean"
               },
               "note": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 200
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -6356,9 +6377,16 @@
                     "type": "boolean"
                   },
                   "note": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 },
                 "required": [
@@ -6759,9 +6787,16 @@
               ]
             },
             "note": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 500
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                },
+                {
+                  "type": "null"
+                }
+              ]
             }
           },
           "required": [
@@ -7101,9 +7136,16 @@
                       "type": "number"
                     },
                     "note": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 500
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -7123,9 +7165,16 @@
           "maxItems": 20
         },
         "note": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 500
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "expected_version": {
           "type": "object",
@@ -8116,30 +8165,58 @@
           "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
         },
         "ingredient_id": {
-          "type": "string",
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "text": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 200
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "quantity": {
-          "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "unit": {
-          "enum": [
-            "g",
-            "kg",
-            "oz",
-            "lb",
-            "ml",
-            "l",
-            "tsp",
-            "tbsp",
-            "cup",
-            "fl_oz",
-            "each"
+          "anyOf": [
+            {
+              "enum": [
+                "g",
+                "kg",
+                "oz",
+                "lb",
+                "ml",
+                "l",
+                "tsp",
+                "tbsp",
+                "cup",
+                "fl_oz",
+                "each"
+              ]
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "ticked": {

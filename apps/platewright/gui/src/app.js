@@ -532,7 +532,8 @@ async function lineDialog(l){
   build:()=>{const base={quantity:Number(q.value),unit:unit.value};
    if(l)return {id:l.id,...base,...(l.ingredient_id?{}:{text:text.value.trim()})};
    return ing.value?{ingredient_id:ing.value,...base}:{text:text.value.trim(),...base};},
-  after:r=>{focus.shopping=r.id;}});
+  // The write already re-read the list; showing the line just saved only redraws the view.
+  after:r=>{focus.shopping=r.id;return UI.navigate('shopping');}});
 }
 function excludeDialog(l){
  const reason=textInput('',{required:true,placeholder:'e.g. Using parsley from the garden'});
@@ -574,7 +575,7 @@ async function pantryDialog(item){
  formDialog({title:item?'Update '+item.name:'Add to the pantry',tool:TOOLS.pantrySet,submitLabel:'Save',
   fields:[field('Ingredient',ing),el('div',{class:'pw-inline'},el('label',{},'Quantity',q),el('label',{},'Unit',unit)),el('div',{class:'pw-inline'},el('label',{},'Use by',useBy),el('label',{class:'pw-checks'},none,'No use-by date'))],
   build:()=>{const id=item?.ingredient_id||ing.value;if(!id)throw Error('Choose an ingredient.');return {id,quantity:Number(q.value),unit:unit.value,...(none.checked?{use_by:null}:useBy.value?{use_by:useBy.value}:{})};},
-  after:r=>{focus.pantry=r.id;}});
+  after:r=>{focus.pantry=r.id;return UI.navigate('pantry');}});
 }
 
 // ---- Household --------------------------------------------------------------------------------------

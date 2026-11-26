@@ -126,6 +126,13 @@ const CONTENT_INPUT = {title: str(200), servings: NUM, lines: arr(LINE_INPUT, {m
 const DISH_INPUT = {anyOf: [obj({recipe_id: ID, servings: NUM}, ['servings']), obj({leftovers_of: SLOT, recipe_id: ID, portions: NUM}, ['recipe_id'])]};
 const SWAP_INPUT = obj({ingredient_id: ID, line: INT(0), rule_id: ID, to_ingredient_id: ID, ratio: NUM}, ['line', 'rule_id', 'to_ingredient_id', 'ratio']);
 const SHOP_ADD = {ingredient_id: ID, text: str(200), quantity: NUM, unit: UNIT};
+// Tool inputs also take null where the matching read returns null, so a record read from the App can
+// be sent back unchanged: null means "none", as the App stores it (no note; a line without an
+// ingredient, a text, a quantity or a unit). Events keep the shapes above.
+const orNull = (schema, keys) => ({...schema, properties: {...schema.properties, ...Object.fromEntries(keys.map(k => [k, nul(schema.properties[k])]))}});
+const GUEST_TOOL_INPUT = {...GUEST_INPUT, properties: {...GUEST_INPUT.properties, constraints: arr(orNull(GUEST_CONSTRAINT_INPUT, ['note']), {maxItems: 20})}};
+const CONTENT_TOOL_INPUT = {...CONTENT_INPUT, lines: arr(orNull(LINE_INPUT, ['note']), {minItems: 1, maxItems: 40})};
+const SHOP_TOOL = Object.fromEntries(Object.entries(SHOP_ADD).map(([k, v]) => [k, nul(v)]));
 
 // ---- Events ------------------------------------------------------------------------------------------
 const BY = {by: ID};
@@ -219,13 +226,13 @@ tool('recipes.get', 'Read a recipe (or an earlier revision) at any number of ser
     variant: nul(obj({...inline(ref('variant')).properties, base_title: str(200), base_current_revision: INT(1), stale_base: BOOL})), origin: ref('origin')})},
   {read: true, optional: ['servings', 'unit_system', 'units', 'revision']});
 tool('recipes.check', 'Check a recipe for members (default: all) and guests on the date of the meal (default today): one verdict per person (unsafe, may_contain, unsuitable, over_limit, disliked, ok_if_omitted or ok) with the lines behind it. Constraints apply as they stand on that date. Not medical advice.',
-  {id: ID, date: DATE, members: arr(ID, {uniqueItems: true, maxItems: 20}), guests: arr(GUEST_INPUT, {maxItems: 20}), revision: INT(1)},
+  {id: ID, date: DATE, members: arr(ID, {uniqueItems: true, maxItems: 20}), guests: arr(GUEST_TOOL_INPUT, {maxItems: 20}), revision: INT(1)},
   {recipe_id: ID, revision: INT(1), date: DATE, ...NUTRITION_VIEW, verdicts: arr(PERSON_VERDICT)}, {read: true, optional: ['date', 'members', 'guests', 'revision']});
 tool('substitutions.list', 'List the substitution rules for an ingredient (ingredient_id) or for each line of a recipe (id), with whether each rule applies to the recipe\'s method tags and why not.',
   {id: ID, ingredient_id: ID}, {recipe_id: nul(ID), ingredient_id: nul(ID), rules: arr(RULE_VIEW), lines: arr(obj({line: INT(0), ingredient_id: ID, name: str(120), rules: arr(RULE_VIEW)}))},
   {read: true, optional: ['id', 'ingredient_id']});
 tool('recipes.variant.preview', 'Preview a recipe with swaps (by rule_id, or a custom to_ingredient_id with a ratio from 0.01 to 100; each swapped quantity must stay between 0.001 and 1,000,000): returns exactly the content recipes.variant.create would save, its nutrition, and the check before and after the swaps. Writes nothing.',
-  {id: ID, swaps: arr(SWAP_INPUT, {minItems: 1, maxItems: 20}), title: str(200), date: DATE, members: arr(ID, {uniqueItems: true, maxItems: 20}), guests: arr(GUEST_INPUT, {maxItems: 20})},
+  {id: ID, swaps: arr(SWAP_INPUT, {minItems: 1, maxItems: 20}), title: str(200), date: DATE, members: arr(ID, {uniqueItems: true, maxItems: 20}), guests: arr(GUEST_TOOL_INPUT, {maxItems: 20})},
   {base_recipe_id: ID, base_revision: INT(1), title: str(200), unverified: BOOL, swaps: arr(ref('swap')), content: ref('content'), lines: arr(SHOWN_LINE),
     ...NUTRITION_VIEW, date: DATE, base_check: arr(PERSON_VERDICT), check: arr(PERSON_VERDICT),
     changes: arr(obj({kind: en(['member', 'guest']), id: ID, from: VERDICT, to: VERDICT}))},
@@ -241,19 +248,19 @@ tool('notifications.list', 'List notifications (what other household members did
 
 // Writes (11)
 tool('recipes.create', 'Save a new recipe at revision 1 (servings 1 to 200; every quantity between 0.001 and 1,000,000 and in a unit its ingredient is measured in).',
-  CONTENT_INPUT, {id: ID, state: en(['active']), revision: INT(1)}, {optional: ['tags', 'active_minutes', 'total_minutes']});
+  CONTENT_TOOL_INPUT, {id: ID, state: en(['active']), revision: INT(1)}, {optional: ['tags', 'active_minutes', 'total_minutes']});
 tool('recipes.update', 'Edit a recipe through patch, which adds a revision; patch.archived archives (true) or restores (false) it without a new revision. Servings and quantities follow recipes.create. An archived recipe can only be restored; a variant can only be archived or restored.',
-  {id: ID, patch: obj({...CONTENT_INPUT, archived: BOOL}, [...Object.keys(CONTENT_INPUT), 'archived'])},
+  {id: ID, patch: obj({...CONTENT_TOOL_INPUT, archived: BOOL}, [...Object.keys(CONTENT_TOOL_INPUT), 'archived'])},
   {id: ID, state: en(['active', 'archived']), revision: INT(1), new_revision: BOOL});
 tool('recipes.variant.create', 'Save a recipe with swaps as a new variant recipe that records its base, the base revision and the swaps; a custom swap marks it unverified. Saves exactly what recipes.variant.preview shows, with the same ratio and quantity bounds.',
   {id: ID, swaps: arr(SWAP_INPUT, {minItems: 1, maxItems: 20}), title: str(200)},
   {id: ID, state: en(['active']), revision: INT(1), base_recipe_id: ID, base_revision: INT(1), unverified: BOOL}, {optional: ['title']});
 tool('members.constraint.set', 'Add a constraint to a member (id = the member\'s person_id), or replace one by constraint.id; it is kept with its dates, its note and a history row. Omitted dates default to today and no expiry for a new constraint and are kept on a replacement.',
-  {id: ID, constraint: CONSTRAINT_INPUT}, {id: ID, member_id: ID, state: en(['scheduled', 'active', 'expired', 'ended']), action: en(['created', 'replaced'])});
+  {id: ID, constraint: orNull(CONSTRAINT_INPUT, ['note'])}, {id: ID, member_id: ID, state: en(['scheduled', 'active', 'expired', 'ended']), action: en(['created', 'replaced'])});
 tool('members.constraint.remove', 'End a member\'s scheduled or active constraint from now (id = the member\'s person_id); its history is kept.',
   {id: ID, constraint_id: ID, note: str(500)}, {id: ID, member_id: ID, state: {const: 'ended'}, ended_at: TS}, {optional: ['note']});
 tool('plan.slot.set', 'Set a slot (id = date:meal) with dishes (a recipe at servings, default from the attendees\' portion factors plus one per guest, or portions of leftovers, at most 200, from an earlier slot), attendees (default all members) and guests with their constraints; it replaces the slot. No dishes clears it. A dish that is wrong for someone is planned and flagged, not refused.',
-  {id: SLOT, dishes: arr(DISH_INPUT, {maxItems: 10}), attendees: arr(ID, {maxItems: 20}), guests: arr(GUEST_INPUT, {maxItems: 20}), note: str(500)},
+  {id: SLOT, dishes: arr(DISH_INPUT, {maxItems: 10}), attendees: arr(ID, {maxItems: 20}), guests: arr(GUEST_TOOL_INPUT, {maxItems: 20}), note: nul(str(500))},
   {id: SLOT, state: en(['planned', 'cleared']), default_servings: NUM, flags: arr(FLAG)}, {optional: ['attendees', 'guests', 'note'], target: 'current household plan'});
 tool('plan.slot.mark', 'Mark a planned slot cooked (not before its date; records portions made (at most 200) and eaten per recipe, default its servings and its attendees\' portions; deduct_pantry takes the exact quantities from the pantry, never below zero, and returns what was short) or skipped.',
   {id: SLOT, status: en(['cooked', 'skipped']), portions: arr(obj({recipe_id: ID, made: NUM, eaten: NUM}, ['made', 'eaten']), {maxItems: 10}), deduct_pantry: BOOL},
@@ -267,7 +274,7 @@ tool('shopping.generate', 'Generate (or regenerate) the shopping list for a wind
   {start: DATE, end: DATE}, {id: ID, state: {const: 'current'}, start: DATE, end: DATE, generation: INT(1), line_count: INT(0),
     added: arr(ID), kept: arr(ID), dropped: arr(ID), surplus: arr(ID)});
 tool('shopping.item.set', 'Without id: add a manual line (ingredient_id or text, quantity up to 1,000,000, unit). With id: change a manual line, tick or untick a line, or exclude a derived line with a reason (or include it again).',
-  {id: ID, ...SHOP_ADD, ticked: BOOL, excluded: BOOL, reason: str(300)}, {id: ID, state: en(['needed', 'ticked', 'excluded']), kind: en(['derived', 'manual'])},
+  {id: ID, ...SHOP_TOOL, ticked: BOOL, excluded: BOOL, reason: str(300)}, {id: ID, state: en(['needed', 'ticked', 'excluded']), kind: en(['derived', 'manual'])},
   {optional: ['id', 'ingredient_id', 'text', 'quantity', 'unit', 'ticked', 'excluded', 'reason']});
 tool('shopping.item.remove', 'Remove a manual line; a derived line is excluded instead (derived_line).',
   {id: ID}, {id: ID, state: {const: 'removed'}, kind: {const: 'manual'}});
