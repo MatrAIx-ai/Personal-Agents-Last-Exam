@@ -1,7 +1,7 @@
 'use strict';
 const { fail, copy } = require('./domain-utils.cjs');
 const { log } = require('./diagnostics.cjs');
-const { subtotal, withDelivery, pricedLines } = require('./prices.cjs');
+const { subtotal, withDelivery, pricedLines, replaceUnavailable } = require('./prices.cjs');
 
 function applyEvent(ctx, data, event) {
   if (event.operation === 'freshcart.list.apply') {
@@ -67,15 +67,9 @@ function applyEvent(ctx, data, event) {
       const sub = data.substitutions.find(row => row.id === attempt.substitution_id);
       if (!order || !sub) fail('invalid_event', 'Adjustment is missing its order.');
       const offer = sub.offers.find(row => row.id === sub.chosen_offer_id);
-      const line = order.lines.find(row => row.item_id === sub.unavailable_item_id);
-      if (!line || !offer) fail('invalid_event', 'Adjustment line is missing.');
-      const previous = line.line_cents;
-      line.item_id = offer.item_id;
-      line.name = offer.label;
-      line.unit_cents = line.unit_cents + Math.round(offer.delta_cents / line.qty);
-      line.line_cents = previous + offer.delta_cents;
-      order.subtotal_cents += offer.delta_cents;
-      order.total_cents += offer.delta_cents;
+      if (!offer || !replaceUnavailable(order, sub.unavailable_item_id, offer)) {
+        fail('invalid_event', 'Adjustment line is missing.');
+      }
       order.adjustments.push({ cents: offer.delta_cents, at: event.at, authorization_key: attempt.authorization_key });
       sub.status = 'accepted';
       return data;

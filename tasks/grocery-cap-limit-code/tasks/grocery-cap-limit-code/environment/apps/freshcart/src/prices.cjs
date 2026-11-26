@@ -36,4 +36,22 @@ function pricedLines(data, lines) {
   });
 }
 
-module.exports = { itemById, subtotal, withDelivery, pricedLines };
+function replaceUnavailable(order, itemId, offer) {
+  const lines = order.lines.filter(row => row.item_id === itemId);
+  if (!lines.length) return false;
+  const qty = lines.reduce((sum, row) => sum + row.qty, 0) || 1;
+  let remaining = offer.delta_cents;
+  lines.forEach((line, index) => {
+    const share = index === lines.length - 1 ? remaining : Math.round(offer.delta_cents * line.qty / qty);
+    remaining -= share;
+    line.item_id = offer.item_id;
+    line.name = offer.label;
+    line.unit_cents += line.qty ? Math.round(share / line.qty) : 0;
+    line.line_cents += share;
+  });
+  order.subtotal_cents += offer.delta_cents;
+  order.total_cents += offer.delta_cents;
+  return true;
+}
+
+module.exports = { itemById, subtotal, withDelivery, pricedLines, replaceUnavailable };

@@ -14,6 +14,8 @@ Harbor's `task.toml`, `environment/Dockerfile` and `tests/test.sh` are written. 
 
 ## How to run
 
+The local replay needs Node and Python. `tools/fetch-deps.sh` needs a network path to GitHub so it can fetch the pinned Keelcard tree. After that fetch, the replay and the grader use the local files.
+
 From the repository root, after `tasks/grocery-cap-limit-code/tools/fetch-deps.sh`:
 
 ```sh

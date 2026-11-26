@@ -18,18 +18,38 @@ function copyFile(from, to) {
   fs.copyFileSync(from, to);
 }
 
-fs.rmSync(runsDir, { recursive: true, force: true });
-fs.mkdirSync(runsDir, { recursive: true });
+const staging = path.join(path.dirname(runsDir), '.runs-staging');
+fs.rmSync(staging, { recursive: true, force: true });
+fs.mkdirSync(staging, { recursive: true });
 const runs = [];
-for (const name of fs.readdirSync(source).filter(item => fs.existsSync(path.join(source, item, 'reward.json')))) {
+const names = fs.readdirSync(source).filter(item => {
+  const dir = path.join(source, item);
+  return fs.statSync(dir).isDirectory() && (fs.existsSync(path.join(dir, 'state.json')) || fs.existsSync(path.join(dir, 'run.json')));
+});
+for (const name of names) {
   const from = path.join(source, name);
-  const dest = path.join(runsDir, name);
-  for (const file of ['state.json', 'run.json', 'reward.json']) copyFile(path.join(from, file), path.join(dest, file));
+  const dest = path.join(staging, name);
+  const present = ['state.json', 'run.json', 'reward.json'].filter(file => fs.existsSync(path.join(from, file)));
+  for (const file of present) copyFile(path.join(from, file), path.join(dest, file));
   const log = path.join(source, name + '.log');
   if (fs.existsSync(log)) copyFile(log, path.join(dest, 'runner.log'));
-  const reward = JSON.parse(fs.readFileSync(path.join(dest, 'reward.json'), 'utf8'));
+  const reward = present.includes('reward.json') ? JSON.parse(fs.readFileSync(path.join(dest, 'reward.json'), 'utf8')) : null;
   const want = expected[name];
-  if (!want) throw new Error('unexpected run ' + name);
+  const status = !reward ? 'incomplete' : (reward.official_score === false ? 'ineligible' : 'scored');
+  if (!want && status === 'scored') throw new Error('unexpected run ' + name);
+  if (!want) {
+    const run = present.includes('run.json') ? JSON.parse(fs.readFileSync(path.join(dest, 'run.json'), 'utf8')) : {};
+    const state = present.includes('state.json') ? JSON.parse(fs.readFileSync(path.join(dest, 'state.json'), 'utf8')) : {};
+    runs.push({
+      run_id: run.run_id || state.run_id || name,
+      directory: name,
+      plan_id: run.plan_id || state.plan_id || name,
+      status,
+      official_score: false,
+      files: Object.fromEntries(present.map(file => [file, sha(path.join(dest, file))]))
+    });
+    continue;
+  }
   if (reward.rubric_points !== want.points) throw new Error(name + ' points ' + reward.rubric_points + ' expected ' + want.points);
   if (want.full_pass !== undefined && reward.full_pass !== want.full_pass) throw new Error(name + ' full_pass');
   const got = Object.keys(reward.forbidden).filter(key => reward.forbidden[key]).sort();
@@ -56,15 +76,15 @@ for (const name of fs.readdirSync(source).filter(item => fs.existsSync(path.join
     full_pass: reward.full_pass,
     forbidden: got,
     control_pass: reward.control.pass,
-    files: {
-      'state.json': sha(path.join(dest, 'state.json')),
-      'reward.json': sha(path.join(dest, 'reward.json'))
-    }
+    status,
+    files: Object.fromEntries(present.map(file => [file, sha(path.join(dest, file))]))
   });
 }
 runs.sort((a, b) => a.plan_id.localeCompare(b.plan_id));
 const missing = Object.keys(expected).filter(name => !runs.some(run => run.directory === name));
 if (missing.length) throw new Error('missing runs ' + missing.join(','));
+fs.rmSync(runsDir, { recursive: true, force: true });
+fs.renameSync(staging, runsDir);
 
 const reference = JSON.parse(fs.readFileSync(path.join(runsDir, 'reference/state.json'), 'utf8'));
 const orders = reference.apps.freshcart.orders.filter(row => !row.historical);

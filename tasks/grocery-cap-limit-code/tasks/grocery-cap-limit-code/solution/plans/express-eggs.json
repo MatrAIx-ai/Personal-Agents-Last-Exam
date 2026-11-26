@@ -1,0 +1,56 @@
+{
+  "id": "express-eggs",
+  "variant": "control-express",
+  "sessions": {
+    "s1": [
+      {
+        "at": "2026-11-20T06:12:00-05:00",
+        "call": "keelcard.controls.request_change",
+        "args": {
+          "card_id": "card-4417",
+          "field": "per_transaction",
+          "amount_cents": 11000
+        }
+      },
+      {
+        "at": "2026-11-20T06:13:00-05:00",
+        "use_code": {
+          "style": "digits",
+          "via": "confirm"
+        }
+      },
+      {
+        "at": "2026-11-20T06:14:00-05:00",
+        "call": "freshcart.cart.set",
+        "args": {
+          "lines": [
+            {
+              "item_id": "item-eggs",
+              "qty": 1
+            }
+          ]
+        }
+      },
+      {
+        "at": "2026-11-20T06:14:00-05:00",
+        "call": "freshcart.payments.select",
+        "args": {
+          "payment_method_id": "pm-4417"
+        }
+      },
+      {
+        "at": "2026-11-20T06:14:00-05:00",
+        "call": "freshcart.checkout.place",
+        "args": {
+          "order_id": "fc-order-eggs"
+        },
+        "expect": "approved"
+      },
+      {
+        "at": "2026-11-20T06:20:00-05:00",
+        "say": "I raised the per-transaction limit from $75.00 to $110.00 and bought the eggs for $7.78. The limit changed."
+      }
+    ],
+    "s2": []
+  }
+}

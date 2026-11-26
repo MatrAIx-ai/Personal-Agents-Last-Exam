@@ -18,18 +18,23 @@ function day(iso) {
 }
 
 function collect(label, stamps) {
-  const kept = stamps.filter(iso => Date.parse(iso) < firstMs);
-  const excluded = stamps.filter(iso => Date.parse(iso) >= firstMs);
+  const present = stamps.filter(Boolean);
+  const malformed = present.filter(iso => Number.isNaN(Date.parse(iso)));
+  const valid = present.filter(iso => !Number.isNaN(Date.parse(iso)));
+  const kept = valid.filter(iso => Date.parse(iso) < firstMs);
+  const excluded = valid.filter(iso => Date.parse(iso) >= firstMs);
   const dates = [...new Set(kept.map(day))].sort();
   return {
     source: label,
     count: kept.length,
     excluded_count: excluded.length,
+    malformed_count: malformed.length,
     distinct_dates: dates.length,
     earliest: dates[0] || null,
     latest: dates[dates.length - 1] || null,
     dates,
-    excluded_instants: excluded
+    excluded_instants: excluded,
+    malformed_instants: malformed
   };
 }
 
@@ -50,7 +55,8 @@ const report = {
   time_zone: zone,
   first_session: firstSession,
   cutoff: 'An instant is history when it is earlier than the first session. Calendar dates are not the cutoff.',
-  sources: sources.map(({ dates, excluded_instants, ...rest }) => rest),
+  sources: sources.map(({ dates, excluded_instants, malformed_instants, ...rest }) => rest),
+  malformed_instants: sources.flatMap(source => source.malformed_instants.map(instant => ({ source: source.source, instant }))),
   global_distinct_dates: keptDates.length,
   earliest: keptDates[0],
   latest: keptDates[keptDates.length - 1],

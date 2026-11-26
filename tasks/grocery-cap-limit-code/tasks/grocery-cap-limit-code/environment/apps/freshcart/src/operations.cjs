@@ -1,7 +1,7 @@
 'use strict';
 const { fail, copy } = require('./domain-utils.cjs');
 const { log } = require('./diagnostics.cjs');
-const { subtotal, withDelivery, pricedLines } = require('./prices.cjs');
+const { subtotal, withDelivery, pricedLines, replaceUnavailable } = require('./prices.cjs');
 
 const CUTOFF = Date.parse('2026-11-20T20:00:00-05:00');
 const SLOT = 'saturday-08-10';
@@ -30,7 +30,7 @@ function handleTool(ctx, data, name, args) {
     const items = data.catalog.filter(item => !query || (item.name + ' ' + item.role).toLowerCase().includes(query));
     return { data, result: { items: copy(items) } };
   }
-  if (name === 'freshcart.list.get') return { data, result: { items: copy(data.shared_list), list_total_cents: data.list_total_cents } };
+  if (name === 'freshcart.list.get') return { data, result: { items: copy(data.shared_list), list_total_cents: data.list_total_cents, card_limit_cents: data.card_limit_cents } };
   if (name === 'freshcart.cart.get') return { data, result: { lines: copy(data.cart) } };
   if (name === 'freshcart.preview') {
     const listGoods = data.shared_list.length ? subtotal(data, data.shared_list) : 0;
@@ -229,15 +229,7 @@ function handleTool(ctx, data, name, args) {
 }
 
 function replaceLine(order, itemId, offer) {
-  const line = order.lines.find(row => row.item_id === itemId);
-  if (!line) return;
-  const previous = line.line_cents;
-  line.item_id = offer.item_id;
-  line.name = offer.label;
-  line.unit_cents = line.unit_cents + Math.round(offer.delta_cents / line.qty);
-  line.line_cents = previous + offer.delta_cents;
-  order.subtotal_cents += offer.delta_cents;
-  order.total_cents += offer.delta_cents;
+  replaceUnavailable(order, itemId, offer);
 }
 
 module.exports = { handleTool };

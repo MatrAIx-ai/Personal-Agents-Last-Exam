@@ -99,6 +99,7 @@ async function runStep(ctx, step, serial) {
       }
       return refused;
     } catch (error) {
+      if (error && (error.halt || error.clockBarrier || error.unknown_variant)) throw error;
       if (error && /was accepted/.test(error.message)) throw error;
       return { status: 'refused', message: error.message };
     }

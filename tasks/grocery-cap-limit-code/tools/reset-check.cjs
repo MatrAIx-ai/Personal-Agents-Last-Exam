@@ -84,6 +84,37 @@ async function main() {
       }
     });
     if (delivered.status !== 'committed') throw new Error('mail probe ' + delivered.status + ' ' + (delivered.message || ''));
+    const later = '2026-11-18T10:00:00-08:00';
+    const advanced = {};
+    for (const id of ['keelcard', 'mail', 'freshcart', 'webstub']) {
+      const snap = await infra[id].call('env.snapshot');
+      const moved = await infra[id].call('env.advance_time', {
+        expected_version: snap.version,
+        request_id: 'reset-advance-' + id,
+        virtual_now: later
+      });
+      if (moved.status !== 'committed') throw new Error(id + ' advance ' + moved.status);
+      advanced[id] = (await infra[id].call('env.snapshot')).snapshot.virtual_now;
+    }
+    const limitSnap = await infra.keelcard.call('env.snapshot');
+    const requested = await agent.keelcard.call('keelcard.controls.request_change', {
+      card_id: 'card-4417',
+      field: 'per_transaction',
+      amount_cents: 11000,
+      expected_version: limitSnap.version,
+      request_id: 'reset-limit'
+    });
+    if (!requested || requested.status === 'error') throw new Error('limit request failed');
+    const pending = (await infra.keelcard.call('env.snapshot')).snapshot.data.change_requests.slice(-1)[0];
+    const confirmSnap = await infra.keelcard.call('env.snapshot');
+    const confirmed = await agent.keelcard.call('keelcard.controls.confirm_change', {
+      change_request_id: pending.change_request_id || pending.id,
+      code: pending.code,
+      expected_version: confirmSnap.version,
+      request_id: 'reset-confirm'
+    });
+    if (!confirmed || confirmed.outcome !== 'applied') throw new Error('limit confirm failed');
+    const raised = (await infra.keelcard.call('env.snapshot')).snapshot.data.cards.find(row => row.card_id === 'card-4417').limits.per_transaction;
     for (const id of ['keelcard', 'mail', 'freshcart', 'webstub']) {
       const snap = await infra[id].call('env.snapshot');
       const reset = await infra[id].call('env.reset', { expected_version: snap.version });
@@ -106,6 +137,10 @@ async function main() {
       restored_cart_lines: fresh.data.cart.length,
       restored_clock: fresh.virtual_now,
       keelcard_clock: keel.virtual_now,
+      mail_clock: mail.virtual_now,
+      webstub_clock: (await infra.webstub.call('env.snapshot')).snapshot.virtual_now,
+      clocks_before_reset: advanced,
+      raised_limit_cents: raised,
       card_limit_cents: card.limits.per_transaction,
       inbox_messages: mail.data.messages.length,
       probe_message_present: Boolean(probe),

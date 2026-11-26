@@ -32,6 +32,14 @@ const components = {
   harbor_dockerfile: fileHash('tasks/grocery-cap-limit-code/environment/Dockerfile'),
   harbor_task_toml: fileHash('tasks/grocery-cap-limit-code/task.toml'),
   harbor_test_sh: fileHash('tasks/grocery-cap-limit-code/tests/test.sh'),
+  harbor_image: 'node:22-bookworm@sha256:7c400d78797d8cbe3f6bb21d2227b86af4cd24b0014cc9f62ff989cc16de988e',
+  harbor_status: 'written and unbuilt until infrastructure 135',
+  fingerprint_helper: {
+    path: 'tasks/grocery-cap-limit-code/tests/vendor/fingerprints.cjs',
+    sha256: fileHash('tasks/grocery-cap-limit-code/tests/vendor/fingerprints.cjs'),
+    keelcard_pin: 'c481a2ae10b4bb17725c69f692203f22af793bb9',
+    mount: 'PALE_FINGERPRINT_HELPER'
+  },
   local_driver: [
     'tasks/grocery-cap-limit-code/local-driver/driver.cjs',
     'tasks/grocery-cap-limit-code/local-driver/plan-agent.cjs',

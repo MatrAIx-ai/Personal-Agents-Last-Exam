@@ -46,7 +46,7 @@ async function runScenario(options) {
   const rules = world.parse(script);
   const historyName = variant === 'control-express' ? 'history-express.json' : 'history.json';
   const history = readJson(path.join(taskRoot, 'context/user', historyName));
-  const arrivals = readJson(path.join(workspace, 'mail/arrivals.json'));
+  const arrivals = readJson(path.join(taskRoot, 'context/mail/arrivals.json'));
   const listEdits = readJson(path.join(workspace, 'freshcart/list-edits.json'));
   const hint = hinted ? hintText() : '';
   const transcript = [];
@@ -136,14 +136,25 @@ async function runScenario(options) {
       sent: published.sent || [],
       report: published.report || null
     };
+    delivery = deliveryOf(published);
     if (published.halted || published.stopped) {
-      delivery = published.sent && published.sent.length ? 'confirmed' : 'unresolved';
       const halt = new RunHalt(publication);
       halt.delivery = delivery;
       throw halt;
     }
-    if (published.sent && published.sent.length) delivery = 'confirmed';
     return published;
+  }
+
+  function deliveryOf(published) {
+    const report = published.report || {};
+    const sent = published.sent || [];
+    const rejected = report.outcome === 'rejected' || sent.some(item => item.receipt && item.receipt.status === 'rejected');
+    if (rejected) return 'rejected';
+    if (report.mail_confirmed === true && !published.halted && !published.stopped) return 'confirmed';
+    const committed = sent.some(item => item.receipt && item.receipt.status === 'committed');
+    if (committed && !published.halted && !published.stopped) return 'confirmed';
+    if (published.halted || published.stopped) return 'unresolved';
+    return committed ? 'confirmed' : 'none';
   }
 
   async function applyReports(reports) {
@@ -197,7 +208,18 @@ async function runScenario(options) {
       message
     });
     logCall({ actor: 'merchant', app: 'keelcard', name: 'channel.card.authorization', args: { authorization_key: request.authorization_key, amount_cents: request.amount_cents }, result: { status: receipt.status, code: receipt.code || null } });
-    if (receipt.status !== 'committed') throw new RunHalt(receipt);
+    if (receipt.status !== 'committed') {
+      publication = {
+        halted: true,
+        stopped: false,
+        sent: [{ receipt }],
+        report: { outcome: 'rejected', mail_confirmed: false, code: receipt.code || null }
+      };
+      delivery = 'rejected';
+      const halt = new RunHalt(publication);
+      halt.delivery = delivery;
+      throw halt;
+    }
     const lookup = await agent.keelcard.call('keelcard.authorizations.lookup', { authorization_key: request.authorization_key });
     logCall({ actor: 'merchant', app: 'keelcard', name: 'keelcard.authorizations.lookup', args: { authorization_key: request.authorization_key }, result: lookup });
     const row = lookup.authorization;
@@ -241,7 +263,10 @@ async function runScenario(options) {
       decline_code: row.decline_code,
       authorization_key: request.authorization_key,
       hold_cents: row.hold_cents,
-      spend_controls: decision === 'declined' ? 'keelcard.controls' : null
+      spend_controls: decision === 'declined' ? 'keelcard.controls' : null,
+      list_total_cents: attempt.list_total_cents,
+      cart_total_cents: attempt.total_cents,
+      card_limit_cents: attempt.card_limit_cents
     };
   }
 
@@ -251,6 +276,9 @@ async function runScenario(options) {
     const attempt = snap.snapshot.data.checkout_attempts.find(row => row.id === result.attempt_id);
     if (!attempt) throw new Error('Checkout attempt was not stored');
     const mediated = await mediate(attempt);
+    mediated.list_total_cents = result.list_total_cents;
+    mediated.cart_total_cents = result.cart_total_cents;
+    mediated.card_limit_cents = result.card_limit_cents;
     logCall({ actor: 'merchant', app: 'freshcart', name: name + '.decision', args: { attempt_id: attempt.id }, result: mediated });
     return mediated;
   }
@@ -369,6 +397,16 @@ async function runScenario(options) {
     await loadAll();
     routers.push({ name: 'mail', router: await create({ config: routerConfig(registryFile, 'keelcard'), publisher: 'keelcard', run: runId, stateDir }) });
     routers.push({ name: 'merchant', router: await create({ config: routerConfig(registryFile, 'freshcart'), publisher: 'freshcart', run: runId, stateDir }) });
+    if (plan.fault === 'reject-mail' || plan.fault === 'reject-publish') {
+      const targets = plan.fault === 'reject-publish' ? routers : routers.filter(item => item.name === 'mail');
+      for (const item of targets) {
+        const inner = item.router.call.bind(item.router);
+        item.router.call = async (method, payload) => {
+          if (method === 'router.publish') return { status: 'rejected', code: 'mailbox_rejected', stop_run: false, event_id: null };
+          return inner(method, payload);
+        };
+      }
+    }
     const { runPlan } = require('./plan-agent.cjs');
     await runPlan(ctx, plan);
     return await finish(null);
@@ -432,7 +470,8 @@ async function runScenario(options) {
       }
     }
     const unknown = Boolean(error && error.unknown_variant);
-    const halted = Boolean(error && error.halt);
+    const publicationHalted = Boolean(publication && (publication.halted || publication.stopped));
+    const halted = Boolean(error && error.halt) || publicationHalted;
     const barrier = clockBarrier || (error && error.clockBarrier) || null;
     const official = !unknown && !halted && !barrier && !error;
     const state = {
@@ -446,7 +485,7 @@ async function runScenario(options) {
       publication,
       clock_barrier: barrier,
       official_score: official,
-      ineligible_reason: official ? null : (unknown ? 'unknown_variant' : (barrier ? 'clock_barrier' : 'incomplete')),
+      ineligible_reason: official ? null : (unknown ? 'unknown_variant' : (barrier ? 'clock_barrier' : (halted ? 'halt' : 'incomplete'))),
       transcript,
       tool_log: toolLog,
       events_delivered: delivered,

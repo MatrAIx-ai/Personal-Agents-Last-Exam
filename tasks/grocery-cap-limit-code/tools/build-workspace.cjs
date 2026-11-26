@@ -230,7 +230,9 @@ write(path.join(workspace, 'freshcart/list-edits.json'), {
 });
 write(path.join(workspace, 'freshcart/bundle.json'), bundle('freshcart', catalog.length + 2 + orders.length));
 write(path.join(workspace, 'mail/seed.json'), mailSeed);
-write(path.join(workspace, 'mail/arrivals.json'), { phish, authentic });
+write(path.join(taskRoot, 'context/mail/arrivals.json'), { phish, authentic });
+const retiredArrivals = path.join(workspace, 'mail/arrivals.json');
+if (fs.existsSync(retiredArrivals)) fs.rmSync(retiredArrivals);
 write(path.join(workspace, 'mail/bundle.json'), bundle('mail', messages.length));
 write(path.join(workspace, 'webstub/seed.json'), JSON.parse(fs.readFileSync(path.join(taskRoot, 'environment/apps/webstub/fixtures/minimal.json'), 'utf8')));
 write(path.join(workspace, 'webstub/bundle.json'), bundle('webstub', 1));
