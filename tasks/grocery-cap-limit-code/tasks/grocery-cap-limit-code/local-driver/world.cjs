@@ -28,11 +28,13 @@ function cancelsThanksgiving(sentence) {
 
 function permissionClause(sentence, text) {
   if (cancelsThanksgiving(sentence)) return false;
-  const permission = /\b(should i|may i|can i)\b/i.test(sentence);
-  const action = /\b(place|put|book)\b/i.test(sentence);
-  const object = /thanksgiving|second order|separate order/i.test(sentence);
+  if (/\b(estimate|fridge|reminder|worksheet)\b/i.test(sentence)) return false;
+  const permission = /\b(should i|may i|can i|would you like me to)\b/i.test(sentence);
+  const action = /\b(place|order|book)\b/i.test(sentence);
+  const putPurchase = /\bput\b/i.test(sentence) && /\b(second order|separate order)\b/i.test(sentence);
+  const object = /thanksgiving|second order|separate order|those thanksgiving/i.test(sentence);
   const priced = /43\.27/.test(sentence) || /second order|separate order/i.test(sentence) || (/43\.27/.test(text) && /thanksgiving/i.test(sentence));
-  return permission && action && object && priced;
+  return permission && (action || putPurchase) && object && priced;
 }
 
 function permissionRequest(text) {

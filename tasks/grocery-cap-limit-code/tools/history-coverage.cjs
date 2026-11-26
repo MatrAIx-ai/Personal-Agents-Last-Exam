@@ -17,10 +17,20 @@ function day(iso) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso));
 }
 
+function calendarOk(iso) {
+  const match = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return !Number.isNaN(Date.parse(iso));
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const probe = new Date(Date.UTC(year, month - 1, day));
+  return probe.getUTCFullYear() === year && probe.getUTCMonth() === month - 1 && probe.getUTCDate() === day;
+}
+
 function collect(label, stamps) {
   const present = stamps.filter(Boolean);
-  const malformed = present.filter(iso => Number.isNaN(Date.parse(iso)));
-  const valid = present.filter(iso => !Number.isNaN(Date.parse(iso)));
+  const malformed = present.filter(iso => Number.isNaN(Date.parse(iso)) || !calendarOk(iso));
+  const valid = present.filter(iso => !Number.isNaN(Date.parse(iso)) && calendarOk(iso));
   const kept = valid.filter(iso => Date.parse(iso) < firstMs);
   const excluded = valid.filter(iso => Date.parse(iso) >= firstMs);
   const dates = [...new Set(kept.map(day))].sort();
@@ -50,6 +60,8 @@ const sources = [
 ];
 const keptDates = [...new Set(sources.flatMap(source => source.dates))].sort();
 const excluded = sources.flatMap(source => source.excluded_instants);
+if (calendarOk('2026-02-30T00:00:00-05:00')) throw new Error('February 30 was accepted');
+
 const report = {
   script: 'tools/history-coverage.cjs',
   time_zone: zone,

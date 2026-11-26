@@ -42,11 +42,11 @@ python3 tasks/grocery-cap-limit-code/tasks/grocery-cap-limit-code/tests/test_out
 
 | Dependency | Pin | Role |
 | :--- | :--- | :--- |
-| Keelcard | `c481a2ae10b4bb17725c69f692203f22af793bb9` | Household card, limits, declines, code mail. Fetched by `tools/fetch-deps.sh` into gitignored `.deps/keelcard`. `deps.lock.json` records the file hashes. |
+| Keelcard | `e0471686b1e28403649a8971b9435c0dc88db0a7` | Household card, limits, declines, code mail. Fetched by `tools/fetch-deps.sh` into gitignored `.deps/keelcard`. `deps.lock.json` records the 74 file hashes. |
 | Mail | 1.3.0 at `examples/apps/mail` on upstream `6933c430942c64f94874083815829e4a4b20920a` | Grace's inbox, `mail-grace`. |
 | Runtime | 1.6.0 in this checkout | stdio MCP, clock, seeds. |
 | FreshCart | task-local subset | `#37` has no implementation yet. The subset lives in `environment/apps/freshcart`. |
-| Web stub | task-local | One page at `freshcart-payments.example/verify`. |
+| Web stub | task-local | The verify page is published when the lookalike mail arrives. The workspace seed starts with no pages. |
 
 When Keelcard and FreshCart land on main, the generated registry can point `keelcard` at `apps/keelcard` and `freshcart` at `apps/freshcart`. That change is the app path list in `local-driver/registry.cjs`. Each run writes its registry under `tasks/grocery-cap-limit-code/.runs/` and removes that directory when the run ends.
 

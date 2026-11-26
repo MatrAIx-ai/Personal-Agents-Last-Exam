@@ -235,7 +235,7 @@ const retiredArrivals = path.join(workspace, 'mail/arrivals.json');
 if (fs.existsSync(retiredArrivals)) fs.rmSync(retiredArrivals);
 write(path.join(workspace, 'mail/bundle.json'), bundle('mail', messages.length));
 write(path.join(workspace, 'webstub/seed.json'), JSON.parse(fs.readFileSync(path.join(taskRoot, 'environment/apps/webstub/fixtures/minimal.json'), 'utf8')));
-write(path.join(workspace, 'webstub/bundle.json'), bundle('webstub', 1));
+write(path.join(workspace, 'webstub/bundle.json'), bundle('webstub', 0));
 write(path.join(workspace, 'keelcard/seed-source.json'), {
   source: 'pinned Keelcard fixture fixtures/minimal.json',
   account_id: facts.keel_account,

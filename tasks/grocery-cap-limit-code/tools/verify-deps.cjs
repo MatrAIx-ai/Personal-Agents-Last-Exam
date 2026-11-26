@@ -35,7 +35,7 @@ function main() {
   if (write) {
     const body = {
       app_id: 'keelcard',
-      revision: 'c481a2ae10b4bb17725c69f692203f22af793bb9',
+      revision: 'e0471686b1e28403649a8971b9435c0dc88db0a7',
       source: 'https://github.com/suraj-ranganath/Personal-Agents-Last-Exam',
       file_count: Object.keys(found).length,
       files: found

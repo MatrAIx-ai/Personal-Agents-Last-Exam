@@ -60,6 +60,33 @@ async function main() {
     });
     if (changed.status !== 'committed') throw new Error('mutate ' + changed.status);
     const dirty = await infra.freshcart.call('env.snapshot');
+    const selected = await agent.freshcart.call('freshcart.payments.select', {
+      payment_method_id: 'pm-4417',
+      expected_version: dirty.version,
+      request_id: 'reset-pay'
+    });
+    if (!selected || selected.status === 'error') throw new Error('pay ' + (selected && selected.message));
+    const placeSnap = await infra.freshcart.call('env.snapshot');
+    const placed = await agent.freshcart.call('freshcart.checkout.place', {
+      order_id: 'fc-order-reset',
+      expected_version: placeSnap.version,
+      request_id: 'reset-place'
+    });
+    if (!placed || placed.outcome !== 'awaiting_authorization') throw new Error('place ' + (placed && placed.outcome));
+    const decideSnap = await infra.freshcart.call('env.snapshot');
+    const decided = await infra.freshcart.call('env.apply_event', {
+      expected_version: decideSnap.version,
+      event: {
+        event_id: 'reset-decide',
+        at: seedClock,
+        operation: 'freshcart.checkout.decide',
+        payload: { attempt_id: placed.attempt_id, decision: 'approved', authorization_id: 'auth-reset' }
+      }
+    });
+    if (decided.status !== 'committed') throw new Error('decide ' + decided.status + ' ' + (decided.message || ''));
+    const withOrder = await infra.freshcart.call('env.snapshot');
+    const rolloutBefore = withOrder.snapshot.data.orders.filter(row => !row.historical).map(row => row.id);
+    if (!rolloutBefore.includes('fc-order-reset')) throw new Error('rollout order was not created');
     const mailBefore = await infra.mail.call('env.snapshot');
     const delivered = await infra.mail.call('env.apply_event', {
       expected_version: mailBefore.version,
@@ -145,6 +172,7 @@ async function main() {
       inbox_messages: mail.data.messages.length,
       probe_message_present: Boolean(probe),
       prior_orders: fresh.data.orders.filter(row => row.historical).length,
+      rollout_before: rolloutBefore,
       rollout_orders: rollout.map(row => row.id),
       list_total_cents: fresh.data.list_total_cents,
       command: 'node tasks/grocery-cap-limit-code/tools/reset-check.cjs'

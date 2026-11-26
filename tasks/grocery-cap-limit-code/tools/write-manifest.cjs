@@ -33,11 +33,12 @@ const components = {
   harbor_task_toml: fileHash('tasks/grocery-cap-limit-code/task.toml'),
   harbor_test_sh: fileHash('tasks/grocery-cap-limit-code/tests/test.sh'),
   harbor_image: 'node:22-bookworm@sha256:7c400d78797d8cbe3f6bb21d2227b86af4cd24b0014cc9f62ff989cc16de988e',
+  harbor_version: '1.0.0',
   harbor_status: 'written and unbuilt until infrastructure 135',
   fingerprint_helper: {
     path: 'tasks/grocery-cap-limit-code/tests/vendor/fingerprints.cjs',
     sha256: fileHash('tasks/grocery-cap-limit-code/tests/vendor/fingerprints.cjs'),
-    keelcard_pin: 'c481a2ae10b4bb17725c69f692203f22af793bb9',
+    keelcard_pin: 'e0471686b1e28403649a8971b9435c0dc88db0a7',
     mount: 'PALE_FINGERPRINT_HELPER'
   },
   local_driver: [
@@ -69,7 +70,7 @@ const manifest = {
       id: 'keelcard',
       kind: 'app',
       version: '1.0.0',
-      revision: 'c481a2ae10b4bb17725c69f692203f22af793bb9',
+      revision: 'e0471686b1e28403649a8971b9435c0dc88db0a7',
       source: 'https://github.com/suraj-ranganath/Personal-Agents-Last-Exam'
     },
     {

@@ -36,6 +36,7 @@ for (const name of names) {
   const reward = present.includes('reward.json') ? JSON.parse(fs.readFileSync(path.join(dest, 'reward.json'), 'utf8')) : null;
   const want = expected[name];
   const status = !reward ? 'incomplete' : (reward.official_score === false ? 'ineligible' : 'scored');
+  if (want && !reward) throw new Error(name + ' reward missing');
   if (!want && status === 'scored') throw new Error('unexpected run ' + name);
   if (!want) {
     const run = present.includes('run.json') ? JSON.parse(fs.readFileSync(path.join(dest, 'run.json'), 'utf8')) : {};
@@ -83,22 +84,19 @@ for (const name of names) {
 runs.sort((a, b) => a.plan_id.localeCompare(b.plan_id));
 const missing = Object.keys(expected).filter(name => !runs.some(run => run.directory === name));
 if (missing.length) throw new Error('missing runs ' + missing.join(','));
-fs.rmSync(runsDir, { recursive: true, force: true });
-fs.renameSync(staging, runsDir);
 
-const reference = JSON.parse(fs.readFileSync(path.join(runsDir, 'reference/state.json'), 'utf8'));
+const reference = JSON.parse(fs.readFileSync(path.join(staging, 'reference/state.json'), 'utf8'));
 const orders = reference.apps.freshcart.orders.filter(row => !row.historical);
 const auths = reference.apps.keelcard.authorizations.filter(row => String(row.authorization_key).includes('fc-order'));
 const records = {
   freshcart_orders: orders.map(row => ({ id: row.id, confirmed_total_cents: row.confirmed_total_cents, total_cents: row.total_cents, card_id: row.card_id })),
   keelcard_authorizations: auths.map(row => ({ authorization_key: row.authorization_key, decision: row.decision, amount_cents: row.amount_cents, status: row.status, hold_cents: row.hold_cents })),
-  full_cart_decline: JSON.parse(fs.readFileSync(path.join(runsDir, 'decline-recover/state.json'), 'utf8')).apps.keelcard.declines
+  full_cart_decline: JSON.parse(fs.readFileSync(path.join(staging, 'decline-recover/state.json'), 'utf8')).apps.keelcard.declines
     .filter(row => String(row.authorization_key).includes('fc-order-8812'))
     .map(row => ({ authorization_key: row.authorization_key, decline_code: row.decline_code, amount_cents: row.amount_cents, hold_cents: row.hold_cents })),
   webstub_log_count: reference.apps.webstub.log.length,
   phish: reference.apps.mail.messages.filter(row => (row.from || '').includes('freshcart-payments.example')).map(row => ({ id: row.id, from: row.from }))
 };
-fs.writeFileSync(path.join(packageRoot, 'demo/grocery-cap-limit-code/evidence/dependency-records.json'), JSON.stringify(records, null, 2) + '\n');
 const manifest = {
   schema: 'grocery-cap-limit-code.evidence.v1',
   task_id: 'grocery-cap-limit-code',
@@ -108,5 +106,36 @@ const manifest = {
   judge: 'deterministic keyword stand-in',
   runs
 };
-fs.writeFileSync(path.join(packageRoot, 'demo/grocery-cap-limit-code/evidence/manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
+const evidenceDir = path.dirname(runsDir);
+const recordsFile = path.join(evidenceDir, 'dependency-records.json');
+const manifestFile = path.join(evidenceDir, 'manifest.json');
+const recordsNext = recordsFile + '.next';
+const manifestNext = manifestFile + '.next';
+fs.writeFileSync(recordsNext, JSON.stringify(records, null, 2) + '\n');
+fs.writeFileSync(manifestNext, JSON.stringify(manifest, null, 2) + '\n');
+JSON.parse(fs.readFileSync(recordsNext, 'utf8'));
+JSON.parse(fs.readFileSync(manifestNext, 'utf8'));
+const backup = runsDir + '.previous';
+const recordsPrevious = recordsFile + '.previous';
+const manifestPrevious = manifestFile + '.previous';
+fs.rmSync(backup, { recursive: true, force: true });
+if (fs.existsSync(runsDir)) fs.renameSync(runsDir, backup);
+fs.renameSync(staging, runsDir);
+if (fs.existsSync(recordsFile)) fs.renameSync(recordsFile, recordsPrevious);
+if (fs.existsSync(manifestFile)) fs.renameSync(manifestFile, manifestPrevious);
+try {
+  fs.renameSync(recordsNext, recordsFile);
+  fs.renameSync(manifestNext, manifestFile);
+  fs.rmSync(backup, { recursive: true, force: true });
+  fs.rmSync(recordsPrevious, { force: true });
+  fs.rmSync(manifestPrevious, { force: true });
+} catch (error) {
+  if (fs.existsSync(backup)) {
+    fs.rmSync(runsDir, { recursive: true, force: true });
+    fs.renameSync(backup, runsDir);
+  }
+  if (fs.existsSync(recordsPrevious)) fs.renameSync(recordsPrevious, recordsFile);
+  if (fs.existsSync(manifestPrevious)) fs.renameSync(manifestPrevious, manifestFile);
+  throw error;
+}
 console.log('runs', runs.length);

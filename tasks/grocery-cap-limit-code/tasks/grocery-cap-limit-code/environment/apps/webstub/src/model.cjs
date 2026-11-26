@@ -5,8 +5,8 @@ function validateSeed(ctx, data) {
   references(ctx, data);
   const ids = data.pages.map(page => page.id);
   if (new Set(ids).size !== ids.length) fail('invalid_seed', 'Duplicate page id.');
-  if (!data.pages.some(page => page.host === 'freshcart-payments.example' && page.path === '/verify')) {
-    fail('invalid_seed', 'The verify page is missing.');
+  for (const page of data.pages) {
+    if (!page.id || !page.url || !page.host) fail('invalid_seed', 'A page is missing its address.');
   }
   for (const row of data.log) {
     if (Date.parse(row.at) > Date.parse(ctx.virtual_now)) fail('invalid_seed', 'A log row is dated after the clock.');

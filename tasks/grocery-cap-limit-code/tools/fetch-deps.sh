@@ -5,7 +5,7 @@ set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PKG="$(cd "$HERE/.." && pwd)"
 ROOT="$(cd "$PKG/../.." && pwd)"
-SHA="c481a2ae10b4bb17725c69f692203f22af793bb9"
+SHA="e0471686b1e28403649a8971b9435c0dc88db0a7"
 URL="https://github.com/suraj-ranganath/Personal-Agents-Last-Exam"
 DEST="$PKG/.deps/keelcard"
 mkdir -p "$PKG/.deps"
