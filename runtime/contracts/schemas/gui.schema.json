@@ -1,0 +1,270 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "pale.gui.v1"
+    },
+    "status": {
+      "enum": [
+        "implemented",
+        "declared",
+        "unsupported"
+      ]
+    },
+    "surface_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+    },
+    "audience": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "agent",
+          "reviewer"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "entrypoint": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "local_web",
+            "web_url",
+            "device_view"
+          ]
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ready_probe": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "kind",
+        "location"
+      ],
+      "additionalProperties": false
+    },
+    "state_connection": {
+      "type": "object",
+      "properties": {
+        "app_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          },
+          "minItems": 1
+        },
+        "adapter": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$"
+        },
+        "authoritative_state": {
+          "enum": [
+            "app_runtime",
+            "static_fixture"
+          ]
+        }
+      },
+      "required": [
+        "app_ids",
+        "adapter",
+        "authoritative_state"
+      ],
+      "additionalProperties": false
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "route_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "asset_bindings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "slot": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "asset_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$"
+                },
+                "required": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "slot",
+                "asset_id",
+                "required"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "route_id",
+          "path",
+          "asset_bindings"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "content_policy": {
+      "type": "object",
+      "properties": {
+        "untrusted_html": {
+          "enum": [
+            "text_only",
+            "sanitize"
+          ]
+        },
+        "svg": {
+          "enum": [
+            "disabled",
+            "sanitize"
+          ]
+        },
+        "remote_fetch": {
+          "enum": [
+            "disabled",
+            "allowlist"
+          ]
+        },
+        "remote_allowlist": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "missing_asset_behavior": {
+          "enum": [
+            "placeholder",
+            "hide",
+            "error"
+          ]
+        }
+      },
+      "required": [
+        "untrusted_html",
+        "svg",
+        "remote_fetch",
+        "remote_allowlist",
+        "missing_asset_behavior"
+      ],
+      "additionalProperties": false
+    },
+    "observation": {
+      "type": "object",
+      "properties": {
+        "mechanism": {
+          "enum": [
+            "explicit_read",
+            "screen_observation",
+            "harness_notification"
+          ]
+        },
+        "payload_policy": {
+          "enum": [
+            "visible_surface_only",
+            "summary_only"
+          ]
+        },
+        "capability_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "mechanism",
+        "payload_policy"
+      ],
+      "additionalProperties": false
+    },
+    "extensions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "namespace",
+          "version",
+          "required",
+          "data"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "renderer_ref": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "status",
+    "surface_id",
+    "audience",
+    "state_connection",
+    "routes",
+    "content_policy",
+    "observation",
+    "extensions"
+  ],
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "properties": {
+        "status": {
+          "const": "implemented"
+        }
+      },
+      "required": [
+        "entrypoint"
+      ]
+    },
+    {
+      "properties": {
+        "status": {
+          "enum": [
+            "declared",
+            "unsupported"
+          ]
+        }
+      }
+    }
+  ]
+}
