@@ -16,5 +16,5 @@ node "$TASK/environment/local-driver/run.cjs" \
   --setting "$SETTING" \
   --variant "$VARIANT" \
   --memory notes \
-  --run-id "icc-solve-${SETTING}" \
+  --run-id "icc-solve-${SETTING}-${VARIANT}" \
   --out "$OUT"

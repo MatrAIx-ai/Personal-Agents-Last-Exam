@@ -1,12 +1,14 @@
 'use strict';
 // Scripted Maren. Reads the timeline clock and context/user/script.json. Separate from the grader.
-const {parseProgress, isProposedList, saysFinished, fernhillQuestion} = require('../../language.cjs');
+const {parseProgress, isProposedList, saysFinished, fernhillQuestion, conditionAllows} = require('../../language.cjs');
 
 class Harness {
-  constructor({setting, variant, script}) {
+  constructor({setting, variant, script, approvalSpec, stopSpec}) {
     this.setting = setting;
     this.variant = variant;
     this.script = script;
+    this.approvalSpec = approvalSpec;
+    this.stopSpec = stopSpec;
     this.session = 's1';
     this.approvalDelivered = false;
     this.stopDelivered = false;
@@ -17,8 +19,14 @@ class Harness {
     this.turnHadArchive = false;
     this.turnSays = [];
     this.s2Turns = 0;
-    this.allowApproval = true;
-    this.allowStop = true;
+  }
+
+  approvalAllowed() {
+    return conditionAllows(this.approvalSpec, this.variant, 'turn_end');
+  }
+
+  stopAllowed() {
+    return conditionAllows(this.stopSpec, this.variant, 'stop');
   }
 
   setSession(id) {
@@ -40,7 +48,7 @@ class Harness {
     this.turnSays.push(text);
     if (isProposedList(text)) this.sawProposal = true;
     if (this.stopDelivered) this.saidAfterStop = true;
-    if (this.setting === 'A' && this.allowStop && this.session === 's1' && this.variant !== 'no-reply' && this.approvalDelivered && !this.stopDelivered && this.archiveMoves > 0 && parseProgress(text)) {
+    if (this.setting === 'A' && this.stopAllowed() && this.session === 's1' && this.variant !== 'no-reply' && this.approvalDelivered && !this.stopDelivered && this.archiveMoves > 0 && parseProgress(text)) {
       this.stopDelivered = true;
       return {text: this.script.messages.stop, kind: 'stop'};
     }
@@ -73,12 +81,12 @@ class Harness {
     }
     if (this.variant === 'no-reply' && !this.approvalDelivered) return {endSession: true};
     if (!this.approvalDelivered) {
-      if (this.sawProposal && this.allowApproval) return {reply: msg.approval, kind: 'approval', advance: this.script.times.approval, markApproval: true};
-      if (this.sawProposal && !this.allowApproval) return {endSession: true};
+      if (this.sawProposal && this.approvalAllowed()) return {reply: msg.approval, kind: 'approval', advance: this.script.times.approval, markApproval: true};
+      if (this.sawProposal && !this.approvalAllowed()) return {endSession: true};
       return {reply: msg.clarify, kind: 'clarify'};
     }
-    if (this.setting === 'B' && this.allowStop && !this.stopDelivered && this.turnHadArchive) return {reply: msg.stop, kind: 'stop', markStop: true};
-    if (this.setting === 'A' && this.allowStop && !this.stopDelivered && this.turnHadArchive) return {reply: msg.stop, kind: 'stop', markStop: true};
+    if (this.setting === 'B' && this.stopAllowed() && !this.stopDelivered && this.turnHadArchive) return {reply: msg.stop, kind: 'stop', markStop: true};
+    if (this.setting === 'A' && this.stopAllowed() && !this.stopDelivered && this.turnHadArchive) return {reply: msg.stop, kind: 'stop', markStop: true};
     if (this.stopDelivered && this.saidAfterStop) return {endSession: true};
     if (this.stopDelivered) return {};
     if (!this.yesUsed) return {reply: msg.yes_go_ahead, kind: 'yes_go_ahead', markYes: true};

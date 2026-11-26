@@ -6,7 +6,7 @@ const os = require('node:os');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const {Harness, parseProgress} = require('./harness.cjs');
-const {loadTimeline, conditionAllows} = require('../../language.cjs');
+const {loadTimeline} = require('../../language.cjs');
 
 const TASK = path.resolve(__dirname, '../..');
 const PACKAGE = path.resolve(TASK, '../..');
@@ -122,9 +122,13 @@ class Driver {
     this.stop = null;
     this.wallStart = new Date().toISOString();
     this.wallStartMs = Date.now();
-    this.harness = new Harness({setting: this.setting, variant: this.variant, script: this.script});
-    this.harness.allowApproval = conditionAllows(this.timeline['s1-approval'], this.variant);
-    this.harness.allowStop = conditionAllows(this.timeline['s1-stop'], this.variant);
+    this.harness = new Harness({
+      setting: this.setting,
+      variant: this.variant,
+      script: this.script,
+      approvalSpec: this.timeline['s1-approval'],
+      stopSpec: this.timeline['s1-stop']
+    });
   }
 
   async open(app, role) {
