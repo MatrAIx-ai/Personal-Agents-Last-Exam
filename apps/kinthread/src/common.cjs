@@ -18,7 +18,7 @@ function nfc(value) {
   return String(value).normalize('NFC');
 }
 function fold(value) {
-  return nfc(value).normalize('NFKC').toLocaleLowerCase('en-US');
+  return nfc(value).normalize('NFKC').toLocaleLowerCase('en-US').replace(/\u00df/g, 'ss').normalize('NFC');
 }
 function handleOf(value) {
   const raw = String(value || '').trim();
@@ -92,9 +92,21 @@ function vaultField(item, name) {
   if (!field) fail('field_not_found', 'Vault field does not exist.');
   return field;
 }
-function mask(value) {
+function mask(value, classification) {
   const text = String(value);
+  if ((classification === 'secret' || classification === 'private') && text.length <= 2) return '*'.repeat(text.length);
+  if (text.length <= 2) return text;
   return text.slice(-2);
+}
+function intervalsOf(member) {
+  if (Array.isArray(member.membership_intervals) && member.membership_intervals.length) return member.membership_intervals;
+  return [{joined_at: member.joined_at, left_at: member.left_at || null}];
+}
+function ensureIntervals(member) {
+  if (!Array.isArray(member.membership_intervals) || !member.membership_intervals.length) {
+    member.membership_intervals = [{joined_at: member.joined_at, left_at: member.left_at || null}];
+  }
+  return member.membership_intervals;
 }
 function take(data, key, prefix) {
   const n = data.seq[key];
@@ -169,9 +181,12 @@ function memberAt(group, personId, instant) {
   const member = memberRow(group, personId);
   if (!member) return null;
   const t = at(instant, 'invalid_event');
-  if (at(member.joined_at, 'invalid_seed') > t) return null;
-  if (member.left_at && at(member.left_at, 'invalid_seed') <= t) return null;
-  return member;
+  const covered = intervalsOf(member).some(row => {
+    if (at(row.joined_at, 'invalid_seed') > t) return false;
+    if (row.left_at && at(row.left_at, 'invalid_seed') <= t) return false;
+    return true;
+  });
+  return covered ? member : null;
 }
 function profileAt(member, instant) {
   const t = at(instant, 'invalid_event');
@@ -203,12 +218,13 @@ function publicMember(member) {
     membership: member.membership,
     left_at: member.left_at,
     removed_by: member.removed_by,
+    membership_intervals: copy(intervalsOf(member)),
     profile_history: copy(member.profile_history),
     role_history: copy(member.role_history)
   };
 }
 function publicField(field) {
-  return {name: field.name, classification: field.classification, leak_check: field.leak_check, masked: mask(field.value)};
+  return {name: field.name, classification: field.classification, leak_check: field.leak_check, masked: mask(field.value, field.classification)};
 }
 function publicItem(item) {
   return {
@@ -238,7 +254,7 @@ module.exports = {
   POWERS, NOTICE_TYPES, KINDS, LEVELS, ITEM_KINDS, CLASSIFICATIONS,
   fail, copy, references, log, at, nfc, fold, handleOf, clockOk, notBefore,
   groupOf, memberRow, activeMember, roleRow, hasPower, boundPerson,
-  requireUser, requirePower, grantStatus, revealOutcome, vaultItem, vaultField, mask, take, touch,
+  requireUser, requirePower, grantStatus, revealOutcome, vaultItem, vaultField, mask, intervalsOf, ensureIntervals, take, touch,
   pushActivity, pushChange, pushNotice, titles, clockLabel, memberAt, profileAt, roleAt,
   publicMember, publicField, publicItem, publicGrant
 };

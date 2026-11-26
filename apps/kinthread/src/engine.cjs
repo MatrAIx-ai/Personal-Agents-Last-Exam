@@ -3,22 +3,27 @@ const c = require('./common.cjs');
 
 function seenGroup(data, groupId) {
   const group = c.groupOf(data, groupId);
-  if (!c.memberRow(group, data.owner_person_id)) c.fail('not_member', 'The account owner has no membership in this group.');
+  if (!c.activeMember(group, data.owner_person_id)) c.fail('not_member', 'The account owner is not an active member of this group.');
   return group;
 }
 
 function reads(ctx, data, name, args) {
   if (name === 'kinthread.groups.list') {
-    const groups = data.groups.filter(group => c.memberRow(group, data.owner_person_id)).map(group => ({
-      group_id: group.group_id,
-      name: group.name,
-      status: group.status,
-      messages_conversation_id: group.messages_conversation_id,
-      settings: c.copy(group.settings),
-      settings_version: group.settings_version,
-      member_count: group.members.filter(member => member.membership === 'member').length,
-      updated_at: group.updated_at
-    }));
+    const groups = data.groups.filter(group => c.memberRow(group, data.owner_person_id)).map(group => {
+      const owner = c.memberRow(group, data.owner_person_id);
+      return {
+        group_id: group.group_id,
+        name: group.name,
+        status: group.status,
+        messages_conversation_id: group.messages_conversation_id,
+        settings: c.copy(group.settings),
+        settings_version: group.settings_version,
+        member_count: group.members.filter(member => member.membership === 'member').length,
+        owner_membership: owner.membership,
+        owner_left_at: owner.left_at,
+        updated_at: group.updated_at
+      };
+    });
     return {groups};
   }
   if (name === 'kinthread.groups.get') {
@@ -123,12 +128,34 @@ function addMemberRecord(data, group, ctx, spec) {
 }
 
 function closeMembership(group, member, ctx, reason, removedBy) {
+  const intervals = c.ensureIntervals(member);
+  const open = intervals[intervals.length - 1];
+  open.left_at = ctx.virtual_now;
   member.membership = reason;
   member.left_at = ctx.virtual_now;
   member.removed_by = removedBy || null;
   for (const grant of group.grants) {
     if (grant.person_id === member.person_id && c.grantStatus(grant, ctx.virtual_now) === 'active') grant.revoked_at = ctx.virtual_now;
   }
+}
+
+function reopenMember(existing, ctx, spec) {
+  const handle = c.handleOf(spec.handle);
+  if (existing.handle !== handle) c.fail('handle_immutable', 'The handle stays with this person.');
+  const intervals = c.ensureIntervals(existing);
+  intervals.push({joined_at: ctx.virtual_now, left_at: null});
+  existing.display_name = c.nfc(spec.display_name);
+  existing.avatar_asset_id = spec.avatar_asset_id || null;
+  existing.kind = spec.kind || existing.kind;
+  existing.role = spec.role;
+  existing.added_by = spec.added_by;
+  existing.joined_at = ctx.virtual_now;
+  existing.membership = 'member';
+  existing.left_at = null;
+  existing.removed_by = null;
+  existing.profile_history.push({at: ctx.virtual_now, display_name: existing.display_name, avatar_asset_id: existing.avatar_asset_id});
+  existing.role_history.push({at: ctx.virtual_now, role: spec.role, changed_by: spec.added_by, acting_via: spec.acting_via || null});
+  return existing;
 }
 
 function setRole(member, ctx, role, changedBy, via) {
@@ -154,19 +181,7 @@ function writes(ctx, data, name, args) {
     if (group.members.some(member => member.handle === handle && member.person_id !== args.person_id)) c.fail('invalid_arguments', 'Handle is already used in this group.');
     let member;
     if (existing) {
-      existing.handle = handle;
-      existing.display_name = c.nfc(args.display_name);
-      existing.avatar_asset_id = args.avatar_asset_id || null;
-      existing.kind = args.kind || 'person';
-      existing.role = args.role;
-      existing.added_by = actor.person_id;
-      existing.joined_at = ctx.virtual_now;
-      existing.membership = 'member';
-      existing.left_at = null;
-      existing.removed_by = null;
-      existing.profile_history.push({at: ctx.virtual_now, display_name: existing.display_name, avatar_asset_id: existing.avatar_asset_id});
-      existing.role_history.push({at: ctx.virtual_now, role: args.role, changed_by: actor.person_id, acting_via: via});
-      member = existing;
+      member = reopenMember(existing, ctx, {handle, display_name: args.display_name, avatar_asset_id: args.avatar_asset_id || null, kind: args.kind || 'person', role: args.role, added_by: actor.person_id, acting_via: via});
     } else {
       member = addMemberRecord(data, group, ctx, {person_id: args.person_id, handle, display_name: args.display_name, avatar_asset_id: args.avatar_asset_id || null, kind: args.kind || 'person', role: args.role, added_by: actor.person_id, acting_via: via});
     }
@@ -209,7 +224,7 @@ function writes(ctx, data, name, args) {
     const label = String(args.label || '').trim();
     if (!label || label.length > 80) c.fail('invalid_arguments', 'Assistant label must be 1 to 80 characters.');
     data.assistant_label = label;
-    data.label_history.push({at: ctx.virtual_now, label});
+    data.label_history.push({at: ctx.virtual_now, label, request_id});
     c.log(ctx, 'kinthread.assistant_label', {changed: true});
     return finish(data, {label, notice_id: null});
   }
@@ -239,9 +254,10 @@ function writes(ctx, data, name, args) {
     const target = c.activeMember(group, args.person_id);
     if (!target) c.fail('not_member', 'That person is not an active member.');
     if (target.person_id === actor.person_id) c.fail('sole_owner', 'The owner already holds this group.');
+    const previous = target.role;
     setRole(actor, ctx, 'admin', actor.person_id, via);
     setRole(target, ctx, 'owner', actor.person_id, via);
-    const changeId = c.pushChange(data, group, ctx, {kind: 'ownership', person_id: target.person_id, from_role: 'admin', to_role: 'owner', acting_via: via, request_id, summary: 'Ownership transferred.'});
+    const changeId = c.pushChange(data, group, ctx, {kind: 'ownership', person_id: target.person_id, from_role: previous, to_role: 'owner', acting_via: via, request_id, summary: 'Ownership transferred.'});
     const notice = c.pushNotice(data, group, ctx, {notice_type: 'ownership_change', title: c.titles(group, 'ownership_change'), body: 'Your assistant transferred ownership to @' + target.handle + ' at ' + c.clockLabel(ctx.virtual_now) + '.', object_id: changeId});
     c.pushActivity(data, group, ctx, {kind: 'ownership', text: data.assistant_label + ' transferred ownership to @' + target.handle + '.', person_id: actor.person_id, acting_via: via});
     c.touch(ctx, group);
@@ -358,11 +374,17 @@ function otherActor(ctx, group, personId, power) {
   return member;
 }
 
+function requireOpen(group) {
+  if (group.status === 'archived') c.fail('group_archived', 'This group is archived.');
+}
+
 function applyBusinessEvent(ctx, data, event) {
   const payload = event.payload || {};
   const group = data.groups.find(item => item.group_id === payload.group_id);
   if (event.operation !== 'notice.delivery_result' && !group) c.fail('invalid_event', 'Unknown group.');
+  if (event.operation !== 'notice.delivery_result') requireOpen(group);
   if (event.operation === 'member.profile_changed') {
+    if (payload.display_name === undefined && payload.avatar_asset_id === undefined) c.fail('invalid_event', 'A profile change needs a name or an avatar.');
     const member = c.memberRow(group, payload.person_id);
     if (!member || member.membership !== 'member') c.fail('not_member', 'That person is not an active member.');
     if (payload.display_name !== undefined) member.display_name = c.nfc(payload.display_name);
@@ -384,18 +406,7 @@ function applyBusinessEvent(ctx, data, event) {
     if (group.members.some(member => member.handle === handle && member.person_id !== payload.person_id)) c.fail('invalid_event', 'Handle is already used in this group.');
     const existing = c.memberRow(group, payload.person_id);
     if (existing) {
-      existing.handle = handle;
-      existing.display_name = c.nfc(payload.display_name);
-      existing.avatar_asset_id = payload.avatar_asset_id || null;
-      existing.kind = payload.kind || 'person';
-      existing.role = payload.role;
-      existing.added_by = actor.person_id;
-      existing.joined_at = ctx.virtual_now;
-      existing.membership = 'member';
-      existing.left_at = null;
-      existing.removed_by = null;
-      existing.profile_history.push({at: ctx.virtual_now, display_name: existing.display_name, avatar_asset_id: existing.avatar_asset_id});
-      existing.role_history.push({at: ctx.virtual_now, role: payload.role, changed_by: actor.person_id, acting_via: null});
+      reopenMember(existing, ctx, {handle, display_name: payload.display_name, avatar_asset_id: payload.avatar_asset_id || null, kind: payload.kind || 'person', role: payload.role, added_by: actor.person_id, acting_via: null});
     } else {
       addMemberRecord(data, group, ctx, {person_id: payload.person_id, handle, display_name: payload.display_name, avatar_asset_id: payload.avatar_asset_id || null, kind: payload.kind || 'person', role: payload.role, added_by: actor.person_id, acting_via: null});
     }
@@ -479,6 +490,7 @@ function applyBusinessEvent(ctx, data, event) {
     if (payload.action === 'add') {
       if (group.checklist.some(item => item.item_id === payload.item_id)) c.fail('invalid_event', 'Checklist id already exists.');
       if (!payload.text) c.fail('invalid_event', 'Checklist add needs text.');
+      if (payload.assignee && !c.activeMember(group, payload.assignee)) c.fail('not_member', 'Assignee is not an active member.');
       group.checklist.push({item_id: payload.item_id, text: payload.text, status: 'open', assignee: payload.assignee || null, due_at: payload.due_at || null, history: [{at: ctx.virtual_now, action: 'add', person_id: actor.person_id}]});
     } else {
       const item = group.checklist.find(row => row.item_id === payload.item_id);
@@ -495,12 +507,15 @@ function applyBusinessEvent(ctx, data, event) {
   if (event.operation === 'notice.delivery_result') {
     const notice = data.notices.find(row => row.notice_id === payload.notice_id);
     if (!notice) c.fail('invalid_event', 'Unknown notice.');
+    const expectedKey = 'notice-' + notice.notice_id;
+    if (payload.publish_request_id !== expectedKey) c.fail('publish_request_mismatch', 'The publish request id must be notice- plus the notice id.');
     const next = payload.status;
-    const prev = notice.delivery && notice.delivery.status;
-    if (prev === 'committed' && next === 'rejected') c.fail('delivery_status_conflict', 'A committed delivery cannot be recorded as rejected.');
-    if (prev === 'rejected' && next === 'committed') c.fail('delivery_status_conflict', 'A rejected delivery cannot be recorded as committed.');
-    if (prev === next) return data;
-    notice.delivery = {status: next, publish_request_id: payload.publish_request_id, messaging_event_id: payload.messaging_event_id || null, recorded_at: ctx.virtual_now};
+    const prev = notice.delivery;
+    const same = prev && prev.status === next && prev.publish_request_id === payload.publish_request_id && (prev.messaging_event_id || null) === (payload.messaging_event_id || null);
+    if (same) return data;
+    if (prev && (prev.status === 'committed' || prev.status === 'rejected')) c.fail('delivery_status_conflict', 'A recorded delivery outcome stays in place.');
+    const messaging = next === 'committed' ? (payload.messaging_event_id || (prev && prev.messaging_event_id) || null) : (payload.messaging_event_id || null);
+    notice.delivery = {status: next, publish_request_id: payload.publish_request_id, messaging_event_id: messaging, recorded_at: ctx.virtual_now};
     notice.status = 'recorded';
     return data;
   }

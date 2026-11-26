@@ -16,7 +16,7 @@ function write(name, description, properties, required, resultProps, resultRequi
   return tool(name, description, false, obj(props, ['expected_version', 'request_id', ...required]), out('committed', resultRequired, resultProps));
 }
 function out(status, required, properties) {
-  return obj({status: {const: status}, app_id: {const: 'kinthread'}, version, ...properties}, ['status', 'app_id', 'version', ...required]);
+  return obj({status: {const: status}, app_id: {const: 'kinthread'}, version, duplicate: {type: 'boolean'}, ...properties}, ['status', 'app_id', 'version', ...required]);
 }
 function tool(name, description, readOnly, inputSchema, outputSchema) {
   return {name, description, read_only: readOnly, scope: name, resource_target: 'current account', inputSchema, outputSchema};

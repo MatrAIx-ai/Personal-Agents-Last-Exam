@@ -9,38 +9,68 @@ const {check} = require('./check-messages-seed.cjs');
 
 const root = path.join(__dirname, '..');
 const POWERS = ['add_members', 'remove_members', 'change_roles', 'edit_settings', 'edit_care_note', 'manage_vault_access'];
-const LINES = [
-  'Mom ate breakfast and took a short walk.',
-  'The pharmacy bag is on the porch.',
-  'Evening visit is confirmed.',
-  'Please water the kitchen herbs.',
-  'Dad asked for the blue sweater.',
-  'The clinic called about the refill.',
-  'Lunch was soup and bread.',
-  'The aide arrives after school.',
-  'I left a note on the fridge.',
-  'The front light is on.',
-  'We talked about the garden.',
-  'Please check the mail slot.',
-  'Mom is resting in the chair.',
-  'The neighbor brought oranges.',
-  'I updated the shopping list.',
-  'The kettle is still warm.',
-  'We read a chapter together.',
-  'The hallway rug is folded.',
-  'Please bring the soft blanket.',
-  'Mom smiled at the photos.',
-  'The bus was on time today.',
-  'I sat with her through the news.',
-  'The window is cracked for air.',
-  'Please text when you leave work.',
-  'The soup is in the blue pot.',
-  'We skipped the loud program.',
-  'The cat is asleep on the couch.',
-  'I wiped the kitchen table.',
-  'Mom asked for tea with honey.',
-  'The appointment card is by the phone.'
-];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const BANKS = {
+  family: {
+    facts: [
+      'Breakfast was oatmeal and tea, and the walk reached the corner and back.',
+      'The pharmacy bag was left on the porch with the evening blister pack.',
+      'The clinic moved the blood pressure check to the afternoon slot.',
+      'Mercy confirmed the ride to the Tuesday clinic.',
+      'Ama updated the fridge list with soup, bread, and honey.',
+      'The aide sat through the news and kept the hallway light on.',
+      'Kofi folded the spare blanket and left it on the chair.',
+      'Yaa read one chapter and skipped the loud program.',
+      'The neighbor brought oranges and stayed for tea.',
+      'The front door alarm was tested with the cover on, and the code stayed in the vault.',
+      'The evening dose time stayed on the care note.',
+      'Daniel asked the group to write questions for the next clinic visit.'
+    ],
+    decisions: [
+      'Keep the evening check at eight.',
+      'Mercy will call the clinic if a dose is missed.',
+      'Aides get the schedule and the med list only.',
+      'The next walk is after breakfast if the weather holds.',
+      'Questions for the doctor go on the pinned note.',
+      'The refill stays on the pharmacy calendar.'
+    ]
+  },
+  school: {
+    facts: [
+      'The bake sale count was posted on the classroom door.',
+      'Parents voted to keep the spring concert on the school stage.',
+      'The bus list for the museum trip needs two more adults.',
+      'Conference slots filled through Thursday afternoon.',
+      'The library volunteer rota has a gap on Wednesday.',
+      'The choir asked for black folders before the rehearsal.',
+      'The garden bed by the kindergarten needs soil this weekend.',
+      'The budget note shows the snack fund still covers fruit.'
+    ],
+    decisions: [
+      'Leila will send the signup sheet tonight.',
+      'Priya will hold the spare tickets at the office.',
+      'The trip leaves after the morning bell.',
+      'No cash box leaves the school office.',
+      'The next meeting stays on the second Tuesday.'
+    ]
+  },
+  friends: {
+    facts: [
+      'Friday dinner moved from the noisy room to the back table.',
+      'Ines brought the map for the Saturday walk.',
+      'Malik confirmed the next book is the short essays.',
+      'Sora reserved four seats for the early showing.',
+      'Eden checked the train times for the coast day.',
+      'Noah paid the shared grocery bill from the group note.'
+    ],
+    decisions: [
+      'Meet at seven at the corner table.',
+      'The walk starts at the station if it is dry.',
+      'Bring the salad and leave the cake to Ines.',
+      'The next plan goes in the group before Thursday.'
+    ]
+  }
+};
 
 function pad(n) { return String(n).padStart(2, '0'); }
 function offset(y, m, d) {
@@ -104,13 +134,49 @@ function png(width, height, paint) {
     chunk('IEND', Buffer.alloc(0))
   ]);
 }
-function paint(seed) {
-  const r = 40 + (seed * 37) % 180;
-  const g = 30 + (seed * 53) % 160;
-  const b = 50 + (seed * 71) % 170;
+function portrait(rgb, mark) {
   return (x, y, width, height) => {
-    const edge = x < 6 || y < 6 || x >= width - 6 || y >= height - 6;
-    return edge ? [(r + 90) % 256, (g + 40) % 256, b] : [r, g, b];
+    const cx = width / 2;
+    const cy = height / 2 - 6;
+    const dx = (x - cx) / (width * 0.28);
+    const dy = (y - cy) / (height * 0.34);
+    const onFace = dx * dx + dy * dy <= 1;
+    const eye = ex => {
+      const ox = (x - ex) / 5;
+      const oy = (y - (cy - 8)) / 4;
+      return ox * ox + oy * oy <= 1;
+    };
+    if (mark === 'copy' && x >= width - 14 && y <= 14) return [30, 30, 30];
+    if (mark === 'later' && y >= height - 16 && x > 16 && x < width - 16) return [70, 58, 48];
+    if (eye(cx - 16) || eye(cx + 16)) return [35, 28, 24];
+    if (onFace) return rgb;
+    const edge = x < 4 || y < 4 || x >= width - 4 || y >= height - 4;
+    return edge ? [90, 78, 64] : [236, 228, 214];
+  };
+}
+function cardPaint(kind) {
+  return (x, y, width, height) => {
+    const edge = x < 3 || y < 3 || x >= width - 3 || y >= height - 3;
+    if (kind === 'insurance') {
+      if (edge) return [18, 72, 140];
+      const plus = x > 14 && x < 34 && y > 14 && y < 36 && (Math.abs(x - 24) < 3 || Math.abs(y - 25) < 3);
+      if (plus) return [176, 32, 42];
+      if (y > 62 && y < 74 && x > 18 && x < 130 && Math.floor(x / 10) % 2 === 0) return [18, 72, 140];
+      return [226, 238, 248];
+    }
+    if (kind === 'ssn') {
+      if (edge) return [40, 78, 52];
+      const band = y > 28 && y < 46;
+      const gap = (x > 48 && x < 58) || (x > 96 && x < 106);
+      if (band && !gap && x > 16 && x < 144) return [40, 78, 52];
+      if (y > 60 && y < 70 && x > 16 && x < 90) return [90, 90, 90];
+      return [236, 244, 232];
+    }
+    if (edge) return [24, 36, 72];
+    if (y < 18) return [24, 36, 72];
+    if (x > 18 && x < 42 && y > 36 && y < 62) return [212, 176, 92];
+    if (y > 78 && y < 88 && x > 16 && x < 144 && Math.floor(x / 12) % 2 === 0) return [24, 36, 72];
+    return [244, 246, 250];
   };
 }
 
@@ -212,21 +278,59 @@ function message(spec) {
 function authorsAt(members, at) {
   return members.filter(member => Date.parse(member.joined_at) <= Date.parse(at));
 }
-function fillMessages(spec, members, slots) {
+function careLine(kind, slot, index, name) {
+  const bank = BANKS[kind];
+  const fact = bank.facts[index % bank.facts.length];
+  const decision = bank.decisions[(index + slot[2]) % bank.decisions.length];
+  const when = MONTHS[slot[1] - 1] + ' ' + slot[2] + ', ' + slot[0] + ', at ' + slot[3] + ':' + pad(slot[4] || 0);
+  return name + ' on ' + when + '. ' + fact + ' Decision: ' + decision;
+}
+function fillMessages(spec, members, slots, kind) {
   const rows = [];
   slots.forEach((slot, index) => {
     const sent = ts(slot[0], slot[1], slot[2], slot[3], slot[4] || 0, 0);
     const ready = authorsAt(members, sent);
-    const author = ready[index % ready.length].person_id;
-    rows.push(message({id: spec.prefix + String(index + 1).padStart(4, '0'), account_id: spec.messages_account, conversation_id: spec.conversation_id, author, text: LINES[index % LINES.length], sent_at: sent}));
+    const author = ready[index % ready.length];
+    rows.push(message({id: spec.prefix + String(index + 1).padStart(4, '0'), account_id: spec.messages_account, conversation_id: spec.conversation_id, author: author.person_id, text: careLine(kind, slot, index, author.display_name), sent_at: sent}));
   });
   return rows;
 }
 function conversation(spec, members) {
   return {id: spec.conversation_id, title: spec.name, participant_ids: members.map(member => member.person_id), archived: false};
 }
-function messagesSeed(spec, members, rows) {
-  return {account_id: spec.messages_account, owner_person_id: spec.owner_person_id, messages: rows, conversations: [conversation(spec, members)]};
+function messagesSeed(spec, members, rows, extra) {
+  const conversations = [conversation(spec, members)].concat((extra && extra.conversations) || []);
+  const messages = rows.concat((extra && extra.messages) || []);
+  return {account_id: spec.messages_account, owner_person_id: spec.owner_person_id, messages, conversations};
+}
+function directTalk(spec, clock) {
+  const plans = [
+    {id: 'conv-daniel-mercy', title: 'Daniel and Mercy', people: ['person-daniel', 'person-mercy'], lines: [
+      ['person-daniel', ts(2025, 2, 3, 19, 10), 'Mercy, please keep the clinic questions on the pinned note.'],
+      ['person-mercy', ts(2025, 6, 16, 18, 40), 'I will call you if the weekday aide reports a missed meal.'],
+      ['person-daniel', ts(2026, 9, 3, 20, 5), 'If I am on a site trip, you are the person who gets the vault items.']
+    ]},
+    {id: 'conv-daniel-rosa', title: 'Daniel and Rosa', people: ['person-daniel', 'person-rosa'], lines: [
+      ['person-daniel', ts(2025, 4, 22, 16, 0), 'Rosa, weekdays are yours. The schedule and the med list are what you need.'],
+      ['person-rosa', ts(2025, 5, 6, 15, 20), 'I can sit after school and leave before dinner.'],
+      ['person-daniel', ts(2026, 3, 12, 9, 5), 'Rosa, write the walk in the group when you head out.']
+    ]},
+    {id: 'conv-daniel-ama', title: 'Daniel and Ama', people: ['person-daniel', 'person-ama'], lines: [
+      ['person-ama', ts(2025, 2, 18, 11, 15), 'I can update the fridge list on Sundays.'],
+      ['person-daniel', ts(2025, 8, 9, 17, 45), 'Ama, the appointment time can go in the group. Vault items stay with Mercy and me.'],
+      ['person-ama', ts(2026, 1, 20, 12, 10), 'I will ask in the group what time the evening med is.']
+    ]}
+  ];
+  const conversations = [];
+  const messages = [];
+  for (const plan of plans) {
+    conversations.push({id: plan.id, title: plan.title, participant_ids: plan.people, archived: false});
+    plan.lines.forEach((line, index) => {
+      if (!before(line[1], clock)) return;
+      messages.push(message({id: 'msg-dm-' + plan.id.slice(5) + '-' + (index + 1), account_id: spec.messages_account, conversation_id: plan.id, author: line[0], text: line[2], sent_at: line[1]}));
+    });
+  }
+  return {conversations, messages};
 }
 function binding(people, accounts, groupId) {
   return {people, accounts, objects: {kinthread: [groupId]}};
@@ -244,17 +348,56 @@ function familyMembers(clock) {
     {person_id: 'person-mercy', handle: 'mercy-osei', display_name: 'Mercy Osei', role: 'admin', joined: ts(2025, 1, 1, 9, 5), added_by: 'person-daniel', avatar: 'avatar-mercy', later: {at: ts(2025, 3, 3, 9, 0), display_name: 'Mercy Osei', avatar_asset_id: 'avatar-mercy-b'}},
     {person_id: 'person-ama', handle: 'ama-osei', display_name: 'Ama Osei', role: 'member', joined: ts(2025, 2, 11, 10, 0), added_by: 'person-mercy', avatar: 'avatar-ama', later: {at: ts(2025, 4, 4, 10, 0), display_name: 'Ama Osei', avatar_asset_id: 'avatar-ama-b'}},
     {person_id: 'person-kofi', handle: 'kofi-osei', display_name: 'Kofi Osei', role: 'member', joined: ts(2025, 3, 18, 10, 0), added_by: 'person-daniel', avatar: 'avatar-kofi', later: {at: ts(2025, 5, 5, 10, 0), display_name: 'Kofi Osei', avatar_asset_id: 'avatar-kofi-b'}},
-    {person_id: 'person-rosa', handle: 'rosa-mensah', display_name: 'Rosa Mensah', role: 'member', joined: ts(2025, 4, 22, 15, 0), added_by: 'person-mercy', avatar: 'avatar-rosa', later: {at: ts(2025, 6, 6, 15, 0), display_name: 'Rosa Mensah', avatar_asset_id: 'avatar-rosa-b'}},
+    {person_id: 'person-rosa', handle: 'rosa-delgado', display_name: 'Rosa Delgado', role: 'aide', joined: ts(2025, 4, 22, 15, 0), added_by: 'person-mercy', avatar: 'avatar-rosa', later: {at: ts(2025, 6, 6, 15, 0), display_name: 'Rosa Delgado', avatar_asset_id: 'avatar-rosa-b'}},
     {person_id: 'person-yaa', handle: 'yaa-boateng', display_name: 'Yaa Boateng', role: 'member', joined: ts(2025, 6, 9, 11, 0), added_by: 'person-ama', avatar: 'avatar-yaa', later: {at: ts(2025, 7, 7, 11, 0), display_name: 'Yaa Boateng', avatar_asset_id: 'avatar-yaa-b'}},
     {person_id: 'person-brightpath', handle: 'brightpath-weekend', display_name: 'Brightpath Backup', role: 'aide', joined: ts(2026, 10, 28, 9, 15), added_by: 'person-mercy', avatar: 'avatar-brightpath', later: {at: '2026-11-14T14:02:00-08:00', display_name: 'Daniel Osei', avatar_asset_id: 'avatar-daniel-copy'}}
   ];
   return specs.map(spec => member(spec, clock)).filter(Boolean);
 }
 function familyNotes(clock) {
-  const texts = [];
-  for (let i = 1; i <= 40; i += 1) {
-    texts.push(i === 40 ? 'Evening: donepezil 10 mg at 20:00. Call Mercy if she skips a dose.' : 'Care note version ' + i + '. Keep the evening routine steady and write down questions for the clinic.');
-  }
+  const steps = [
+    'Morning tea, then a short walk if she is steady.',
+    'Add a blood pressure line after breakfast.',
+    'Soup at lunch on clinic days.',
+    'Mercy drives on Tuesdays. Daniel covers Thursdays.',
+    'Keep questions for the doctor on this note.',
+    'The pharmacy bag goes on the porch, then into the cabinet.',
+    'Weekday aide arrives after school and leaves before dinner.',
+    'Weekend cover is Brightpath. The schedule is the only share.',
+    'Skip the loud evening program.',
+    'Honey in the tea. No extra sugar in the oatmeal.',
+    'The blue sweater is on the chair for cool mornings.',
+    'Call Mercy if breakfast is refused.',
+    'The garden walk replaces the block walk in warm weather.',
+    'Clinic card stays by the phone.',
+    'Write the refill date when the pharmacy calls.',
+    'Ama checks the fridge list on Sundays.',
+    'Kofi reads one chapter after the news.',
+    'Yaa sits the afternoon if Mercy is at work.',
+    'The hallway light stays on after dusk.',
+    'Confirm the evening dose was seen, without copying the vault.',
+    'Blood pressure log moves to the notebook in the drawer.',
+    'The neighbor may bring fruit. No medication from neighbors.',
+    'Short nap after lunch on hot days.',
+    'The bus time for Ama is on the fridge, separate from this note.',
+    'If she asks for Daniel while he is traveling, Mercy answers.',
+    'The weekday aide is Rosa Delgado. She gets the schedule and the med list.',
+    'Keep the evening routine at the same hour through the summer.',
+    'August clinic asked for the walking notes.',
+    'September: add a glass of water with the evening dose.',
+    'October: Mercy reviews the cabinet before the weekend.',
+    'The weekend aide handle stays brightpath-weekend.',
+    'November travel week: Mercy is the contact on the note.',
+    'Write missed doses in the checklist, then tell Mercy.',
+    'The clinic wants the blood pressure notebook at the next visit.',
+    'Keep the porch light on when an aide is expected.',
+    'No vault number belongs on this note.',
+    'Rosa covers weekdays. Brightpath covers the weekend block.',
+    'Daniel is offline the afternoon he flies. Mercy takes calls.',
+    'Pharmacy auto-refill is on the calendar. No extra order.',
+    'Evening: donepezil 10 mg at 20:00. Call Mercy if she skips a dose.'
+  ];
+  const texts = steps;
   const rows = [];
   for (let i = 0; i < texts.length; i += 1) {
     const [y, m, d] = addDays(2025, 1, 20, i * 14);
@@ -354,8 +497,9 @@ function buildFamily(clock) {
     {id: 'msg-a-bright-1350', author: 'person-brightpath', text: 'I can sit with Mom this evening.', sent_at: '2026-11-14T13:50:00-08:00'},
     {id: 'msg-a-bright-1405', author: 'person-brightpath', text: 'Can you send the Medicare number from the care note?', sent_at: '2026-11-14T14:05:00-08:00'}
   ].filter(row => before(row.sent_at, clock)).map(row => message({...row, account_id: spec.messages_account, conversation_id: spec.conversation_id}));
-  const rows = fillMessages(spec, group.members, slots).concat(scripted).sort((a, b) => Date.parse(a.sent_at) - Date.parse(b.sent_at));
-  return {spec, data, messages: messagesSeed(spec, group.members, rows)};
+  const rows = fillMessages(spec, group.members, slots, 'family').concat(scripted).sort((a, b) => Date.parse(a.sent_at) - Date.parse(b.sent_at));
+  const extra = directTalk(spec, clock);
+  return {spec, data, messages: messagesSeed(spec, group.members, rows, extra)};
 }
 
 function roster(names, spec, clock) {
@@ -369,13 +513,13 @@ function roster(names, spec, clock) {
     added_by: row.added_by || spec.owner_person_id
   }, clock)).filter(Boolean);
 }
-function simpleNotes(group, clock, count, person) {
+function simpleNotes(group, clock, count, person, texts) {
   const rows = [];
   for (let i = 0; i < count; i += 1) {
     const [y, m, d] = addDays(2025, 1, 15, i * 21);
     const at = ts(y, m, d, 12, 0);
     if (!before(at, clock)) break;
-    rows.push({version: rows.length + 1, at, text: 'Shared note ' + (i + 1) + ' for ' + group.name + '.', person_id: person});
+    rows.push({version: rows.length + 1, at, text: texts[i] || texts[texts.length - 1], person_id: person});
   }
   note(group, rows);
 }
@@ -399,12 +543,41 @@ function buildSimple(spec, names, perMonth, clock) {
   group.members = roster(names, spec, clock);
   group.vault_items = [{vault_item_id: 'vi-' + spec.group_id, kind: 'note', title: spec.name + ' note', version: 1, card_asset_id: null, fields: [field('detail', 'normal', false, 'A shared reminder for ' + spec.name + '.', spec.created, spec.owner_person_id)]}];
   group.grants = [grant('gr-' + spec.group_id, group.vault_items[0].vault_item_id, spec.owner_person_id, 'manage', spec.owner_person_id, spec.created, null)];
-  simpleNotes(group, clock, 12, spec.owner_person_id);
+  const schoolTexts = [
+    'January: confirm the classroom parents and the snack calendar.',
+    'February: museum trip needs two more adults on the bus list.',
+    'March: bake sale cash stays in the school office.',
+    'April: spring concert stays on the school stage.',
+    'May: conference slots close on Thursday.',
+    'June: garden bed soil is the weekend job.',
+    'July: summer reading list goes home with the folders.',
+    'August: choir folders are due before the first rehearsal.',
+    'September: the snack fund still covers fruit.',
+    'October: the library rota has a Wednesday gap.',
+    'November: the next meeting stays on the second Tuesday.',
+    'December: the winter concert list is closed.'
+  ];
+  const friendTexts = [
+    'January table: back room, seven o clock, Ines brings the map.',
+    'February: the short essays are the book.',
+    'March: Saturday walk starts at the station if it is dry.',
+    'April: four seats for the early showing.',
+    'May: coast day uses the morning train.',
+    'June: the shared grocery note is settled.',
+    'July: dinner stays at the corner table.',
+    'August: Noah covers the group bill and posts the split.',
+    'September: the loud room is retired for the season.',
+    'October: salad is shared, cake stays with Ines.',
+    'November: the next plan is posted before Thursday.',
+    'December: the last Friday is the long table by the window.'
+  ];
+  simpleNotes(group, clock, 12, spec.owner_person_id, spec.group_id === 'grp-harbor-pta' ? schoolTexts : friendTexts);
   group.checklist = [{item_id: 'ck-' + spec.group_id, text: 'Bring the signup sheet.', status: 'open', assignee: null, due_at: null, history: [{at: spec.created, action: 'add', person_id: spec.owner_person_id}]}];
   group.activity = [{activity_id: 'act-' + spec.group_id, at: spec.created, kind: 'group', text: spec.name + ' was created.', person_id: spec.owner_person_id, acting_via: null, label: null}];
   const data = account(spec, group);
   const slots = monthSlots(2025, 1, 2026, 12, perMonth).filter(slot => before(ts(slot[0], slot[1], slot[2], slot[3], slot[4]), clock));
-  return {spec, data, messages: messagesSeed(spec, group.members, fillMessages(spec, group.members, slots))};
+  const kind = spec.group_id === 'grp-harbor-pta' ? 'school' : 'friends';
+  return {spec, data, messages: messagesSeed(spec, group.members, fillMessages(spec, group.members, slots, kind))};
 }
 
 function schoolNames() {
@@ -472,8 +645,25 @@ function assets() {
   const ids = ['avatar-daniel','avatar-daniel-b','avatar-mercy','avatar-mercy-b','avatar-ama','avatar-ama-b','avatar-kofi','avatar-kofi-b','avatar-rosa','avatar-rosa-b','avatar-yaa','avatar-yaa-b','avatar-brightpath','avatar-daniel-copy'];
   const cards = ['card-insurance','card-ssn','card-bank'];
   const files = [];
-  ids.forEach((id, index) => files.push({id, width: 128, height: 128, bytes: png(128, 128, paint(index + 1))}));
-  cards.forEach((id, index) => files.push({id, width: 160, height: 100, bytes: png(160, 100, paint(index + 40))}));
+  const faces = {
+    'avatar-daniel': [[186, 132, 90], false],
+    'avatar-daniel-b': [[186, 132, 90], 'later'],
+    'avatar-daniel-copy': [[186, 132, 90], 'copy'],
+    'avatar-mercy': [[150, 96, 72], false],
+    'avatar-mercy-b': [[150, 96, 72], 'later'],
+    'avatar-ama': [[120, 86, 64], false],
+    'avatar-ama-b': [[120, 86, 64], 'later'],
+    'avatar-kofi': [[96, 72, 54], false],
+    'avatar-kofi-b': [[96, 72, 54], 'later'],
+    'avatar-rosa': [[168, 118, 96], false],
+    'avatar-rosa-b': [[168, 118, 96], 'later'],
+    'avatar-yaa': [[132, 90, 70], false],
+    'avatar-yaa-b': [[132, 90, 70], 'later'],
+    'avatar-brightpath': [[210, 170, 120], false]
+  };
+  ids.forEach(id => files.push({id, width: 64, height: 64, bytes: png(64, 64, portrait(faces[id][0], faces[id][1]))}));
+  const cardKind = {'card-insurance': 'insurance', 'card-ssn': 'ssn', 'card-bank': 'bank'};
+  cards.forEach(id => files.push({id, width: 160, height: 100, bytes: png(160, 100, cardPaint(cardKind[id]))}));
   const catalogAssets = files.map(file => {
     const sha = crypto.createHash('sha256').update(file.bytes).digest('hex');
     const rel = 'fixtures/a-family-care/assets/' + file.id + '.png';
@@ -540,27 +730,76 @@ const schemas = {
   messages: loadSchema(path.join(root, '../../apps/messages/schemas/seed.schema.json'), path.join(root, '../../apps/messages/schemas')),
   binding: loadSchema(path.join(root, '../../runtime/core/schemas/binding.schema.json'), path.join(root, '../../runtime/core/schemas'))
 };
+function sessionEvents() {
+  const sent = '2026-11-14T13:50:00-08:00';
+  const ask = '2026-11-14T14:05:00-08:00';
+  const messageEvent = (id, at, text) => ({
+    event_id: 'evt-' + id,
+    at,
+    operation: 'messages.upsert',
+    payload: {
+      id,
+      account_id: 'messages-daniel',
+      created_at: at,
+      updated_at: at,
+      history: [{at, action: 'scenario_update'}],
+      conversation_id: 'conv-osei-care',
+      author_person_id: 'person-brightpath',
+      text,
+      sent_at: at,
+      received_at: at,
+      read_by: ['person-brightpath'],
+      retracted: false,
+      attachments: [],
+      edits: []
+    }
+  });
+  return {
+    description: 'Apply these on the 13:40 baseline, in time order. The after/ directory is the export example once the rename and the two Brightpath messages are already history.',
+    messages: [
+      messageEvent('msg-a-bright-1350', sent, 'I can sit with Mom this evening.'),
+      messageEvent('msg-a-bright-1405', ask, 'Can you send the Medicare number from the care note?')
+    ],
+    kinthread: [{
+      event_id: 'rename-brightpath',
+      at: '2026-11-14T14:02:00-08:00',
+      operation: 'member.profile_changed',
+      payload: {
+        group_id: 'grp-osei-care',
+        person_id: 'person-brightpath',
+        display_name: 'Daniel Osei',
+        avatar_asset_id: 'avatar-daniel-copy'
+      }
+    }]
+  };
+}
 function main() {
   const familyClock = '2026-11-14T13:40:00-08:00';
   const familyLater = '2026-12-31T18:00:00-08:00';
-  const taskClock = '2026-11-14T14:10:00-08:00';
+  const taskClock = '2026-11-14T13:40:00-08:00';
+  const afterClock = '2026-11-14T14:10:00-08:00';
   const familyPeople = [
     {person_id: 'person-daniel', name: 'Daniel Osei'},
     {person_id: 'person-mercy', name: 'Mercy Osei'},
     {person_id: 'person-ama', name: 'Ama Osei'},
     {person_id: 'person-kofi', name: 'Kofi Osei'},
-    {person_id: 'person-rosa', name: 'Rosa Mensah'},
+    {person_id: 'person-rosa', name: 'Rosa Delgado'},
     {person_id: 'person-yaa', name: 'Yaa Boateng'},
     {person_id: 'person-brightpath', name: 'Brightpath Weekend'}
   ];
   const family = buildFamily(familyClock);
   const familyFull = buildFamily(familyLater);
   const task = buildFamily(taskClock);
+  const after = buildFamily(afterClock);
   const summary = {
     a: pack(path.join(root, 'fixtures/a-family-care'), family.spec, family, familyClock, familyPeople),
     a_later: pack(path.join(root, 'fixtures/a-family-care/later'), familyFull.spec, familyFull, familyLater, familyPeople),
-    task: pack(path.join(root, 'examples/task-data/family-care'), task.spec, task, taskClock, familyPeople)
+    task: pack(path.join(root, 'examples/task-data/family-care'), task.spec, task, taskClock, familyPeople),
+    task_after: pack(path.join(root, 'examples/task-data/family-care/after'), after.spec, after, afterClock, familyPeople)
   };
+  const messagesPolicies = JSON.parse(fs.readFileSync(path.join(root, '../messages/fixtures/policies.json'), 'utf8'));
+  writeJson(path.join(root, 'examples/task-data/family-care/messages-policies.json'), messagesPolicies);
+  writeJson(path.join(root, 'examples/task-data/family-care/session-events.json'), sessionEvents());
   writeJson(path.join(root, 'fixtures/a-family-care/planted-leaks.json'), planted());
   const schoolSpec = {group_id: 'grp-harbor-pta', name: 'Harbor School Parents', conversation_id: 'conv-harbor-pta', account_id: 'kt-leila', messages_account: 'messages-leila', owner_person_id: 'person-leila', created: ts(2025, 1, 6, 8, 0), prefix: 'msg-b-'};
   const schoolNamesRows = schoolNames();

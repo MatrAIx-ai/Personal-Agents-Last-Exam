@@ -28,5 +28,99 @@ function demonstrate() {
   };
 }
 
-module.exports = {demonstrate};
-if (require.main === module) console.log(JSON.stringify(demonstrate(), null, 2));
+async function publishAndRead() {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const path = require('node:path');
+  const {Client} = require('../../../runtime/client.cjs');
+  const {publishPendingNotices} = require('./publish-pending.cjs');
+  const root = path.resolve(__dirname, '../../..');
+  const registry = path.join(root, 'apps.registry.json');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kinthread-role-'));
+  const run = 'kinthread-role-example';
+  const data = JSON.parse(JSON.stringify(require('../fixtures/minimal.json')).replaceAll('person-daniel', 'person-maya'));
+  data.account_id = 'kt-maya';
+  const binding = {
+    people: [{person_id: 'person-maya', name: 'Maya Chen'}, {person_id: 'person-mercy', name: 'Mercy Osei'}],
+    accounts: [{app_id: 'kinthread', account_id: 'kt-maya', owner_person_id: 'person-maya'}],
+    objects: {kinthread: ['grp-home']}
+  };
+  fs.writeFileSync(path.join(dir, 'router.json'), JSON.stringify({
+    schema_version: 2,
+    registry: 'apps.registry.json',
+    authentication: {mode: 'trusted-stdio'},
+    publishers: [{
+      app_id: 'kinthread',
+      account_id: 'kt-maya',
+      owner_person_id: 'person-maya',
+      package_root: 'apps/kinthread',
+      contribution_ref: 'contribution/contribution.json',
+      allowed_recipients: [{app_id: 'mail', account_id: 'mail-maya', channel: 'channel.email'}]
+    }]
+  }, null, 2));
+  const clients = [];
+  const open = (app, role, name) => {
+    const options = {registry};
+    if (role === 'infra' && app === 'kinthread') options.initialProfile = 'sandbox';
+    const client = new Client(app, role, run, dir, name, options);
+    clients.push(client);
+    return client;
+  };
+  try {
+    const infra = open('kinthread', 'infra', 'role-infra');
+    const agent = open('kinthread', 'agent', 'role-agent');
+    await infra.initialize();
+    await agent.initialize();
+    const boot = await infra.call('env.snapshot');
+    const loaded = await infra.call('env.load_seed', {
+      expected_version: boot.version,
+      request_id: 'role-seed',
+      data,
+      binding,
+      policies: require('../fixtures/policies.json'),
+      virtual_now: boot.snapshot.virtual_now
+    });
+    assert.equal(loaded.status, 'ready');
+    const ready = await infra.call('env.snapshot');
+    const args = {expected_version: ready.version, request_id: 'role-mercy', group_id: 'grp-home', person_id: 'person-mercy', role: 'member'};
+    const changed = await agent.call('kinthread.roles.set', args);
+    const replay = await agent.call('kinthread.roles.set', args);
+    assert.equal(replay.duplicate, true);
+    assert.equal(replay.notice_id, changed.notice_id);
+    const router = new Client(null, null, null, null, 'role-router', {commandArgs: [
+      path.join(root, 'runtime/messaging/service.cjs'),
+      '--config', path.join(dir, 'router.json'),
+      '--publisher', 'kinthread',
+      '--run', run,
+      '--state-dir', dir
+    ]});
+    clients.push(router);
+    await router.initialize();
+    const sent = await publishPendingNotices({infra, router});
+    const again = await publishPendingNotices({infra, router});
+    const mail = open('mail', 'agent', 'role-mail');
+    await mail.initialize();
+    const got = await mail.call('mail.get', {id: sent.results[0].result.event_id});
+    const after = await infra.call('env.snapshot');
+    return {
+      notice_id: changed.notice_id,
+      duplicate_publish: again.results[0].result.duplicate,
+      mail_subject: got.message.subject,
+      mail_from: got.message.from,
+      notices: after.snapshot.data.notices.length
+    };
+  } finally {
+    await Promise.allSettled(clients.map(client => client.close()));
+    fs.rmSync(dir, {recursive: true, force: true});
+  }
+}
+
+module.exports = {demonstrate, publishAndRead};
+if (require.main === module) {
+  publishAndRead().then(result => {
+    console.log(JSON.stringify({pending: demonstrate(), mail: result}, null, 2));
+  }).catch(error => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}

@@ -7,7 +7,8 @@ function load(file) {
 }
 function check(kinthread, messages) {
   const errors = [];
-  for (const group of kinthread.groups) {
+  const groups = kinthread.groups || [];
+  for (const group of groups) {
     const conversation = (messages.conversations || []).find(item => item.id === group.messages_conversation_id);
     if (!conversation) {
       errors.push('Missing Messages conversation ' + group.messages_conversation_id);
@@ -20,9 +21,23 @@ function check(kinthread, messages) {
     for (const personId of conversation.participant_ids) {
       if (!group.members.some(member => member.person_id === personId)) errors.push(personId + ' is a Messages participant and is absent from ' + group.group_id);
     }
-    for (const message of messages.messages || []) {
-      if (message.conversation_id !== conversation.id || !message.sent_at) continue;
-      if (!memberAt(group, message.author_person_id, message.sent_at)) errors.push(message.id + ' author ' + message.author_person_id + ' was not a member at ' + message.sent_at);
+  }
+  for (const conversation of messages.conversations || []) {
+    const linked = groups.find(group => group.messages_conversation_id === conversation.id);
+    if (linked) continue;
+    for (const personId of conversation.participant_ids || []) {
+      if (!groups.some(group => group.members.some(member => member.person_id === personId))) errors.push(personId + ' is in ' + conversation.id + ' and is absent from every Kinthread group');
+    }
+  }
+  for (const message of messages.messages || []) {
+    if (!message.sent_at) {
+      errors.push(message.id + ' has no sent_at, so authorship at send time cannot be established');
+      continue;
+    }
+    const linked = groups.find(group => group.messages_conversation_id === message.conversation_id);
+    const home = linked || groups.find(group => group.members.some(member => member.person_id === message.author_person_id));
+    if (!home || !memberAt(home, message.author_person_id, message.sent_at)) {
+      errors.push((message.id || 'message') + ' author ' + message.author_person_id + ' was not a member at ' + message.sent_at);
     }
   }
   return errors;

@@ -32,38 +32,30 @@
           "const": "member.profile_changed"
         },
         "payload": {
-          "type": "object",
-          "properties": {
-            "group_id": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "group_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+                "person_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+                "display_name": {"type": "string", "minLength": 1, "maxLength": 80},
+                "avatar_asset_id": {"anyOf": [{"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"}, {"type": "null"}]}
+              },
+              "required": ["group_id", "person_id", "display_name"],
+              "additionalProperties": false
             },
-            "person_id": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
-            },
-            "display_name": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 80
-            },
-            "avatar_asset_id": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+            {
+              "type": "object",
+              "properties": {
+                "group_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+                "person_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"},
+                "display_name": {"type": "string", "minLength": 1, "maxLength": 80},
+                "avatar_asset_id": {"anyOf": [{"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$"}, {"type": "null"}]}
+              },
+              "required": ["group_id", "person_id", "avatar_asset_id"],
+              "additionalProperties": false
             }
-          },
-          "required": [
-            "group_id",
-            "person_id"
-          ],
-          "additionalProperties": false
+          ]
         }
       },
       "required": [

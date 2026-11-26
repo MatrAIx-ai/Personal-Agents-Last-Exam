@@ -44,6 +44,11 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 80
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
           }
         },
         "required": [
@@ -257,6 +262,36 @@
                       "type": "null"
                     }
                   ]
+                },
+                "membership_intervals": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "joined_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "left_at": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "joined_at",
+                      "left_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1,
+                  "maxItems": 100
                 },
                 "profile_history": {
                   "type": "array",

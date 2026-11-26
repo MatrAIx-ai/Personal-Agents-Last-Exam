@@ -5,27 +5,98 @@
     "start": "2025-01-01",
     "end": "2026-12-31"
   },
-  "method": "Civil month is the year and month embedded in each timestamp. The generator writes the Pacific offset for that date.",
+  "method": "The civil date is the year, month, and day written in each timestamp. The generator stores the Pacific offset for that date, so the calendar day is the date in the string.",
+  "date_fields": [
+    "label_history.at",
+    "group.created_at",
+    "member.joined_at",
+    "member.left_at",
+    "profile_history.at",
+    "role_history.at",
+    "membership_intervals.joined_at",
+    "membership_intervals.left_at",
+    "vault_field.history.at",
+    "note.history.at",
+    "checklist.history.at",
+    "grant.granted_at",
+    "grant.revoked_at",
+    "reveal.at",
+    "activity.at",
+    "changes.at",
+    "notice.created_at",
+    "delivery.recorded_at",
+    "message.sent_at",
+    "message.edits.at"
+  ],
+  "exclusions": [
+    "seq counters and ids are not dated records.",
+    "expires_at and due_at are deadlines and are omitted from the month counts. The date test still allows them to sit after a fixture clock.",
+    "Policies, bindings, clocks, and image bytes are not dated records.",
+    "Base fixtures and the task baseline are checked for future timestamps and are omitted from the 24-month totals. The later partitions are the coverage set."
+  ],
   "smoke_fixtures": [
     "fixtures/minimal.json"
   ],
+  "sources": [
+    {
+      "partition": "a-family-care-later",
+      "seed": "fixtures/a-family-care/later/seed.json",
+      "messages": "fixtures/a-family-care/later/messages-seed.json",
+      "seed_sha256": "6a8015d5fc0f80a7644cd1aeddaafbe7b0dcfc59bbf4bf983bd74f3c024b82e5",
+      "messages_sha256": "961d61781871c8203be96227c708be2a0d6c77fef06b9d8e519d23cbe17decc7"
+    },
+    {
+      "partition": "b-school-parents-later",
+      "seed": "fixtures/b-school-parents/later/seed.json",
+      "messages": "fixtures/b-school-parents/later/messages-seed.json",
+      "seed_sha256": "0498d24535cb29b1be692ee3189f3aa16a2810649bc6cc2d5e2c82c207f3656d",
+      "messages_sha256": "b33b1304e699b8478984ac467fb57b1c7652f5a1611d242dc84b85469e7db942"
+    },
+    {
+      "partition": "c-friends-later",
+      "seed": "fixtures/c-friends/later/seed.json",
+      "messages": "fixtures/c-friends/later/messages-seed.json",
+      "seed_sha256": "b6c2f4487af0501afce806506509317b3210b7a9b77d90202822eab168bb1119",
+      "messages_sha256": "5786649552d979637a95079e331f8935f5f186958e0cf4a030b128b185115eee"
+    }
+  ],
+  "message_bodies": {
+    "a-family-care-later": {
+      "messages": 527,
+      "distinct_bodies": 527
+    },
+    "b-school-parents-later": {
+      "messages": 360,
+      "distinct_bodies": 360
+    },
+    "c-friends-later": {
+      "messages": 192,
+      "distinct_bodies": 192
+    }
+  },
   "partitions": {
     "a-family-care": {
       "clock": "2026-11-14T13:40:00-08:00",
       "future_timestamps": 0,
-      "messages": 509,
+      "messages": 518,
       "members": 7
     },
     "a-family-care-later": {
       "clock": "2026-12-31T18:00:00-08:00",
       "future_timestamps": 0,
-      "messages": 518,
+      "messages": 527,
       "members": 7
     },
     "family-care-task": {
+      "clock": "2026-11-14T13:40:00-08:00",
+      "future_timestamps": 0,
+      "messages": 518,
+      "members": 7
+    },
+    "family-care-after": {
       "clock": "2026-11-14T14:10:00-08:00",
       "future_timestamps": 0,
-      "messages": 511,
+      "messages": 520,
       "members": 7
     },
     "b-school-parents": {
@@ -55,230 +126,137 @@
   },
   "by_month": {
     "2025-01": {
-      "a-family-care-later.label": 1,
-      "a-family-care-later.group": 1,
-      "a-family-care-later.member": 2,
-      "a-family-care-later.note": 1,
-      "a-family-care-later.checklist": 1,
-      "a-family-care-later.grant": 18,
-      "a-family-care-later.activity": 3,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.label": 1,
-      "b-school-parents-later.group": 1,
-      "b-school-parents-later.member": 38,
-      "b-school-parents-later.note": 1,
-      "b-school-parents-later.checklist": 1,
-      "b-school-parents-later.grant": 1,
-      "b-school-parents-later.activity": 1,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.label": 1,
-      "c-friends-later.group": 1,
-      "c-friends-later.member": 5,
-      "c-friends-later.note": 1,
-      "c-friends-later.checklist": 1,
-      "c-friends-later.grant": 1,
-      "c-friends-later.activity": 1,
-      "c-friends-later.message": 8
+      "a-family-care-later": 45,
+      "b-school-parents-later": 136,
+      "c-friends-later": 30
     },
     "2025-02": {
-      "a-family-care-later.member": 1,
-      "a-family-care-later.note": 2,
-      "a-family-care-later.checklist": 1,
-      "a-family-care-later.grant": 1,
-      "a-family-care-later.activity": 2,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.note": 2,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.note": 2,
-      "c-friends-later.message": 8
+      "a-family-care-later": 17,
+      "b-school-parents-later": 17,
+      "c-friends-later": 10
     },
     "2025-03": {
-      "a-family-care-later.member": 1,
-      "a-family-care-later.note": 3,
-      "a-family-care-later.reveal": 1,
-      "a-family-care-later.activity": 2,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.note": 1,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.note": 1,
-      "c-friends-later.message": 8
+      "a-family-care-later": 14,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2025-04": {
-      "a-family-care-later.member": 1,
-      "a-family-care-later.note": 2,
-      "a-family-care-later.activity": 2,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.note": 2,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.note": 2,
-      "c-friends-later.message": 8
+      "a-family-care-later": 13,
+      "b-school-parents-later": 17,
+      "c-friends-later": 10
     },
     "2025-05": {
-      "a-family-care-later.note": 2,
-      "a-family-care-later.grant": 1,
-      "a-family-care-later.activity": 1,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.note": 1,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.note": 1,
-      "c-friends-later.message": 8
+      "a-family-care-later": 10,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2025-06": {
-      "a-family-care-later.member": 1,
-      "a-family-care-later.note": 2,
-      "a-family-care-later.activity": 2,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.note": 1,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.note": 1,
-      "c-friends-later.message": 8
+      "a-family-care-later": 13,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2025-07": {
-      "a-family-care-later.note": 2,
-      "a-family-care-later.activity": 1,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.note": 2,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.note": 2,
-      "c-friends-later.message": 8
+      "a-family-care-later": 8,
+      "b-school-parents-later": 17,
+      "c-friends-later": 10
     },
     "2025-08": {
-      "a-family-care-later.note": 2,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.note": 1,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.note": 1,
-      "c-friends-later.message": 8
+      "a-family-care-later": 7,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2025-09": {
-      "a-family-care-later.note": 3,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.note": 1,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.note": 1,
-      "c-friends-later.message": 8
+      "a-family-care-later": 7,
+      "b-school-parents-later": 16,
+      "c-friends-later": 9
     },
     "2025-10": {
-      "a-family-care-later.note": 2,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.message": 8
+      "a-family-care-later": 6,
+      "b-school-parents-later": 15,
+      "c-friends-later": 8
     },
     "2025-11": {
-      "a-family-care-later.note": 2,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.message": 8
+      "a-family-care-later": 6,
+      "b-school-parents-later": 15,
+      "c-friends-later": 8
     },
     "2025-12": {
-      "a-family-care-later.note": 2,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.message": 8
+      "a-family-care-later": 6,
+      "b-school-parents-later": 15,
+      "c-friends-later": 8
     },
     "2026-01": {
-      "a-family-care-later.note": 2,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.message": 8
+      "a-family-care-later": 7,
+      "b-school-parents-later": 15,
+      "c-friends-later": 8
     },
     "2026-02": {
-      "a-family-care-later.note": 2,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.message": 8
+      "a-family-care-later": 6,
+      "b-school-parents-later": 15,
+      "c-friends-later": 8
     },
     "2026-03": {
-      "a-family-care-later.note": 3,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.message": 8
+      "a-family-care-later": 8,
+      "b-school-parents-later": 15,
+      "c-friends-later": 8
     },
     "2026-04": {
-      "a-family-care-later.note": 2,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.message": 8
+      "a-family-care-later": 6,
+      "b-school-parents-later": 15,
+      "c-friends-later": 8
     },
     "2026-05": {
-      "a-family-care-later.note": 2,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.message": 8
+      "a-family-care-later": 6,
+      "b-school-parents-later": 15,
+      "c-friends-later": 8
     },
     "2026-06": {
-      "a-family-care-later.note": 2,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.message": 8
+      "a-family-care-later": 6,
+      "b-school-parents-later": 15,
+      "c-friends-later": 8
     },
     "2026-07": {
-      "a-family-care-later.note": 2,
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.message": 8
+      "a-family-care-later": 6,
+      "b-school-parents-later": 15,
+      "c-friends-later": 8
     },
     "2026-08": {
-      "a-family-care-later.message": 4,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.member": 1,
-      "c-friends-later.message": 8
+      "a-family-care-later": 4,
+      "b-school-parents-later": 15,
+      "c-friends-later": 11
     },
     "2026-09": {
-      "a-family-care-later.message": 159,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.message": 8
+      "a-family-care-later": 160,
+      "b-school-parents-later": 15,
+      "c-friends-later": 8
     },
     "2026-10": {
-      "a-family-care-later.member": 1,
-      "a-family-care-later.grant": 1,
-      "a-family-care-later.activity": 1,
-      "a-family-care-later.message": 186,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.message": 8
+      "a-family-care-later": 191,
+      "b-school-parents-later": 15,
+      "c-friends-later": 8
     },
     "2026-11": {
-      "a-family-care-later.activity": 1,
-      "a-family-care-later.message": 88,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.message": 8
+      "a-family-care-later": 90,
+      "b-school-parents-later": 15,
+      "c-friends-later": 8
     },
     "2026-12": {
-      "a-family-care-later.message": 5,
-      "b-school-parents-later.message": 15,
-      "c-friends-later.message": 8
+      "a-family-care-later": 5,
+      "b-school-parents-later": 15,
+      "c-friends-later": 8
     }
   },
   "gaps": [],
   "distinct_dates": {
-    "a-family-care-later.label": 1,
-    "a-family-care-later.group": 1,
-    "a-family-care-later.member": 6,
-    "a-family-care-later.note": 40,
-    "a-family-care-later.checklist": 2,
-    "a-family-care-later.grant": 5,
-    "a-family-care-later.reveal": 1,
-    "a-family-care-later.activity": 13,
-    "a-family-care-later.message": 98,
-    "b-school-parents-later.label": 1,
-    "b-school-parents-later.group": 1,
-    "b-school-parents-later.member": 1,
-    "b-school-parents-later.note": 12,
-    "b-school-parents-later.checklist": 1,
-    "b-school-parents-later.grant": 1,
-    "b-school-parents-later.activity": 1,
-    "b-school-parents-later.message": 360,
-    "c-friends-later.label": 1,
-    "c-friends-later.group": 1,
-    "c-friends-later.member": 2,
-    "c-friends-later.note": 12,
-    "c-friends-later.checklist": 1,
-    "c-friends-later.grant": 1,
-    "c-friends-later.activity": 1,
-    "c-friends-later.message": 192
+    "a-family-care-later": 158,
+    "b-school-parents-later": 367,
+    "c-friends-later": 201
   },
-  "global_distinct_dates": 435,
+  "global_distinct_dates": 438,
+  "total_dated_records": 1367,
+  "unrecognized_dates": [],
   "earliest": "2025-01-01",
   "latest": "2026-12-31",
-  "note": "Later partitions are complete seeds loaded at their own clock. A task that starts on the base clock loads the base seed, so December records stay out of that session."
+  "load_example": "node examples/read-january.cjs",
+  "note": "Later partitions are complete seeds loaded at their own clock. A task that starts on the 13:40 baseline loads examples/task-data/family-care, so December records stay out of that session."
 }

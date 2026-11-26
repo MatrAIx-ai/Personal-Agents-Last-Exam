@@ -42,6 +42,7 @@ function validateSeed(ctx, data) {
     if (notice.recipient_person_id !== data.owner_person_id) c.fail('invalid_seed', 'Notices are addressed to the account owner.');
     if (notice.status === 'pending_delivery' && notice.delivery) c.fail('invalid_seed', 'A pending notice has no delivery result.');
     if (notice.status === 'recorded' && !notice.delivery) c.fail('invalid_seed', 'A recorded notice needs a delivery result.');
+    if (notice.delivery && notice.delivery.recorded_at) timeOk(notice.delivery.recorded_at, now, 'invalid_seed');
   }
   for (const group of data.groups) {
     timeOk(group.created_at, now, 'invalid_seed');
@@ -68,6 +69,20 @@ function validateSeed(ctx, data) {
       if (member.membership === 'member' && member.left_at) c.fail('invalid_seed', 'Active members have no left time.');
       if (member.membership !== 'member') {
         if (!member.left_at || timeOk(member.left_at, now, 'invalid_seed') < joined) c.fail('invalid_seed', 'Closed membership needs a later left time.');
+      }
+      if (Array.isArray(member.membership_intervals) && member.membership_intervals.length) {
+        let prev = -Infinity;
+        for (const row of member.membership_intervals) {
+          const start = timeOk(row.joined_at, now, 'invalid_seed');
+          if (start < prev) c.fail('invalid_seed', 'Membership intervals go backwards.');
+          if (row.left_at) {
+            const end = timeOk(row.left_at, now, 'invalid_seed');
+            if (end < start) c.fail('invalid_seed', 'A membership interval ends before it starts.');
+            prev = end;
+          } else prev = start;
+        }
+        const last = member.membership_intervals[member.membership_intervals.length - 1];
+        if (last.joined_at !== member.joined_at || (last.left_at || null) !== (member.left_at || null)) c.fail('invalid_seed', 'The latest membership interval must match the current join and leave times.');
       }
       ordered(member.profile_history, now, 'invalid_seed');
       ordered(member.role_history, now, 'invalid_seed');
